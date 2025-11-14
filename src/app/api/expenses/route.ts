@@ -5,6 +5,7 @@ export const runtime = 'nodejs'
 import { NextResponse, type NextRequest } from 'next/server'
 
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { formatCurrency } from '@/lib/currency'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, safeString } from '@/lib/type-guards'
@@ -55,13 +56,14 @@ async function GET(request: NextRequest): Promise<NextResponse> {
   const category = searchParams.get('category')
 
   try {
-    const supabase = typed(await createClient())
-
     // Authenticate user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+    
+    const supabase = typed(await createClient())
 
     // Calculate offset for pagination
     const offset = (page - 1) * limit
@@ -69,7 +71,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     let query = supabase
       .from('financial_records')
       .select('id, description, category, amount, date, reference, type, created_at, created_by')
-      .eq('user_id', user['id'])
+      .eq('user_id', user.id)
       .eq('type', 'EXPENSE')
       .range(offset, offset + limit - 1)
 
@@ -168,7 +170,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
         categoryBreakdown
       }
     })
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error fetching expenses:')
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
@@ -177,13 +179,14 @@ async function GET(request: NextRequest): Promise<NextResponse> {
 // Define the original POST function
 async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const supabase = typed(await createClient())
-
-    // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = typed(await createClient())
 
     // The request body is already sanitized by the security middleware
     const _body = await request.json() as FinancialRecordInsert
@@ -237,7 +240,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     return NextResponse.json(expense, { status: 201 })
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error creating expense:')
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }

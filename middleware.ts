@@ -1,31 +1,15 @@
+import { StackServerApp } from '@stackframe/stack'
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 
-
 import { generateNonce, getStrictCSP } from '@/lib/csp'
 import { middlewareLogger } from '@/lib/logger'
-import { updateSession } from '@/utils/supabase/middleware'
+import { stackClientApp } from '@/stack/client'
 
-import type { User, Session } from '@supabase/supabase-js'
-
-
-
-const PROTECTED_ROUTES = new Set([
-  '/dashboard',
-  '/orders',
-  '/ingredients',
-  '/recipes',
-  '/customers',
-  '/cash-flow',
-  '/profit',
-  '/settings',
-  '/ai-chatbot',
-  '/categories',
-  '/operational-costs',
-  '/reports',
-])
-
-const AUTH_PAGES = new Set(['/auth/login', '/auth/register'])
+// Initialize Stack Server App for middleware
+const stackServerApp = new StackServerApp({
+  inheritsFrom: stackClientApp,
+})
 
 const RequestHeadersSchema = z.object({
   'user-agent': z.string().nullable().optional(),
@@ -116,13 +100,7 @@ function validateRequest(request: NextRequest, isDev: boolean): NextResponse | n
   return null
 }
 
-/**
- * Update session and get user
- */
-async function getUser(request: NextRequest): Promise<{ user: User | null; session: Session | null; response: NextResponse }> {
-  const { user, session, response } = await updateSession(request)
-  return { user, session, response }
-}
+
 
 /**
  * Add API headers for CORS
@@ -136,68 +114,95 @@ function addApiHeaders(response: NextResponse, isDev: boolean): void {
 }
 
 /**
- * Check if route is protected
+ * Protected routes that require authentication
+ */
+const PROTECTED_ROUTES = [
+  '/dashboard',
+  '/ingredients',
+  '/recipes',
+  '/orders',
+  '/customers',
+  '/hpp',
+  '/production',
+  '/reports',
+  '/ai-chatbot',
+  '/suppliers',
+  '/financial',
+  '/operational-costs',
+  '/settings',
+  '/profile'
+]
+
+/**
+ * Check if route requires authentication
  */
 function isProtectedRoute(pathname: string): boolean {
-  for (const base of PROTECTED_ROUTES) {
-    if (pathname.startsWith(base)) {
-      return true
+  return PROTECTED_ROUTES.some(route => pathname.startsWith(route))
+}
+
+/**
+ * Handle authentication check
+ */
+async function handleAuthCheck(request: NextRequest, nonce: string, isDev: boolean): Promise<NextResponse | null> {
+  const { pathname } = request.nextUrl
+  
+  // Skip auth check for Stack Auth handler routes
+  if (pathname.startsWith('/handler/')) {
+    return null
+  }
+  
+  // Check if route is protected
+  if (isProtectedRoute(pathname)) {
+    try {
+      const user = await stackServerApp.getUser()
+      
+      if (!user) {
+        // User not authenticated, redirect to sign-in
+        const url = request.nextUrl.clone()
+        url.pathname = '/handler/sign-in'
+        url.searchParams.set('redirect', pathname)
+        
+        const redirectResponse = NextResponse.redirect(url)
+        addSecurityHeaders(redirectResponse, nonce, isDev)
+        
+        if (isDev) {
+          middlewareLogger.debug(
+            { pathname, redirectTo: '/handler/sign-in' },
+            'Unauthenticated user redirected to sign-in'
+          )
+        }
+        
+        return redirectResponse
+      }
+      
+      if (isDev) {
+        middlewareLogger.debug(
+          { pathname, userId: user.id },
+          'Authenticated user accessing protected route'
+        )
+      }
+    } catch (error) {
+      middlewareLogger.error({ error, pathname }, 'Auth check failed')
+      // On error, redirect to sign-in for safety
+      const url = request.nextUrl.clone()
+      url.pathname = '/handler/sign-in'
+      const redirectResponse = NextResponse.redirect(url)
+      addSecurityHeaders(redirectResponse, nonce, isDev)
+      return redirectResponse
     }
   }
-  return false
-}
-
-/**
- * Handle protected route redirect
- */
-function handleProtectedRouteRedirect(request: NextRequest, user: User | null, nonce: string, isDev: boolean): NextResponse | null {
-  const { pathname } = request.nextUrl
-  if (isProtectedRoute(pathname) && user === null && !pathname.startsWith('/auth/login')) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/auth/login'
-    url.searchParams.set('redirectTo', pathname)
-    const redirectResponse = NextResponse.redirect(url)
-    addSecurityHeaders(redirectResponse, nonce, isDev)
-    return redirectResponse
-  }
-  return null
-}
-
-/**
- * Check if route is auth page
- */
-function isAuthPage(pathname: string): boolean {
-  for (const base of AUTH_PAGES) {
-    if (pathname.startsWith(base)) {
-      return true
-    }
-  }
-  return false
-}
-
-/**
- * Handle auth page redirect
- */
-function handleAuthPageRedirect(request: NextRequest, user: User | null, nonce: string, isDev: boolean): NextResponse | null {
-  const { pathname } = request.nextUrl
-  if (isAuthPage(pathname) && user !== null) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
-    const redirectResponse = NextResponse.redirect(url)
-    addSecurityHeaders(redirectResponse, nonce, isDev)
-    return redirectResponse
-  }
+  
   return null
 }
 
 /**
  * Handle root redirect
  */
-function handleRootRedirect(request: NextRequest, user: User | null, nonce: string, isDev: boolean): NextResponse | null {
+function handleRootRedirect(request: NextRequest, nonce: string, isDev: boolean): NextResponse | null {
   const { pathname } = request.nextUrl
   if (pathname === '/') {
     const url = request.nextUrl.clone()
-    url.pathname = user !== null ? '/dashboard' : '/auth/login'
+    url.pathname = '/dashboard'
     const redirectResponse = NextResponse.redirect(url)
     addSecurityHeaders(redirectResponse, nonce, isDev)
     return redirectResponse
@@ -245,24 +250,20 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
       return validationError
     }
 
-    const { user, response } = await getUser(request)
+    // Check authentication for protected routes
+    const authRedirect = await handleAuthCheck(request, nonce, isDev)
+    if (authRedirect) {
+      return authRedirect
+    }
+
+    const response = NextResponse.next()
     addSecurityHeaders(response, nonce, isDev)
 
     if (request.nextUrl.pathname.startsWith('/api/')) {
       addApiHeaders(response, isDev)
     }
 
-    const protectedRedirect = handleProtectedRouteRedirect(request, user, nonce, isDev)
-    if (protectedRedirect) {
-      return protectedRedirect
-    }
-
-    const authRedirect = handleAuthPageRedirect(request, user, nonce, isDev)
-    if (authRedirect) {
-      return authRedirect
-    }
-
-    const rootRedirect = handleRootRedirect(request, user, nonce, isDev)
+    const rootRedirect = handleRootRedirect(request, nonce, isDev)
     if (rootRedirect) {
       return rootRedirect
     }

@@ -1,21 +1,17 @@
 'use client'
 
-import { Suspense } from 'react'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
-import { AppLayout } from '@/components/layout/app-layout'
-import { OperationalCostFormPage } from '@/components/operational-costs/OperationalCostFormPage'
-import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
-
-
-
-const NewOperationalCostPage = (): JSX.Element => (
-    <AppLayout pageTitle="Tambah Biaya Operasional">
-        <div className="p-6">
-            <Suspense fallback={<DataGridSkeleton rows={6} />}>
-                <OperationalCostFormPage mode="create" />
-            </Suspense>
-        </div>
-    </AppLayout>
-)
+const NewOperationalCostPage = (): JSX.Element => {
+    const router = useRouter()
+    
+    useEffect(() => {
+        // Redirect to main page - form is handled via dialog
+        router.push('/operational-costs')
+    }, [router])
+    
+    return null as unknown as React.ReactElement
+}
 
 export default NewOperationalCostPage

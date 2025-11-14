@@ -5,6 +5,7 @@ import { createErrorResponse, handleAPIError } from '@/lib/api-core'
 import { cacheInvalidation } from '@/lib/cache'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 import { RecipeIngredientInsertSchema, RecipeUpdateSchema } from '@/lib/validations/domains/recipe'
 import type { Insert } from '@/types/database'
@@ -25,26 +26,25 @@ async function getRecipe(
 ): Promise<NextResponse> {
   try {
     const { id } = await context['params']
-    
+
     // Validate UUID format
     if (!isValidUUID(id)) {
       return NextResponse.json({ error: 'Invalid recipe ID format' }, { status: 400 })
     }
-    
-    const supabase = typed(await createClient())
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = typed(await createClient())
 
     const { data: recipe, error } = await supabase
       .from('recipes')
       .select(RECIPE_FIELDS.DETAIL)
       .eq('id', id)
-      .eq('created_by', user['id'])
       .single()
 
     if (error) {
@@ -55,7 +55,7 @@ async function getRecipe(
     }
 
     return NextResponse.json(recipe)
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/recipes/[id]')
     const apiError = handleAPIError(error)
     return createErrorResponse(apiError.message, apiError.statusCode)
@@ -69,20 +69,20 @@ async function updateRecipe(
 ): Promise<NextResponse> {
   try {
     const { id } = await context['params']
-    
+
     // Validate UUID format
     if (!isValidUUID(id)) {
       return NextResponse.json({ error: 'Invalid recipe ID format' }, { status: 400 })
     }
-    
-    const supabase = typed(await createClient())
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = typed(await createClient())
 
     const body = await request.json() as { recipe_ingredients?: unknown; ingredients?: unknown; [key: string]: unknown }
     
@@ -117,7 +117,6 @@ async function updateRecipe(
         .from('recipes')
         .update(recipeData)
         .eq('id', id)
-        .eq('created_by', user['id'])
         .select('id, name')
         .single()
 
@@ -165,7 +164,6 @@ async function updateRecipe(
         .from('recipe_ingredients')
         .delete()
         .eq('recipe_id', id)
-        .eq('user_id', user['id'])
 
       if (deleteError) {
         apiLogger.error({ error: deleteError }, 'Error deleting old ingredients')
@@ -182,7 +180,7 @@ async function updateRecipe(
                 quantity: v.data!.quantity,
                 unit: v.data!.unit,
                 notes: v.data!.notes ?? null,
-                user_id: user['id']
+                user_id: user.id
               }
             }
             throw new Error('Invalid ingredient data')
@@ -207,7 +205,6 @@ async function updateRecipe(
       .from('recipes')
       .select(RECIPE_FIELDS.DETAIL)
       .eq('id', id)
-      .eq('created_by', user['id'])
       .single()
 
     if (fetchError) {
@@ -219,7 +216,7 @@ async function updateRecipe(
     cacheInvalidation.recipes()
 
     return NextResponse.json(completeRecipe)
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in PUT /api/recipes/[id]')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
@@ -232,27 +229,26 @@ async function deleteRecipe(
 ): Promise<NextResponse> {
   try {
     const { id } = await context['params']
-    
+
     // Validate UUID format
     if (!isValidUUID(id)) {
       return NextResponse.json({ error: 'Invalid recipe ID format' }, { status: 400 })
     }
-    
-    const supabase = typed(await createClient())
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = typed(await createClient())
 
     // Delete recipe (ingredients will be cascade deleted)
     const { error } = await supabase
       .from('recipes')
       .delete()
       .eq('id', id)
-      .eq('created_by', user['id'])
 
     if (error) {
       if (error['code'] === 'PGRST116') {
@@ -265,7 +261,7 @@ async function deleteRecipe(
     cacheInvalidation.recipes()
 
     return NextResponse.json({ message: 'Recipe deleted successfully' })
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in DELETE /api/recipes/[id]')
     const apiError = handleAPIError(error)
     return createErrorResponse(apiError.message, apiError.statusCode)

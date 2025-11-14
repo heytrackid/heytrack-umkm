@@ -23,14 +23,14 @@ const Context = createContext<SupabaseContext | undefined>(undefined)
  * </SupabaseProvider>
  */
 export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
-  const [supabase] = useState<SupabaseClient<Database>>(() => {
+  const [supabase] = useState(() => {
     // Initialize client synchronously on first render only
     const logger = createClientLogger('SupabaseProvider')
     
     try {
       const client = createClient()
       logger.info('Supabase client initialized successfully')
-      return client
+      return client as any
     } catch (error) {
       logger.error({ error }, 'Failed to initialize Supabase client')
       throw error

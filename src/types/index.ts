@@ -16,9 +16,9 @@
 // DATABASE TYPES (Primary Source)
 // ==========================================================
 export type {
-    CompositeTypes, Database, Enums, Tables,
-    TablesInsert,
-    TablesUpdate
+  CompositeTypes, Database, Enums, Tables,
+  TablesInsert,
+  TablesUpdate
 } from './supabase-generated'
 
 // Re-export helper types from database.ts
@@ -37,15 +37,15 @@ export type { Insert, Row, TableName, Update, ViewName } from './database'
 // FEATURE TYPES (Application Features)
 // ==========================================================
 // Note: UserProfile is also exported from domain/auth, using that as primary
-export type * from './features/auth'
+// export type * from './features/auth' // TODO: File missing - using Stack Auth instead
 // Note: RateLimitError is also in shared/errors, using that as primary
 export type {
-    BusinessContext, ChatContextCache, ChatError, ChatMessage, ChatSession, ContextType, FinancialSummary, HppSummary, IngredientSummary, MessageMetadata, OrderSummary, RecipeSummary
+  BusinessContext, ChatContextCache, ChatError, ChatMessage, ChatSession, ContextType, FinancialSummary, HppSummary, IngredientSummary, MessageMetadata, OrderSummary, RecipeSummary
 } from './features/chat'
 // Note: InventoryAlert is also in domain/inventory, using that as primary
 export type {
-    BusinessSummary, CompetitorPrice, CostBreakdownAnalysis, CustomerSegment,
-    DashboardAnalytics, ExpenseCategory, FinancialAnalytics, InventoryAnalysis, InventoryMetrics, InventoryStatus, MarketComparison, PricingAnalysis, PricingImpact, PricingRecommendation, PricingTier, PricingTierOption, PricingTiers, ProductPerformance, RevenueCategory, SalesAnalytics, SalesTrend, SmartPricingAnalysis, SystemAlert, TimePeriod
+  BusinessSummary, CompetitorPrice, CostBreakdownAnalysis, CustomerSegment,
+  DashboardAnalytics, ExpenseCategory, FinancialAnalytics, InventoryAnalysis, InventoryMetrics, InventoryStatus, MarketComparison, PricingAnalysis, PricingImpact, PricingRecommendation, PricingTier, PricingTierOption, PricingTiers, ProductPerformance, RevenueCategory, SalesAnalytics, SalesTrend, SmartPricingAnalysis, SystemAlert, TimePeriod
 } from './features/analytics'
 
 export type * from './features/notifications'
@@ -57,8 +57,8 @@ export type * from './ui/components'
 // Note: OrderItemUpdate is also in domain/orders, using that as primary
 export type * from './ui/charts'
 export type {
-    ArrayItemUpdate, FormAction, FormFieldUpdate,
-    FormFieldUpdater, FormState, FormValidationError, FormValidationResult
+  ArrayItemUpdate, FormAction, FormFieldUpdate,
+  FormFieldUpdater, FormState, FormValidationError, FormValidationResult
 } from './ui/forms'
 export type * from './ui/responsive'
 

@@ -4,22 +4,26 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
- import { apiLogger } from '@/lib/logger'
- import { SecurityPresets, withSecurity } from '@/utils/security/index'
- import { createClient } from '@/utils/supabase/server'
- import type { NotificationsTable } from '@/types/database'
+ import { isErrorResponse, requireAuth } from '@/lib/api-auth'
+import { apiLogger } from '@/lib/logger'
+import type { NotificationsTable } from '@/types/database'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createClient } from '@/utils/supabase/server'
  
 
 
 async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     const supabase = await createClient()
-    
-    // Auth check
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }    const _body = await request.json() as { category?: string }
+
+    const _body = await request.json() as { category?: string }
     const { category } = _body
 
     // Build query
@@ -30,8 +34,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
     let query = supabase
       .from('notifications')
-      .update(updateData)
-      .eq('user_id', user.id)
+      .update(updateData as never)
       .eq('is_read', false)
 
     // Filter by category if provided
@@ -42,15 +45,14 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     const { error } = await query
 
     if (error) {
-      apiLogger.error({ error, userId: user['id'] }, 'Failed to mark all notifications as read')
+      apiLogger.error({ error, userId: user.id }, 'Failed to mark all notifications as read')
       return NextResponse.json({ error: 'Failed to mark all as read' }, { status: 500 })
     }
 
-    apiLogger.info({ userId: user['id'], category }, 'Marked all notifications as read')
+    apiLogger.info({ userId: user.id, category }, 'Marked all notifications as read')
 
     return NextResponse.json({ message: 'All notifications marked as read' })
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in POST /api/notifications/mark-all-read')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

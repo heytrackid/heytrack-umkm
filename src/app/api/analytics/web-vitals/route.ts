@@ -7,6 +7,7 @@ import { z } from 'zod'
 
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { SecurityPresets, createSecureHandler } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
@@ -20,17 +21,17 @@ const WebVitalsSchema = z.object({
 
 async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
 
     const body = WebVitalsSchema.parse(await request.json())
 
     apiLogger.info({
-      userId: user['id'],
+      userId: user.id,
       metric: body.name,
       value: body.value,
       rating: body.rating,
@@ -39,7 +40,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     }, 'Web Vitals metric recorded')
 
     return NextResponse.json({ success: true })
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Failed to record web vitals')
     return handleAPIError(error, 'POST /api/analytics/web-vitals')
   }

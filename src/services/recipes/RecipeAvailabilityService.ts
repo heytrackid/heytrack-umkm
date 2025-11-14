@@ -223,20 +223,21 @@ export class RecipeAvailabilityService {
       }
 
       return recipes.map((recipe) => {
-        const price = recipe.selling_price ?? 0
+        const typedRecipe = recipe as any // Type assertion for RLS
+        const price = typedRecipe.selling_price ?? 0
         const estimatedMargin = 0.3
 
         // Check ingredient availability based on recipe_ingredients data
         let isAvailable = true
         const insufficientIngredients: string[] = []
 
-        for (const recipeIngredient of recipe.recipe_ingredients || []) {
+        for (const recipeIngredient of typedRecipe.recipe_ingredients || []) {
           const ingredient = Array.isArray(recipeIngredient.ingredient) 
             ? recipeIngredient.ingredient[0] 
             : recipeIngredient.ingredient
           if (!ingredient) continue
 
-          const requiredAmount = recipeIngredient.quantity * (recipe.servings ?? 1)
+          const requiredAmount = recipeIngredient.quantity * (typedRecipe.servings ?? 1)
           const availableStock = ingredient['current_stock'] ?? 0
 
           if (availableStock < requiredAmount) {
@@ -246,17 +247,17 @@ export class RecipeAvailabilityService {
         }
 
         return {
-          id: recipe['id'],
-          name: recipe.name,
-          category: recipe.category ?? '',
-          servings: recipe.servings ?? 1,
-          description: recipe.description,
+          id: typedRecipe['id'],
+          name: typedRecipe.name,
+          category: typedRecipe.category ?? '',
+          servings: typedRecipe.servings ?? 1,
+          description: typedRecipe.description,
           selling_price: price,
-          cost_per_unit: recipe.cost_per_unit ?? (price * 0.7),
-          margin_percentage: recipe.margin_percentage ?? estimatedMargin,
+          cost_per_unit: typedRecipe.cost_per_unit ?? (price * 0.7),
+          margin_percentage: typedRecipe.margin_percentage ?? estimatedMargin,
           is_available: isAvailable,
-          prep_time: recipe.prep_time ?? null,
-          cook_time: recipe.cook_time ?? null
+          prep_time: typedRecipe.prep_time ?? null,
+          cook_time: typedRecipe.cook_time ?? null
         }
       })
     } catch (error) {

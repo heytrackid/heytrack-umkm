@@ -4,6 +4,7 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import type { Row } from '@/types/database'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
@@ -38,19 +39,15 @@ const getEfficiencyLevel = (timesMade: number): 'high' | 'low' | 'medium' => {
 // GET /api/hpp/comparison - Get recipe comparison data
 async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     // Create authenticated Supabase client
     const supabase = await createClient()
-
-    // Validate session
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error:')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
 
     const { searchParams } = new URL(request.url)
     const category = searchParams.get('category')
@@ -142,7 +139,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     }
 
     apiLogger.info({
-      userId: user['id'],
+      userId: user.id,
       totalRecipes,
       category: category ?? 'all'
     }, 'Recipe comparison data retrieved successfully')
@@ -152,8 +149,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
       benchmark,
       total: totalRecipes
     })
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error fetching recipe comparison data')
     return NextResponse.json(
       { error: 'Internal server error' },

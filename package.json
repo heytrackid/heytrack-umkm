@@ -32,7 +32,8 @@
     "clean:cache": "rm -rf .next/cache",
     "fix:hmr": "./scripts/fix-hmr.sh",
     "supabase:types": "supabase gen types typescript --local > src/types/supabase-generated.ts",
-    "supabase:types:remote": "supabase gen types typescript --project-id vrrjoswzmlhkmmcfhicw > src/types/supabase-generated.ts"
+    "supabase:types:remote": "supabase gen types typescript --project-id vrrjoswzmlhkmmcfhicw > src/types/supabase-generated.ts",
+    "supabase:types:service-role": "supabase gen types typescript --local --schema public > src/types/supabase-generated.ts"
   },
   "packageManager": "pnpm@10.21.0",
   "pnpm": {
@@ -64,6 +65,7 @@
     "@radix-ui/react-toast": "^1.2.15",
     "@radix-ui/react-toggle": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@stackframe/stack": "^2.8.51",
     "@supabase/realtime-js": "^2.78.0",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.58.0",
@@ -76,11 +78,13 @@
     "@vercel/analytics": "^1.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "critters": "^0.0.25",
     "date-fns": "^4.1.0",
     "dompurify": "^3.3.0",
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
     "input-otp": "^1.4.2",
+    "jose": "^6.1.1",
     "lucide-react": "^0.544.0",
     "next": "^16.0.0",
     "next-themes": "^0.4.6",

@@ -5,6 +5,7 @@ import type {
     TablesInsert as SupabaseTablesInsert,
     TablesUpdate as SupabaseTablesUpdate,
 } from '@/types/supabase-generated'
+import type { BypassRLS } from './database-config'
 
 // Core Supabase-generated helpers
 export type {
@@ -16,11 +17,11 @@ export type {
 } from './supabase-generated'
 
 // Generic type helpers for table operations
-export type TableName = string
-export type ViewName = string
-export type Row<T extends TableName> = T extends keyof DatabaseType['public']['Tables'] ? DatabaseType['public']['Tables'][T]['Row'] : Record<string, unknown>
-export type Insert<T extends TableName> = T extends keyof DatabaseType['public']['Tables'] ? DatabaseType['public']['Tables'][T]['Insert'] : Record<string, unknown>
-export type Update<T extends TableName> = T extends keyof DatabaseType['public']['Tables'] ? DatabaseType['public']['Tables'][T]['Update'] : Record<string, unknown>
+export type TableName = keyof DatabaseType['public']['Tables']
+export type ViewName = keyof DatabaseType['public']['Views']
+export type Row<T extends TableName> = DatabaseType['public']['Tables'][T]['Row']
+export type Insert<T extends TableName> = DatabaseType['public']['Tables'][T]['Insert']
+export type Update<T extends TableName> = DatabaseType['public']['Tables'][T]['Update']
 
 // Fallback types for tables that might not exist in generated types
 export type SafeRow<T extends string> = T extends TableName ? Row<T> : Record<string, unknown>
@@ -389,3 +390,6 @@ export const VIEW_NAMES = {
 
 export type TableNameConstant = (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES]
 export type ViewNameConstant = (typeof VIEW_NAMES)[keyof typeof VIEW_NAMES]
+
+// Re-export BypassRLS type
+export type { BypassRLS } from './database-config'

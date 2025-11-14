@@ -3,6 +3,7 @@ export const runtime = 'nodejs'
 
 import { NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import type { Insert } from '@/types/database'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
@@ -16,14 +17,14 @@ import { createClient } from '@/utils/supabase/server'
  */
 async function postHandler(): Promise<NextResponse> {
   try {
-    const supabase = await createClient()
-    
-    // Authenticate user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }    // Template operational costs (common for Indonesian culinary businesses)
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
+    const supabase = await createClient()    // Template operational costs (common for Indonesian culinary businesses)
     const templates: Array<Insert<'operational_costs'>> = [
       {
         user_id: user['id'],
@@ -110,7 +111,7 @@ async function postHandler(): Promise<NextResponse> {
     // Insert all templates
     const { data, error } = await supabase
       .from('operational_costs')
-      .insert(templates)
+      .insert(templates as never)
       .select()
 
     if (error) {
@@ -128,8 +129,7 @@ async function postHandler(): Promise<NextResponse> {
       count: data.length,
       costs: data
     }, { status: 201 })
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in POST /api/operational-costs/quick-setup')
     return NextResponse.json(
       { error: 'Internal server error' },

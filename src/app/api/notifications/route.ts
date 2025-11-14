@@ -4,6 +4,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import { NotificationInsertSchema } from '@/lib/validations/domains/notification'
 import type { Insert, Json, Row } from '@/types/database'
@@ -16,13 +17,14 @@ type Notification = Row<'notifications'>
 
 async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const supabase = await createClient()
-    
-    // Auth check
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     // Parse query params
     const { searchParams } = new URL(request.url)
@@ -71,8 +73,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
       notifications: data,
       unread_count: unreadCount ?? 0,
     })
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in GET /api/notifications')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
@@ -80,13 +81,15 @@ async function GET(request: NextRequest): Promise<NextResponse> {
 
 async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const supabase = await createClient()
-    
-    // Auth check
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
+
     const body: unknown = await request.json()
 
     // Validate request body
@@ -115,7 +118,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
 
     const { data, error } = await supabase
       .from('notifications')
-      .insert(notificationPayload)
+      .insert(notificationPayload as never)
       .select()
       .single()
 
@@ -125,8 +128,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     return NextResponse.json(data, { status: 201 })
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in POST /api/notifications')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

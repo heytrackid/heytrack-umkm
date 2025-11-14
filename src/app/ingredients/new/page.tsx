@@ -10,8 +10,8 @@ import { EnhancedIngredientForm } from '@/components/ingredients/index'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb'
-import { useSupabaseCRUD } from '@/hooks/supabase/index'
+import { BreadcrumbPatterns, PageBreadcrumb } from '@/components/ui/page-breadcrumb'
+import { useAuth, useSupabaseCRUD } from '@/hooks/index'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
@@ -30,6 +30,7 @@ const NewIngredientPage = (): JSX.Element => {
   const { supabase } = useSupabase()
   const { create: createIngredient } = useSupabaseCRUD('ingredients')
   const { toast } = useToast()
+  const { user } = useAuth() // Get user from auth hook
 
   const [loading, setLoading] = useState(false)
 
@@ -49,13 +50,9 @@ const NewIngredientPage = (): JSX.Element => {
     try {
       setLoading(true)
 
-      const {
-        data: { user },
-        error: authError
-      } = await supabase.auth.getUser()
-
-      if (authError || !user) {
-        throw authError ?? new Error('User not authenticated')
+      // Get user from client-side auth hook
+      if (!user) {
+        throw new Error('User not authenticated')
       }
 
       const payload: IngredientInsert = {

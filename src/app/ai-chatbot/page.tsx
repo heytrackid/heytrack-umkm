@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Suspense, useCallback, useEffect, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
-import { useAuth } from '@/providers/AuthProvider'
-import { useSupabase } from '@/providers/SupabaseProvider'
+import { useAuth } from '@/hooks/useAuth'
 
 import { useAIService, useChatMessages } from '@/app/ai-chatbot/hooks/index'
 

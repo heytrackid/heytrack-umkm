@@ -4,6 +4,7 @@ export const runtime = 'nodejs'
 
 import { NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger, logError } from '@/lib/logger'
 import { prepareUpdate } from '@/lib/supabase/insert-helpers'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
@@ -28,13 +29,14 @@ async function getSale(
   try {
     apiLogger.info({ saleId: id }, 'GET /api/sales/[id] - Request received')
 
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      logError(apiLogger, authError, 'GET /api/sales/[id] - Unauthorized')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     const { data: sale, error } = await supabase
       .from('financial_records')
@@ -42,7 +44,6 @@ async function getSale(
         *
       `)
       .eq('id', id)
-      .eq('user_id', user['id'])
       .eq('record_type', 'INCOME')
       .single()
 
@@ -60,9 +61,9 @@ async function getSale(
       )
     }
 
-    apiLogger.info({ saleId: id, userId: user['id'] }, 'GET /api/sales/[id] - Success')
+    apiLogger.info({ saleId: id, userId: user.id }, 'GET /api/sales/[id] - Success')
     return NextResponse.json(sale)
-  } catch (error: unknown) {
+  } catch (error) {
     logError(apiLogger, error, 'GET /api/sales/[id] - Unexpected error')
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
@@ -82,22 +83,22 @@ async function updateSale(
   try {
     apiLogger.info({ saleId: id }, 'PUT /api/sales/[id] - Request received')
 
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      logError(apiLogger, authError, 'PUT /api/sales/[id] - Unauthorized')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     const body = await request.json() as Record<string, unknown>
     const updatePayload = prepareUpdate('financial_records', body)
 
     const { data: sale, error } = await supabase
       .from('financial_records')
-      .update(updatePayload)
+      .update(updatePayload as never)
       .eq('id', id)
-      .eq('user_id', user['id'])
       .eq('record_type', 'INCOME')
       .select(`
         *
@@ -118,9 +119,9 @@ async function updateSale(
       )
     }
 
-    apiLogger.info({ saleId: id, userId: user['id'] }, 'PUT /api/sales/[id] - Success')
+    apiLogger.info({ saleId: id, userId: user.id }, 'PUT /api/sales/[id] - Success')
     return NextResponse.json(sale)
-  } catch (error: unknown) {
+  } catch (error) {
     logError(apiLogger, error, 'PUT /api/sales/[id] - Unexpected error')
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
@@ -140,19 +141,19 @@ async function deleteSale(
   try {
     apiLogger.info({ saleId: id }, 'DELETE /api/sales/[id] - Request received')
 
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      logError(apiLogger, authError, 'DELETE /api/sales/[id] - Unauthorized')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     const { error } = await supabase
       .from('financial_records')
       .delete()
       .eq('id', id)
-      .eq('user_id', user['id'])
       .eq('record_type', 'INCOME')
 
     if (error) {
@@ -163,7 +164,7 @@ async function deleteSale(
       )
     }
 
-    apiLogger.info({ saleId: id, userId: user['id'] }, 'DELETE /api/sales/[id] - Success')
+    apiLogger.info({ saleId: id, userId: user.id }, 'DELETE /api/sales/[id] - Success')
     return NextResponse.json({ message: 'Sale deleted successfully' })
   } catch (error) {
     logError(apiLogger, error, 'DELETE /api/sales/[id] - Unexpected error')

@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { createSuccessResponse, createErrorResponse, handleAPIError, withQueryValidation, PaginationSchema, calculateOffset, createPaginationMeta } from '@/lib/api-core'
 import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { IngredientInsertSchema } from '@/lib/validations/domains/ingredient'
 import type { Insert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
@@ -33,23 +34,21 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     const { page = 1, limit = 1000, sort, order = 'desc', search } = queryValidation
     const offset = calculateOffset(page, limit)
 
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     // Create authenticated Supabase client
     const supabase = typed(await createClient())
 
-    // Validate session
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error:')
-      return createErrorResponse('Unauthorized', 401)
-    }
-
-    // Build query - using ingredients table
+    // Build query - using ingredients table (RLS handles user_id filtering)
     // ✅ OPTIMIZED: Use specific fields instead of SELECT *
     let supabaseQuery = supabase
       .from('ingredients')
       .select(INGREDIENT_FIELDS.LIST, { count: 'exact' })
-      .eq('user_id', user['id'])
       .range(offset, offset + limit - 1)
 
     // Apply search filter - using name instead of nama_bahan
@@ -81,8 +80,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     // Add caching for ingredients list (2 minutes stale-while-revalidate)
     response.headers.set('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=300')
     return response
-
-  } catch (error: unknown) {
+  } catch (error) {
     const apiError = handleAPIError(error)
     return createErrorResponse(apiError.message, apiError['statusCode'])
   }
@@ -110,17 +108,16 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     const validatedData = validation['data']
 
     // Create authenticated Supabase client
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     const supabase = typed(await createClient())
 
-    // Validate session
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error:')
-      return createErrorResponse('Unauthorized', 401)
-    }
     const ingredientData = {
-      user_id: user['id'],
       name: validatedData.name,
       unit: validatedData.unit,
       price_per_unit: validatedData.price_per_unit,
@@ -145,8 +142,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     return createSuccessResponse(insertedData, 'Bahan baku berhasil ditambahkan')
-
-  } catch (error: unknown) {
+  } catch (error) {
     const apiError = handleAPIError(error)
     return createErrorResponse(apiError.message, apiError['statusCode'])
   }

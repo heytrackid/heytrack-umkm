@@ -1,13 +1,7 @@
 'use client'
- 
 
-import { Suspense } from 'react'
-
-import { AppLayout } from '@/components/layout/app-layout'
-import { OperationalCostFormPage } from '@/components/operational-costs/OperationalCostFormPage'
-import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
-
-
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 interface EditOperationalCostPageProps {
     params: {
@@ -15,14 +9,15 @@ interface EditOperationalCostPageProps {
     }
 }
 
-const EditOperationalCostPage = ({ params }: EditOperationalCostPageProps): JSX.Element => (
-    <AppLayout pageTitle="Edit Biaya Operasional">
-        <div className="p-6">
-            <Suspense fallback={<DataGridSkeleton rows={6} />}>
-                <OperationalCostFormPage mode="edit" costId={params['id']} />
-            </Suspense>
-        </div>
-    </AppLayout>
-)
+const EditOperationalCostPage = ({ params }: EditOperationalCostPageProps): JSX.Element => {
+    const router = useRouter()
+    
+    useEffect(() => {
+        // Redirect to main page - form is handled via dialog
+        router.push('/operational-costs')
+    }, [router, params])
+    
+    return null as unknown as React.ReactElement
+}
 
 export default EditOperationalCostPage

@@ -8,6 +8,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import type { Update } from '@/types/database'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
@@ -27,19 +28,19 @@ async function getHandler(
     }
 
     // 1. Authentication
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
 
-    // 2. Query template with ownership check
+    const supabase = await createClient()
+
+    // 2. Query template (RLS handles ownership check)
     const { data, error } = await supabase
       .from('whatsapp_templates')
       .select('id, user_id, name, message, is_active, created_at, updated_at')
       .eq('id', id)
-      .eq('user_id', user.id)
       .single()
 
     if (error?.code === 'PGRST116') {
@@ -52,8 +53,7 @@ async function getHandler(
     }
 
     return NextResponse.json(data)
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in GET /api/whatsapp-templates/[id]')
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -73,12 +73,13 @@ async function putHandler(
     }
 
     // 1. Authentication
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     // 2. Parse body
     const _body = await request.json() as {
@@ -95,7 +96,7 @@ async function putHandler(
     if (_body.is_default && _body.category) {
       await supabase
         .from('whatsapp_templates')
-        .update({ is_default: false })
+        .update({ is_default: false } as never)
         .eq('user_id', user['id'])
         .eq('category', _body.category)
         .neq('id', id)
@@ -115,9 +116,8 @@ async function putHandler(
 
     const { data, error } = await supabase
       .from('whatsapp_templates')
-      .update(updateData)
+      .update(updateData as never)
       .eq('id', id)
-      .eq('user_id', user.id)
       .select()
       .single()
 
@@ -126,14 +126,13 @@ async function putHandler(
     }
 
     if (error) {
-      apiLogger.error({ error, userId: user['id'], templateId: id }, 'Failed to update template')
+      apiLogger.error({ error, userId: user.id, templateId: id }, 'Failed to update template')
       throw error
     }
 
-    apiLogger.info({ userId: user['id'], templateId: id }, 'WhatsApp template updated')
+    apiLogger.info({ userId: user.id, templateId: id }, 'WhatsApp template updated')
     return NextResponse.json(data)
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in PUT /api/whatsapp-templates/[id]')
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -153,19 +152,19 @@ async function deleteHandler(
     }
 
     // 1. Authentication
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
 
-    // 2. Delete template with ownership check
+    const supabase = await createClient()
+
+    // 2. Delete template (RLS handles ownership check)
     const { error } = await supabase
       .from('whatsapp_templates')
       .delete()
       .eq('id', id)
-      .eq('user_id', user.id)
 
     if (error?.code === 'PGRST116') {
       return NextResponse.json({ error: 'Template not found' }, { status: 404 })
@@ -176,10 +175,9 @@ async function deleteHandler(
       throw error
     }
 
-    apiLogger.info({ userId: user['id'], templateId: id }, 'WhatsApp template deleted')
+    apiLogger.info({ userId: user.id, templateId: id }, 'WhatsApp template deleted')
     return NextResponse.json({ message: 'Template deleted successfully' })
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in DELETE /api/whatsapp-templates/[id]')
     return NextResponse.json(
       { error: 'Internal server error' },

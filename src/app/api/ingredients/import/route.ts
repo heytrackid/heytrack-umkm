@@ -3,6 +3,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import type { Insert } from '@/types/database'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
@@ -26,13 +27,16 @@ const sanitizeString = (value?: string | null, fallback?: string | null): string
 
 async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
-    // 1. Authenticate
+    // 1. Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }    // 2. Parse CSV data from request
+
+    // 2. Parse CSV data from request
     const body = await request.json() as { ingredients: Array<Partial<IngredientInsert>> }
     const { ingredients } = body
 
@@ -107,7 +111,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     // 5. Insert ingredients in batch
     const { data, error } = await supabase
       .from('ingredients')
-      .insert(validIngredients)
+      .insert(validIngredients as never)
       .select()
 
     if (error) {
@@ -129,7 +133,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
       data
     })
 
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in POST /api/ingredients/import')
     return NextResponse.json(
       { error: 'Terjadi kesalahan saat import' },

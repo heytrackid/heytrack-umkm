@@ -5,14 +5,16 @@ export const runtime = 'nodejs'
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { cacheInvalidation } from '@/lib/cache'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
-import type { Database, Insert, OrderStatus } from '@/types/database'
+import type { Insert, OrderStatus, Row } from '@/types/database'
 import { InputSanitizer, SecurityPresets, createSecureHandler } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
-import type { SupabaseClient } from '@supabase/supabase-js'
+type OrderRow = Row<'orders'>
+
 
 
 
@@ -105,14 +107,13 @@ const ImportOrdersSchema = z.object({
 
 type ImportedOrder = z.infer<typeof ImportedOrderSchema>
 
-async function authenticateUser(supabase: SupabaseClient<Database>) {
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-  if (authError || !user) {
+async function authenticateUser(): Promise<{ id: string }> {
+  const authResult = await requireAuth()
+  if (isErrorResponse(authResult)) {
     throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
   }
 
-  return user
+  return authResult
 }
 
 async function parseAndValidateRequest(request: NextRequest): Promise<{ orders: ImportedOrder[] }> {
@@ -120,7 +121,7 @@ async function parseAndValidateRequest(request: NextRequest): Promise<{ orders: 
   return ImportOrdersSchema.parse(body)
 }
 
-async function fetchRecipes(supabase: SupabaseClient<Database>, userId: string): Promise<Map<string, string>> {
+async function fetchRecipes(supabase: any, userId: string): Promise<Map<string, string>> {
   const { data: recipes, error: recipesError } = await supabase
     .from('recipes')
     .select('id, name')
@@ -212,7 +213,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // 1. Authenticate
     const supabase = await createClient()
-    const user = await authenticateUser(supabase)
+    const user = await authenticateUser()
 
     // 2. Parse and validate request
     const { orders } = await parseAndValidateRequest(request)
@@ -254,7 +255,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
         // Create new customer
         const { data: newCustomer, error: customerError } = await supabase
           .from('customers')
-          .insert(customerData)
+          .insert(customerData as never)
           .select('id')
           .single()
 
@@ -278,7 +279,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     }
 
     // 6. Create orders with items
-    const createdOrders = []
+    const createdOrders: OrderRow[] = []
 
     const orderPromises = ordersToCreate.map(async (orderData) => {
       const customerId = customerIds.get(orderData.customerName)
@@ -289,7 +290,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
         .insert({
           ...orderData.order,
           customer_id: customerId ?? null
-        })
+        } as never)
         .select()
         .single()
 
@@ -298,24 +299,26 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
         return null
       }
 
+      const typedNewOrder = newOrder as OrderRow
+
       // Create order items
       const itemsWithOrderId = orderData.items.map(item => ({
         ...item,
-        order_id: newOrder['id']
+        order_id: typedNewOrder['id']
       }))
 
       const { error: itemsError } = await supabase
         .from('order_items')
-        .insert(itemsWithOrderId)
+        .insert(itemsWithOrderId as never)
 
       if (itemsError) {
         apiLogger.error({ error: itemsError }, 'Failed to create order items')
         // Rollback: delete the order
-        await supabase.from('orders').delete().eq('id', newOrder['id'])
+        await supabase.from('orders').delete().eq('id', typedNewOrder['id'])
         return null
       }
 
-      return newOrder
+      return typedNewOrder
     })
 
     const orderResults = await Promise.all(orderPromises)
@@ -336,12 +339,10 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({
       success: true,
-      ordersCount: createdOrders.length,
-      customersCount: customerIds.size,
+      message: `Successfully imported ${createdOrders.length} orders`,
       data: createdOrders
     })
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in POST /api/orders/import')
     return handleAPIError(error, 'POST /api/orders/import')
   }

@@ -34,10 +34,10 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { NotificationCenter } from '@/components/ui/notification-center'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { useAuth } from '@/hooks/useAuth'
 import { useInstantNavigation } from '@/hooks/useInstantNavigation'
 import { useNotifications } from '@/hooks/useNotifications'
 import { uiLogger } from '@/lib/client-logger'
-import { useAuth } from '@/providers/AuthProvider'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { useResponsive } from '@/utils/responsive'
 

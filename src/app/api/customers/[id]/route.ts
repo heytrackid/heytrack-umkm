@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 // Internal modules
 import { apiLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 import { CustomerUpdateSchema } from '@/lib/validations/domains/customer'
 import { typed } from '@/types/type-utilities'
@@ -39,12 +40,14 @@ async function buildCustomerContext(context: RouteContext): Promise<CustomerRout
     return NextResponse.json({ error: 'Invalid customer ID format' }, { status: 400 })
   }
 
-  const supabase = typed(await createClient())
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  // Authenticate with Stack Auth
+  const authResult = await requireAuth()
+  if (isErrorResponse(authResult)) {
+    return authResult
   }
+  const user = authResult
 
+  const supabase = typed(await createClient())
   return { supabase, userId: user.id, customerId: id }
 }
 
@@ -146,7 +149,7 @@ export const GET = withSecurity(async function GET(
     }
 
     return NextResponse.json(data)
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/customers/[id]')
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
@@ -186,7 +189,7 @@ export const PUT = withSecurity(async function PUT(
     }
 
     return NextResponse.json(data)
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in PUT /api/customers/[id]')
     return NextResponse.json(
       { error: getErrorMessage(error) },
@@ -224,7 +227,7 @@ export const DELETE = withSecurity(async function DELETE(
     }
 
     return NextResponse.json({ message: 'Customer deleted successfully' })
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in DELETE /api/customers/[id]')
     return NextResponse.json(
       { error: getErrorMessage(error) },

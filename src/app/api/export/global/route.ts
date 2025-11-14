@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { GlobalExportService } from '@/lib/export/global-export'
 import { apiLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
@@ -13,18 +14,17 @@ export const dynamic = 'force-dynamic'
 
 async function GET(_request: NextRequest): Promise<NextResponse> {
   try {
-    // 1. Authenticate
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // 1. Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
 
-    apiLogger.info({ userId: user['id'] }, 'Starting global export')
+    apiLogger.info({ userId: user.id }, 'Starting global export')
 
     // 2. Generate export
-    const buffer = await GlobalExportService.generateExport(user['id'])
+    const buffer = await GlobalExportService.generateExport(user.id)
 
     // 3. Return file
     const filename = `HeyTrack_Export_${new Date().toISOString().split('T')[0]}.xlsx`
@@ -37,8 +37,7 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
         'Content-Length': buffer.length.toString(),
       },
     })
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in GET /api/export/global')
     return NextResponse.json(
       { error: 'Failed to generate export' },

@@ -4,10 +4,11 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isRecord, isValidUUID } from '@/lib/type-guards'
 import { OrderUpdateSchema } from '@/lib/validations/domains/order'
-import type { Update } from '@/types/database'
+import type { Row, Update } from '@/types/database'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
@@ -17,6 +18,7 @@ interface RouteContext {
 }
 
 type OrderUpdate = Update<'orders'>
+type OrderRow = Row<'orders'>
 type FinancialRecordUpdate = Update<'financial_records'>
 
 const normalizeDateValue = (value?: string | null) => {
@@ -36,18 +38,15 @@ async function GET(
     if (!isValidUUID(id)) {
       return NextResponse.json({ error: 'Invalid order ID format' }, { status: 400 })
     }
-    
-    const supabase = await createClient()
 
-    // Validate session
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     // Fetch order with items
     const { data, error } = await supabase
@@ -70,7 +69,6 @@ async function GET(
         )
       `)
       .eq('id', id)
-      .eq('user_id', user.id)
       .single()
 
     if (error) {
@@ -106,7 +104,7 @@ async function GET(
     }
 
     return NextResponse.json(data)
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/orders/[id]:')
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -127,18 +125,15 @@ async function PUT(
     if (!isValidUUID(id)) {
       return NextResponse.json({ error: 'Invalid order ID format' }, { status: 400 })
     }
-    
-    const supabase = await createClient()
 
-    // Validate session
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     const body = await request.json() as unknown
 
@@ -161,7 +156,6 @@ async function PUT(
       .from('orders')
       .select('id, status, financial_record_id')
       .eq('id', id)
-      .eq('user_id', user['id'])
       .single()
 
     if (checkError || !existingOrder) {
@@ -170,6 +164,9 @@ async function PUT(
         { status: 404 }
       )
     }
+
+    // Type assertion to fix RLS type inference
+    const typedExistingOrder = existingOrder as Pick<OrderRow, 'id' | 'status' | 'financial_record_id'>
 
     // Update order
     const updateData: OrderUpdate = {
@@ -181,9 +178,8 @@ async function PUT(
 
     const { data: updatedOrder, error: updateError } = await supabase
       .from('orders')
-      .update(updateData)
+      .update(updateData as never)
       .eq('id', id)
-      .eq('user_id', user['id'])
       .select()
       .single()
 
@@ -195,31 +191,34 @@ async function PUT(
       )
     }
 
+    // Type assertion to fix RLS type inference issue
+    const typedUpdatedOrder = updatedOrder as OrderRow
+
     // If status changed to DELIVERED and there's no financial record, create one
     if (
       validatedData['status'] === 'DELIVERED' && 
-      existingOrder['status'] !== 'DELIVERED' &&
-      !existingOrder.financial_record_id &&
-      updatedOrder.total_amount &&
-      updatedOrder.total_amount > 0
+      typedExistingOrder['status'] !== 'DELIVERED' &&
+      !typedExistingOrder.financial_record_id &&
+      typedUpdatedOrder.total_amount &&
+      typedUpdatedOrder.total_amount > 0
     ) {
-      const incomeDate = normalizeDateValue(updatedOrder.delivery_date)
- ?? normalizeDateValue(updatedOrder.order_date)
+      const incomeDate = normalizeDateValue(typedUpdatedOrder.delivery_date)
+ ?? normalizeDateValue(typedUpdatedOrder.order_date)
  ?? new Date().toISOString().split('T')[0]
 
       const incomeData = {
-        user_id: user['id'],
+        user_id: user.id,
         type: 'INCOME' as const,
         category: 'Revenue',
-        amount: updatedOrder.total_amount,
+        amount: typedUpdatedOrder.total_amount,
         date: incomeDate ?? null,
-        reference: `Order #${updatedOrder['order_no']}${updatedOrder['customer_name'] ? ` - ${updatedOrder['customer_name']}` : ''}`,
-        description: `Income from order ${updatedOrder['order_no']}`
+        reference: `Order #${typedUpdatedOrder['order_no']}${typedUpdatedOrder['customer_name'] ? ` - ${typedUpdatedOrder['customer_name']}` : ''}`,
+        description: `Income from order ${typedUpdatedOrder['order_no']}`
       }
 
       const { data: incomeRecord, error: incomeError } = await supabase
         .from('financial_records')
-        .insert(incomeData)
+        .insert(incomeData as never)
         .select('id')
         .single()
 
@@ -227,32 +226,30 @@ async function PUT(
         // Link financial record to order
         await supabase
           .from('orders')
-          .update({ financial_record_id: incomeRecord['id'] } as OrderUpdate)
+          .update({ financial_record_id: incomeRecord['id'] } as never)
           .eq('id', id)
-          .eq('user_id', user['id'])
       }
     }
 
     // If status changed from DELIVERED to something else, update financial record
     if (
-      existingOrder['status'] === 'DELIVERED' && 
+      typedExistingOrder['status'] === 'DELIVERED' && 
       validatedData['status'] && 
       validatedData['status'] !== 'DELIVERED' &&
-      existingOrder.financial_record_id
+      typedExistingOrder.financial_record_id
     ) {
       // Mark financial record as cancelled or update reference
       const updateFinancialData: FinancialRecordUpdate = {
-        description: `Order ${updatedOrder['order_no']} - Status changed to ${validatedData['status']}`
+        description: `Order ${typedUpdatedOrder['order_no']} - Status changed to ${validatedData['status']}`
       }
       await supabase
         .from('financial_records')
-        .update(updateFinancialData)
-        .eq('id', existingOrder.financial_record_id)
-        .eq('user_id', user['id'])
+        .update(updateFinancialData as never)
+        .eq('id', typedExistingOrder.financial_record_id)
     }
 
-    return NextResponse.json(updatedOrder)
-  } catch (error: unknown) {
+    return NextResponse.json(typedUpdatedOrder)
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in PUT /api/orders/[id]:')
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -274,24 +271,20 @@ async function DELETE(
       return NextResponse.json({ error: 'Invalid order ID format' }, { status: 400 })
     }
     
-    const supabase = await createClient()
-
-    // Validate session
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     // Check if order exists and get financial_record_id
     const { data: existingOrder, error: checkError } = await supabase
       .from('orders')
       .select('id, financial_record_id')
       .eq('id', id)
-      .eq('user_id', user['id'])
       .single()
 
     if (checkError || !existingOrder) {
@@ -301,19 +294,20 @@ async function DELETE(
       )
     }
 
+    // Type assertion to fix RLS type inference
+    const typedExistingOrderForDelete = existingOrder as Pick<OrderRow, 'id' | 'financial_record_id'>
+
     // Delete order items first (cascade should handle this, but being explicit)
     await supabase
       .from('order_items')
       .delete()
       .eq('order_id', id)
-      .eq('user_id', user['id'])
 
     // Delete order
     const { error: deleteError } = await supabase
       .from('orders')
       .delete()
       .eq('id', id)
-      .eq('user_id', user['id'])
 
     if (deleteError) {
       apiLogger.error({ error: deleteError }, 'Error deleting order:')
@@ -324,16 +318,15 @@ async function DELETE(
     }
 
     // Delete associated financial record if exists
-    if (existingOrder.financial_record_id) {
+    if (typedExistingOrderForDelete.financial_record_id) {
       await supabase
         .from('financial_records')
         .delete()
-        .eq('id', existingOrder.financial_record_id)
-        .eq('user_id', user['id'])
+        .eq('id', typedExistingOrderForDelete.financial_record_id)
     }
 
     return NextResponse.json({ message: 'Order deleted successfully' })
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in DELETE /api/orders/[id]:')
     return NextResponse.json(
       { error: 'Internal server error' },

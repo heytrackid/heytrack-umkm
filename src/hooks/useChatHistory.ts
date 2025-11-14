@@ -1,8 +1,8 @@
 'use client'
 
 import { createClientLogger } from '@/lib/client-logger'
-import { createClient } from '@/utils/supabase/client'
 import type { Json } from '@/types/database'
+import { createClient } from '@/utils/supabase/client'
 import { useCallback, useEffect, useState } from 'react'
 
 const logger = createClientLogger('useChatHistory')
@@ -95,7 +95,7 @@ export function useChatHistory(userId: string) {
             user_id: userId,
             title: 'New Conversation',
             context_snapshot: {}
-          })
+          } as never)
           .select()
           .single()
 
@@ -130,7 +130,7 @@ export function useChatHistory(userId: string) {
             actions: message.actions,
             data: message.data
           } as Json
-        })
+        } as never)
 
       if (error) throw error
 
@@ -139,7 +139,7 @@ export function useChatHistory(userId: string) {
         .from('chat_sessions')
         .update({
           updated_at: new Date().toISOString()
-        })
+        } as never)
         .eq('id', currentSessionId)
 
     } catch (error) {
@@ -166,7 +166,7 @@ export function useChatHistory(userId: string) {
           user_id: userId,
           title: 'New Conversation',
           context_snapshot: {}
-        })
+        } as never)
         .select()
         .single()
 

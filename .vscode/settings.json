@@ -62,5 +62,6 @@
   },
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "typescript.autoClosingTags": false
 }

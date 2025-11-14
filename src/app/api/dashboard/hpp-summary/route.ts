@@ -3,6 +3,7 @@ export const runtime = 'nodejs'
 
 import { NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 
 import { typed } from '@/types/type-utilities'
@@ -41,12 +42,12 @@ async function getTypedClient(): Promise<TypedSupabaseClient> {
   return typed(await createClient())
 }
 
-async function requireUserId(supabase: TypedSupabaseClient): Promise<string> {
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) {
+async function requireUserId(): Promise<string> {
+  const authResult = await requireAuth()
+  if (isErrorResponse(authResult)) {
     throw new Error('Unauthorized')
   }
-  return user.id
+  return authResult.id
 }
 
 async function fetchRecipes(
@@ -217,8 +218,12 @@ function buildResponse(
 
 async function getHandler(): Promise<NextResponse> {
   try {
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const userId = authResult.id
     const supabase = await getTypedClient()
-    const userId = await requireUserId(supabase)
 
     const [recipes, hppCalculations, alerts] = await Promise.all([
       fetchRecipes(supabase, userId),
@@ -227,7 +232,7 @@ async function getHandler(): Promise<NextResponse> {
     ])
 
     return NextResponse.json(buildResponse(recipes, hppCalculations, alerts))
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error fetching HPP dashboard summary')
     return NextResponse.json({ error: 'Failed to fetch HPP summary' }, { status: 500 })
   }

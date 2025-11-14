@@ -3,6 +3,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger, logError } from '@/lib/logger'
 import type { Database } from '@/types/database'
 import { typed } from '@/types/type-utilities'
@@ -61,12 +62,12 @@ async function getSupabaseClient(): Promise<TypedSupabaseClient> {
   return typed(await createClient())
 }
 
-async function requireUserId(supabase: TypedSupabaseClient): Promise<string> {
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) {
+async function requireUserId(): Promise<string> {
+  const authResult = await requireAuth()
+  if (isErrorResponse(authResult)) {
     throw new Error('Unauthorized')
   }
-  return user.id
+  return authResult.id
 }
 
 function getTodayRange(): { start: string; end: string } {
@@ -192,8 +193,12 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'GET /api/dashboard/production-schedule')
 
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const userId = authResult.id
     const supabase = await getSupabaseClient()
-    const userId = await requireUserId(supabase)
     const { start, end } = getTodayRange()
 
     const [batches, pendingOrders, lowStockAlerts] = await Promise.all([
@@ -220,7 +225,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     }, 'Dashboard data fetched')
 
     return NextResponse.json(response)
-  } catch (error: unknown) {
+  } catch (error) {
     logError(apiLogger, error, 'Unexpected error')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

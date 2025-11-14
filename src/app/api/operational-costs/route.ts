@@ -4,6 +4,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import { OperationalCostInsertSchema } from '@/lib/validations/domains/finance'
@@ -26,19 +27,15 @@ import { createClient } from '@/utils/supabase/server'
  */
 async function GET(request: NextRequest): Promise<NextResponse> {
   try {
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     // Create authenticated Supabase client
     const supabase = await createClient()
-
-    // Validate session
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error:')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
 
     const { searchParams } = new URL(request.url)
     const startDate = searchParams.get('start_date')
@@ -85,8 +82,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
       data: data ?? [],
       count: count ?? 0
     })
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in GET /api/operational-costs:')
     return NextResponse.json(
       { error: getErrorMessage(error) },
@@ -102,21 +98,17 @@ async function GET(request: NextRequest): Promise<NextResponse> {
  */
 async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     // Create authenticated Supabase client
     const supabase = await createClient()
 
-    // Validate session
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error:')
-       return NextResponse.json(
-         { error: 'Unauthorized' },
-         { status: 401 }
-       )
-     }
-
-      const body = await request.json() as unknown
+    const body = await request.json() as unknown
 
     // Validate request body with Zod
     const validation = OperationalCostInsertSchema.safeParse(body)
@@ -147,7 +139,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
 
     const { data, error } = await supabase
       .from('operational_costs')
-      .insert(insertPayload)
+      .insert(insertPayload as never)
       .select()
       .single()
 
@@ -160,8 +152,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     return NextResponse.json(data, { status: 201 })
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in POST /api/operational-costs:')
     return NextResponse.json(
       { error: getErrorMessage(error) },

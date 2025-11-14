@@ -6,6 +6,7 @@ import { z } from 'zod'
 
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger, logError } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { ProductionBatchService } from '@/services/production/ProductionBatchService'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
@@ -29,18 +30,19 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'GET /api/production/suggestions - Request received')
     
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     const client = await createClient()
 
-    const { data: { user }, error: authError } = await client.auth.getUser()
+    const suggestions = await ProductionBatchService.getSuggestedBatches(user.id)
 
-    if (authError || !user) {
-      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
-    }
-
-    const suggestions = await ProductionBatchService.getSuggestedBatches(user['id'])
-
-    apiLogger.info({ 
-      userId: user['id'],
+    apiLogger.info({
+      userId: user.id,
       suggestionsCount: suggestions.length
     }, 'GET /api/production/suggestions - Success')
 
@@ -66,19 +68,20 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/production/suggestions - Request received')
     
-    const client = await createClient()
-
-    const { data: { user }, error: authError } = await client.auth.getUser()
-
-    if (authError || !user) {
-      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const client = await createClient()
 
     const { order_ids, planned_date } = CreateBatchSchema.parse(await request.json())
 
     const result = await ProductionBatchService.createBatchFromOrders(
       order_ids,
-      user['id'],
+      user.id,
       planned_date
     )
 

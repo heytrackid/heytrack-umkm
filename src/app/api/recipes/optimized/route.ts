@@ -8,6 +8,7 @@ export const runtime = 'nodejs'
 
 import { createCachedResponse, cachePresets } from '@/lib/api-cache'
 import { apiLogger, dbLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { safeNumber, getErrorMessage } from '@/lib/type-guards'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
@@ -17,20 +18,15 @@ import type { NextRequest, NextResponse } from 'next/server'
 async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'GET /api/recipes/optimized - Request received')
-    const supabase = await createClient()
 
-    // Get user
-    const {
-      data: { user },
-      error: authError
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return createCachedResponse(
-        { error: 'Unauthorized' },
-        cachePresets.realtime
-      )
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     // Parse query params
     const {searchParams} = request.nextUrl
@@ -94,7 +90,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
       },
       cacheConfig
     )
-  } catch (error: unknown) {
+  } catch (error) {
     dbLogger.error({ error: getErrorMessage(error), msg: 'Recipes API error' })
     return createCachedResponse(
       { error: 'Internal server error' },

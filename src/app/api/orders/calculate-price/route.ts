@@ -7,6 +7,7 @@ import { z } from 'zod'
 
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger, logError } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { APISecurity, InputSanitizer, SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
@@ -28,14 +29,14 @@ async function calculatePricePOST(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/orders/calculate-price')
 
-    const client = await createClient()
-
-    const { data: { user }, error: authError } = await client.auth.getUser()
-
-    if (authError || !user) {
-      logError(apiLogger, authError, 'Unauthorized')
-      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const client = await createClient()
 
     const sanitizedBody = APISecurity.sanitizeRequestBody(await request.json())
     const parsedBody = CalculatePriceSchema.parse(sanitizedBody)

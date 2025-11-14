@@ -4,6 +4,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import { NotificationPreferencesUpdateSchema } from '@/lib/validations/domains/notification-preferences'
 import { DEFAULT_NOTIFICATION_PREFERENCES } from '@/types/domain/notification-preferences'
@@ -13,13 +14,14 @@ import { createClient } from '@/utils/supabase/server'
 
 async function getHandler() {
   try {
-    const supabase = await createClient()
-    
-    // Auth check
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     // Get user preferences
     const { data, error } = await supabase
@@ -36,7 +38,7 @@ async function getHandler() {
           .insert({
             user_id: user['id'],
             ...DEFAULT_NOTIFICATION_PREFERENCES,
-          })
+          } as never)
           .select()
           .single()
 
@@ -53,8 +55,7 @@ async function getHandler() {
     }
 
     return NextResponse.json(data)
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in GET /api/notifications/preferences')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
@@ -62,13 +63,14 @@ async function getHandler() {
 
 async function putHandler(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    
-    // Auth check
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     const body = await request.json() as unknown
     const validation = NotificationPreferencesUpdateSchema.safeParse(body)
@@ -88,7 +90,7 @@ async function putHandler(request: NextRequest) {
           Object.entries(validation['data']).map(([key, value]) => [key, value ?? null])
         ),
         updated_at: new Date().toISOString(),
-      })
+      } as never)
       .eq('user_id', user['id'])
       .select()
       .single()
@@ -103,7 +105,7 @@ async function putHandler(request: NextRequest) {
             ...Object.fromEntries(
               Object.entries(validation['data']).map(([key, value]) => [key, value ?? null])
             ),
-          })
+          } as never)
           .select()
           .single()
 
@@ -120,13 +122,12 @@ async function putHandler(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to update preferences' }, { status: 500 })
     }
 
-    apiLogger.info({ userId: user['id'] }, 'Notification preferences updated')
+    apiLogger.info({ userId: user.id }, 'Notification preferences updated')
     return NextResponse.json(data)
-
-   } catch (error: unknown) {
-     apiLogger.error({ error }, 'Error in PUT /api/notifications/preferences')
-     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-   }
+  } catch (error) {
+    apiLogger.error({ error }, 'Error in PUT /api/notifications/preferences')
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
 
 export const GET = withSecurity(getHandler, SecurityPresets.enhanced())

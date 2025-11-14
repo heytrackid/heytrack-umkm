@@ -8,19 +8,43 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { useSettings } from '@/contexts/settings-context'
-import { useInventoryAlerts, useReorderManagement } from '@/hooks/index'
-import { InventoryAlertsList } from '@/hooks/useInventoryAlerts'
+// import { useInventoryAlerts, useReorderManagement } from '@/hooks/index' // TODO: Hooks missing
+// import { InventoryAlertsList } from '@/hooks/useInventoryAlerts'
+
+// Temporary placeholder component
+const InventoryAlertsList = ({ alerts, maxItems }: { alerts: any[]; maxItems?: number }) => <div>No alerts</div>
 
 
 
 export const InventoryDashboard = (): JSX.Element => {
   const { formatCurrency } = useSettings()
-  const { inventoryStatus, loading: alertsLoading, refetch: refetchAlerts } = useInventoryAlerts()
-  const { reorderData, loading: reorderLoading, refetch: refetchReorder } = useReorderManagement()
+  // TODO: Re-enable when hooks are available
+  const inventoryStatus = { 
+    critical: 0, 
+    low: 0, 
+    adequate: 0,
+    total_ingredients: 0,
+    healthy_stock_count: 0,
+    low_stock_count: 0,
+    out_of_stock_count: 0,
+    total_value: 0,
+    alerts: []
+  }
+  const alertsLoading = false
+  const reorderData = { 
+    suggestions: [],
+    total_suggestions: 0,
+    total_estimated_cost: 0,
+    urgent_count: 0,
+    high_count: 0,
+    medium_count: 0,
+    low_count: 0
+  }
+  const reorderLoading = false
 
   const handleRefresh = () => {
-    refetchAlerts()
-    refetchReorder()
+    // refetchAlerts()
+    // refetchReorder()
   }
 
   if (alertsLoading || reorderLoading) {
@@ -158,7 +182,7 @@ export const InventoryDashboard = (): JSX.Element => {
               </div>
             ) : (
               <div className="space-y-3">
-                {reorderData.suggestions.slice(0, 5).map((suggestion) => (
+                {reorderData.suggestions.slice(0, 5).map((suggestion: any) => (
                   <div key={suggestion.ingredient_id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">

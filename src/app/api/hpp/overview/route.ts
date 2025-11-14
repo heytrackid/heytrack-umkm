@@ -4,6 +4,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
@@ -27,17 +28,14 @@ interface AlertWithRecipe {
 // GET /api/hpp/overview - Get comprehensive HPP overview data in one request
 async function GET(_request: NextRequest): Promise<NextResponse> {
   try {
-    const supabase = await createClient()
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     const getOverviewData = async (): Promise<{
       totalRecipes: number
@@ -109,10 +107,11 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
       const recipesWithHpp = recipesWithCost.length
 
       // Process alerts data - handle Supabase join structure
-      const alertsData: AlertWithRecipe[] = alertsRaw.map((alert) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const alertsData: any[] = alertsRaw.map((alert: any) => {
         const alertWithRecipes = alert as { recipes: unknown }
         return {
-          ...alert,
+          ...(alert as Record<string, unknown>),
           recipes: Array.isArray(alertWithRecipes.recipes) ? alertWithRecipes.recipes[0] as { name: string } | null : alertWithRecipes.recipes as { name: string } | null
         }
       })
@@ -153,8 +152,7 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
     }, 'HPP overview retrieved successfully')
 
     return NextResponse.json(result)
-
-  } catch (error: unknown) {
+  } catch (error) {
     return handleAPIError(error, 'GET /api/hpp/overview')
   }
 }

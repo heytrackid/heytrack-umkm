@@ -3,6 +3,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { PricingAutomation, UMKM_CONFIG } from '@/lib/automation/index'
 import { apiLogger } from '@/lib/logger'
 import type { Row } from '@/types/database'
@@ -37,10 +38,11 @@ async function postHandler(request: NextRequest, { params }: { params: Promise<{
     const { id: recipeId } = resolvedParams
     
     // Verify user is authenticated
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }    // Get the recipe data from the request
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult    // Get the recipe data from the request
     const body = await request.json() as unknown
     let recipeData: RecipeWithIngredients | null = null
     if (body && typeof body === 'object' && !Array.isArray(body)) {
@@ -75,9 +77,10 @@ async function postHandler(request: NextRequest, { params }: { params: Promise<{
 
       // Transform the data structure to match RecipeWithIngredients
       // Supabase returns joined data as arrays, so we need to extract the first element
-      const transformedIngredients = (data.recipe_ingredients ?? []).map((ri: RecipeIngredientWithIngredient) => ({
+      const typedData = data as any // Type assertion to fix RLS inference
+      const transformedIngredients = (typedData.recipe_ingredients ?? []).map((ri: RecipeIngredientWithIngredient) => ({
         id: '',
-        recipe_id: data.id,
+        recipe_id: typedData.id,
         ingredient_id: ri.ingredients?.id ?? '',
         quantity: ri.quantity,
         unit: ri.unit,
@@ -99,7 +102,7 @@ async function postHandler(request: NextRequest, { params }: { params: Promise<{
       } as RecipeIngredient & { ingredient: Row<'ingredients'> | null }))
 
       recipeData = {
-        ...data,
+        ...typedData,
         recipe_ingredients: transformedIngredients
       }
     }
@@ -150,7 +153,6 @@ async function postHandler(request: NextRequest, { params }: { params: Promise<{
       success: true,
       data: pricingAnalysis
     })
-
   } catch (error) {
     const normalizedError = error instanceof Error ? error : new Error(String(error))
     apiLogger.error({ error: normalizedError }, 'Error calculating pricing')

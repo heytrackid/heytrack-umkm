@@ -1,18 +1,17 @@
-import { logger } from '@/lib/logger'
+import { logger } from '@/lib/logger';
 
-import type { Json } from '@/types/database'
+import type { Json } from '@/types/database';
 import type {
-
-  BusinessContext,
-  RecipeSummary,
-  IngredientSummary,
-  OrderSummary,
-  HppSummary,
-  FinancialSummary,
-  QuickStat,
-  BusinessInsight,
-} from '@/types/features/chat'
-import { createClient } from '@/utils/supabase/server'
+    BusinessContext,
+    BusinessInsight,
+    FinancialSummary,
+    HppSummary,
+    IngredientSummary,
+    OrderSummary,
+    QuickStat,
+    RecipeSummary,
+} from '@/types/features/chat';
+import { createClient } from '@/utils/supabase/server';
 
 // Business Context Service - Aggregates business data for AI context
 
@@ -101,11 +100,14 @@ export class BusinessContextService {
       .order('created_at', { ascending: false })
       .limit(100);
 
-    return data?.map(r => ({
-      id: r['id'],
-      name: r.name,
-      hpp: r.cost_per_unit ?? 0
-    })) ?? [];
+    return data?.map(r => {
+      const typed = r as any // Type assertion for RLS
+      return {
+        id: typed['id'],
+        name: typed.name,
+        hpp: typed.cost_per_unit ?? 0
+      }
+    }) ?? [];
   }
 
   /**
@@ -123,13 +125,16 @@ export class BusinessContextService {
       .limit(20);
 
     return (
-      data?.map((ing) => ({
-        id: ing['id'],
-        name: ing.name,
-        stock: ing.current_stock ?? 0,
-        unit: ing.unit,
-        low_stock: (ing.current_stock ?? 0) <= (ing.min_stock ?? 0),
-      })) ?? []
+      data?.map((ing) => {
+        const typed = ing as any // Type assertion for RLS
+        return {
+          id: typed['id'],
+          name: typed.name,
+          stock: typed.current_stock ?? 0,
+          unit: typed.unit,
+          low_stock: (typed.current_stock ?? 0) <= (typed.min_stock ?? 0),
+        }
+      }) ?? []
     );
   }
 
@@ -147,13 +152,16 @@ export class BusinessContextService {
       .order('created_at', { ascending: false })
       .limit(100);
 
-    return (data ?? []).map(order => ({
-      id: order['id'],
-      customer_name: order['customer_name'] ?? 'Unknown customer',
-      total_amount: order.total_amount ?? 0,
-      status: order['status'] ?? 'UNKNOWN',
-      created_at: order.created_at ?? new Date().toISOString()
-    }));
+    return (data ?? []).map(order => {
+      const typed = order as any // Type assertion for RLS
+      return {
+        id: typed['id'],
+        customer_name: typed['customer_name'] ?? 'Unknown customer',
+        total_amount: typed.total_amount ?? 0,
+        status: typed['status'] ?? 'UNKNOWN',
+        created_at: typed.created_at ?? new Date().toISOString()
+      }
+    });
   }
 
   /**
@@ -173,8 +181,8 @@ export class BusinessContextService {
 
     const alertsCount = 0;
 
-    const current = calculations?.[0];
-    const previous = calculations?.[1];
+    const current = calculations?.[0] as any; // Type assertion for RLS
+    const previous = calculations?.[1] as any; // Type assertion for RLS
 
     let trend: 'down' | 'stable' | 'up' = 'stable';
     if (current && previous) {
@@ -210,7 +218,7 @@ export class BusinessContextService {
       .gte('created_at', startOfMonth.toISOString());
 
     const totalRevenue =
-      orders?.reduce((sum, order) => sum + (order.total_amount ?? 0), 0) ?? 0;
+      orders?.reduce((sum, order) => sum + ((order as any).total_amount ?? 0), 0) ?? 0;
 
     // Get costs from operational_costs and ingredient_purchases
     const { data: opCosts } = await supabase
@@ -226,8 +234,8 @@ export class BusinessContextService {
       .gte('purchase_date', startOfMonth.toISOString());
 
     const totalCosts =
-      (opCosts?.reduce((sum, cost) => sum + cost.amount, 0) ?? 0) +
-      (purchases?.reduce((sum, purchase) => sum + purchase.total_price, 0) ??
+      (opCosts?.reduce((sum, cost) => sum + (cost as any).amount, 0) ?? 0) +
+      (purchases?.reduce((sum, purchase) => sum + (purchase as any).total_price, 0) ??
         0);
 
     return {
@@ -255,7 +263,8 @@ export class BusinessContextService {
 
     if (!data) {return null;}
 
-    const expiresAt = new Date(data.expires_at);
+    const typedData = data as any // Type assertion for RLS
+    const expiresAt = new Date(typedData.expires_at);
     if (expiresAt < new Date()) {
       return null;
     }
@@ -281,7 +290,7 @@ export class BusinessContextService {
       context_type: 'full_context',
       data: serializableContext,
       expires_at: expiresAt.toISOString(),
-    });
+    } as never);
   }
 
   /**

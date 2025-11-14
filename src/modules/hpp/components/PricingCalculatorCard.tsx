@@ -1,7 +1,7 @@
 'use client'
 
-import { Loader2, CheckCircle, TrendingUp, TrendingDown, DollarSign, Lightbulb } from 'lucide-react'
-import { useState, useEffect, useRef, type ComponentType } from 'react'
+import { CheckCircle, ChevronDown, ChevronUp, DollarSign, Lightbulb, Loader2, TrendingDown, TrendingUp } from 'lucide-react'
+import { useEffect, useRef, useState, type ComponentType } from 'react'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
@@ -57,6 +57,7 @@ export const PricingCalculatorCard = ({
     const { formatCurrency } = useCurrency()
     const [mode, setMode] = useState<'auto' | 'manual'>('auto')
     const [manualPrice, setManualPrice] = useState(suggestedPrice)
+    const [isExpanded, setIsExpanded] = useState(false)
 
     // Update manual price when mode changes to auto
     const prevModeRef = useRef(mode)
@@ -115,35 +116,113 @@ export const PricingCalculatorCard = ({
             <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                     <DollarSign className="h-5 w-5" />
-                    Kalkulator Harga Jual
+                    Harga Jual & Margin
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-                {/* Current Price Info */}
-                {hasCurrentPrice && (
-                    <Alert>
-                        <DollarSign className="h-4 w-4" />
-                        <AlertDescription>
-                            <div className="flex items-center justify-between">
+                {/* COLLAPSED STATE - Quick Summary */}
+                {!isExpanded && (
+                    <div className="space-y-4">
+                        {/* Display Price Summary */}
+                        <div className="p-6 bg-gradient-to-br from-muted/30 to-muted/50 dark:from-muted/10 dark:to-muted/20 rounded-lg border-2 border-border/20">
+                            <div className="flex items-start justify-between mb-4">
                                 <div>
-                                    <p className="font-semibold">Harga Jual Saat Ini</p>
-                                    <p className="text-sm text-muted-foreground">
-                                        Margin: {currentMargin.toFixed(0)}% • Untung: {formatCurrency(currentProfit)}
+                                    <div className="text-sm text-muted-foreground mb-1">Harga Jual yang Disarankan</div>
+                                    <div className="text-4xl font-bold text-foreground">
+                                        {formatCurrency(displayPrice)}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        Margin: {displayMargin.toFixed(0)}% • Untung: {formatCurrency(profit)}
                                     </p>
                                 </div>
-                                <span className="text-xl font-bold">{formatCurrency(currentPrice)}</span>
+                                <Badge variant={manualMarginVariant} className="gap-1">
+                                    <MarginStatusIcon className="h-3 w-3" />
+                                    {marginLabel}
+                                </Badge>
                             </div>
-                        </AlertDescription>
-                    </Alert>
+
+                            {/* Quick Breakdown */}
+                            <div className="bg-card p-4 rounded-lg space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Biaya Produksi</span>
+                                    <span className="font-medium">{formatCurrency(totalCost)}</span>
+                                </div>
+                                <div className="flex justify-between text-muted-foreground">
+                                    <span>Keuntungan ({displayMargin.toFixed(0)}%)</span>
+                                    <span className="font-semibold">+ {formatCurrency(profit)}</span>
+                                </div>
+                                <div className="flex justify-between pt-2 border-t font-semibold">
+                                    <span>Harga Jual</span>
+                                    <span className="text-foreground">{formatCurrency(displayPrice)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Current Price Info (if exists) */}
+                        {hasCurrentPrice && (
+                            <Alert>
+                                <DollarSign className="h-4 w-4" />
+                                <AlertDescription>
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="font-semibold">Harga Jual Saat Ini</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                Margin: {currentMargin.toFixed(0)}% • Untung: {formatCurrency(currentProfit)}
+                                            </p>
+                                        </div>
+                                        <span className="text-xl font-bold">{formatCurrency(currentPrice)}</span>
+                                    </div>
+                                </AlertDescription>
+                            </Alert>
+                        )}
+
+                        {/* Quick Actions */}
+                        <div className="flex gap-2">
+                            <Button
+                                onClick={() => onSavePrice(displayPrice, displayMargin)}
+                                className="flex-1"
+                                disabled={Boolean(isSaving || displayPrice === currentPrice || (mode === 'manual' && manualPrice < totalCost))}
+                            >
+                                {actionContent}
+                            </Button>
+                            <Button
+                                variant="outline"
+                                onClick={() => setIsExpanded(true)}
+                            >
+                                <ChevronDown className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
                 )}
 
-                {/* Current Cost */}
-                <div className="p-4 bg-muted/20 rounded-lg">
-                    <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Biaya Produksi</span>
-                        <span className="text-lg font-semibold">{formatCurrency(totalCost)}</span>
-                    </div>
-                </div>
+                {/* EXPANDED STATE - Full Calculator */}
+                {isExpanded && (
+                    <>
+                        {/* Current Price Info */}
+                        {hasCurrentPrice && (
+                            <Alert>
+                                <DollarSign className="h-4 w-4" />
+                                <AlertDescription>
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="font-semibold">Harga Jual Saat Ini</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                Margin: {currentMargin.toFixed(0)}% • Untung: {formatCurrency(currentProfit)}
+                                            </p>
+                                        </div>
+                                        <span className="text-xl font-bold">{formatCurrency(currentPrice)}</span>
+                                    </div>
+                                </AlertDescription>
+                            </Alert>
+                        )}
+
+                        {/* Current Cost */}
+                        <div className="p-4 bg-muted/20 rounded-lg">
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm text-muted-foreground">Biaya Produksi</span>
+                                <span className="text-lg font-semibold">{formatCurrency(totalCost)}</span>
+                            </div>
+                        </div>
 
                 {/* Mode Tabs */}
                 <SwipeableTabs value={mode} onValueChange={(v) => setMode(v as 'auto' | 'manual')}>
@@ -265,16 +344,24 @@ export const PricingCalculatorCard = ({
                     </AlertDescription>
                 </Alert>
 
-                {/* Actions */}
-                { }
-                <Button
-                    onClick={() => onSavePrice(displayPrice, displayMargin)}
-                    className="w-full"
-                     
-                    disabled={Boolean(isSaving || displayPrice === currentPrice || (mode === 'manual' && manualPrice < totalCost))}
-                >
-                    {actionContent}
-                </Button>
+                        {/* Actions */}
+                        <div className="flex gap-2">
+                            <Button
+                                onClick={() => onSavePrice(displayPrice, displayMargin)}
+                                className="flex-1"
+                                disabled={Boolean(isSaving || displayPrice === currentPrice || (mode === 'manual' && manualPrice < totalCost))}
+                            >
+                                {actionContent}
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                onClick={() => setIsExpanded(false)}
+                            >
+                                <ChevronUp className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </>
+                )}
             </CardContent>
         </Card>
     )

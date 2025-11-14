@@ -3,6 +3,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import { FinancialRecordUpdateSchema, type FinancialRecordUpdate } from '@/lib/validations/domains/finance'
 import type { Update } from '@/types/database'
@@ -16,25 +17,26 @@ async function getHandler(
   { params }: { params: Promise<Record<string, string>> }
 ): Promise<NextResponse> {
   try {
+    // Authenticate
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     const awaitedParams = await params
     const id = awaitedParams['id']
     if (!id) {
       return NextResponse.json({ error: 'Missing id parameter' }, { status: 400 })
     }
+    
     const supabase = await createClient()
 
-    // Authenticate
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Fetch financial record
+    // Fetch financial record (RLS will filter by user_id automatically)
     const { data, error } = await supabase
       .from('financial_records')
       .select('id, user_id, date, description, category, amount, reference, type, created_at, created_by')
       .eq('id', id)
-      .eq('user_id', user['id'])
       .single()
 
     if (error) {
@@ -46,7 +48,7 @@ async function getHandler(
     }
 
     return NextResponse.json(data)
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in GET /api/financial/records/[id]')
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
@@ -61,19 +63,20 @@ async function putHandler(
   { params }: { params: Promise<Record<string, string>> }
 ): Promise<NextResponse> {
   try {
+    // Authenticate
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     const awaitedParams = await params
     const id = awaitedParams['id']
     if (!id) {
       return NextResponse.json({ error: 'Missing id parameter' }, { status: 400 })
     }
+    
     const supabase = await createClient()
-
-    // Authenticate
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const body = await request.json() as FinancialRecordUpdate
 
     // Validate request body
@@ -100,12 +103,12 @@ async function putHandler(
       ...(validatedData.reference_id !== undefined && { reference: validatedData.reference_id ?? null })
     }
 
-    // Update with RLS enforcement
-    const { data, error } = await supabase
-      .from('financial_records')
+    // Update with RLS enforcement (RLS will filter by user_id automatically)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase
+      .from('financial_records') as any)
       .update(updatePayload)
       .eq('id', id)
-      .eq('user_id', user.id)
       .select()
       .single()
 
@@ -118,7 +121,7 @@ async function putHandler(
     }
 
     return NextResponse.json(data)
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in PUT /api/financial/records/[id]')
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
@@ -133,25 +136,26 @@ async function deleteHandler(
   { params }: { params: Promise<Record<string, string>> }
 ): Promise<NextResponse> {
   try {
+    // Authenticate
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     const awaitedParams = await params
     const id = awaitedParams['id']
     if (!id) {
       return NextResponse.json({ error: 'Missing id parameter' }, { status: 400 })
     }
+    
     const supabase = await createClient()
 
-    // Authenticate
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check if record is linked to orders or other entities
+    // Check if record is linked to orders or other entities (RLS will filter by user_id)
     const { data: linkedOrders } = await supabase
       .from('orders')
       .select('id')
       .eq('financial_record_id', id)
-      .eq('user_id', user['id'])
       .limit(1)
 
     if (linkedOrders && linkedOrders.length > 0) {
@@ -161,12 +165,11 @@ async function deleteHandler(
       )
     }
 
-    // Delete with RLS enforcement
+    // Delete with RLS enforcement (RLS will filter by user_id automatically)
     const { error } = await supabase
       .from('financial_records')
       .delete()
       .eq('id', id)
-      .eq('user_id', user['id'])
 
     if (error) {
       if (error['code'] === 'PGRST116') {
@@ -177,7 +180,7 @@ async function deleteHandler(
     }
 
     return NextResponse.json({ message: 'Financial record deleted successfully' })
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in DELETE /api/financial/records/[id]')
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },

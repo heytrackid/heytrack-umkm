@@ -5,7 +5,8 @@ export const runtime = 'nodejs'
  import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
- import { apiLogger } from '@/lib/logger'
+ import { isErrorResponse, requireAuth } from '@/lib/api-auth'
+import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, safeNumber } from '@/lib/type-guards'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
@@ -26,16 +27,14 @@ const FinancialRecordSchema = z.object({
  */
 async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const supabase = await createClient()
-
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     const body = await request.json()
     const validation = FinancialRecordSchema.safeParse(body)
@@ -51,8 +50,9 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     const { description, category, amount, date, type } = data
 
     // Insert into financial_records
-    const { data: record, error: insertError } = await supabase
-      .from('financial_records')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: record, error: insertError } = await (supabase
+      .from('financial_records') as any)
       .insert({
         user_id: user.id,
         type: type.toUpperCase() as 'EXPENSE' | 'INCOME',
@@ -77,8 +77,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
       success: true,
       data: record
     })
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in POST /api/financial/records')
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -93,16 +92,14 @@ async function POST(request: NextRequest): Promise<NextResponse> {
  */
 async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const supabase = await createClient()
-
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     const { searchParams } = new URL(request.url)
     const startDate = searchParams.get('start_date')
@@ -145,8 +142,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
       success: true,
       data: records ?? []
     })
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/financial/records')
     return NextResponse.json(
       { error: 'Internal server error' },

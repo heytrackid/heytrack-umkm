@@ -3,6 +3,7 @@ export const runtime = 'nodejs'
 
 import { NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
@@ -14,19 +15,17 @@ async function postHandler(): Promise<NextResponse> {
 
     apiLogger.info('Marking all HPP alerts as read')
 
-    // Get current user for filtering alerts
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-
-    if (userError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
 
     // Update all unread alerts for the current user
-    const { data, error } = await supabase
-      .from('hpp_alerts')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase
+      .from('hpp_alerts') as any)
       .update({
         is_read: true,
         read_at: new Date().toISOString(),
@@ -47,12 +46,9 @@ async function postHandler(): Promise<NextResponse> {
 
     return NextResponse.json({
       success: true,
-      data: {
-        updatedCount,
-        alerts: data
-      }
+      message: `Marked ${updatedCount} alerts as read`,
+      updatedCount
     })
-
   } catch (error) {
     return handleAPIError(error, 'POST /api/hpp/alerts/bulk-read')
   }

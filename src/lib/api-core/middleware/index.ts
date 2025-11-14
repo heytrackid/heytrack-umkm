@@ -7,10 +7,10 @@ import type { NextRequest, NextResponse } from 'next/server'
 
 
 // Re-export individual middleware
-export { withValidation, withQueryValidation } from './validation'
-export { withRateLimit } from './rate-limit'
 export { withCors } from './cors'
-export { withAuth } from './auth'
+export { withRateLimit } from './rate-limit'
+export { withQueryValidation, withValidation } from './validation'
+// export { withAuth } from './auth' // Removed - auth middleware not implemented
 
 /**
  * Combine multiple middleware functions

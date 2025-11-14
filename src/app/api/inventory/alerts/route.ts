@@ -5,6 +5,7 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
 import { typed } from '@/types/type-utilities'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
@@ -17,15 +18,16 @@ import { createClient } from '@/utils/supabase/server'
  */
 async function GET(__request: NextRequest): Promise<NextResponse> {
   try {
-    const supabase = typed(await createClient())
-    
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
 
+    const supabase = typed(await createClient())
     const alertService = new InventoryAlertService()
-    const alerts = await alertService.getActiveAlerts(user['id'])
+    const alerts = await alertService.getActiveAlerts(user.id)
 
     return NextResponse.json(alerts)
 
@@ -44,18 +46,19 @@ async function GET(__request: NextRequest): Promise<NextResponse> {
  */
 async function POST(__request: NextRequest): Promise<NextResponse> {
   try {
-    const supabase = await createClient()
-    
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
 
+    const supabase = await createClient()
     const alertService = new InventoryAlertService()
-    await alertService.checkLowStockAlerts(user['id'])
+    await alertService.checkLowStockAlerts(user.id)
 
-    return NextResponse.json({ 
-      message: 'Inventory alerts checked successfully' 
+    return NextResponse.json({
+      message: 'Inventory alerts checked successfully'
     })
 
   } catch (error: unknown) {

@@ -7,12 +7,12 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
-import { APIError } from '@/lib/errors/api-error-handler'
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
-import { createSecureRouteHandler, SecurityPresets } from '@/utils/security/index'
 import { typed } from '@/types/type-utilities'
+import { createSecureRouteHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 
@@ -22,17 +22,14 @@ interface RouteContext {
 
 async function getHandler(_request: NextRequest, context: RouteContext): Promise<NextResponse> {
   try {
-    const supabase = await createClient()
-
-    // Get authenticated user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     const { id } = await context.params
     if (!id) {
@@ -42,34 +39,31 @@ async function getHandler(_request: NextRequest, context: RouteContext): Promise
 
     // Get session and messages
     const [session, messages] = await Promise.all([
-      ChatSessionService.getSession(typed(supabase), sessionId, user['id']),
-      ChatSessionService.getMessages(typed(supabase), sessionId, user['id']),
+      ChatSessionService.getSession(typed(supabase), sessionId, user.id),
+      ChatSessionService.getMessages(typed(supabase), sessionId, user.id),
     ])
 
     apiLogger.info(
-      { userId: user['id'], sessionId, messageCount: messages.length },
+      { userId: user.id, sessionId, messageCount: messages.length },
       'Session loaded'
     )
 
     return NextResponse.json({ session, messages })
-  } catch (error: unknown) {
+  } catch (error) {
     return handleAPIError(error)
   }
 }
 
 async function deleteHandler(_request: NextRequest, context: RouteContext): Promise<NextResponse> {
   try {
-    const supabase = await createClient()
-
-    // Get authenticated user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     const { id } = await context.params
     if (!id) {
@@ -78,12 +72,11 @@ async function deleteHandler(_request: NextRequest, context: RouteContext): Prom
     const sessionId = id
 
     // Delete session
-    await ChatSessionService.deleteSession(typed(supabase), sessionId, user['id'])
+    await ChatSessionService.deleteSession(typed(supabase), sessionId, user.id)
 
-    apiLogger.info({ userId: user['id'], sessionId }, 'Session deleted')
-
-    return NextResponse.json({ message: 'Session deleted successfully' })
-  } catch (error: unknown) {
+    apiLogger.info({ userId: user.id, sessionId }, 'Session deleted')
+    return NextResponse.json({ success: true })
+  } catch (error) {
     return handleAPIError(error)
   }
 }

@@ -3,6 +3,7 @@ export const runtime = 'nodejs'
 
 
  
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import { calculateRecipeCOGS, toNumber } from '@/lib/supabase/query-helpers'
 import type { Row } from '@/types/database'
@@ -29,19 +30,15 @@ type OrderItem = Row<'order_items'>
  */
 async function getHandler(request: NextRequest) {
   try {
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     // Create authenticated Supabase client
     const supabase = await createClient()
-
-    // Validate session
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error:')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
 
     const { searchParams } = new URL(request.url)
 
@@ -102,15 +99,18 @@ async function getHandler(request: NextRequest) {
     // Transform recipes - handle Supabase join structure
     // Supabase returns ingredient as array, we need to extract first element
     const recipes: RecipeWithIngredients[] = Array.isArray(recipesRaw)
-      ? recipesRaw.map((recipe) => ({
-          ...recipe,
-          recipe_ingredients: Array.isArray(recipe.recipe_ingredients)
-            ? recipe.recipe_ingredients.map((ri: { ingredient: unknown }) => ({
-                ...ri,
-                ingredient: Array.isArray(ri.ingredient) ? ri.ingredient[0]! : ri.ingredient
-              }))
-            : []
-        })) as RecipeWithIngredients[]
+      ? recipesRaw.map((recipe) => {
+          const typedRecipe = recipe as any // Type assertion to fix RLS inference
+          return {
+            ...typedRecipe,
+            recipe_ingredients: Array.isArray(typedRecipe.recipe_ingredients)
+              ? typedRecipe.recipe_ingredients.map((ri: { ingredient: unknown }) => ({
+                  ...ri,
+                  ingredient: Array.isArray(ri.ingredient) ? ri.ingredient[0]! : ri.ingredient
+                }))
+              : []
+          }
+        }) as RecipeWithIngredients[]
       : []
 
     // Get all expenses from financial_records (one-time expenses)
@@ -141,20 +141,26 @@ async function getHandler(request: NextRequest) {
 
     // Combine all expenses (one-time + operational)
     const allExpenses = [
-      ...(expenses ?? []).map(exp => ({
-        category: exp.category || 'Other',
-        amount: exp.amount,
-        description: exp.description,
-        date: exp.date,
-        source: 'expense' as const
-      })),
-      ...(operationalCosts ?? []).map(cost => ({
-        category: cost.category || 'Operational',
-        amount: cost.amount,
-        description: cost.description,
-        date: cost.date,
-        source: 'operational' as const
-      }))
+      ...(expenses ?? []).map(exp => {
+        const typedExp = exp as any // Type assertion to fix RLS inference
+        return {
+          category: typedExp.category || 'Other',
+          amount: typedExp.amount,
+          description: typedExp.description,
+          date: typedExp.date,
+          source: 'expense' as const
+        }
+      }),
+      ...(operationalCosts ?? []).map(cost => {
+        const typedCost = cost as any // Type assertion to fix RLS inference
+        return {
+          category: typedCost.category || 'Operational',
+          amount: typedCost.amount,
+          description: typedCost.description,
+          date: typedCost.date,
+          source: 'operational' as const
+        }
+      })
     ]
 
     // Calculate profit metrics
@@ -192,8 +198,7 @@ async function getHandler(request: NextRequest) {
     }
 
     return NextResponse.json(response)
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error generating profit report:')
     return NextResponse.json(
       { error: 'Internal server error', details: error instanceof Error ? error.message : String(error) },

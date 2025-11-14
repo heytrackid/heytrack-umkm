@@ -3,8 +3,8 @@
 import { useVirtualizer } from '@tanstack/react-virtual'
 import React, { useEffect, useRef, type RefObject } from 'react'
 
-import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
 import type { Message } from '@/app/ai-chatbot/types/index'
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 import { MessageBubble } from '@/app/ai-chatbot/components/MessageBubble'
@@ -30,15 +30,16 @@ export const MessageList = ({
   const virtualizerRef = useRef<HTMLDivElement>(null)
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Use virtual scrolling for long conversations (>20 messages)
-  const useVirtualScrolling = messages.length > 20
-
+  // Always call useVirtualizer (hooks must be called unconditionally)
   const virtualizer = useVirtualizer({
     count: messages.length,
     getScrollElement: () => virtualizerRef.current,
     estimateSize: () => 120, // Estimated height per message
     overscan: 3,
   })
+
+  // Use virtual scrolling for long conversations (>20 messages)
+  const useVirtualScrolling = messages.length > 20
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {

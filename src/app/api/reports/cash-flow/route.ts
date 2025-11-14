@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 
  import { apiLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
  import { withSecurity, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
@@ -69,13 +70,13 @@ interface CategoryBreakdownProcessing {
 async function getHandler(request: NextRequest) {
   try {
     // ✅ CRITICAL FIX: Add authentication
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
 
+    const supabase = await createClient()
     const { searchParams } = new URL(request.url)
 
     // Parse query parameters
@@ -179,7 +180,6 @@ async function getHandler(request: NextRequest) {
     }
 
     return NextResponse.json(response)
-
   } catch (error) {
     apiLogger.error({ error }, 'Error generating cash flow report:')
     return NextResponse.json(

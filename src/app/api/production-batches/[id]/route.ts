@@ -3,6 +3,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { extractFirst, isProductionBatch, isRecord, isValidUUID, safeString } from '@/lib/type-guards'
@@ -22,22 +23,22 @@ async function putHandler(
   }
   
   try {
-    const supabase = await createClient()
-    
-    // ✅ Authenticate user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     const body = await request.json() as Record<string, unknown>
 
-    // ✅ Update with RLS (user_id filter)
+    // ✅ Update with RLS (user_id filter automatically applied)
     const { data: batch, error } = await supabase
       .from('productions')
-      .update(body)
+      .update(body as never)
       .eq('id', id)
-      .eq('user_id', user.id)
       .select(`
         *,
         recipe:recipes(name)
@@ -63,17 +64,18 @@ async function putHandler(
     const recipeName = recipe && isRecord(recipe) ? safeString(recipe['name'] as string, 'Unknown') : 'Unknown'
 
     // ✅ Map database columns to expected format
+    const typedBatch = batch as any // Type assertion to fix RLS inference
     const mappedBatch = {
-      ...batch,
-      batch_number: batch.id.slice(0, 8).toUpperCase(),
-      planned_date: batch.created_at,
-      actual_cost: batch.total_cost,
+      ...typedBatch,
+      batch_number: typedBatch.id.slice(0, 8).toUpperCase(),
+      planned_date: typedBatch.created_at,
+      actual_cost: typedBatch.total_cost,
       recipe_name: recipeName,
       unit: 'pcs' // Default unit since recipes table doesn't have unit field
     }
 
     return NextResponse.json(mappedBatch)
-  } catch (error: unknown) {
+  } catch (error) {
     return handleAPIError(error)
   }
 }
@@ -90,13 +92,14 @@ async function deleteHandler(
   }
   
   try {
-    const supabase = await createClient()
-    
-    // ✅ Authenticate user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     // ✅ Fetch batch first to check if it exists
     const { data: batch } = await supabase
@@ -118,12 +121,12 @@ async function deleteHandler(
       .eq('user_id', user['id'])
 
     if (error) {
-      apiLogger.error({ error, userId: user['id'], batchId: id }, 'Failed to delete production batch')
+      apiLogger.error({ error, userId: user.id, batchId: id }, 'Failed to delete production batch')
       throw error
     }
 
     return NextResponse.json({ message: 'Production batch deleted successfully' })
-  } catch (error: unknown) {
+  } catch (error) {
     return handleAPIError(error)
   }
 }

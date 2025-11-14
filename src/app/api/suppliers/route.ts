@@ -4,7 +4,8 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
- import { apiLogger } from '@/lib/logger'
+ import { isErrorResponse, requireAuth } from '@/lib/api-auth'
+import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
@@ -39,13 +40,14 @@ async function GET(request: NextRequest): Promise<NextResponse> {
   const { page, limit, search, sort_by, sort_order } = queryValidation['data']
 
   try {
-    const supabase = await createClient()
-    
-    // Authenticate user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     // Calculate offset for pagination
     const offset = (page - 1) * limit
@@ -78,15 +80,15 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     const { count } = await countQuery
 
     return NextResponse.json({
-      data: suppliers,
-      pagination: {
+      data: suppliers ?? [],
+      meta: {
         page,
         limit,
         total: count ?? 0,
         totalPages: Math.ceil((count ?? 0) / limit)
       }
     })
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/suppliers')
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
@@ -94,13 +96,15 @@ async function GET(request: NextRequest): Promise<NextResponse> {
 
 async function POST(request: Request): Promise<NextResponse> {
   try {
-    const supabase = await createClient()
-    
-    // Authenticate user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
+
     const body = await request.json() as unknown
 
     // Validate request body
@@ -129,7 +133,7 @@ async function POST(request: Request): Promise<NextResponse> {
 
     const { data: supplier, error } = await supabase
       .from('suppliers')
-      .insert(insertPayload)
+      .insert(insertPayload as never)
       .select('id, name, contact_person, email, phone, address, notes, is_active, created_at, updated_at')
       .single()
 
@@ -138,7 +142,7 @@ async function POST(request: Request): Promise<NextResponse> {
     }
 
     return NextResponse.json(supplier, { status: 201 })
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in POST /api/suppliers')
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }

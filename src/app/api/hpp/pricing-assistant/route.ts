@@ -4,6 +4,7 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { PricingAssistantService } from '@/services/orders/PricingAssistantService'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
@@ -17,19 +18,15 @@ interface PricingRecommendation {
 // POST /api/hpp/pricing-assistant - Generate pricing recommendation
 async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     // Create authenticated Supabase client
     const supabase = await createClient()
-
-    // Validate session
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error:')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
 
     const body = await request.json() as { recipeId?: string }
     const { recipeId } = body
@@ -42,10 +39,10 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     }
 
     // Generate pricing recommendation using service
-    const recommendation = await PricingAssistantService.generatePricingRecommendation(recipeId, user['id']) as PricingRecommendation
+    const recommendation = await PricingAssistantService.generatePricingRecommendation(recipeId, user.id) as PricingRecommendation
 
     apiLogger.info({
-      userId: user['id'],
+      userId: user.id,
       recipeId,
       recommendedPrice: recommendation.recommendedPrice,
       confidence: recommendation.confidence
@@ -56,7 +53,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
       recommendation
     })
 
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error generating pricing recommendation')
     return NextResponse.json(
       { error: 'Internal server error' },

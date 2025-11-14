@@ -5,6 +5,7 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger, logError } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
@@ -27,20 +28,20 @@ interface RestockSuggestion {
 async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'GET /api/inventory/restock-suggestions')
-    
+
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     const client = await createClient()
 
-    const { data: { user }, error: authError } = await client.auth.getUser()
-
-    if (authError || !user) {
-      logError(apiLogger, authError, 'Unauthorized')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const suggestions = await RecipeAvailabilityService.getRestockSuggestions(user['id'])
+    const suggestions = await RecipeAvailabilityService.getRestockSuggestions(user.id)
 
     apiLogger.info({
-      userId: user['id'],
+      userId: user.id,
       suggestionsCount: suggestions.length,
       criticalCount: suggestions.filter((s: RestockSuggestion) => s.urgency === 'CRITICAL').length
     }, 'Restock suggestions fetched')

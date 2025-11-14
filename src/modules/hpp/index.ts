@@ -6,8 +6,9 @@
  */
 
 // Components
-export { UnifiedHppPage } from './components/UnifiedHppPage'
 export { HppCostTrendsChart } from './components/HppCostTrendsChart'
+export { HppQuickSummary } from './components/HppQuickSummary'
+export { UnifiedHppPage } from './components/UnifiedHppPage'
 
 // Services
 // NOTE: Server-only services are NOT exported from this barrel file
@@ -16,10 +17,10 @@ export { HppCostTrendsChart } from './components/HppCostTrendsChart'
 // - import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
 
 // Hooks
-export { useUnifiedHpp } from './hooks/useUnifiedHpp'
-export { useHppOverview } from './hooks/useHppOverview'
 export { useHppCalculatorWorker } from './hooks/useHppCalculatorWorker'
+export { useHppOverview } from './hooks/useHppOverview'
 export { useHppWorker } from './hooks/useHppWorker'
+export { useUnifiedHpp } from './hooks/useUnifiedHpp'
 
 // Types
 export type * from './types'

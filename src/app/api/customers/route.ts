@@ -7,6 +7,7 @@ import { z } from 'zod'
 
 import { CUSTOMER_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { typedInsert } from '@/lib/supabase/typed-insert'
 import { getErrorMessage, safeNumber, safeString } from '@/lib/type-guards'
 import { CustomerInsertSchema } from '@/lib/validations/domains/customer'
@@ -34,14 +35,14 @@ interface ListQuery {
 }
 
 async function requireUser(): Promise<AuthResult | NextResponse> {
-  const supabase = typed(await createClient())
-  const { data: { user }, error } = await supabase.auth.getUser()
-
-  if (error || !user) {
-    apiLogger.error({ error }, 'Unauthorized access to /api/customers')
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  // Authenticate with Stack Auth
+  const authResult = await requireAuth()
+  if (isErrorResponse(authResult)) {
+    return authResult
   }
+  const user = authResult
 
+  const supabase = typed(await createClient())
   return { supabase, userId: user.id }
 }
 
@@ -121,7 +122,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     return NextResponse.json(data)
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Unexpected error in GET /api/customers')
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
@@ -158,7 +159,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     return NextResponse.json(data, { status: 201 })
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Unexpected error in POST /api/customers')
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }

@@ -8,7 +8,8 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
- import { apiLogger } from '@/lib/logger'
+ import { isErrorResponse, requireAuth } from '@/lib/api-auth'
+import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 import { NotificationUpdateSchema } from '@/lib/validations/domains/notification'
 import type { NotificationsTable } from '@/types/database'
@@ -31,11 +32,12 @@ async function putHandler(
       return NextResponse.json({ error: 'Invalid notification ID format' }, { status: 400 })
     }
     
-    // Authenticate user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
 
     const body = await request.json() as unknown
 
@@ -73,7 +75,7 @@ async function putHandler(
 
     const { data: notification, error } = await supabase
       .from('notifications')
-      .update(updateData)
+      .update(updateData as never)
       .eq('id', notificationId)
       .eq('user_id', user.id)
       .select()
@@ -91,8 +93,7 @@ async function putHandler(
     apiLogger.info({ notificationId, is_read, is_dismissed }, 'Notification updated successfully')
 
     return NextResponse.json(notification)
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in PATCH /api/notifications/[id]')
     return NextResponse.json(
       { error: 'Internal server error' },

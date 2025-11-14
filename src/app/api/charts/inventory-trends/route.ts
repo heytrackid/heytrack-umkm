@@ -2,6 +2,7 @@ export const runtime = 'nodejs'
 
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 import type { NextRequest } from 'next/server'
@@ -10,12 +11,12 @@ import { NextResponse } from 'next/server'
 
 async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
 
     const { searchParams } = new URL(request.url)
     const days = parseInt(searchParams.get('days') || '30', 10)
@@ -24,25 +25,22 @@ async function GET(request: NextRequest) {
     const startDate = new Date()
     startDate.setDate(startDate.getDate() - days)
 
-    // Use typed supabase client to avoid type inference issues
-    const typedSupabase = supabase
+    const supabase = await createClient()
 
-    // Fetch ingredient purchases over time
-    const { data: purchases, error: purchasesError } = await typedSupabase
+    // Fetch ingredient purchases over time (RLS handles user_id filtering)
+    const { data: purchases, error: purchasesError } = await supabase
       .from('ingredient_purchases')
       .select('purchase_date, quantity, total_price, ingredient:ingredients(name)')
-      .eq('user_id', user.id)
       .gte('purchase_date', startDate.toISOString().split('T')[0])
       .lte('purchase_date', endDate.toISOString().split('T')[0])
       .order('purchase_date', { ascending: true })
 
     if (purchasesError) throw purchasesError
 
-    // Fetch current stock levels
-    const { data: ingredients, error: ingredientsError } = await typedSupabase
+    // Fetch current stock levels (RLS handles user_id filtering)
+    const { data: ingredients, error: ingredientsError } = await supabase
       .from('ingredients')
       .select('id, name, current_stock, reorder_point')
-      .eq('user_id', user.id)
 
     if (ingredientsError) throw ingredientsError
 
@@ -101,7 +99,7 @@ async function GET(request: NextRequest) {
         },
       },
     })
-  } catch (error: unknown) {
+  } catch (error) {
     return handleAPIError(error, 'GET /api/charts/inventory-trends')
   }
 }

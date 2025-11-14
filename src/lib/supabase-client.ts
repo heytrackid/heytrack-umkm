@@ -202,55 +202,13 @@ export function getSupabaseClient() {
   return createClient()
 }
 
-/**
- * Update session middleware utility
- */
-export { updateSession } from '@/utils/supabase/middleware'
+
 
 // ==========================================================
 // UTILITY FUNCTIONS
 // ==========================================================
 
-/**
- * Check if user is authenticated
- */
-export async function isAuthenticated() {
-  try {
-    const supabase = await getSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    return Boolean(user)
-  } catch {
-    return false
-  }
-}
-
-/**
- * Get current user
- */
-export async function getCurrentUser() {
-  try {
-    const supabase = await getSupabaseClient()
-    const { data: { user }, error } = await supabase.auth.getUser()
-    if (error) {throw error}
-    return user
-  } catch {
-    return null
-  }
-}
-
-/**
- * Sign out user
- */
-export async function signOut() {
-  try {
-    const supabase = await getSupabaseClient()
-    const { error } = await supabase.auth.signOut()
-    if (error) {throw error}
-    return { success: true }
-  } catch (error) {
-    return { success: false, error }
-  }
-}
+// Auth functions removed - use new auth provider
 
 // ==========================================================
 // TYPE EXPORTS

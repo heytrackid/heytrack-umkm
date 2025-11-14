@@ -2,6 +2,7 @@ export const runtime = 'nodejs'
 
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 import type { NextRequest} from 'next/server';
@@ -10,14 +11,12 @@ import type { OrdersTable, OperationalCostsTable, IngredientPurchasesTable } fro
 
 async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const supabase = await createClient()
-
-    // Validate session
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
 
     const { searchParams } = new URL(request.url)
     const days = parseInt(searchParams.get('days') || '90', 10)
@@ -27,14 +26,12 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     const startDate = new Date()
     startDate.setDate(startDate.getDate() - days)
 
-    // Use typed supabase client to avoid type inference issues
-    const typedSupabase = supabase
+    const supabase = await createClient()
 
-    // Fetch orders data (revenue)
-    const { data, error: ordersError } = await typedSupabase
+    // Fetch orders data (revenue) - RLS handles user_id filtering
+    const { data, error: ordersError } = await supabase
       .from('orders')
       .select('created_at, total_amount, status')
-      .eq('user_id', user.id)
       .gte('created_at', startDate.toISOString())
       .lte('created_at', endDate.toISOString())
       .order('created_at', { ascending: true })
@@ -60,7 +57,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     const startDateStr = getDateString(startDate)
     const endDateStr = getDateString(endDate)
 
-    const { data: expenses, error: expensesError } = await typedSupabase
+    const { data: expenses, error: expensesError } = await supabase
       .from('operational_costs')
       .select('date, amount, category')
       .eq('user_id', user.id)
@@ -70,11 +67,10 @@ async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (expensesError) throw expensesError
 
-    // Fetch ingredient purchases (HPP)
-    const { data: purchases, error: purchasesError } = await typedSupabase
+    // Fetch ingredient purchases (HPP) - RLS handles user_id filtering
+    const { data: purchases, error: purchasesError } = await supabase
       .from('ingredient_purchases')
       .select('purchase_date, total_price')
-      .eq('user_id', user.id)
       .gte('purchase_date', startDateStr)
       .lte('purchase_date', endDateStr)
       .order('purchase_date', { ascending: true })
@@ -130,7 +126,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
       success: true,
       data: chartData,
     })
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in GET /api/charts/financial-trends')
     return handleAPIError(error, 'GET /api/charts/financial-trends')
   }

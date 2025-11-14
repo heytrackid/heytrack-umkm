@@ -5,6 +5,7 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { getErrorMessage } from '@/lib/type-guards'
 import { PaginationQuerySchema, SalesInsertSchema, SalesQuerySchema } from '@/lib/validations'
 import type { Insert } from '@/types/database'
@@ -61,13 +62,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
    try {
      const supabase = typed(await createClient())
 
-     // Authenticate user
-     const { data: { user }, error: authError } = await supabase.auth.getUser()
-     if (authError || !user) {
-       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-     }
-
-     // Calculate offset for pagination
+     // Authenticate user     // Calculate offset for pagination
      const offset = (page - 1) * limit
 
     let query = supabase
@@ -76,7 +71,6 @@ async function GET(request: NextRequest): Promise<NextResponse> {
         *
       `)
       .eq('record_type', 'INCOME')
-      .eq('user_id', user['id'])
       .range(offset, offset + limit - 1)
 
     // Add filters
@@ -106,7 +100,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     if (error) {throw error;}
 
     // Get total count
-    let countQuery = supabase.from('financial_records').select('id', { count: 'exact', head: true }).eq('record_type', 'INCOME').eq('user_id', user['id'])
+    let countQuery = supabase.from('financial_records').select('id', { count: 'exact', head: true }).eq('record_type', 'INCOME')
 
     // Apply same filters to count query
     if (search) {
@@ -133,7 +127,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
         totalPages: Math.ceil((count ?? 0) / limit)
       }
     })
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in GET /api/sales')
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
@@ -142,13 +136,16 @@ async function GET(request: NextRequest): Promise<NextResponse> {
 // Define the original POST function
 async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     const supabase = typed(await createClient())
 
-    // Authenticate user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }    // The request body is already sanitized by the security middleware
+    // The request body is already sanitized by the security middleware
     const body = await request.json() as unknown
 
     // Validate request body
@@ -188,7 +185,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     return NextResponse.json(sale, { status: 201 })
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in POST /api/sales')
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }

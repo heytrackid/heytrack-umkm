@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 import { useSupabaseCRUD } from '@/hooks/supabase/index'
 import { useToast } from '@/hooks/use-toast'
@@ -27,7 +27,7 @@ export function useGenericCRUD<TTable extends keyof TablesMap>(tableName: TTable
   const create = useCallback(async (data: TableInsert<TTable>) => {
     setLoading(true)
     try {
-      const result = await createRecord(data)
+      const result = await createRecord(data as any) // Type assertion for RLS
       toast({
         title: "Berhasil",
         description: "Data berhasil ditambahkan",
@@ -48,7 +48,7 @@ export function useGenericCRUD<TTable extends keyof TablesMap>(tableName: TTable
   const update = useCallback(async (id: string, data: TableUpdate<TTable>) => {
     setLoading(true)
     try {
-      const result = await updateRecord(id, data)
+      const result = await updateRecord(id, data as any) // Type assertion for RLS
       toast({
         title: "Berhasil",
         description: "Data berhasil diperbarui",

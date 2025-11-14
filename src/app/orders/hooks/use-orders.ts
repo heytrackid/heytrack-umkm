@@ -1,22 +1,22 @@
 import { useMemo } from 'react'
 
-import { DEFAULT_ORDERS_CONFIG, calculateOrderTotals, type OrdersModuleConfig, type OrderPriority } from '@/app/orders/config/orders.config'
+import { DEFAULT_ORDERS_CONFIG, calculateOrderTotals, type OrderPriority, type OrdersModuleConfig } from '@/app/orders/config/orders.config'
 import type {
+  CreateOrderData,
+  InvoiceData,
   Order,
+  OrderFilters,
   OrderItem,
   OrderPayment,
-  PaymentMethod,
-  CreateOrderData,
-  UpdateOrderData,
-  OrderFilters,
   OrderSummary,
   OrderTotalsBreakdown,
-  InvoiceData
+  PaymentMethod,
+  UpdateOrderData
 } from '@/app/orders/types/orders.types'
-import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks/index'
+import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks/index'
 import { formatCurrency, parseCurrencyString } from '@/lib/currency'
 
-import type { CatchError } from '@/types/common' 
+import type { CatchError } from '@/types/common'
 
 interface FinancialMetadata {
   currency?: string | null
@@ -258,11 +258,11 @@ export function useOrderPayments(orderId?: string | null) {
   } = useSupabaseCRUD('financial_records', referenceKey ? {
     strategy: 'swr',
     orderBy: { column: 'date', ascending: false },
-    filter: { reference: referenceKey, type: 'INCOME', category: 'SALES' },
-  } : {
+    filters: { reference: referenceKey, type: 'INCOME', category: 'SALES' },
+  } as any : {
     strategy: 'swr',
     orderBy: { column: 'date', ascending: false },
-  })
+  } as any)
 
   const payments: OrderPayment[] = useMemo(() => {
     if (!Array.isArray(data) || !orderId) {

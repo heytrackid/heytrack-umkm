@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cacheInvalidation } from '@/lib/cache'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { typed } from '@/types/type-utilities'
@@ -16,17 +17,14 @@ import { createClient } from '@/utils/supabase/server'
 // POST /api/hpp/calculate - Calculate HPP for a recipe
 async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const supabase = await createClient()
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
 
     const body = await request.json() as { recipeId?: string }
@@ -117,8 +115,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
         ingredients_count: calculation.material_breakdown.length
       }
     })
-
-  } catch (error: unknown) {
+  } catch (error) {
     return handleAPIError(error, 'POST /api/hpp/calculate')
   }
 }
@@ -126,22 +123,19 @@ async function POST(request: NextRequest): Promise<NextResponse> {
 // POST /api/hpp/calculate/batch - Calculate HPP for all recipes
 async function PUT(request: NextRequest): Promise<NextResponse> {
   try {
-    const supabase = await createClient()
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     // Get all active recipes
     const { data: recipes, error: recipesError } = await supabase
       .from('recipes')
       .select('id')
-      .eq('user_id', (user as { id: string }).id)
       .eq('is_active', true)
 
     const typedRecipes = recipes as Array<{ id: string }> | null
@@ -186,8 +180,7 @@ async function PUT(request: NextRequest): Promise<NextResponse> {
       successCount,
       errorCount
     })
-
-  } catch (error: unknown) {
+  } catch (error) {
     return handleAPIError(error, 'PUT /api/hpp/calculate')
   }
 }

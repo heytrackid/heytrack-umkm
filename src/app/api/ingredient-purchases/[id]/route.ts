@@ -2,12 +2,13 @@
 export const runtime = 'nodejs'
 
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { createErrorResponse, createSuccessResponse } from '@/lib/api-core'
 import { apiLogger } from '@/lib/logger'
-import { getErrorMessage, isValidUUID, isRecord, extractFirst } from '@/lib/type-guards'
+import { extractFirst, getErrorMessage, isRecord, isValidUUID } from '@/lib/type-guards'
 import type { IngredientPurchaseUpdate } from '@/lib/validations/database-validations'
-import type { Update, Insert } from '@/types/database'
-import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import type { BypassRLS, Insert, Update } from '@/types/database'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 import type { NextRequest, NextResponse } from 'next/server'
@@ -31,13 +32,14 @@ export const GET = withSecurity(async function GET(
       return createErrorResponse('Invalid purchase ID format', 400)
     }
 
-    const supabase = await createClient()
-
-    // Authenticate
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return createErrorResponse('Unauthorized', 401)
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     // Fetch purchase with ingredient details
     const { data, error } = await supabase
@@ -53,7 +55,7 @@ export const GET = withSecurity(async function GET(
         )
       `)
       .eq('id', id)
-      .eq('user_id', user['id'])
+      .eq('user_id', user.id)
       .single()
 
     if (error) {
@@ -105,7 +107,7 @@ export const GET = withSecurity(async function GET(
     }
 
     return createSuccessResponse(data)
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/ingredient-purchases/[id]')
     return createErrorResponse(getErrorMessage(error), 500)
   }
@@ -123,13 +125,14 @@ export const PUT = withSecurity(async function PUT(
       return createErrorResponse('Invalid purchase ID format', 400)
     }
 
-    const supabase = await createClient()
-
-    // Authenticate
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return createErrorResponse('Unauthorized', 401)
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     const body = await request.json() as IngredientPurchaseUpdate
 
@@ -138,7 +141,7 @@ export const PUT = withSecurity(async function PUT(
       .from('ingredient_purchases')
       .select('id, ingredient_id, quantity, user_id')
       .eq('id', id)
-      .eq('user_id', user['id'])
+      .eq('user_id', user.id)
       .single()
 
     if (fetchError || !existingPurchase) {
@@ -171,7 +174,7 @@ export const PUT = withSecurity(async function PUT(
 
     const { data: updatedPurchase, error: updateError } = await supabase
       .from('ingredient_purchases')
-      .update(updatePayload)
+      .update(updatePayload as never)
       .eq('id', id)
       .eq('user_id', user.id)
       .select(`
@@ -213,12 +216,12 @@ export const PUT = withSecurity(async function PUT(
         total_price: quantityDiff * (body.unit_price ?? 0),
         reference: `PURCHASE-UPDATE-${id}`,
         notes: `Purchase quantity adjusted from ${oldQuantity} to ${newQuantity}`,
-        user_id: user['id']
+        user_id: user.id
       }
 
       const { error: transactionError } = await supabase
         .from('stock_transactions')
-        .insert(adjustmentTransaction)
+        .insert(adjustmentTransaction as BypassRLS<typeof adjustmentTransaction>)
 
       if (transactionError) {
         apiLogger.error({ error: transactionError }, 'Failed to create adjustment transaction')
@@ -238,11 +241,11 @@ export const PUT = withSecurity(async function PUT(
 
       await supabase
         .from('inventory_stock_logs')
-        .insert(stockLog)
+        .insert(stockLog as BypassRLS<typeof stockLog>)
     }
 
     return createSuccessResponse(updatedPurchase)
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in PUT /api/ingredient-purchases/[id]')
     return createErrorResponse(getErrorMessage(error), 500)
   }
@@ -260,20 +263,21 @@ export const DELETE = withSecurity(async function DELETE(
       return createErrorResponse('Invalid purchase ID format', 400)
     }
 
-    const supabase = await createClient()
-
-    // Authenticate
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return createErrorResponse('Unauthorized', 401)
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     // Get purchase details
     const { data: purchase, error: fetchError } = await supabase
       .from('ingredient_purchases')
       .select('id, ingredient_id, quantity, user_id')
       .eq('id', id)
-      .eq('user_id', user['id'])
+      .eq('user_id', user.id)
       .single()
 
     if (fetchError || !purchase) {
@@ -306,12 +310,12 @@ export const DELETE = withSecurity(async function DELETE(
       quantity: -typedPurchase.quantity, // Negative to reduce stock
       reference: `PURCHASE-DELETE-${typedPurchase.id}`,
       notes: `Purchase deleted - reverting stock`,
-      user_id: user['id']
+      user_id: user.id
     }
 
     const { error: transactionError } = await supabase
       .from('stock_transactions')
-      .insert(reversalTransaction)
+      .insert(reversalTransaction as BypassRLS<typeof reversalTransaction>)
 
     if (transactionError) {
       apiLogger.error({ error: transactionError }, 'Failed to create reversal transaction')
@@ -332,14 +336,14 @@ export const DELETE = withSecurity(async function DELETE(
 
     await supabase
       .from('inventory_stock_logs')
-      .insert(reversalLog)
+      .insert(reversalLog as BypassRLS<typeof reversalLog>)
 
     // Delete purchase
     const { error: deleteError } = await supabase
       .from('ingredient_purchases')
       .delete()
       .eq('id', id)
-      .eq('user_id', user['id'])
+      .eq('user_id', user.id)
 
     if (deleteError) {
       apiLogger.error({ error: deleteError }, 'Error deleting purchase')
@@ -347,7 +351,7 @@ export const DELETE = withSecurity(async function DELETE(
     }
 
     return createSuccessResponse(null, 'Purchase deleted successfully')
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in DELETE /api/ingredient-purchases/[id]')
     return createErrorResponse(getErrorMessage(error), 500)
   }

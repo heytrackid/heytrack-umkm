@@ -4,9 +4,10 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
-import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 const SupplierImportSchema = z.object({
@@ -29,13 +30,15 @@ async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/suppliers/import - Request received')
 
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
 
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'POST /api/suppliers/import - Unauthorized')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }    const body = await request.json()
+    const supabase = await createClient()
+    const body = await request.json()
     const validation = SuppliersImportSchema.safeParse(body)
 
     if (!validation.success) {
@@ -87,7 +90,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
         }
 
         validSuppliers.push(supplierData)
-      } catch (error: unknown) {
+      } catch (error) {
         errors.push({ row: rowNumber, error: `Error processing row: ${String(error)}` })
       }
     })
@@ -104,7 +107,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     // Insert suppliers
     const { data, error: insertError } = await supabase
       .from('suppliers')
-      .insert(validSuppliers)
+      .insert(validSuppliers as never)
       .select('id, name')
 
     if (insertError) {
@@ -122,8 +125,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
       count: validSuppliers.length,
       data
     })
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'POST /api/suppliers/import - Unexpected error')
     return handleAPIError(error, 'POST /api/suppliers/import')
   }

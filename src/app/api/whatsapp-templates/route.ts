@@ -8,9 +8,10 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import type { Insert } from '@/types/database'
-import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 
@@ -20,22 +21,22 @@ type WhatsAppTemplateInsert = Insert<'whatsapp_templates'>
 async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // 1. Authentication
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     // 2. Query parameters
     const { searchParams } = new URL(request.url)
     const activeOnly = searchParams.get('active') === 'true'
 
-    // 3. Query templates
+    // 3. Query templates (RLS handles user_id filtering)
     let query = supabase
       .from('whatsapp_templates')
       .select('id, user_id, name, message, is_active, created_at, updated_at')
-      .eq('user_id', user['id'])
       .order('created_at', { ascending: false })
 
     if (activeOnly) {
@@ -45,14 +46,13 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     const { data, error } = await query
 
     if (error) {
-      apiLogger.error({ error, userId: user['id'] }, 'Failed to fetch WhatsApp templates')
+      apiLogger.error({ error, userId: user.id }, 'Failed to fetch WhatsApp templates')
       throw error
     }
 
-    apiLogger.info({ userId: user['id'], count: data.length }, 'WhatsApp templates fetched')
+    apiLogger.info({ userId: user.id, count: data.length }, 'WhatsApp templates fetched')
     return NextResponse.json(data)
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in GET /api/whatsapp-templates')
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -64,12 +64,13 @@ async function GET(request: NextRequest): Promise<NextResponse> {
 async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // 1. Authentication
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }    // 2. Parse and validate body
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
+    const supabase = await createClient()    // 2. Parse and validate body
     const _body = await request.json() as {
       name?: string
       template_content?: string
@@ -91,7 +92,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     if (_body.is_default) {
       await supabase
         .from('whatsapp_templates')
-        .update({ is_default: false })
+        .update({ is_default: false } as never)
         .eq('user_id', user['id'])
         .eq('category', _body.category)
     }
@@ -110,7 +111,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
 
     const { data, error } = await supabase
       .from('whatsapp_templates')
-      .insert(templateData)
+      .insert(templateData as never)
       .select()
       .single()
 
@@ -119,10 +120,10 @@ async function POST(request: NextRequest): Promise<NextResponse> {
       throw error
     }
 
-    apiLogger.info({ userId: user['id'], templateId: data['id'] }, 'WhatsApp template created')
+    const typedData = data as { id: string } // Type assertion to fix RLS inference
+    apiLogger.info({ userId: user.id, templateId: typedData.id }, 'WhatsApp template created')
     return NextResponse.json(data, { status: 201 })
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in POST /api/whatsapp-templates')
     return NextResponse.json(
       { error: 'Internal server error' },

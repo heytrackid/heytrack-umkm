@@ -1,11 +1,13 @@
+import { StackProvider, StackTheme } from "@stackframe/stack";
 import { Analytics } from '@vercel/analytics/next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { stackClientApp } from "../stack/client";
 
 import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SettingsProvider } from '@/contexts/settings-context';
 import { getNonce } from '@/lib/nonce';
-import { AuthProvider } from '@/providers/AuthProvider';
+
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { SupabaseProvider } from '@/providers/SupabaseProvider';
@@ -70,9 +72,8 @@ const RootLayout = async ({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[100svh] m-0 p-0 w-full`}
         suppressHydrationWarning
-      >
+      ><StackProvider app={stackClientApp}><StackTheme>
         <SupabaseProvider>
-          <AuthProvider>
             <ThemeProvider
               attribute="class"
               defaultTheme="dark"
@@ -102,10 +103,9 @@ const RootLayout = async ({
                   </SettingsProvider>
                 </QueryProvider>
               </ThemeProvider>
-            </AuthProvider>
           </SupabaseProvider>
         <Analytics />
-      </body>
+      </StackTheme></StackProvider></body>
     </html>
   );
 }

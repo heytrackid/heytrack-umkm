@@ -3,6 +3,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 import { OperationalCostUpdateSchema } from '@/lib/validations/domains/finance'
@@ -24,20 +25,20 @@ async function getHandler(
       return NextResponse.json({ error: 'Invalid operational cost ID format' }, { status: 400 })
     }
     
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     const supabase = await createClient()
 
-    // Authenticate
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Fetch operational cost
+    // Fetch operational cost (RLS handles user_id filtering)
     const { data, error } = await supabase
       .from('operational_costs')
       .select('id, user_id, name, amount, frequency, category, created_at, updated_at')
       .eq('id', id)
-      .eq('user_id', user['id'])
       .single()
 
     if (error) {
@@ -49,7 +50,7 @@ async function getHandler(
     }
 
     return NextResponse.json(data)
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/operational-costs/[id]')
     return NextResponse.json(
       { error: getErrorMessage(error) },
@@ -71,13 +72,14 @@ async function putHandler(
       return NextResponse.json({ error: 'Invalid operational cost ID format' }, { status: 400 })
     }
     
-    const supabase = await createClient()
-
-    // Authenticate
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     const body = await request.json() as unknown
 
@@ -112,9 +114,8 @@ async function putHandler(
     }
     const { data, error } = await supabase
       .from('operational_costs')
-      .update(updatePayload)
+      .update(updatePayload as never)
       .eq('id', id)
-      .eq('user_id', user.id)
       .select()
       .single()
 
@@ -127,7 +128,7 @@ async function putHandler(
     }
 
     return NextResponse.json(data)
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in PUT /api/operational-costs/[id]')
     return NextResponse.json(
       { error: getErrorMessage(error) },
@@ -149,20 +150,20 @@ async function deleteHandler(
       return NextResponse.json({ error: 'Invalid operational cost ID format' }, { status: 400 })
     }
     
-    const supabase = await createClient()
-
-    // Authenticate
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     // Delete with RLS enforcement
     const { error } = await supabase
       .from('operational_costs')
       .delete()
       .eq('id', id)
-      .eq('user_id', user['id'])
 
     if (error) {
       if (error['code'] === 'PGRST116') {
@@ -173,7 +174,7 @@ async function deleteHandler(
     }
 
     return NextResponse.json({ message: 'Operational cost deleted successfully' })
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in DELETE /api/operational-costs/[id]')
     return NextResponse.json(
       { error: getErrorMessage(error) },

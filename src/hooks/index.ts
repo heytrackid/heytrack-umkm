@@ -1,63 +1,41 @@
-
 /**
- * Barrel export for all hooks
- * Provides convenient single-import access to all custom hooks
+ * Central export file for all custom hooks
+ * 
+ * This file provides a single import point for all hooks used throughout the application.
  * 
  * Usage:
- *   import { useResponsive, useSupabase, useAuth } from '@/hooks/index'
+ *   import { useResponsive, useSupabase } from '@/hooks/index'
  */
 
-// UI Hooks
-export { useIsMobile, useMediaQuery, useMobile, useOrientation, useResponsive, useScreenSize, useTouchDevice } from '@/utils/responsive'
-
-// export { useLoading } from './useLoading'
-export { useToast } from './use-toast'
-export { useConfirm } from './useConfirm'
-
-// Error Handling Hooks
-// export { useErrorHandler, useAsyncError, useFormErrors, useRetry } from './useErrorHandler'
-
-// Auth Hooks
-export { useAuth } from '@/providers/AuthProvider'
+// Auth Hook (No Auth Mode)
+export { useAuth } from './useAuth'
 
 // Database Hooks - ALL API-based versions
-export { useIngredients } from './useIngredients'
-export { useRecipes } from './useRecipes'
-export { useOperationalCosts } from './useOperationalCosts'
+// export { useCategories } from './useCategories' // TODO: File missing
 export { useCustomers } from './useCustomers'
+export { useIngredientPurchases } from './useIngredientPurchases'
+export { useIngredients } from './useIngredients'
+export { useOperationalCosts } from './useOperationalCosts'
+// export { useOrders } from './useOrders' // TODO: File missing - use useOrdersQuery instead
+// export { useProductionBatches } from './useProductionBatches' // TODO: File missing
+export { useRecipes } from './useRecipes'
 export { useSuppliers } from './useSuppliers'
-export { useFinancialRecords } from './useFinancialRecords'
-export { useOrders, useOrder, useOrderStats } from './useOrdersQuery'
-// Keep Supabase versions only for utility functions
-export {
-    useSupabaseBulk, useSupabaseCRUD, useSupabaseQuery
-} from './supabase'
 
-// Business Logic Hooks
+// Utility Hooks
+export { useChatHistory } from './useChatHistory'
 export { useCurrency } from './useCurrency'
-// export { useEnhancedCRUD } from './useEnhancedCRUD'
-// export { UseAIPowered as useAIPowered } from './useAIPowered'
+export { useDebounce } from './useDebounce'
+export { useInstantNavigation } from './useInstantNavigation'
+// export { useLocalStorage } from './useLocalStorage' // TODO: File missing
+export { useNotifications } from './useNotifications'
 
-// Performance Hooks
-export { useAdvancedButtonPreloading, useAdvancedLinkPreloading, useSimplePreload } from './usePreloading'
+// Dashboard Hooks
+// export { useDashboard } from './api/useDashboard' // TODO: File missing or export missing
 
-// API Hooks
-export { useDashboardStats, useTopProducts, useWeeklySales } from './api/useDashboard'
-export { useHPPAlerts } from './api/useHPPAlerts'
-export { useHPPComparison } from './api/useHPPComparison'
-export { useHPPExport } from './api/useHPPExport'
-export { useHPPSnapshots } from './api/useHPPSnapshots'
+// Supabase Hooks
+export { useSupabaseQuery } from './supabase/core'
+export { useSupabaseCRUD } from './supabase/useSupabaseCRUD'
 
-// HPP Hooks
-export { useHppOverview } from '@/modules/hpp/hooks/useHppOverview'
-export { useHppWorker } from '@/modules/hpp/hooks/useHppWorker'
+// Re-export from shadcn/ui
+export { useToast } from './use-toast'
 
-// Inventory Hooks
-export { useIngredientStockStatus, useInventoryAlerts } from './useInventoryAlerts'
-export { usePurchaseOrderGenerator, useReorderManagement } from './useReorderManagement'
-
-// HPP Automation Hooks
-// export { useHPPAutomation, useRecipeHPPAnalysis } from './useHPPAutomation'
-
-// Performance Hooks
-export { usePerformanceMonitoring } from '@/lib/performance'

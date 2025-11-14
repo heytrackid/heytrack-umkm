@@ -4,6 +4,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger, logError } from '@/lib/logger'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
@@ -18,26 +19,28 @@ export const PUT = withSecurity(async function PUT(
   try {
     const resolvedParams = await params
     const alertId = resolvedParams['id']
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    if (authError || !user) {
-      logError(apiLogger, authError, 'PUT /api/hpp/alerts/[id]/read - Unauthorized')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient()
 
     apiLogger.info({ alertId, userId: user.id }, 'Marking HPP alert as read')
 
     // Update the alert to mark it as read
-    const { data, error } = await supabase
-      .from('hpp_alerts')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase
+      .from('hpp_alerts') as any)
       .update({
         is_read: true,
         read_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
       .eq('id', alertId)
-      .eq('user_id', user.id)
       .select()
       .single()
 
@@ -53,13 +56,12 @@ export const PUT = withSecurity(async function PUT(
       )
     }
 
-    apiLogger.info({ alertId, userId: user['id'] }, 'Alert marked as read successfully')
+    apiLogger.info({ alertId, userId: user.id }, 'Alert marked as read successfully')
 
     return NextResponse.json({
       success: true,
       data
     })
-
   } catch (error) {
     return handleAPIError(error, 'PUT /api/hpp/alerts/[id]/read')
   }

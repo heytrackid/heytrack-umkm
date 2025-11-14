@@ -1,5 +1,5 @@
-import { apiLogger } from '@/lib/logger'
-import { useSupabase } from '@/providers/SupabaseProvider'
+import { apiLogger } from '@/lib/logger';
+import { useSupabase } from '@/providers/SupabaseProvider';
 
 
 
@@ -8,9 +8,17 @@ export function useAIService(sessionId?: string | null): { processAIQuery: (quer
 
 
   const processAIQuery = async (query: string): Promise<{ message: string; suggestions: string[]; data?: Record<string, unknown> }> => {
-    // Get current user ID for database filtering
-    const { data: { user } } = await supabase.auth.getUser()
-    const userId = user?.id
+    // Get current user ID from Stack Auth
+    let userId: string | undefined
+    try {
+      const response = await fetch('/api/auth/me')
+      if (response.ok) {
+        const data = await response.json()
+        userId = data.userId
+      }
+    } catch (error) {
+      apiLogger.error({ error }, 'Failed to get user from Stack Auth')
+    }
 
     if (!userId) {
       apiLogger.warn('AI Chatbot accessed without authentication')

@@ -26,6 +26,10 @@
     },
     "my-mcp-server-5fa7e296": {
       "url": "https://mcp.vercel.com"
+    },
+    "stack-auth": {
+      "type": "http",
+      "url": "https://mcp.stack-auth.com/"
     }
   }
 }

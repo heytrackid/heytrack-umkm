@@ -4,6 +4,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { cacheInvalidation } from '@/lib/cache'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
@@ -30,18 +31,18 @@ async function getSupplier(
       return NextResponse.json({ error: 'Invalid supplier ID format' }, { status: 400 })
     }
     
-    const supabase = await createClient()
-    
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
-    
+    const user = authResult
+
+    const supabase = await createClient()
     const { data, error } = await supabase
       .from('suppliers')
       .select('id, name, contact_person, email, phone, address, notes, is_active, created_at, updated_at, user_id')
       .eq('id', id)
-      .eq('user_id', user['id'])
       .single()
 
     if (error) {
@@ -53,7 +54,7 @@ async function getSupplier(
     }
 
     return NextResponse.json(data)
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/suppliers/[id]')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
@@ -72,21 +73,21 @@ async function updateSupplier(
       return NextResponse.json({ error: 'Invalid supplier ID format' }, { status: 400 })
     }
     
-    const supabase = await createClient()
-    
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
 
+    const supabase = await createClient()
     const body = await request.json() as Update<'suppliers'>
     const updatePayload = body
 
     const { data, error } = await supabase
       .from('suppliers')
-      .update(updatePayload)
+      .update(updatePayload as never)
       .eq('id', id)
-      .eq('user_id', user['id'])
       .select('id, name, contact_person, email, phone, address, notes, is_active, updated_at')
       .single()
 
@@ -100,10 +101,10 @@ async function updateSupplier(
       apiLogger.error({ error }, 'Error updating supplier')
       return NextResponse.json({ error: 'Failed to update supplier' }, { status: 500 })
     }
-
     cacheInvalidation.suppliers()
+
     return NextResponse.json(data)
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in PUT /api/suppliers/[id]')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
@@ -122,19 +123,19 @@ async function deleteSupplier(
       return NextResponse.json({ error: 'Invalid supplier ID format' }, { status: 400 })
     }
     
-    const supabase = await createClient()
-    
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
 
-    // Check if supplier is used in ingredients
+    const supabase = await createClient()
+    // Check if supplier is used in ingredients (RLS handles user_id filtering)
     const { data: ingredients } = await supabase
       .from('ingredients')
       .select('id')
       .eq('supplier_id', id)
-      .eq('user_id', user['id'])
       .limit(1)
     
     if (ingredients && ingredients.length > 0) {
@@ -148,7 +149,6 @@ async function deleteSupplier(
       .from('suppliers')
       .delete()
       .eq('id', id)
-      .eq('user_id', user['id'])
 
     if (error) {
       apiLogger.error({ error }, 'Error deleting supplier')
@@ -157,7 +157,7 @@ async function deleteSupplier(
 
     cacheInvalidation.suppliers()
     return NextResponse.json({ message: 'Supplier deleted successfully' })
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in DELETE /api/suppliers/[id]')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

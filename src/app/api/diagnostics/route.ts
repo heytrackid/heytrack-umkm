@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
  import { handleAPIError } from '@/lib/errors/api-error-handler'
  import { apiLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
  import { SecurityPresets, withSecurity } from '@/utils/security/index'
 
 interface EnvVarDiagnostics {
@@ -107,7 +108,7 @@ async function diagnosticsGET(_request: NextRequest): Promise<NextResponse> {
         'Access-Control-Allow-Methods': 'GET',
       },
     })
-  } catch (error: unknown) {
+  } catch (error) {
     return handleAPIError(error, 'GET /api/diagnostics')
   }
 }

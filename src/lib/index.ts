@@ -31,20 +31,11 @@ export { logger, uiLogger } from './logger'
 // ==========================================================
 
 export {
-  getSupabaseClient,
-  typedInsert,
-  typedUpdate,
-  typedDelete,
-  typedSelect,
-  isAuthenticated,
-  getCurrentUser,
-  signOut,
-  updateSession,
+    getSupabaseClient, typedDelete, typedInsert, typedSelect, typedUpdate
 } from './supabase-client'
 
 export type {
-  QueryResult,
-  QueryArrayResult,
+    QueryArrayResult, QueryResult
 } from './supabase-client'
 
 // ==========================================================
@@ -52,22 +43,7 @@ export type {
 // ==========================================================
 
 export {
-  requiredString,
-  optionalString,
-  positiveNumber,
-  nonNegativeNumber,
-  email,
-  phone,
-  uuid,
-  rupiah,
-  percentage,
-  indonesianName,
-  IngredientSchema,
-  CustomerSchema,
-  validateInput,
-  sanitizeSQL,
-  formatValidationErrors,
-  zodErrorsToFieldErrors,
+    CustomerSchema, IngredientSchema, email, formatValidationErrors, indonesianName, nonNegativeNumber, optionalString, percentage, phone, positiveNumber, requiredString, rupiah, sanitizeSQL, uuid, validateInput, zodErrorsToFieldErrors
 } from './validations/'
 
 // ==========================================================
@@ -75,54 +51,31 @@ export {
 // ==========================================================
 
 export {
-  // Core utilities
 
-  // Date utilities
-  formatDate,
-  formatDateTime,
-  formatRelativeTime,
+    // Constants
+    BUSINESS_TYPES, CATEGORIES, ORDER_STATUSES,
+    PAYMENT_METHODS, UNITS, calculatePercentage,
+    calculateTrend,
+    // String utilities
+    capitalize,
+    // Core utilities
+    // Date utilities
+    formatDate,
+    formatDateTime, formatNumber, formatOrderStatus, formatPhoneNumber,
 
-  // Array/Object utilities
-  groupBy,
-  sortBy,
-  unique,
-  uniqueBy,
-
-  // String utilities
-  capitalize,
-  slugify,
-  truncate,
-  formatNumber,
-
-  // Validation utilities
-  isEmail,
-  isPhoneNumber,
-  formatPhoneNumber,
-
-  // Business utilities
-  formatProductName,
-  formatOrderStatus,
-  getStatusColor,
-  calculatePercentage,
-  calculateTrend,
-
-  // Constants
-  BUSINESS_TYPES,
-  ORDER_STATUSES,
-  PAYMENT_METHODS,
-  CATEGORIES,
-  UNITS,
+    // Business utilities
+    formatProductName, formatRelativeTime, getStatusColor,
+    // Array/Object utilities
+    groupBy,
+    // Validation utilities
+    isEmail,
+    isPhoneNumber, slugify, sortBy, truncate, unique,
+    uniqueBy
 } from '@/shared'
 
 export type {
-  BusinessType,
-  OrderStatus,
-  PaymentMethod,
-  Category,
-  Unit,
-  BusinessEntity,
-  Address,
-  Contact,
+    Address, BusinessEntity, BusinessType, Category, Contact, OrderStatus,
+    PaymentMethod, Unit
 } from '@/shared'
 
 // ==========================================================
@@ -130,64 +83,35 @@ export type {
 // ==========================================================
 
 export {
-  // Cache system
-  apiCache,
-
-  // Response utilities
-  createSuccessResponse,
-  createErrorResponse,
-  createPaginatedResponse,
-
-  // Validation utilities
-  validateRequestData,
-  validateRequestOrRespond,
-
-  // Pagination utilities
-  extractPagination,
-  calculateOffset,
-  createPaginationMeta,
-  usePagination,
-
-  // Middleware utilities
-  withValidation,
-  withQueryValidation,
-  withRateLimit,
-  withCors,
-  withAuth,
-  withMiddleware,
-
-  // Error handling
-  handleAPIError,
-  createAPIErrorResponse,
-
-  // Common schemas
-  IdParamSchema,
-  PaginationSchema,
-  DateRangeSchema,
-  StatusFilterSchema,
-  SearchSchema,
-  BulkDeleteSchema,
-  BulkUpdateSchema,
-
-  // Route handler utilities
-  createRouteHandler,
-
-  // Utility functions
-  parseSearchParams,
-  getClientIP,
-  createETag,
-  handleConditionalGET,
+    BulkDeleteSchema,
+    BulkUpdateSchema, DateRangeSchema,
+    // Common schemas
+    IdParamSchema,
+    PaginationSchema, SearchSchema, StatusFilterSchema,
+    // Cache system
+    apiCache, calculateOffset, createAPIErrorResponse, createETag, createErrorResponse,
+    createPaginatedResponse, createPaginationMeta,
+    // Route handler utilities
+    createRouteHandler,
+    // Response utilities
+    createSuccessResponse,
+    // Pagination utilities
+    extractPagination, getClientIP,
+    // Error handling
+    handleAPIError, handleConditionalGET,
+    // Utility functions
+    parseSearchParams, usePagination,
+    // Validation utilities
+    validateRequestData,
+    validateRequestOrRespond, withCors, withMiddleware, withQueryValidation,
+    withRateLimit,
+    // Middleware utilities
+    withValidation
 } from './api-core/'
 
 export type {
-  ApiSuccessResponse,
-  ApiErrorResponse,
-  PaginatedResponse,
-  ValidationResult,
-  PaginationParams,
-  PaginationState,
-  MiddlewareOptions,
-  APIError,
+    APIError, ApiErrorResponse, ApiSuccessResponse, MiddlewareOptions, PaginatedResponse, PaginationParams,
+    PaginationState, ValidationResult
 } from './api-core/'
 
 // ==========================================================
@@ -195,11 +119,8 @@ export type {
 // ==========================================================
 
 export {
-  formatCurrentCurrency,
-  formatCurrency,
-  parseCurrencyString,
-  currencies,
-  currencyConfigs,
+    currencies,
+    currencyConfigs, formatCurrency, formatCurrentCurrency, parseCurrencyString
 } from './currency'
 
 // ==========================================================
@@ -227,42 +148,20 @@ export {
 // } from './hpp/'
 
 export {
-  AIClient,
-  AISecurity,
-  PromptBuilder,
-  AIService,
-  NLPProcessor,
-  BusinessAI,
-  processChatbotQuery,
-  trainNLPModel,
-  parseNaturalLanguage,
-  generateAIInsights,
+    AIClient,
+    AISecurity, AIService, BusinessAI, NLPProcessor, PromptBuilder, generateAIInsights, parseNaturalLanguage, processChatbotQuery,
+    trainNLPModel
 } from './ai'
 
 export {
-  captureError,
-  captureMessage,
-  handleApiError,
-  handleAuthError,
-  logAuthError,
-  createAuthError,
-  handleDatabaseError,
-  AUTH_ERROR_MESSAGES,
+    AUTH_ERROR_MESSAGES, captureError,
+    captureMessage, createAuthError, handleApiError,
+    handleAuthError, handleDatabaseError, logAuthError
 } from './errors'
 
-// Auth error utilities
-export {
-  getAuthErrorMessage,
-  validateEmail,
-  validatePassword,
-  LoginSchema,
-  RegisterSchema,
-  PasswordResetSchema,
-  UpdatePasswordSchema,
-} from './auth-errors'
+// Auth utilities removed - use new auth provider
 
 export type {
-  ErrorSeverity,
-  ErrorContext,
-  AuthError,
+    AuthError, ErrorContext, ErrorSeverity
 } from './errors'
+

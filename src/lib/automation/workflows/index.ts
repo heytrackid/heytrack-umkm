@@ -1,7 +1,7 @@
 import { BaseWorkflowAutomation } from '@/lib/automation/base-workflow'
 import { automationLogger } from '@/lib/logger'
 
-import type { WorkflowEventData, WorkflowResult, AutomationConfig } from '@/types/features/automation'
+import type { AutomationConfig, WorkflowEventData, WorkflowResult } from '@/types/features/automation'
 
 import { FinancialWorkflowHandlers } from '@/lib/automation/workflows/financial-workflows'
 import { HPPWorkflowHandlers } from '@/lib/automation/workflows/hpp-workflows'
@@ -38,10 +38,9 @@ export class WorkflowAutomation extends BaseWorkflowAutomation {
 
     const context = this.createContext(event)
 
-    // Set up Supabase client in context using client-safe wrapper
-    // This will use server client when in server context, throw error if called from client
-    const { createServerClient } = await import('@/utils/supabase/client-safe')
-    context.supabase = await createServerClient()
+    // Set up Supabase client in context
+    const { createClient } = await import('@/utils/supabase/server')
+    context.supabase = await createClient() as any
 
     switch (event.event) {
       // Order events

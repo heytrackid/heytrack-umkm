@@ -45,7 +45,7 @@ async function handleHealthCheck(_request: NextRequest): Promise<NextResponse> {
       },
       version: '1.0.0'
     }, { status: 200 })
-  } catch (error: unknown) {
+  } catch (error) {
     return handleAPIError(error, 'GET /api/health')
   }
 }

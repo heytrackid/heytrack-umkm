@@ -19,9 +19,7 @@ interface RealtimePayload<T extends TableName> {
  */
 export function useSupabaseQuery<T extends TableName>(
   tableName: T,
-  // @ts-expect-error - Generic type constraint limitation with Supabase types
   options: UseSupabaseQueryOptions<T & TableName> = {}
-  // @ts-expect-error - Generic type constraint limitation with Supabase types
 ): UseSupabaseQueryResult<T & TableName> {
   const { supabase } = useSupabase()
   const [data, setData] = useState<Array<Row<T>>>((options.initial ?? []) as Array<Row<T>>)
@@ -154,7 +152,6 @@ export function useSupabaseQuery<T extends TableName>(
   }, [tableName, fetchData, options.realtime, options.refetchOnMount, options.initial, supabase])
 
   return {
-    // @ts-expect-error - Generic type constraint limitation with Supabase types
     data,
     loading,
     error,

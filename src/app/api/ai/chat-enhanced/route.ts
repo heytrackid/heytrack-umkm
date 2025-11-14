@@ -12,6 +12,7 @@ import { z } from 'zod'
 import { ContextAwareAI } from '@/lib/ai-chatbot-enhanced'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { AIFallbackService } from '@/lib/services/AIFallbackService'
 import { BusinessContextService } from '@/lib/services/BusinessContextService'
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
@@ -38,14 +39,14 @@ const ChatRequestSchema = z.object({
   currentPage: z.string().trim().max(200).optional()
 }).strict()
 
-async function authenticateUser(supabase: SupabaseClient<Database>): Promise<{ userId: string }> {
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-  if (authError || !user) {
+async function authenticateUser(): Promise<{ userId: string }> {
+  // Use Stack Auth instead of Supabase auth
+  const authResult = await requireAuth()
+  if (isErrorResponse(authResult)) {
     throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
   }
 
-  return { userId: user['id'] }
+  return { userId: authResult.id }
 }
 
 function checkRateLimits(userId: string): void {
@@ -200,7 +201,7 @@ async function chatEnhancedPOST(request: NextRequest): Promise<NextResponse> {
 
   try {
     const supabase = await createClient()
-    const { userId } = await authenticateUser(typed(supabase))
+    const { userId } = await authenticateUser()
 
     await checkRateLimits(userId)
 

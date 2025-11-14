@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { cacheInvalidation, cacheKeys, withCache } from '@/lib/cache'
 import { apiLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { PaginationQuerySchema } from '@/lib/validations'
 import type { HppRecommendationsTable } from '@/types/database'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
@@ -14,19 +15,15 @@ import { createClient } from '@/utils/supabase/server'
 // GET /api/hpp/recommendations - Get HPP recommendations
 async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     // Create authenticated Supabase client
     const supabase = await createClient()
-
-    // Validate session
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error:')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
 
     const { searchParams } = new URL(request.url)
 
@@ -119,8 +116,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     }, 'HPP recommendations retrieved successfully')
 
     return NextResponse.json(result)
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error fetching HPP recommendations')
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -132,19 +128,15 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
 // POST /api/hpp/recommendations - Create new recommendation
 async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     // Create authenticated Supabase client
     const supabase = await createClient()
-
-    // Validate session
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error:')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
     const body = await request.json() as {
       recipeId?: string
       recommendationType?: string
@@ -175,7 +167,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     }
     const { data, error } = await supabase
       .from('hpp_recommendations')
-      .insert(insertData)
+      .insert(insertData as any)
       .select()
       .single()
 
@@ -196,8 +188,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
       success: true,
       recommendation: data
     })
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error creating HPP recommendation')
     return NextResponse.json(
       { error: 'Internal server error' },

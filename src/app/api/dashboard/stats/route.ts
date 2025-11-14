@@ -4,6 +4,7 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, safeString } from '@/lib/type-guards'
 import type { Database, OrderStatus } from '@/types/database'
@@ -119,12 +120,12 @@ async function getTypedSupabase(): Promise<TypedSupabaseClient> {
   return typed(client)
 }
 
-async function requireUserId(supabase: SupabaseClient<Database>): Promise<string> {
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) {
+async function requireUserId(): Promise<string> {
+  const authResult = await requireAuth()
+  if (isErrorResponse(authResult)) {
     throw new Error('Unauthorized')
   }
-  return user.id
+  return authResult.id
 }
 
 function normalizeDate(value: string | null): string | undefined {
@@ -441,17 +442,16 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     const filters = buildDateFilters(url.searchParams)
     apiLogger.info({ path: url.pathname, filters }, 'GET /api/dashboard/stats - Start')
 
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      apiLogger.warn('Unauthorized access to dashboard stats')
+      return authResult
+    }
+    const userId = authResult.id
+    apiLogger.info({ userId }, 'Authenticated user for dashboard stats')
+    
     const supabase = await getTypedSupabase()
     apiLogger.debug('Supabase client initialized')
-
-    let userId: string
-    try {
-      userId = await requireUserId(supabase)
-      apiLogger.info({ userId }, 'Authenticated user for dashboard stats')
-    } catch (error) {
-      apiLogger.warn({ error: getErrorMessage(error) }, 'Unauthorized access to dashboard stats')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
 
     const dataStartedAt = Date.now()
     const dashboardData = await fetchDashboardData(supabase, userId, filters)
@@ -488,7 +488,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     // Add caching for dashboard stats (5 minutes stale-while-revalidate)
     response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
     return response
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error, durationTotalMs: Date.now() - startedAt }, 'Error fetching dashboard stats')
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }

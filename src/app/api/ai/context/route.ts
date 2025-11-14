@@ -6,6 +6,7 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server';
 
 import { logger } from '@/lib/logger';
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { BusinessContextService } from '@/lib/services/BusinessContextService';
 import { createSecureHandler, InputSanitizer, SecurityPresets } from '@/utils/security/index';
 import { createClient } from '@/utils/supabase/server';
@@ -15,14 +16,12 @@ import { createClient } from '@/utils/supabase/server';
  */
 async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
 
     const {searchParams} = request.nextUrl;
     const rawPage = searchParams.get('page') ?? undefined;
@@ -30,7 +29,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     const currentPage = sanitizedPage && sanitizedPage.length > 0 ? sanitizedPage : undefined;
 
     const context = await BusinessContextService.loadContext(
-      user['id'],
+      user.id,
       currentPage
     );
 
@@ -39,7 +38,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
       cached: false, // Cache detection not yet implemented
       expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
     });
-  } catch (error: unknown) {
+  } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error(`Failed to load context: ${errorMessage}`);
     return NextResponse.json(
@@ -54,19 +53,17 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
  */
 async function deleteHandler(): Promise<NextResponse> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
 
-    await BusinessContextService.invalidateCache(user['id']);
+    await BusinessContextService.invalidateCache(user.id);
 
     return NextResponse.json({ success: true });
-  } catch (error: unknown) {
+  } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error(`Failed to invalidate context: ${errorMessage}`);
     return NextResponse.json(

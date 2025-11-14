@@ -9,6 +9,7 @@ import { cacheInvalidation, cacheKeys, withCache } from '@/lib/cache'
 import { ORDER_FIELDS } from '@/lib/database/query-fields'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger, logError } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { OrderInsertSchema } from '@/lib/validations/domains/order'
 import { createPaginationMeta } from '@/lib/validations/pagination'
@@ -104,15 +105,16 @@ async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'GET /api/orders - Request received')
 
-    const supabase = typed(await createClient())
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      logError(apiLogger, authError, 'GET /api/orders - Unauthorized')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
 
-    apiLogger.info({ userId: user['id'] }, 'GET /api/orders - User authenticated')
+    apiLogger.info({ userId: user.id }, 'GET /api/orders - User authenticated')
+
+    const supabase = typed(await createClient())
 
     const { searchParams } = new URL(request.url)
     
@@ -142,7 +144,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
 
     // ✅ PERFORMANCE: Use cached batch query
     const params: FetchOrdersParams = {
-      page, limit, status, user_id: user['id']
+      page, limit, status, user_id: user.id
     }
     if (search !== undefined) {
       params.search = search
@@ -161,7 +163,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     const { data: orders, count } = await fetchOrdersWithCache(supabase, params)
 
     apiLogger.info({
-      userId: user['id'],
+      userId: user.id,
       count: orders?.length ?? 0,
       totalCount: count ?? 0,
       cached: true // Indicates caching is working
@@ -171,8 +173,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
       data: orders,
       meta: createPaginationMeta(page, limit, count ?? 0)
     })
-
-  } catch (error: unknown) {
+  } catch (error) {
     logError(apiLogger, error, 'GET /api/orders - Unexpected error')
     return handleAPIError(error, 'GET /api/orders')
   }
@@ -183,13 +184,15 @@ async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/orders - Request received')
 
-    const supabase = typed(await createClient())
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
 
-    if (authError || !user) {
-      logError(apiLogger, authError, 'POST /api/orders - Unauthorized')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }    const body: unknown = await request.json()
+    const supabase = typed(await createClient())
+    const body: unknown = await request.json()
     const validation = OrderInsertSchema.safeParse(body)
 
     if (!validation.success) {
@@ -210,7 +213,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
         ?? new Date().toISOString().split('T')[0]
 
       const incomeData: FinancialRecordInsert = {
-        user_id: user['id'],
+        user_id: user.id,
         type: 'INCOME',
         category: 'Revenue',
         amount: validatedData.total_amount,
@@ -238,7 +241,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
       ...Object.fromEntries(
         Object.entries(validatedData).map(([key, value]) => [key, value ?? null])
       ),
-      user_id: user['id'],
+      user_id: user.id,
       status: orderStatus,
       order_date: validatedData.order_date ?? new Date().toISOString().split('T')[0],
       tax_amount: validatedData.tax_amount ?? 0,
@@ -255,7 +258,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     if (orderError) {
       logError(apiLogger, orderError, 'POST /api/orders - Failed to create order')
       if (incomeRecordId) {
-        await supabase.from('financial_records').delete().eq('id', incomeRecordId).eq('user_id', user['id'])
+        await supabase.from('financial_records').delete().eq('id', incomeRecordId).eq('user_id', user.id)
       }
       return NextResponse.json({ error: 'Failed to create order' }, { status: 500 })
     }
@@ -267,7 +270,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
       const updateData: FinancialRecordUpdate = { 
         reference: `Order ${createdOrder['id']} - ${validatedData['customer_name'] || 'Customer'}` 
       }
-      await supabase.from('financial_records').update(updateData).eq('id', incomeRecordId).eq('user_id', user['id'])
+      await supabase.from('financial_records').update(updateData).eq('id', incomeRecordId).eq('user_id', user.id)
     }
 
     // Create order items
@@ -280,7 +283,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
         total_price: item.total_price || (item.quantity * item.unit_price),
         special_requests: item.special_requests ?? null,
         order_id: createdOrder['id'],
-        user_id: user['id']
+        user_id: user.id
       }))
 
       const { error: itemsError } = await supabase.from('order_items').insert(orderItems)
@@ -288,9 +291,9 @@ async function POST(request: NextRequest): Promise<NextResponse> {
       if (itemsError) {
         logError(apiLogger, itemsError, 'POST /api/orders - Failed to create order items')
         // Rollback order and income record
-        await supabase.from('orders').delete().eq('id', createdOrder['id']).eq('user_id', user['id'])
+        await supabase.from('orders').delete().eq('id', createdOrder['id']).eq('user_id', user.id)
         if (incomeRecordId) {
-          await supabase.from('financial_records').delete().eq('id', incomeRecordId).eq('user_id', user['id'])
+          await supabase.from('financial_records').delete().eq('id', incomeRecordId).eq('user_id', user.id)
         }
         return NextResponse.json({ error: 'Failed to create order items' }, { status: 500 })
       }
@@ -300,7 +303,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     cacheInvalidation.orders()
     
     apiLogger.info({ 
-      userId: user['id'],
+      userId: user.id,
       orderId: createdOrder['id'],
       orderNo: createdOrder['order_no'],
       incomeRecorded: Boolean(incomeRecordId)
@@ -310,8 +313,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
       ...createdOrder,
       income_recorded: Boolean(incomeRecordId)
     }, { status: 201 })
-
-  } catch (error: unknown) {
+  } catch (error) {
     logError(apiLogger, error, 'POST /api/orders - Unexpected error')
     return handleAPIError(error, 'POST /api/orders')
   }

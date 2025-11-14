@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cacheInvalidation, cacheKeys, withCache } from '@/lib/cache'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { getErrorMessage } from '@/lib/type-guards'
 import { PaginationQuerySchema } from '@/lib/validations'
 import { RecipeInsertSchema } from '@/lib/validations/domains/recipe'
@@ -19,19 +20,15 @@ import { createClient } from '@/utils/supabase/server'
 // GET /api/recipes - Get all recipes with ingredient relationships
 async function GET(request: NextRequest): Promise<NextResponse> {
   try {
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     // Create authenticated Supabase client
     const supabase = typed(await createClient())
-
-    // Validate session
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error:')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
 
     const { searchParams } = new URL(request.url)
 
@@ -146,8 +143,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     // Add HTTP caching headers (5 minutes stale-while-revalidate)
     response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
     return response
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/recipes:')
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -159,19 +155,15 @@ async function GET(request: NextRequest): Promise<NextResponse> {
 // POST /api/recipes - Create new recipe with ingredients
 async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     // Create authenticated Supabase client
     const supabase = typed(await createClient())
-
-    // Validate session
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error:')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
 
     // Parse and validate request body
     const _body = await request.json() as unknown
@@ -274,7 +266,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     cacheInvalidation.recipes()
 
     return NextResponse.json(completeRecipe, { status: 201 })
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in POST /api/recipes:')
     return NextResponse.json(
       { error: 'Internal server error' },

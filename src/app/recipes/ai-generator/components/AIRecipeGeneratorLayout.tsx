@@ -1,8 +1,8 @@
 'use client'
 
-import { ChefHat, Sparkles, Zap, ArrowLeft, ArrowRight, CheckCircle } from 'lucide-react'
+import { ArrowLeft, ArrowRight, CheckCircle, ChefHat, Sparkles, Zap } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect, useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
@@ -12,7 +12,7 @@ import { useAuth } from '@/hooks/index'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 import { typedInsert } from '@/lib/supabase-client'
-import { loadDraft, clearDraft } from '@/lib/utils/recipe-helpers'
+import { clearDraft, loadDraft } from '@/lib/utils/recipe-helpers'
 import { useSupabase } from '@/providers/SupabaseProvider'
 
 
@@ -26,7 +26,7 @@ import { SmartIngredientSelector } from '@/app/recipes/ai-generator/components/S
 
 
 
-import type { GeneratedRecipe, AvailableIngredient } from '@/app/recipes/ai-generator/components/types'
+import type { AvailableIngredient, GeneratedRecipe } from '@/app/recipes/ai-generator/components/types'
 
 // AI Recipe Generator Layout - Enhanced Interactive Version
 // Improved UX with live preview, quick mode, and better guidance
@@ -146,9 +146,14 @@ const AIRecipeGeneratorPage = () => {
     setGeneratedRecipe(null)
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-
-      if (!user) {
+      // Get user_id from Stack Auth
+      const authResponse = await fetch('/api/auth/me')
+      if (!authResponse.ok) {
+        throw new Error('User not authenticated')
+      }
+      
+      const { userId } = await authResponse.json()
+      if (!userId) {
         throw new Error('User not authenticated')
       }
 
@@ -164,7 +169,7 @@ const AIRecipeGeneratorPage = () => {
           targetPrice: targetPrice ? parseFloat(targetPrice) : undefined,
           dietaryRestrictions,
           preferredIngredients: selectedIngredients,
-          userId: user['id']
+          userId
         })
       })
 
@@ -196,15 +201,20 @@ const AIRecipeGeneratorPage = () => {
     if (!generatedRecipe) { return }
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-
-      if (!user) {
+      // Get user_id from Stack Auth
+      const authResponse = await fetch('/api/auth/me')
+      if (!authResponse.ok) {
+        throw new Error('User not authenticated')
+      }
+      
+      const { userId } = await authResponse.json()
+      if (!userId) {
         throw new Error('User not authenticated')
       }
 
       // Save recipe to database
       const recipeInsert: Insert<'recipes'> = {
-        user_id: user['id'],
+        user_id: userId,
         name: generatedRecipe.name,
         category: generatedRecipe.category,
         servings: generatedRecipe.servings,
@@ -239,7 +249,7 @@ const AIRecipeGeneratorPage = () => {
             ingredient_id: ingredient['id'],
             quantity: ing.quantity,
             unit: ing.unit,
-            user_id: user['id']
+            user_id: userId
           }
         })
         .filter((value): value is Insert<'recipe_ingredients'> => value !== null)

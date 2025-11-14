@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
 
 import { SUGGESTIONS, type Message } from '@/app/ai-chatbot/types/index'
-import { useSupabase } from '@/providers/SupabaseProvider'
-import { ChatSessionService } from '@/lib/services/ChatSessionService'
 import { createLogger } from '@/lib/logger'
+import { ChatSessionService } from '@/lib/services/ChatSessionService'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import type { MessageMetadata } from '@/types/features/chat'
 
 interface OrderRow { id: string; status: string; total_amount: number; created_at: string }
@@ -95,8 +95,12 @@ export function useChatMessages(): UseChatMessagesResult {
     if (!currentSessionId) return
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      // Get user_id from JWT token in cookies (Stack Auth)
+      const response = await fetch('/api/auth/me')
+      if (!response.ok) return
+      
+      const { userId } = await response.json()
+      if (!userId) return
 
       // Only store user and assistant messages, not system messages
       if (message.role === 'user' || message.role === 'assistant') {
@@ -169,9 +173,51 @@ export function useChatMessages(): UseChatMessagesResult {
     if (hasShownWelcome) { return }
 
     const initializeChat = async (): Promise<void> => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        // Fallback generic welcome
+      try {
+        // Get user_id from JWT token in cookies (Stack Auth)
+        const response = await fetch('/api/auth/me')
+        if (!response.ok) {
+          // Fallback generic welcome
+          setMessages([{
+            id: 'welcome',
+            role: 'assistant',
+            content: '👋 **Halo!** Selamat datang di HeyTrack! 😊\n\nSaya AI assistant yang siap bantu bisnis kuliner kamu makin sukses. Mau nanya apa hari ini? Bisa tentang resep, stok, harga, atau strategi jualan! 🚀',
+            timestamp: new Date(),
+            suggestions: SUGGESTIONS.slice(0, 3).map(s => s.text)
+          }])
+          setHasShownWelcome(true)
+          return
+        }
+
+        const { userId } = await response.json()
+        if (!userId) {
+          // Fallback generic welcome
+          setMessages([{
+            id: 'welcome',
+            role: 'assistant',
+            content: '👋 **Halo!** Selamat datang di HeyTrack! 😊\n\nSaya AI assistant yang siap bantu bisnis kuliner kamu makin sukses. Mau nanya apa hari ini? Bisa tentang resep, stok, harga, atau strategi jualan! 🚀',
+            timestamp: new Date(),
+            suggestions: SUGGESTIONS.slice(0, 3).map(s => s.text)
+          }])
+          setHasShownWelcome(true)
+          return
+        }
+
+        // Initialize session first
+        await initializeSession(userId)
+
+        // Only show welcome if no existing messages
+        if (messages.length === 0) {
+          const stats = await fetchBusinessStats(userId)
+          const welcomeMessage = createWelcomeMessage(stats)
+          setMessages([welcomeMessage])
+        }
+
+        setHasShownWelcome(true)
+      } catch (error) {
+        const logger = createLogger('useChatMessages')
+        logger.error({ error: error as unknown }, 'Failed to initialize chat')
+        // Show fallback welcome
         setMessages([{
           id: 'welcome',
           role: 'assistant',
@@ -180,24 +226,11 @@ export function useChatMessages(): UseChatMessagesResult {
           suggestions: SUGGESTIONS.slice(0, 3).map(s => s.text)
         }])
         setHasShownWelcome(true)
-        return
       }
-
-      // Initialize session first
-      await initializeSession(user.id)
-
-      // Only show welcome if no existing messages
-      if (messages.length === 0) {
-        const stats = await fetchBusinessStats(user.id)
-        const welcomeMessage = createWelcomeMessage(stats)
-        setMessages([welcomeMessage])
-      }
-
-      setHasShownWelcome(true)
     }
 
     void initializeChat()
-  }, [hasShownWelcome, supabase, createWelcomeMessage, fetchBusinessStats, initializeSession, messages.length])
+  }, [hasShownWelcome, createWelcomeMessage, fetchBusinessStats, initializeSession, messages.length])
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {

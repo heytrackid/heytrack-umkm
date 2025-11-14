@@ -4,6 +4,7 @@ export const runtime = 'nodejs'
 
 import { NextResponse } from 'next/server';
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth';
 import { apiLogger, logError } from '@/lib/logger';
 import { prepareUpdate } from '@/lib/supabase/insert-helpers';
 import { extractFirst, getErrorMessage, isRecord, isValidUUID, safeString } from '@/lib/type-guards';
@@ -30,19 +31,19 @@ export const GET = withSecurity(async function GET(
   try {
     apiLogger.info({ expenseId: id }, 'GET /api/expenses/[id] - Request received');
 
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      logError(apiLogger, authError, 'GET /api/expenses/[id] - Unauthorized');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient();
 
     const { data: expense, error } = await supabase
       .from('financial_records')
       .select('*')
       .eq('id', id)
-      .eq('user_id', user.id)
       .eq('type', 'EXPENSE')
       .single();
 
@@ -69,21 +70,20 @@ export const GET = withSecurity(async function GET(
     }
 
     // ✅ V2: Safe extraction of supplier data
-    let responseExpense: typeof expense & { supplier_name?: string } = expense;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const responseExpense: any = { ...(expense as Record<string, unknown>) };
     if ('supplier' in expense) {
       const supplier = extractFirst(expense['supplier'])
       if (supplier && isRecord(supplier) && 'name' in supplier) {
         // Supplier data safely extracted
-        responseExpense = {
-          ...expense,
-          supplier_name: safeString(supplier['name'], 'Unknown')
-        };
+        responseExpense['supplier_name'] = safeString(supplier['name'], 'Unknown');
       }
     }
 
-    apiLogger.info({ expenseId: id, userId: user['id'] }, 'GET /api/expenses/[id] - Success');
+    apiLogger.info({ expenseId: id, userId: user.id }, 'GET /api/expenses/[id] - Success');
+
     return NextResponse.json(responseExpense);
-  } catch (error: unknown) {
+  } catch (error) {
     logError(apiLogger, error, 'GET /api/expenses/[id] - Unexpected error');
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
@@ -103,13 +103,14 @@ export const PUT = withSecurity(async function PUT(
   try {
     apiLogger.info({ expenseId: id }, 'PUT /api/expenses/[id] - Request received');
 
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      logError(apiLogger, authError, 'PUT /api/expenses/[id] - Unauthorized');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient();
 
     const body = await request.json() as unknown;
 
@@ -130,11 +131,11 @@ export const PUT = withSecurity(async function PUT(
     ) as Database['public']['Tables']['financial_records']['Update'])
 
     // ✅ Use financial_records table
-    const { data: expense, error } = await supabase
-      .from('financial_records')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: expense, error } = await (supabase
+      .from('financial_records') as any)
       .update(updatePayload)
       .eq('id', id)
-      .eq('user_id', user.id)
       .select()
       .single();
 
@@ -152,9 +153,9 @@ export const PUT = withSecurity(async function PUT(
       )
     }
 
-    apiLogger.info({ expenseId: id, userId: user['id'] }, 'PUT /api/expenses/[id] - Success');
+    apiLogger.info({ expenseId: id, userId: user.id }, 'PUT /api/expenses/[id] - Success');
     return NextResponse.json(expense);
-  } catch (error: unknown) {
+  } catch (error) {
     logError(apiLogger, error, 'PUT /api/expenses/[id] - Unexpected error');
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
@@ -174,19 +175,19 @@ export const DELETE = withSecurity(async function DELETE(
   try {
     apiLogger.info({ expenseId: id }, 'DELETE /api/expenses/[id] - Request received');
 
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      logError(apiLogger, authError, 'DELETE /api/expenses/[id] - Unauthorized');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
+
+    const supabase = await createClient();
 
     const { error } = await supabase
       .from('financial_records')
       .delete()
       .eq('id', id)
-      .eq('user_id', user['id'])
       .eq('type', 'EXPENSE');
 
     if (error) {
@@ -197,10 +198,10 @@ export const DELETE = withSecurity(async function DELETE(
       )
     }
 
-    apiLogger.info({ expenseId: id, userId: user['id'] }, 'DELETE /api/expenses/[id] - Success');
+    apiLogger.info({ expenseId: id, userId: user.id }, 'DELETE /api/expenses/[id] - Success');
     return NextResponse.json({ message: 'Expense deleted successfully' });
-  } catch (error: unknown) {
+  } catch (error) {
     logError(apiLogger, error, 'DELETE /api/expenses/[id] - Unexpected error');
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
-   }
+  }
 }, SecurityPresets.enhanced())

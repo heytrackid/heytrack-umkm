@@ -1,8 +1,8 @@
 'use client'
 
-import { BarChart3, Calculator, TrendingUp, Bell } from 'lucide-react'
+import { BarChart3, Bell, Calculator, TrendingUp } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { memo, useCallback, useEffect, useState, useRef } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
@@ -12,6 +12,7 @@ import { HppAlertsTab } from '@/modules/hpp/components/HppAlertsTab'
 import { HppBreakdownVisual } from '@/modules/hpp/components/HppBreakdownVisual'
 import { HppEmptyState } from '@/modules/hpp/components/HppEmptyState'
 import { HppOverviewCard } from '@/modules/hpp/components/HppOverviewCard'
+import { HppQuickSummary } from '@/modules/hpp/components/HppQuickSummary'
 import { HppScenarioPlanner } from '@/modules/hpp/components/HppScenarioPlanner'
 import { PricingCalculatorCard } from '@/modules/hpp/components/PricingCalculatorCard'
 import { ProductComparisonCard } from '@/modules/hpp/components/ProductComparisonCard'
@@ -100,8 +101,6 @@ export const UnifiedHppPage = memo(() => {
         {/* Overview Card - Always visible */}
         {overview && <HppOverviewCard overview={overview} />}
 
-
-
         {/* Recipe Selector - Prominent position */}
         <RecipeSelector
           recipes={recipes}
@@ -113,9 +112,12 @@ export const UnifiedHppPage = memo(() => {
         {/* Empty State - Show when no recipe selected */}
         {!selectedRecipeId && !recipeLoading && <HppEmptyState />}
 
-        {/* Main Content - Show immediately when recipe selected */}
+        {/* Main Content - Progressive Disclosure */}
         {recipe && (
           <div className="space-y-6">
+            {/* Quick Summary - Always visible at top */}
+            {recipe.total_cost > 0 && <HppQuickSummary recipe={recipe} />}
+
             {/* Primary Action: Cost Calculation */}
             <CostCalculationCard
               recipe={recipe}

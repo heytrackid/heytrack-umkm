@@ -147,7 +147,7 @@ export class InventoryAlertService {
             .single()
 
           if (!existingAlert) {
-            await supabase
+            await (supabase as any)
               .from('inventory_alerts')
               .insert({
                 ...alert,
@@ -190,7 +190,7 @@ export class InventoryAlertService {
             .update({
               is_active: false,
               resolved_at: new Date().toISOString()
-            })
+            } as never)
             .eq('ingredient_id', ingredient['id'])
             .eq('user_id', userId)
             .eq('is_active', true)
@@ -241,7 +241,7 @@ export class InventoryAlertService {
         .single()
 
       if (!existingAlert) {
-        await supabase
+        await (supabase as any)
           .from('inventory_alerts')
           .insert({
             ...alertPayload,
@@ -301,7 +301,7 @@ export class InventoryAlertService {
         .from('inventory_alerts')
         .update({
           acknowledged_at: new Date().toISOString()
-        })
+        } as never)
         .eq('id', alertId)
         .eq('user_id', userId)
 

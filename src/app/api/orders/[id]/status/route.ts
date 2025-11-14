@@ -1,8 +1,8 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-import 'server-only'
 import { NextResponse, type NextRequest } from 'next/server'
+import 'server-only'
 import { z } from 'zod'
 
 import { triggerWorkflow } from '@/lib/automation/workflows/index'
@@ -81,7 +81,7 @@ async function createIncomeRecordIfNeeded(
         reference: `Order #${currentOrder['order_no'] || ''}${currentOrder['customer_name'] ? ` - ${currentOrder['customer_name']}` : ''}`,
         description: `Income from order ${currentOrder['order_no'] || ''}`,
         user_id: currentOrder.user_id
-      }])
+      }] as any)
       .select()
       .single()
 
@@ -112,7 +112,7 @@ async function updateOrderStatus(
       updated_at: new Date().toISOString(),
       ...(notes && { notes }),
       ...(incomeRecordId && { financial_record_id: incomeRecordId })
-    })
+    } as never)
     .eq('id', orderId)
     .select('id, order_no, status, total_amount, customer_name, delivery_date, order_date, updated_at, financial_record_id')
     .single()
@@ -238,8 +238,7 @@ async function putHandler(
 
     // Return success response
     return buildResponse(status, updatedOrder, previousStatus, incomeRecordId, currentOrder)
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error in order status update:')
     return handleAPIError(error, 'PUT /api/orders/[id]/status')
   }
@@ -268,12 +267,13 @@ async function getHandler(
 
     // Note: Status history would require a separate audit table in production
     // For now, return current status info
+    const typedOrder = order as OrderRow
     const statusInfo = {
-      current_status: order['status'],
-      status_display: order['status'] ? getStatusDisplay(order['status']) : 'Unknown',
-      can_transition_to: order['status'] ? getValidTransitions(order['status']) : [],
-      automation_enabled: order['status'] ? isAutomationEnabled(order['status']) : false,
-      updated_at: order.updated_at
+      current_status: typedOrder['status'],
+      status_display: typedOrder['status'] ? getStatusDisplay(typedOrder['status']) : 'Unknown',
+      can_transition_to: typedOrder['status'] ? getValidTransitions(typedOrder['status']) : [],
+      automation_enabled: typedOrder['status'] ? isAutomationEnabled(typedOrder['status']) : false,
+      updated_at: typedOrder.updated_at
     }
 
     return NextResponse.json({
@@ -281,8 +281,7 @@ async function getHandler(
       order_no: order['order_no'],
       status_info: statusInfo
     })
-
-  } catch (error: unknown) {
+  } catch (error) {
     apiLogger.error({ error }, 'Error getting order status:')
     return handleAPIError(error, 'GET /api/orders/[id]/status')
   }

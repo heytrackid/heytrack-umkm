@@ -3,6 +3,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import { IngredientPurchaseInsertSchema } from '@/lib/validations'
 import { getErrorMessage } from '@/shared/guards'
@@ -17,17 +18,14 @@ import { createClient } from '@/utils/supabase/server'
  */
 async function getHandler(request: NextRequest): Promise<NextResponse> {
     try {
-        const supabase = await createClient()
-
-        // Validate session
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
-            return NextResponse.json(
-                { error: 'Unauthorized' },
-                { status: 401 }
-            )
+        // Authenticate with Stack Auth
+        const authResult = await requireAuth()
+        if (isErrorResponse(authResult)) {
+            return authResult
         }
+        const user = authResult
+
+        const supabase = await createClient()
 
         // Get query parameters
         const {searchParams} = request.nextUrl
@@ -49,7 +47,6 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
           price_per_unit
         )
       `)
-            .eq('user_id', user['id'])
             .order('purchase_date', { ascending: false })
 
         // Apply filters
@@ -86,7 +83,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
         }
 
         return NextResponse.json(purchases ?? [])
-    } catch (error: unknown) {
+    } catch (error) {
         apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/ingredient-purchases:')
         return NextResponse.json(
             { error: 'Internal server error' },
@@ -101,17 +98,14 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
  */
 async function postHandler(request: NextRequest): Promise<NextResponse> {
     try {
-        const supabase = await createClient()
-
-        // Validate session
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
-            return NextResponse.json(
-                { error: 'Unauthorized' },
-                { status: 401 }
-            )
+        // Authenticate with Stack Auth
+        const authResult = await requireAuth()
+        if (isErrorResponse(authResult)) {
+            return authResult
         }
+        const user = authResult
+
+        const supabase = await createClient()
 
         const body = await request.json() as Record<string, unknown>
 
@@ -198,7 +192,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
         
         const { data: purchase, error: purchaseError } = await supabase
             .from('ingredient_purchases')
-            .insert(purchaseRecord)
+            .insert(purchaseRecord as never)
             .select(`
         *,
         ingredient:ingredients (
@@ -239,7 +233,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
         const { error: stockError } = await supabase
             .from('ingredients')
-            .update(stockUpdate)
+            .update(stockUpdate as never)
             .eq('id', validatedData.ingredient_id)
             .eq('user_id', (user as { id: string }).id)
             // Add optimistic lock: only update if current_stock hasn't changed
@@ -252,23 +246,24 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
         }
 
         // 4. Create stock ledger entry
+        const typedPurchase = purchase as { id: string } | null
         const stockLog: Insert<'inventory_stock_logs'> = {
             ingredient_id: validatedData.ingredient_id,
             quantity_before: ingredientData.current_stock ?? 0,
             quantity_after: newStock,
             quantity_changed: qtyBeli,
             change_type: 'increase',
-            reference_id: purchase?.id || null,
+            reference_id: typedPurchase?.id || null,
             reference_type: 'ingredient_purchase'
         }
 
         await supabase
             .from('inventory_stock_logs')
-            .insert(stockLog)
+            .insert(stockLog as never)
             .select()
 
         return NextResponse.json(purchase, { status: 201 })
-    } catch (error: unknown) {
+    } catch (error) {
         apiLogger.error({ error: getErrorMessage(error) }, 'Error in POST /api/ingredient-purchases:')
         return NextResponse.json(
             { error: 'Internal server error' },

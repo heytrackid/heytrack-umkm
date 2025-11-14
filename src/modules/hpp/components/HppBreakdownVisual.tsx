@@ -3,12 +3,12 @@
 import {
     ChevronDown,
     ChevronUp,
-    Package,
-    Zap,
-    Users,
-    TrendingUp,
     Download,
-    Info
+    Info,
+    Package,
+    TrendingUp,
+    Users,
+    Zap
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
@@ -47,7 +47,7 @@ interface HppBreakdownVisualProps {
 export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVisualProps): JSX.Element => {
     const { toast } = useToast()
     const { formatCurrency } = useCurrency()
-    const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['ingredients']))
+    const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set()) // Default: all collapsed
 
     const toggleSection = (section: string): void => {
         const newExpanded = new Set(expandedSections)

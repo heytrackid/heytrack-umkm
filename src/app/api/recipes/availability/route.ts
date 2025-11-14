@@ -4,6 +4,7 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger, logError } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
@@ -23,18 +24,18 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
       )
     }
 
-    const client = await createClient()
-
-    const { data: { user }, error: authError } = await client.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
 
+    const client = await createClient()
     const result = await RecipeAvailabilityService.checkAvailability(recipeId, quantity)
 
-    apiLogger.info({ 
-      userId: user['id'],
+    apiLogger.info({
+      userId: user.id,
       recipeId,
       quantity,
       isAvailable: result.is_available
@@ -50,13 +51,15 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
 // POST /api/recipes/availability - Check multiple recipes
 async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
     const client = await createClient()
-
-    const { data: { user }, error: authError } = await client.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }    const body = await request.json() as { recipes?: Array<{ recipe_id: string; quantity: number }> }
+    const body = await request.json() as { recipes?: Array<{ recipe_id: string; quantity: number }> }
     const { recipes } = body
 
     if (!recipes || !Array.isArray(recipes)) {

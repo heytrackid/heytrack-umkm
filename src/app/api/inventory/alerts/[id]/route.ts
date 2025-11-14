@@ -4,6 +4,7 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
+import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
@@ -20,15 +21,16 @@ async function putHandler(
   const { id } = await params
   
   try {
-    const supabase = await createClient()
-    
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
     }
+    const user = authResult
 
+    const supabase = await createClient()
     const alertService = new InventoryAlertService()
-    await alertService.acknowledgeAlert(id, user['id'])
+    await alertService.acknowledgeAlert(id, user.id)
 
     return NextResponse.json({ 
       message: 'Alert acknowledged successfully' 
