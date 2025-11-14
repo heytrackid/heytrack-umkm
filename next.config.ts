@@ -101,7 +101,34 @@ const nextConfig: NextConfig = {
   },
 
   async redirects() {
-    return []
+    return [
+      // Redirect old Supabase Auth routes to new Stack Auth routes
+      {
+        source: '/auth/login',
+        destination: '/handler/sign-in',
+        permanent: true,
+      },
+      {
+        source: '/auth/register',
+        destination: '/handler/sign-up',
+        permanent: true,
+      },
+      {
+        source: '/auth/reset-password',
+        destination: '/handler/forgot-password',
+        permanent: true,
+      },
+      {
+        source: '/auth/logout',
+        destination: '/handler/sign-out',
+        permanent: true,
+      },
+      {
+        source: '/auth/:path*',
+        destination: '/handler/:path*',
+        permanent: true,
+      },
+    ]
   },
 }
 

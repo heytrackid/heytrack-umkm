@@ -1,27 +1,24 @@
 {
-  "crons": [],
-  "functions": {
-    "src/app/api/**/*.ts": {
-      "maxDuration": 30
-    }
-  },
-  "headers": [
+  "redirects": [
     {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "https://app.heytrack.id"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, PUT, DELETE, OPTIONS"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization"
-        }
-      ]
+      "source": "/auth/login",
+      "destination": "/handler/sign-in",
+      "permanent": true
+    },
+    {
+      "source": "/auth/register",
+      "destination": "/handler/sign-up",
+      "permanent": true
+    },
+    {
+      "source": "/auth/reset-password",
+      "destination": "/handler/forgot-password",
+      "permanent": true
+    },
+    {
+      "source": "/auth/:path*",
+      "destination": "/handler/:path*",
+      "permanent": true
     }
   ]
 }
