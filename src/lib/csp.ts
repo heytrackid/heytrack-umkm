@@ -18,29 +18,29 @@ export async function calculateHash(content: string): Promise<string> {
 }
 
 export function getStrictCSP(nonce: string, isDev = false): string {
-  // Script sources - include Vercel Analytics
+  // Script sources - include Vercel Analytics and Stack Auth
   const scriptSrc = isDev
-    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com https://vercel.live https://*.vercel.app;`
-    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com https://*.vercel.app;`
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com https://vercel.live https://*.vercel.app https://*.stack-auth.com;`
+    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com https://*.vercel.app https://*.stack-auth.com;`
 
-  // Frame sources - allow Vercel Live
+  // Frame sources - allow Vercel Live and Stack Auth
   const frameSrc = isDev
-    ? `frame-src 'self' https://vercel.live https://*.vercel.app;`
-    : `frame-src 'self' https://vercel.live https://*.vercel.app;`
+    ? `frame-src 'self' https://vercel.live https://*.vercel.app https://*.stack-auth.com;`
+    : `frame-src 'self' https://vercel.live https://*.vercel.app https://*.stack-auth.com;`
 
   const policies = [
     `default-src 'self' https: data: blob:;`,
     scriptSrc,
     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.vercel.app;`,
-    `img-src 'self' https: data: blob: https://*.supabase.co https://*.vercel.app https://app.heytrack.id;`,
+    `img-src 'self' https: data: blob: https://*.supabase.co https://*.vercel.app https://app.heytrack.id https://*.stack-auth.com;`,
     `font-src 'self' https://fonts.gstatic.com data: https://*.vercel.app;`,
-    `connect-src 'self' https://*.supabase.co https://vrrjoswzmlhkmmcfhicw.supabase.co wss://*.supabase.co https://api.openrouter.ai https://fonts.googleapis.com https://vitals.vercel-insights.com https://vercel.live https://*.vercel.app https://app.heytrack.id https://api.stack-auth.com ${isDev ? "http://localhost:3000 http://127.0.0.1:3000 ws://localhost:3000 ws://127.0.0.1:3000" : ''};`,
+    `connect-src 'self' https://*.supabase.co https://vrrjoswzmlhkmmcfhicw.supabase.co wss://*.supabase.co https://api.openrouter.ai https://fonts.googleapis.com https://vitals.vercel-insights.com https://vercel.live https://*.vercel.app https://app.heytrack.id https://*.stack-auth.com wss://*.stack-auth.com ${isDev ? "http://localhost:3000 http://127.0.0.1:3000 ws://localhost:3000 ws://127.0.0.1:3000" : ''};`,
     `worker-src 'self' blob: https://*.vercel.app;`,
     `media-src 'self' https://*.supabase.co https://*.vercel.app;`,
     frameSrc,
     `object-src 'none';`,
     `base-uri 'self';`,
-    `form-action 'self' https://*.supabase.co;`,
+    `form-action 'self' https://*.supabase.co https://*.stack-auth.com;`,
     `frame-ancestors 'none';`,
     `manifest-src 'self' https://*.vercel.app;`,
     `upgrade-insecure-requests;`,
