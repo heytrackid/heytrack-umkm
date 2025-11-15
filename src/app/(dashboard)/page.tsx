@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { useDashboardStats } from '@/hooks/api/useDashboard'
 import { AutoSyncFinancialDashboard } from '@/components/dashboard/AutoSyncFinancialDashboard'
+import { MobileHeader } from '@/components/layout/mobile-header'
 
 import { ProductionScheduleWidget } from '@/components/dashboard/ProductionScheduleWidget'
 import {
@@ -62,6 +64,7 @@ export default function DashboardPage(): JSX.Element {
 
   return (
     <>
+      <MobileHeader title="Dashboard" showSearch={false} />
       <OnboardingWizard open={onboardingOpen} onOpenChange={setOnboardingOpen} />
       <div className="space-y-6">
         <div className="flex justify-between items-center">
@@ -111,7 +114,7 @@ export default function DashboardPage(): JSX.Element {
                 <DollarSign className="h-6 w-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Revenue</p>
+                <p className="text-sm text-muted-foreground">Pendapatan</p>
                 <p className="text-2xl font-bold">{formatCurrency(stats?.revenue.weekly || 0)}</p>
               </div>
             </div>
@@ -217,15 +220,9 @@ export default function DashboardPage(): JSX.Element {
               </div>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-8">
-            <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground">Belum ada pesanan</p>
-            <Link href="/orders/new">
-              <Button className="mt-3">Buat Pesanan Pertama</Button>
-            </Link>
-          </div>
-        )}
+         ) : (
+           <EmptyState {...EmptyStatePresets.dashboard} />
+         )}
       </Card>
 
       {/* Low Stock Alert */}

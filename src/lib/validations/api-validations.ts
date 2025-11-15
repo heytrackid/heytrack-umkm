@@ -123,24 +123,7 @@ export const BusinessInfoSettingsSchema = z.object({
   description: z.string().max(1000).optional().or(z.literal('')),
 })
 
-export const NotificationSettingsSchema = z.object({
-  email: z.object({
-    orders: z.boolean().default(true),
-    inventory: z.boolean().default(true),
-    finance: z.boolean().default(true),
-    system: z.boolean().default(true),
-  }),
-  push: z.object({
-    orders: z.boolean().default(true),
-    inventory: z.boolean().default(false),
-    finance: z.boolean().default(false),
-    system: z.boolean().default(true),
-  }),
-  sms: z.object({
-    critical: z.boolean().default(true),
-    orders: z.boolean().default(false),
-  }).optional()
-})
+
 
 export const RegionalSettingsSchema = z.object({
   language: z.enum(['id', 'en', 'jv']).default('id'),
@@ -171,7 +154,7 @@ export const ThemeSettingsSchema = z.object({
 export const AppSettingsSchema = z.object({
   user: UserProfileSettingsSchema.optional(),
   business: BusinessInfoSettingsSchema.optional(),
-  notifications: NotificationSettingsSchema.optional(),
+
   regional: RegionalSettingsSchema.optional(),
   security: SecuritySettingsSchema.optional(),
   theme: ThemeSettingsSchema.optional(),
@@ -270,7 +253,7 @@ export type FileUpload = z.infer<typeof FileUploadSchema>
 export type ImageUpload = z.infer<typeof ImageUploadSchema>
 export type UserProfileSettings = z.infer<typeof UserProfileSettingsSchema>
 export type BusinessInfoSettings = z.infer<typeof BusinessInfoSettingsSchema>
-export type NotificationSettings = z.infer<typeof NotificationSettingsSchema>
+
 export type RegionalSettings = z.infer<typeof RegionalSettingsSchema>
 export type SecuritySettings = z.infer<typeof SecuritySettingsSchema>
 export type ThemeSettings = z.infer<typeof ThemeSettingsSchema>

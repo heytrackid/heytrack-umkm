@@ -1,32 +1,32 @@
 'use client'
 
 import {
-  BarChart3,
-  Bot,
-  Box,
-  ChefHat,
-  ChevronDown,
-  DollarSign,
-  FileText,
-  Home,
-  Package,
-  Settings,
-  ShoppingCart,
-  Store,
-  TrendingUp,
-  Truck,
-  Users,
-  Wallet
+    Bot,
+    Box,
+    ChefHat,
+    ChevronDown,
+    DollarSign,
+    FileText,
+    Home,
+    Package,
+    Receipt,
+    Settings,
+    ShoppingCart,
+    Store,
+    TrendingUp,
+    Truck,
+    Users,
+    Wallet
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
@@ -104,12 +104,17 @@ const navigationGroups = [
         url: '/cash-flow',
         icon: Wallet
       },
-      {
-        title: 'Profit',
-        url: '/profit',
-        icon: TrendingUp
-      }
-    ]
+       {
+         title: 'Laba',
+         url: '/profit',
+         icon: TrendingUp
+       },
+       {
+         title: 'Biaya Operasional',
+         url: '/operational-costs',
+         icon: Receipt
+       }
+     ]
   },
   {
     label: 'Laporan',
@@ -130,11 +135,7 @@ const settingsItems = [
     url: '/settings',
     icon: Settings
   },
-  {
-    title: 'Notifikasi',
-    url: '/settings/notifications',
-    icon: Settings
-  }
+
 ]
 
 export function TabNavigation() {
@@ -154,7 +155,7 @@ export function TabNavigation() {
   }
 
   return (
-    <nav className="w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border sticky top-14 z-40">
+    <nav className="w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border sticky top-0 z-40">
       <div className="container mx-auto px-4">
         <div className="flex items-center gap-2 overflow-x-auto py-3 scrollbar-hide">
           {navigationGroups.map((group) => {

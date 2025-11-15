@@ -9,6 +9,7 @@ import { AppLayout } from '@/components/layout/app-layout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -403,12 +404,18 @@ const CashFlowPage = () => {
                   <div key={i} className="h-12 bg-muted animate-pulse rounded" />
                 ))}
               </div>
-            ) : filteredRecords.length === 0 ? (
-              <div className="text-center py-8">
-                <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Belum ada transaksi</p>
-              </div>
-            ) : (
+             ) : filteredRecords.length === 0 ? (
+               <EmptyState
+                 {...EmptyStatePresets.financial}
+                 actions={[
+                   {
+                     label: 'Tambah Transaksi',
+                     onClick: () => setIsAddDialogOpen(true),
+                     icon: Plus
+                   }
+                 ]}
+               />
+             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>

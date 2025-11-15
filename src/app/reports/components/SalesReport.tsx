@@ -1,6 +1,10 @@
-import { ShoppingCart, DollarSign, CheckCircle, Clock } from 'lucide-react'
+'use client'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { createLogger } from '@/lib/logger'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
+import { uiLogger } from '@/lib/client-logger'
+import { CheckCircle, Clock, DollarSign, ShoppingCart } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 interface SalesReportProps {
   dateRange: {
@@ -9,58 +13,70 @@ interface SalesReportProps {
   }
 }
 
-// Server-side data fetching
-async function fetchSalesData(dateRange: { start: string | undefined; end: string | undefined }) {
-  const logger = createLogger('SalesReport')
-
-  if (!dateRange.start || !dateRange.end) {
-    return { totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 }
-  }
-
-  try {
-    const params = new URLSearchParams({
-      start_date: dateRange.start,
-      end_date: dateRange.end,
-      limit: '1000' // Get all data for the period
-    })
-
-    const response = await fetch(`${process.env['NEXT_PUBLIC_SITE_URL'] || 'http://localhost:3000'}/api/sales?${params}`, {
-      cache: 'no-store',
-    })
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch sales data')
-    }
-
-    const result = await response.json()
-    const sales = result.data || []
-
-    // Calculate stats from API data
-    const stats = sales.reduce(
-      (acc: { totalOrders: number; totalRevenue: number; completedOrders: number; pendingOrders: number }, sale: { amount?: number }) => {
-        acc.totalOrders += 1
-        acc.totalRevenue += sale.amount ?? 0
-        // Note: The sales API returns financial_records, not orders, so status-based counting may not apply
-        return acc
-      },
-      { totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 }
-    )
-
-    return stats
-  } catch (error) {
-    logger.error({ error }, 'Failed to fetch sales data')
-    return { totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 }
-  }
+interface SalesStats {
+  totalOrders: number
+  totalRevenue: number
+  completedOrders: number
+  pendingOrders: number
 }
 
-export const SalesReport = async ({ dateRange }: SalesReportProps) => {
-  const salesStats = await fetchSalesData(dateRange)
+export const SalesReport = ({ dateRange }: SalesReportProps) => {
+  const [salesStats, setSalesStats] = useState<SalesStats>({
+    totalOrders: 0,
+    totalRevenue: 0,
+    completedOrders: 0,
+    pendingOrders: 0
+  })
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Calculate growth percentage (assuming we have previous period data)
-  const revenueGrowth = 12; // This would be calculated from previous period
-  const orderGrowth = 8; // This would be calculated from previous period
+  useEffect(() => {
+    const fetchSalesData = async () => {
+      if (!dateRange.start || !dateRange.end) {
+        setSalesStats({ totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 })
+        setIsLoading(false)
+        return
+      }
 
-  // Format currency function (simplified for server component)
+      try {
+        setIsLoading(true)
+        const params = new URLSearchParams({
+          startDate: dateRange.start,
+          endDate: dateRange.end,
+        })
+
+        const response = await fetch(`/api/reports/sales?${params}`, {
+          cache: 'no-store',
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch sales data')
+        }
+
+        const result = await response.json()
+        const report = result.data || { summary: { totalOrders: 0, totalRevenue: 0 } }
+
+        const stats = {
+          totalOrders: report.summary.totalOrders,
+          totalRevenue: report.summary.totalRevenue,
+          completedOrders: report.summary.totalOrders, // All orders in this endpoint are DELIVERED
+          pendingOrders: 0
+        }
+
+        setSalesStats(stats)
+      } catch (error) {
+        uiLogger.error({ error }, 'Failed to fetch sales data')
+        setSalesStats({ totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void fetchSalesData()
+  }, [dateRange.start, dateRange.end])
+
+  const revenueGrowth = 12
+  const orderGrowth = 8
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -69,11 +85,46 @@ export const SalesReport = async ({ dateRange }: SalesReportProps) => {
     }).format(amount)
   }
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }, (_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader className="pb-2">
+                <div className="h-4 bg-muted rounded w-24" />
+              </CardHeader>
+              <CardContent>
+                <div className="h-8 bg-muted rounded w-32 mb-2" />
+                <div className="h-3 bg-muted rounded w-40" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (salesStats.totalOrders === 0) {
+    return (
+      <EmptyState
+        {...EmptyStatePresets.reports}
+        actions={[
+          {
+            label: 'Buat Pesanan',
+            href: '/orders/new',
+            icon: ShoppingCart
+          }
+        ]}
+      />
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="hover: ">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Total Pesanan
@@ -85,7 +136,7 @@ export const SalesReport = async ({ dateRange }: SalesReportProps) => {
             <p className="text-xs text-muted-foreground">+{orderGrowth}% dari periode sebelumnya</p>
           </CardContent>
         </Card>
-        <Card className="hover: ">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Total Pendapatan
@@ -97,7 +148,7 @@ export const SalesReport = async ({ dateRange }: SalesReportProps) => {
             <p className="text-xs text-muted-foreground">+{revenueGrowth}% dari periode sebelumnya</p>
           </CardContent>
         </Card>
-        <Card className="hover: ">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Selesai
@@ -109,7 +160,7 @@ export const SalesReport = async ({ dateRange }: SalesReportProps) => {
             <p className="text-xs text-muted-foreground">Diterima pelanggan</p>
           </CardContent>
         </Card>
-        <Card className="hover: ">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Pending
@@ -124,7 +175,7 @@ export const SalesReport = async ({ dateRange }: SalesReportProps) => {
       </div>
 
       {/* Detailed View */}
-      <Card className="border-0 ">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             Detail Penjualan

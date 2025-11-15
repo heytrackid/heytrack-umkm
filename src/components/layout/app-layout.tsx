@@ -14,11 +14,11 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { NotificationCenter } from '@/components/ui/notification-center'
+
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { useAuth } from '@/hooks/useAuth'
 import { useInstantNavigation } from '@/hooks/useInstantNavigation'
-import { useNotifications } from '@/hooks/useNotifications'
+
 import { uiLogger } from '@/lib/client-logger'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { useResponsive } from '@/utils/responsive'
@@ -57,8 +57,7 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
   // Responsive detection
   const { isMobile } = useResponsive()
 
-  // Notifications
-  const notifications = useNotifications()
+
 
   // Supabase client
   const { supabase: _supabase } = useSupabase()
@@ -180,12 +179,7 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
           </div>
 
             <div className="flex items-center gap-2">
-              <NotificationCenter
-                notifications={notifications.notifications}
-                onMarkAsRead={notifications.markAsRead}
-                onMarkAllAsRead={notifications.markAllAsRead}
-                onClearAll={notifications.clearAll}
-              />
+
               <Button
                 variant="ghost"
                 size="sm"

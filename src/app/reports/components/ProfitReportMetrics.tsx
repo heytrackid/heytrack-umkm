@@ -47,7 +47,7 @@ export const ProfitMetrics: React.FC<ProfitMetricsProps> = ({ summary, isMobile 
             <Card className="hover: ">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
-                        Total Revenue
+                        Total Pendapatan
                     </CardTitle>
                     <DollarSign className="h-5 w-5 text-muted-foreground" />
                 </CardHeader>
@@ -90,7 +90,7 @@ export const ProfitMetrics: React.FC<ProfitMetricsProps> = ({ summary, isMobile 
             <Card className="hover: ">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
-                        Gross Profit
+                        Laba Kotor
                     </CardTitle>
                     <TrendingUp className="h-5 w-5 text-muted-foreground" />
                 </CardHeader>
@@ -110,7 +110,7 @@ export const ProfitMetrics: React.FC<ProfitMetricsProps> = ({ summary, isMobile 
             <Card className="hover: ">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
-                        Net Profit
+                        Laba Bersih
                     </CardTitle>
                     <ShoppingCart className="h-5 w-5 text-muted-foreground" />
                 </CardHeader>
@@ -146,35 +146,35 @@ export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProp
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <TrendingUp className="h-5 w-5" />
-                    Breakdown Profit
+                    Rincian Laba
                 </CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="space-y-4">
                     <div className="flex justify-between items-center p-4 bg-green-50 dark:bg-green-950 rounded-lg border">
-                        <span className="font-medium">Total Revenue</span>
+                        <span className="font-medium">Total Pendapatan</span>
                         <span className="text-lg font-bold">{formatCurrency(summary.total_revenue)}</span>
                     </div>
                     <div className="flex justify-between items-center p-4 bg-orange-50 dark:bg-orange-950 rounded-lg border">
-                        <span className="font-medium">- COGS (Cost of Goods Sold)</span>
+                        <span className="font-medium">- HPP (Harga Pokok Penjualan)</span>
                         <span className="text-lg font-bold text-orange-600">
                             ({formatCurrency(summary.total_cogs)})
                         </span>
                     </div>
                     <div className="flex justify-between items-center p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border-2 border-blue-200">
-                        <span className="font-medium">= Gross Profit</span>
+                        <span className="font-medium">= Laba Kotor</span>
                         <span className="text-lg font-bold text-blue-600">
                             {formatCurrency(summary.gross_profit)}
                         </span>
                     </div>
                     <div className="flex justify-between items-center p-4 bg-red-50 dark:bg-red-950 rounded-lg border">
-                        <span className="font-medium">- Operating Expenses</span>
+                        <span className="font-medium">- Biaya Operasional</span>
                         <span className="text-lg font-bold text-red-600">
                             ({formatCurrency(summary.total_operating_expenses)})
                         </span>
                     </div>
                     <div className="flex justify-between items-center p-4 bg-muted rounded-lg border-2 border-border/20">
-                        <span className="font-bold text-lg">= Net Profit</span>
+                        <span className="font-bold text-lg">= Laba Bersih</span>
                         <span className={`text-xl font-bold ${summary.net_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {formatCurrency(summary.net_profit)}
                         </span>

@@ -1,47 +1,24 @@
 'use client'
 
-import { BarChart3, Calendar, AlertCircle, Filter, CheckCircle, TrendingUp, ShoppingCart, Package, DollarSign, ArrowUpIcon, ArrowDownIcon } from 'lucide-react'
+import { AlertCircle, ArrowDownIcon, ArrowUpIcon, Calendar, CheckCircle, DollarSign, Filter, Package, ShoppingCart, TrendingUp } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useState, type ReactNode } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
-import { useDashboardStats } from '@/hooks/useDashboardStats'
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-
-const SalesReport = dynamic(
-  () => import('./SalesReport')
-    .then(m => ({ default: m.SalesReport }))
-    .catch(() => {
-      return { default: () => <div className="p-4 text-center text-red-600">Failed to load sales report</div> }
-    }),
-  {
-  loading: () => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }, (_, i) => (
-          <div key={i} className="h-24 bg-muted/50 rounded animate-pulse" />
-        ))}
-      </div>
-      <div className="space-y-2">
-        {Array.from({ length: 5 }, (_, i) => (
-          <div key={i} className="h-16 bg-muted/50 rounded animate-pulse" />
-        ))}
-      </div>
-    </div>
-  ),
-  ssr: false
-})
+import { useDashboardStats } from '@/hooks/useDashboardStats'
+import { SalesReport } from './SalesReport'
 
 const InventoryReport = dynamic(
   () => import('./InventoryReport')
@@ -192,22 +169,11 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
           </BreadcrumbList>
         </Breadcrumb>
 
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
-              <BarChart3 className="h-7 w-7 sm:h-8 sm:w-8 text-blue-600" />
-              Laporan
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Analisis bisnis dan laporan keuangan
-            </p>
-          </div>
-        </div>
+
 
         {/* Summary Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="hover:shadow-md transition-shadow">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Total Penjualan
@@ -240,7 +206,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Laba Bersih
@@ -268,7 +234,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Stok Rendah
@@ -294,7 +260,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Total Pesanan
@@ -475,7 +441,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
             <SwipeableTabsList className="h-12 w-full">
               <SwipeableTabsTrigger value="profit" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:">
                 <TrendingUp className="h-4 w-4 mr-2" />
-                {getTabLabel('Profit & Loss', 'Profit')}
+                {getTabLabel('Laba Rugi', 'Laba')}
               </SwipeableTabsTrigger>
               <SwipeableTabsTrigger value="sales" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:">
                 <ShoppingCart className="h-4 w-4 mr-2" />

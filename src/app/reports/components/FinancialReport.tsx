@@ -102,7 +102,7 @@ export const FinancialReport = ({ dateRange }: FinancialReportProps) => {
         <Card className="hover: ">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Margin Profit
+              Margin Laba
             </CardTitle>
             <DollarSign className="h-5 w-5 text-blue-500" />
           </CardHeader>
@@ -176,7 +176,7 @@ export const FinancialReport = ({ dateRange }: FinancialReportProps) => {
               </div>
               
               <div className="flex justify-between mt-4">
-                <span>Profit Margin</span>
+                <span>Margin Keuntungan</span>
                 <span className="font-medium">{profitMargin.toFixed(1)}%</span>
               </div>
               <div className="w-full bg-muted rounded-full h-2.5">

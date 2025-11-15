@@ -3,11 +3,9 @@
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
-import { PageHeader } from '@/components/layout/PageHeader'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useAuth } from '@/hooks/index'
 import { useToast } from '@/hooks/use-toast'
-import { useSupabase } from '@/providers/SupabaseProvider'
 
 import { ReportsLayout } from '@/app/reports/components/ReportsLayout'
 
@@ -20,7 +18,9 @@ import { ReportsLayout } from '@/app/reports/components/ReportsLayout'
 
 const ReportsPage = () => {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
-  const { supabase } = useSupabase()
+  const { toast } = useToast()
+  const router = useRouter()
+  
   // Extract initial date range from URL for consistency across pages
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -33,8 +33,6 @@ const ReportsPage = () => {
       window.history.replaceState(null, '', url)
     }
   }, [])
-  const { toast } = useToast()
-  const router = useRouter()
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -52,9 +50,6 @@ const ReportsPage = () => {
   if (isAuthLoading) {
     return (
       <div className="space-y-6 p-6">
-        {/* Header - Always visible */}
-        <PageHeader title="Laporan" description="Analisis performa bisnis Anda" />
-
         {/* Stats skeleton */}
         <div className="grid gap-4 md:grid-cols-4">
           {Array.from({ length: 4 }, (_, i) => (
@@ -74,10 +69,6 @@ const ReportsPage = () => {
 
   return (
     <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between gap-3">
-        <PageHeader title="Laporan" description="Analisis performa bisnis Anda" />
-
-      </div>
       <ReportsLayout />
     </div>
   )

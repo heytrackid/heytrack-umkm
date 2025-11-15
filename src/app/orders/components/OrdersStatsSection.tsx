@@ -39,7 +39,7 @@ const OrdersStatsSection = ({
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
+            <p className="text-sm font-medium text-muted-foreground">Total Pendapatan</p>
             <p className="text-2xl font-bold">{formatCurrency(totalRevenue)}</p>
             <p className="text-xs text-muted-foreground mt-1">23.2% dari periode sebelumnya</p>
           </div>
@@ -65,7 +65,7 @@ const OrdersStatsSection = ({
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Pending Revenue</p>
+            <p className="text-sm font-medium text-muted-foreground">Pendapatan Pending</p>
             <p className="text-2xl font-bold">{formatCurrency(pendingRevenue)}</p>
             <p className="text-xs text-muted-foreground mt-1">belum dibayar</p>
           </div>

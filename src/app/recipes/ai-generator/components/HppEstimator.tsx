@@ -232,7 +232,7 @@ export const HppEstimator = ({ selectedIngredients, servings, targetPrice }: Hpp
                                 </div>
                             </div>
 
-                            {/* Profit Margin */}
+                            {/* Margin Keuntungan */}
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                     <Label className="text-sm">Margin Keuntungan</Label>

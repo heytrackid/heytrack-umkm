@@ -13,7 +13,7 @@ export { BusinessInfoSettings } from './BusinessInfoSettings'
 export { BusinessSettings } from './BusinessSettings'
 export { DangerZone } from './DangerZone'
 export { DateTimeSettings } from './DateTimeSettings'
-export { NotificationSettings } from './NotificationSettings'
+
 export { NumberCurrencySettings } from './NumberCurrencySettings'
 export { ProfileSettings } from './ProfileSettings'
 export { RegionalSettings } from './RegionalSettings'

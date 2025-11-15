@@ -104,7 +104,7 @@ const DEFAULT_CATEGORY: CostCategory =
     COST_CATEGORIES[COST_CATEGORIES.length - 1] ??
     { id: 'other', name: 'Lainnya', icon: '📦', description: 'Biaya lainnya' }
 
-export const EnhancedOperationalCostsPage = (): JSX.Element => {
+export const EnhancedOperationalCostsPage = () => {
     const _router = useRouter()
     const { formatCurrency } = useSettings()
 

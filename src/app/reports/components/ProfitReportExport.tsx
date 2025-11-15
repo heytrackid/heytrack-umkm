@@ -19,7 +19,7 @@ export const exportToCSV = ({ profitData, dateRange }: ExportToCSVProps) => {
     }
 
     const csvData = [
-        ['Period', 'Revenue', 'COGS', 'Gross Profit', 'Gross Margin', 'Orders Count'],
+        ['Periode', 'Pendapatan', 'HPP', 'Laba Kotor', 'Margin Laba Kotor', 'Jumlah Pesanan'],
         ...profitData.profit_by_period.map(item => [
             item.period,
             item.revenue.toString(),

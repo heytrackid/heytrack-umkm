@@ -85,7 +85,7 @@ const TrendTab: React.FC<{
         <Card>
             <CardHeader>
                 <div className="flex justify-between items-start">
-                    <CardTitle>Trend Profit</CardTitle>
+                    <CardTitle>Trend Laba</CardTitle>
                     {selectedDataPoint && (
                         <Button
                             variant="ghost"
@@ -99,9 +99,9 @@ const TrendTab: React.FC<{
                 </div>
                 {selectedDataPoint && (
                     <div className="text-sm text-muted-foreground bg-blue-50 dark:bg-blue-950 p-3 rounded-md mt-2">
-                        <strong>{selectedDataPoint.period}:</strong> Revenue {formatCurrency(selectedDataPoint.revenue)},
-                        COGS {formatCurrency(selectedDataPoint.cogs)},
-                        Gross Profit {formatCurrency(selectedDataPoint.gross_profit)}
+                        <strong>{selectedDataPoint.period}:</strong> Pendapatan {formatCurrency(selectedDataPoint.revenue)},
+                        HPP {formatCurrency(selectedDataPoint.cogs)},
+                        Laba Kotor {formatCurrency(selectedDataPoint.gross_profit)}
                     </div>
                 )}
             </CardHeader>
@@ -113,7 +113,7 @@ const TrendTab: React.FC<{
                             <div className="text-right">
                                 <p className="font-bold">{formatCurrency(period.revenue)}</p>
                                 <p className="text-sm text-muted-foreground">
-                                    Profit: {formatCurrency(period.gross_profit)}
+                                    Laba: {formatCurrency(period.gross_profit)}
                                 </p>
                             </div>
                         </div>
@@ -243,17 +243,17 @@ const ComparisonTab: React.FC<{
                                 {new Date(profitData.summary.period.start).toLocaleDateString('id-ID')} - {new Date(profitData.summary.period.end).toLocaleDateString('id-ID')}
                             </p>
                         </CardHeader>
-                        <CardContent className="space-y-2">
+                         <CardContent className="space-y-2">
                             <div className="flex justify-between">
-                                <span>Revenue:</span>
+                                <span>Pendapatan:</span>
                                 <span className="font-semibold">{formatCurrency(Number(profitData.summary.total_revenue ?? 0))}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span>Gross Profit:</span>
+                                <span>Laba Kotor:</span>
                                 <span className="font-semibold text-green-600">{formatCurrency(profitData.summary.gross_profit)}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span>Net Profit:</span>
+                                <span>Laba Bersih:</span>
                                 <span className="font-semibold text-green-600">{formatCurrency(profitData.summary.net_profit)}</span>
                             </div>
                         </CardContent>
@@ -268,15 +268,15 @@ const ComparisonTab: React.FC<{
                         </CardHeader>
                         <CardContent className="space-y-2">
                             <div className="flex justify-between">
-                                <span>Revenue:</span>
+                                <span>Pendapatan:</span>
                                 <span className="font-semibold">{formatCurrency(comparisonData.summary.total_revenue)}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span>Gross Profit:</span>
+                                <span>Laba Kotor:</span>
                                 <span className="font-semibold text-green-600">{formatCurrency(comparisonData.summary.gross_profit)}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span>Net Profit:</span>
+                                <span>Laba Bersih:</span>
                                 <span className="font-semibold text-green-600">{formatCurrency(comparisonData.summary.net_profit)}</span>
                             </div>
                         </CardContent>
@@ -295,7 +295,7 @@ const ComparisonTab: React.FC<{
                                     {profitData.summary.total_revenue > comparisonData.summary.total_revenue ? '+' : ''}
                                     {(((profitData.summary.total_revenue - comparisonData.summary.total_revenue) / comparisonData.summary.total_revenue) * 100).toFixed(1)}%
                                 </div>
-                                <div className="text-sm text-muted-foreground">Revenue Growth</div>
+                                <div className="text-sm text-muted-foreground">Pertumbuhan Pendapatan</div>
                                 <div className="flex justify-center mt-2">
                                     {profitData.summary.total_revenue > comparisonData.summary.total_revenue ?
                                         <TrendingUp className="h-5 w-5 text-green-600" /> :
@@ -309,7 +309,7 @@ const ComparisonTab: React.FC<{
                                     {profitData.summary.gross_profit > comparisonData.summary.gross_profit ? '+' : ''}
                                     {(((profitData.summary.gross_profit - comparisonData.summary.gross_profit) / comparisonData.summary.gross_profit) * 100).toFixed(1)}%
                                 </div>
-                                <div className="text-sm text-muted-foreground">Gross Profit Growth</div>
+                                <div className="text-sm text-muted-foreground">Pertumbuhan Laba Kotor</div>
                                 <div className="flex justify-center mt-2">
                                     {profitData.summary.gross_profit > comparisonData.summary.gross_profit ?
                                         <TrendingUp className="h-5 w-5 text-green-600" /> :
@@ -323,7 +323,7 @@ const ComparisonTab: React.FC<{
                                     {profitData.summary.net_profit > comparisonData.summary.net_profit ? '+' : ''}
                                     {(((profitData.summary.net_profit - comparisonData.summary.net_profit) / comparisonData.summary.net_profit) * 100).toFixed(1)}%
                                 </div>
-                                <div className="text-sm text-muted-foreground">Net Profit Growth</div>
+                                <div className="text-sm text-muted-foreground">Pertumbuhan Laba Bersih</div>
                                 <div className="flex justify-center mt-2">
                                     {profitData.summary.net_profit > comparisonData.summary.net_profit ?
                                         <TrendingUp className="h-5 w-5 text-green-600" /> :
@@ -341,7 +341,7 @@ const ComparisonTab: React.FC<{
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Perbandingan Revenue vs COGS vs Profit</CardTitle>
+                <CardTitle>Perbandingan Pendapatan vs HPP vs Laba</CardTitle>
                 <p className="text-sm text-muted-foreground">
                     Aktifkan &#34;Compare Periods&#34; untuk melihat perbandingan dengan periode sebelumnya
                 </p>

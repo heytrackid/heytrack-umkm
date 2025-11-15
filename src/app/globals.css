@@ -80,23 +80,23 @@
 
 .dark {
   /* Lighter Vercel-inspired dark mode - Softer blacks with better visibility */
-  --background: oklch(0.02 0 0);         /* Very dark gray #050505 instead of pure black */
+  --background: oklch(0.05 0 0);         /* #0D0D0D - sedikit lebih terang dari hitam */
   --foreground: oklch(0.95 0 0);         /* Brighter light gray #F2F2F2 */
-  --card: oklch(0.08 0 0);               /* #141414 - balanced visibility */
+  --card: oklch(0.18 0 0);               /* #2E2E2E - lebih terang untuk card */
   --card-foreground: oklch(0.95 0 0);    /* Brighter light gray #F2F2F2 */
-  --popover: oklch(0.12 0 0);            /* #1F1F1F - elevated but visible */
+  --popover: oklch(0.18 0 0);            /* #2E2E2E - elevated but visible */
   --popover-foreground: oklch(0.95 0 0);
   --primary: oklch(0.8 0 0);             /* Restored brighter primary */
   --primary-foreground: oklch(0.12 0 0);
-  --secondary: oklch(0.12 0 0);          /* #1F1F1F - balanced secondary */
+  --secondary: oklch(0.18 0 0);          /* #2E2E2E - lebih terang untuk secondary */
   --secondary-foreground: oklch(0.95 0 0);
-  --muted: oklch(0.12 0 0);              /* #1F1F1F - balanced muted */
-  --muted-foreground: oklch(0.6 0 0);    /* Brighter medium gray #999999 */
-  --accent: oklch(0.12 0 0);
+  --muted: oklch(0.18 0 0);              /* #2E2E2E - lebih terang untuk muted/table rows */
+  --muted-foreground: oklch(0.65 0 0);   /* Brighter medium gray #A6A6A6 */
+  --accent: oklch(0.18 0 0);
   --accent-foreground: oklch(0.95 0 0);
   --destructive: oklch(0.65 0 0);        /* Brighter destructive */
-  --border: oklch(0.25 0 0);             /* #404040 - more visible borders */
-  --input: oklch(0.08 0 0);              /* #141414 - match card color */
+  --border: oklch(0.28 0 0);             /* #474747 - more visible borders */
+  --input: oklch(0.15 0 0);              /* #262626 - sedikit lebih gelap dari card */
   --ring: oklch(0.55 0 0);               /* Brighter ring */
 
   /* Syntax highlighting colors for dark mode */

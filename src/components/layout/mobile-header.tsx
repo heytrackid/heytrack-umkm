@@ -11,7 +11,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { type FormEvent, type ReactNode, useCallback, useEffect, useState } from 'react'
 
-import { NotificationBell } from '@/components/notifications/NotificationBell'
+
 import { Button } from '@/components/ui/button'
 import {
     DropdownMenu,
@@ -34,10 +34,7 @@ interface MobileHeaderProps {
   showSearch?: boolean | undefined
   searchPlaceholder?: string | undefined
   onSearch?: ((query: string) => void) | undefined
-  notification?: {
-    count: number
-    onClick: () => void
-  } | undefined
+
   className?: string
   onMenuToggle?: () => void
 
@@ -51,7 +48,7 @@ export const MobileHeader = ({
   showSearch = true,
   searchPlaceholder = "Cari...",
   onSearch,
-  notification: _notification,
+
   className,
   onMenuToggle,
 
@@ -130,11 +127,21 @@ export const MobileHeader = ({
             </Button>
           )}
 
-          {/* Title - Hidden when search is expanded */}
-          {!isSearchExpanded && title && (
-            <h1 className="font-semibold text-lg text-wrap-mobile">
-              {title}
-            </h1>
+          {/* Logo and Title - Hidden when search is expanded */}
+          {!isSearchExpanded && (
+            <>
+              <div
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground mr-2 cursor-pointer"
+                onClick={() => router.push('/dashboard')}
+              >
+                <span className="font-bold text-sm">HT</span>
+              </div>
+              {title && (
+                <h1 className="font-semibold text-lg text-wrap-mobile">
+                  {title}
+                </h1>
+              )}
+            </>
           )}
         </div>
 
@@ -184,8 +191,7 @@ export const MobileHeader = ({
 
         {/* Right Section - Actions */}
         <div className="flex items-center space-x-1">
-          {/* Notification Bell */}
-          <NotificationBell />
+
 
           {/* Dark/Light Mode Toggle */}
           <ThemeToggle />
@@ -271,10 +277,6 @@ export const MobileHeader = ({
 export const DashboardHeader = (): JSX.Element => (
   <MobileHeader
     title="Dashboard"
-    notification={{
-      count: 5,
-      onClick: () => uiLogger.debug('Notifications clicked')
-    }}
   />
 )
 

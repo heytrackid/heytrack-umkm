@@ -3,7 +3,7 @@ import { Suspense, lazy } from 'react'
 import { BusinessSettings } from '@/app/settings/components/BusinessSettings'
 import { DangerZone } from '@/app/settings/components/DangerZone'
 import { DateTimeSettings } from '@/app/settings/components/DateTimeSettings'
-import { NotificationSettings } from '@/app/settings/components/NotificationSettings'
+
 import { NumberCurrencySettings } from '@/app/settings/components/NumberCurrencySettings'
 import { ProfileSettings } from '@/app/settings/components/ProfileSettings'
 import { SecuritySettings } from '@/app/settings/components/SecuritySettings'
@@ -32,7 +32,7 @@ export const SettingsTabs = ({ activeTab, onTabChange, settings, onSettingChange
     <SwipeableTabsList>
       <SwipeableTabsTrigger value="general" className="text-xs sm:text-sm">Umum</SwipeableTabsTrigger>
       <SwipeableTabsTrigger value="profile" className="text-xs sm:text-sm">Profil</SwipeableTabsTrigger>
-      <SwipeableTabsTrigger value="notifications" className="text-xs sm:text-sm">Notifikasi</SwipeableTabsTrigger>
+
       <SwipeableTabsTrigger value="system" className="text-xs sm:text-sm">Sistem</SwipeableTabsTrigger>
       <SwipeableTabsTrigger value="ui" className="text-xs sm:text-sm">Tampilan</SwipeableTabsTrigger>
     </SwipeableTabsList>
@@ -57,12 +57,7 @@ export const SettingsTabs = ({ activeTab, onTabChange, settings, onSettingChange
       </Suspense>
     </SwipeableTabsContent>
 
-    {/* Notifications Settings */}
-    <SwipeableTabsContent value="notifications" className="space-y-6">
-      <Suspense fallback={<SettingsLoadingSkeleton />}>
-        <NotificationSettings settings={settings} onSettingChange={onSettingChange} />
-      </Suspense>
-    </SwipeableTabsContent>
+
 
     {/* System Settings */}
     <SwipeableTabsContent value="system" className="space-y-6">

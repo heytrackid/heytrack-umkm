@@ -54,14 +54,7 @@ export {
   CustomerInsights
 } from './BusinessComponents'
 
-// Notification Components
-export {
-  NotificationCenter,
-  ToastNotification,
-  ActivityFeed,
-  AlertBanner,
-  NotificationBadge
-} from './NotificationComponents'
+
 
 // Re-export utilities
 export * from '@/lib/shared/utilities'

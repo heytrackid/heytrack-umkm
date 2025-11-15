@@ -64,7 +64,7 @@ export {
   ImageUploadSchema,
   UserProfileSettingsSchema,
   BusinessInfoSettingsSchema,
-  NotificationSettingsSchema,
+
   RegionalSettingsSchema,
   SecuritySettingsSchema,
   ThemeSettingsSchema,

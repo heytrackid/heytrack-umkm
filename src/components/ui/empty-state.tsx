@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, Zap, type LucideIcon } from 'lucide-react'
+import { Plus, Zap, Package, ShoppingCart, type LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'
@@ -227,6 +227,51 @@ export const EmptyStatePresets = {
       { icon: '💡', text: 'Gunakan kata kunci yang lebih umum' },
       { icon: '🔤', text: 'Periksa ejaan kata kunci' },
       { icon: '🔧', text: 'Hapus beberapa filter untuk hasil lebih luas' }
+    ]
+  },
+  dashboard: {
+    emoji: '🚀',
+    title: 'Selamat Datang di HeyTrack!',
+    description: 'Mari mulai mengelola bisnis kuliner Anda dengan mudah dan efisien.',
+    actions: [
+      {
+        label: 'Buat Pesanan Pertama',
+        href: '/orders/new',
+        icon: ShoppingCart
+      },
+      {
+        label: 'Tambah Bahan Baku',
+        href: '/ingredients/new',
+        icon: Package
+      },
+      {
+        label: 'Setup Cepat',
+        href: '/operational-costs',
+        variant: 'outline' as const,
+        icon: Zap
+      }
+    ],
+    tips: [
+      { icon: '📦', text: 'Mulai dengan menambah bahan baku' },
+      { icon: '👨‍🍳', text: 'Buat resep untuk menghitung HPP' },
+      { icon: '🛒', text: 'Terima pesanan pertama Anda' }
+    ]
+  },
+  financial: {
+    emoji: '💰',
+    title: 'Belum Ada Transaksi',
+    description: 'Mulai tracking arus kas dengan menambahkan transaksi pemasukan dan pengeluaran.',
+    actions: [
+      {
+        label: 'Tambah Transaksi',
+        onClick: () => {}, // Will be overridden in usage
+        icon: Plus
+      }
+    ],
+    tips: [
+      { icon: '💡', text: 'Track semua pemasukan dan pengeluaran' },
+      { icon: '📊', text: 'Lihat trend arus kas bulanan' },
+      { icon: '📈', text: 'Analisis profitabilitas bisnis' }
     ]
   }
 }

@@ -178,29 +178,29 @@ const DashboardPage = () => {
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2">
-                  <Link href="/ingredients">
-                    <LoadingButton variant="outline" className="h-24 flex-col gap-2">
+                  <LoadingButton variant="outline" asChild className="h-24 flex-col gap-2">
+                    <Link href="/ingredients">
                       <Package className="h-6 w-6 text-muted-foreground" />
                       <span className="text-sm font-medium">Bahan Baku</span>
-                    </LoadingButton>
-                  </Link>
-                  <Link href="/recipes">
-                    <LoadingButton variant="outline" className="h-24 flex-col gap-2">
-                      <ChefHat className="h-6 w-6 text-muted-foreground" />
-                      <span className="text-sm font-medium">Resep</span>
-                    </LoadingButton>
-                  </Link>
-                  <LoadingButton variant="outline" asChild className="h-24 flex-col gap-2">
-                    <a href="/hpp">
-                      <Calculator className="h-6 w-6 text-muted-foreground" />
-                      <span className="text-sm font-medium">Hitung HPP</span>
-                    </a>
+                    </Link>
                   </LoadingButton>
                   <LoadingButton variant="outline" asChild className="h-24 flex-col gap-2">
-                    <a href="/orders">
+                    <Link href="/recipes">
+                      <ChefHat className="h-6 w-6 text-muted-foreground" />
+                      <span className="text-sm font-medium">Resep</span>
+                    </Link>
+                  </LoadingButton>
+                  <LoadingButton variant="outline" asChild className="h-24 flex-col gap-2">
+                    <Link href="/hpp">
+                      <Calculator className="h-6 w-6 text-muted-foreground" />
+                      <span className="text-sm font-medium">Hitung HPP</span>
+                    </Link>
+                  </LoadingButton>
+                  <LoadingButton variant="outline" asChild className="h-24 flex-col gap-2">
+                    <Link href="/orders">
                       <ShoppingCart className="h-6 w-6 text-primary" />
                       <span className="text-sm font-medium">Pesanan</span>
-                    </a>
+                    </Link>
                   </LoadingButton>
                 </div>
               </div>

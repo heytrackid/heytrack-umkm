@@ -138,7 +138,7 @@ export const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
                 <div>
                     <h2 className="text-2xl font-bold flex items-center gap-2">
                         <TrendingUp className="h-6 w-6 text-blue-600" />
-                        Laporan Profit & Loss
+                        Laporan Laba Rugi
                     </h2>
                     <p className="text-sm text-muted-foreground mt-1">
                         {new Date(summary.period.start).toLocaleDateString('id-ID')} - {new Date(summary.period.end).toLocaleDateString('id-ID')}

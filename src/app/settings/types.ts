@@ -27,15 +27,7 @@ export interface UserSettings {
   avatar: string | null
 }
 
-export interface NotificationSettings {
-  emailNotifications: boolean
-  pushNotifications: boolean
-  lowStockAlert: boolean
-  orderUpdates: boolean
-  dailyReports: boolean
-  weeklyReports: boolean
-  monthlyReports: boolean
-}
+
 
 export interface SystemSettings {
   defaultTax: number
@@ -54,7 +46,6 @@ export interface UISettings {
 export interface AppSettingsState {
   general: GeneralSettings
   user: UserSettings
-  notifications: NotificationSettings
   system: SystemSettings
   ui: UISettings
 }
@@ -89,15 +80,7 @@ export const DEFAULT_APP_SETTINGS: AppSettingsState = {
     role: 'Owner',
     avatar: null,
   },
-  notifications: {
-    emailNotifications: true,
-    pushNotifications: true,
-    lowStockAlert: true,
-    orderUpdates: true,
-    dailyReports: true,
-    weeklyReports: false,
-    monthlyReports: true,
-  },
+
   system: {
     defaultTax: 11,
     lowStockThreshold: 10,
@@ -128,10 +111,7 @@ export const normalizeSettings = (
     ...(merged.user ?? {}),
   }
 
-  const notifications: NotificationSettings = {
-    ...DEFAULT_APP_SETTINGS.notifications,
-    ...(merged.notifications ?? {}),
-  }
+
 
   const systemSource: Partial<SystemSettings> = merged.system ?? {}
   const parsedDefaultTax = Number(systemSource.defaultTax)
@@ -162,7 +142,6 @@ export const normalizeSettings = (
   return {
     general,
     user,
-    notifications,
     system,
     ui,
   }

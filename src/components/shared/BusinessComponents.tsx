@@ -317,13 +317,13 @@ export const ProfitabilityCalculator = ({
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-sm text-muted-foreground">Revenue</p>
+            <p className="text-sm text-muted-foreground">Pendapatan</p>
             <p className="text-lg font-semibold text-muted-foreground">
               {formatCurrency(data.revenue)}
             </p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">COGS</p>
+            <p className="text-sm text-muted-foreground">HPP</p>
             <p className="text-lg font-semibold text-red-600">
               {formatCurrency(data.costOfGoodsSold)}
             </p>
@@ -333,7 +333,7 @@ export const ProfitabilityCalculator = ({
         {showBreakdown && (
           <div className="space-y-3 pt-4 border-t">
             <div className="flex justify-between">
-              <span>Gross Profit</span>
+              <span>Laba Kotor</span>
               <span className="font-medium">
                 {formatCurrency(calculations.grossProfit)}
                 <span className="text-sm text-muted-foreground ml-2">
@@ -343,7 +343,7 @@ export const ProfitabilityCalculator = ({
             </div>
 
             <div className="flex justify-between">
-              <span>Operating Expenses</span>
+              <span>Biaya Operasional</span>
               <span className="font-medium text-red-600">
                 -{formatCurrency(data.operatingExpenses)}
               </span>
@@ -360,7 +360,7 @@ export const ProfitabilityCalculator = ({
 
             {data.otherExpenses && (
               <div className="flex justify-between">
-                <span>Other Expenses</span>
+                <span>Biaya Lainnya</span>
                 <span className="font-medium text-red-600">
                   -{formatCurrency(data.otherExpenses)}
                 </span>
@@ -369,7 +369,7 @@ export const ProfitabilityCalculator = ({
 
             <div className="border-t pt-3">
               <div className="flex justify-between font-semibold">
-                <span>Net Income</span>
+                <span>Laba Bersih</span>
                 <span className={calculations.netIncome >= 0 ? 'text-foreground' : 'text-red-600'}>
                   {formatCurrency(calculations.netIncome)}
                   <span className="text-sm text-muted-foreground ml-2">

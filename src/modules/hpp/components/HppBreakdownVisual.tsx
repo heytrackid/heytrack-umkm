@@ -12,7 +12,6 @@ import {
 import { useMemo, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import {
@@ -20,7 +19,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { useToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
 
 
@@ -44,7 +42,6 @@ interface HppBreakdownVisualProps {
 }
 
 export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVisualProps): JSX.Element => {
-    const { toast } = useToast()
     const { formatCurrency } = useCurrency()
     const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set()) // Default: all collapsed
 
