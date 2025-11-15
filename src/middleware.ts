@@ -2,7 +2,7 @@ import { stackServerApp } from '@/stack/server'
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 
-import { generateNonce, getStrictCSP } from '@/lib/csp'
+
 import { middlewareLogger } from '@/lib/logger'
 
 const RequestHeadersSchema = z.object({
@@ -120,51 +120,33 @@ function isProtectedRoute(pathname: string): boolean {
 /**
  * Handle root redirect for authenticated users
  */
-async function handleRootRedirect(request: NextRequest, nonce: string, isDev: boolean): Promise<NextResponse | null> {
+async function handleRootRedirect(request: NextRequest, isDev: boolean): Promise<NextResponse | null> {
   const { pathname } = request.nextUrl
   if (pathname === '/') {
     // Check if user is authenticated
     const user = await stackServerApp.getUser()
-    
+
     if (user) {
       // Redirect authenticated users to dashboard
       const url = request.nextUrl.clone()
       url.pathname = '/dashboard'
       const redirectResponse = NextResponse.redirect(url)
-      addSecurityHeaders(redirectResponse, nonce, isDev)
       return redirectResponse
     } else {
       // Redirect unauthenticated users to sign-in
       const url = request.nextUrl.clone()
       url.pathname = '/handler/sign-in'
       const redirectResponse = NextResponse.redirect(url)
-      addSecurityHeaders(redirectResponse, nonce, isDev)
       return redirectResponse
     }
   }
   return null
 }
 
-/**
- * Add security headers to response
- */
-function addSecurityHeaders(response: NextResponse, nonce: string, isDev: boolean): void {
-  response.headers.set('Content-Security-Policy', getStrictCSP(nonce, isDev))
-  response.headers.set('x-nonce', nonce)
-  response.headers.set('X-Frame-Options', 'DENY')
-  response.headers.set('X-Content-Type-Options', 'nosniff')
-  response.headers.set('X-XSS-Protection', '1; mode=block')
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
-  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
-  
-  if (!isDev) {
-    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
-  }
-}
+
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   const isDev = process.env.NODE_ENV === 'development'
-  const nonce = generateNonce()
 
   const corsResponse = handleCorsPreflight(request, isDev)
   if (corsResponse) {
@@ -181,12 +163,11 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   try {
     const validationError = validateRequest(request, isDev)
     if (validationError) {
-      addSecurityHeaders(validationError, nonce, isDev)
       return validationError
     }
 
     // Handle root redirect first
-    const rootRedirect = await handleRootRedirect(request, nonce, isDev)
+    const rootRedirect = await handleRootRedirect(request, isDev)
     if (rootRedirect) {
       return rootRedirect
     }
@@ -194,21 +175,19 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     // Check authentication for protected routes
     if (isProtectedRoute(pathname)) {
       const user = await stackServerApp.getUser()
-      
+
       if (!user) {
         // Redirect to sign-in page if not authenticated
         const url = request.nextUrl.clone()
         url.pathname = '/handler/sign-in'
         url.searchParams.set('redirect', pathname)
         const redirectResponse = NextResponse.redirect(url)
-        addSecurityHeaders(redirectResponse, nonce, isDev)
         return redirectResponse
       }
     }
 
     // Continue with request
     const response = NextResponse.next()
-    addSecurityHeaders(response, nonce, isDev)
 
     if (request.nextUrl.pathname.startsWith('/api/')) {
       addApiHeaders(response, isDev)
@@ -218,7 +197,6 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   } catch (error) {
     middlewareLogger.error({ error }, 'Middleware error')
     const errorResponse = NextResponse.next()
-    addSecurityHeaders(errorResponse, nonce, isDev)
     return errorResponse
   }
 }

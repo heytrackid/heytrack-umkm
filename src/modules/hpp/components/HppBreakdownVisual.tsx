@@ -188,19 +188,23 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                             </thead>
                             <tbody>${ingredientRows}</tbody>
                         </table>
-                        <script>
-                            window.onload = function() {
-                                window.print();
-                                setTimeout(function() { window.close(); }, 1000);
-                            }
-                        </script>
                     </body>
                 </html>
             `
 
             // Use secure Blob approach instead of document.write
             const secureWindow = HtmlEscaper.openSecureWindow(htmlContent, '_blank')
-            if (!secureWindow) {
+            if (secureWindow) {
+                // Add print functionality after window loads
+                secureWindow.onload = function() {
+                    secureWindow.print();
+                    setTimeout(function() {
+                        if (secureWindow && !secureWindow.closed) {
+                            secureWindow.close();
+                        }
+                    }, 1000);
+                };
+            } else {
                 throw new Error('Pop-up diblokir oleh browser')
             }
 

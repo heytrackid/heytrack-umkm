@@ -6,7 +6,7 @@ import { stackServerApp } from "../stack/server";
 import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SettingsProvider } from '@/contexts/settings-context';
-import { getNonce } from '@/lib/nonce';
+import { headers } from 'next/headers';
 
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
@@ -32,6 +32,8 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: "HeyTrack UMKM - Smart Culinary Management System",
   description: "Comprehensive culinary business management system with AI Assistant, COGS calculation, inventory management, orders tracking, and financial analytics for Indonesian SMEs",
@@ -42,8 +44,8 @@ const RootLayout = async ({
 }: Readonly<{
   children: ReactNode;
 }>): Promise<ReactElement> => {
-  // Get CSP nonce for this request
-  const nonce = await getNonce()
+  // Get CSP nonce from headers
+  const nonce = (await headers()).get('x-nonce')
 
   return (
     <html lang="id" suppressHydrationWarning className="dark h-full">

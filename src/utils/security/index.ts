@@ -37,12 +37,20 @@ export class HtmlEscaper {
       const { url } = this.createSecureHtmlContent(content)
       const windowFeatures = 'noopener,noreferrer,width=1024,height=768'
       const secureWindow = window.open(url, windowName, windowFeatures)
-      
-      // Clean up blob URL after a short delay
-      setTimeout(() => {
-        URL.revokeObjectURL(url)
-      }, 1000)
-      
+
+      if (secureWindow) {
+        // Clean up blob URL after a delay to allow content to load and print
+        const cleanupTimer = setTimeout(() => {
+          URL.revokeObjectURL(url)
+        }, 3000) // Longer timeout to ensure print operations finish
+
+        // Optionally add cleanup when the window closes
+        secureWindow.addEventListener('beforeunload', () => {
+          clearTimeout(cleanupTimer)
+          URL.revokeObjectURL(url)
+        })
+      }
+
       return secureWindow
     } catch (error) {
       logger.error({ error }, 'Failed to open secure window')

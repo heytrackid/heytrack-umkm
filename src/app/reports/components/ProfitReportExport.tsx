@@ -108,12 +108,6 @@ export const exportToPDF = ({ profitData, dateRange, formatCurrency }: ExportToP
                     `).join('')}
                 </tbody>
             </table>
-            <script>
-                window.onload = function() {
-                    window.print();
-                    setTimeout(function() { window.close(); }, 1000);
-                }
-            </script>
         </body>
         </html>
     `
@@ -121,7 +115,17 @@ export const exportToPDF = ({ profitData, dateRange, formatCurrency }: ExportToP
     // Use secure Blob approach instead of document.write
     const logger = createLogger('ProfitReportExport')
     const secureWindow = HtmlEscaper.openSecureWindow(htmlContent, '_blank')
-    if (!secureWindow) {
+    if (secureWindow) {
+        // Add print and close functionality after window loads
+        secureWindow.onload = function() {
+            secureWindow.print();
+            setTimeout(function() {
+                if (secureWindow && !secureWindow.closed) {
+                    secureWindow.close();
+                }
+            }, 1000);
+        };
+    } else {
         logger.error('Failed to open export window')
     }
 }
