@@ -118,16 +118,29 @@ function isProtectedRoute(pathname: string): boolean {
 }
 
 /**
- * Handle root redirect
+ * Handle root redirect for authenticated users
  */
-function handleRootRedirect(request: NextRequest, nonce: string, isDev: boolean): NextResponse | null {
+async function handleRootRedirect(request: NextRequest, nonce: string, isDev: boolean): Promise<NextResponse | null> {
   const { pathname } = request.nextUrl
   if (pathname === '/') {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
-    const redirectResponse = NextResponse.redirect(url)
-    addSecurityHeaders(redirectResponse, nonce, isDev)
-    return redirectResponse
+    // Check if user is authenticated
+    const user = await stackServerApp.getUser()
+    
+    if (user) {
+      // Redirect authenticated users to dashboard
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
+      const redirectResponse = NextResponse.redirect(url)
+      addSecurityHeaders(redirectResponse, nonce, isDev)
+      return redirectResponse
+    } else {
+      // Redirect unauthenticated users to sign-in
+      const url = request.nextUrl.clone()
+      url.pathname = '/handler/sign-in'
+      const redirectResponse = NextResponse.redirect(url)
+      addSecurityHeaders(redirectResponse, nonce, isDev)
+      return redirectResponse
+    }
   }
   return null
 }
@@ -173,7 +186,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     }
 
     // Handle root redirect first
-    const rootRedirect = handleRootRedirect(request, nonce, isDev)
+    const rootRedirect = await handleRootRedirect(request, nonce, isDev)
     if (rootRedirect) {
       return rootRedirect
     }
