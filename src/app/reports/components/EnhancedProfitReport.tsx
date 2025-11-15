@@ -11,7 +11,7 @@ import { useResponsive } from '@/hooks/useResponsive'
 import { apiLogger } from '@/lib/logger'
 
 // Import our separated components
-import { exportToCSV, exportToPDF, printReport } from '@/app/reports/components/ProfitReportExport'
+import { exportToCSV, printReport } from '@/app/reports/components/ProfitReportExport'
 import { ProfitMetrics, ProfitBreakdown } from '@/app/reports/components/ProfitReportMetrics'
 import { ProfitReportTabs } from '@/app/reports/components/ProfitReportTabs'
 
@@ -169,10 +169,7 @@ export const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
                                 <FileText className="h-4 w-4 mr-2" />
                                 Ekspor CSV
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => exportToPDF({ profitData, dateRange: { start: dateRange.start as string, end: dateRange.end as string }, formatCurrency })}>
-                                <FileText className="h-4 w-4 mr-2" />
-                                Ekspor PDF
-                            </DropdownMenuItem>
+
                             <DropdownMenuItem onClick={printReport}>
                                 <Printer className="h-4 w-4 mr-2" />
                                 Cetak
