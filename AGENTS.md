@@ -9,6 +9,7 @@
 - **Testing**: `npx vitest` (all), `npx vitest path/to/test.test.ts` (single), `npx vitest --watch` (watch mode), `npx vitest --coverage` (with coverage)
 - **Database**: `pnpm run supabase:types` (generate types), `pnpm run supabase:types:remote` (from remote)
 - **Maintenance**: `pnpm run clean` (cache), `pnpm run clean:all` (full reset)
+- **Git Hooks**: Pre-commit hook runs `pnpm run validate` (lint + type-check) automatically
 
 ## Code Style & Conventions
 

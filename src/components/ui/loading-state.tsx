@@ -8,7 +8,7 @@ interface LoadingStateProps {
   className?: string
 }
 
-export const LoadingState = ({ message = 'Memuat...', size = 'md', className }: LoadingStateProps) => {
+export const LoadingState = ({ message, size = 'md', className }: LoadingStateProps) => {
   const sizeClasses = {
     sm: 'h-4 w-4',
     md: 'h-8 w-8',
@@ -20,7 +20,11 @@ export const LoadingState = ({ message = 'Memuat...', size = 'md', className }: 
   return (
     <div className={cn('flex items-center justify-center py-8', className)}>
       <Loader2 className={cn('animate-spin text-primary', currentSizeClass || 'h-8 w-8')} />
-      {message && <p className="mt-2 text-sm text-muted-foreground">Memuat konten...</p>}
+      {message && (
+        <p className="mt-2 text-sm text-muted-foreground text-center">
+          {message}
+        </p>
+      )}
     </div>
   )
 }

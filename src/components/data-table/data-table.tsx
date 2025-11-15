@@ -67,6 +67,7 @@ export const DataTable = <TData, TValue>({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [globalFilter, setGlobalFilter] = useState('')
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,
@@ -81,11 +82,6 @@ export const DataTable = <TData, TValue>({
       sorting,
       columnVisibility,
       globalFilter,
-    },
-    initialState: {
-      pagination: {
-        pageSize,
-      },
     },
   })
 

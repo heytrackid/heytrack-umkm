@@ -43,15 +43,48 @@ export const FinancialReport = ({ dateRange }: FinancialReportProps) => {
     { totalIncome: 0, totalExpense: 0 }
   )
 
+  // Calculate previous period stats
+  const previousFinancialData = (financialRecords ?? []).filter((record): record is FinancialRecord & { date: string } => {
+    if (!record.date || !dateRange.start || !dateRange.end) { return false }
+    const startDate = new Date(dateRange.start)
+    const endDate = new Date(dateRange.end)
+    const periodLength = endDate.getTime() - startDate.getTime()
+    const previousEnd = new Date(startDate.getTime() - 1)
+    const previousStart = new Date(previousEnd.getTime() - periodLength)
+    const recordDate = new Date(record.date).toISOString().split('T')[0] as string
+    return recordDate >= previousStart.toISOString().split('T')[0] && recordDate <= previousEnd.toISOString().split('T')[0]
+  })
+
+  const previousStats = previousFinancialData.reduce<{ totalIncome: number; totalExpense: number }>(
+    (stats, record) => {
+      if (record['type'] === 'INCOME') {
+        stats.totalIncome += record.amount
+      }
+      if (record['type'] === 'EXPENSE') {
+        stats.totalExpense += record.amount
+      }
+      return stats
+    },
+    { totalIncome: 0, totalExpense: 0 }
+  )
+
   const netProfit = financialStats.totalIncome - financialStats.totalExpense
   const profitMargin = financialStats.totalIncome > 0
     ? (netProfit / financialStats.totalIncome) * 100
     : 0
 
-  // Calculate growth percentages (would come from previous period data)
-  const incomeGrowth = 15;
-  const expenseGrowth = 8;
-  const profitGrowth = 22;
+  // Calculate growth percentages from previous period data
+  const incomeGrowth = previousStats.totalIncome > 0
+    ? Math.round(((financialStats.totalIncome - previousStats.totalIncome) / previousStats.totalIncome) * 100)
+    : 0
+  const expenseGrowth = previousStats.totalExpense > 0
+    ? Math.round(((financialStats.totalExpense - previousStats.totalExpense) / previousStats.totalExpense) * 100)
+    : 0
+  const previousProfit = previousStats.totalIncome - previousStats.totalExpense
+  const currentProfit = netProfit
+  const profitGrowth = previousProfit > 0
+    ? Math.round(((currentProfit - previousProfit) / previousProfit) * 100)
+    : 0
 
   return (
     <div className="space-y-6">

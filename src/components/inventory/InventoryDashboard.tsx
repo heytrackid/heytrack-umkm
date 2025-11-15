@@ -1,52 +1,39 @@
  
 'use client'
 
-import { AlertTriangle, Package, RefreshCw, ShoppingCart, TrendingUp } from 'lucide-react'
+import { AlertTriangle, Package, RefreshCw, Search, ShoppingCart, TrendingUp } from 'lucide-react'
+import { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { useSettings } from '@/contexts/settings-context'
-import type { ReorderSuggestion } from '@/hooks/useReorderManagement'
-// import { useInventoryAlerts, useReorderManagement } from '@/hooks/index' // TODO: Hooks missing
-// import { InventoryAlertsList } from '@/hooks/useInventoryAlerts'
-
-// Temporary placeholder component
-const InventoryAlertsList = ({ alerts: _alerts, maxItems: _maxItems }: { alerts: unknown[]; maxItems?: number }) => <div>No alerts</div>
+import { useInventoryAlerts, InventoryAlertsList } from '@/hooks/useInventoryAlerts'
+import { useReorderManagement, type ReorderSuggestion } from '@/hooks/useReorderManagement'
 
 
 
 export const InventoryDashboard = (): JSX.Element => {
   const { formatCurrency } = useSettings()
-  // TODO: Re-enable when hooks are available
-  const inventoryStatus = { 
-    critical: 0, 
-    low: 0, 
-    adequate: 0,
-    total_ingredients: 0,
-    healthy_stock_count: 0,
-    low_stock_count: 0,
-    out_of_stock_count: 0,
-    total_value: 0,
-    alerts: []
-  }
-  const alertsLoading = false
-  const reorderData = { 
-    suggestions: [],
-    total_suggestions: 0,
-    total_estimated_cost: 0,
-    urgent_count: 0,
-    high_count: 0,
-    medium_count: 0,
-    low_count: 0
-  }
-  const reorderLoading = false
+  const { inventoryStatus, loading: alertsLoading, refetch: refetchAlerts } = useInventoryAlerts()
+  const { reorderData, loading: reorderLoading, refetch: refetchReorder } = useReorderManagement()
+  const [searchTerm, setSearchTerm] = useState('')
 
   const handleRefresh = () => {
-    // refetchAlerts()
-    // refetchReorder()
+    refetchAlerts()
+    refetchReorder()
   }
+
+  const filteredAlerts = inventoryStatus.alerts.filter(alert =>
+    alert.ingredient_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    alert.message.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  const filteredSuggestions = reorderData.suggestions.filter(suggestion =>
+    suggestion.ingredient_name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   if (alertsLoading || reorderLoading) {
     return (
@@ -83,10 +70,22 @@ export const InventoryDashboard = (): JSX.Element => {
           <h2 className="text-2xl font-bold">Inventory Management</h2>
           <p className="text-muted-foreground">Monitor stock levels and reorder suggestions</p>
         </div>
-        <Button onClick={handleRefresh} disabled={alertsLoading || reorderLoading}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${(alertsLoading || reorderLoading) ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search ingredients..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8 w-64"
+              aria-label="Search ingredients"
+            />
+          </div>
+          <Button onClick={handleRefresh} disabled={alertsLoading || reorderLoading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${(alertsLoading || reorderLoading) ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -155,11 +154,11 @@ export const InventoryDashboard = (): JSX.Element => {
               Stock Alerts
             </CardTitle>
             <CardDescription>
-              Items requiring attention ({inventoryStatus.alerts.length} alerts)
+              Items requiring attention ({filteredAlerts.length} alerts)
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <InventoryAlertsList alerts={inventoryStatus.alerts} maxItems={5} />
+            <InventoryAlertsList alerts={filteredAlerts} maxItems={5} />
           </CardContent>
         </Card>
 
@@ -171,19 +170,19 @@ export const InventoryDashboard = (): JSX.Element => {
               Reorder Suggestions
             </CardTitle>
             <CardDescription>
-              Recommended purchases ({reorderData.total_suggestions} items)
+              Recommended purchases ({filteredSuggestions.length} items)
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {reorderData.suggestions.length === 0 ? (
+            {filteredSuggestions.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <ShoppingCart className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <p>No reorder suggestions at this time</p>
                 <p className="text-sm">All items are sufficiently stocked</p>
               </div>
             ) : (
-              <div className="space-y-3">
-                {reorderData.suggestions.slice(0, 5).map((suggestion: ReorderSuggestion) => (
+               <div className="space-y-3">
+                 {filteredSuggestions.slice(0, 5).map((suggestion: ReorderSuggestion) => (
                   <div key={suggestion.ingredient_id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
@@ -212,13 +211,13 @@ export const InventoryDashboard = (): JSX.Element => {
                     </div>
                   </div>
                 ))}
-                {reorderData.suggestions.length > 5 && (
-                  <div className="text-center py-2">
-                    <p className="text-sm text-muted-foreground">
-                      +{reorderData.suggestions.length - 5} more suggestions
-                    </p>
-                  </div>
-                )}
+                 {filteredSuggestions.length > 5 && (
+                   <div className="text-center py-2">
+                     <p className="text-sm text-muted-foreground">
+                       +{filteredSuggestions.length - 5} more suggestions
+                     </p>
+                   </div>
+                 )}
               </div>
             )}
           </CardContent>

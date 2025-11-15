@@ -31,6 +31,7 @@ export const MessageList = ({
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Always call useVirtualizer (hooks must be called unconditionally)
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: messages.length,
     getScrollElement: () => virtualizerRef.current,

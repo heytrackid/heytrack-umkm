@@ -72,6 +72,15 @@ async function updateCustomer(
   return response.json()
 }
 
+async function fetchCustomer(id: string): Promise<Customer> {
+  const response = await fetch(`/api/customers/${id}`)
+  if (!response.ok) {
+    throw new Error('Failed to fetch customer')
+  }
+  const data = await response.json()
+  return data.data
+}
+
 async function deleteCustomer(id: string): Promise<void> {
   const response = await fetch(`/api/customers/${id}`, {
     method: 'DELETE',
@@ -86,6 +95,14 @@ export function useCustomers() {
   return useQuery({
     queryKey: ['customers'],
     queryFn: fetchCustomers,
+  })
+}
+
+export function useCustomer(id: string) {
+  return useQuery({
+    queryKey: ['customers', id],
+    queryFn: () => fetchCustomer(id),
+    enabled: !!id,
   })
 }
 

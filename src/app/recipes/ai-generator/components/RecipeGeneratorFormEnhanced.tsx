@@ -247,6 +247,7 @@ const RecipeGeneratorFormEnhanced = ({
                         onChange={() => toggleIngredient(ingredient.name)}
                         disabled={loading}
                         className="rounded"
+                        aria-label={`Select ${ingredient.name}`}
                       />
                       <span className="text-sm">{ingredient.name}</span>
                     </label>

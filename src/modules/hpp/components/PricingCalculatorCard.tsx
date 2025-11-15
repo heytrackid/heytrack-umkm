@@ -251,10 +251,11 @@ export const PricingCalculatorCard = ({
                                 max={150}
                                 step={5}
                                 className="w-full"
+                                aria-valuetext={`${marginPercentage}%`}
                             />
                             <div className="flex justify-between text-xs text-muted-foreground">
                                 <span>30%</span>
-                                <span>60% (Rekomendasi)</span>
+                                <span>50-70% (Rekomendasi)</span>
                                 <span>150%</span>
                             </div>
                         </div>

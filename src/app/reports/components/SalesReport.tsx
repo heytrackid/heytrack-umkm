@@ -28,25 +28,29 @@ export const SalesReport = ({ dateRange }: SalesReportProps) => {
     pendingOrders: 0
   })
   const [isLoading, setIsLoading] = useState(true)
+  const [previousStats, setPreviousStats] = useState({
+    totalOrders: 0,
+    totalRevenue: 0
+  })
 
   useEffect(() => {
     const fetchSalesData = async () => {
       if (!dateRange.start || !dateRange.end) {
         setSalesStats({ totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 })
+        setPreviousStats({ totalOrders: 0, totalRevenue: 0 })
         setIsLoading(false)
         return
       }
 
       try {
-        setIsLoading(true)
+        // Fetch current period
         const params = new URLSearchParams({
-          startDate: dateRange.start,
-          endDate: dateRange.end,
+          start_date: dateRange.start,
+          end_date: dateRange.end,
+          status: 'DELIVERED'
         })
 
-        const response = await fetch(`/api/reports/sales?${params}`, {
-          cache: 'no-store',
-        })
+        const response = await fetch(`/api/orders?${params.toString()}`)
 
         if (!response.ok) {
           throw new Error('Failed to fetch sales data')
@@ -63,9 +67,36 @@ export const SalesReport = ({ dateRange }: SalesReportProps) => {
         }
 
         setSalesStats(stats)
+
+        // Fetch previous period for growth calculation
+        const startDate = new Date(dateRange.start)
+        const endDate = new Date(dateRange.end)
+        const periodLength = endDate.getTime() - startDate.getTime()
+
+        const previousEnd = new Date(startDate.getTime() - 1)
+        const previousStart = new Date(previousEnd.getTime() - periodLength)
+
+        const prevParams = new URLSearchParams({
+          start_date: previousStart.toISOString().split('T')[0],
+          end_date: previousEnd.toISOString().split('T')[0],
+          status: 'DELIVERED'
+        })
+
+        const prevResponse = await fetch(`/api/orders?${prevParams.toString()}`)
+        if (prevResponse.ok) {
+          const prevResult = await prevResponse.json()
+          const prevReport = prevResult.data || { summary: { totalOrders: 0, totalRevenue: 0 } }
+          setPreviousStats({
+            totalOrders: prevReport.summary.totalOrders,
+            totalRevenue: prevReport.summary.totalRevenue
+          })
+        } else {
+          setPreviousStats({ totalOrders: 0, totalRevenue: 0 })
+        }
       } catch (error) {
         uiLogger.error({ error }, 'Failed to fetch sales data')
         setSalesStats({ totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 })
+        setPreviousStats({ totalOrders: 0, totalRevenue: 0 })
       } finally {
         setIsLoading(false)
       }
@@ -74,8 +105,12 @@ export const SalesReport = ({ dateRange }: SalesReportProps) => {
     void fetchSalesData()
   }, [dateRange.start, dateRange.end])
 
-  const revenueGrowth = 12
-  const orderGrowth = 8
+  const revenueGrowth = previousStats.totalRevenue > 0
+    ? Math.round(((salesStats.totalRevenue - previousStats.totalRevenue) / previousStats.totalRevenue) * 100)
+    : 0
+  const orderGrowth = previousStats.totalOrders > 0
+    ? Math.round(((salesStats.totalOrders - previousStats.totalOrders) / previousStats.totalOrders) * 100)
+    : 0
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {

@@ -1,6 +1,7 @@
 import { Package, PackageCheck, AlertTriangle, ShoppingCart } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 import { useSupabaseCRUD } from '@/hooks/supabase/index'
 import { useCurrency } from '@/hooks/useCurrency'
 
@@ -126,12 +127,11 @@ export const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps)
                   <span className="text-green-600">Adekuat</span>
                   <span>{adequateStock} item</span>
                 </div>
-                <div className="w-full bg-muted rounded-full h-2.5">
-                   <div
-                     className="bg-green-600 h-2.5 rounded-full"
-                     style={{ width: `${((adequateStock / totalItems) * 100) || 0}%` }}
-                   />
-                </div>
+                 <Progress
+                   value={(adequateStock / totalItems) * 100 || 0}
+                   className="h-2.5"
+                   aria-label={`Adequate stock: ${adequateStock} items`}
+                 />
               </div>
               
               <div className="space-y-2">
@@ -139,12 +139,11 @@ export const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps)
                   <span className="text-orange-600">Stok Rendah</span>
                   <span>{inventoryStats.lowStock} item</span>
                 </div>
-                <div className="w-full bg-muted rounded-full h-2.5">
-                   <div
-                     className="bg-orange-500 h-2.5 rounded-full"
-                     style={{ width: `${((inventoryStats.lowStock / totalItems) * 100) || 0}%` }}
-                   />
-                </div>
+                 <Progress
+                   value={(inventoryStats.lowStock / totalItems) * 100 || 0}
+                   className="h-2.5"
+                   aria-label={`Low stock: ${inventoryStats.lowStock} items`}
+                 />
               </div>
               
               <div className="space-y-2">
@@ -152,12 +151,11 @@ export const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps)
                   <span className="text-red-600">Habis</span>
                   <span>{inventoryStats.outOfStock} item</span>
                 </div>
-                <div className="w-full bg-muted rounded-full h-2.5">
-                   <div
-                     className="bg-red-500 h-2.5 rounded-full"
-                     style={{ width: `${((inventoryStats.outOfStock / totalItems) * 100) || 0}%` }}
-                   />
-                </div>
+                 <Progress
+                   value={(inventoryStats.outOfStock / totalItems) * 100 || 0}
+                   className="h-2.5"
+                   aria-label={`Out of stock: ${inventoryStats.outOfStock} items`}
+                 />
               </div>
             </div>
             

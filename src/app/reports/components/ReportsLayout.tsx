@@ -2,9 +2,10 @@
 
 import { AlertCircle, ArrowDownIcon, ArrowUpIcon, Calendar, CheckCircle, DollarSign, Filter, Package, ShoppingCart, TrendingUp } from 'lucide-react'
 import dynamic from 'next/dynamic'
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -31,12 +32,12 @@ const InventoryReport = dynamic(
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {Array.from({ length: 4 }, (_, i) => (
-            <div key={i} className="h-24 bg-muted/50 rounded animate-pulse" />
+            <Skeleton key={i} className="h-24 rounded" />
           ))}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="h-64 bg-muted/50 rounded animate-pulse" />
-          <div className="h-64 bg-muted/50 rounded animate-pulse" />
+          <Skeleton className="h-64 rounded" />
+          <Skeleton className="h-64 rounded" />
         </div>
       </div>
     ),
@@ -55,12 +56,12 @@ const FinancialReport = dynamic(
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {Array.from({ length: 4 }, (_, i) => (
-            <div key={i} className="h-24 bg-muted/50 rounded animate-pulse" />
+            <Skeleton key={i} className="h-24 rounded" />
           ))}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="h-48 bg-muted/50 rounded animate-pulse" />
-          <div className="h-48 bg-muted/50 rounded animate-pulse" />
+          <Skeleton className="h-48 rounded" />
+          <Skeleton className="h-48 rounded" />
         </div>
       </div>
     ),
@@ -77,13 +78,13 @@ const EnhancedProfitReport = dynamic(
   {
     loading: () => (
       <div className="space-y-4">
-        <div className="h-16 bg-muted/50 rounded animate-pulse" />
+        <Skeleton className="h-16 rounded" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }, (_, i) => (
-            <div key={i} className="h-24 bg-muted/50 rounded animate-pulse" />
+            <Skeleton key={i} className="h-24 rounded" />
           ))}
         </div>
-        <div className="h-96 bg-muted/50 rounded animate-pulse" />
+        <Skeleton className="h-96 rounded" />
       </div>
     ),
     ssr: false
@@ -183,8 +184,8 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
             <CardContent>
               {statsLoading ? (
                 <div className="space-y-2">
-                  <div className="h-8 bg-muted animate-pulse rounded" />
-                  <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
                 </div>
               ) : statsError ? (
                 <div className="text-sm text-red-600">Error loading data</div>
@@ -216,8 +217,8 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
             <CardContent>
               {statsLoading ? (
                 <div className="space-y-2">
-                  <div className="h-8 bg-muted animate-pulse rounded" />
-                  <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
                 </div>
               ) : statsError ? (
                 <div className="text-sm text-red-600">Error loading data</div>
@@ -244,8 +245,8 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
             <CardContent>
               {statsLoading ? (
                 <div className="space-y-2">
-                  <div className="h-8 bg-muted animate-pulse rounded" />
-                  <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
                 </div>
               ) : statsError ? (
                 <div className="text-sm text-red-600">Error loading data</div>
@@ -270,8 +271,8 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
             <CardContent>
               {statsLoading ? (
                 <div className="space-y-2">
-                  <div className="h-8 bg-muted animate-pulse rounded" />
-                  <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
                 </div>
               ) : statsError ? (
                 <div className="text-sm text-red-600">Error loading data</div>

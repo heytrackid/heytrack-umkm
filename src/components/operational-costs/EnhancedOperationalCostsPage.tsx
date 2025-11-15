@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState, useCallback } from 'react'
 
 import { PageHeader } from '@/components/layout/PageHeader'
+import { Skeleton } from '@/components/ui/skeleton'
 import { DeleteModal } from '@/components/ui/index'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -432,15 +433,15 @@ export const EnhancedOperationalCostsPage = () => {
             {/* Cost List */}
             {loading && (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {Array.from({ length: 6 }, (_, index) => index).map((skeletonIndex) => (
+                     {Array.from({ length: 6 }, (_, index) => index).map((skeletonIndex) => (
                         <Card key={`operational-cost-skeleton-${skeletonIndex}`}>
                             <CardContent className="p-6">
                                 <div className="space-y-3">
-                                    <div className="h-6 bg-muted rounded animate-pulse" />
-                                    <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
+                                    <Skeleton className="h-6 w-full" />
+                                    <Skeleton className="h-4 w-3/4" />
                                     <div className="flex gap-2">
-                                        <div className="h-6 bg-muted rounded animate-pulse w-20" />
-                                        <div className="h-6 bg-muted rounded animate-pulse w-16" />
+                                        <Skeleton className="h-6 w-20" />
+                                        <Skeleton className="h-6 w-16" />
                                     </div>
                                 </div>
                             </CardContent>

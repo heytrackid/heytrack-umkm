@@ -55,6 +55,7 @@ export const VirtualizedOrderCards = memo(({
 }: VirtualizedOrderCardsProps) => {
   const parentRef = useRef<HTMLDivElement>(null)
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: orders.length,
     getScrollElement: () => parentRef.current,

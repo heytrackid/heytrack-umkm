@@ -39,16 +39,16 @@ export function RecipeForm({
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="name">Nama Resep *</Label>
-          <Input id="name" {...register('name')} placeholder="Contoh: Nasi Goreng Spesial" />
-          {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+          <Input id="name" {...register('name')} placeholder="Contoh: Nasi Goreng Spesial" aria-describedby={errors.name ? 'name-error' : undefined} />
+          {errors.name && <p id="name-error" className="text-sm text-destructive">{errors.name.message}</p>}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="category">Kategori</Label>
-            <Input id="category" {...register('category')} placeholder="Contoh: Makanan Utama" />
+            <Input id="category" {...register('category')} placeholder="Contoh: Makanan Utama" aria-describedby={errors.category ? 'category-error' : undefined} />
             {errors.category && (
-              <p className="text-sm text-destructive">{errors.category.message}</p>
+              <p id="category-error" className="text-sm text-destructive">{errors.category.message}</p>
             )}
           </div>
 
@@ -59,9 +59,10 @@ export function RecipeForm({
               type="number"
               {...register('serving_size', { valueAsNumber: true })}
               placeholder="1"
+              aria-describedby={errors.serving_size ? 'serving_size-error' : undefined}
             />
             {errors.serving_size && (
-              <p className="text-sm text-destructive">{errors.serving_size.message}</p>
+              <p id="serving_size-error" className="text-sm text-destructive">{errors.serving_size.message}</p>
             )}
           </div>
         </div>
@@ -73,9 +74,10 @@ export function RecipeForm({
             {...register('description')}
             placeholder="Deskripsi singkat tentang resep ini..."
             rows={3}
+            aria-describedby={errors.description ? 'description-error' : undefined}
           />
           {errors.description && (
-            <p className="text-sm text-destructive">{errors.description.message}</p>
+            <p id="description-error" className="text-sm text-destructive">{errors.description.message}</p>
           )}
         </div>
 

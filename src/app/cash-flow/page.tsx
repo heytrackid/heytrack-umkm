@@ -6,6 +6,7 @@ import { ArrowDownIcon, ArrowUpIcon, DollarSign, Filter, Plus, Search, TrendingD
 import { useCallback, useEffect, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -67,7 +68,7 @@ const CashFlowPage = () => {
 
         switch (dateFilter) {
           case 'today':
-            startDate.setDate(today.getDate())
+            // startDate is already today
             break
           case 'week':
             startDate.setDate(today.getDate() - 7)
@@ -193,7 +194,7 @@ const CashFlowPage = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
-              <DollarSign className="h-7 w-7 sm:h-8 sm:w-8 text-green-600" />
+              <DollarSign className="h-7 w-7 sm:h-8 sm:w-8 text-green-600" aria-label="Arus Kas" />
               Arus Kas
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
@@ -250,6 +251,8 @@ const CashFlowPage = () => {
                     value={newTransaction.amount}
                     onChange={(e) => setNewTransaction(prev => ({ ...prev, amount: e.target.value }))}
                     placeholder="0"
+                    min="0"
+                    step="0.01"
                   />
                 </div>
                 <div>
@@ -298,9 +301,9 @@ const CashFlowPage = () => {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Arus Kas Bersih</CardTitle>
               {summary.netCashFlow >= 0 ? (
-                <TrendingUp className="h-4 w-4 text-green-600" />
+                <TrendingUp className="h-4 w-4 text-green-600" aria-label="Positive cash flow" />
               ) : (
-                <TrendingDown className="h-4 w-4 text-red-600" />
+                <TrendingDown className="h-4 w-4 text-red-600" aria-label="Negative cash flow" />
               )}
             </CardHeader>
             <CardContent>
@@ -313,7 +316,7 @@ const CashFlowPage = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Transaksi</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <DollarSign className="h-4 w-4 text-muted-foreground" aria-label="Total Transaksi" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
@@ -401,7 +404,7 @@ const CashFlowPage = () => {
             {loading ? (
               <div className="space-y-4">
                 {Array.from({ length: 5 }, (_, i) => (
-                  <div key={i} className="h-12 bg-muted animate-pulse rounded" />
+                  <Skeleton key={i} className="h-12 rounded" />
                 ))}
               </div>
              ) : filteredRecords.length === 0 ? (
@@ -415,40 +418,72 @@ const CashFlowPage = () => {
                    }
                  ]}
                />
-             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Tanggal</TableHead>
-                    <TableHead>Deskripsi</TableHead>
-                    <TableHead>Kategori</TableHead>
-                    <TableHead>Tipe</TableHead>
-                    <TableHead className="text-right">Jumlah</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredRecords.map((record) => (
-                    <TableRow key={record.id}>
-                      <TableCell>
-                        {format(new Date(record.date), 'dd MMM yyyy', { locale: idLocale })}
-                      </TableCell>
-                      <TableCell>{record.description}</TableCell>
-                      <TableCell>{record.category}</TableCell>
-                      <TableCell>
-                        <Badge variant={record.type === 'INCOME' ? 'default' : 'destructive'}>
-                          {record.type === 'INCOME' ? 'Pemasukan' : 'Pengeluaran'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className={`text-right font-medium ${
-                        record.type === 'INCOME' ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {record.type === 'INCOME' ? '+' : '-'}{formatCurrency(record.amount)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
+              ) : (
+               <>
+                 {/* Desktop Table */}
+                 <div className="hidden md:block">
+                   <Table>
+                     <TableHeader>
+                       <TableRow>
+                         <TableHead>Tanggal</TableHead>
+                         <TableHead>Deskripsi</TableHead>
+                         <TableHead>Kategori</TableHead>
+                         <TableHead>Tipe</TableHead>
+                         <TableHead className="text-right">Jumlah</TableHead>
+                       </TableRow>
+                     </TableHeader>
+                     <TableBody>
+                       {filteredRecords.map((record) => (
+                         <TableRow key={record.id}>
+                           <TableCell>
+                             {format(new Date(record.date), 'dd MMM yyyy', { locale: idLocale })}
+                           </TableCell>
+                           <TableCell>{record.description}</TableCell>
+                           <TableCell>{record.category}</TableCell>
+                           <TableCell>
+                             <Badge variant={record.type === 'INCOME' ? 'default' : 'destructive'}>
+                               {record.type === 'INCOME' ? 'Pemasukan' : 'Pengeluaran'}
+                             </Badge>
+                           </TableCell>
+                           <TableCell className={`text-right font-medium ${
+                             record.type === 'INCOME' ? 'text-green-600' : 'text-red-600'
+                           }`}>
+                             {record.type === 'INCOME' ? '+' : '-'}{formatCurrency(record.amount)}
+                           </TableCell>
+                         </TableRow>
+                       ))}
+                     </TableBody>
+                   </Table>
+                 </div>
+
+                 {/* Mobile Cards */}
+                 <div className="md:hidden space-y-3">
+                   {filteredRecords.map((record) => (
+                     <Card key={record.id} className="p-4">
+                       <div className="flex justify-between items-start mb-2">
+                         <div>
+                           <p className="font-medium">{record.description}</p>
+                           <p className="text-sm text-muted-foreground">
+                             {format(new Date(record.date), 'dd MMM yyyy', { locale: idLocale })}
+                           </p>
+                         </div>
+                         <Badge variant={record.type === 'INCOME' ? 'default' : 'destructive'}>
+                           {record.type === 'INCOME' ? 'Pemasukan' : 'Pengeluaran'}
+                         </Badge>
+                       </div>
+                       <div className="flex justify-between items-center">
+                         <span className="text-sm text-muted-foreground">{record.category}</span>
+                         <span className={`font-medium ${
+                           record.type === 'INCOME' ? 'text-green-600' : 'text-red-600'
+                         }`}>
+                           {record.type === 'INCOME' ? '+' : '-'}{formatCurrency(record.amount)}
+                         </span>
+                       </div>
+                     </Card>
+                   ))}
+                 </div>
+               </>
+             )}
           </CardContent>
         </Card>
       </div>

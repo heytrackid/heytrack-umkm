@@ -152,6 +152,7 @@ export function RecipeIngredientSelector({
                     variant="ghost"
                     size="icon"
                     onClick={() => handleRemove(index)}
+                    aria-label={`Remove ${getIngredientName(item.ingredient_id)}`}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

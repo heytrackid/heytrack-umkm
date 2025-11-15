@@ -81,6 +81,15 @@ async function updateIngredient(id: string, data: Partial<CreateIngredientData>)
   return response.json()
 }
 
+async function fetchIngredient(id: string): Promise<Ingredient> {
+  const response = await fetch(`/api/ingredients/${id}`)
+  if (!response.ok) {
+    throw new Error('Failed to fetch ingredient')
+  }
+  const data = await response.json()
+  return data.data
+}
+
 async function deleteIngredient(id: string): Promise<void> {
   const response = await fetch(`/api/ingredients/${id}`, {
     method: 'DELETE',
@@ -95,6 +104,14 @@ export function useIngredients() {
   return useQuery({
     queryKey: ['ingredients'],
     queryFn: fetchIngredients,
+  })
+}
+
+export function useIngredient(id: string) {
+  return useQuery({
+    queryKey: ['ingredients', id],
+    queryFn: () => fetchIngredient(id),
+    enabled: !!id,
   })
 }
 

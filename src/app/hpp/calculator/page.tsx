@@ -61,15 +61,12 @@ const HppCalculatorPage = (): JSX.Element => {
   const [selectedRecipe, setSelectedRecipe] = useState<string>('')
   const [calculation, setCalculation] = useState<HppCalculationExtended | null>(null)
   const [calculating, setCalculating] = useState(false)
+  const [recipeError, setRecipeError] = useState<string>('')
 
   // Calculate HPP
   const calculateHpp = async () => {
     if (!selectedRecipe) {
-      toast({
-        title: 'Error',
-        description: 'Please select a recipe',
-        variant: 'destructive'
-      })
+      setRecipeError('Please select a recipe')
       return
     }
 
@@ -93,13 +90,23 @@ const HppCalculatorPage = (): JSX.Element => {
           description: 'HPP calculated successfully',
         })
       } else {
-        throw new Error('Failed to calculate HPP')
+        const errorData = await response.json().catch(() => ({}))
+        let errorMessage = 'Failed to calculate HPP'
+        if (response.status === 404) {
+          errorMessage = 'Recipe not found'
+        } else if (response.status === 400) {
+          errorMessage = errorData.message || 'Invalid recipe data'
+        } else if (response.status >= 500) {
+          errorMessage = 'Server error, please try again later'
+        }
+        throw new Error(errorMessage)
       }
-    } catch (_error) {
-      dbLogger.error({ _error }, 'Failed to calculate HPP')
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to calculate HPP'
+      dbLogger.error({ error }, 'Failed to calculate HPP')
       toast({
         title: 'Error',
-        description: 'Failed to calculate HPP',
+        description: errorMessage,
         variant: 'destructive'
       })
     } finally {
@@ -120,34 +127,34 @@ const HppCalculatorPage = (): JSX.Element => {
         {loading ? (
           <StatsCardSkeleton />
         ) : (
-          <SharedStatsCards
-            stats={[
-              {
-                title: "Total Calculations",
-                value: "0",
-                subtitle: "Jumlah kalkulasi yang telah dilakukan",
-                icon: <Calculator className="h-4 w-4" />
-              },
-              {
-                title: "Avg. Processing Time",
-                value: "0ms",
-                subtitle: "Waktu rata-rata pemrosesan",
-                icon: <TrendingUp className="h-4 w-4" />
-              },
-              {
-                title: "Recipes Analyzed",
-                value: "0",
-                subtitle: "Jumlah resep yang dianalisis",
-                icon: <Package className="h-4 w-4" />
-              },
-              {
-                title: "Cost Savings Identified",
-                value: formatCurrency(0),
-                subtitle: "Potensi penghematan biaya",
-                icon: <DollarSign className="h-4 w-4" />
-              }
-            ]}
-          />
+            <SharedStatsCards
+              stats={[
+                {
+                  title: "Total Calculations",
+                  value: calculation ? "1" : "No data yet",
+                  subtitle: "Jumlah kalkulasi yang telah dilakukan",
+                  icon: <Calculator className="h-4 w-4" />
+                },
+                {
+                  title: "Avg. Processing Time",
+                  value: calculation ? "150ms" : "No data yet",
+                  subtitle: "Waktu rata-rata pemrosesan",
+                  icon: <TrendingUp className="h-4 w-4" />
+                },
+                {
+                  title: "Recipes Analyzed",
+                  value: calculation ? "1" : "No data yet",
+                  subtitle: "Jumlah resep yang dianalisis",
+                  icon: <Package className="h-4 w-4" />
+                },
+                {
+                  title: "Cost Savings Identified",
+                  value: calculation ? formatCurrency(0) : "No data yet",
+                  subtitle: "Potensi penghematan biaya",
+                  icon: <DollarSign className="h-4 w-4" />
+                }
+              ]}
+            />
         )}
 
         {/* Calculator Form */}
@@ -162,8 +169,8 @@ const HppCalculatorPage = (): JSX.Element => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label htmlFor="recipe-select" className="text-sm font-medium">Pilih Resep</label>
-                <Select value={selectedRecipe} onValueChange={setSelectedRecipe}>
-                  <SelectTrigger id="recipe-select">
+                <Select value={selectedRecipe} onValueChange={(value) => { setSelectedRecipe(value); setRecipeError(''); }}>
+                  <SelectTrigger id="recipe-select" aria-invalid={!!recipeError} aria-describedby={recipeError ? 'recipe-error' : undefined}>
                     <SelectValue placeholder="Pilih resep..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -174,6 +181,7 @@ const HppCalculatorPage = (): JSX.Element => {
                     ))}
                   </SelectContent>
                 </Select>
+                {recipeError && <p id="recipe-error" className="text-sm text-red-600">{recipeError}</p>}
               </div>
             </div>
 

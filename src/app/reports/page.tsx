@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
+import { Skeleton } from '@/components/ui/skeleton'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useAuth } from '@/hooks/index'
 import { useToast } from '@/hooks/use-toast'
@@ -60,7 +61,7 @@ const ReportsPage = () => {
         {/* Report cards skeleton */}
         <div className="grid gap-6 md:grid-cols-2">
           {[1, 2, 3, 4].map(i => (
-            <div key={`card-skeleton-${i}`} className="h-64 bg-muted animate-pulse rounded-lg" />
+            <Skeleton key={`card-skeleton-${i}`} className="h-64 rounded-lg" />
           ))}
         </div>
       </div>
