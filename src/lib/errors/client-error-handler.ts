@@ -6,7 +6,7 @@ const logger = createClientLogger('ClientFile')
 // Session handler functions
 async function handleSessionExpired(): Promise<void> {
   const sessionLogger = createClientLogger('SessionHandler')
-  sessionLogger.warn('Session expired, clearing local data')
+  sessionLogger.warn({}, 'Session expired, clearing local data')
   
   if (typeof window !== 'undefined') {
     const keysToRemove: string[] = []

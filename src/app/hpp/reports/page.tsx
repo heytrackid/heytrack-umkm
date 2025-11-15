@@ -19,7 +19,6 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { useHppOverview } from '@/hooks/useHppData'
 import { useResponsive } from '@/hooks/useResponsive'
 import { dbLogger } from '@/lib/logger'
-import { HppCostTrendsChart } from '@/modules/hpp/index'
 
 type HppExportFormat = 'csv' | 'excel' | 'json' | 'pdf'
 type HppExportMetric = 'alerts' | 'cost_breakdown' | 'hpp' | 'margin' | 'recommendations' | 'trends'
@@ -318,7 +317,9 @@ const HppReportsPage = (): JSX.Element => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <HppCostTrendsChart data={analytics.costTrends} />
+                    <div className="text-center py-8 text-muted-foreground">
+                      Chart visualization removed
+                    </div>
                   </CardContent>
                 </Card>
 

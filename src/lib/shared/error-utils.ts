@@ -56,7 +56,7 @@ export function useErrorHandler() {
     const message = getErrorMessage(error)
     const title = context ? `${context} Error` : 'Error'
 
-    logger.error({ error }, `${context ?? 'App'} Error`)
+    logger.error({ error, context }, 'App Error')
 
     toast({
       title,

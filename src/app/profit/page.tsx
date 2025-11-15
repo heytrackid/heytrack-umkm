@@ -1,18 +1,15 @@
 'use client'
 
 import { AlertCircle, Download, Loader2 } from 'lucide-react'
-import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
-import { logger } from '@/lib/logger'
 
+import { PageHeader } from '@/components/layout'
 import { AppLayout } from '@/components/layout/app-layout'
-import { PageHeader } from '@/components/layout/PageHeader'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { StatsSkeleton } from '@/components/ui/index'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
-import { useSettings } from '@/contexts/settings-context'
 import { useResponsive } from '@/hooks/useResponsive'
 
 
@@ -25,39 +22,20 @@ import {
     ProfitFilters,
     ProfitInfoCard,
     ProfitSummaryCards,
-    useProductChartData,
     useProfitData
 } from '@/app/profit/components/index'
 
-
-// Loading component for chart
-const LoadingChart = () => (
-  <Card>
-    <CardContent className="p-6">
-      <div className="h-[350px] bg-muted animate-pulse rounded flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    </CardContent>
-  </Card>
-)
-
-// Only lazy load HEAVY chart components
-// ✅ Correct pattern for named exports (per Next.js docs)
-const ProductProfitabilityChart = dynamic(
-  () => import(/* webpackChunkName: "profit-chart" */ './components')
-    .then(mod => mod.ProductProfitabilityChart)
-    .catch((error) => {
-      logger.error({ error }, 'Failed to load ProductProfitabilityChart')
-      return { default: () => <div className="p-4 text-center text-red-600">Failed to load profit chart</div> }
-    }),
-  {
-    loading: LoadingChart
-  }
-)
-
 const ProfitReportPage = () => {
-  const { formatCurrency } = useSettings()
   const { isMobile } = useResponsive()
+
+  // Simple currency formatter
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+    }).format(amount)
+  }
 
   const {
     loading,
@@ -69,7 +47,7 @@ const ProfitReportPage = () => {
     exportReport
   } = useProfitData()
 
-  const productChartData = useProductChartData(profitData ?? null)
+  // Chart data removed - no longer using charts
 
   // Loading skeleton helper functions to avoid unstable nested components
   const renderProfitInfoSkeleton = () => (
@@ -267,16 +245,7 @@ const ProfitReportPage = () => {
               {/* Summary Cards Loading */}
               <StatsSkeleton count={4} />
 
-              {/* Product Profitability Chart Loading */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="h-[350px] bg-muted animate-pulse rounded flex items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Product Profitability Table Loading */}
+                {/* Product Profitability Table Loading */}
               <Card>
                 <CardContent className="p-6">
                   <div className="animate-pulse space-y-4">
@@ -355,15 +324,6 @@ const ProfitReportPage = () => {
                 isMobile={isMobile}
               />
             )}
-
-            {/* Product Profitability Chart */}
-            <ProductProfitabilityChart
-              chartData={productChartData}
-              filters={filters}
-              onFiltersChange={updateFilters}
-              formatCurrency={formatCurrency}
-              isMobile={isMobile}
-            />
 
             {/* Product Profitability Table */}
             <ProductProfitabilityTable

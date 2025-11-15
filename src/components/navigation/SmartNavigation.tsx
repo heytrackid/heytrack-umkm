@@ -1,6 +1,6 @@
 'use client'
 
-import { LayoutDashboard, ShoppingCart, Users, Package, Utensils, DollarSign, Settings, BarChart3, Plus, Search, Truck, MoreHorizontal, Receipt, MessageSquare } from 'lucide-react'
+import { LayoutDashboard, ShoppingCart, Users, Package, Utensils, DollarSign, Settings, TrendingUp, Plus, Search, Truck, MoreHorizontal, Receipt, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Fragment, type ReactNode, useState } from 'react'
@@ -203,7 +203,7 @@ const navigationItems = [
   {
     title: 'HPP',
     href: '/hpp',
-    icon: BarChart3,
+    icon: TrendingUp,
     preloadTargets: ['/recipes', '/hpp']
   },
   {

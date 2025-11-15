@@ -41,7 +41,7 @@ export function useSupabaseQuery<T extends TableName>(
       setError(null)
 
       const currentOptions = optionsRef.current
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       let _query = supabase.from(tableName as any).select(currentOptions.select ?? '*')
 
       // Apply filters

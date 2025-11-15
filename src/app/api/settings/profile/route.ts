@@ -1,6 +1,5 @@
 export const runtime = 'nodejs'
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
@@ -27,28 +26,34 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
     const supabase = await createClient()
 
     // Get or create profile
-    let { data: profile, error } = await supabase
+    const { data: profile, error } = await supabase
       .from('user_profiles')
       .select('*')
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
 
-    if (error && error.code === 'PGRST116') {
+    if (error) {
+      throw error
+    }
+
+    if (!profile) {
       // Profile doesn't exist, create it
       const { data: newProfile, error: insertError } = await supabase
         .from('user_profiles')
         .insert({
           user_id: user.id,
           full_name: user.displayName || '',
-          email: (user as any).email || user.id,
-        } as any)
+          email: user.id,
+        })
         .select()
         .single()
 
       if (insertError) throw insertError
-      profile = newProfile
-    } else if (error) {
-      throw error
+
+      return NextResponse.json({
+        success: true,
+        data: newProfile,
+      })
     }
 
     return NextResponse.json({
@@ -91,8 +96,9 @@ async function PUT(request: NextRequest): Promise<NextResponse> {
       .upsert(
         {
           user_id: user.id,
+          email: user.email!,
           ...validation.data,
-        } as any,
+        },
         {
           onConflict: 'user_id',
         }

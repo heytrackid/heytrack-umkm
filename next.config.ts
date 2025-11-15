@@ -14,15 +14,30 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true, // Ignore Supabase type issues in build
   },
   typedRoutes: true,
-  compiler: { 
-    removeConsole: isProd ? { exclude: ['error'] } : false 
+  compiler: {
+    removeConsole: isProd ? { exclude: ['error'] } : false
   },
+
+  // Build configuration for production
   // ⚡ Build Performance Optimizations (SWC is default in Next.js 15+)
   poweredByHeader: false,
   compress: true,
   output: 'standalone',
   generateBuildId: async () =>
     process.env['VERCEL_GIT_COMMIT_SHA']?.slice(0, 10) || `build-${Date.now()}`,
+
+  // Exclude server-only packages from client bundle
+  serverExternalPackages: [
+    'pino',
+    'pino-pretty',
+    'thread-stream',
+    'sonic-boom',
+    'atomic-sleep',
+    'fast-redact',
+    'on-exit-leak-free',
+    'pino-abstract-transport',
+    'real-require',
+  ],
 
   experimental: {
     typedEnv: true,

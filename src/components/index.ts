@@ -18,9 +18,6 @@ export { Skeleton } from './ui/skeleton'
 export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from './ui/table'
 export { Textarea } from './ui/textarea'
 
-// Chart Components
-export { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from './ui/chart'
-
 // Form Components
 export { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from './ui/form'
 

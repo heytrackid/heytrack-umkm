@@ -339,7 +339,7 @@ export function usePerformanceMonitoring() {
 
   // Export metrics for analytics
   const exportMetrics = useMemo(() => () => {
-    perfLogger.info('Performance metrics export')
+    perfLogger.info({}, 'Performance metrics export')
   }, [])
 
   return {

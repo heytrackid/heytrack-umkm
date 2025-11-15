@@ -51,7 +51,7 @@ class DebugLogger {
   private context: DebugContext = {};
 
   constructor(context = 'Debug') {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+     
     this.logger = require('./logger').createLogger(context); // Dynamic import to avoid circular dependencies
   }
 
@@ -103,23 +103,23 @@ class DebugLogger {
     const startMemory = options.includeMemory && typeof process !== 'undefined'
       ? process.memoryUsage()
       : undefined;
-    
+
     try {
       const result = fn();
       const end = process.hrtime.bigint();
       const duration = Number(end - start) / 1_000_000; // Convert to milliseconds
-      
+
       const logData = {
         ...this['context'],
         duration,
-        ...(options.includeMemory && startMemory ? { 
+        ...(options.includeMemory && startMemory ? {
           memoryBefore: startMemory,
           memoryAfter: process.memoryUsage(),
           memoryDiff: this.calculateMemoryDiff(startMemory, process.memoryUsage())
         } : {})
       };
 
-      this.logger.info(logData, `${message} completed in ${duration.toFixed(2)}ms`);
+      this.logger.info(logData, `${message} completed`, { durationMs: duration.toFixed(2) });
       return result;
     } catch (error) {
       const end = process.hrtime.bigint();
@@ -136,7 +136,7 @@ class DebugLogger {
         } : {})
       };
 
-      this.logger.error(logData, `${message} failed after ${duration.toFixed(2)}ms`);
+      this.logger.error(logData, `${message} failed`, { durationMs: duration.toFixed(2) });
       throw error;
     }
   }
@@ -160,7 +160,7 @@ class DebugLogger {
         } : {})
       };
 
-      this.logger.info(logData, `${message} completed in ${duration.toFixed(2)}ms`);
+      this.logger.info(logData, `${message} completed`, { durationMs: duration.toFixed(2) });
       return result;
     } catch (error) {
       const end = process.hrtime.bigint();
@@ -177,7 +177,7 @@ class DebugLogger {
         } : {})
       };
 
-      this.logger.error(logData, `${message} failed after ${duration.toFixed(2)}ms`);
+      this.logger.error(logData, `${message} failed`, { durationMs: duration.toFixed(2) });
       throw error;
     }
   }

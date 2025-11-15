@@ -25,7 +25,7 @@ export async function getSupabaseJwt(): Promise<string | null> {
 
     const jwtSecret = process.env['SUPABASE_JWT_SECRET']
     if (!jwtSecret) {
-      logger.warn('SUPABASE_JWT_SECRET is not set')
+      logger.warn({}, 'SUPABASE_JWT_SECRET is not set')
       return null
     }
 

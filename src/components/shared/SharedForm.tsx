@@ -83,7 +83,7 @@ export const SharedForm = <T extends FieldValues>({
   compact = false
 }: SharedFormProps<T>) => {
   // zodResolver requires specific schema types, but we need generic support
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const resolver = zodResolver(schema as any) as Resolver<T>
 
   const form = useForm<T>({
@@ -188,7 +188,7 @@ export function useSharedForm<T extends FieldValues>(
   defaultValues?: Partial<T>
 ) {
   const form = useForm<T>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     resolver: zodResolver(schema as any) as Resolver<T>,
     defaultValues: defaultValues as DefaultValues<T> | undefined,
   })

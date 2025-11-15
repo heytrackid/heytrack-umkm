@@ -10,9 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { QuickActionsSkeleton, StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
-import { createClientLogger } from '@/lib/client-logger'
+import { uiLogger } from '@/lib/logger'
 
-const logger = createClientLogger('HppDashboardWidget') 
+// Using uiLogger for client-side logging
+const logger = uiLogger 
 
 interface HppDashboardData {
   totalRecipes: number

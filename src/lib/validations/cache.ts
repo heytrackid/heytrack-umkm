@@ -226,7 +226,7 @@ export class CachedValidationHelpers {
    */
   static validateCustomer(data: unknown) {
     // Dynamic import to avoid circular dependencies
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+     
     const { CustomerInsertSchema } = require('./domains/customer')
     return withValidationCache(
       CustomerInsertSchema,
@@ -240,7 +240,7 @@ export class CachedValidationHelpers {
    */
    
   static validateIngredient(data: unknown) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+     
     const { IngredientInsertSchema } = require('./domains/ingredient')
     return withValidationCache(
       IngredientInsertSchema,
@@ -254,7 +254,7 @@ export class CachedValidationHelpers {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
    */
   static validateOrder(data: unknown) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+     
     const { OrderInsertSchema } = require('./domains/order')
     return withValidationCache(
       OrderInsertSchema,
@@ -268,7 +268,7 @@ export class CachedValidationHelpers {
    * Cached recipe validation
    */
   static validateRecipe(data: unknown) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+     
     const { RecipeInsertSchema } = require('./domains/recipe')
     return withValidationCache(
       RecipeInsertSchema,

@@ -6,7 +6,6 @@
  */
 
 // Components
-export { HppCostTrendsChart } from './components/HppCostTrendsChart'
 export { HppQuickSummary } from './components/HppQuickSummary'
 export { UnifiedHppPage } from './components/UnifiedHppPage'
 

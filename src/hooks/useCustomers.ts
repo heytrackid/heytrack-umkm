@@ -105,7 +105,7 @@ export function useCreateCustomer() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['customers'] })
 
-      logger.info('Customer created successfully')
+      logger.info({}, 'Customer created successfully')
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
@@ -182,7 +182,7 @@ export function useDeleteCustomer() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['customers'] })
 
-      logger.info('Customer deleted successfully')
+      logger.info({}, 'Customer deleted successfully')
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)

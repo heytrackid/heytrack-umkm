@@ -1,6 +1,6 @@
 'use client'
 
-import { BarChart3, Bot, DollarSign, Maximize2, MessageCircle, Minimize2, Package, Send, Trash2, User, Users } from 'lucide-react';
+import { Bot, DollarSign, Maximize2, MessageCircle, Minimize2, Package, Send, Trash2, TrendingUp, User, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input';
 import type { ChatAction, ChatContext } from '@/lib/ai-chatbot/types';
 import { createClientLogger } from '@/lib/client-logger';
 
-import { DataVisualization } from '@/components/ai-chatbot/DataVisualization';
 import { useChatHistory } from '@/hooks/useChatHistory';
 
 
@@ -41,6 +40,9 @@ export const ChatbotInterface = ({
   isMinimized = false,
   onToggleMinimize
 }: ChatbotInterfaceProps): JSX.Element => {
+  // State for confirmation dialog
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
+
   // Use chat history hook for database persistence
   const { 
     messages, 
@@ -282,8 +284,8 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
     switch (type) {
       case 'add_order': return <Package className="h-4 w-4" />;
       case 'check_stock': return <Package className="h-4 w-4" />;
-      case 'view_report': return <BarChart3 className="h-4 w-4" />;
-      case 'analysis': return <BarChart3 className="h-4 w-4" />;
+      case 'view_report': return <TrendingUp className="h-4 w-4" />;
+      case 'analysis': return <TrendingUp className="h-4 w-4" />;
       case 'recommendation': return <Users className="h-4 w-4" />;
       default: return <MessageCircle className="h-4 w-4" />;
     }
@@ -342,27 +344,6 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
               </div>
             )}
 
-            {/* Data visualization */}
-            {message['data'] && (message.role === 'assistant' || message.role === 'system') && (
-              <div className="mt-3">
-                {(() => {
-                  // Determine visualization type based on message data structure
-                  const data = message['data'] as Record<string, unknown> | undefined;
-                  if (data?.['profitMargin'] !== undefined) {
-                    return <DataVisualization type="financial" data={data} compact />;
-                  } if (data?.['criticalItems']) {
-                    return <DataVisualization type="inventory" data={data} compact />;
-                  } if (data?.['topCustomers']) {
-                    return <DataVisualization type="customers" data={data} compact />;
-                  } if (data?.['topRecipes']) {
-                    return <DataVisualization type="products" data={data} compact />;
-                  } if (data?.['analysis']) {
-                    return <DataVisualization type="analysis" data={data} compact />;
-                  }
-                  return null;
-                })()}
-              </div>
-            )}
           </div>
 
           {/* Timestamp */}
@@ -390,7 +371,7 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
           disabled={isLoading}
           className="text-xs h-8 bg-background hover:bg-muted"
         >
-          <BarChart3 className="h-3 w-3 mr-1" />
+          <TrendingUp className="h-3 w-3 mr-1" />
           Analisis Profit
         </Button>
         <Button
@@ -475,16 +456,43 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
             <Button
               variant="ghost"
               size="sm"
-              onClick={async () => {
-                if (confirm('Yakin ingin menghapus semua riwayat chat?')) {
-                  await clearHistory();
-                }
-              }}
+              onClick={() => setShowClearConfirm(true)}
               className="text-white hover:bg-white/20 h-8 w-8 p-0 rounded-full transition-all"
               title="Clear chat history"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
+          )}
+          {showClearConfirm && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <Card className="w-96">
+                <CardHeader>
+                  <h3 className="text-lg font-semibold">Hapus Riwayat Chat?</h3>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Yakin ingin menghapus semua riwayat chat? Tindakan ini tidak dapat dibatalkan.
+                  </p>
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowClearConfirm(false)}
+                    >
+                      Batal
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={async () => {
+                        await clearHistory()
+                        setShowClearConfirm(false)
+                      }}
+                    >
+                      Hapus
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           )}
           {onToggleMinimize && (
             <Button

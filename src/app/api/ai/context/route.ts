@@ -39,7 +39,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error(`Failed to load context: ${errorMessage}`);
+    logger.error({ error: errorMessage }, 'Failed to load context');
     return NextResponse.json(
       { error: 'Failed to load context' },
       { status: 500 }
@@ -64,7 +64,7 @@ async function deleteHandler(): Promise<NextResponse> {
     return NextResponse.json({ success: true });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error(`Failed to invalidate context: ${errorMessage}`);
+    logger.error({ error: errorMessage }, 'Failed to invalidate context');
     return NextResponse.json(
       { error: 'Failed to invalidate context' },
       { status: 500 }

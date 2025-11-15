@@ -30,21 +30,7 @@ export const CardSkeleton = (): JSX.Element => (
   </Card>
 )
 
-export const ChartSkeleton = (): JSX.Element => (
-  <Card>
-    <CardContent className="p-6">
-      <div className="space-y-4">
-        <Skeleton className="h-6 w-1/3" />
-        <Skeleton className="h-64 w-full" />
-        <div className="flex justify-between">
-          <Skeleton className="h-4 w-12" />
-          <Skeleton className="h-4 w-12" />
-          <Skeleton className="h-4 w-12" />
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-)
+
 
 // Generic lazy wrapper with customizable loading
 interface LazyWrapperProps {

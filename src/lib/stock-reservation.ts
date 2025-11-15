@@ -3,7 +3,7 @@
  * Prevents overselling by reserving stock when orders are created
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { createClient } from '@/utils/supabase/server'
 
 export interface StockReservation {

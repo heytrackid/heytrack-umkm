@@ -19,8 +19,6 @@ import { useAuth } from '@/hooks/useAuth'
 import { useCurrency } from '@/hooks/useCurrency'
 
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
-import { FinancialTrendsChart } from '@/modules/charts/components/FinancialTrendsChart'
-import { InventoryTrendsChart } from '@/modules/charts/components/InventoryTrendsChart'
 import HppDashboardWidget from './components/HppDashboardWidget'
 import RecentOrdersSection from './components/RecentOrdersSection'
 import StatsCardsSection from './components/StatsCardsSection'
@@ -239,8 +237,6 @@ const DashboardPage = () => {
             <StockAlertsSection lowStockItems={dashboardData?.inventory?.lowStockAlerts ?? []} />
           </div>
 
-          <FinancialTrendsChart days={90} />
-          <InventoryTrendsChart days={30} />
           <HppDashboardWidget />
         </div>
 

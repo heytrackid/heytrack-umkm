@@ -24,19 +24,8 @@ export function useWebVitals(onMetric?: (metric: Metric) => void) {
             // Send to analytics
             onMetric?.(metric)
 
-            // Send to API endpoint for tracking
-            if (typeof window !== 'undefined' && 'sendBeacon' in navigator) {
-                const body = JSON.stringify({
-                    name: metric.name,
-                    value: metric.value,
-                    rating: metric.rating,
-                    delta: metric.delta,
-                    id: metric.id,
-                    navigationType: metric.navigationType
-                })
-
-                navigator.sendBeacon('/api/analytics/web-vitals', body)
-            }
+            // API analytics endpoint has been removed
+            // Original functionality would send web vitals to /api/analytics/web-vitals
         }
 
         // Track all Core Web Vitals
@@ -87,14 +76,8 @@ export function useLongTaskTracking() {
                     name: entry.name
                 }, `Long task detected: ${entry.duration}ms`)
 
-                // Send to analytics
-                if (typeof window !== 'undefined' && 'sendBeacon' in navigator) {
-                    navigator.sendBeacon('/api/analytics/long-tasks', JSON.stringify({
-                        duration: entry.duration,
-                        startTime: entry.startTime,
-                        name: entry.name
-                    }))
-                }
+                // API analytics endpoint has been removed
+                // Original functionality would send long tasks to /api/analytics/long-tasks
             }
         })
     })

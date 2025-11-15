@@ -181,6 +181,7 @@ export function useConfirmationDialog(): { confirm: (options: Omit<ConfirmationD
     // Implementation akan menggunakan state management untuk dialog
     // Untuk sekarang, kita akan return Promise yang resolve dengan hasil
      
+    // eslint-disable-next-line no-alert
     const result = window.confirm(`${options.title}\n\n${options.description}`)
     resolve(result)
   })

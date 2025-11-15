@@ -95,7 +95,7 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
       const recipesWithHpp = recipesWithCost.length
 
       // Process alerts data - handle Supabase join structure
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const alertsData: any[] = alertsRaw.map((alert: any) => {
         const alertWithRecipes = alert as { recipes: unknown }
         return {

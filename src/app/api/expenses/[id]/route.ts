@@ -70,7 +70,7 @@ export const GET = withSecurity(async function GET(
     }
 
     // ✅ V2: Safe extraction of supplier data
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const responseExpense: any = { ...(expense as Record<string, unknown>) };
     if ('supplier' in expense) {
       const supplier = extractFirst(expense['supplier'])

@@ -67,6 +67,8 @@ export interface RecipeWithHpp {
   margin_percentage: number | null
   ingredients: RecipeIngredientWithPrice[]
   operational_costs: number
+  labor_costs: number
+  overhead_costs: number
   total_cost: number
 }
 

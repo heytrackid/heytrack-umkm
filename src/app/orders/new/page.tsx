@@ -19,8 +19,7 @@ import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTr
 const OrderCustomerStep = dynamic(
   () => import('./_components/OrderCustomerStep')
     .then(m => ({ default: m.OrderCustomerStep }))
-    .catch((error) => {
-      console.error('Failed to load OrderCustomerStep:', error)
+    .catch(() => {
       return { default: () => <div className="p-4 text-center text-red-600">Failed to load customer step</div> }
     }),
   {
@@ -40,8 +39,7 @@ const OrderCustomerStep = dynamic(
 const OrderItemsStep = dynamic(
   () => import('./_components/OrderItemsStep')
     .then(m => ({ default: m.OrderItemsStep }))
-    .catch((error) => {
-      console.error('Failed to load OrderItemsStep:', error)
+    .catch(() => {
       return { default: () => <div className="p-4 text-center text-red-600">Failed to load items step</div> }
     }),
   {
@@ -61,8 +59,7 @@ const OrderItemsStep = dynamic(
 const OrderDeliveryStep = dynamic(
   () => import('./_components/OrderDeliveryStep')
     .then(m => ({ default: m.OrderDeliveryStep }))
-    .catch((error) => {
-      console.error('Failed to load OrderDeliveryStep:', error)
+    .catch(() => {
       return { default: () => <div className="p-4 text-center text-red-600">Failed to load delivery step</div> }
     }),
   {
@@ -81,8 +78,7 @@ const OrderDeliveryStep = dynamic(
 const OrderPaymentStep = dynamic(
   () => import('./_components/OrderPaymentStep')
     .then(m => ({ default: m.OrderPaymentStep }))
-    .catch((error) => {
-      console.error('Failed to load OrderPaymentStep:', error)
+    .catch(() => {
       return { default: () => <div className="p-4 text-center text-red-600">Failed to load payment step</div> }
     }),
   {
@@ -101,8 +97,7 @@ const OrderPaymentStep = dynamic(
 const OrderSummary = dynamic(
   () => import('./_components/OrderSummary')
     .then(m => ({ default: m.OrderSummary }))
-    .catch((error) => {
-      console.error('Failed to load OrderSummary:', error)
+    .catch(() => {
       return { default: () => <div className="p-4 text-center text-red-600">Failed to load order summary</div> }
     }),
   {
@@ -335,7 +330,7 @@ const NewOrderPage = () => {
               </CardContent>
             </Card>
 
-            {/* Order Summary - No longer sidebar */}
+            {/* Order Summary */}
             <Card>
               <CardContent className="p-6">
                 <Suspense fallback={

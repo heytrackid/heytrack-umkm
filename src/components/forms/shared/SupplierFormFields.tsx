@@ -1,4 +1,5 @@
-import { FormField, FormGrid, FormSection } from '@/components/ui/crud-form'
+import { FormGrid, FormSection } from '@/components/ui/crud-form'
+import { FormField } from '@/components/forms/shared/FormField'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 
@@ -32,27 +33,25 @@ export const SupplierFormFields = ({
         description="Masukkan informasi dasar supplier"
       >
         <FormField
-          name="name"
           label="Nama Supplier"
           error={errors.name?.message}
           required
         >
           <Input
-            {...register('name')}
             type="text"
             placeholder="Nama supplier atau perusahaan"
+            {...register('name')}
           />
         </FormField>
 
         <FormField
-          name="contact_person"
           label="Contact Person"
           error={errors.contact_person?.message}
         >
           <Input
-            {...register('contact_person')}
             type="text"
             placeholder="Nama orang yang bisa dihubungi"
+            {...register('contact_person')}
           />
         </FormField>
       </FormSection>
@@ -63,26 +62,24 @@ export const SupplierFormFields = ({
       >
         <FormGrid cols={2}>
           <FormField
-            name="phone"
             label="Nomor Telepon"
             error={errors.phone?.message}
           >
             <Input
-              {...register('phone')}
               type="tel"
               placeholder="Nomor telepon yang bisa dihubungi"
+              {...register('phone')}
             />
           </FormField>
 
           <FormField
-            name="email"
             label="Email"
             error={errors.email?.message}
           >
             <Input
-              {...register('email')}
               type="email"
               placeholder="Alamat email untuk komunikasi"
+              {...register('email')}
             />
           </FormField>
         </FormGrid>
@@ -90,14 +87,13 @@ export const SupplierFormFields = ({
 
       <FormSection title="Alamat">
         <FormField
-          name="address"
           label="Alamat"
           error={errors.address?.message}
         >
           <Textarea
-            {...register('address')}
             placeholder="Alamat lengkap supplier"
             rows={3}
+            {...register('address')}
           />
         </FormField>
       </FormSection>
@@ -105,14 +101,13 @@ export const SupplierFormFields = ({
       {showNotes && (
         <FormSection title="Catatan Tambahan">
           <FormField
-            name="notes"
             label="Catatan"
             error={errors.notes?.message}
           >
             <Textarea
-              {...register('notes')}
               placeholder="Catatan tambahan tentang supplier (opsional)"
               rows={2}
+              {...register('notes')}
             />
           </FormField>
         </FormSection>

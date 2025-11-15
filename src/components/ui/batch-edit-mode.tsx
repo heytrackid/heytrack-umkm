@@ -69,7 +69,7 @@ export const BatchEditMode = <T,>({
     const selectedIds = Array.from(selectedItems)
     
     if (action.requiresConfirmation) {
-       
+       // eslint-disable-next-line no-alert
       if (!confirm(`Yakin ingin melakukan aksi ini pada ${selectedCount} item?`)) {
         return
       }

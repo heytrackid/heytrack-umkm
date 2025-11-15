@@ -105,7 +105,7 @@ export function useCreateSupplier() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['suppliers'] })
 
-      logger.info('Supplier created successfully')
+      logger.info({}, 'Supplier created successfully')
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
@@ -182,7 +182,7 @@ export function useDeleteSupplier() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['suppliers'] })
 
-      logger.info('Supplier deleted successfully')
+      logger.info({}, 'Supplier deleted successfully')
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)

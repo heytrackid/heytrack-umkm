@@ -1,5 +1,6 @@
  
  
+// Using Pino logger for all logging
 'use client'
 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -9,17 +10,17 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'
 
 import type { Order, OrderStatus } from '@/app/orders/types/orders.types'
-import { PageHeader } from '@/components/layout/PageHeader'
+import { PageHeader } from '@/components/layout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
+import { Input } from '@/components/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useCurrency } from '@/hooks/useCurrency'
-import { createClientLogger } from '@/lib/client-logger'
+import { uiLogger } from '@/lib/logger'
 import { arrayCalculations } from '@/lib/performance/index'
 import { getErrorMessage } from '@/lib/type-guards'
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
@@ -28,7 +29,8 @@ import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@/modules/orders/typ
 
 
 
-const logger = createClientLogger('OrdersPage')
+// Using uiLogger for client-side logging
+const logger = uiLogger
 
 
 
@@ -38,7 +40,7 @@ const OrderForm = dynamic(
   () => import('./OrderForm')
     .then(mod => mod.OrderForm)
     .catch((error) => {
-      console.error('Failed to load OrderForm:', error)
+      logger.error({ error }, 'Failed to load OrderForm')
       return { default: () => <div className="h-64 sm:h-96 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load order form</div> }
     }),
   {
@@ -51,7 +53,7 @@ const OrderDetailView = dynamic(
   () => import('./OrderDetailView')
     .then(mod => mod.OrderDetailView)
     .catch((error) => {
-      console.error('Failed to load OrderDetailView:', error)
+      logger.error({ error }, 'Failed to load OrderDetailView')
       return { default: () => <div className="h-64 sm:h-96 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load order details</div> }
     }),
   {
@@ -120,26 +122,22 @@ const OrdersPage = (_props: OrdersPageProps) => {
         credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) { 
-        logger.error('Failed to fetch orders', { status: response.status })
+        logger.error({ status: response.status }, 'Failed to fetch orders')
         throw new Error('Failed to fetch orders') 
       }
       const result: unknown = await response.json()
       
-      logger.info('Received orders data', { result })
-      
       // Handle both formats: direct array or { data: array }
       if (Array.isArray(result)) {
-        logger.info('Orders data is array', { count: result.length })
         return result as Order[]
       }
-      
+
       if (result && typeof result === 'object' && 'data' in result) {
         const data = (result as { data: unknown }).data
         const orders = Array.isArray(data) ? (data as Order[]) : []
-        logger.info('Orders data extracted from object', { count: orders.length })
         return orders
       }
-      
+
       logger.warn('Orders data format not recognized, returning empty array')
       return []
     },

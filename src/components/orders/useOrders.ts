@@ -33,7 +33,7 @@ export function useOrders() {
     queryKey: orderKeys.list(50),
     queryFn: async () => {
       try {
-        queryLogger.info('Fetching orders from API...')
+        queryLogger.info({}, 'Fetching orders from API...')
         const response = await fetch('/api/orders?limit=50', {
           credentials: 'include', // Include cookies for authentication
         })
@@ -97,7 +97,7 @@ export function useOrders() {
 
         // ✅ FIX: API returns { data: [...], meta: {...} }
         if (json && typeof json === 'object' && 'data' in json && Array.isArray(json['data'])) {
-          queryLogger.info(`Orders fetched successfully: count=${(json['data'] as unknown[]).length}`)
+          queryLogger.info({ count: (json['data'] as unknown[]).length }, 'Orders fetched successfully')
 
           return {
             data: json['data'],
@@ -105,7 +105,7 @@ export function useOrders() {
           }
         }
 
-        queryLogger.error(`API returned unexpected format: response=${JSON.stringify(json)}`)
+        queryLogger.error({ response: json }, 'API returned unexpected format')
         throw new Error('API returned unexpected format. Expected { data: [...] }')
         
         } catch (error) {
@@ -117,7 +117,7 @@ export function useOrders() {
         }
 
         // Log and re-throw other errors
-        queryLogger.error(`Error in orders query: error=${String(normalizedError)}`)
+        queryLogger.error({ error: String(normalizedError) }, 'Error in orders query')
         throw normalizedError
       }
     },
@@ -204,7 +204,7 @@ export function useOrders() {
           }))
         }
 
-        queryLogger.info(`Creating order... orderData=${JSON.stringify(newOrder)}`)
+        queryLogger.info({ orderData: newOrder }, 'Creating order...')
 
         const response = await fetch('/api/orders', {
           method: 'POST',
@@ -250,7 +250,7 @@ export function useOrders() {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: orderKeys.all })
-      queryLogger.info('Order created, cache invalidated')
+      queryLogger.info({}, 'Order created, cache invalidated')
     },
     onError: (error) => {
       const message = getErrorMessage(error)
@@ -310,7 +310,7 @@ export function useOrders() {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: orderKeys.all })
-      queryLogger.info('Order updated successfully')
+      queryLogger.info({}, 'Order updated successfully')
     },
     onError: (error) => {
       const message = getErrorMessage(error)

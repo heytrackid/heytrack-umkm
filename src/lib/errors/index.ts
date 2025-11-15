@@ -45,7 +45,7 @@ export function useErrorHandler() {
 
   const handle = useCallback((error: unknown, context?: string) => {
     const appError = error instanceof Error ? error : new Error(String(error))
-    logger.error({ error, context }, `Error in ${context ?? 'component'}`)
+    logger.error({ error, context }, 'Error in component')
 
     setErrorState({
       error: appError as AppError,

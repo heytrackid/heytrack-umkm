@@ -5,6 +5,7 @@
  * while still allowing Supabase to handle reconnection automatically.
  */
 
+/* eslint-disable no-console */
 import { logger } from '@/lib/logger'
 
 // Store original console.error
@@ -36,7 +37,7 @@ export function initRealtimeErrorSuppression() {
 
     if (!shouldSuppress) {
       // Pass through other errors normally
-      logger.error(args.join(' '))
+      logger.error({}, args.join(' '))
     }
     // Silently ignore WebSocket errors - Supabase handles reconnection
   }

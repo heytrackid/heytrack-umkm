@@ -16,9 +16,6 @@ import { performanceLogger } from '@/lib/client-logger'
  * Dynamically import heavy libraries only when needed
  */
 export const lazyImports = {
-  // Charts - Load only when needed
-  recharts: (): Promise<unknown> => import('recharts'),
-
   // Excel export - Load only when exporting
   exceljs: (): Promise<unknown> => import('exceljs'),
 
@@ -89,7 +86,7 @@ export function shouldLoadFeature(feature: string): boolean {
     nav.connection?.effectiveType === '2g'
 
   // Don't load heavy features on mobile with slow connection
-  const heavyFeatures = ['charts', 'export', 'ai-chatbot']
+  const heavyFeatures = ['export', 'ai-chatbot']
   
   if (isMobile && isSlowConnection && heavyFeatures.includes(feature)) {
     return false

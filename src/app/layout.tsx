@@ -1,7 +1,7 @@
 import { StackProvider, StackTheme } from "@stackframe/stack";
 import { Analytics } from '@vercel/analytics/next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import { stackClientApp } from "../stack/client";
+import { stackServerApp } from "../stack/server";
 
 import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary';
 import { ThemeProvider } from '@/components/providers/theme-provider';
@@ -63,6 +63,7 @@ const RootLayout = async ({
         {nonce && (
           <script
             nonce={nonce}
+            suppressHydrationWarning
             dangerouslySetInnerHTML={{
               __html: `window.__CSP_NONCE__ = '${nonce}';`,
             }}
@@ -72,7 +73,7 @@ const RootLayout = async ({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[100svh] m-0 p-0 w-full`}
         suppressHydrationWarning
-      ><StackProvider app={stackClientApp}><StackTheme>
+      ><StackProvider app={stackServerApp}><StackTheme>
         <SupabaseProvider>
             <ThemeProvider
               attribute="class"

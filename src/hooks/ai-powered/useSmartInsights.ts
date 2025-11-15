@@ -75,7 +75,7 @@ export function useSmartInsights({
                 priority: 'high' as const
               }
             } catch (error) {
-              logger.warn({ error }, `Pricing analysis failed for ${recipe.name ?? 'unknown'}`)
+              logger.warn({ error, recipeName: recipe.name }, 'Pricing analysis failed')
               return null
             }
           }

@@ -7,7 +7,6 @@ import {
     CheckCircle,
     DollarSign,
     Info,
-    LineChart,
     ShoppingCart,
     TrendingDown,
     TrendingUp,
@@ -386,114 +385,7 @@ export const ProfitabilityCalculator = ({
   )
 }
 
-// Sales Performance Chart Component
-interface SalesData {
-  period: string
-  sales: number
-  target?: number
-  orders: number
-}
 
-interface SalesPerformanceChartProps {
-  data: SalesData[]
-  period: 'daily' | 'monthly' | 'weekly' | 'yearly'
-  showTargets?: boolean
-  className?: string
-}
-
-export const SalesPerformanceChart = ({
-  data,
-  period,
-  showTargets = false,
-  className = ""
-}: SalesPerformanceChartProps) => {
-  const maxSales = Math.max(...data.map(d => d.sales))
-  const maxTarget = showTargets && data.some(d => d.target)
-    ? Math.max(...data.map(d => d.target ?? 0))
-    : maxSales
-
-  const chartHeight = 200
-  const getBarHeight = (value: number) => (value / maxTarget) * chartHeight
-
-  return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <LineChart className="h-5 w-5" />
-          Sales Performance
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {/* Chart */}
-          <div className="flex items-end gap-2 h-48">
-            {data.map((item, index) => (
-              <div key={index} className="flex-1 flex flex-col items-center gap-2">
-                <div className="flex flex-col items-center gap-1 w-full">
-                  {/* Target bar (if shown) */}
-                  {showTargets && item.target && (
-                    <div
-                      className="w-2 bg-blue-200 rounded-t"
-                      style={{ height: getBarHeight(item.target) }}
-                    />
-                  )}
-
-                  {/* Sales bar */}
-                  <div
-                    className="w-6 bg-primary rounded-t transition-all duration-300 hover:opacity-80"
-                    style={{ height: getBarHeight(item.sales) }}
-                  />
-                </div>
-
-                <span className="text-xs text-muted-foreground text-center">
-                  {item.period}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* Legend */}
-          <div className="flex items-center justify-center gap-6 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-primary rounded" />
-              <span>Sales</span>
-            </div>
-            {showTargets && (
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-blue-200 rounded" />
-                <span>Target</span>
-              </div>
-            )}
-          </div>
-
-          {/* Summary */}
-          <div className="grid grid-cols-3 gap-4 pt-4 border-t text-center">
-            <div>
-              <p className="text-2xl font-bold text-primary">
-                {formatCurrency(data.reduce((sum, d) => sum + d.sales, 0))}
-              </p>
-              <p className="text-sm text-muted-foreground">Total Sales</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold">
-                {data.reduce((sum, d) => sum + d.orders, 0)}
-              </p>
-              <p className="text-sm text-muted-foreground">Orders</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-muted-foreground">
-                {data.length > 0 ? formatCurrency(
-                  data.reduce((sum, d) => sum + d.sales, 0) / data.length
-                ) : '0'}
-              </p>
-              <p className="text-sm text-muted-foreground">Avg per {period.slice(0, -2)}</p>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
 
 // Customer Insights Component
 interface CustomerInsight {

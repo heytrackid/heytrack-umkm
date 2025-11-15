@@ -1,6 +1,5 @@
 export const runtime = 'nodejs'
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
@@ -29,14 +28,18 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
     const supabase = await createClient()
 
     // Get or create business settings using app_settings
-    let { data: settings, error } = await supabase
+    const { data: settings, error } = await supabase
       .from('app_settings')
       .select('*')
       .eq('user_id', user.id)
       .eq('settings_data->>type', 'business')
-      .single()
+      .maybeSingle()
 
-    if (error && error.code === 'PGRST116') {
+    if (error) {
+      throw error
+    }
+
+    if (!settings) {
       // Settings don't exist, create default
       const { data: newSettings, error: insertError } = await supabase
         .from('app_settings')
@@ -55,9 +58,11 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
         .single()
 
       if (insertError) throw insertError
-      settings = newSettings
-    } else if (error) {
-      throw error
+
+      return NextResponse.json({
+        success: true,
+        data: newSettings,
+      })
     }
 
     return NextResponse.json({

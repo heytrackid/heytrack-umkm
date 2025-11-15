@@ -1,5 +1,6 @@
 'use client'
 
+// Using Pino logger for all logging
 import { useQuery } from '@tanstack/react-query'
 import { AlertCircle } from 'lucide-react'
 import dynamic from 'next/dynamic'
@@ -10,6 +11,7 @@ import { useOrderItemsController } from '@/components/orders/hooks/useOrderItems
 import { Button } from '@/components/ui/button'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { warningToast } from '@/hooks/use-toast'
+import { uiLogger } from '@/lib/logger'
 import { ORDER_CONFIG } from '@/modules/orders/constants'
 import { calculateOrderTotals, generateOrderNo } from '@/modules/orders/utils/helpers'
 
@@ -30,7 +32,7 @@ const CustomerSection = dynamic(
   () => import('./CustomerSection')
     .then(mod => mod.CustomerSection)
     .catch((error) => {
-      console.error('Failed to load CustomerSection:', error)
+      uiLogger.error({ error }, 'Failed to load CustomerSection')
       return { default: () => <div className="h-64 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load customer section</div> }
     }),
   {
@@ -43,7 +45,7 @@ const ItemsSection = dynamic(
   () => import('./ItemsSection')
     .then(mod => mod.ItemsSection)
     .catch((error) => {
-      console.error('Failed to load ItemsSection:', error)
+      uiLogger.error({ error }, 'Failed to load ItemsSection')
       return { default: () => <div className="h-64 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load items section</div> }
     }),
   {
@@ -56,7 +58,7 @@ const DeliverySection = dynamic(
   () => import('./DeliverySection')
     .then(mod => mod.DeliverySection)
     .catch((error) => {
-      console.error('Failed to load DeliverySection:', error)
+      uiLogger.error({ error }, 'Failed to load DeliverySection')
       return { default: () => <div className="h-64 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load delivery section</div> }
     }),
   {
@@ -69,7 +71,7 @@ const PaymentSection = dynamic(
   () => import('./PaymentSection')
     .then(mod => mod.PaymentSection)
     .catch((error) => {
-      console.error('Failed to load PaymentSection:', error)
+      uiLogger.error({ error }, 'Failed to load PaymentSection')
       return { default: () => <div className="h-64 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load payment section</div> }
     }),
   {

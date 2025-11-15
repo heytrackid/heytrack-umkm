@@ -1,68 +1,25 @@
 'use client'
 
 import { AlertTriangle, Plus, ShoppingCart, Upload } from 'lucide-react'
-import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
-import { Suspense, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { IngredientsCRUDSkeleton as ImportedIngredientsCRUDSkeleton } from '@/app/ingredients/components/IngredientsCRUDSkeleton'
 import { generateIngredientsTemplate, parseIngredientsCSV } from '@/components/import/csv-helpers'
+import { ImportDialog } from '@/components/import/ImportDialog'
+import { EnhancedIngredientsPage } from '@/components/ingredients/EnhancedIngredientsPage'
+import { IngredientFormDialog } from '@/components/ingredients/IngredientFormDialog'
+import { PageHeader } from '@/components/layout'
 import { AppLayout } from '@/components/layout/app-layout'
-import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
-import { BreadcrumbPatterns, PageBreadcrumb, StatCardPatterns, StatsCards } from '@/components/ui/index'
-import { useAuth } from '@/hooks/index'
+import { StatCardPatterns, StatsCards } from '@/components/ui/index'
 import { useToast } from '@/hooks/use-toast'
 import { useIngredients } from '@/hooks/useIngredients'
 
 import type { Row } from '@/types/database'
 
-
-// Lazy load heavy components
-// ✅ Correct pattern for named exports (per Next.js docs)
-
-const IngredientsCRUD = dynamic(
-  () => import('@/components/ingredients/EnhancedIngredientsPage')
-    .then(mod => mod.EnhancedIngredientsPage)
-    .catch((error) => {
-      console.error('Failed to load EnhancedIngredientsPage:', error)
-      return { default: () => <div className="p-4 text-center text-red-600">Failed to load ingredients page</div> }
-    }),
-  {
-    loading: () => <ImportedIngredientsCRUDSkeleton />,
-    ssr: false
-  }
-)
-
-const IngredientFormDialog = dynamic(
-  () => import('@/components/ingredients/IngredientFormDialog')
-    .then(mod => mod.IngredientFormDialog)
-    .catch((error) => {
-      console.error('Failed to load IngredientFormDialog:', error)
-      return { default: () => null }
-    }),
-  {
-    loading: () => null,
-    ssr: false
-  }
-)
-
-const ImportDialog = dynamic(
-  () => import('@/components/import/ImportDialog')
-    .then(mod => mod.ImportDialog)
-    .catch((error) => {
-      console.error('Failed to load ImportDialog:', error)
-      return { default: () => null }
-    }),
-  {
-    loading: () => null,
-    ssr: false
-  }
-)
-
 const IngredientsPage = () => {
   const { data: ingredients, isLoading: loading, error } = useIngredients();
-  const { isLoading: isAuthLoading } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const [importDialogOpen, setImportDialogOpen] = useState(false);
@@ -103,15 +60,11 @@ const IngredientsPage = () => {
   ) ?? 0;
   const outOfStockCount = ingredients?.filter((i: Row<'ingredients'>) => (i.current_stock ?? 0) <= 0).length ?? 0;
 
-  // ✅ FIX: Combine loading states
-  const isLoading = isAuthLoading || loading
-
   // Show loading state
-  if (isLoading && !ingredients) {
+  if (loading && !ingredients) {
     return (
       <AppLayout>
         <div className="space-y-6 p-6">
-          <PageBreadcrumb items={BreadcrumbPatterns.ingredients} />
 
           {/* Header - Always visible */}
           <PageHeader
@@ -164,7 +117,6 @@ const IngredientsPage = () => {
   return (
     <AppLayout>
       <div className="space-y-6 p-6">
-        <PageBreadcrumb items={BreadcrumbPatterns.ingredients} />
 
         {/* Header */}
         <PageHeader
@@ -231,63 +183,61 @@ const IngredientsPage = () => {
         )}
 
         {/* Main Content */}
-        <Suspense fallback={<ImportedIngredientsCRUDSkeleton />}>
-          <IngredientsCRUD onAdd={() => setShowAddDialog(true)} />
-        </Suspense>
+        {loading ? (
+          <ImportedIngredientsCRUDSkeleton />
+        ) : (
+          <EnhancedIngredientsPage onAdd={() => setShowAddDialog(true)} />
+        )}
 
         {/* Import Dialog */}
-        <Suspense fallback={null}>
-          <ImportDialog
-            open={importDialogOpen}
-            onOpenChange={setImportDialogOpen}
-            title="Import Bahan Baku"
-            description="Upload file CSV untuk import data bahan baku secara massal"
-            templateUrl={templateUrl}
-            templateFilename="template-bahan-baku.csv"
-            parseCSV={parseIngredientsCSV}
-            onImport={async (data: unknown) => {
-              try {
-                const response = await fetch('/api/ingredients/import', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ ingredients: data })
-                })
+        <ImportDialog
+          open={importDialogOpen}
+          onOpenChange={setImportDialogOpen}
+          title="Import Bahan Baku"
+          description="Upload file CSV untuk import data bahan baku secara massal"
+          templateUrl={templateUrl}
+          templateFilename="template-bahan-baku.csv"
+          parseCSV={parseIngredientsCSV}
+          onImport={async (data: unknown) => {
+            try {
+              const response = await fetch('/api/ingredients/import', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ingredients: data })
+              })
 
-                const result = await response.json() as { error?: string; details?: unknown[]; count?: number }
+              const result = await response.json() as { error?: string; details?: unknown[]; count?: number }
 
-                if (!response.ok) {
-                  return {
-                    success: false,
-                    error: result.error ?? 'Import gagal',
-                    details: result.details || []
-                  }
-                }
-
-                // Refresh data
-                router.refresh()
-
-                return {
-                  success: true,
-                  ...(result.count !== undefined && { count: result.count })
-                }
-               } catch {
+              if (!response.ok) {
                 return {
                   success: false,
-                  error: 'Terjadi kesalahan saat import'
+                  error: result.error ?? 'Import gagal',
+                  details: result.details || []
                 }
               }
-            }}
-          />
-        </Suspense>
+
+              // Refresh data
+              router.refresh()
+
+              return {
+                success: true,
+                ...(result.count !== undefined && { count: result.count })
+              }
+             } catch {
+              return {
+                success: false,
+                error: 'Terjadi kesalahan saat import'
+              }
+            }
+          }}
+        />
 
         {/* Add/Edit Dialog */}
-        <Suspense fallback={null}>
-          <IngredientFormDialog
-            open={showAddDialog}
-            onOpenChange={setShowAddDialog}
-            onSuccess={() => router.refresh()}
-          />
-        </Suspense>
+        <IngredientFormDialog
+          open={showAddDialog}
+          onOpenChange={setShowAddDialog}
+          onSuccess={() => router.refresh()}
+        />
       </div>
     </AppLayout>
   );

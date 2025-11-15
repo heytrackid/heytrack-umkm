@@ -97,7 +97,7 @@ export class WacEngineService {
 
     } catch (error) {
       const normalizedError = normalizeError(error)
-      this.logger.error({ error: normalizedError }, `Failed to calculate WAC for ingredient ${ingredientId}`)
+      this.logger.error({ error: normalizedError, ingredientId }, 'Failed to calculate WAC for ingredient')
       throw normalizedError
     }
   }
@@ -135,7 +135,7 @@ export class WacEngineService {
 
     } catch (error) {
       const normalizedError = normalizeError(error)
-      this.logger.error({ error: normalizedError }, `Failed to update WAC for ingredient ${ingredientId}`)
+      this.logger.error({ error: normalizedError, ingredientId }, 'Failed to update WAC for ingredient')
       throw normalizedError
     }
   }
@@ -203,15 +203,15 @@ export class WacEngineService {
           .eq('id', ingredientId)
 
         if (updateError) {
-          this.logger.error({ error: updateError }, `Failed to update price for ingredient ${ingredientId}`)
+          this.logger.error({ error: updateError, ingredientId }, 'Failed to update price for ingredient')
         } else {
-          this.logger.info(`Updated ingredient ${ingredientId} price from ${currentPrice} to ${newWac} (WAC change)`)
+          this.logger.info({ ingredientId, currentPrice, newWac }, 'Updated ingredient price (WAC change)')
         }
       }
 
     } catch (error) {
       const normalizedError = normalizeError(error)
-      this.logger.error({ error: normalizedError }, `Failed to update ingredient price for ${ingredientId}`)
+      this.logger.error({ error: normalizedError, ingredientId }, 'Failed to update ingredient price')
     }
   }
 
@@ -220,7 +220,7 @@ export class WacEngineService {
    */
   async recalculateAllWac(): Promise<void> {
     try {
-      this.logger.info('Starting WAC recalculation for all ingredients')
+      this.logger.info({}, 'Starting WAC recalculation for all ingredients')
 
       const supabase = await this.getSupabase()
 
@@ -235,7 +235,7 @@ export class WacEngineService {
       }
 
       if (!ingredients || ingredients.length === 0) {
-        this.logger.info('No active ingredients found')
+        this.logger.info({}, 'No active ingredients found')
         return
       }
 
@@ -251,7 +251,7 @@ export class WacEngineService {
 
       await Promise.all(promises)
 
-      this.logger.info(`WAC recalculated for ${ingredients.length} ingredients`)
+      this.logger.info({ ingredientCount: ingredients.length }, 'WAC recalculated for ingredients')
 
     } catch (error) {
       const normalizedError = normalizeError(error)
@@ -324,7 +324,7 @@ export class WacEngineService {
 
     } catch (error) {
       const normalizedError = normalizeError(error)
-      this.logger.error({ error: normalizedError }, `Failed to get WAC history for ingredient ${ingredientId}`)
+      this.logger.error({ error: normalizedError, ingredientId }, 'Failed to get WAC history for ingredient')
       throw normalizedError
     }
   }

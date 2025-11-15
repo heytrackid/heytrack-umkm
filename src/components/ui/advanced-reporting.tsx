@@ -93,16 +93,7 @@ export const AdvancedReporting = ({
     }, 1500)
   }
 
-  // Get chart title based on active report
-  const getChartTitle = () => {
-    if (activeReport === 'sales') {
-      return 'Grafik Penjualan'
-    }
-    if (activeReport === 'orders') {
-      return 'Grafik Pesanan'
-    }
-    return 'Grafik Keuntungan'
-  }
+
 
   return (
     <div className="space-y-6">
@@ -110,7 +101,7 @@ export const AdvancedReporting = ({
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
-            <BarChart3 className="h-6 w-6" />
+            <TrendingUp className="h-6 w-6" />
             Laporan Lanjutan
           </h2>
           <p className="text-muted-foreground mt-1">
@@ -179,7 +170,7 @@ export const AdvancedReporting = ({
         </Card>
       </div>
 
-      {/* Chart Controls */}
+      {/* Report Controls */}
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="font-medium">Laporan:</h3>
         <Button
@@ -205,13 +196,26 @@ export const AdvancedReporting = ({
         </Button>
       </div>
 
-      {/* Chart */}
+      {/* Data Summary */}
       <div className="bg-background rounded-xl border p-4">
         <h3 className="text-lg font-semibold mb-4">
-          {getChartTitle()}
+          Data Summary
         </h3>
-        <div className="h-64 sm:h-80 flex items-center justify-center text-muted-foreground">
-          Chart visualization placeholder
+        <div className="h-64 sm:h-80 flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto" />
+            <p className="text-muted-foreground">Data summary for {activeReport}</p>
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="text-center">
+                <p className="text-2xl font-bold">1,234</p>
+                <p className="text-sm text-muted-foreground">Total</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold">+12%</p>
+                <p className="text-sm text-muted-foreground">Growth</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

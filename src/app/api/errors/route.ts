@@ -99,7 +99,7 @@ async function logErrorToDatabase(
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { error } = await (supabase.from('error_logs') as any).insert(payload)
     if (error) {
       throw error

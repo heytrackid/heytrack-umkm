@@ -244,7 +244,6 @@ export const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
             {/* Tabbed Content */}
             <ProfitReportTabs
                 profitData={profitData}
-                chartType={chartType}
                 selectedDataPoint={selectedDataPoint}
                 setSelectedDataPoint={setSelectedDataPoint}
                 compareMode={compareMode}

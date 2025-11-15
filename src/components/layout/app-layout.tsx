@@ -1,30 +1,12 @@
 'use client'
 
-import {
-    BarChart3,
-    Calculator,
-    CircleDollarSign,
-    Download,
-    Factory,
-    FileText,
-    LayoutDashboard,
-    MessageSquare,
-    Package,
-    Receipt,
-    ShoppingCart,
-    TrendingUp,
-    Truck,
-    User,
-    Users,
-    Utensils,
-    Wallet
-} from 'lucide-react'
+import { Download, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { memo, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 
 import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary'
-import { TabNavigation } from '@/components/layout/TabNavigation'
 import { SmartBottomNav } from '@/components/navigation/SmartNavigation'
+import { TabNavigation } from '@/components/navigation/TabNavigation'
 import { Button } from '@/components/ui/button'
 import {
     DropdownMenu,
@@ -41,82 +23,32 @@ import { uiLogger } from '@/lib/client-logger'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { useResponsive } from '@/utils/responsive'
 
-
 interface AppLayoutProps {
   children: ReactNode
   pageTitle?: string
 }
 
-const mainTabs = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  {
-    label: 'Inventori',
-    icon: Package,
-    items: [
-      { label: 'Bahan Baku', href: '/ingredients', icon: Package },
-      { label: 'Resep', href: '/recipes', icon: Utensils },
-      { label: 'Pemasok', href: '/suppliers', icon: Truck },
-      { label: 'HPP', href: '/hpp', icon: Calculator }
-    ]
-  },
-  {
-    label: 'Manajemen',
-    icon: Users,
-    items: [
-      { label: 'Pelanggan', href: '/customers', icon: Users }
-    ]
-  },
-  {
-    label: 'Operasional',
-    icon: Factory,
-    items: [
-      { label: 'Produksi', href: '/production', icon: Factory },
-      { label: 'Pesanan', href: '/orders', icon: ShoppingCart },
-      { label: 'Biaya Operasional', href: '/operational-costs', icon: Receipt }
-    ]
-  },
-  {
-    label: 'Keuangan',
-    icon: Wallet,
-    items: [
-      { label: 'Arus Kas', href: '/cash-flow', icon: CircleDollarSign },
-      { label: 'Profit', href: '/profit', icon: TrendingUp }
-    ]
-  },
-  { label: 'AI Chatbot', href: '/ai-chatbot', icon: MessageSquare, badge: '✨' },
-  {
-    label: 'Analitik',
-    icon: BarChart3,
-    items: [
-      { label: 'Laporan', href: '/reports', icon: FileText }
-    ]
-  }
-]
-
-export const AppLayout = memo(({
-  children
-}: AppLayoutProps) => {
+export const AppLayout = memo(({ children }: AppLayoutProps) => {
   const { user, isLoading: loading, isAuthenticated } = useAuth()
   const { prefetchRoute } = useInstantNavigation()
   const router = useRouter()
-   const mainContentRef = useRef<HTMLDivElement>(null)
-   const [mounted, setMounted] = useState(false)
+  const mainContentRef = useRef<HTMLDivElement>(null)
+  const [mounted, setMounted] = useState(false)
 
-    // Set mounted state to prevent hydration mismatch
-    useLayoutEffect(() => {
-      const timer = setTimeout(() => {
-        setMounted(true)
-      }, 0)
-      
-      return () => clearTimeout(timer)
-    }, [])
+  // Set mounted state to prevent hydration mismatch
+  useLayoutEffect(() => {
+    const timer = setTimeout(() => {
+      setMounted(true)
+    }, 0)
 
-   // Prefetch critical routes on mount for faster navigation
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Prefetch critical routes on mount for faster navigation
   useEffect(() => {
     if (user) {
-      // Prefetch common routes after user loads
       const criticalRoutes = ['/dashboard', '/orders', '/customers', '/ingredients']
-      criticalRoutes.forEach(route => {
+      criticalRoutes.forEach((route) => {
         void prefetchRoute(route)
       })
     }
@@ -130,8 +62,6 @@ export const AppLayout = memo(({
 
   // Supabase client
   const { supabase: _supabase } = useSupabase()
-
-
 
   // Swipe gesture support for mobile navigation
   useEffect(() => {
@@ -164,10 +94,9 @@ export const AppLayout = memo(({
       const deltaX = e.touches[0].clientX - startX
       const deltaY = e.touches[0].clientY - startY
 
-      // Determine if this is a horizontal swipe (more horizontal than vertical movement)
       if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
         isHorizontalSwipe = true
-        e.preventDefault() // Prevent scrolling when swiping horizontally
+        e.preventDefault()
       }
     }
 
@@ -179,19 +108,15 @@ export const AppLayout = memo(({
       const endX = e.changedTouches[0].clientX
       const deltaX = endX - startX
 
-      // Minimum swipe distance (100px)
       if (Math.abs(deltaX) < 100) {
         return
       }
 
-      // Get current path to determine navigation
       const currentPath = window.location.pathname
-
-      // Define navigation order for swipe gestures
       const navOrder = ['/dashboard', '/orders', '/customers', '/ingredients']
 
-      const currentIndex = navOrder.findIndex(path =>
-        currentPath === path || (path !== '/' && currentPath.startsWith(path))
+      const currentIndex = navOrder.findIndex(
+        (path) => currentPath === path || (path !== '/' && currentPath.startsWith(path))
       )
 
       if (currentIndex === -1) {
@@ -200,10 +125,8 @@ export const AppLayout = memo(({
 
       let nextIndex
       if (deltaX > 0) {
-        // Swipe right - go to previous item
         nextIndex = currentIndex > 0 ? currentIndex - 1 : navOrder.length - 1
       } else {
-        // Swipe left - go to next item
         nextIndex = currentIndex < navOrder.length - 1 ? currentIndex + 1 : 0
       }
 
@@ -212,7 +135,6 @@ export const AppLayout = memo(({
         router.push(nextPath)
       }
 
-      // Reset swipe state
       startX = 0
       startY = 0
       isHorizontalSwipe = false
@@ -240,116 +162,122 @@ export const AppLayout = memo(({
 
   return (
     <GlobalErrorBoundary>
-      <div className="flex h-screen flex-col">
-      {/* Top Header */}
-      <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-4 md:px-6">
-        <div className="flex items-center gap-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <span className="font-bold text-sm">HT</span>
+      <div className="min-h-screen bg-background">
+        {/* Top Header */}
+        <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-4 md:px-6">
+          <div className="flex items-center gap-2">
+            {!isMobile && (
+              <>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <span className="font-bold text-sm">HT</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-semibold text-sm">HeyTrack</span>
+                  <span className="text-muted-foreground text-xs">UMKM Management</span>
+                </div>
+              </>
+            )}
           </div>
-          <span className="hidden font-semibold md:inline">HeyTrack</span>
-        </div>
 
-        <div className="flex items-center gap-2">
-          <NotificationCenter
-            notifications={notifications.notifications}
-            onMarkAsRead={notifications.markAsRead}
-            onMarkAllAsRead={notifications.markAllAsRead}
-            onClearAll={notifications.clearAll}
-          />
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={async () => {
-              try {
-                const response = await fetch('/api/export/global')
-                if (response.ok) {
-                  const blob = await response.blob()
-                  const url = window.URL.createObjectURL(blob)
-                  const a = document.createElement('a')
-                  a.href = url
-                  a.download = `heytrack-export-${new Date().toISOString().split('T')[0]}.xlsx`
-                  document['body'].appendChild(a)
-                  a.click()
-                  document['body'].removeChild(a)
-                  window.URL.revokeObjectURL(url)
-                } else {
-                  uiLogger.error('Failed to export data')
-                }
-              } catch (error) {
-                uiLogger.error({ error }, 'Error exporting data')
-              }
-            }}
-            title="Export Data"
-          >
-            <Download className="h-4 w-4" />
-          </Button>
-          <ThemeToggle />
-
-          {/* User Authentication */}
-          {loading && (
-            <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
-          )}
-
-          {!loading && user && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <User className="mr-2 h-4 w-4" />
-                  <span className="hidden sm:inline">{user.email?.split('@')[0]}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <div className="px-2 py-1.5 text-sm font-medium">{user.email}</div>
-                <DropdownMenuItem onClick={() => router.push('/settings')}>
-                  Pengaturan
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => router.push('/auth/logout')}
-                  className="text-red-600 focus:text-red-600"
-                >
-                  Keluar
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-
-          {!loading && !isAuthenticated && (
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={() => router.push('/auth/login')}>
-                Masuk
-              </Button>
+              <NotificationCenter
+                notifications={notifications.notifications}
+                onMarkAsRead={notifications.markAsRead}
+                onMarkAllAsRead={notifications.markAllAsRead}
+                onClearAll={notifications.clearAll}
+              />
               <Button
+                variant="ghost"
                 size="sm"
-                onClick={() => router.push('/auth/register')}
-                className="hidden sm:inline-flex"
+                onClick={async () => {
+                  try {
+                    const response = await fetch('/api/export/global')
+                    if (response.ok) {
+                      const blob = await response.blob()
+                      const url = window.URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = `heytrack-export-${new Date().toISOString().split('T')[0]}.xlsx`
+                      document['body'].appendChild(a)
+                      a.click()
+                      document['body'].removeChild(a)
+                      window.URL.revokeObjectURL(url)
+                    } else {
+                      uiLogger.error({}, 'Failed to export data')
+                    }
+                  } catch (error) {
+                    uiLogger.error({ error }, 'Error exporting data')
+                  }
+                }}
+                title="Export Data"
               >
-                Daftar
+                <Download className="h-4 w-4" />
               </Button>
+              <ThemeToggle />
+
+              {/* User Authentication */}
+              {loading && <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />}
+
+              {!loading && user && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <User className="mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">{user.email?.split('@')[0]}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <div className="px-2 py-1.5 text-sm font-medium">{user.email}</div>
+                    <DropdownMenuItem onClick={() => router.push('/settings')}>
+                      Pengaturan
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => router.push('/handler/sign-out')}
+                      className="text-red-600 focus:text-red-600"
+                    >
+                      Keluar
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+
+              {!loading && !isAuthenticated && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => router.push('/handler/sign-in')}
+                  >
+                    Masuk
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => router.push('/handler/sign-up')}
+                    className="hidden sm:inline-flex"
+                  >
+                    Daftar
+                  </Button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </header>
+          </header>
 
-      {/* Conditional Navigation: Tab Navigation for tablet/desktop, Bottom Nav for mobile */}
-      {!isMobile && <TabNavigation tabs={mainTabs} />}
+          {/* Tab Navigation - Desktop Only */}
+          {!isMobile && <TabNavigation />}
 
-       {/* Main Content */}
-       <main
-         ref={mainContentRef}
-          className={`flex-1 overflow-auto bg-background ${isMobile ? 'pb-[calc(56px+env(safe-area-inset-bottom))]' : ''}`}
-       >
-         <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-8">
-           {children}
-         </div>
-       </main>
+          {/* Main Content */}
+          <main
+            ref={mainContentRef}
+            className={`flex-1 overflow-auto bg-background ${isMobile ? 'pb-[calc(56px+env(safe-area-inset-bottom))]' : ''}`}
+          >
+            <div className="container mx-auto h-full px-4 py-6 md:px-6 md:py-8">{children}</div>
+          </main>
 
-      {/* Bottom Navigation for Mobile */}
-      {isMobile && <SmartBottomNav />}
+        {/* Bottom Navigation for Mobile */}
+        {isMobile && <SmartBottomNav />}
       </div>
     </GlobalErrorBoundary>
   )
 })
 
 AppLayout.displayName = 'AppLayout'
-

@@ -1,6 +1,6 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
 
-import { uiLogger, serializeError } from '@/lib/logger'
+import { serializeError, uiLogger } from '@/lib/logger'
 
 /**
  * Bundle Splitting Utilities
@@ -8,7 +8,7 @@ import { uiLogger, serializeError } from '@/lib/logger'
  */
 
 // Lazy load with error boundary
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export function lazyLoad<T extends ComponentType<any>>(
   importFunc: () => Promise<{ default: T }>
 ): LazyExoticComponent<T> {
@@ -150,36 +150,7 @@ export class BundleMonitor {
   }
 }
 
-// Shared recharts bundle to avoid duplicate imports
-const rechartsBundle = () => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
-
-export const LazyRecharts = {
-  LineChart: lazyLoad(() => rechartsBundle().then(mod => ({ default: mod.LineChart }))),
-  BarChart: lazyLoad(() => rechartsBundle().then(mod => ({ default: mod.BarChart }))),
-  AreaChart: lazyLoad(() => rechartsBundle().then(mod => ({ default: mod.AreaChart }))),
-  PieChart: lazyLoad(() => rechartsBundle().then(mod => ({ default: mod.PieChart }))),
-  Line: lazyLoad(() => rechartsBundle().then(mod => ({ default: mod.Line }))),
-  Bar: lazyLoad(() => rechartsBundle().then(mod => ({ default: mod.Bar }))),
-  XAxis: lazyLoad(() => rechartsBundle().then(mod => ({ default: mod.XAxis }))),
-  YAxis: lazyLoad(() => rechartsBundle().then(mod => ({ default: mod.YAxis }))),
-  CartesianGrid: lazyLoad(() => rechartsBundle().then(mod => ({ default: mod.CartesianGrid }))),
-  Tooltip: lazyLoad(() => rechartsBundle().then(mod => ({ default: mod.Tooltip }))),
-  Legend: lazyLoad(() => rechartsBundle().then(mod => ({ default: mod.Legend }))),
-  ResponsiveContainer: lazyLoad(() => rechartsBundle().then(mod => ({ default: mod.ResponsiveContainer }))),
-  Cell: lazyLoad(() => rechartsBundle().then(mod => ({ default: mod.Cell }))),
-}
-
-// Export common lazy-loaded components
-// ✅ Correct pattern for named exports (per Next.js docs)
-export const LazyCharts = {
-  BarChart: lazyLoad(() => import('@/components/ui/charts/bar-chart').then(mod => ({ default: mod.MobileBarChart }))),
-  LineChart: lazyLoad(() => import('@/components/ui/charts/line-chart').then(mod => ({ default: mod.MobileLineChart }))),
-  PieChart: lazyLoad(() => import('@/components/ui/charts/pie-chart').then(mod => ({ default: mod.MobilePieChart }))),
-  AreaChart: lazyLoad(() => import('@/components/ui/charts/area-chart').then(mod => ({ default: mod.MobileAreaChart }))),
-}
-
-// Note: LazyCharts uses { default: ... } because lazyLoad() expects default exports
-// The chart components themselves are named exports, but we wrap them as default for lazyLoad()
+// Charts removed - no longer using chart visualizations
 
 export const LazyPages = {
   Dashboard: lazyLoad(() => import('@/app/dashboard/page')),

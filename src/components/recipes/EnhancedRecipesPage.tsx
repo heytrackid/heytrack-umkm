@@ -32,7 +32,7 @@ import {
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { undoableToast } from '@/components/ui/enhanced-toast'
 import { FilterBadges, createFilterBadges } from '@/components/ui/filter-badges'
-import { SimpleFAB } from '@/components/ui/floating-action-button'
+
 import { DeleteModal } from '@/components/ui/index'
 import { Input } from '@/components/ui/input'
 import {
@@ -75,7 +75,7 @@ type Recipe = Row<'recipes'>
 
 type DifficultyFilter = 'all' | 'easy' | 'hard' | 'medium'
 
-export const EnhancedRecipesPage = (): JSX.Element => {
+export const EnhancedRecipesPage = () => {
     const router = useRouter()
     const { data: recipesResponse, isLoading: loading } = useRecipes()
     const { remove: deleteRecipe } = useSupabaseCRUD('recipes')
@@ -548,13 +548,7 @@ export const EnhancedRecipesPage = (): JSX.Element => {
                 recipe={editingRecipe}
             />
 
-            {/* Floating Action Button for Mobile */}
-            {isMobile && (
-                <SimpleFAB
-                    onClick={handleAdd}
-                    icon={<Plus className="h-6 w-6" />}
-                />
-            )}
+
         </div >
     )
 }

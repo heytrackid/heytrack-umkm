@@ -8,7 +8,7 @@ import { logger } from '@/lib/logger'
 // Dynamically import the production page to optimize initial load
 const EnhancedProductionPage = dynamic(
   () => import('./components/EnhancedProductionPage')
-    .then(m => ({ default: m.EnhancedProductionPage }))
+    .then(m => m.EnhancedProductionPage)
     .catch((error) => {
       logger.error({ error }, 'Failed to load EnhancedProductionPage:')
       return { default: () => <div className="p-4 text-center text-red-600">Failed to load production page</div> }

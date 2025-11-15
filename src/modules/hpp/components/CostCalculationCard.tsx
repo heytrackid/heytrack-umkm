@@ -112,9 +112,16 @@ export const CostCalculationCard = ({ recipe, onRecalculate, isCalculating }: Co
                                 <div className="flex justify-between items-center">
                                     <div className="flex items-center gap-2">
                                         <Zap className="h-4 w-4 text-muted-foreground" />
-                                        <span className="text-muted-foreground">Operasional</span>
+                                        <span className="text-muted-foreground">Tenaga Kerja</span>
                                     </div>
-                                    <span className="font-medium">{formatCurrency(recipe.operational_costs)}</span>
+                                    <span className="font-medium">{formatCurrency(recipe.labor_costs)}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <div className="flex items-center gap-2">
+                                        <Zap className="h-4 w-4 text-muted-foreground" />
+                                        <span className="text-muted-foreground">Overhead</span>
+                                    </div>
+                                    <span className="font-medium">{formatCurrency(recipe.overhead_costs)}</span>
                                 </div>
                             </div>
                         </div>
@@ -168,19 +175,34 @@ export const CostCalculationCard = ({ recipe, onRecalculate, isCalculating }: Co
                             </div>
                         )}
 
-                        {/* Operational Costs */}
+                        {/* Labor Costs */}
                         <div className="space-y-3">
                             <div className="flex items-center gap-2 text-sm font-semibold">
                                 <Zap className="h-4 w-4" />
-                                Biaya Operasional
+                                Biaya Tenaga Kerja
                             </div>
                             <div className="pl-6">
                                 <div className="flex justify-between items-center text-sm">
                                     <span className="text-muted-foreground">
-                                        Gas, Listrik, Kemasan, dll
-                                        <span className="text-xs ml-1">(15% dari bahan)</span>
+                                        Gaji karyawan, upah produksi
                                     </span>
-                                    <span className="font-medium">{formatCurrency(recipe.operational_costs)}</span>
+                                    <span className="font-medium">{formatCurrency(recipe.labor_costs)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Overhead Costs */}
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-2 text-sm font-semibold">
+                                <Zap className="h-4 w-4" />
+                                Biaya Overhead
+                            </div>
+                            <div className="pl-6">
+                                <div className="flex justify-between items-center text-sm">
+                                    <span className="text-muted-foreground">
+                                        Sewa tempat, listrik, air, gas, kemasan
+                                    </span>
+                                    <span className="font-medium">{formatCurrency(recipe.overhead_costs)}</span>
                                 </div>
                             </div>
                         </div>

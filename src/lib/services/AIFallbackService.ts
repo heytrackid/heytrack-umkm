@@ -418,7 +418,7 @@ export class AIFallbackService {
         this.responseCache.delete(key);
       }
 
-      logger.debug(`Cache cleanup: removed ${toRemove.length} old entries`);
+      logger.debug({ removedCount: toRemove.length }, 'Cache cleanup: removed old entries');
     }
   }
 }

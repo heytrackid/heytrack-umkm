@@ -107,7 +107,7 @@ export function useCreateFinancialRecord() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['financial-records'] })
 
-      logger.info('Financial record created successfully')
+      logger.info({}, 'Financial record created successfully')
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
@@ -184,7 +184,7 @@ export function useDeleteFinancialRecord() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['financial-records'] })
 
-      logger.info('Financial record deleted successfully')
+      logger.info({}, 'Financial record deleted successfully')
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)

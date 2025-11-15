@@ -8,6 +8,9 @@ import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useDashboardStats } from '@/hooks/api/useDashboard'
+import { AutoSyncFinancialDashboard } from '@/components/dashboard/AutoSyncFinancialDashboard'
+
+import { ProductionScheduleWidget } from '@/components/dashboard/ProductionScheduleWidget'
 import {
     AlertTriangle,
     DollarSign,
@@ -89,101 +92,62 @@ export default function DashboardPage(): JSX.Element {
             </Card>
           ))}
         </div>
-      ) : stats && (
+      ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Pesanan</p>
-                <p className="text-2xl font-bold text-foreground">{stats.totalOrders}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stats.pendingOrders} pending
-                </p>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <ShoppingCart className="h-6 w-6 text-green-600" />
               </div>
-              <ShoppingCart className="h-8 w-8 text-primary" />
+              <div>
+                <p className="text-sm text-muted-foreground">Total Orders</p>
+                <p className="text-2xl font-bold">{stats?.orders.total || 0}</p>
+              </div>
             </div>
           </Card>
-
           <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Pendapatan</p>
-                <p className="text-2xl font-bold text-foreground">
-                  {formatCurrency(stats.totalRevenue)}
-                </p>
-                <p className="text-xs text-green-600 mt-1">
-                  {stats.completedOrders} selesai
-                </p>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <DollarSign className="h-6 w-6 text-blue-600" />
               </div>
-              <DollarSign className="h-8 w-8 text-green-500" />
+              <div>
+                <p className="text-sm text-muted-foreground">Revenue</p>
+                <p className="text-2xl font-bold">{formatCurrency(stats?.revenue.weekly || 0)}</p>
+              </div>
             </div>
           </Card>
-
           <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Pelanggan</p>
-                <p className="text-2xl font-bold text-foreground">{stats.totalCustomers}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Pelanggan aktif
-                </p>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <Package className="h-6 w-6 text-orange-600" />
               </div>
-              <Users className="h-8 w-8 text-blue-500" />
+              <div>
+                <p className="text-sm text-muted-foreground">Suppliers</p>
+                <p className="text-2xl font-bold">{stats?.customers.total || 0}</p>
+              </div>
             </div>
           </Card>
-
           <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Stok Rendah</p>
-                <p className="text-2xl font-bold text-foreground">{stats.lowStockItems}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stats.totalRecipes} resep
-                </p>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <Users className="h-6 w-6 text-purple-600" />
               </div>
-              {stats.lowStockItems > 0 ? (
-                <AlertTriangle className="h-8 w-8 text-red-500" />
-              ) : (
-                <Package className="h-8 w-8 text-primary" />
-              )}
+              <div>
+                <p className="text-sm text-muted-foreground">Customers</p>
+                <p className="text-2xl font-bold">{stats?.customers.total || 0}</p>
+              </div>
             </div>
           </Card>
         </div>
       )}
 
-      <Separator className="my-6" />
+      {/* Auto-Sync Financial Dashboard */}
+      <AutoSyncFinancialDashboard />
 
-      {/* Cash Flow Summary */}
-      {!statsLoading && stats && (
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4 text-foreground">Ringkasan Arus Kas (30 Hari Terakhir)</h2>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="p-4 bg-green-500/10 rounded-lg">
-              <p className="text-sm text-muted-foreground">Total Pemasukan</p>
-              <p className="text-xl font-bold text-green-600">
-                {formatCurrency(stats.cashFlow.totalIncome)}
-              </p>
-            </div>
-            <div className="p-4 bg-red-500/10 rounded-lg">
-              <p className="text-sm text-muted-foreground">Total Pengeluaran</p>
-              <p className="text-xl font-bold text-red-600">
-                {formatCurrency(stats.cashFlow.totalExpense)}
-              </p>
-            </div>
-            <div className="p-4 bg-primary/10 rounded-lg">
-              <p className="text-sm text-muted-foreground">Arus Kas Bersih</p>
-              <p className={`text-xl font-bold ${stats.cashFlow.netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {formatCurrency(stats.cashFlow.netCashFlow)}
-              </p>
-            </div>
-          </div>
-          <Link href="/cash-flow">
-            <Button variant="outline" className="mt-4">
-              Lihat Detail Arus Kas
-            </Button>
-          </Link>
-        </Card>
-      )}
+      {/* Production Schedule Widget */}
+      <ProductionScheduleWidget />
+
+      <Separator className="my-6" />
 
       {/* Quick Actions */}
       <Card className="p-6">

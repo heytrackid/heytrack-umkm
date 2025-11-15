@@ -152,11 +152,11 @@ export async function executeAgentTask<T>(
   context: AgentContext,
   executor: (task: AgentTask, context: AgentContext) => Promise<T>
 ): Promise<AgentResult<T>> {
-  const logger = createAgentLogger(agentName, context.correlationId)
+  const logger = createAgentLogger(agentName, context.correlationId) as ReturnType<typeof createAgentLogger>
   const startTime = Date.now()
 
   try {
-    logger.info(`Starting agent task ${task['id']} of type ${task['type']}`)
+    logger.info('Starting agent task', { taskId: task['id'], taskType: task['type'] })
 
     // Add task start telemetry
     context.telemetry.events.push({
@@ -176,7 +176,7 @@ export async function executeAgentTask<T>(
       data: { taskId: task['id'], duration }
     })
 
-    logger.info(`Completed agent task ${task['id']} in ${duration}ms`)
+    logger.info('Completed agent task', { taskId: task['id'], duration })
 
     return {
       success: true,

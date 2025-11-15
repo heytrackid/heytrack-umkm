@@ -51,7 +51,6 @@ export {
   StockLevelIndicator,
   MetricCard,
   ProfitabilityCalculator,
-  SalesPerformanceChart,
   CustomerInsights
 } from './BusinessComponents'
 

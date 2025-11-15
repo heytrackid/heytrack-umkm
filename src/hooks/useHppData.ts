@@ -60,21 +60,22 @@ export function useHppOverview() {
   })
 }
 
+// HPP analytics functionality has been removed
 export function useHppAnalytics(startDate?: string, endDate?: string) {
-  const params = new URLSearchParams()
-  if (startDate) params.set('start_date', startDate)
-  if (endDate) params.set('end_date', endDate)
-
-  return useQuery<HppAnalytics>({
-    queryKey: ['hpp-analytics', params.toString()],
-    queryFn: async () => {
-      const response = await fetch(`/api/hpp/analytics?${params}`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch HPP analytics')
-      }
-      return response.json()
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-  })
+  // Return a mock query that always succeeds with empty data to prevent errors
+  return {
+    data: null,
+    isLoading: false,
+    isError: false,
+    isSuccess: true,
+    dataUpdatedAt: Date.now(),
+    error: null,
+    isFetched: true,
+    isFetchedAfterMount: true,
+    isFetching: false,
+    isRefetching: false,
+    refetch: () => Promise.resolve({ data: null, error: null }),
+    remove: () => {},
+    status: 'success' as const,
+  }
 }

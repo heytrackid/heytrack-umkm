@@ -1,5 +1,6 @@
 'use client'
 
+// Using Pino logger for all logging
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Calendar, MessageCircle, Plus, ShoppingCart, TrendingUp, XCircle } from 'lucide-react'
 import dynamic from 'next/dynamic'
@@ -38,7 +39,7 @@ const OrderForm = dynamic(
   () => import('../OrderForm')
     .then(mod => mod.OrderForm)
     .catch((error) => {
-      console.error('Failed to load OrderForm:', error)
+      uiLogger.error({ error }, 'Failed to load OrderForm')
       return { default: () => <div className="h-96 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load form</div> }
     }),
   {
@@ -51,7 +52,7 @@ const OrderDetailView = dynamic(
   () => import('../OrderDetailView')
     .then(mod => mod.OrderDetailView)
     .catch((error) => {
-      console.error('Failed to load OrderDetailView:', error)
+      uiLogger.error({ error }, 'Failed to load OrderDetailView')
       return { default: () => <div className="h-96 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load details</div> }
     }),
   {

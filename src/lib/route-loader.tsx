@@ -146,7 +146,7 @@ export function createSmartRouteLoader(
     React.useEffect(() => {
       const loadTime = performance.now() - startTimeRef.current
       const logger = createClientLogger('RouteLoader')
-      logger.info(`🚀 ${routeName} loaded in ${loadTime.toFixed(2)}ms`)
+      logger.info({ routeName, loadTime }, 'Route loaded')
     }, [])
 
     return <LazyComponent {...props} />

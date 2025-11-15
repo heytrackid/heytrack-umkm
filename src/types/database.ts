@@ -59,8 +59,6 @@ export type DailySalesSummary = Tables<'daily_sales_summary'>
 // Chat/AI Tables
 export type ChatSession = Tables<'chat_sessions'>
 export type ChatMessage = Tables<'chat_messages'>
-export type ConversationSession = Tables<'conversation_sessions'>
-export type ConversationHistory = Tables<'conversation_history'>
 export type ChatContextCache = Tables<'chat_context_cache'>
 
 // System Tables
@@ -111,8 +109,6 @@ export type UsageAnalyticsInsert = TablesInsert<'usage_analytics'>
 export type DailySalesSummaryInsert = TablesInsert<'daily_sales_summary'>
 export type ChatSessionInsert = TablesInsert<'chat_sessions'>
 export type ChatMessageInsert = TablesInsert<'chat_messages'>
-export type ConversationSessionInsert = TablesInsert<'conversation_sessions'>
-export type ConversationHistoryInsert = TablesInsert<'conversation_history'>
 export type WhatsAppTemplateInsert = TablesInsert<'whatsapp_templates'>
 export type AppSettingsInsert = TablesInsert<'app_settings'>
 export type ErrorLogInsert = TablesInsert<'error_logs'>

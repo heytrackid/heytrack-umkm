@@ -53,7 +53,7 @@ export function useHppWorker() {
   useEffect(() => {
     // Check if Web Workers are supported
     if (typeof Worker === 'undefined') {
-      logger.warn('Web Workers not supported in this browser')
+      logger.warn({}, 'Web Workers not supported in this browser')
       return undefined
     }
 

@@ -1,5 +1,3 @@
-import { apiLogger } from '@/lib/logger'
-
 /**
  * Lazy Loading Components Index
  * Centralized exports for all code-split components
@@ -43,14 +41,12 @@ export const RouteLazyLoadingConfig = {
   // Dashboard Page
   dashboard: {
     essential: ['stats-cards', 'recent-orders'],
-    charts: ['line-chart', 'bar-chart', 'area-chart'],
     defer: ['stock-alerts', 'quick-actions']
   },
 
   // Finance Page  
   finance: {
     essential: ['financial-summary', 'transaction-list'],
-    charts: ['financial-trends', 'category-breakdown'],
     modals: ['finance-form', 'transaction-detail'],
     defer: ['analytics-dashboard', 'export-features']
   },
@@ -66,7 +62,6 @@ export const RouteLazyLoadingConfig = {
   inventory: {
     essential: ['inventory-table', 'stock-alerts'],
     modals: ['ingredient-form', 'inventory-detail'],
-    charts: ['stock-trends', 'usage-analytics'],
     defer: ['reorder-automation', 'supplier-integration']
   },
 
@@ -113,12 +108,6 @@ export const PreloadingStrategy = {
     return config?.essential || []
   },
 
-  // Preload charts when dashboard is accessed
-  onDashboard: [
-    'recharts',
-    'chart-components'
-  ],
-
   // Preload tables when data pages are accessed
   onDataPage: [
     'react-table',
@@ -129,10 +118,6 @@ export const PreloadingStrategy = {
 
 // Bundle Size Estimates (for monitoring)
 export const ComponentBundleSizes = {
-  // Chart Components
-  'recharts-bundle': '~180kb',
-  'chart-components': '~25kb',
-
   // Table Components  
   'react-table-bundle': '~90kb',
   'table-components': '~30kb',
@@ -174,8 +159,9 @@ export const LazyLoadingMetrics = {
     LazyLoadingMetrics.loadedComponents.add(componentName)
     LazyLoadingMetrics.loadingTimes.set(componentName, loadTime)
 
-    if (loadTime > 1000) {
-      apiLogger.warn({ loadTime: loadTime.toFixed(2) }, `Slow component load: ${componentName}`)
+    if (loadTime > 1000 && typeof window !== 'undefined') {
+      // eslint-disable-next-line no-console
+      console.warn(`Slow component load: ${componentName} (${loadTime.toFixed(2)}ms)`)
     }
   },
 
@@ -184,11 +170,14 @@ export const LazyLoadingMetrics = {
     const currentFailures = LazyLoadingMetrics.failedComponents.get(componentName) || 0
     LazyLoadingMetrics.failedComponents.set(componentName, currentFailures + 1)
 
-    apiLogger.error({
-      componentName,
-      failureCount: currentFailures + 1,
-      error: error instanceof Error ? error.message : String(error)
-    }, 'Component load failure')
+    if (typeof window !== 'undefined') {
+      // eslint-disable-next-line no-console
+      console.error('Component load failure:', {
+        componentName,
+        failureCount: currentFailures + 1,
+        error: error instanceof Error ? error.message : String(error)
+      })
+    }
   },
 
   // Get metrics summary
@@ -231,7 +220,7 @@ export const globalLazyLoadingUtils = {
             // preloadPromises.push(preloadTableBundle()) // Disabled due to syntax errors
             break
           case 'financial-summary':
-            // preloadPromises.push(preloadChartBundle()) // Use chart preloader if available
+            // Preload financial summary components
             break
           default:
             break
@@ -257,7 +246,10 @@ export const globalLazyLoadingUtils = {
   monitorBundleImpact: () => {
     if (typeof performance !== 'undefined' && 'memory' in performance) {
       const {memory} = performance as typeof performance & { memory: { usedJSHeapSize: number } }
-      apiLogger.debug(`Current memory usage: ${(memory.usedJSHeapSize / 1024 / 1024).toFixed(2)} MB`)
+      if (typeof window !== 'undefined') {
+        // eslint-disable-next-line no-console
+        console.debug(`Current memory usage: ${(memory.usedJSHeapSize / 1024 / 1024).toFixed(2)} MB`)
+      }
     }
   }
 }

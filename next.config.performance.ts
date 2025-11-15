@@ -119,14 +119,8 @@ function applyProdOptimizations(config: Record<string, unknown>): void {
         test: /[\\/]components[\\/]ui[\\/]/,
         chunks: 'all',
         priority: 30
-      },
-      // Recharts chunk (heavy library)
-      recharts: {
-        name: 'recharts',
-        test: /[\\/]node_modules[\\/]recharts[\\/]/,
-        chunks: 'all',
-        priority: 40
       }
+      // Charts removed - no longer using recharts
     }
   }
 }
@@ -155,7 +149,6 @@ export const performanceConfig: Partial<NextConfig> = {
     optimizePackageImports: [
       'lucide-react',
       '@radix-ui/react-icons',
-      'recharts',
       'date-fns'
     ],
     // Enable PPR (Partial Prerendering) when stable

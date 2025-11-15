@@ -16,9 +16,9 @@
 // DATABASE TYPES (Primary Source)
 // ==========================================================
 export type {
-  Database,
-  Enums,
-  Insert, Json, Row, TableName, Update, ViewName
+    Database,
+    Enums,
+    Insert, Json, Row, TableName, Update, ViewName
 } from './database'
 
 // ==========================================================
@@ -34,13 +34,10 @@ export type {
 // export type * from './features/auth' // TODO: File missing - using Stack Auth instead
 // Note: RateLimitError is also in shared/errors, using that as primary
 export type {
-  BusinessContext, ChatContextCache, ChatError, ChatMessage, ChatSession, ContextType, FinancialSummary, HppSummary, IngredientSummary, MessageMetadata, OrderSummary, RecipeSummary
+    BusinessContext, ChatContextCache, ChatError, ChatMessage, ChatSession, ContextType, FinancialSummary, HppSummary, IngredientSummary, MessageMetadata, OrderSummary, RecipeSummary
 } from './features/chat'
 // Note: InventoryAlert is also in domain/inventory, using that as primary
-export type {
-  BusinessSummary, CompetitorPrice, CostBreakdownAnalysis, CustomerSegment,
-  DashboardAnalytics, ExpenseCategory, FinancialAnalytics, InventoryAnalysis, InventoryMetrics, InventoryStatus, MarketComparison, PricingAnalysis, PricingImpact, PricingRecommendation, PricingTier, PricingTierOption, PricingTiers, ProductPerformance, RevenueCategory, SalesAnalytics, SalesTrend, SmartPricingAnalysis, SystemAlert, TimePeriod
-} from './features/analytics'
+// Analytics types removed as feature is deprecated
 
 export type * from './features/notifications'
 
@@ -49,10 +46,9 @@ export type * from './features/notifications'
 // ==========================================================
 export type * from './ui/components'
 // Note: OrderItemUpdate is also in domain/orders, using that as primary
-export type * from './ui/charts'
 export type {
-  ArrayItemUpdate, FormAction, FormFieldUpdate,
-  FormFieldUpdater, FormState, FormValidationError, FormValidationResult
+    ArrayItemUpdate, FormAction, FormFieldUpdate,
+    FormFieldUpdater, FormState, FormValidationError, FormValidationResult
 } from './ui/forms'
 export type * from './ui/responsive'
 
@@ -71,9 +67,9 @@ export type * from './shared/utils'
 
 // Re-export specific types from database.ts
 export type {
-  Customer, FinancialRecord, Ingredient, IngredientWithStock, OperationalCost, Order,
-  OrderItem, OrderWithDetails,
-  ProductionWithRecipe, Recipe,
-  RecipeIngredient, RecipeWithIngredients, Supplier
+    Customer, FinancialRecord, Ingredient, IngredientWithStock, OperationalCost, Order,
+    OrderItem, OrderWithDetails,
+    ProductionWithRecipe, Recipe,
+    RecipeIngredient, RecipeWithIngredients, Supplier
 } from './database'
 

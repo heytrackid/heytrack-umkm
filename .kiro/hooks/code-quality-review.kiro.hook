@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "name": "Code Quality Review",
+  "description": "Automatically reviews code changes for correctness, readability, best practices, performance, and security issues. Provides actionable feedback when improvements are needed.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/**/*.{ts",
+      "tsx",
+      "js",
+      "jsx}"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Please perform a concise but thorough code quality review of the provided code. Focus on the following aspects:\n\n**Correctness**: Check for potential bugs, logical errors, edge-case oversights, or runtime risks (e.g., null dereferences, off-by-one errors, race conditions).\n\n**Readability & Maintainability**: Flag confusing variable names, overly complex expressions, deeply nested logic, or lack of clarity in control flow.\n\n**Best Practices**: Identify violations of common language/framework conventions, anti-patterns, or missed opportunities to use idiomatic constructs.\n\n**Performance**: Highlight obvious inefficiencies (e.g., unnecessary loops, redundant computations, avoidable allocations) — but only if they're significant and not premature optimizations.\n\n**Security**: Point out any obvious security issues (e.g., SQL injection, XSS vectors, hardcoded secrets).\n\nIf you find concrete issues that can be improved, suggest specific, actionable fixes — ideally with corrected code snippets. However, if the code is already clean, correct, and follows good practices, simply respond with: \"✅ Code looks solid — no meaningful improvements needed.\"\n\nDon't over-engineer or suggest changes just for the sake of it. Prioritize real value over stylistic preferences unless a style issue impacts clarity or correctness."
+  }
+}

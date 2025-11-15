@@ -10,8 +10,7 @@ import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
 const OrdersContent = dynamic(
   () => import('@/modules/orders/components/OrdersPage')
     .then(m => ({ default: m.OrdersPage }))
-    .catch((error) => {
-      console.error('Failed to load OrdersPage:', error)
+    .catch(() => {
       return { default: () => <div className="p-4 text-center text-red-600">Failed to load orders page</div> }
     }),
   {

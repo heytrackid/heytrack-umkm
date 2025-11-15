@@ -33,6 +33,11 @@ export const CustomersLayout = (): JSX.Element => {
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; customer: Customer | null; bulk: boolean }>({
+    show: false,
+    customer: null,
+    bulk: false
+  })
 
   // Fetch customers
   const fetchCustomers = useCallback(async () => {
@@ -87,9 +92,14 @@ export const CustomersLayout = (): JSX.Element => {
   }, [])
 
   const handleDelete = useCallback(async (customer: Customer) => {
-    if (!confirm(`Hapus pelanggan ${customer.name}?`)) return
+    setDeleteConfirm({ show: true, customer, bulk: false })
+  }, [])
+
+  const confirmDelete = useCallback(async () => {
+    if (!deleteConfirm.customer) return
 
     try {
+      const customer = deleteConfirm.customer
       const response = await fetch(`/api/customers/${customer.id}`, {
         method: 'DELETE'
       })
@@ -104,6 +114,7 @@ export const CustomersLayout = (): JSX.Element => {
       })
 
       fetchCustomers()
+      setDeleteConfirm({ show: false, customer: null, bulk: false })
     } catch (error) {
       logger.error({ error }, 'Failed to delete customer')
       toast({
@@ -112,11 +123,13 @@ export const CustomersLayout = (): JSX.Element => {
         variant: 'destructive'
       })
     }
-  }, [toast, fetchCustomers])
+  }, [toast, fetchCustomers, deleteConfirm.customer])
 
   const handleBulkDelete = useCallback(async () => {
-    if (!confirm(`Hapus ${selectedItems.length} pelanggan?`)) return
+    setDeleteConfirm({ show: true, customer: null, bulk: true })
+  }, [])
 
+  const confirmBulkDelete = useCallback(async () => {
     try {
       await Promise.all(
         selectedItems.map(id =>
@@ -131,6 +144,7 @@ export const CustomersLayout = (): JSX.Element => {
 
       setSelectedItems([])
       fetchCustomers()
+      setDeleteConfirm({ show: false, customer: null, bulk: false })
     } catch (error) {
       logger.error({ error }, 'Failed to delete customers')
       toast({
@@ -218,6 +232,37 @@ export const CustomersLayout = (): JSX.Element => {
         customer={editingCustomer}
         onSuccess={handleDialogSuccess}
       />
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirm.show && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-card p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-2">
+              {deleteConfirm.bulk ? 'Hapus Pelanggan?' : `Hapus ${deleteConfirm.customer?.name}?`}
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {deleteConfirm.bulk 
+                ? `Yakin ingin menghapus ${selectedItems.length} pelanggan? Tindakan ini tidak dapat dibatalkan.`
+                : 'Yakin ingin menghapus pelanggan ini? Tindakan ini tidak dapat dibatalkan.'
+              }
+            </p>
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setDeleteConfirm({ show: false, customer: null, bulk: false })}
+              >
+                Batal
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={deleteConfirm.bulk ? confirmBulkDelete : confirmDelete}
+              >
+                Hapus
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

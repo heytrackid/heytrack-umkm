@@ -15,8 +15,8 @@ const logger = createClientLogger('AIChatbot')
 // Lazy load heavy chatbot components
 // ✅ Correct pattern for named exports (per Next.js docs)
 const ChatHeader = dynamic(
-  () => import('./components')
-    .then(mod => mod.ChatHeader)
+  () => import('./components/ChatHeader')
+    .then(mod => ({ default: mod.ChatHeader }))
     .catch((error) => {
       logger.error({ error }, 'Failed to load ChatHeader:')
       return { default: () => <div className="h-16 bg-red-100 rounded-t-xl flex items-center justify-center text-red-600">Failed to load chat header</div> }
@@ -27,8 +27,8 @@ const ChatHeader = dynamic(
 )
 
 const ChatInput = dynamic(
-  () => import('./components')
-    .then(mod => mod.ChatInput)
+  () => import('./components/ChatInput')
+    .then(mod => ({ default: mod.ChatInput }))
     .catch((error) => {
       logger.error({ error }, 'Failed to load ChatInput:')
       return { default: () => <div className="h-20 bg-red-100 flex items-center justify-center text-red-600">Failed to load chat input</div> }
@@ -39,8 +39,8 @@ const ChatInput = dynamic(
 )
 
 const MessageList = dynamic(
-  () => import('./components')
-    .then(mod => mod.MessageList)
+  () => import('./components/MessageList')
+    .then(mod => ({ default: mod.MessageList }))
     .catch((error) => {
       logger.error({ error }, 'Failed to load MessageList:')
       return { default: () => <div className="flex-1 bg-red-100 flex items-center justify-center text-red-600">Failed to load messages</div> }

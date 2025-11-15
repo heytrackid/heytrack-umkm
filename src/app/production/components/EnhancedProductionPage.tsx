@@ -22,8 +22,7 @@ import { apiLogger } from '@/lib/logger'
 const LazyProductionFormDialog = dynamic(
   () => import('./ProductionFormDialog')
     .then(mod => mod.ProductionFormDialog)
-    .catch((error) => {
-      console.error('Failed to load ProductionFormDialog:', error)
+    .catch(() => {
       return { default: () => <div className="p-4 text-center text-red-600">Failed to load production form</div> }
     }),
   {
@@ -47,9 +46,22 @@ const LazyProductionFormDialog = dynamic(
 
 import type { ProductionStatus, Row } from '@/types/database'
 
-// Extended type for production page display
-interface ProductionWithRecipe extends Row<'production_batches'> {
-    recipe?: Pick<Row<'recipes'>, 'name'> | null
+// Extended type for production page display - matches API response
+interface ProductionWithRecipe extends Omit<Row<'productions'>, 'completed_at' | 'notes' | 'quantity' | 'started_at'> {
+    recipe?: Pick<Row<'recipes'>, 'name' | 'cook_time'> | null
+    // Mapped fields from API
+    batch_number: string
+    planned_date: string
+    actual_cost: number
+    unit: string
+    priority: number
+    estimated_duration: number
+    recipe_name?: string
+    // Additional fields used in component
+    quantity?: number
+    started_at?: string | null
+    completed_at?: string | null
+    notes?: string | null
     // Override status to use the enum type
     status: ProductionStatus
 }
@@ -59,7 +71,9 @@ const isProductionWithRecipe = (value: unknown): value is ProductionWithRecipe =
         return false
     }
     const record = value as Record<string, unknown>
-    return typeof record['id'] === 'string' && typeof record['status'] === 'string'
+    return typeof record['id'] === 'string' &&
+           typeof record['batch_number'] === 'string' &&
+           typeof record['status'] === 'string'
 }
 
 const isProductionWithRecipeArray = (value: unknown): value is ProductionWithRecipe[] =>

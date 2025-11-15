@@ -52,6 +52,8 @@ interface HppComparisonResponse {
 export type RecipeWithCosts = RecipeDetailResponse & RecipeWithHpp & {
   ingredients: RecipeIngredientWithPrice[]
   operational_costs: number
+  labor_costs: number
+  overhead_costs: number
   total_cost: number
 }
 
@@ -99,7 +101,7 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
       })
       if (!response.ok) {throw new Error('Failed to fetch recipes')}
       const payload = await response.json() as Recipe[] | RecipesListResponse | null
-      
+
       let recipeCount = 0
       if (Array.isArray(payload)) {
         recipeCount = payload.length
@@ -148,62 +150,109 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
     queryKey: ['recipe-detail', selectedRecipeId],
     queryFn: async (): Promise<RecipeWithCosts | null> => {
       if (!selectedRecipeId) {return null}
+
+      // Fetch complete HPP calculation from the backend service first
+      let totalCost = 0;
+      let operationalCost = 0;
+      let laborCost = 0;
+      let overheadCost = 0;
+      let recipeDetail: RecipeDetailResponse | null = null;
       
-      const response = await fetch(`/api/recipes/${selectedRecipeId}`, {
-        credentials: 'include', // Include cookies for authentication
-      })
-      if (!response.ok) {throw new Error('Failed to fetch recipe')}
-      const _data: RecipeDetailResponse = await response.json()
+      try {
+        const hppResponse = await fetch(`/api/hpp/calculations?recipeId=${selectedRecipeId}`, {
+          credentials: 'include', // Include cookies for authentication
+        });
+        
+        if (hppResponse.ok) {
+          const hppData = await hppResponse.json();
+          if (Array.isArray(hppData.calculations) && hppData.calculations.length > 0) {
+            // Get the most recent HPP calculation
+            const latestCalculation = hppData.calculations[0];
+            totalCost = latestCalculation.cost_per_unit || 0;
+            
+            // Calculate per-unit costs based on servings from recipe info
+            const recipeResponse = await fetch(`/api/recipes/${selectedRecipeId}`, {
+              credentials: 'include', // Include cookies for authentication
+            });
+            if (recipeResponse.ok) {
+              recipeDetail = await recipeResponse.json();
+            } else {
+              throw new Error('Failed to fetch recipe details');
+            }
+            
+            const servings = Number(recipeDetail!.servings) || 1;
+            operationalCost = (latestCalculation.overhead_cost || 0) / servings;
+            laborCost = (latestCalculation.labor_cost || 0) / servings;
+            overheadCost = (latestCalculation.overhead_cost || 0) / servings;
+          }
+        }
+      } catch (error) {
+        logger.warn({ error, recipeId: selectedRecipeId }, 'Failed to fetch complete HPP calculation, will use fallback calculation');
+      }
 
-      // Calculate total cost from ingredients with type safety
-      let ingredientCost = 0
-      const recipeIngredients = Array.isArray(_data.recipe_ingredients)
-        ? _data.recipe_ingredients.filter(isValidRecipeIngredient)
-        : []
+      // If no complete HPP calculation is available, fall back to basic calculation
+      if (totalCost === 0) {
+        const response = await fetch(`/api/recipes/${selectedRecipeId}`, {
+          credentials: 'include', // Include cookies for authentication
+        });
+        if (!response.ok) {throw new Error('Failed to fetch recipe')}
+        recipeDetail = await response.json();
 
-       ingredientCost = recipeIngredients.reduce((sum: number, ri) => {
-         const quantity = ri.quantity ?? 0
-         // Use WAC if available, otherwise use current price
-         const unitPrice =
-           ri.ingredients?.weighted_average_cost ??
-           ri.ingredients?.price_per_unit ??
-           0
+        // Calculate ingredient costs for fallback
+        let ingredientCost = 0;
+        const recipeIngredients = Array.isArray(recipeDetail!.recipe_ingredients)
+          ? recipeDetail!.recipe_ingredients.filter(isValidRecipeIngredient)
+          : [];
 
-         // Log warning if ingredient has no price
-         if (unitPrice === 0 && ri.ingredients?.name) {
-           logger.warn({
-             ingredientId: ri.ingredient_id,
-             ingredientName: ri.ingredients.name
-           }, 'Ingredient has no price data for HPP calculation')
-         }
+         ingredientCost = recipeIngredients.reduce((sum: number, ri) => {
+           const quantity = ri.quantity ?? 0;
+           // Use WAC if available, otherwise use current price
+           const unitPrice =
+             ri.ingredients?.weighted_average_cost ??
+             ri.ingredients?.price_per_unit ??
+             0;
 
-         return sum + quantity * unitPrice
-       }, 0)
-      
-      // Get operational costs using configured percentage and minimum
-      const operationalCost = Math.max(
-        ingredientCost * HPP_CONFIG.MIN_OPERATIONAL_COST_PERCENTAGE,
-        HPP_CONFIG.DEFAULT_OVERHEAD_PER_SERVING
-      )
-      
-       const result = {
-         ..._data,
-        ingredients: recipeIngredients.map((ri): RecipeIngredientWithPrice => ({
-          id: ri.ingredient_id,
-          name: ri.ingredients?.name ?? 'Unknown',
-          quantity: ri.quantity ?? 0,
-          unit: ri.unit ?? 'unit',
-          unit_price:
-            ri.ingredients?.weighted_average_cost ??
-            ri.ingredients?.price_per_unit ??
-            0,
-          category: ri.ingredients?.category ?? undefined
-        })),
+           // Log warning if ingredient has no price
+           if (unitPrice === 0 && ri.ingredients?.name) {
+             logger.warn({
+               ingredientId: ri.ingredient_id,
+               ingredientName: ri.ingredients.name
+             }, 'Ingredient has no price data for HPP calculation');
+           }
+
+           return sum + quantity * unitPrice;
+         }, 0);
+
+        // Fallback operational costs calculation
+        operationalCost = Math.max(
+          ingredientCost * HPP_CONFIG.MIN_OPERATIONAL_COST_PERCENTAGE,
+          HPP_CONFIG.DEFAULT_OVERHEAD_PER_SERVING
+        );
+        totalCost = ingredientCost + operationalCost;
+      }
+
+        const result = {
+          ...recipeDetail!,
+        ingredients: (recipeDetail!.recipe_ingredients || [])
+          .filter(isValidRecipeIngredient)
+          .map((ri): RecipeIngredientWithPrice => ({
+            id: ri.ingredient_id,
+            name: ri.ingredients?.name ?? 'Unknown',
+            quantity: ri.quantity ?? 0,
+            unit: ri.unit ?? 'unit',
+            unit_price:
+              ri.ingredients?.weighted_average_cost ??
+              ri.ingredients?.price_per_unit ??
+              0,
+            category: ri.ingredients?.category ?? undefined
+          })),
         operational_costs: operationalCost,
-        total_cost: ingredientCost + operationalCost
-      } as RecipeWithCosts
-      
-      return result
+        labor_costs: laborCost,
+        overhead_costs: overheadCost,
+        total_cost: totalCost
+      } as RecipeWithCosts;
+
+      return result;
     },
     enabled: Boolean(selectedRecipeId),
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -239,7 +288,7 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
         body: JSON.stringify({ recipeId }),
         credentials: 'include', // Include cookies for authentication
       })
-      
+
       if (!response.ok) {throw new Error('Failed to calculate HPP')}
       return response.json()
     },
@@ -248,7 +297,7 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
       void queryClient.invalidateQueries({ queryKey: ['recipe-detail', recipeId] })
       void queryClient.invalidateQueries({ queryKey: ['hpp-overview'] })
       void queryClient.invalidateQueries({ queryKey: ['hpp-comparison'] })
-      
+
       toast({
         title: 'Berhasil ✓',
         description: 'Biaya produksi berhasil dihitung'
@@ -276,7 +325,7 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
         }),
         credentials: 'include', // Include cookies for authentication
       })
-      
+
       if (!response.ok) {throw new Error('Failed to update price')}
       return response.json()
     },
@@ -286,7 +335,7 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
       void queryClient.invalidateQueries({ queryKey: ['recipes-list'] })
       void queryClient.invalidateQueries({ queryKey: ['hpp-overview'] })
       void queryClient.invalidateQueries({ queryKey: ['hpp-comparison'] })
-      
+
       toast({
         title: 'Tersimpan ✓',
         description: 'Harga jual berhasil disimpan'

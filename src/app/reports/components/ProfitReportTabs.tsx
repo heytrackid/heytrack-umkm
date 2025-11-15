@@ -1,15 +1,14 @@
 // Tabbed content components for Profit Report
 'use client'
 
-import { TrendingUp, TrendingDown } from 'lucide-react'
+import { TrendingDown, TrendingUp } from 'lucide-react'
 import React from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
 
-import { ProfitChart, ExpensesPieChart, ComparisonChart } from '@/app/reports/components/ProfitReportCharts'
-import { COLORS, type SelectedDataPoint, type ProfitData } from '@/app/reports/components/ProfitReportTypes'
+import { COLORS, type ProfitData, type SelectedDataPoint } from '@/app/reports/components/ProfitReportTypes'
 
 interface PartialProfitData {
     summary: {
@@ -64,7 +63,6 @@ interface ProfitReportTabsProps {
     // Data props
     profitData: PartialProfitData
     // State props
-    chartType: 'area' | 'bar' | 'line'
     selectedDataPoint: SelectedDataPoint | null
     setSelectedDataPoint: (dataPoint: SelectedDataPoint | null) => void
     compareMode: boolean
@@ -74,10 +72,9 @@ interface ProfitReportTabsProps {
 // Trend tab content
 const TrendTab: React.FC<{
     profitData: PartialProfitData
-    chartType: 'area' | 'bar' | 'line'
     selectedDataPoint: SelectedDataPoint | null
     setSelectedDataPoint: (dataPoint: SelectedDataPoint | null) => void
-}> = ({ profitData, chartType, selectedDataPoint, setSelectedDataPoint }) => {
+}> = ({ profitData, selectedDataPoint, setSelectedDataPoint }) => {
     const { formatCurrency } = useCurrency()
 
     const handleDataPointSelect = (dataPoint: SelectedDataPoint) => {
@@ -109,12 +106,19 @@ const TrendTab: React.FC<{
                 )}
             </CardHeader>
             <CardContent>
-                <ProfitChart
-                    data={profitData.profit_by_period}
-                    chartType={chartType}
-                    onDataPointSelect={handleDataPointSelect}
-                    selectedDataPoint={selectedDataPoint}
-                />
+                <div className="space-y-4">
+                    {profitData.profit_by_period.map((period, index) => (
+                        <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
+                            <span className="font-medium">{period.period}</span>
+                            <div className="text-right">
+                                <p className="font-bold">{formatCurrency(period.revenue)}</p>
+                                <p className="text-sm text-muted-foreground">
+                                    Profit: {formatCurrency(period.gross_profit)}
+                                </p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </CardContent>
         </Card>
     )
@@ -195,28 +199,24 @@ const ExpensesTab: React.FC<{
                 <CardTitle>Breakdown Biaya Operasional</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="grid gap-6 md:grid-cols-2">
-                    <ExpensesPieChart data={profitData.operating_expenses_breakdown} />
-
-                    <div className="space-y-3">
-                        {profitData.operating_expenses_breakdown.map((expense: ProfitData['operating_expenses_breakdown'][0], index: number) => (
-                            <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
-                                <div className="flex items-center gap-3">
-                                    <div
-                                        className="w-4 h-4 rounded-full"
-                                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                                    />
-                                    <span className="font-medium">{expense.category}</span>
-                                </div>
-                                <div className="text-right">
-                                    <p className="font-bold">{formatCurrency(expense.total)}</p>
-                                    <p className="text-sm text-muted-foreground">
-                                        {expense.percentage.toFixed(1)}%
-                                    </p>
-                                </div>
+                <div className="space-y-3">
+                    {profitData.operating_expenses_breakdown.map((expense: ProfitData['operating_expenses_breakdown'][0], index: number) => (
+                        <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                                <div
+                                    className="w-4 h-4 rounded-full"
+                                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                                />
+                                <span className="font-medium">{expense.category}</span>
                             </div>
-                        ))}
-                    </div>
+                            <div className="text-right">
+                                <p className="font-bold">{formatCurrency(expense.total)}</p>
+                                <p className="text-sm text-muted-foreground">
+                                    {expense.percentage.toFixed(1)}%
+                                </p>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </CardContent>
         </Card>
@@ -347,10 +347,7 @@ const ComparisonTab: React.FC<{
                 </p>
             </CardHeader>
             <CardContent>
-                <ComparisonChart
-                    currentData={profitData.profit_by_period}
-                    previousData={comparisonData?.profit_by_period ?? null}
-                />
+                <p className="text-muted-foreground">Aktifkan mode perbandingan untuk melihat data.</p>
             </CardContent>
         </Card>
     )
@@ -359,7 +356,6 @@ const ComparisonTab: React.FC<{
 // Main tabbed content component
 export const ProfitReportTabs: React.FC<ProfitReportTabsProps> = ({
     profitData,
-    chartType,
     selectedDataPoint,
     setSelectedDataPoint,
     compareMode,
@@ -373,7 +369,6 @@ export const ProfitReportTabs: React.FC<ProfitReportTabsProps> = ({
                 return (
                     <TrendTab
                         profitData={profitData}
-                        chartType={chartType}
                         selectedDataPoint={selectedDataPoint}
                         setSelectedDataPoint={setSelectedDataPoint}
                     />

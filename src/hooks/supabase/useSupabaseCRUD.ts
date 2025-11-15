@@ -66,7 +66,7 @@ export function useSupabaseCRUD<TTable extends TableName>(
     } catch (err) {
       const errorObj = err instanceof Error ? err : new Error('Unknown error')
       setError(errorObj)
-      logger.error('Failed to fetch data', { error: errorObj })
+      logger.error({ error: errorObj }, 'Failed to fetch data')
     } finally {
       setLoading(false)
     }
@@ -90,7 +90,7 @@ export function useSupabaseCRUD<TTable extends TableName>(
     } catch (err) {
       const errorObj = err instanceof Error ? err : new Error('Unknown error')
       setError(errorObj)
-      logger.error('Failed to create record', { error: errorObj })
+      logger.error({ error: errorObj }, 'Failed to create record')
       return null
     }
   }, [tableName, fetchData])
@@ -114,7 +114,7 @@ export function useSupabaseCRUD<TTable extends TableName>(
     } catch (err) {
       const errorObj = err instanceof Error ? err : new Error('Unknown error')
       setError(errorObj)
-      logger.error('Failed to update record', { error: errorObj })
+      logger.error({ error: errorObj }, 'Failed to update record')
       return null
     }
   }, [tableName, fetchData])
@@ -136,7 +136,7 @@ export function useSupabaseCRUD<TTable extends TableName>(
     } catch (err) {
       const errorObj = err instanceof Error ? err : new Error('Unknown error')
       setError(errorObj)
-      logger.error('Failed to delete record', { error: errorObj })
+      logger.error({ error: errorObj }, 'Failed to delete record')
       return false
     }
   }, [tableName, fetchData])

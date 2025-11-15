@@ -22,8 +22,7 @@ import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTr
 const SalesReport = dynamic(
   () => import('./SalesReport')
     .then(m => ({ default: m.SalesReport }))
-    .catch((error) => {
-      console.error('Failed to load SalesReport:', error)
+    .catch(() => {
       return { default: () => <div className="p-4 text-center text-red-600">Failed to load sales report</div> }
     }),
   {
@@ -47,8 +46,7 @@ const SalesReport = dynamic(
 const InventoryReport = dynamic(
   () => import('./InventoryReport')
     .then(m => ({ default: m.InventoryReport }))
-    .catch((error) => {
-      console.error('Failed to load InventoryReport:', error)
+    .catch(() => {
       return { default: () => <div className="p-4 text-center text-red-600">Failed to load inventory report</div> }
     }),
   {
@@ -72,8 +70,7 @@ const InventoryReport = dynamic(
 const FinancialReport = dynamic(
   () => import('./FinancialReport')
     .then(m => ({ default: m.FinancialReport }))
-    .catch((error) => {
-      console.error('Failed to load FinancialReport:', error)
+    .catch(() => {
       return { default: () => <div className="p-4 text-center text-red-600">Failed to load financial report</div> }
     }),
   {
@@ -97,8 +94,7 @@ const FinancialReport = dynamic(
 const EnhancedProfitReport = dynamic(
   () => import('./EnhancedProfitReport')
     .then(m => ({ default: m.EnhancedProfitReport }))
-    .catch((error) => {
-      console.error('Failed to load EnhancedProfitReport:', error)
+    .catch(() => {
       return { default: () => <div className="p-4 text-center text-red-600">Failed to load profit report</div> }
     }),
   {

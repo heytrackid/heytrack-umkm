@@ -33,6 +33,7 @@ import {
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { useSettings } from '@/contexts/settings-context'
 import { useIngredients, useDeleteIngredient } from '@/hooks/useIngredients'
+import { useIsMobile } from '@/hooks/use-mobile'
 import { useToast } from '@/hooks/use-toast'
 import { usePagination } from '@/hooks/usePagination'
 import {
@@ -61,7 +62,7 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
     const { data: ingredients, isLoading } = useIngredients()
     const deleteIngredient = useDeleteIngredient()
     const { toast } = useToast()
-    const { isMobile } = useMobile()
+    const isMobile = useIsMobile()
 
     // Modal states
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)

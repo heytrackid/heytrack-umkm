@@ -1,6 +1,5 @@
 export const runtime = 'nodejs'
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
@@ -19,29 +18,35 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
     const supabase = await createClient()
 
     // Get or create onboarding record
-    let { data: onboarding, error } = await supabase
+    const { data: onboarding, error } = await supabase
       .from('user_onboarding')
       .select('*')
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
 
-    if (error && error.code === 'PGRST116') {
-      // Create new onboarding record
-      const { data: newOnboarding, error: insertError} = await supabase
+    if (error) {
+      throw error
+    }
+
+    // If no record exists, create one
+    if (!onboarding) {
+      const { data: newOnboarding, error: insertError } = await supabase
         .from('user_onboarding')
         .insert({
           user_id: user.id,
           current_step: 0,
           steps_completed: [],
           completed: false,
-        } as any)
+        })
         .select()
         .single()
 
       if (insertError) throw insertError
-      onboarding = newOnboarding
-    } else if (error) {
-      throw error
+
+      return NextResponse.json({
+        success: true,
+        data: newOnboarding,
+      })
     }
 
     return NextResponse.json({
@@ -82,7 +87,7 @@ async function PATCH(request: NextRequest): Promise<NextResponse> {
         {
           user_id: user.id,
           ...updateData,
-        } as any,
+        },
         {
           onConflict: 'user_id',
         }

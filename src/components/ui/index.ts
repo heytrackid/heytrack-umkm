@@ -233,12 +233,6 @@ export {
 
 
 export {
-    ChartContainer, ChartLegend,
-    ChartLegendContent, ChartTooltip,
-    ChartTooltipContent
-} from './chart'
-
-export {
     ThemeToggle
 } from './theme-toggle'
 
@@ -304,15 +298,6 @@ export {
 } from './mobile-forms'
 
 
-
-// ==========================================================
-// CHART COMPONENTS
-// ==========================================================
-
-export {
-    MobileAreaChart, MobileBarChart,
-    MobileLineChart, MobilePieChart
-} from './charts'
 
 // ==========================================================
 // FORM COMPONENTS (ADDITIONAL)
