@@ -44,12 +44,12 @@ export function useSupabaseCRUD<TTable extends TableName>(
 
       let query = supabase.from(tableName).select('*')
 
-      // Apply filters
-      if (options?.filters) {
-        Object.entries(options.filters).forEach(([key, value]) => {
-          query = query.eq(key, value as any) // Type assertion for RLS
-        })
-      }
+       // Apply filters
+       if (options?.filters) {
+         Object.entries(options.filters).forEach(([key, value]) => {
+            query = query.eq(key as never, value as never) // Type assertion for RLS
+         })
+       }
 
       // Apply ordering
       if (options?.orderBy) {
@@ -70,7 +70,7 @@ export function useSupabaseCRUD<TTable extends TableName>(
     } finally {
       setLoading(false)
     }
-  }, [tableName, options?.filters, options?.orderBy])
+  }, [tableName, options?.filters, options?.orderBy, supabase, logger])
 
   // Create
   const create = useCallback(async (newData: Partial<RowType>): Promise<RowType | null> => {
@@ -93,17 +93,17 @@ export function useSupabaseCRUD<TTable extends TableName>(
       logger.error({ error: errorObj }, 'Failed to create record')
       return null
     }
-  }, [tableName, fetchData])
+  }, [tableName, fetchData, supabase, logger])
 
   // Update
   const update = useCallback(async (id: string, updateData: Partial<RowType>): Promise<RowType | null> => {
     try {
-      const { data: result, error: updateError } = await supabase
-        .from(tableName)
-        .update(updateData as never)
-        .eq('id', id as any)
-        .select()
-        .single()
+        const { data: result, error: updateError } = await supabase
+          .from(tableName)
+          .update(updateData as never)
+          .eq('id' as never, id as never)
+          .select()
+          .single()
 
       if (updateError) throw updateError
 
@@ -117,15 +117,15 @@ export function useSupabaseCRUD<TTable extends TableName>(
       logger.error({ error: errorObj }, 'Failed to update record')
       return null
     }
-  }, [tableName, fetchData])
+  }, [tableName, fetchData, supabase, logger])
 
   // Delete
   const remove = useCallback(async (id: string): Promise<boolean> => {
     try {
-      const { error: deleteError } = await supabase
-        .from(tableName)
-        .delete()
-        .eq('id', id as any) // Type assertion for RLS
+       const { error: deleteError } = await supabase
+         .from(tableName)
+         .delete()
+          .eq('id' as never, id as never) // Type assertion for RLS
 
       if (deleteError) throw deleteError
 
@@ -139,7 +139,7 @@ export function useSupabaseCRUD<TTable extends TableName>(
       logger.error({ error: errorObj }, 'Failed to delete record')
       return false
     }
-  }, [tableName, fetchData])
+  }, [tableName, fetchData, supabase, logger])
 
   const clearError = useCallback(() => {
     setError(null)

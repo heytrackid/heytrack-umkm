@@ -125,11 +125,13 @@ export const useOrderItemsController = <TItem extends OrderItemBase>(
     [filterRecipe]
   )
 
-  useEffect(() => {
-    if (availableRecipes) {
-      setRecipes(normalizeRecipes(availableRecipes))
-    }
+  const normalizedRecipes = useMemo(() => {
+    return availableRecipes ? normalizeRecipes(availableRecipes) : []
   }, [availableRecipes, normalizeRecipes])
+
+  useEffect(() => {
+    setRecipes(normalizedRecipes)
+  }, [normalizedRecipes])
 
   const fetchRecipes = useCallback(async () => {
     if (!autoFetchRecipes) {

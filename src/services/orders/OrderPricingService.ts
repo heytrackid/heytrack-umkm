@@ -58,7 +58,7 @@ export class OrderPricingService {
           .eq('id', customer_id)
           .single()
 
-        const typedCustomer = customer as any
+        const typedCustomer = customer as { discount_percentage: number; loyalty_points: number }
         if (typedCustomer?.discount_percentage) {
           discount_percentage = Number(typedCustomer.discount_percentage)
           dbLogger.info({ 
@@ -128,7 +128,7 @@ export class OrderPricingService {
           }
 
           // Use recipe selling price as unit price
-          const baseUnitPrice = item.custom_price ?? (recipe as any).selling_price ?? 0
+          const baseUnitPrice = item.custom_price ?? (recipe as { selling_price: number }).selling_price ?? 0
           const unit_price = baseUnitPrice
           const total_price = baseUnitPrice * item.quantity
           
@@ -136,7 +136,7 @@ export class OrderPricingService {
           let estimated_cost = baseUnitPrice * ORDER_CONFIG.DEFAULT_HPP_PERCENTAGE // Fallback estimate
           
           try {
-            const latestHpp = await hppCalculator.getLatestHpp(supabase as any, recipe['id'], (recipe as any).user_id)
+            const latestHpp = await hppCalculator.getLatestHpp(supabase, recipe['id'], (recipe as { user_id: string }).user_id)
             if (latestHpp && latestHpp.cost_per_unit && latestHpp.cost_per_unit > 0) {
               estimated_cost = latestHpp.cost_per_unit
               dbLogger.info({ 
@@ -146,7 +146,7 @@ export class OrderPricingService {
             } else {
               // If no HPP exists, try to calculate it
               try {
-                const hppResult = await hppCalculator.calculateRecipeHpp(supabase as any, recipe['id'], (recipe as any).user_id)
+                const hppResult = await hppCalculator.calculateRecipeHpp(supabase, recipe['id'], (recipe as { user_id: string }).user_id)
                 estimated_cost = hppResult.cost_per_unit
                 dbLogger.info({ 
                   recipeId: recipe['id'], 
@@ -174,7 +174,7 @@ export class OrderPricingService {
 
           return {
             recipe_id: recipe['id'],
-            recipe_name: (recipe as any).name,
+            recipe_name: (recipe as { name: string }).name,
             quantity: item.quantity,
             unit_price,
             total_price,

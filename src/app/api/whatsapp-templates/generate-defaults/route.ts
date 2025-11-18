@@ -41,16 +41,14 @@ async function postHandler(): Promise<NextResponse> {
       )
     }
 
-    // 3. Since there's no specific function for creating default templates,
-    // we'll log the event and return success
-    const { error: logError } = await supabase.rpc('log_sync_event', {
-      event_type: 'cleanup_expired_context_cache',
-      event_data: JSON.stringify({ userId: user.id }),
-    } as any)
+    // 3. Create default templates using database function
+    const { error: createError } = await supabase.rpc('create_default_whatsapp_templates', {
+      p_user_id: user.id
+    })
 
-    if (logError) {
-      apiLogger.error({ error: logError, userId: user.id }, 'Failed to log template creation event')
-      // We don't throw here as this is just logging
+    if (createError) {
+      apiLogger.error({ error: createError, userId: user.id }, 'Failed to create default templates')
+      throw createError
     }
 
     // 4. Fetch created templates
@@ -65,7 +63,7 @@ async function postHandler(): Promise<NextResponse> {
       throw fetchError
     }
 
-    apiLogger.info({ userId: user.id, count: templates?.length }, 'Default templates created')
+    apiLogger.info({ userId: user.id, count: templates?.length }, 'Default templates created successfully')
 
     return NextResponse.json({
       success: true,

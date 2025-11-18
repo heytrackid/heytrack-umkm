@@ -35,7 +35,7 @@ export class WacEngineService {
 
   private async getSupabase(): Promise<SupabaseClient<Database>> {
     if (!this.supabase) {
-      this.supabase = await createClient() as any
+      this.supabase = await createClient() as unknown as SupabaseClient<Database>
     }
     return this.supabase!
   }

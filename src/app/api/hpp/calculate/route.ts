@@ -9,13 +9,13 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { typed } from '@/types/type-utilities'
 import { createClient } from '@/utils/supabase/server'
 
 
 // POST /api/hpp/calculate - Calculate HPP for a recipe
-async function POST(request: NextRequest): Promise<NextResponse> {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // Authenticate with Stack Auth
     const authResult = await requireAuth()
@@ -121,7 +121,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
 }
 
 // POST /api/hpp/calculate/batch - Calculate HPP for all recipes
-async function PUT(request: NextRequest): Promise<NextResponse> {
+async function putHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // Authenticate with Stack Auth
     const authResult = await requireAuth()
@@ -186,8 +186,5 @@ async function PUT(request: NextRequest): Promise<NextResponse> {
 }
 
 // Apply security middleware
-const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
-const securedPUT = withSecurity(PUT, SecurityPresets.enhanced())
-
-// Export secured handlers
-export { securedPOST as POST, securedPUT as PUT }
+export const POST = createSecureHandler(postHandler, 'POST /api/hpp/calculate', SecurityPresets.enhanced())
+export const PUT = createSecureHandler(putHandler, 'PUT /api/hpp/calculate', SecurityPresets.enhanced())

@@ -2,11 +2,11 @@ export const runtime = 'nodejs'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
-async function GET(_request: NextRequest): Promise<NextResponse> {
+async function getHandler(_request: NextRequest): Promise<NextResponse> {
   try {
     const authResult = await requireAuth()
     if (isErrorResponse(authResult)) {
@@ -37,5 +37,4 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
   }
 }
 
-const securedGET = withSecurity(GET, SecurityPresets.enhanced())
-export { securedGET as GET }
+export const GET = createSecureHandler(getHandler, 'GET /api/export/ingredients', SecurityPresets.enhanced())

@@ -40,7 +40,7 @@ import {
 } from '@/components/ui/select'
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { useSettings } from '@/contexts/settings-context'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { useOperationalCosts, useDeleteOperationalCost } from '@/hooks/useOperationalCosts'
 import { usePagination } from '@/hooks/usePagination'
 import { useResponsive } from '@/hooks/useResponsive'
@@ -114,7 +114,7 @@ export const EnhancedOperationalCostsPage = () => {
 
     // Use delete mutation
     const deleteCostMutation = useDeleteOperationalCost()
-    const { toast } = useToast()
+
     const { isMobile } = useResponsive()
     const { confirm, ConfirmDialog } = useConfirm()
 
@@ -248,22 +248,15 @@ export const EnhancedOperationalCostsPage = () => {
                 ? resultPayload.count ?? COST_CATEGORIES.length
                 : COST_CATEGORIES.length
 
-            toast({
-                title: 'Template ditambahkan',
-                description: `${templatesAdded} template biaya operasional berhasil ditambahkan`,
-            })
+            toast.success(`${templatesAdded} template biaya operasional berhasil ditambahkan`)
 
             // Force refresh page to show new data
             _router.refresh()
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Gagal menambahkan template'
-            toast({
-                title: 'Error',
-                description: message,
-                variant: 'destructive',
-            })
+            toast.error(message)
         }
-    }, [confirm, toast, _router])
+    }, [confirm, _router])
 
     const clearFilters = () => {
         setSearchTerm('')

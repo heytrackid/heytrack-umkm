@@ -61,7 +61,12 @@ export const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, 
         throw new Error(`API call failed: ${response['status']}`)
       }
 
-      const pricingAnalysis = await response.json() as SmartPricingAnalysis
+      const pricingData = await response.json()
+      if (!pricingData.success) {
+        throw new Error(pricingData.error || 'Gagal menghitung harga')
+      }
+
+      const pricingAnalysis: SmartPricingAnalysis = pricingData.data
       setAnalysis(pricingAnalysis)
       setCustomPrice(pricingAnalysis.pricing.standard.price || 0)
     } catch (error: unknown) {
@@ -102,6 +107,26 @@ export const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, 
               positioning: 'Harga premium untuk positioning eksklusif'
             }
           },
+          analysis: [
+            {
+              tier: 'economy',
+              profitAmount: (Math.ceil((totalCalculatedCost * 1.3) / 500) * 500) - totalCalculatedCost,
+              profitMargin: 30,
+              breakEvenVolume: 0
+            },
+            {
+              tier: 'standard',
+              profitAmount: (Math.ceil((totalCalculatedCost * 1.6) / 500) * 500) - totalCalculatedCost,
+              profitMargin: 60,
+              breakEvenVolume: 0
+            },
+            {
+              tier: 'premium',
+              profitAmount: (Math.ceil((totalCalculatedCost * 2.0) / 1000) * 1000) - totalCalculatedCost,
+              profitMargin: 100,
+              breakEvenVolume: 0
+            }
+          ],
           recommendations: ['Gagal memuat analisis harga otomatis. Silakan coba lagi nanti.']
         }
         setAnalysis(fallbackAnalysis)

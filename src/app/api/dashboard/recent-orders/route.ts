@@ -1,47 +1,49 @@
 export const runtime = 'nodejs'
 
-import { isErrorResponse, requireAuth } from '@/lib/api-auth'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
-import { createClient } from '@/utils/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { NextResponse } from 'next/server'
 
-async function GET(request: NextRequest): Promise<NextResponse> {
-  try {
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
+const RecentOrdersQuerySchema = z.object({
+  limit: z.coerce.number().int().positive().max(50).optional().default(5),
+})
 
-    const { searchParams } = new URL(request.url)
-    const limit = parseInt(searchParams.get('limit') || '5')
+// GET /api/dashboard/recent-orders - Get recent orders
+async function getRecentOrdersHandler(
+  context: RouteContext,
+  query?: z.infer<typeof RecentOrdersQuerySchema>
+): Promise<NextResponse> {
+  const { user, supabase } = context
+  const { limit = 5 } = query || {}
 
-    const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('orders' as never)
+    .select(`
+      id,
+      order_number,
+      total_amount,
+      status,
+      created_at,
+      customers (
+        name
+      )
+    `)
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(limit)
 
-    const { data, error } = await supabase
-      .from('orders')
-      .select(`
-        id,
-        order_number,
-        total_amount,
-        status,
-        created_at,
-        customers (
-          name
-        )
-      `)
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(limit)
-
-    if (error) throw error
-
-    return NextResponse.json({ data })
-  } catch (error) {
-    return handleAPIError(error, 'GET /api/dashboard/recent-orders')
+  if (error) {
+    return NextResponse.json({ error: 'Failed to fetch recent orders' }, { status: 500 })
   }
+
+  return NextResponse.json({ success: true, data })
 }
 
-const securedGET = withSecurity(GET, SecurityPresets.enhanced())
-export { securedGET as GET }
+export const GET = createApiRoute(
+  {
+    method: 'GET',
+    path: '/api/dashboard/recent-orders',
+    querySchema: RecentOrdersQuerySchema,
+  },
+  getRecentOrdersHandler
+)

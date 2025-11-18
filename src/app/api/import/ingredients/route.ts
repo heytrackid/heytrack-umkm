@@ -1,95 +1,96 @@
 export const runtime = 'nodejs'
 
-import { isErrorResponse, requireAuth } from '@/lib/api-auth'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
-import { createClient } from '@/utils/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 
-async function POST(request: NextRequest): Promise<NextResponse> {
-  try {
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
+import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-core'
+import { apiLogger } from '@/lib/logger'
+import { typed } from '@/types/type-utilities'
 
-    const body = await request.json()
-    const { ingredients } = body
+import type { NextResponse } from 'next/server'
 
-    if (!Array.isArray(ingredients) || ingredients.length === 0) {
-      return NextResponse.json(
-        { error: 'Ingredients array is required and must not be empty' },
-        { status: 400 }
-      )
-    }
+// Schema for bulk import
+const BulkImportSchema = z.object({
+  ingredients: z.array(z.object({
+    name: z.string(),
+    category: z.string().optional(),
+    unit: z.string(),
+    price_per_unit: z.number(),
+    current_stock: z.number(),
+    reorder_point: z.number(),
+    supplier: z.string().optional(),
+  })).min(1).max(1000, 'Maximum 1000 ingredients per import'),
+})
 
-    // Limit to 1000 rows per import
-    if (ingredients.length > 1000) {
-      return NextResponse.json(
-        { error: 'Maximum 1000 ingredients per import' },
-        { status: 400 }
-      )
-    }
+type BulkImportBody = z.infer<typeof BulkImportSchema>
 
-    const supabase = await createClient()
+// POST /api/import/ingredients - Bulk import ingredients
+async function importIngredientsHandler(
+  context: RouteContext,
+  _query?: never,
+  body?: BulkImportBody
+): Promise<NextResponse> {
+  const { user, supabase } = context
 
-    // Prepare data for insertion
-    const ingredientsToInsert = ingredients.map((ing: {
-      name: string
-      category?: string
-      unit: string
-      price_per_unit: number
-      current_stock: number
-      reorder_point: number
-      supplier?: string
-    }) => ({
-      name: ing.name,
-      category: ing.category || null,
-      unit: ing.unit,
-      price_per_unit: ing.price_per_unit,
-      current_stock: ing.current_stock,
-      reorder_point: ing.reorder_point,
-      min_stock: ing.reorder_point, // Use reorder_point as min_stock
-      supplier: ing.supplier || null,
-      user_id: user.id,
-    }))
-
-    // Insert in batches of 100
-    const batchSize = 100
-    const results: unknown[] = []
-    const errors: Array<{ batch: number; error: string }> = []
-
-    for (let i = 0; i < ingredientsToInsert.length; i += batchSize) {
-      const batch = ingredientsToInsert.slice(i, i + batchSize)
-
-      const { data, error } = await supabase
-        .from('ingredients')
-        .insert(batch as never[])
-        .select()
-
-      if (error) {
-        errors.push({
-          batch: Math.floor(i / batchSize) + 1,
-          error: error.message,
-        })
-      } else {
-        results.push(...(data || []))
-      }
-    }
-
-    return NextResponse.json({
-      data: {
-        imported: results.length,
-        total: ingredients.length,
-        failed: ingredients.length - results.length,
-        errors,
-      },
-    })
-  } catch (error) {
-    return handleAPIError(error, 'POST /api/import/ingredients')
+  if (!body) {
+    return createErrorResponse('Request body is required', 400)
   }
+
+  const { ingredients } = body
+
+  // Prepare data for insertion with user context
+  const ingredientsToInsert = ingredients.map((ing) => ({
+    name: ing.name,
+    category: ing.category || null,
+    unit: ing.unit,
+    price_per_unit: ing.price_per_unit,
+    current_stock: ing.current_stock,
+    reorder_point: ing.reorder_point,
+    min_stock: ing.reorder_point,
+    supplier: ing.supplier || null,
+    user_id: user.id,
+    created_by: user.id,
+    updated_by: user.id,
+  }))
+
+  // Insert in batches of 100
+  const batchSize = 100
+  const results: unknown[] = []
+  const errors: Array<{ batch: number; error: string }> = []
+
+  for (let i = 0; i < ingredientsToInsert.length; i += batchSize) {
+    const batch = ingredientsToInsert.slice(i, i + batchSize)
+
+    const { data, error } = await typed(supabase)
+      .from('ingredients')
+      .insert(batch as never[])
+      .select(INGREDIENT_FIELDS.LIST)
+
+    if (error) {
+      apiLogger.error({ error, batchIndex: i }, 'Failed to insert ingredient batch')
+      errors.push({
+        batch: Math.floor(i / batchSize) + 1,
+        error: error.message,
+      })
+    } else {
+      results.push(...(data || []))
+    }
+  }
+
+  return createSuccessResponse({
+    imported: results.length,
+    total: ingredients.length,
+    failed: ingredients.length - results.length,
+    errors,
+  }, `Berhasil mengimpor ${results.length} bahan baku`)
 }
 
-const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
-export { securedPOST as POST }
+export const POST = createApiRoute(
+  {
+    method: 'POST',
+    path: '/api/import/ingredients',
+    bodySchema: BulkImportSchema,
+  },
+  importIngredientsHandler
+)

@@ -2,6 +2,7 @@
 export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 
 import { cacheInvalidation, cacheKeys, withCache } from '@/lib/cache'
 import { apiLogger } from '@/lib/logger'
@@ -12,6 +13,10 @@ import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { typed } from '@/types/type-utilities'
 
 import { createClient } from '@/utils/supabase/server'
+
+const CalculateHppSchema = z.object({
+  recipeId: z.string().uuid('Recipe ID harus valid'),
+}).strict()
 
 // GET /api/hpp/calculations - Get HPP calculations with pagination and filtering
 async function getHandler(request: NextRequest): Promise<NextResponse> {
@@ -164,15 +169,9 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     // Create authenticated Supabase client
     const supabase = await createClient()
 
-    const body = await request.json() as { recipeId?: string }
-    const { recipeId } = body
-
-    if (!recipeId) {
-      return NextResponse.json(
-        { error: 'recipeId is required' },
-        { status: 400 }
-      )
-    }
+    const body = await request.json() as Record<string, unknown>
+    const validatedData = CalculateHppSchema.parse(body)
+    const { recipeId } = validatedData
 
     // Calculate HPP using consolidated service
     const hppService = new HppCalculatorService()

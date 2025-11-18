@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { useAuth } from '@/hooks/index'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { apiLogger } from '@/lib/logger'
 import { typedInsert } from '@/lib/supabase-client'
 import { clearDraft, loadDraft } from '@/lib/utils/recipe-helpers'
@@ -37,7 +37,6 @@ import type { AvailableIngredient, GeneratedRecipe } from '@/app/recipes/ai-gene
 
 const AIRecipeGeneratorPage = () => {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
-  const { toast } = useToast()
   const router = useRouter()
   const { supabase } = useSupabase()
 
@@ -72,36 +71,18 @@ const AIRecipeGeneratorPage = () => {
   // Handle auth errors
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
-      toast({
-        title: 'Sesi berakhir',
-        description: 'Sesi Anda telah berakhir. Silakan login kembali.',
-        variant: 'destructive',
-      })
+      toast.error('Sesi Anda telah berakhir. Silakan login kembali.')
       router.push('/auth/login')
     }
-  }, [isAuthLoading, isAuthenticated, router, toast])
+  }, [isAuthLoading, isAuthenticated, router])
 
    // Sprint 1: Load draft on mount
    useEffect(() => {
      const draft = loadDraft()
      if (draft) {
-       toast({
-         title: '📝 Draft ditemukan!',
-         description: 'Mau lanjutin draft sebelumnya?',
-         action: (
-           <Button size="sm" onClick={() => {
-             setProductName(draft.productName)
-             setProductType(draft.productType)
-             setServings(draft.servings)
-             setSelectedIngredients(draft.selectedIngredients)
-             if (draft.targetPrice) { setTargetPrice(draft.targetPrice) }
-           }}>
-             Restore
-           </Button>
-         )
-       })
+       toast('📝 Draft ditemukan! Mau lanjutin draft sebelumnya?')
      }
-   }, [toast])
+    }, [])
 
    const fetchIngredients = useCallback(async () => {
       const { data, error } = await supabase
@@ -134,11 +115,7 @@ const AIRecipeGeneratorPage = () => {
 
   const handleGenerate = useCallback(async () => {
     if (!productName || !productType || !servings) {
-      toast({
-        title: 'Data belum lengkap',
-        description: 'Mohon isi nama produk dan jumlah hasil',
-        variant: 'destructive',
-      })
+      toast.error('Mohon isi nama produk dan jumlah hasil')
       return
     }
 
@@ -181,21 +158,14 @@ const AIRecipeGeneratorPage = () => {
       const data = await response.json() as { recipe: GeneratedRecipe }
       setGeneratedRecipe(data.recipe)
 
-      toast({
-        title: '✨ Resep berhasil dibuat!',
-        description: 'AI telah meracik resep profesional untuk Anda',
-      })
+      toast.success('AI telah meracik resep profesional untuk Anda')
     } catch (error: unknown) {
       apiLogger.error({ error }, 'Error generating recipe:')
-      toast({
-        title: 'Gagal generate resep',
-        description: (error as Error).message || 'Terjadi kesalahan, coba lagi',
-        variant: 'destructive',
-      })
+      toast.error((error as Error).message || 'Terjadi kesalahan, coba lagi')
     } finally {
       setLoading(false)
     }
-  }, [productName, productType, servings, targetPrice, dietaryRestrictions, selectedIngredients, toast, supabase])
+  }, [productName, productType, servings, targetPrice, dietaryRestrictions, selectedIngredients])
 
   const handleSaveRecipe = useCallback(async () => {
     if (!generatedRecipe) { return }
@@ -260,10 +230,7 @@ const AIRecipeGeneratorPage = () => {
         if (ingredientsError) { throw ingredientsError }
       }
 
-      toast({
-        title: '✅ Resep berhasil disimpan!',
-        description: 'Resep sudah tersimpan di database Anda',
-      })
+      toast.success('Resep sudah tersimpan di database Anda')
 
       // Reset form & clear draft
       setGeneratedRecipe(null)
@@ -276,13 +243,9 @@ const AIRecipeGeneratorPage = () => {
 
     } catch (error: unknown) {
       apiLogger.error({ error }, 'Error saving recipe:')
-      toast({
-        title: 'Gagal menyimpan resep',
-        description: (error as Error).message || 'Terjadi kesalahan',
-        variant: 'destructive',
-       })
+      toast.error((error as Error).message || 'Terjadi kesalahan')
      }
-   }, [generatedRecipe, availableIngredients, toast, supabase])
+    }, [generatedRecipe, availableIngredients, supabase])
 
   const handleGenerateAgain = useCallback(() => {
     setGeneratedRecipe(null)

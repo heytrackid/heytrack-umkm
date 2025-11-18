@@ -5,6 +5,7 @@ import Image from 'next/image'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { LoadingSpinner } from '@/components/ui/loading-state'
 import { Skeleton } from '@/components/ui/skeleton'
 
 
@@ -75,7 +76,7 @@ export const ProgressiveLoader = ({
       <Card className="w-full">
         <CardContent className="p-6">
           <div className="flex items-center justify-center mb-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            <LoadingSpinner size="md" />
             <span className="ml-3">{loadingMessage}</span>
           </div>
           {showTimeout && (
@@ -153,8 +154,8 @@ export const ProgressiveDataTable = <T extends Record<string, ReactNode>>({
           >
             {isLoadingMore ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2" />
-                Loading more...
+                <LoadingSpinner size="sm" />
+                <span className="ml-2">Loading more...</span>
               </>
             ) : (
               `Load more (${data.length - displayedData.length} remaining)`

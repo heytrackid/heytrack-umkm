@@ -3,11 +3,11 @@ export const runtime = 'nodejs'
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { calculateAverageDailyUsage, calculateReorderPoint } from '@/lib/business-rules/inventory'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
-import { createClient } from '@/utils/supabase/server'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { NextRequest, NextResponse } from 'next/server'
 
-async function POST(request: NextRequest): Promise<NextResponse> {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     const authResult = await requireAuth()
     if (isErrorResponse(authResult)) {
@@ -18,7 +18,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     const body = await request.json()
     const { ingredientId, leadTimeDays = 7, safetyStockDays = 3 } = body
 
-    const supabase = await createClient()
+    const supabase = createServiceRoleClient()
 
     // Get ingredient
     const { data: _ingredient, error: ingredientError } = await supabase
@@ -87,5 +87,4 @@ async function POST(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
-export { securedPOST as POST }
+export const POST = createSecureHandler(postHandler, 'POST /api/ingredients/calculate-reorder', SecurityPresets.enhanced())

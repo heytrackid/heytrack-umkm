@@ -2,7 +2,7 @@ export const runtime = 'nodejs'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
@@ -13,7 +13,7 @@ const generateRecipeSchema = z.object({
   dietary: z.array(z.string()).optional(),
 })
 
-async function POST(request: NextRequest): Promise<NextResponse> {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     const authResult = await requireAuth()
     if (isErrorResponse(authResult)) {
@@ -140,5 +140,4 @@ Please provide the recipe in the following JSON format:
   }
 }
 
-const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
-export { securedPOST as POST }
+export const POST = createSecureHandler(postHandler, 'POST /api/recipes/generate', SecurityPresets.enhanced())

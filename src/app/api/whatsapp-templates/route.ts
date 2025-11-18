@@ -1,139 +1,90 @@
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
-// WhatsApp Templates API - List & Create
-// GET: List all templates for authenticated user
-// POST: Create new template
-
-import { NextRequest, NextResponse } from 'next/server'
-
-import { isErrorResponse, requireAuth } from '@/lib/api-auth'
+import { z } from 'zod'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { createListHandler } from '@/lib/api/crud-helpers'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core'
 import { apiLogger } from '@/lib/logger'
-import type { Insert } from '@/types/database'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
-import { createClient } from '@/utils/supabase/server'
+import type { NextResponse } from 'next/server'
 
+// GET /api/whatsapp-templates - List all templates
+export const GET = createApiRoute(
+  {
+    method: 'GET',
+    path: '/api/whatsapp-templates',
+  },
+  createListHandler({
+    table: 'whatsapp_templates',
+    selectFields: 'id, user_id, name, message, category, template_content, is_active, is_default, created_at, updated_at',
+    defaultSort: 'created_at',
+    defaultOrder: 'desc',
+    searchFields: ['name', 'category'],
+  })
+)
 
+// POST /api/whatsapp-templates - Create new template
+const TemplateInsertSchema = z.object({
+  name: z.string(),
+  template_content: z.string(),
+  category: z.string(),
+  description: z.string().optional(),
+  variables: z.array(z.string()).optional(),
+  is_active: z.boolean().optional(),
+  is_default: z.boolean().optional(),
+})
 
-type WhatsAppTemplateInsert = Insert<'whatsapp_templates'>
+async function createTemplateHandler(
+  context: RouteContext,
+  _query?: never,
+  body?: z.infer<typeof TemplateInsertSchema>
+): Promise<NextResponse> {
+  const { user, supabase } = context
 
-async function GET(request: NextRequest): Promise<NextResponse> {
-  try {
-    // 1. Authentication
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
-
-    const supabase = await createClient()
-
-    // 2. Query parameters
-    const { searchParams } = new URL(request.url)
-    const activeOnly = searchParams.get('active') === 'true'
-
-    // 3. Query templates (RLS handles user_id filtering)
-    let query = supabase
-      .from('whatsapp_templates')
-      .select('id, user_id, name, message, is_active, created_at, updated_at')
-      .order('created_at', { ascending: false })
-
-    if (activeOnly) {
-      query = query.eq('is_active', true)
-    }
-
-    const { data, error } = await query
-
-    if (error) {
-      apiLogger.error({ error, userId: user.id }, 'Failed to fetch WhatsApp templates')
-      throw error
-    }
-
-    apiLogger.info({ userId: user.id, count: data.length }, 'WhatsApp templates fetched')
-    return NextResponse.json(data)
-  } catch (error) {
-    apiLogger.error({ error }, 'Error in GET /api/whatsapp-templates')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+  if (!body) {
+    return createErrorResponse('Request body is required', 400)
   }
+
+  // If setting as default, unset other defaults in same category
+  if (body.is_default) {
+    await supabase
+      .from('whatsapp_templates' as never)
+      .update({ is_default: false } as never)
+      .eq('user_id', user.id)
+      .eq('category', body.category)
+  }
+
+  // Insert template
+  const templateData = {
+    name: body.name,
+    description: body.description ?? '',
+    category: body.category,
+    template_content: body.template_content,
+    variables: body.variables ?? [],
+    is_active: body.is_active ?? true,
+    is_default: body.is_default ?? false,
+    user_id: user.id,
+  }
+
+  const { data, error } = await supabase
+    .from('whatsapp_templates' as never)
+    .insert(templateData as never)
+    .select()
+    .single()
+
+  if (error) {
+    apiLogger.error({ error, userId: user.id }, 'Failed to create WhatsApp template')
+    return createErrorResponse('Failed to create template', 500)
+  }
+
+  apiLogger.info({ userId: user.id }, 'WhatsApp template created')
+  return createSuccessResponse(data, 'Template created successfully')
 }
 
-async function POST(request: NextRequest): Promise<NextResponse> {
-  try {
-    // 1. Authentication
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
-
-    const supabase = await createClient()    // 2. Parse and validate body
-    const _body = await request.json() as {
-      name?: string
-      template_content?: string
-      category?: string
-      description?: string
-      variables?: string[]
-      is_active?: boolean
-      is_default?: boolean
-    }
-
-    if (!_body.name || !_body.template_content || !_body.category) {
-      return NextResponse.json(
-        { error: 'Missing required fields: name, template_content, category' },
-        { status: 400 }
-      )
-    }
-
-    // 3. If setting as default, unset other defaults
-    if (_body.is_default) {
-      await supabase
-        .from('whatsapp_templates')
-        .update({ is_default: false } as never)
-        .eq('user_id', user['id'])
-        .eq('category', _body.category)
-    }
-
-    // 4. Insert template
-    const templateData: WhatsAppTemplateInsert = {
-      name: _body.name,
-      description: _body.description ?? '',
-      category: _body.category,
-      template_content: _body.template_content,
-      variables: _body.variables ?? [],
-      is_active: _body.is_active ?? true,
-      is_default: _body.is_default ?? false,
-      user_id: user['id']
-    }
-
-    const { data, error } = await supabase
-      .from('whatsapp_templates')
-      .insert(templateData as never)
-      .select()
-      .single()
-
-    if (error) {
-      apiLogger.error({ error, userId: user['id'] }, 'Failed to create WhatsApp template')
-      throw error
-    }
-
-    const typedData = data as { id: string } // Type assertion to fix RLS inference
-    apiLogger.info({ userId: user.id, templateId: typedData.id }, 'WhatsApp template created')
-    return NextResponse.json(data, { status: 201 })
-  } catch (error) {
-    apiLogger.error({ error }, 'Error in POST /api/whatsapp-templates')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
-
-// Apply security middleware
-const securedGET = withSecurity(GET, SecurityPresets.enhanced())
-const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
-
-export { securedGET as GET, securedPOST as POST }
+export const POST = createApiRoute(
+  {
+    method: 'POST',
+    path: '/api/whatsapp-templates',
+    bodySchema: TemplateInsertSchema,
+  },
+  createTemplateHandler
+)

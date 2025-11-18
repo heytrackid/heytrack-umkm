@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { getErrorMessage } from '@/lib/type-guards'
 
 import type { Row } from '@/types/database'
@@ -46,7 +46,7 @@ interface CustomerFormComponentProps {
 }
 
 export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormComponentProps): JSX.Element => {
-  const { toast } = useToast()
+
 
   const form = useForm<CustomerFormData>({
     resolver: zodResolver(CustomerFormSchema),
@@ -63,23 +63,20 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
     }
   })
 
+  // Extract watch values to avoid React Hook Form linting warnings
+  const watchedCustomerType = useWatch({ control: form.control, name: 'customer_type' })
+  const watchedIsActive = useWatch({ control: form.control, name: 'is_active' })
+
   const handleSubmit = async (data: CustomerFormData): Promise<void> => {
     try {
       await onSubmit(data)
-      toast({
-        title: 'Berhasil',
-        description: 'Data customer berhasil disimpan'
-      })
+      toast.success('Data customer berhasil disimpan')
       if (!initialData) {
         form.reset()
       }
     } catch (error: unknown) {
       const message = getErrorMessage(error)
-      toast({
-        title: 'Error',
-        description: message || 'Gagal menyimpan data customer',
-        variant: 'destructive'
-      })
+      toast.error(message || 'Gagal menyimpan data customer')
     }
   }
 
@@ -118,7 +115,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
               error={form.formState.errors['customer_type']?.message as string}
             >
               <Select
-                value={form.watch('customer_type') as string}
+                value={watchedCustomerType as string}
                 onValueChange={(value) => form.setValue('customer_type', value as 'regular' | 'retail' | 'vip' | 'wholesale')}
               >
                 <SelectTrigger>
@@ -150,7 +147,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
 
           <div className="flex items-center space-x-2">
             <Checkbox
-              checked={form.watch('is_active') ?? true}
+              checked={watchedIsActive ?? true}
               onCheckedChange={(checked) => form.setValue('is_active', checked === true)}
             />
             <Label>Aktif</Label>

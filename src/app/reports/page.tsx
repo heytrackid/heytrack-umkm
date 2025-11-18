@@ -6,7 +6,7 @@ import { useEffect } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useAuth } from '@/hooks/index'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 
 import { ReportsLayout } from '@/app/reports/components/ReportsLayout'
 
@@ -19,7 +19,7 @@ import { ReportsLayout } from '@/app/reports/components/ReportsLayout'
 
 const ReportsPage = () => {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
-  const { toast } = useToast()
+
   const router = useRouter()
   
   // Extract initial date range from URL for consistency across pages
@@ -38,14 +38,10 @@ const ReportsPage = () => {
   // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
-      toast({
-        title: 'Sesi berakhir',
-        description: 'Sesi Anda telah berakhir. Silakan login kembali.',
-        variant: 'destructive',
-      })
+      toast.error('Sesi Anda telah berakhir. Silakan login kembali.')
       router.push('/auth/login?redirectTo=/reports')
     }
-  }, [isAuthLoading, isAuthenticated, router, toast])
+  }, [isAuthLoading, isAuthenticated, router])
 
   // Show loading state while auth is initializing
   if (isAuthLoading) {

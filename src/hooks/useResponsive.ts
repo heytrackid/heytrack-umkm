@@ -3,9 +3,11 @@ import { useState, useEffect } from 'react';
 export const useResponsive = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(true); // Default to desktop for SSR
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const checkResponsive = () => {
       const width = window.innerWidth;
       setIsMobile(width < 768);

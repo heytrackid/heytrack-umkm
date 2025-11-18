@@ -7,7 +7,7 @@ import { z } from 'zod'
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 const SupplierImportSchema = z.object({
@@ -26,7 +26,7 @@ const SuppliersImportSchema = z.object({
 })
 
 // POST /api/suppliers/import - Import suppliers from CSV
-async function POST(request: NextRequest): Promise<NextResponse> {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/suppliers/import - Request received')
 
@@ -132,6 +132,4 @@ async function POST(request: NextRequest): Promise<NextResponse> {
 }
 
 // Apply security middleware
-const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
-
-export { securedPOST as POST }
+export const POST = createSecureHandler(postHandler, 'POST /api/suppliers/import', SecurityPresets.enhanced())

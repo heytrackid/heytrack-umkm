@@ -8,7 +8,7 @@ import { PageHeader } from '@/components/shared/index'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useIngredients } from '@/hooks/useIngredients'
 import { dbLogger } from '@/lib/logger'
@@ -19,7 +19,6 @@ import type { Row as _Row } from '@/types/database'
 
 const WacEnginePage = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
-  const { toast } = useToast()
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
    // Use ingredients hook with caching
@@ -40,11 +39,7 @@ const WacEnginePage = (): JSX.Element => {
   // Calculate WAC for selected ingredient
   const calculateWac = () => {
     if (!selectedIngredient) {
-      toast({
-        title: 'Error',
-        description: 'Please select an ingredient',
-        variant: 'destructive'
-      })
+      toast.error('Please select an ingredient')
       return
     }
 
@@ -52,17 +47,10 @@ const WacEnginePage = (): JSX.Element => {
       setCalculating(true)
       // This would normally call a WAC API endpoint
       // For now, we'll simulate the calculation
-      toast({
-        title: 'Info',
-        description: 'WAC calculation endpoint not yet implemented',
-      })
+      toast('WAC calculation endpoint not yet implemented')
     } catch (error) {
       dbLogger.error({ error }, 'Failed to calculate WAC')
-      toast({
-        title: 'Error',
-        description: 'Failed to calculate WAC',
-        variant: 'destructive'
-      })
+      toast.error('Failed to calculate WAC')
     } finally {
       setCalculating(false)
     }
@@ -72,26 +60,16 @@ const WacEnginePage = (): JSX.Element => {
   const recalculateAll = () => {
     try {
       setRecalculating(true)
-      toast({
-        title: 'Info',
-        description: 'Full WAC recalculation started',
-      })
+      toast('Full WAC recalculation started')
 
       // Simulate recalculation
       timeoutRef.current = setTimeout(() => {
         setRecalculating(false)
-        toast({
-          title: 'Success',
-          description: 'WAC recalculation completed',
-        })
+        toast.success('WAC recalculation completed')
       }, 2000)
     } catch (error) {
       dbLogger.error({ error }, 'Failed to recalculate WAC')
-      toast({
-        title: 'Error',
-        description: 'Failed to recalculate WAC',
-        variant: 'destructive'
-      })
+      toast.error('Failed to recalculate WAC')
       setRecalculating(false)
     }
   }

@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 
 import { useToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
@@ -6,7 +7,7 @@ import { createClientLogger } from '@/lib/client-logger'
 const logger = createClientLogger('Hook')
 import { getErrorMessage } from '@/lib/type-guards'
 
-import type { Insert, Update } from '@/types/database'
+import type { Insert, Row, Update } from '@/types/database'
 
 /**
  * React Query hooks for Recipes
@@ -14,39 +15,77 @@ import type { Insert, Update } from '@/types/database'
  */
 
 
+type Recipe = Row<'recipes'>
 type RecipeInsert = Insert<'recipes'>
 type RecipeUpdate = Update<'recipes'>
+
+interface RecipesResponse {
+  data?: Recipe[]
+  meta?: Record<string, unknown>
+  error?: string
+}
 
 interface UseRecipesOptions {
   limit?: number
   offset?: number
   search?: string
+  status?: string
 }
 
 /**
  * Fetch all recipes with caching
  */
 export function useRecipes(options?: UseRecipesOptions) {
-  return useQuery({
+  const { toast } = useToast()
+
+  const queryResult = useQuery<RecipesResponse, Error, Recipe[]>({
     queryKey: ['recipes', options],
     queryFn: async () => {
       const params = new URLSearchParams()
       if (options?.limit) {params.set('limit', options.limit.toString())}
       if (options?.offset) {params.set('offset', options.offset.toString())}
       if (options?.search) {params.set('search', options.search)}
+      if (options?.status) {params.set('status', options.status)}
+      const queryString = params.toString()
       
-      const response = await fetch(`/api/recipes?${params}`, {
+      const response = await fetch(queryString ? `/api/recipes?${queryString}` : '/api/recipes', {
         credentials: 'include', // Include cookies for authentication
       })
-      if (!response.ok) {
-        throw new Error('Failed to fetch recipes')
+      let payload: RecipesResponse | null = null
+      try {
+        payload = await response.json() as RecipesResponse
+      } catch {
+        // ignore parsing error, handled below
       }
-      return response.json()
+
+      if (!response.ok || payload === null || typeof payload !== 'object') {
+        const errorMessage = payload && typeof payload === 'object' && 'error' in payload && typeof (payload as { error?: unknown }).error === 'string'
+          ? (payload as { error: string }).error
+          : 'Failed to fetch recipes'
+        throw new Error(errorMessage)
+      }
+      return payload
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
     refetchOnWindowFocus: false,
+    select: (result: RecipesResponse) => result.data ?? [],
   })
+
+  useEffect(() => {
+    if (!queryResult.error) {
+      return
+    }
+    const message = getErrorMessage(queryResult.error) || 'Gagal memuat data resep'
+    logger.error({ error: message }, 'useRecipes: failed to fetch recipes')
+    toast({
+      title: 'Gagal memuat resep',
+      description: message,
+      variant: 'destructive',
+    })
+  }, [queryResult.error, toast])
+
+  return queryResult
 }
 
 /**

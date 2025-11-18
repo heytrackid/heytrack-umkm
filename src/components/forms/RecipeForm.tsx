@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
 import { memo } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { getErrorMessage } from '@/lib/type-guards'
 import {
   RecipeFormSchema,
@@ -33,7 +33,7 @@ interface RecipeFormProps {
 }
 
 export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeFormProps) => {
-  const { toast } = useToast()
+
 
   const form = useForm({
     resolver: zodResolver(RecipeFormSchema),
@@ -57,22 +57,19 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
   const handleSubmit = async (data: RecipeFormData) => {
     try {
       await onSubmit(data)
-      toast({
-        title: 'Berhasil',
-        description: 'Resep berhasil disimpan'
-      })
+      toast.success('Resep berhasil disimpan')
       if (!initialData) {
         form.reset()
       }
     } catch (error: unknown) {
       const message = getErrorMessage(error)
-      toast({
-        title: 'Error',
-        description: message || 'Gagal menyimpan resep',
-        variant: 'destructive'
-      })
+      toast.error(message || 'Gagal menyimpan resep')
     }
   }
+
+  // Extract watch values to avoid React Hook Form linting warnings
+  const watchedDifficulty = useWatch({ control: form.control, name: 'difficulty' })
+  const watchedIsActive = useWatch({ control: form.control, name: 'is_active' })
 
   return (
     <Card>
@@ -139,7 +136,7 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
                 onValueChange={(value) => {
                   form.setValue('difficulty', value as 'EASY' | 'HARD' | 'MEDIUM')
                 }}
-                {...(form.watch('difficulty') ? { value: form.watch('difficulty') as string } : {})}
+                {...(watchedDifficulty ? { value: watchedDifficulty as string } : {})}
               
               >
                 <SelectTrigger>
@@ -189,7 +186,7 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
 
           <div className="flex items-center space-x-2">
             <Checkbox
-              checked={Boolean(form.watch('is_active'))}
+              checked={Boolean(watchedIsActive)}
               onCheckedChange={(checked) => form.setValue('is_active', Boolean(checked))}
             />
             <Label>Aktif</Label>

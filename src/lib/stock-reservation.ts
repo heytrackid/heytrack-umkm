@@ -40,42 +40,19 @@ export async function reserveStock(
 ): Promise<string> {
   const supabase = await createClient()
 
-  const { data, error } = await supabase.rpc('reserve_stock', {
-    p_order_id: orderId,
-    p_ingredient_id: ingredientId,
-    p_quantity: quantity,
-    p_user_id: userId,
-  } as any)
+   // @ts-ignore - rpc type issues
+   const { data, error } = await supabase.rpc('reserve_stock', {
+     p_order_id: orderId,
+     p_ingredient_id: ingredientId,
+     p_quantity: quantity,
+     p_user_id: userId,
+   })
 
-  if (error) {
-    throw new Error(`Failed to reserve stock: ${error.message}`)
-  }
+   if (error) {
+     throw new Error(`Failed to reserve stock: ${error.message}`)
+   }
 
-  return data as string
-}
-
-/**
- * Release reserved stock (on order cancellation)
- * @param orderId - Order ID
- * @param userId - User ID
- * @returns Number of reservations released
- */
-export async function releaseStock(
-  orderId: string,
-  userId: string
-): Promise<number> {
-  const supabase = await createClient()
-
-  const { data, error } = await supabase.rpc('release_stock', {
-    p_order_id: orderId,
-    p_user_id: userId,
-  } as any)
-
-  if (error) {
-    throw new Error(`Failed to release stock: ${error.message}`)
-  }
-
-  return data as number
+   return String(data)
 }
 
 /**
@@ -90,10 +67,11 @@ export async function consumeStock(
 ): Promise<number> {
   const supabase = await createClient()
 
-  const { data, error } = await supabase.rpc('consume_stock', {
-    p_order_id: orderId,
-    p_user_id: userId,
-  } as any)
+   // @ts-ignore - rpc type issues
+   const { data, error } = await supabase.rpc('consume_stock', {
+     p_order_id: orderId,
+     p_user_id: userId,
+   })
 
   if (error) {
     throw new Error(`Failed to consume stock: ${error.message}`)
@@ -114,10 +92,11 @@ export async function getAvailableStock(
 ): Promise<number> {
   const supabase = await createClient()
 
-  const { data, error } = await supabase.rpc('get_available_stock', {
-    p_ingredient_id: ingredientId,
-    p_user_id: userId,
-  } as any)
+   // @ts-ignore - rpc type issues
+   const { data, error } = await supabase.rpc('get_available_stock', {
+     p_ingredient_id: ingredientId,
+     p_user_id: userId,
+   })
 
   if (error) {
     throw new Error(`Failed to get available stock: ${error.message}`)
@@ -242,7 +221,11 @@ export async function reserveStockForOrder(
     } catch (error) {
       // If any reservation fails, release all previous reservations
       if (reservationIds.length > 0) {
-        await releaseStock(orderId, userId)
+        const supabase = await createClient()
+        await supabase
+          .from('stock_reservations')
+          .update({ status: 'released' })
+          .in('id', reservationIds)
       }
       throw error
     }

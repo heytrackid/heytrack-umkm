@@ -32,7 +32,7 @@ export class HppAutomation {
     userId: string
   ) {
     const uniqueIds = Array.from(new Set(recipeIds.filter(Boolean)))
-    const results: Array<{ recipeId: string; success: boolean; calculation?: any; error?: unknown }> = []
+    const results: Array<{ recipeId: string; success: boolean; calculation?: unknown; error?: unknown }> = []
 
     for (const recipeId of uniqueIds) {
       try {

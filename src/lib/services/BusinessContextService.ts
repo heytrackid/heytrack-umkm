@@ -101,9 +101,9 @@ export class BusinessContextService {
       .limit(100);
 
     return data?.map(r => {
-      const typed = r as any // Type assertion for RLS
+      const typed = r as unknown as { id: string; name: string; cost_per_unit: number | null } // Type assertion for RLS
       return {
-        id: typed['id'],
+        id: typed.id,
         name: typed.name,
         hpp: typed.cost_per_unit ?? 0
       }
@@ -126,9 +126,9 @@ export class BusinessContextService {
 
     return (
       data?.map((ing) => {
-        const typed = ing as any // Type assertion for RLS
+        const typed = ing as unknown as { id: string; name: string; current_stock: number | null; unit: string; min_stock: number | null } // Type assertion for RLS
         return {
-          id: typed['id'],
+          id: typed.id,
           name: typed.name,
           stock: typed.current_stock ?? 0,
           unit: typed.unit,
@@ -153,10 +153,10 @@ export class BusinessContextService {
       .limit(100);
 
     return (data ?? []).map(order => {
-      const typed = order as any // Type assertion for RLS
+      const typed = order as unknown as { id: string; customer_name: string | null; total_amount: number | null; status: string | null; created_at: string | null } // Type assertion for RLS
       return {
-        id: typed['id'],
-        customer_name: typed['customer_name'] ?? 'Unknown customer',
+        id: typed.id,
+        customer_name: typed.customer_name ?? 'Unknown customer',
         total_amount: typed.total_amount ?? 0,
         status: typed['status'] ?? 'UNKNOWN',
         created_at: typed.created_at ?? new Date().toISOString()
@@ -181,21 +181,21 @@ export class BusinessContextService {
 
     const alertsCount = 0;
 
-    const current = calculations?.[0] as any; // Type assertion for RLS
-    const previous = calculations?.[1] as any; // Type assertion for RLS
+    const current = calculations?.[0] as unknown as Record<string, unknown>; // Type assertion for RLS
+    const previous = calculations?.[1] as unknown as Record<string, unknown>; // Type assertion for RLS
 
     let trend: 'down' | 'stable' | 'up' = 'stable';
     if (current && previous) {
-      const diff = current.total_hpp - previous.total_hpp;
+      const diff = (current['total_hpp'] as number) - (previous['total_hpp'] as number);
       if (diff > 0.05) {trend = 'up';}
       else if (diff < -0.05) {trend = 'down';}
     }
 
     return {
-      average_hpp: current?.total_hpp ?? 0,
+      average_hpp: (current?.['total_hpp'] as number) ?? 0,
       trend,
       alerts_count: alertsCount || 0,
-      last_updated: current?.created_at ?? new Date().toISOString(),
+      last_updated: (current?.['created_at'] as string) ?? new Date().toISOString(),
     };
   }
 
@@ -218,7 +218,7 @@ export class BusinessContextService {
       .gte('created_at', startOfMonth.toISOString());
 
     const totalRevenue =
-      orders?.reduce((sum, order) => sum + ((order as any).total_amount ?? 0), 0) ?? 0;
+      orders?.reduce((sum, order) => sum + ((order as { total_amount: number }).total_amount ?? 0), 0) ?? 0;
 
     // Get costs from operational_costs and ingredient_purchases
     const { data: opCosts } = await supabase
@@ -234,8 +234,8 @@ export class BusinessContextService {
       .gte('purchase_date', startOfMonth.toISOString());
 
     const totalCosts =
-      (opCosts?.reduce((sum, cost) => sum + (cost as any).amount, 0) ?? 0) +
-      (purchases?.reduce((sum, purchase) => sum + (purchase as any).total_price, 0) ??
+      (opCosts?.reduce((sum, cost) => sum + (cost as { amount: number }).amount, 0) ?? 0) +
+      (purchases?.reduce((sum, purchase) => sum + (purchase as { total_price: number }).total_price, 0) ??
         0);
 
     return {
@@ -263,7 +263,7 @@ export class BusinessContextService {
 
     if (!data) {return null;}
 
-    const typedData = data as any // Type assertion for RLS
+    const typedData = data as unknown as { expires_at: string } // Type assertion for RLS
     const expiresAt = new Date(typedData.expires_at);
     if (expiresAt < new Date()) {
       return null;

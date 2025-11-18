@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { useAuth } from '@/hooks/index'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { uiLogger } from '@/lib/client-logger'
 
 // Lazy load heavy components
@@ -44,20 +44,15 @@ const WhatsAppTemplatesLayout = () => {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false)
 
     const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
-    const { toast } = useToast()
     const router = useRouter()
 
     // Handle auth errors
     useEffect(() => {
         if (!isAuthLoading && !isAuthenticated) {
-            toast({
-                title: 'Sesi berakhir',
-                description: 'Sesi Anda telah berakhir. Silakan login kembali.',
-                variant: 'destructive',
-            })
+            toast.error('Sesi Anda telah berakhir. Silakan login kembali.')
             router.push('/auth/login')
         }
-    }, [isAuthLoading, isAuthenticated, router, toast])
+    }, [isAuthLoading, isAuthenticated, router])
 
     const fetchTemplates = useCallback(async () => {
         try {
@@ -81,23 +76,15 @@ const WhatsAppTemplatesLayout = () => {
                 
                 setTemplates(data)
             } else {
-                toast({
-                    title: 'Error',
-                    description: 'Gagal memuat template',
-                    variant: 'destructive',
-                })
+                toast.error('Gagal memuat template')
             }
         } catch (error: unknown) {
             uiLogger.error({ error: String(error) }, 'Error fetching WhatsApp templates')
-            toast({
-                title: 'Error',
-                description: 'Terjadi kesalahan saat memuat template',
-                variant: 'destructive',
-            })
+            toast.error('Terjadi kesalahan saat memuat template')
         } finally {
             setLoading(false)
         }
-    }, [toast])
+    }, [])
 
     useEffect(() => {
         void fetchTemplates()
@@ -125,30 +112,19 @@ const WhatsAppTemplatesLayout = () => {
             })
 
             if (response.ok) {
-                toast({
-                    title: 'Berhasil',
-                    description: 'Template berhasil dihapus',
-                })
+                toast.success('Template berhasil dihapus')
                 await fetchTemplates()
             } else {
-                toast({
-                    title: 'Error',
-                    description: 'Gagal menghapus template',
-                    variant: 'destructive',
-                })
+                toast.error('Gagal menghapus template')
             }
         } catch (error: unknown) {
             uiLogger.error({ error: String(error), template: templateToDelete }, 'Error deleting WhatsApp template')
-            toast({
-                title: 'Error',
-                description: 'Terjadi kesalahan saat menghapus template',
-                variant: 'destructive',
-            })
+            toast.error('Terjadi kesalahan saat menghapus template')
         } finally {
             setTemplateToDelete(null)
             setIsConfirmOpen(false)
         }
-    }, [fetchTemplates, templateToDelete, toast])
+    }, [fetchTemplates, templateToDelete])
 
     const handleToggleDefault = useCallback(async (template: WhatsAppTemplate) => {
         try {
@@ -163,27 +139,16 @@ const WhatsAppTemplatesLayout = () => {
             })
 
             if (response.ok) {
-                toast({
-                    title: 'Berhasil',
-                    description: template.is_default ? 'Template bukan lagi default' : 'Template diset sebagai default',
-                })
+                toast.success(template.is_default ? 'Template bukan lagi default' : 'Template diset sebagai default')
                 await fetchTemplates()
             } else {
-                toast({
-                    title: 'Error',
-                    description: 'Gagal mengupdate template',
-                    variant: 'destructive',
-                })
+                toast.error('Gagal mengupdate template')
             }
         } catch (error: unknown) {
             uiLogger.error({ error: String(error), template }, 'Error updating WhatsApp template')
-            toast({
-                title: 'Error',
-                description: 'Terjadi kesalahan saat mengupdate template',
-                variant: 'destructive',
-            })
+            toast.error('Terjadi kesalahan saat mengupdate template')
         }
-    }, [fetchTemplates, toast])
+    }, [fetchTemplates])
 
     const handlePreview = useCallback((template: WhatsAppTemplate) => {
         setPreviewTemplate(template)
@@ -201,13 +166,10 @@ const WhatsAppTemplatesLayout = () => {
     }, [])
 
     const handleSuccess = useCallback(async () => {
-        toast({
-            title: 'Berhasil',
-            description: editingTemplate?.id ? 'Template berhasil diupdate' : 'Template berhasil dibuat',
-        })
+        toast.success(editingTemplate?.id ? 'Template berhasil diupdate' : 'Template berhasil dibuat')
         await fetchTemplates()
         setEditingTemplate(null)
-    }, [fetchTemplates, toast, editingTemplate])
+    }, [fetchTemplates, editingTemplate])
 
     const handleGenerateDefaults = useCallback(async () => {
         try {
@@ -219,30 +181,23 @@ const WhatsAppTemplatesLayout = () => {
 
             if (response.ok) {
                 const _data = await response.json() as { templates?: unknown[] }
-                toast({
-                    title: '🎉 Template Siap Digunakan!',
-                    description: `${_data.templates?.length ?? 8} template WhatsApp sudah dibuat dan siap kamu edit!`,
+                toast.success(`🎉 Template Siap Digunakan!`, {
+                    description: `${_data.templates?.length ?? 8} template WhatsApp sudah dibuat dan siap kamu edit!`
                 })
                 await fetchTemplates()
             } else {
                 const errorBody = await response.json() as { message?: string }
-                toast({
-                    title: 'Gagal membuat template',
-                    description: errorBody.message ?? 'Terjadi kesalahan',
-                    variant: 'destructive',
+                toast.error('Gagal membuat template', {
+                    description: errorBody.message ?? 'Terjadi kesalahan'
                 })
             }
         } catch (error: unknown) {
             uiLogger.error({ error: String(error) }, 'Error generating default templates')
-            toast({
-                title: 'Error',
-                description: 'Terjadi kesalahan saat membuat template default',
-                variant: 'destructive',
-            })
+            toast.error('Terjadi kesalahan saat membuat template default')
         } finally {
             setGeneratingDefaults(false)
         }
-    }, [fetchTemplates, toast])
+    }, [fetchTemplates])
 
     // Show loading state while auth is initializing
     if (isAuthLoading) {

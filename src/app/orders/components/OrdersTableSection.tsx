@@ -10,7 +10,7 @@ import { LoadingButton } from '@/components/ui/loading-button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { OrderSkeleton } from '@/components/ui/skeletons/table-skeletons'
-import { useToast } from '@/hooks/index'
+import { toast } from 'sonner'
 
 import type { Row } from '@/types/database'
 
@@ -39,7 +39,6 @@ const OrderSection = ({
   const [isDeleting, setIsDeleting] = useState(false)
 
   const router = useRouter()
-  const { toast } = useToast()
 
   const ORDER_STATUS_CONFIG: Record<string, { label: string; color: string }> = useMemo(() => ({
     PENDING: { label: "Pending", color: 'bg-secondary text-secondary-foreground' },
@@ -86,17 +85,10 @@ const OrderSection = ({
         throw new Error(message ?? 'Gagal menghapus pesanan')
       }
 
-      toast({
-        title: 'Pesanan terhapus',
-        description: `Pesanan ${orderToDelete.order_no} berhasil dihapus.`
-      })
+      toast.success(`Pesanan ${orderToDelete.order_no} berhasil dihapus.`)
       router.refresh()
     } catch (error) {
-      toast({
-        title: 'Gagal menghapus pesanan',
-        description: error instanceof Error ? error.message : 'Terjadi kesalahan saat menghapus pesanan.',
-        variant: 'destructive'
-      })
+      toast.error(error instanceof Error ? error.message : 'Terjadi kesalahan saat menghapus pesanan.')
     } finally {
       setIsDeleting(false)
       setDeleteDialogOpen(false)

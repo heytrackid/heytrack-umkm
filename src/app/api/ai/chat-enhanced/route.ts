@@ -19,7 +19,7 @@ import { ChatSessionService } from '@/lib/services/ChatSessionService'
 import { RateLimiter, RATE_LIMITS } from '@/lib/services/RateLimiter'
 import { SuggestionEngine } from '@/lib/services/SuggestionEngine'
 import { typed } from '@/types/type-utilities'
-import { APISecurity, InputSanitizer, SecurityPresets, withSecurity } from '@/utils/security/index'
+import { APISecurity, InputSanitizer, createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -248,4 +248,4 @@ async function chatEnhancedPOST(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-export const POST = withSecurity(chatEnhancedPOST, SecurityPresets.enhanced())
+export const POST = createSecureHandler(chatEnhancedPOST, 'POST /api/ai/chat-enhanced', SecurityPresets.enhanced())

@@ -11,7 +11,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { uiLogger } from '@/lib/logger'
 
 interface ImportDialogProps {
@@ -44,17 +44,13 @@ export const ImportDialog = ({
         details?: Array<{ row: number; error: string }> | unknown[]
     } | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
-    const { toast } = useToast()
+
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         const selectedFile = e.target.files?.[0]
         if (selectedFile) {
             if (!selectedFile.name.endsWith('.csv')) {
-                toast({
-                    title: 'File tidak valid',
-                    description: 'Hanya file CSV yang diperbolehkan',
-                    variant: 'destructive'
-                })
+                toast.error('File tidak valid - Hanya file CSV yang diperbolehkan')
                 return
             }
             setFile(selectedFile)
@@ -89,10 +85,7 @@ export const ImportDialog = ({
             setResult(result)
 
             if (result.success) {
-                toast({
-                    title: 'Import berhasil',
-                    description: `${result.count} data berhasil diimport`,
-                })
+                toast.success(`${result.count} data berhasil diimport`)
 
                 // Close dialog after 2 seconds
                 setTimeout(() => {

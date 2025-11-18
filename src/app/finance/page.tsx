@@ -3,6 +3,8 @@
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
+import { LoadingState } from '@/components/ui/loading-state'
+
 /**
  * Redirect page for backward compatibility
  * /finance -> /cash-flow
@@ -15,12 +17,7 @@ const FinanceRedirect = (): JSX.Element => {
   }, [router])
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4" />
-        <p className="text-muted-foreground">Redirecting to Cash Flow...</p>
-      </div>
-    </div>
+    <LoadingState message="Redirecting to Cash Flow..." size="md" />
   )
 }
 

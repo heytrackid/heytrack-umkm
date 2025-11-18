@@ -259,10 +259,10 @@ export function useOrderPayments(orderId?: string | null) {
     strategy: 'swr',
     orderBy: { column: 'date', ascending: false },
     filters: { reference: referenceKey, type: 'INCOME', category: 'SALES' },
-  } as any : {
+  } : {
     strategy: 'swr',
     orderBy: { column: 'date', ascending: false },
-  } as any)
+  })
 
   const payments: OrderPayment[] = useMemo(() => {
     if (!Array.isArray(data) || !orderId) {

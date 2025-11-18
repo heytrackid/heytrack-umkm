@@ -12,16 +12,32 @@ import { IngredientFormDialog } from '@/components/ingredients/IngredientFormDia
 import { PageHeader } from '@/components/layout'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatCardPatterns, StatsCards } from '@/components/ui/index'
-import { useToast } from '@/hooks/use-toast'
 import { useIngredients } from '@/hooks/useIngredients'
+import { useQuery } from '@tanstack/react-query'
+import { useSettings } from '@/contexts/settings-context'
+import { toast } from 'sonner'
 
 import type { Row } from '@/types/database'
 
 const IngredientsPage = () => {
   const { data: ingredients, isLoading: loading, error } = useIngredients();
-  const { toast } = useToast();
+  const { formatCurrency } = useSettings();
   const router = useRouter();
+
+  // Fetch recent purchases
+  const { data: purchases } = useQuery({
+    queryKey: ['purchases', 'recent'],
+    queryFn: async () => {
+      const response = await fetch('/api/purchases?page=1&limit=5', {
+        credentials: 'include'
+      })
+      if (!response.ok) return []
+      const result = await response.json()
+      return result.data || []
+    }
+  })
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
 
@@ -35,20 +51,12 @@ const IngredientsPage = () => {
   // Handle auth errors
   useEffect(() => {
     if (error && typeof error === 'object' && (error).message?.includes('401')) {
-      toast({
-        title: 'Sesi berakhir',
-        description: typeof error === 'string' ? error : (error).message || 'Terjadi kesalahan autentikasi',
-        variant: 'destructive',
-      });
+      toast.error(typeof error === 'string' ? error : (error).message || 'Terjadi kesalahan autentikasi');
       router.push('/auth/login');
     } else if (error) {
-      toast({
-        title: 'Terjadi kesalahan',
-        description: 'Gagal memuat data bahan baku. Silakan coba lagi.',
-        variant: 'destructive',
-      });
+      toast.error('Gagal memuat data bahan baku. Silakan coba lagi.');
     }
-  }, [error, router, toast]);
+  }, [error, router]);
 
   // Calculate stats
   const totalIngredients = ingredients?.length ?? 0;
@@ -187,6 +195,38 @@ const IngredientsPage = () => {
           <ImportedIngredientsCRUDSkeleton />
         ) : (
           <EnhancedIngredientsPage onAdd={() => setShowAddDialog(true)} />
+        )}
+
+        {/* Recent Purchases */}
+        {purchases && purchases.length > 0 && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Pembelian Terbaru</CardTitle>
+                <Button variant="ghost" size="sm" onClick={() => router.push('/ingredients/purchases')}>
+                  Lihat Semua
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+               <div className="space-y-3">
+                 {purchases.slice(0, 5).map((purchase: Row<'ingredient_purchases'>) => (
+                  <div key={purchase.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">{purchase.supplier || 'Supplier'}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {purchase.purchase_date ? new Date(purchase.purchase_date).toLocaleDateString('id-ID') : 'N/A'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">{formatCurrency(purchase.total_price || 0)}</p>
+                      <p className="text-sm text-muted-foreground">Completed</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Import Dialog */}

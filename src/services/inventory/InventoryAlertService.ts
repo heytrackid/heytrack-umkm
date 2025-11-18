@@ -147,7 +147,7 @@ export class InventoryAlertService {
             .single()
 
           if (!existingAlert) {
-            await (supabase as any)
+            await supabase
               .from('inventory_alerts')
               .insert({
                 ...alert,
@@ -241,7 +241,7 @@ export class InventoryAlertService {
         .single()
 
       if (!existingAlert) {
-        await (supabase as any)
+        await supabase
           .from('inventory_alerts')
           .insert({
             ...alertPayload,

@@ -2,6 +2,7 @@
 export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 
 import { apiLogger, logError } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
@@ -9,6 +10,13 @@ import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailability
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
+
+const CheckMultipleRecipesSchema = z.object({
+  recipes: z.array(z.object({
+    recipe_id: z.string().uuid('Recipe ID harus valid'),
+    quantity: z.number().positive('Jumlah harus > 0'),
+  })).min(1, 'Minimal satu resep untuk dicek'),
+}).strict()
 
 // GET /api/recipes/availability?recipe_id=xxx&quantity=10
 async function getHandler(request: NextRequest): Promise<NextResponse> {
@@ -59,15 +67,9 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     const _user = authResult
 
     const _client = await createClient()
-    const body = await request.json() as { recipes?: Array<{ recipe_id: string; quantity: number }> }
-    const { recipes } = body
-
-    if (!recipes || !Array.isArray(recipes)) {
-      return NextResponse.json(
-        { error: 'recipes array is required' },
-        { status: 400 }
-      )
-    }
+    const body = await request.json() as Record<string, unknown>
+    const validatedData = CheckMultipleRecipesSchema.parse(body)
+    const { recipes } = validatedData
 
     const results = await RecipeAvailabilityService.checkMultipleRecipes(recipes)
 

@@ -1,5 +1,6 @@
 'use client'
 
+import { RecipeIngredientSelector } from '@/components/recipes/RecipeIngredientSelector'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -7,7 +8,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { recipeSchema, type RecipeFormData } from '@/lib/validations/recipes'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
-import { RecipeIngredientSelector } from './RecipeIngredientSelector'
 
 interface RecipeFormProps {
   defaultValues?: Partial<RecipeFormData>

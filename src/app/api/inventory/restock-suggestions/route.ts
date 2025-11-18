@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { apiLogger, logError } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 
@@ -66,4 +66,4 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-export const GET = withSecurity(getHandler, SecurityPresets.enhanced())
+export const GET = createSecureHandler(getHandler, 'GET /api/inventory/restock-suggestions', SecurityPresets.enhanced())

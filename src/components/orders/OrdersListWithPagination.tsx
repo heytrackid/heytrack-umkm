@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/select'
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { useSettings } from '@/contexts/settings-context'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { usePagination } from '@/hooks/usePagination'
 
 
@@ -40,7 +40,7 @@ interface OrderWithItems extends Order {
 
 export const OrdersListWithPagination = (): JSX.Element => {
     const router = useRouter()
-    const { toast } = useToast()
+
     const { formatCurrency } = useSettings()
     // const _supabase = createClient()
 
@@ -88,11 +88,7 @@ export const OrdersListWithPagination = (): JSX.Element => {
             setOrders(result['data'])
             setTotalItems(result.meta.total)
         } catch (error) {
-            toast({
-                title: 'Error',
-                description: error instanceof Error ? error.message : 'Gagal memuat data pesanan',
-                variant: 'destructive',
-            })
+            toast.error(error instanceof Error ? error.message : 'Gagal memuat data pesanan')
         } finally {
             setLoading(false)
         }

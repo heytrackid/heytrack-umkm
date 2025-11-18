@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { LoadingButton } from '@/components/ui/loading-button'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 
 import type { Row } from '@/types/database'
@@ -32,7 +32,7 @@ export const IngredientFormDialog = ({
     ingredient,
     onSuccess
 }: IngredientFormDialogProps) => {
-    const { toast } = useToast()
+
     const [isSubmitting, setIsSubmitting] = useState(false)
     const mode = ingredient ? 'edit' : 'create'
 
@@ -72,20 +72,13 @@ export const IngredientFormDialog = ({
                 throw new Error(error.error ?? 'Gagal menyimpan bahan baku')
             }
 
-            toast({
-                title: ingredient ? 'Bahan baku diperbarui' : 'Bahan baku ditambahkan',
-                description: `${data.name} berhasil ${ingredient ? 'diperbarui' : 'ditambahkan'}`,
-            })
+            toast.success(`${data.name} berhasil ${ingredient ? 'diperbarui' : 'ditambahkan'}`)
 
             form.reset()
             onOpenChange(false)
             void onSuccess?.()
         } catch (error: unknown) {
-            toast({
-                title: 'Error',
-                description: error instanceof Error ? error.message : 'Terjadi kesalahan',
-                variant: 'destructive'
-            })
+            toast.error(error instanceof Error ? error.message : 'Terjadi kesalahan')
         } finally {
             setIsSubmitting(false)
         }

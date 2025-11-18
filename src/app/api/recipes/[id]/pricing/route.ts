@@ -20,29 +20,20 @@ interface RecipeWithIngredients extends Row<'recipes'> {
   }>
 }
 
-// Type for recipe ingredient with nested ingredient as returned by the query
-interface RecipeIngredientWithIngredient {
-  quantity: number
-  unit: string
-  ingredients: {
-    id: string
-    name: string
-    price_per_unit: number | null
-  } | null
-}
-
 async function postHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }): Promise<NextResponse> {
   try {
     const supabase = await createClient()
     const resolvedParams = await params
     const { id: recipeId } = resolvedParams
-    
+
     // Verify user is authenticated
     const authResult = await requireAuth()
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult    // Get the recipe data from the request
+    const user = authResult
+
+    // Get the recipe data from the request
     const body = await request.json() as unknown
     let recipeData: RecipeWithIngredients | null = null
     if (body && typeof body === 'object' && !Array.isArray(body)) {
@@ -54,16 +45,40 @@ async function postHandler(request: NextRequest, { params }: { params: Promise<{
       const { data, error } = await supabase
         .from('recipes')
         .select(`
-          *,
-          recipe_ingredients (
-            *,
+          id,
+          name,
+          description,
+          servings,
+          cost_per_unit,
+          category,
+          cook_time,
+          batch_size,
+          created_at,
+          updated_at,
+          user_id,
+          recipe_ingredients!inner (
+            id,
+            recipe_id,
+            ingredient_id,
+            quantity,
+            unit,
+            user_id,
             ingredients (
-              *
+              id,
+              name,
+              unit,
+              price_per_unit,
+              weighted_average_cost,
+              current_stock,
+              category,
+              created_at,
+              updated_at,
+              user_id
             )
           )
         `)
         .eq('id', recipeId)
-        .eq('user_id', user['id'])
+        .eq('user_id', user.id)
         .single()
 
       if (error) {
@@ -75,79 +90,38 @@ async function postHandler(request: NextRequest, { params }: { params: Promise<{
         return NextResponse.json({ error: 'Recipe not found' }, { status: 404 })
       }
 
-      // Transform the data structure to match RecipeWithIngredients
-      // Supabase returns joined data as arrays, so we need to extract the first element
-      const typedData = data as any // Type assertion to fix RLS inference
-      const transformedIngredients = (typedData.recipe_ingredients ?? []).map((ri: RecipeIngredientWithIngredient) => ({
-        id: '',
-        recipe_id: typedData.id,
-        ingredient_id: ri.ingredients?.id ?? '',
-        quantity: ri.quantity,
-        unit: ri.unit,
-        user_id: user.id,
-        ingredient: ri.ingredients
-          ? {
-              id: ri.ingredients.id,
-              name: ri.ingredients.name,
-              unit: '',
-              price_per_unit: ri.ingredients.price_per_unit,
-              weighted_average_cost: null,
-              current_stock: 0,
-              category: null,
-              created_at: null,
-              updated_at: null,
-              user_id: user['id']
-            }
-          : null
-      } as RecipeIngredient & { ingredient: Row<'ingredients'> | null }))
+      recipeData = data as unknown as RecipeWithIngredients
+    }
 
-      recipeData = {
-        ...typedData,
-        recipe_ingredients: transformedIngredients
-      }
+    // Sanitize recipe data for pricing automation
+    // Ensure all required fields are present and properly typed
+    const sanitizedRecipe: RecipeWithIngredients = {
+      ...recipeData,
+      servings: recipeData.servings || 1,
+      recipe_ingredients: (recipeData.recipe_ingredients || []).filter(ri => ri.ingredient !== null)
     }
 
     // Create a pricing automation instance and calculate pricing
     const pricingAutomation = new PricingAutomation(UMKM_CONFIG)
-    
-    // Transform recipeData to match expected type with proper null handling
-    const recipeForPricing = {
-      ...recipeData,
-      batch_size: recipeData?.batch_size ?? null,
-      category: recipeData?.category ?? null,
-      cook_time: recipeData?.cook_time ?? null,
-      cost_per_unit: recipeData?.cost_per_unit ?? null,
-      created_at: recipeData?.created_at ?? null,
-      created_by: recipeData?.created_by ?? null,
-      description: recipeData?.description ?? null,
-      servings: recipeData?.servings ?? 1,
-      recipe_ingredients: (recipeData?.recipe_ingredients ?? []).map((ri) => ({
-        id: ri?.id || '',
-        recipe_id: ri?.recipe_id || '',
-        ingredient_id: ri?.ingredient_id || '',
-        quantity: ri?.quantity || 0,
-        unit: ri?.unit || '',
-        user_id: ri?.user_id || '',
-        ingredient: ri?.ingredient ?? null
-      }))
-    } as RecipeWithIngredients
-    
-    // Calculate pricing using the original recipeData which should have the right structure
-    const sanitizedIngredients = (recipeForPricing.recipe_ingredients ?? [])
-        .filter((ri): ri is RecipeIngredient & { ingredient: Ingredient } => ri.ingredient !== null && ri.ingredient !== undefined)
 
-    // Cast to expected type for PricingAutomation
-    const pricingRecipe = recipeForPricing
+    // Verify that all ingredients have price information before calculating
+    const ingredientsWithPrice = sanitizedRecipe.recipe_ingredients?.filter(ri =>
+      ri.ingredient && ri.ingredient.price_per_unit !== null && ri.ingredient.price_per_unit !== undefined
+    ) || []
 
-    type AutomationRecipeInput = Row<'recipes'> & {
-      recipe_ingredients: Array<RecipeIngredient & { ingredient: Ingredient }>
-    }
-    const automationRecipe: AutomationRecipeInput = {
-      ...(pricingRecipe as Row<'recipes'>),
-      recipe_ingredients: sanitizedIngredients
+    if (ingredientsWithPrice.length === 0) {
+      return NextResponse.json({
+        success: false,
+        error: 'Tidak ada bahan dengan harga yang tersedia. Harap lengkapi harga bahan terlebih dahulu.',
+        data: null
+      }, { status: 400 })
     }
 
-    const pricingAnalysis = pricingAutomation.calculateSmartPricing(automationRecipe)
+    // Calculate pricing using the sanitized recipe data
+    const pricingAnalysis = pricingAutomation.calculateSmartPricing({
+      ...sanitizedRecipe,
+      recipe_ingredients: ingredientsWithPrice as Array<RecipeIngredient & { ingredient: Ingredient }>
+    })
 
     return NextResponse.json({
       success: true,

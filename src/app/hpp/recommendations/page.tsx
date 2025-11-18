@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { useCurrency } from '@/hooks/useCurrency'
 import { dbLogger } from '@/lib/logger'
 
@@ -38,7 +38,6 @@ interface Recommendation {
 
 const HppRecommendationsPage = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
-  const { toast } = useToast()
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
   const [loading, setLoading] = useState(true)
   type RecommendationFilter = 'all' | 'implemented' | 'pending'
@@ -70,11 +69,7 @@ const HppRecommendationsPage = (): JSX.Element => {
       }
     } catch (_error) {
       dbLogger.error({ _error }, 'Failed to load recommendations')
-      toast({
-        title: 'Error',
-        description: 'Failed to load recommendations',
-        variant: 'destructive'
-      })
+      toast.error('Failed to load recommendations')
     } finally {
       setLoading(false)
     }
@@ -83,17 +78,10 @@ const HppRecommendationsPage = (): JSX.Element => {
   const markAsImplemented = (recommendationId: string) => {
     try {
       // In a real implementation, this would call an API to update the recommendation
-      toast({
-        title: 'Info',
-        description: `Implementation tracking for recommendation ${recommendationId} will be available in the API`,
-      })
+      toast(`Implementation tracking for recommendation ${recommendationId} will be available in the API`)
     } catch (error) {
       dbLogger.error({ error }, 'Failed to mark recommendation as implemented')
-      toast({
-        title: 'Error',
-        description: 'Failed to update recommendation',
-        variant: 'destructive'
-      })
+      toast.error('Failed to update recommendation')
     }
   }
 

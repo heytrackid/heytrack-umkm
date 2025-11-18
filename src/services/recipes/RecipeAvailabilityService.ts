@@ -223,41 +223,43 @@ export class RecipeAvailabilityService {
       }
 
       return recipes.map((recipe) => {
-        const typedRecipe = recipe as any // Type assertion for RLS
-        const price = typedRecipe.selling_price ?? 0
+        const typedRecipe = recipe as Record<string, unknown> // Type assertion for RLS
+        const price = (typedRecipe as { selling_price: number }).selling_price ?? 0
         const estimatedMargin = 0.3
 
         // Check ingredient availability based on recipe_ingredients data
         let isAvailable = true
         const insufficientIngredients: string[] = []
 
-        for (const recipeIngredient of typedRecipe.recipe_ingredients || []) {
-          const ingredient = Array.isArray(recipeIngredient.ingredient) 
-            ? recipeIngredient.ingredient[0] 
-            : recipeIngredient.ingredient
+        for (const recipeIngredient of ((typedRecipe as { recipe_ingredients: unknown[] }).recipe_ingredients || [])) {
+          const ri = recipeIngredient as { ingredient: unknown; quantity: number }
+          const ingredient = Array.isArray(ri.ingredient)
+            ? (ri.ingredient as unknown[])[0]
+            : ri.ingredient
           if (!ingredient) continue
 
-          const requiredAmount = recipeIngredient.quantity * (typedRecipe.servings ?? 1)
-          const availableStock = ingredient['current_stock'] ?? 0
+          const requiredAmount = ri.quantity * ((typedRecipe['servings'] as number) ?? 1)
+          const ing = ingredient as { current_stock: number; name: string }
+          const availableStock = ing.current_stock ?? 0
 
           if (availableStock < requiredAmount) {
             isAvailable = false
-            insufficientIngredients.push(`${ingredient['name']}: perlu ${requiredAmount}, tersedia ${availableStock}`)
+            insufficientIngredients.push(`${ing.name}: perlu ${requiredAmount}, tersedia ${availableStock}`)
           }
         }
 
         return {
-          id: typedRecipe['id'],
-          name: typedRecipe.name,
-          category: typedRecipe.category ?? '',
-          servings: typedRecipe.servings ?? 1,
-          description: typedRecipe.description,
+          id: typedRecipe['id'] as string,
+          name: typedRecipe['name'] as string,
+          category: (typedRecipe['category'] as string) ?? '',
+          servings: (typedRecipe['servings'] as number) ?? 1,
+          description: typedRecipe['description'] as string,
           selling_price: price,
-          cost_per_unit: typedRecipe.cost_per_unit ?? (price * 0.7),
-          margin_percentage: typedRecipe.margin_percentage ?? estimatedMargin,
+          cost_per_unit: (typedRecipe['cost_per_unit'] as number) ?? (price * 0.7),
+          margin_percentage: (typedRecipe['margin_percentage'] as number) ?? estimatedMargin,
           is_available: isAvailable,
-          prep_time: typedRecipe.prep_time ?? null,
-          cook_time: typedRecipe.cook_time ?? null
+          prep_time: typedRecipe['prep_time'] as number | null,
+          cook_time: typedRecipe['cook_time'] as number | null
         }
       })
     } catch (error) {

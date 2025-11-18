@@ -37,16 +37,16 @@ export class ProductionServices {
       const { data: recipe, error: recipeError } = await supabase
         .from('recipes')
         .select('id, name, user_id, is_active')
-        .eq('id', (batch as any).recipe_id)
+        .eq('id', batch.recipe_id)
         .eq('is_active', true)
         .single()
 
       if (recipeError || !recipe) {
-        throw new Error(`_Recipe not found or inactive: ${(batch as any).recipe_id}`)
+        throw new Error(`Recipe not found or inactive: ${batch.recipe_id}`)
       }
 
       // Check if we have enough ingredients for production
-      const canProduce = await this.checkProductionFeasibility((batch as any).recipe_id, batch.quantity)
+      const canProduce = await this.checkProductionFeasibility(batch.recipe_id, batch.quantity)
       if (!canProduce.feasible) {
         throw new Error(`Insufficient ingredients: ${canProduce.insufficientIngredients.join(', ')}`)
       }
@@ -59,7 +59,7 @@ export class ProductionServices {
         id: batchId,
         status: 'pending',
         scheduled_date: batch.scheduled_date || new Date().toISOString(),
-        notes: batch.notes ?? `Production batch for ${(recipe as any).name}`
+        notes: batch.notes ?? `Production batch for ${recipe.name}`
       }
 
       // Save to production_batches table
@@ -68,13 +68,13 @@ export class ProductionServices {
 
       const batchData = {
         batch_no: batchId,
-        recipe_id: (batch as any).recipe_id,
+        recipe_id: batch.recipe_id,
         planned_quantity: batch.quantity,
         produced_quantity: 0,
         status: 'planned',
         notes: newBatch.notes,
-        created_by: (recipe as any).user_id,
-        user_id: (recipe as any).user_id
+        created_by: recipe.user_id,
+        user_id: recipe.user_id
       }
 
       const { error: insertError } = await supabase
@@ -87,12 +87,12 @@ export class ProductionServices {
       }
 
       // Reserve ingredients for production
-      await this.reserveIngredientsForProduction((batch as any).recipe_id, batch.quantity)
+      await this.reserveIngredientsForProduction(batch.recipe_id, batch.quantity)
 
-      productionLogger.info({ batchId, recipeId: (batch as any).recipe_id, quantity: batch.quantity }, 'Production batch scheduled successfully')
+      productionLogger.info({ batchId, recipeId: batch.recipe_id, quantity: batch.quantity }, 'Production batch scheduled successfully')
       return newBatch
     } catch (error) {
-      productionLogger.error({ error, recipeId: (batch as any).recipe_id }, 'Error in scheduleProductionBatch')
+      productionLogger.error({ error, recipeId: batch.recipe_id }, 'Error in scheduleProductionBatch')
       throw error
     }
   }
@@ -135,7 +135,7 @@ export class ProductionServices {
         throw new Error(`_Recipe not found: ${recipeId}`)
       }
 
-      const recipeIngredients = (recipe as any).recipe_ingredients ?? []
+      const recipeIngredients = (recipe as unknown as { recipe_ingredients: Array<{ ingredient_id: string; quantity_needed: number; ingredients: unknown }> }).recipe_ingredients ?? []
       const insufficientIngredients: string[] = []
       const requiredIngredients: Array<{
         ingredient_id: string
@@ -209,14 +209,15 @@ export class ProductionServices {
       }
 
       // Reserve each ingredient
-      for (const ingredient of (recipe as any).ingredients || []) {
-        const requiredAmount = ingredient.quantity * quantity
+      for (const ingredient of (recipe as unknown as { recipe_ingredients: unknown[] }).recipe_ingredients || []) {
+        const ing = ingredient as { ingredient_id: string; quantity: number; ingredients: { name: string; current_stock: number; unit: string } }
+        const requiredAmount = ing.quantity * quantity
 
         // Create reservation record
         const { error: reservationError } = await supabase
           .from('stock_reservations')
           .insert({
-            ingredient_id: ingredient.ingredient_id,
+            ingredient_id: ing.ingredient_id,
             recipe_id: recipeId,
             quantity: requiredAmount,
             status: 'reserved',
@@ -224,7 +225,7 @@ export class ProductionServices {
           } as never)
 
         if (reservationError) {
-          productionLogger.error({ reservationError, ingredient: ingredient.ingredient_id }, 'Failed to reserve ingredient')
+          productionLogger.error({ reservationError, ingredient: ing.ingredient_id }, 'Failed to reserve ingredient')
           throw reservationError
         }
       }
@@ -297,7 +298,7 @@ export class ProductionServices {
         throw error ?? new Error('Batch not found')
       }
 
-      if ((batch as any).status === 'cancelled') {
+      if ((batch as { status: string }).status === 'cancelled') {
         productionLogger.info({ batchId }, 'Production batch already cancelled')
         return
       }
@@ -306,7 +307,7 @@ export class ProductionServices {
       const { error: releaseError } = await supabase
         .from('stock_reservations')
         .update({ status: 'released', updated_at: new Date().toISOString() } as never)
-        .eq('recipe_id', (batch as any).recipe_id)
+        .eq('recipe_id', (batch as { recipe_id: string }).recipe_id)
         .eq('status', 'reserved')
 
       if (releaseError) {

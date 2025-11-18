@@ -2,13 +2,14 @@ export const runtime = 'nodejs'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { PRODUCTION_FIELDS } from '@/lib/database/query-fields'
 import { ProductionBatchCreateSchema } from '@/lib/validations/domains/production'
 import type { ProductionBatchInsert } from '@/types/database'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
-async function GET(request: NextRequest): Promise<NextResponse> {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     const authResult = await requireAuth()
     if (isErrorResponse(authResult)) {
@@ -50,7 +51,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-async function POST(request: NextRequest): Promise<NextResponse> {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     const authResult = await requireAuth()
     if (isErrorResponse(authResult)) {
@@ -82,8 +83,8 @@ async function POST(request: NextRequest): Promise<NextResponse> {
 
     const { data, error } = await supabase
       .from('production_batches')
-      .insert(insertData as any)
-      .select()
+      .insert(insertData as ProductionBatchInsert)
+      .select(PRODUCTION_FIELDS.LIST)
       .single()
 
     if (error) throw error
@@ -94,7 +95,5 @@ async function POST(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-const securedGET = withSecurity(GET, SecurityPresets.enhanced())
-const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
-
-export { securedGET as GET, securedPOST as POST }
+export const GET = createSecureHandler(getHandler, 'GET /api/production/batches', SecurityPresets.enhanced())
+export const POST = createSecureHandler(postHandler, 'POST /api/production/batches', SecurityPresets.enhanced())

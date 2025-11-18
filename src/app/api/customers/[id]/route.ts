@@ -1,236 +1,87 @@
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-// API Route: /api/customers/[id]
-// Handles GET, PUT, DELETE operations for individual customer
+import type { NextResponse } from 'next/server'
 
-// External dependencies
-import { NextRequest, NextResponse } from 'next/server'
-
-// Internal modules
-import { isErrorResponse, requireAuth } from '@/lib/api-auth'
-import { apiLogger } from '@/lib/logger'
-import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 import { CustomerUpdateSchema } from '@/lib/validations/domains/customer'
-import { typed } from '@/types/type-utilities'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
-import { createClient } from '@/utils/supabase/server'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-core'
+import { apiLogger } from '@/lib/logger'
 
-// Type imports
-import type { CustomerUpdateInput } from '@/lib/validations/domains/customer'
-import type { CustomerUpdate } from '@/types/database'
-
-interface RouteContext {
-  params: Promise<{ id: string }>
-}
-
-type TypedSupabaseClient = ReturnType<typeof typed>
-
-interface CustomerRouteContext {
-  supabase: TypedSupabaseClient
-  userId: string
-  customerId: string
-}
-
-async function buildCustomerContext(context: RouteContext): Promise<CustomerRouteContext | NextResponse> {
-  const { id } = await context.params
-  if (!isValidUUID(id)) {
-    return NextResponse.json({ error: 'Invalid customer ID format' }, { status: 400 })
-  }
-
-  // Authenticate with Stack Auth
-  const authResult = await requireAuth()
-  if (isErrorResponse(authResult)) {
-    return authResult
-  }
-  const user = authResult
-
-  const supabase = typed(await createClient())
-  return { supabase, userId: user.id, customerId: id }
-}
-
-function mapUpdatePayload(data: CustomerUpdateInput): CustomerUpdate {
-  const payload: CustomerUpdate = { updated_at: new Date().toISOString() }
-  const setters: Array<{
-    key: keyof CustomerUpdateInput
-    map: (value: CustomerUpdateInput[keyof CustomerUpdateInput]) => unknown
-  }> = [
-    { key: 'name', map: value => value },
-    { key: 'phone', map: value => value ?? null },
-    { key: 'email', map: value => value ?? null },
-    { key: 'address', map: value => value ?? null },
-    { key: 'customer_type', map: value => value ?? null },
-    { key: 'discount_percentage', map: value => value ?? null },
-    { key: 'notes', map: value => value ?? null },
-    { key: 'is_active', map: value => value ?? null }
-  ]
-
-  setters.forEach(({ key, map }) => {
-    const value = data[key]
-    if (value !== undefined) {
-      ;(payload as Record<string, unknown>)[key as string] = map(value)
-    }
+// GET /api/customers/[id] - Get single customer
+export const GET = createApiRoute(
+  {
+    method: 'GET',
+    path: '/api/customers/[id]',
+  },
+  createGetHandler({
+    table: 'customers',
+    selectFields: 'id, user_id, name, email, phone, address, customer_type, discount_percentage, notes, is_active, loyalty_points, created_at, updated_at',
   })
+)
 
-  return payload
-}
+// PUT /api/customers/[id] - Update customer
+export const PUT = createApiRoute(
+  {
+    method: 'PUT',
+    path: '/api/customers/[id]',
+    bodySchema: CustomerUpdateSchema,
+  },
+  createUpdateHandler(
+    {
+      table: 'customers',
+      selectFields: 'id, name, email, phone, address, customer_type, discount_percentage, notes, is_active, loyalty_points, updated_at',
+    },
+    'Customer updated successfully'
+  )
+)
 
-function handleCustomerNotFound(error: unknown): NextResponse | null {
-  if (typeof error === 'object' && error && 'code' in error && (error as { code: string }).code === 'PGRST116') {
-    return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
+// DELETE /api/customers/[id] - Delete customer with order validation
+async function deleteCustomerHandler(context: RouteContext): Promise<NextResponse> {
+  const { user, supabase, params } = context
+  const id = params?.['id']
+
+  if (!id) {
+    return createErrorResponse('Customer ID is required', 400)
   }
-  return null
-}
 
-async function ensureNoOrders(
-  supabase: TypedSupabaseClient,
-  customerId: string,
-  userId: string
-): Promise<NextResponse | null> {
-  const { data: orders, error } = await supabase
-    .from('orders')
+  // Check if customer has any orders
+  const { data: orders } = await supabase
+    .from('orders' as never)
     .select('id')
-    .eq('customer_id', customerId)
-    .eq('user_id', userId)
+    .eq('customer_id', id)
+    .eq('user_id', user.id)
     .limit(1)
 
-  if (error) {
-    apiLogger.error({ error }, 'Error checking customer orders')
-    return NextResponse.json({ error: 'Failed to check customer orders' }, { status: 500 })
-  }
-
   if (orders && orders.length > 0) {
-    return NextResponse.json({ error: 'Cannot delete customer with existing orders. Please delete orders first.' }, { status: 409 })
+    return createErrorResponse('Cannot delete customer with existing orders. Please delete orders first.', 409)
   }
 
-  return null
+  // Delete customer
+  const { error } = await supabase
+    .from('customers' as never)
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user.id)
+
+  if (error) {
+    apiLogger.error({ error, id }, 'Failed to delete customer')
+    
+    if (error.code === 'PGRST116') {
+      return createErrorResponse('Customer not found', 404)
+    }
+    
+    return createErrorResponse('Failed to delete customer', 500)
+  }
+
+  return createSuccessResponse({ id }, 'Customer deleted successfully')
 }
 
-async function resolveUpdatePayload(
-  request: NextRequest,
-  userId: string
-): Promise<{ updateData: CustomerUpdate } | NextResponse> {
-  const body = await request.json() as Omit<CustomerUpdateInput, 'user_id'>
-  const validation = CustomerUpdateSchema.safeParse({ ...body, user_id: userId })
-
-  if (!validation.success) {
-    return NextResponse.json({ error: 'Invalid request data', details: validation.error.issues }, { status: 400 })
-  }
-
-  return { updateData: mapUpdatePayload(validation.data) }
-}
-
-// Apply security middleware
-export const GET = withSecurity(async function GET(
-  _request: NextRequest,
-  context: RouteContext
-): Promise<NextResponse> {
-  try {
-    const routeContext = await buildCustomerContext(context)
-    if (routeContext instanceof NextResponse) {
-      return routeContext
-    }
-
-    const { supabase, userId, customerId } = routeContext
-    const { data, error } = await supabase
-      .from('customers')
-      .select('id, user_id, name, email, phone, address, created_at, updated_at')
-      .eq('id', customerId)
-      .eq('user_id', userId)
-      .single()
-
-    if (error) {
-      const errorResponse = handleCustomerNotFound(error)
-      if (errorResponse) { return errorResponse }
-      apiLogger.error({ error }, 'Error fetching customer')
-      return NextResponse.json({ error: 'Failed to fetch customer' }, { status: 500 })
-    }
-
-    return NextResponse.json(data)
-  } catch (error) {
-    apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/customers/[id]')
-    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
-  }
-}, SecurityPresets.enhanced())
-
-export const PUT = withSecurity(async function PUT(
-  request: NextRequest,
-  context: RouteContext
-): Promise<NextResponse> {
-  try {
-    const routeContext = await buildCustomerContext(context)
-    if (routeContext instanceof NextResponse) {
-      return routeContext
-    }
-
-    const payloadResult = await resolveUpdatePayload(request, routeContext.userId)
-    if (payloadResult instanceof NextResponse) {
-      return payloadResult
-    }
-
-    const { data, error } = await routeContext.supabase
-      .from('customers')
-      .update(payloadResult.updateData)
-      .eq('id', routeContext.customerId)
-      .eq('user_id', routeContext.userId)
-      .select()
-      .single()
-
-    if (error) {
-      const notFoundResponse = handleCustomerNotFound(error)
-      if (notFoundResponse) { return notFoundResponse }
-      if (typeof error === 'object' && error && 'code' in error && (error as { code: string }).code === '23505') {
-        return NextResponse.json({ error: 'Email already exists' }, { status: 409 })
-      }
-      apiLogger.error({ error }, 'Error updating customer')
-      return NextResponse.json({ error: 'Failed to update customer' }, { status: 500 })
-    }
-
-    return NextResponse.json(data)
-  } catch (error) {
-    apiLogger.error({ error: getErrorMessage(error) }, 'Error in PUT /api/customers/[id]')
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 }
-    )
-  }
-}, SecurityPresets.enhanced())
-
-export const DELETE = withSecurity(async function DELETE(
-  _request: NextRequest,
-  context: RouteContext
-): Promise<NextResponse> {
-  try {
-    const routeContext = await buildCustomerContext(context)
-    if (routeContext instanceof NextResponse) {
-      return routeContext
-    }
-
-    const validationResponse = await ensureNoOrders(routeContext.supabase, routeContext.customerId, routeContext.userId)
-    if (validationResponse) {
-      return validationResponse
-    }
-
-    const { error } = await routeContext.supabase
-      .from('customers')
-      .delete()
-      .eq('id', routeContext.customerId)
-      .eq('user_id', routeContext.userId)
-
-    if (error) {
-      const notFoundResponse = handleCustomerNotFound(error)
-      if (notFoundResponse) { return notFoundResponse }
-      apiLogger.error({ error }, 'Error deleting customer')
-      return NextResponse.json({ error: 'Failed to delete customer' }, { status: 500 })
-    }
-
-    return NextResponse.json({ message: 'Customer deleted successfully' })
-  } catch (error) {
-    apiLogger.error({ error: getErrorMessage(error) }, 'Error in DELETE /api/customers/[id]')
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 }
-    )
-  }
-}, SecurityPresets.enhanced())
+export const DELETE = createApiRoute(
+  {
+    method: 'DELETE',
+    path: '/api/customers/[id]',
+  },
+  deleteCustomerHandler
+)
 

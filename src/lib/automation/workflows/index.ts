@@ -40,7 +40,7 @@ export class WorkflowAutomation extends BaseWorkflowAutomation {
 
     // Set up Supabase client in context
     const { createClient } = await import('@/utils/supabase/server')
-    context.supabase = await createClient() as any
+    context.supabase = await createClient()
 
     switch (event.event) {
       // Order events
