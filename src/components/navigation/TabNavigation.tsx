@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
     Bot,
     Box,
@@ -150,6 +150,14 @@ export function TabNavigation() {
   const [laporanOpen, setLaporanOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
 
+  // Refs for close timeouts to allow moving from trigger to content
+  const utamaTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const produksiTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const pengadaanTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const keuanganTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const laporanTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const settingsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
   // Function to check if a path is active
   const checkIsActive = (url: string) => {
     if (url === '/dashboard') {
@@ -198,14 +206,32 @@ export function TabNavigation() {
               }
             }
 
+            const getTimeoutRef = () => {
+              switch (group.label) {
+                case 'Utama': return utamaTimeoutRef
+                case 'Produksi': return produksiTimeoutRef
+                case 'Pengadaan': return pengadaanTimeoutRef
+                case 'Keuangan': return keuanganTimeoutRef
+                case 'Laporan': return laporanTimeoutRef
+                default: return { current: null }
+              }
+            }
+
             return (
               <DropdownMenu key={group.label} open={getOpenState()} onOpenChange={getSetOpenState()}>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onMouseEnter={() => getSetOpenState()(true)}
-                    onMouseLeave={() => getSetOpenState()(false)}
+                    onMouseEnter={() => {
+                      const ref = getTimeoutRef()
+                      if (ref.current) clearTimeout(ref.current)
+                      getSetOpenState()(true)
+                    }}
+                    onMouseLeave={() => {
+                      const ref = getTimeoutRef()
+                      ref.current = setTimeout(() => getSetOpenState()(false), 100)
+                    }}
                     className={cn(
                       baseTabClasses,
                       underlineClasses,
@@ -230,7 +256,14 @@ export function TabNavigation() {
                   align="start"
                   className="min-w-[200px] p-1"
                   sideOffset={8}
-                  onMouseLeave={() => getSetOpenState()(false)}
+                  onMouseEnter={() => {
+                    const ref = getTimeoutRef()
+                    if (ref.current) clearTimeout(ref.current)
+                  }}
+                  onMouseLeave={() => {
+                    const ref = getTimeoutRef()
+                    ref.current = setTimeout(() => getSetOpenState()(false), 100)
+                  }}
                 >
                   {group.items.map((item) => {
                     const itemIsActive = checkIsActive(item.url)
@@ -268,8 +301,13 @@ export function TabNavigation() {
               <Button
                 variant="ghost"
                 size="sm"
-                onMouseEnter={() => setSettingsOpen(true)}
-                onMouseLeave={() => setSettingsOpen(false)}
+                onMouseEnter={() => {
+                  if (settingsTimeoutRef.current) clearTimeout(settingsTimeoutRef.current)
+                  setSettingsOpen(true)
+                }}
+                onMouseLeave={() => {
+                  settingsTimeoutRef.current = setTimeout(() => setSettingsOpen(false), 100)
+                }}
                 className={cn(
                   baseTabClasses,
                   underlineClasses,
@@ -294,7 +332,12 @@ export function TabNavigation() {
               align="start"
               className="min-w-[200px] p-1"
               sideOffset={8}
-              onMouseLeave={() => setSettingsOpen(false)}
+              onMouseEnter={() => {
+                if (settingsTimeoutRef.current) clearTimeout(settingsTimeoutRef.current)
+              }}
+              onMouseLeave={() => {
+                settingsTimeoutRef.current = setTimeout(() => setSettingsOpen(false), 100)
+              }}
             >
               {settingsItems.map((item) => {
                 const itemIsActive = checkIsActive(item.url)
