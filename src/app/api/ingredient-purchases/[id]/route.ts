@@ -8,7 +8,7 @@ import { apiLogger } from '@/lib/logger'
 import { extractFirst, getErrorMessage, isRecord, isValidUUID } from '@/lib/type-guards'
 import type { IngredientPurchaseUpdate } from '@/lib/validations/database-validations'
 import type { Insert, Update } from '@/types/database'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureRouteHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 import type { NextRequest, NextResponse } from 'next/server'
@@ -16,11 +16,11 @@ import type { NextRequest, NextResponse } from 'next/server'
 
 
 interface RouteContext {
-  params: Promise<{ id: string }>
+  params: Promise<Record<string, string>>
 }
 
-// Apply security middleware
-export const GET = withSecurity(async function GET(
+// GET handler for fetching a single ingredient purchase
+async function getPurchaseHandler(
   _request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -111,9 +111,10 @@ export const GET = withSecurity(async function GET(
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/ingredient-purchases/[id]')
     return createErrorResponse(getErrorMessage(error), 500)
   }
-}, SecurityPresets.enhanced())
+}
 
-export const PUT = withSecurity(async function PUT(
+// PUT handler for updating an ingredient purchase
+async function updatePurchaseHandler(
   request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -249,9 +250,10 @@ export const PUT = withSecurity(async function PUT(
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in PUT /api/ingredient-purchases/[id]')
     return createErrorResponse(getErrorMessage(error), 500)
   }
-}, SecurityPresets.enhanced())
+}
 
-export const DELETE = withSecurity(async function DELETE(
+// DELETE handler for deleting an ingredient purchase
+async function deletePurchaseHandler(
   _request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -308,6 +310,8 @@ export const DELETE = withSecurity(async function DELETE(
       ingredient_id: typedPurchase.ingredient_id,
       type: 'ADJUSTMENT',
       quantity: -typedPurchase.quantity, // Negative to reduce stock
+      unit_price: 0,
+      total_price: 0,
       reference: `PURCHASE-DELETE-${typedPurchase.id}`,
       notes: `Purchase deleted - reverting stock`,
       user_id: user.id
@@ -355,4 +359,9 @@ export const DELETE = withSecurity(async function DELETE(
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in DELETE /api/ingredient-purchases/[id]')
     return createErrorResponse(getErrorMessage(error), 500)
   }
-}, SecurityPresets.enhanced())
+}
+
+// Apply security middleware
+export const GET = createSecureRouteHandler(getPurchaseHandler, 'GET /api/ingredient-purchases/[id]', SecurityPresets.enhanced())
+export const PUT = createSecureRouteHandler(updatePurchaseHandler, 'PUT /api/ingredient-purchases/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureRouteHandler(deletePurchaseHandler, 'DELETE /api/ingredient-purchases/[id]', SecurityPresets.enhanced())

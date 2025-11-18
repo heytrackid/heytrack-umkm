@@ -8,7 +8,7 @@ import { apiLogger } from '@/lib/logger'
 import type { Insert } from '@/types/database'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
-import { createClient } from '@/utils/supabase/server'
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
 
 type IngredientInsert = Insert<'ingredients'>
 
@@ -34,7 +34,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     }
     const user = authResult
 
-    const supabase = await createClient()
+    const supabase = createServiceRoleClient()
 
     // 2. Parse CSV data from request
     const body = await request.json() as { ingredients: Array<Partial<IngredientInsert>> }

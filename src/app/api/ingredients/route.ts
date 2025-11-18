@@ -1,156 +1,38 @@
 export const runtime = 'nodejs'
-import { z } from 'zod'
 
-import { isErrorResponse, requireAuth } from '@/lib/api-auth'
-import { PaginationSchema, calculateOffset, createErrorResponse, createPaginationMeta, createSuccessResponse, handleAPIError, withQueryValidation } from '@/lib/api-core'
 import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
-import { apiLogger } from '@/lib/logger'
 import { IngredientInsertSchema } from '@/lib/validations/domains/ingredient'
-import type { IngredientInsert } from '@/types/database'
-import { typed } from '@/types/type-utilities'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
-import { createClient } from '@/utils/supabase/server'
+import { createApiRoute } from '@/lib/api/route-factory'
+import { ListQuerySchema, createListHandler, createCreateHandler } from '@/lib/api/crud-helpers'
 
-import type { NextRequest, NextResponse } from 'next/server'
+// GET /api/ingredients - List all ingredients with pagination, search, and sorting
+export const GET = createApiRoute(
+  {
+    method: 'GET',
+    path: '/api/ingredients',
+    querySchema: ListQuerySchema,
+  },
+  createListHandler({
+    table: 'ingredients',
+    selectFields: INGREDIENT_FIELDS.LIST,
+    defaultSort: 'name',
+    defaultOrder: 'asc',
+    searchFields: ['name'],
+  })
+)
 
-
-
-// Extended schema for ingredients query
-const IngredientsQuerySchema = PaginationSchema.extend({
-  sort: z.string().optional(),
-  order: z.enum(['asc', 'desc']).default('desc'),
-  search: z.string().optional()
-})
-
-// GET /api/ingredients - Get all bahan baku with pagination and filtering
-async function GET(request: NextRequest): Promise<NextResponse> {
-  try {
-    // Validate query parameters
-    const queryValidation = withQueryValidation(IngredientsQuerySchema)(request)
-    if (queryValidation instanceof Response) {
-      return queryValidation // Return error response
-    }
-
-    const { page = 1, limit = 1000, sort, order = 'desc', search } = queryValidation
-    const offset = calculateOffset(page, limit)
-
-    // Authenticate with Stack Auth
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const _user = authResult
-
-    // Create authenticated Supabase client
-    const supabase = typed(await createClient())
-
-    // Build query - using ingredients table (RLS handles user_id filtering)
-    // ✅ OPTIMIZED: Use specific fields instead of SELECT *
-    let supabaseQuery = supabase
-      .from('ingredients')
-      .select(INGREDIENT_FIELDS.LIST, { count: 'exact' })
-      .range(offset, offset + limit - 1)
-
-    // Apply search filter - using name instead of nama_bahan
-    if (search) {
-      supabaseQuery = supabaseQuery.ilike('name', `%${search}%`)
-    }
-
-    // Apply sorting - default to name
-    if (sort) {
-      supabaseQuery = supabaseQuery.order(sort, { ascending: order === 'asc' })
-    } else {
-      supabaseQuery = supabaseQuery.order('name', { ascending: true })
-    }
-
-    const { data, error, count } = await supabaseQuery
-
-    if (error) {
-      const apiError = handleAPIError(error)
-      return createErrorResponse(apiError.message, apiError['statusCode'])
-    }
-
-    // Create pagination metadata
-    const pagination = createPaginationMeta(count ?? 0, page, limit)
-
-    const response = createSuccessResponse({
-      ingredients: data,
-      pagination
-    })
-    // Add caching for ingredients list (2 minutes stale-while-revalidate)
-    response.headers.set('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=300')
-    return response
-  } catch (error) {
-    const apiError = handleAPIError(error)
-    return createErrorResponse(apiError.message, apiError['statusCode'])
-  }
-}
-
-// POST /api/ingredients - Create new bahan baku
-async function POST(request: NextRequest): Promise<NextResponse> {
-  try {
-    // Parse and validate request body
-    let _body: unknown
-    try {
-      _body = await request.json()
-    } catch (error) {
-      apiLogger.error({ error }, 'Failed to parse request body')
-      return createErrorResponse('Invalid JSON in request body', 400)
-    }
-
-    // Validate request body
-    const validation = IngredientInsertSchema.safeParse(_body)
-    if (!validation.success) {
-      const errorMessages = validation.error.issues.map(issue => issue.message)
-      return createErrorResponse('Invalid request data', 400, errorMessages)
-    }
-
-    const validatedData = validation['data']
-
-    // Create authenticated Supabase client
-    // Authenticate with Stack Auth
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const _user = authResult
-
-    const supabase = typed(await createClient())
-
-    const ingredientData = {
-      name: validatedData.name,
-      unit: validatedData.unit,
-      price_per_unit: validatedData.price_per_unit,
-      current_stock: validatedData.current_stock,
-      min_stock: validatedData.min_stock,
-      category: validatedData.category ?? null,
-      max_stock: validatedData.max_stock ?? null,
-      supplier: validatedData.supplier ?? null,
-      description: validatedData.description ?? null,
-      is_active: validatedData.is_active ?? true,
-    } as IngredientInsert
-
-    const { data: insertedData, error } = await supabase
-      .from('ingredients')
-      .insert(ingredientData)
-      .select('id, name, description, unit, price_per_unit, current_stock, min_stock, supplier, created_at, updated_at, category, max_stock, is_active, weighted_average_cost, user_id')
-      .single()
-
-    if (error) {
-      const apiError = handleAPIError(error)
-      return createErrorResponse(apiError.message, apiError['statusCode'])
-    }
-
-    return createSuccessResponse(insertedData, 'Bahan baku berhasil ditambahkan')
-  } catch (error) {
-    const apiError = handleAPIError(error)
-    return createErrorResponse(apiError.message, apiError['statusCode'])
-  }
-}
-
-// Apply security middleware with consistent enhanced security
-const securedGET = withSecurity(GET, SecurityPresets.enhanced())
-const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
-
-// Export secured handlers
-export { securedGET as GET, securedPOST as POST }
+// POST /api/ingredients - Create new ingredient
+export const POST = createApiRoute(
+  {
+    method: 'POST',
+    path: '/api/ingredients',
+    bodySchema: IngredientInsertSchema,
+  },
+  createCreateHandler(
+    {
+      table: 'ingredients',
+      selectFields: INGREDIENT_FIELDS.LIST,
+    },
+    'Bahan baku berhasil ditambahkan'
+  )
+)

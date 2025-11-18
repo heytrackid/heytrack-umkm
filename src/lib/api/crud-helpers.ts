@@ -1,0 +1,304 @@
+import type { NextResponse } from 'next/server'
+import { z } from 'zod'
+
+import type { RouteContext } from './route-factory'
+import { PaginationSchema, calculateOffset, createPaginationMeta, createSuccessResponse, createErrorResponse, handleAPIError } from '@/lib/api-core'
+import { apiLogger } from '@/lib/logger'
+import type { Database } from '@/types/supabase'
+
+type TableName = keyof Database['public']['Tables']
+
+export interface CrudConfig<TTable extends TableName = TableName> {
+  table: TTable
+  selectFields?: string
+  defaultSort?: string
+  defaultOrder?: 'asc' | 'desc'
+  searchFields?: string[]
+  userIdField?: string
+}
+
+// Extended pagination schema with sorting and search
+export const ListQuerySchema = PaginationSchema.extend({
+  sort: z.string().optional(),
+  order: z.enum(['asc', 'desc']).optional(),
+  search: z.string().optional(),
+})
+
+export type ListQuery = z.infer<typeof ListQuerySchema>
+
+/**
+ * Generic GET handler for listing resources with pagination, search, and sorting
+ */
+export function createListHandler<TTable extends TableName>(config: CrudConfig<TTable>) {
+  const {
+    table,
+    selectFields = '*',
+    defaultSort = 'created_at',
+    defaultOrder = 'desc',
+    searchFields = ['name'],
+    userIdField = 'user_id',
+  } = config
+
+  return async (context: RouteContext, query?: ListQuery): Promise<NextResponse> => {
+    try {
+      const { user, supabase } = context
+      const {
+        page = 1,
+        limit = 1000,
+        sort = defaultSort,
+        order = defaultOrder,
+        search,
+      } = query || {}
+
+      const offset = calculateOffset(page, limit)
+
+      // Build query with user scoping
+      let supabaseQuery = supabase
+        .from(table as never)
+        .select(selectFields, { count: 'exact' })
+        .eq(userIdField, user.id)
+        .range(offset, offset + limit - 1)
+
+      // Apply search across configured fields
+      if (search && searchFields.length > 0) {
+        const searchConditions = searchFields.map(field => `${field}.ilike.%${search}%`).join(',')
+        supabaseQuery = supabaseQuery.or(searchConditions)
+      }
+
+      // Apply sorting
+      supabaseQuery = supabaseQuery.order(sort, { ascending: order === 'asc' })
+
+      const { data, error, count } = await supabaseQuery
+
+      if (error) {
+        apiLogger.error({ error, table }, 'Failed to fetch resources')
+        const apiError = handleAPIError(error)
+        return createErrorResponse(apiError.message, apiError['statusCode'])
+      }
+
+      const pagination = createPaginationMeta(count ?? 0, page, limit)
+
+      const response = createSuccessResponse({
+        [table]: data,
+        pagination,
+      })
+
+      // Add cache headers
+      response.headers.set('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=300')
+      
+      return response
+    } catch (error) {
+      apiLogger.error({ error, table }, 'Unhandled error in list handler')
+      const apiError = handleAPIError(error)
+      return createErrorResponse(apiError.message, apiError['statusCode'])
+    }
+  }
+}
+
+/**
+ * Generic POST handler for creating resources
+ */
+export function createCreateHandler<TTable extends TableName, TInsert = unknown>(
+  config: CrudConfig<TTable>,
+  successMessage = 'Resource created successfully'
+) {
+  const { table, selectFields = '*', userIdField = 'user_id' } = config
+
+  return async (context: RouteContext, _query?: never, body?: TInsert): Promise<NextResponse> => {
+    try {
+      const { user, supabase } = context
+
+      if (!body) {
+        return createErrorResponse('Request body is required', 400)
+      }
+
+      // Add user context to the data
+      const dataWithUser = {
+        ...body,
+        [userIdField]: user.id,
+        created_by: user.id,
+        updated_by: user.id,
+      } as never
+
+      const { data, error } = await supabase
+        .from(table as never)
+        .insert(dataWithUser)
+        .select(selectFields)
+        .single()
+
+      if (error) {
+        apiLogger.error({ error, table }, 'Failed to create resource')
+        const apiError = handleAPIError(error)
+        return createErrorResponse(apiError.message, apiError['statusCode'])
+      }
+
+      return createSuccessResponse(data, successMessage)
+    } catch (error) {
+      apiLogger.error({ error, table }, 'Unhandled error in create handler')
+      const apiError = handleAPIError(error)
+      return createErrorResponse(apiError.message, apiError['statusCode'])
+    }
+  }
+}
+
+/**
+ * Generic GET handler for fetching a single resource by ID
+ */
+export function createGetHandler<TTable extends TableName>(config: CrudConfig<TTable>) {
+  const { table, selectFields = '*', userIdField = 'user_id' } = config
+
+  return async (context: RouteContext): Promise<NextResponse> => {
+    try {
+      const { user, supabase, params } = context
+      const id = params?.['id']
+
+      if (!id) {
+        return createErrorResponse('Resource ID is required', 400)
+      }
+
+      const { data, error } = await supabase
+        .from(table as never)
+        .select(selectFields)
+        .eq('id', id)
+        .eq(userIdField, user.id)
+        .single()
+
+      if (error) {
+        apiLogger.error({ error, table, id }, 'Failed to fetch resource')
+        
+        if (error.code === 'PGRST116') {
+          return createErrorResponse('Resource not found', 404)
+        }
+        
+        const apiError = handleAPIError(error)
+        return createErrorResponse(apiError.message, apiError['statusCode'])
+      }
+
+      return createSuccessResponse(data)
+    } catch (error) {
+      apiLogger.error({ error, table }, 'Unhandled error in get handler')
+      const apiError = handleAPIError(error)
+      return createErrorResponse(apiError.message, apiError['statusCode'])
+    }
+  }
+}
+
+/**
+ * Generic PUT/PATCH handler for updating resources
+ */
+export function createUpdateHandler<TTable extends TableName, TUpdate = unknown>(
+  config: CrudConfig<TTable>,
+  successMessage = 'Resource updated successfully'
+) {
+  const { table, selectFields = '*', userIdField = 'user_id' } = config
+
+  return async (context: RouteContext, _query?: never, body?: TUpdate): Promise<NextResponse> => {
+    try {
+      const { user, supabase, params } = context
+      const id = params?.['id']
+
+      if (!id) {
+        return createErrorResponse('Resource ID is required', 400)
+      }
+
+      if (!body) {
+        return createErrorResponse('Request body is required', 400)
+      }
+
+      // Add updated_by to track changes
+      const dataWithUser = {
+        ...body,
+        updated_by: user.id,
+      } as never
+
+      const { data, error } = await supabase
+        .from(table as never)
+        .update(dataWithUser)
+        .eq('id', id)
+        .eq(userIdField, user.id)
+        .select(selectFields)
+        .single()
+
+      if (error) {
+        apiLogger.error({ error, table, id }, 'Failed to update resource')
+        
+        if (error.code === 'PGRST116') {
+          return createErrorResponse('Resource not found', 404)
+        }
+        
+        const apiError = handleAPIError(error)
+        return createErrorResponse(apiError.message, apiError['statusCode'])
+      }
+
+      return createSuccessResponse(data, successMessage)
+    } catch (error) {
+      apiLogger.error({ error, table }, 'Unhandled error in update handler')
+      const apiError = handleAPIError(error)
+      return createErrorResponse(apiError.message, apiError['statusCode'])
+    }
+  }
+}
+
+/**
+ * Generic DELETE handler for deleting resources
+ */
+export function createDeleteHandler<TTable extends TableName>(
+  config: CrudConfig<TTable>,
+  successMessage = 'Resource deleted successfully'
+) {
+  const { table, userIdField = 'user_id' } = config
+
+  return async (context: RouteContext): Promise<NextResponse> => {
+    try {
+      const { user, supabase, params } = context
+      const id = params?.['id']
+
+      if (!id) {
+        return createErrorResponse('Resource ID is required', 400)
+      }
+
+      const { error } = await supabase
+        .from(table as never)
+        .delete()
+        .eq('id', id)
+        .eq(userIdField, user.id)
+
+      if (error) {
+        apiLogger.error({ error, table, id }, 'Failed to delete resource')
+        
+        if (error.code === 'PGRST116') {
+          return createErrorResponse('Resource not found', 404)
+        }
+        
+        const apiError = handleAPIError(error)
+        return createErrorResponse(apiError.message, apiError['statusCode'])
+      }
+
+      return createSuccessResponse({ id }, successMessage)
+    } catch (error) {
+      apiLogger.error({ error, table }, 'Unhandled error in delete handler')
+      const apiError = handleAPIError(error)
+      return createErrorResponse(apiError.message, apiError['statusCode'])
+    }
+  }
+}
+
+/**
+ * Creates a complete CRUD route set for a resource
+ */
+export function createCrudHandlers<TTable extends TableName, TInsert = unknown, TUpdate = unknown>(
+  config: CrudConfig<TTable>,
+  messages?: {
+    create?: string
+    update?: string
+    delete?: string
+  }
+) {
+  return {
+    list: createListHandler(config),
+    create: createCreateHandler<TTable, TInsert>(config, messages?.create),
+    get: createGetHandler(config),
+    update: createUpdateHandler<TTable, TUpdate>(config, messages?.update),
+    delete: createDeleteHandler(config, messages?.delete),
+  }
+}
