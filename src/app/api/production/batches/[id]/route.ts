@@ -7,13 +7,13 @@ import {
   VALID_PRODUCTION_STATUS_TRANSITIONS,
 } from '@/lib/validations/domains/production'
 import type { ProductionBatchUpdate } from '@/types/database'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
 type _ProductionBatchUpdate = ProductionBatchUpdate
 
-async function GET(
+async function getHandler(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
@@ -57,7 +57,7 @@ async function GET(
   }
 }
 
-async function PUT(
+async function putHandler(
   request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
@@ -137,7 +137,7 @@ async function PUT(
   }
 }
 
-async function DELETE(
+async function deleteHandler(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
@@ -192,8 +192,6 @@ async function DELETE(
   }
 }
 
-const securedGET = withSecurity(GET, SecurityPresets.enhanced())
-const securedPUT = withSecurity(PUT, SecurityPresets.enhanced())
-const securedDELETE = withSecurity(DELETE, SecurityPresets.enhanced())
-
-export { securedDELETE as DELETE, securedGET as GET, securedPUT as PUT }
+export const GET = createSecureHandler(getHandler, 'GET /api/production/batches/[id]', SecurityPresets.enhanced())
+export const PUT = createSecureHandler(putHandler, 'PUT /api/production/batches/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureHandler(deleteHandler, 'DELETE /api/production/batches/[id]', SecurityPresets.enhanced())

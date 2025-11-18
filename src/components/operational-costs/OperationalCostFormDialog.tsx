@@ -16,7 +16,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 
 import type { Row, Insert } from '@/types/database'
 
@@ -59,7 +59,7 @@ export const OperationalCostFormDialog = ({
     cost,
     onSuccess
 }: OperationalCostFormDialogProps) => {
-    const { toast } = useToast()
+
     const [isSubmitting, setIsSubmitting] = useState(false)
     const mode = cost ? 'edit' : 'create'
 
@@ -91,20 +91,12 @@ export const OperationalCostFormDialog = ({
         e.preventDefault()
 
         if (!formData.description) {
-            toast({
-                title: 'Validasi Error',
-                description: 'Nama biaya harus diisi',
-                variant: 'destructive',
-            })
+            toast.error('Nama biaya harus diisi')
             return
         }
 
         if (!formData.amount || formData.amount <= 0) {
-            toast({
-                title: 'Validasi Error',
-                description: 'Jumlah biaya harus lebih dari 0',
-                variant: 'destructive',
-            })
+            toast.error('Jumlah biaya harus lebih dari 0')
             return
         }
 
@@ -125,19 +117,12 @@ export const OperationalCostFormDialog = ({
                 throw new Error(errorMessage ?? 'Gagal menyimpan biaya')
             }
 
-            toast({
-                title: cost ? 'Biaya diperbarui' : 'Biaya ditambahkan',
-                description: `${formData.description} berhasil ${cost ? 'diperbarui' : 'ditambahkan'}`,
-            })
+            toast.success(`${formData.description} berhasil ${cost ? 'diperbarui' : 'ditambahkan'}`)
 
             onOpenChange(false)
             onSuccess?.()
         } catch (error: unknown) {
-            toast({
-                title: 'Error',
-                description: error instanceof Error ? error.message : 'Terjadi kesalahan',
-                variant: 'destructive'
-            })
+            toast.error(error instanceof Error ? error.message : 'Terjadi kesalahan')
         } finally {
             setIsSubmitting(false)
         }

@@ -4,6 +4,7 @@ import useSWR from 'swr'
 import type { ProfitData, ProfitFilters, ExportFormat } from '@/app/profit/components/types'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
+import { calculateProfitDateRange } from '@/app/profit/utils'
 
 
 /**
@@ -15,16 +16,25 @@ import { apiLogger } from '@/lib/logger'
 export function useProfitData() {
   const { toast } = useToast()
   
-  const [filters, setFilters] = useState<ProfitFilters>({
-    selectedPeriod: 'month'
+  const [filters, setFilters] = useState<ProfitFilters>(() => {
+    const defaultRange = calculateProfitDateRange('month')
+    return {
+      selectedPeriod: 'month',
+      startDate: defaultRange.startDate,
+      endDate: defaultRange.endDate
+    }
   })
 
-  // Calculate date range for SWR key
   const getCalculatedDates = () => {
-    const today = new Date()
     const toISODate = (date: Date): string => date.toISOString().substring(0, 10)
 
-    // If custom dateRange is set, use it
+    if (filters.startDate && filters.endDate) {
+      return {
+        calculatedStartDate: filters.startDate,
+        calculatedEndDate: filters.endDate
+      }
+    }
+
     if (filters.dateRange?.from && filters.dateRange?.to) {
       return {
         calculatedStartDate: toISODate(filters.dateRange.from),
@@ -32,62 +42,24 @@ export function useProfitData() {
       }
     }
 
-    // Otherwise, calculate based on selectedPeriod
-    switch (filters.selectedPeriod) {
-      case 'week': {
-        const weekStart = new Date(today)
-        weekStart.setDate(today.getDate() - today.getDay() + 1) // Monday
-        return {
-          calculatedStartDate: toISODate(weekStart),
-          calculatedEndDate: toISODate(today)
-        }
-      }
-      case 'month': {
-        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1)
-        return {
-          calculatedStartDate: toISODate(monthStart),
-          calculatedEndDate: toISODate(today)
-        }
-      }
-      case 'quarter': {
-        const quarterStartMonth = Math.floor(today.getMonth() / 3) * 3
-        const quarterStart = new Date(today.getFullYear(), quarterStartMonth, 1)
-        return {
-          calculatedStartDate: toISODate(quarterStart),
-          calculatedEndDate: toISODate(today)
-        }
-      }
-      case 'year': {
-        const yearStart = new Date(today.getFullYear(), 0, 1)
-        return {
-          calculatedStartDate: toISODate(yearStart),
-          calculatedEndDate: toISODate(today)
-        }
-      }
-      default: {
-        // Default to last 30 days
-        const thirtyDaysAgo = new Date(today)
-        thirtyDaysAgo.setDate(today.getDate() - 30)
-        return {
-          calculatedStartDate: toISODate(thirtyDaysAgo),
-          calculatedEndDate: toISODate(today)
-        }
-      }
+    const derivedRange = calculateProfitDateRange(filters.selectedPeriod ?? 'month')
+    return {
+      calculatedStartDate: derivedRange.startDate ?? toISODate(new Date()),
+      calculatedEndDate: derivedRange.endDate ?? toISODate(new Date())
     }
   }
 
-  // Get dates for the SWR key
-  const base = getCalculatedDates()
-  // Override with URL params if present
-  const urlParams = (typeof window !== 'undefined') ? new URLSearchParams(window.location.search) : null
+  const { calculatedStartDate: baseStartDate, calculatedEndDate: baseEndDate } = getCalculatedDates()
+
+  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
   const urlFrom = urlParams?.get('from')?.slice(0, 10) || undefined
   const urlTo = urlParams?.get('to')?.slice(0, 10) || undefined
-  const calculatedStartDate = urlFrom ?? base.calculatedStartDate
-  const calculatedEndDate = urlTo ?? base.calculatedEndDate
+  const calculatedStartDate = urlFrom ?? baseStartDate
+  const calculatedEndDate = urlTo ?? baseEndDate
+  const selectedPeriod = filters.selectedPeriod ?? 'month'
 
-   // SWR key and fetcher
    const swrKey = calculatedStartDate && calculatedEndDate
-     ? [`/api/reports/profit?start_date=${calculatedStartDate}&end_date=${calculatedEndDate}`]
+     ? [`/api/reports/profit?start_date=${calculatedStartDate}&end_date=${calculatedEndDate}&period=${selectedPeriod}`]
      : null
 
    const fetchProfitData = async (url: string): Promise<ProfitData> => {
@@ -122,6 +94,7 @@ export function useProfitData() {
       const params = new URLSearchParams()
       params.append('start_date', calculatedStartDate)
       params.append('end_date', calculatedEndDate)
+      params.append('period', selectedPeriod)
       params.append('export', format)
 
       const response = await fetch(`/api/reports/profit?${params.toString()}`)
@@ -152,7 +125,7 @@ export function useProfitData() {
     profitData: profitData ?? null,
     filters,
     updateFilters,
-    refetch: () => mutate(),
+    refetch: () => { void mutate() },
     exportReport
   }
 }

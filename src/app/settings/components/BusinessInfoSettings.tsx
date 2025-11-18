@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { validateBusinessInfoSettings } from '@/lib/settings-validation'
 
 
@@ -25,7 +25,6 @@ interface BusinessInfoSettingsProps {
  * Business information settings component with Zod validation
  */
 const BusinessInfoSettingsComponent = ({ settings, onSettingChange }: BusinessInfoSettingsProps) => {
-  const { toast } = useToast()
   const [localSettings, setLocalSettings] = useState<BusinessSettingsState>(settings.general)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -64,11 +63,7 @@ const BusinessInfoSettingsComponent = ({ settings, onSettingChange }: BusinessIn
       setErrors({})
     } catch (error) {
       if (error instanceof Error) {
-        toast({
-          title: 'Pengaturan Tidak Valid',
-          description: error.message,
-          variant: 'destructive',
-        })
+        toast.error(error.message)
       }
     }
   }

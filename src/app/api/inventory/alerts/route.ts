@@ -8,7 +8,7 @@ import { apiLogger } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
 import { typed } from '@/types/type-utilities'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 
@@ -16,7 +16,7 @@ import { createClient } from '@/utils/supabase/server'
  * GET /api/inventory/alerts
  * Get active inventory alerts
  */
-async function GET(__request: NextRequest): Promise<NextResponse> {
+async function getHandler(__request: NextRequest): Promise<NextResponse> {
   try {
     // Authenticate with Stack Auth
     const authResult = await requireAuth()
@@ -44,7 +44,7 @@ async function GET(__request: NextRequest): Promise<NextResponse> {
  * POST /api/inventory/alerts
  * Manually trigger alert check for all ingredients
  */
-async function POST(__request: NextRequest): Promise<NextResponse> {
+async function postHandler(__request: NextRequest): Promise<NextResponse> {
   try {
     // Authenticate with Stack Auth
     const authResult = await requireAuth()
@@ -71,8 +71,5 @@ async function POST(__request: NextRequest): Promise<NextResponse> {
 }
 
 // Apply security middleware
-const securedGET = withSecurity(GET, SecurityPresets.enhanced())
-const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
-
-// Export secured handlers
-export { securedGET as GET, securedPOST as POST }
+export const GET = createSecureHandler(getHandler, 'GET /api/inventory/alerts', SecurityPresets.enhanced())
+export const POST = createSecureHandler(postHandler, 'POST /api/inventory/alerts', SecurityPresets.enhanced())

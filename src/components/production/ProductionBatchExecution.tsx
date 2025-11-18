@@ -3,7 +3,7 @@
 import { differenceInMinutes, format } from 'date-fns'
 import { useEffect, useState } from 'react'
 
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { createClientLogger } from '@/lib/client-logger'
 
 import type { ProductionBatchWithDetails as ProductionBatch } from '@/services/production/BatchSchedulingService'
@@ -37,7 +37,7 @@ export const ProductionBatchExecution = ({
   const [currentNotes, setCurrentNotes] = useState('')
 
 
-  const { toast } = useToast()
+
 
   // Auto-refresh every 30 seconds
   useEffect(() => {
@@ -120,10 +120,7 @@ export const ProductionBatchExecution = ({
     setExecutionStates(newStates)
 
     onBatchUpdate?.(batch['id'], { status: 'IN_PROGRESS' })
-    toast({
-      title: 'Batch Started',
-      description: `Started production of ${batch.recipe_id ?? 'Batch'}`,
-    })
+    toast.success(`Started production of ${batch.recipe_id ?? 'Batch'}`)
   }
 
   const handlePauseBatch = (batchId: string) => {
@@ -142,10 +139,7 @@ export const ProductionBatchExecution = ({
     setExecutionStates(newStates)
 
     onBatchUpdate?.(batchId, { status: 'PLANNED' })
-    toast({
-      title: 'Batch Paused',
-      description: `Paused production of ${state.batch.recipe_id ?? 'Batch'}`,
-    })
+    toast.success(`Paused production of ${state.batch.recipe_id ?? 'Batch'}`)
   }
 
   const handleCompleteBatch = (batchId: string) => {
@@ -156,11 +150,7 @@ export const ProductionBatchExecution = ({
     const allQualityChecksPassed = state.qualityChecks.every(check => check.completed && check.passed !== false)
 
     if (!allQualityChecksPassed) {
-      toast({
-        title: 'Quality Check Required',
-        description: 'Please complete all quality checks before finishing the batch',
-        variant: 'destructive'
-      })
+      toast.error('Please complete all quality checks before finishing the batch')
       return
     }
 
@@ -188,17 +178,10 @@ export const ProductionBatchExecution = ({
       logger.info({ batchId, status: 'COMPLETED' }, 'Production completed, updating system')
 
       onBatchUpdate?.(batchId, { status: 'COMPLETED', completed_at: completedAt.toISOString() })
-      toast({
-        title: 'Batch Completed',
-        description: `Completed production of ${state.batch.recipe_id ?? 'Batch'}`,
-      })
+      toast.success(`Completed production of ${state.batch.recipe_id ?? 'Batch'}`)
      } catch (error) {
       logger.error({ error }, 'Error completing batch:')
-      toast({
-        title: 'Error',
-        description: 'Failed to complete batch',
-        variant: 'destructive'
-      })
+      toast.error('Failed to complete batch')
     }
   }
 
@@ -248,10 +231,7 @@ export const ProductionBatchExecution = ({
     setExecutionStates(newStates)
 
     setCurrentNotes('')
-    toast({
-      title: 'Note Added',
-      description: 'Production note has been added',
-    })
+    toast.success('Production note has been added')
   }
 
   return (

@@ -2,7 +2,7 @@
  
 
 import { AlertTriangle, Calculator, CheckCircle, DollarSign, Lightbulb, Target, TrendingUp } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader, SharedStatsCards } from '@/components/shared/index'
@@ -12,13 +12,10 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { useCurrency } from '@/hooks/useCurrency'
+import { useRecipes } from '@/hooks/useRecipes'
 import { dbLogger } from '@/lib/logger'
-
-import type { Row } from '@/types/database'
-
-type Recipe = Row<'recipes'>
 
 const pricingBreadcrumbs = [
   { label: 'Dashboard', href: '/' },
@@ -50,48 +47,15 @@ interface PricingRecommendation {
 
 const PricingAssistantPage = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
-  const { toast } = useToast()
-  const [recipes, setRecipes] = useState<Recipe[]>([])
+  const { data: recipes = [], isLoading: recipesLoading, error: recipesError, refetch: refetchRecipes } = useRecipes({ limit: 1000 })
   const [selectedRecipe, setSelectedRecipe] = useState<string>('')
   const [recommendation, setRecommendation] = useState<PricingRecommendation | null>(null)
-  const [loading, setLoading] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
-
-  // Load recipes
-  useEffect(() => {
-    const loadRecipes = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch('/api/recipes?limit=1000', {
-          credentials: 'include', // Include cookies for authentication
-        })
-      if (response.ok) {
-        const data = await response.json() as { recipes?: Recipe[] }
-        setRecipes(data.recipes ?? [])
-      }
-    } catch (_error) {
-      dbLogger.error({ _error }, 'Failed to load recipes')
-        toast({
-          title: 'Error',
-          description: 'Failed to load recipes',
-          variant: 'destructive'
-        })
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    void loadRecipes()
-  }, [toast])
 
   // Generate pricing recommendation
   const generateRecommendation = async () => {
     if (!selectedRecipe) {
-      toast({
-        title: 'Error',
-        description: 'Please select a recipe',
-        variant: 'destructive'
-      })
+      toast.error('Please select a recipe')
       return
     }
 
@@ -110,20 +74,13 @@ const PricingAssistantPage = (): JSX.Element => {
         const data = await response.json() as { recommendation?: PricingRecommendation }
         setRecommendation(data.recommendation ?? null)
 
-        toast({
-          title: 'Success',
-          description: 'Pricing recommendation generated successfully',
-        })
+        toast.success('Pricing recommendation generated successfully')
       } else {
         throw new Error('Failed to generate recommendation')
       }
     } catch (_error) {
       dbLogger.error({ _error }, 'Failed to generate pricing recommendation')
-      toast({
-        title: 'Error',
-        description: 'Failed to generate pricing recommendation',
-        variant: 'destructive'
-      })
+      toast.error('Failed to generate pricing recommendation')
     } finally {
       setAnalyzing(false)
     }
@@ -195,24 +152,49 @@ const PricingAssistantPage = (): JSX.Element => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label htmlFor="pricing-recipe-select" className="text-sm font-medium">Pilih Resep</label>
-                <Select value={selectedRecipe} onValueChange={setSelectedRecipe}>
+                <Select
+                  value={selectedRecipe}
+                  onValueChange={setSelectedRecipe}
+                  disabled={recipesLoading || recipes.length === 0}
+                >
                   <SelectTrigger id="pricing-recipe-select">
-                    <SelectValue placeholder="Pilih resep untuk analisis..." />
+                    <SelectValue placeholder={recipesLoading ? 'Memuat resep...' : 'Pilih resep untuk analisis...'} />
                   </SelectTrigger>
                   <SelectContent>
-                    {recipes.map((recipe) => (
-                      <SelectItem key={recipe['id']} value={recipe['id']}>
-                        {recipe.name}
+                    {recipes.length === 0 ? (
+                      <SelectItem value="__no-recipes" disabled>
+                        {recipesLoading ? 'Memuat resep...' : 'Belum ada resep tersedia'}
                       </SelectItem>
-                    ))}
+                    ) : (
+                      recipes.map((recipe) => (
+                        <SelectItem key={recipe['id']} value={recipe['id']}>
+                          {recipe.name}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
+                <div className="text-sm text-muted-foreground">
+                  {recipesLoading
+                    ? 'Memuat daftar resep...'
+                    : recipes.length > 0
+                      ? `${recipes.length} resep siap dianalisis`
+                      : 'Tambahkan resep terlebih dahulu untuk menggunakan asisten harga'}
+                </div>
+                {recipesError && (
+                  <div className="text-sm text-destructive flex items-center gap-2">
+                    Gagal memuat resep
+                    <Button variant="link" size="sm" className="px-0" onClick={() => { void refetchRecipes() }}>
+                      Coba lagi
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
 
             <Button
               onClick={generateRecommendation}
-              disabled={(analyzing || loading) || !selectedRecipe}
+              disabled={analyzing || recipesLoading || !selectedRecipe}
               className="w-full md:w-auto"
             >
               {analyzing ? 'Menganalisis...' : 'Generate Recommendation'}

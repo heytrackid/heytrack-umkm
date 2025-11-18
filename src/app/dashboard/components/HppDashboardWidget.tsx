@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { QuickActionsSkeleton, StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { useCurrency } from '@/hooks/useCurrency'
 import { uiLogger } from '@/lib/logger'
 
@@ -39,7 +39,6 @@ interface HppDashboardData {
 
 const HppDashboardWidget = (): JSX.Element | null => {
   const { formatCurrency } = useCurrency()
-  const { toast } = useToast()
   const router = useRouter()
   const [data, setData] = useState<HppDashboardData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -61,15 +60,11 @@ const HppDashboardWidget = (): JSX.Element | null => {
       setData(realData)
     } catch (error: unknown) {
       logger.error({ error }, 'Failed to load HPP dashboard data')
-      toast({
-        title: 'Error',
-        description: 'Failed to load HPP data',
-        variant: 'destructive'
-      })
+      toast.error('Failed to load HPP data')
     } finally {
       setLoading(false)
     }
-  }, [toast])
+  }, [])
 
   useEffect(() => {
     void fetchData()

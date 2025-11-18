@@ -8,8 +8,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
+import type { ErrorLogInsert } from '@/types/database'
 
 interface ErrorBody {
   message?: string
@@ -100,7 +101,7 @@ async function logErrorToDatabase(
     }
 
      
-    const { error } = await (supabase.from('error_logs') as any).insert(payload)
+    const { error } = await supabase.from('error_logs').insert(payload as ErrorLogInsert)
     if (error) {
       throw error
     }
@@ -109,7 +110,7 @@ async function logErrorToDatabase(
   }
 }
 
-async function POST(request: NextRequest): Promise<NextResponse> {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     const userId = await getOptionalUserId()
 
@@ -143,7 +144,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
 }
 
 // GET /api/errors - Get recent errors (admin only)
-async function GET(request: NextRequest): Promise<NextResponse> {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // Authenticate with Stack Auth
     const authResult = await requireAuth()
@@ -197,10 +198,8 @@ async function GET(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-const securedGET = withSecurity(GET, SecurityPresets.enhanced())
-
 // Custom config for error reporting - selective validation to prevent false positives
-const securedPOST = withSecurity(POST, {
+const errorReportingConfig = {
   sanitizeInputs: true,
   sanitizeQueryParams: true,
   validateContentType: true,
@@ -209,6 +208,7 @@ const securedPOST = withSecurity(POST, {
   rateLimit: { maxRequests: 200, windowMs: 15 * 60 * 1000 }, // Higher limit for error reporting
   checkForSQLInjection: false, // Disable SQL injection checks for error messages
   checkForXSS: false, // Use custom validation instead
-})
+}
 
-export { securedGET as GET, securedPOST as POST }
+export const GET = createSecureHandler(getHandler, 'GET /api/errors', SecurityPresets.enhanced())
+export const POST = createSecureHandler(postHandler, 'POST /api/errors', errorReportingConfig)

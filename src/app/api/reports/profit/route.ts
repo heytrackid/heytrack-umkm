@@ -8,7 +8,7 @@ import { apiLogger } from '@/lib/logger'
 import { calculateRecipeCOGS, toNumber } from '@/lib/supabase/query-helpers'
 import type { Row } from '@/types/database'
 import type { RecipeWithIngredients } from '@/types/query-results'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -100,14 +100,17 @@ async function getHandler(request: NextRequest) {
     // Supabase returns ingredient as array, we need to extract first element
     const recipes: RecipeWithIngredients[] = Array.isArray(recipesRaw)
       ? recipesRaw.map((recipe) => {
-          const typedRecipe = recipe as any // Type assertion to fix RLS inference
+          const typedRecipe = recipe as Record<string, unknown> // Type assertion to fix RLS inference
           return {
-            ...typedRecipe,
-            recipe_ingredients: Array.isArray(typedRecipe.recipe_ingredients)
-              ? typedRecipe.recipe_ingredients.map((ri: { ingredient: unknown }) => ({
-                  ...ri,
-                  ingredient: Array.isArray(ri.ingredient) ? ri.ingredient[0]! : ri.ingredient
-                }))
+            ...(typedRecipe as object),
+            recipe_ingredients: Array.isArray(typedRecipe['recipe_ingredients'])
+              ? (typedRecipe['recipe_ingredients'] as unknown[]).map((ri: unknown) => {
+                  const riRecord = ri as Record<string, unknown>
+                  return {
+                    ...riRecord,
+                    ingredient: Array.isArray(riRecord['ingredient']) ? riRecord['ingredient'][0]! : riRecord['ingredient']
+                  }
+                })
               : []
           }
         }) as RecipeWithIngredients[]
@@ -142,17 +145,17 @@ async function getHandler(request: NextRequest) {
     // Combine all expenses (one-time + operational)
     const allExpenses = [
       ...(expenses ?? []).map(exp => {
-        const typedExp = exp as any // Type assertion to fix RLS inference
+        const typedExp = exp as Record<string, unknown> // Type assertion to fix RLS inference
         return {
-          category: typedExp.category || 'Other',
-          amount: typedExp.amount,
-          description: typedExp.description,
-          date: typedExp.date,
+          category: (typedExp['category'] as string) || 'Other',
+          amount: typedExp['amount'] as number,
+          description: typedExp['description'] as string,
+          date: typedExp['date'] as string,
           source: 'expense' as const
         }
       }),
       ...(operationalCosts ?? []).map(cost => {
-        const typedCost = cost as any // Type assertion to fix RLS inference
+        const typedCost = cost as unknown as { category: string; amount: number; description: string; date: string } // Type assertion to fix RLS inference
         return {
           category: typedCost.category || 'Operational',
           amount: typedCost.amount,
@@ -207,7 +210,7 @@ async function getHandler(request: NextRequest) {
   }
 }
 
-export const GET = withSecurity(getHandler, SecurityPresets.enhanced())
+export const GET = createSecureHandler(getHandler, 'GET /api/reports/profit', SecurityPresets.enhanced())
 
 // Typed interfaces for profit calculation
 interface OrderWithItemsForProfit extends Order {

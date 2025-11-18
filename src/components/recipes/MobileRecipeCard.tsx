@@ -15,9 +15,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-import type { Row } from '@/types/database'
-
-type Recipe = Row<'recipes'>
+import type { Recipe } from '@/types/database'
 
 interface MobileRecipeCardProps {
     recipe: Recipe
@@ -25,9 +23,8 @@ interface MobileRecipeCardProps {
     onEdit: (recipe: Recipe) => void
     onDelete: (recipe: Recipe) => void
     onCalculateHPP: (recipe: Recipe) => void
-
-    getDifficultyColor: (difficulty: string) => string
-    getDifficultyLabel: (difficulty: string) => string
+    getDifficultyColor: (difficulty: string | null | undefined) => string
+    getDifficultyLabel: (difficulty: string | null | undefined) => string
 }
 
 export const MobileRecipeCard = ({
@@ -36,11 +33,12 @@ export const MobileRecipeCard = ({
     onEdit,
     onDelete,
     onCalculateHPP,
-
     getDifficultyColor,
     getDifficultyLabel,
-}: MobileRecipeCardProps) => (
-    <Card className="transition-all" onClick={() => onView(recipe)}>
+}: MobileRecipeCardProps): JSX.Element => (
+    <Card className="transition-all" onClick={(): void => {
+        onView(recipe)
+    }}>
         <CardContent className="p-4">
             <div className="space-y-3">
                 {/* Header */}
@@ -57,7 +55,9 @@ export const MobileRecipeCard = ({
                         )}
                     </div>
                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild onClick={(e: React.MouseEvent<HTMLButtonElement>) => e.stopPropagation()}>
+                        <DropdownMenuTrigger asChild onClick={(e: React.MouseEvent<HTMLButtonElement>): void => {
+                            e.stopPropagation()
+                        }}>
                             <Button variant="ghost" size="sm">
                                 <MoreVertical className="h-4 w-4" />
                             </Button>
@@ -65,21 +65,21 @@ export const MobileRecipeCard = ({
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                            <DropdownMenuItem onClick={(e: React.MouseEvent<HTMLDivElement>): void => {
                                 e.stopPropagation()
                                 onView(recipe)
                             }}>
                                 <Eye className="h-4 w-4 mr-2" />
                                 Lihat Detail
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                            <DropdownMenuItem onClick={(e: React.MouseEvent<HTMLDivElement>): void => {
                                 e.stopPropagation()
                                 onEdit(recipe)
                             }}>
                                 <Edit className="h-4 w-4 mr-2" />
                                 Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={(e) => {
+                            <DropdownMenuItem onClick={(e: React.MouseEvent<HTMLDivElement>): void => {
                                 e.stopPropagation()
                                 onCalculateHPP(recipe)
                             }}>
@@ -88,7 +88,7 @@ export const MobileRecipeCard = ({
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                                onClick={(e) => {
+                                onClick={(e: React.MouseEvent<HTMLDivElement>): void => {
                                     e.stopPropagation()
                                     onDelete(recipe)
                                 }}

@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { Slider } from '@/components/ui/slider'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { createClientLogger } from '@/lib/client-logger'
 import {
     batchSchedulingService,
@@ -68,7 +68,7 @@ export const ProductionCapacityManager = ({
   const [efficiencyMetrics, setEfficiencyMetrics] = useState<EfficiencyMetrics | null>(null)
   const [newBreakStart, setNewBreakStart] = useState('')
   const [newBreakEnd, setNewBreakEnd] = useState('')
-  const { toast } = useToast()
+
 
   useEffect(() => {
     const hasChanges = JSON.stringify(constraints) !== JSON.stringify(originalConstraints)
@@ -142,15 +142,11 @@ export const ProductionCapacityManager = ({
       calculateEfficiencyMetrics(currentConstraints)
     } catch (error: unknown) {
       logger.error({ error }, 'Error loading constraints:')
-      toast({
-        title: 'Error',
-        description: 'Failed to load production capacity settings',
-        variant: 'destructive'
-      })
+      toast.error('Failed to load production capacity settings')
     } finally {
       setLoading(false)
     }
-  }, [calculateEfficiencyMetrics, toast])
+  }, [calculateEfficiencyMetrics])
 
   useEffect(() => {
     void fetchCapacityData()
@@ -163,17 +159,10 @@ export const ProductionCapacityManager = ({
       setOriginalConstraints(constraints)
       calculateEfficiencyMetrics(constraints)
       onCapacityUpdate?.(constraints)
-      toast({
-        title: 'Success',
-        description: 'Production capacity updated successfully'
-      })
+      toast.success('Production capacity updated successfully')
     } catch (error: unknown) {
       logger.error({ error }, 'Error saving constraints:')
-      toast({
-        title: 'Error',
-        description: 'Failed to save production capacity settings',
-        variant: 'destructive'
-      })
+      toast.error('Failed to save production capacity settings')
     } finally {
       setLoading(false)
     }
@@ -181,10 +170,7 @@ export const ProductionCapacityManager = ({
 
   const handleReset = () => {
     setConstraints(originalConstraints)
-    toast({
-      title: 'Success',
-      description: 'Changes reset'
-    })
+    toast.success('Changes reset')
   }
 
   function updateConstraint<K extends keyof ProductionConstraints>(

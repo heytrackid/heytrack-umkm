@@ -8,7 +8,7 @@ import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
 
 // Lazy load the heavy recipes page component
 const EnhancedRecipesPage = dynamic(
-  () => import('@/components/recipes/EnhancedRecipesPage').then(mod => ({ default: mod.EnhancedRecipesPage })),
+  () => import('@/components/recipes/EnhancedRecipesPage'),
   {
     loading: () => <DataGridSkeleton rows={8} />,
     ssr: false

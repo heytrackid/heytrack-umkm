@@ -30,7 +30,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     try {
       const client = createClient()
       logger.info('Supabase client initialized successfully')
-      return client as any
+      return client
     } catch (error) {
       logger.error({ error }, 'Failed to initialize Supabase client')
       throw error

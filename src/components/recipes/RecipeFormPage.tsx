@@ -17,7 +17,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { uiLogger } from '@/lib/logger'
 
 import type { Row, Database } from '@/types/database'
@@ -43,7 +43,6 @@ interface RecipeIngredientForm {
 
 export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog = false }: RecipeFormPageProps) => {
     const router = useRouter()
-    const { toast } = useToast()
 
     const [loading, setLoading] = useState(false)
     const [ingredients, setIngredients] = useState<Ingredient[]>([])
@@ -114,13 +113,9 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
                 )
             }
         } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : 'Gagal memuat resep'
-            toast({
-                title: 'Error',
-                description: message,
-                variant: 'destructive',
-            })
-            router.push('/recipes')
+             const message = error instanceof Error ? error.message : 'Gagal memuat resep'
+             toast.error(message)
+             router.push('/recipes')
         } finally {
             setLoading(false)
         }
@@ -130,32 +125,20 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
         e.preventDefault()
 
         if (!formData.name) {
-            toast({
-                title: 'Validasi Error',
-                description: 'Nama resep harus diisi',
-                variant: 'destructive',
-            })
+            toast.error('Nama resep harus diisi')
             return
         }
 
         // Validate ingredients
         if (recipeIngredients.length === 0) {
-            toast({
-                title: 'Validasi Error',
-                description: 'Resep harus memiliki minimal 1 bahan',
-                variant: 'destructive',
-            })
+            toast.error('Resep harus memiliki minimal 1 bahan')
             return
         }
 
         // Validate each ingredient
         for (const ri of recipeIngredients) {
             if (!ri.ingredient_id || ri.quantity <= 0) {
-                toast({
-                    title: 'Validasi Error',
-                    description: 'Semua bahan harus dipilih dan memiliki jumlah yang valid',
-                    variant: 'destructive',
-                })
+                toast.error('Semua bahan harus dipilih dan memiliki jumlah yang valid')
                 return
             }
         }
@@ -187,10 +170,7 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
 
                 const newRecipe = await response.json() as RecipeInsert
 
-                toast({
-                    title: 'Resep dibuat',
-                    description: `${formData.name} berhasil dibuat dengan ${recipeIngredients.length} bahan`,
-                })
+                toast.success(`${formData.name} berhasil dibuat dengan ${recipeIngredients.length} bahan`)
 
                 if (isDialog && onSuccess) {
                     onSuccess()
@@ -219,10 +199,7 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
                     throw new Error(error.error ?? 'Gagal memperbarui resep')
                 }
 
-                toast({
-                    title: 'Resep diperbarui',
-                    description: `${formData.name} berhasil diperbarui dengan ${recipeIngredients.length} bahan`,
-                })
+                toast.success(`${formData.name} berhasil diperbarui dengan ${recipeIngredients.length} bahan`)
 
                 if (isDialog && onSuccess) {
                     onSuccess()
@@ -232,11 +209,7 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
             }
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : 'Gagal menyimpan resep'
-            toast({
-                title: 'Error',
-                description: message,
-                variant: 'destructive',
-            })
+            toast.error(message)
         } finally {
             setLoading(false)
         }

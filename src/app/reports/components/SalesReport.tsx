@@ -20,6 +20,11 @@ interface SalesStats {
   pendingOrders: number
 }
 
+interface OrderSummary {
+  total_amount?: number | null
+  status?: string | null
+}
+
 export const SalesReport = ({ dateRange }: SalesReportProps) => {
   const [salesStats, setSalesStats] = useState<SalesStats>({
     totalOrders: 0,
@@ -35,6 +40,7 @@ export const SalesReport = ({ dateRange }: SalesReportProps) => {
 
   useEffect(() => {
     const fetchSalesData = async () => {
+      setIsLoading(true)
       if (!dateRange.start || !dateRange.end) {
         setSalesStats({ totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 })
         setPreviousStats({ totalOrders: 0, totalRevenue: 0 })
@@ -43,30 +49,59 @@ export const SalesReport = ({ dateRange }: SalesReportProps) => {
       }
 
       try {
-        // Fetch current period
-        const params = new URLSearchParams({
-          start_date: dateRange.start,
-          end_date: dateRange.end,
-          status: 'DELIVERED'
-        })
+        const buildParams = (start: string, end: string) => {
+          const params = new URLSearchParams()
+          params.set('from', start)
+          params.set('to', end)
+          params.set('limit', '500')
+          params.set('page', '1')
+          params.set('sort_order', 'desc')
+          return params
+        }
 
-        const response = await fetch(`/api/orders?${params.toString()}`)
+        const parseOrders = (payload: unknown): OrderSummary[] => {
+          if (!payload || typeof payload !== 'object' || !('data' in payload)) {
+            return []
+          }
+          const data = (payload as { data?: unknown }).data
+          if (!Array.isArray(data)) {
+            return []
+          }
+          return data as OrderSummary[]
+        }
+
+        const toNumber = (value: unknown): number => {
+          if (typeof value === 'number' && Number.isFinite(value)) {
+            return value
+          }
+          const parsed = Number(value)
+          return Number.isFinite(parsed) ? parsed : 0
+        }
+
+        const response = await fetch(`/api/orders?${buildParams(dateRange.start, dateRange.end).toString()}`)
 
         if (!response.ok) {
           throw new Error('Failed to fetch sales data')
         }
 
-        const result = await response.json()
-        const report = result.data || { summary: { totalOrders: 0, totalRevenue: 0 } }
+        const currentOrders = parseOrders(await response.json())
 
-        const stats = {
-          totalOrders: report.summary.totalOrders,
-          totalRevenue: report.summary.totalRevenue,
-          completedOrders: report.summary.totalOrders, // All orders in this endpoint are DELIVERED
-          pendingOrders: 0
-        }
+        const currentTotals = currentOrders.reduce(
+          (acc, order) => {
+            const status = (order.status ?? '').toString().toUpperCase()
+            acc.totalRevenue += toNumber(order.total_amount)
+            acc.totalOrders += 1
+            if (status === 'DELIVERED') {
+              acc.completedOrders += 1
+            } else if (status !== 'CANCELLED') {
+              acc.pendingOrders += 1
+            }
+            return acc
+          },
+          { totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 }
+        )
 
-        setSalesStats(stats)
+        setSalesStats(currentTotals)
 
         // Fetch previous period for growth calculation
         const startDate = new Date(dateRange.start)
@@ -76,20 +111,23 @@ export const SalesReport = ({ dateRange }: SalesReportProps) => {
         const previousEnd = new Date(startDate.getTime() - 1)
         const previousStart = new Date(previousEnd.getTime() - periodLength)
 
-        const prevParams = new URLSearchParams({
-          start_date: previousStart.toISOString().split('T')[0],
-          end_date: previousEnd.toISOString().split('T')[0],
-          status: 'DELIVERED'
-        })
-
-        const prevResponse = await fetch(`/api/orders?${prevParams.toString()}`)
+        const prevResponse = await fetch(
+          `/api/orders?${buildParams(
+            previousStart.toISOString().split('T')[0],
+            previousEnd.toISOString().split('T')[0]
+          ).toString()}`
+        )
         if (prevResponse.ok) {
-          const prevResult = await prevResponse.json()
-          const prevReport = prevResult.data || { summary: { totalOrders: 0, totalRevenue: 0 } }
-          setPreviousStats({
-            totalOrders: prevReport.summary.totalOrders,
-            totalRevenue: prevReport.summary.totalRevenue
-          })
+          const previousOrders = parseOrders(await prevResponse.json())
+          const previousTotals = previousOrders.reduce(
+            (acc, order) => {
+              acc.totalOrders += 1
+              acc.totalRevenue += toNumber(order.total_amount)
+              return acc
+            },
+            { totalOrders: 0, totalRevenue: 0 }
+          )
+          setPreviousStats(previousTotals)
         } else {
           setPreviousStats({ totalOrders: 0, totalRevenue: 0 })
         }

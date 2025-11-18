@@ -1,11 +1,4 @@
-import type { Row } from '@/types/database'
-
-
-
-// Use generated types from Supabase
-export type Recipe = Row<'recipes'>
-export type RecipeIngredient = Row<'recipe_ingredients'>
-export type Ingredient = Row<'ingredients'>
+import type { Recipe, RecipeIngredient } from '@/types/database'
 
 // Extended type for recipe with ingredient details
 export interface RecipeIngredientWithDetails extends RecipeIngredient {
@@ -17,15 +10,56 @@ export interface RecipeIngredientWithDetails extends RecipeIngredient {
   }
 }
 
+// Type for HPP calculation result
+export interface HppCalculationResult {
+  ingredientCost: number
+  laborCost: number
+  overheadCost: number
+  packagingCost: number
+  totalCost: number
+}
+
+// Type for validation result
+export interface ValidationResult {
+  isValid: boolean
+  errors: string[]
+}
+
+// Type for difficulty info
+export interface DifficultyInfo {
+  label: string
+  color: string
+  icon: string
+  description: string
+}
+
+// Type for category info
+export interface CategoryInfo {
+  label: string
+  icon: string
+  description: string
+}
+
+// Type for recipe summary
+export interface RecipeSummary {
+  timeFormatted: string
+  servingsFormatted: string
+  complexityScore: number
+  difficulty: DifficultyInfo
+  category: CategoryInfo
+  ingredientCount: number
+  totalTime: number
+}
+
 /**
  * Calculate recipe HPP (Harga Pokok Produksi)
  */
 export function calculateRecipeHPP(
   ingredients: RecipeIngredientWithDetails[],
-  overheadRate = 0.15,
-  laborCost = 0,
-  packagingCost = 0
-) {
+  overheadRate: number = 0.15,
+  laborCost: number = 0,
+  packagingCost: number = 0
+): HppCalculationResult {
   const ingredientCost = ingredients.reduce((total, recipeIngredient) => {
     if (!recipeIngredient.ingredient) {return total}
     
@@ -98,7 +132,7 @@ export function scaleRecipe(
 /**
  * Validate recipe data
  */
-export function validateRecipe(recipe: Partial<Recipe>): { isValid: boolean; errors: string[] } {
+export function validateRecipe(recipe: Partial<Recipe>): ValidationResult {
   const errors: string[] = []
 
   if (!recipe.name || recipe.name.trim().length === 0) {
@@ -166,7 +200,7 @@ function getUnitConversionFactor(fromUnit: string, toUnit: string): number {
 /**
  * Get difficulty level display info
  */
-export function getDifficultyInfo(difficulty: string | null) {
+export function getDifficultyInfo(difficulty: string | null): DifficultyInfo {
   if (!difficulty) {
     return {
       label: 'Unknown',
@@ -211,7 +245,7 @@ export function getDifficultyInfo(difficulty: string | null) {
 /**
  * Get category display info with Indonesian localization
  */
-export function getCategoryInfo(category: string) {
+export function getCategoryInfo(category: string): CategoryInfo {
   const categories: Record<string, { label: string; icon: string; description: string }> = {
     bread: {
       label: 'Roti',
@@ -255,8 +289,8 @@ export function getCategoryInfo(category: string) {
 /**
  * Format recipe time display
  */
-export function formatRecipeTime(prepTime: number, cookTime: number): string {
-  const total = prepTime + cookTime
+export function formatRecipeTime(prepTime: number | null, cookTime: number | null): string {
+  const total = (prepTime ?? 0) + (cookTime ?? 0)
   const hours = Math.floor(total / 60)
   const minutes = total % 60
 
@@ -272,7 +306,7 @@ export function formatRecipeTime(prepTime: number, cookTime: number): string {
 export function calculateComplexityScore(
   ingredientCount: number,
   totalTime: number,
-  difficulty: string
+  difficulty: string | null
 ): number {
   let score = 0
   
@@ -283,12 +317,12 @@ export function calculateComplexityScore(
   score += Math.min(totalTime / 5, 40)
   
   // Difficulty multiplier (0-30 points)
-  const difficultyMultiplier = {
+  const difficultyMultiplier: Record<string, number> = {
     easy: 10,
     medium: 20,
     hard: 30
   }
-  score += difficultyMultiplier[difficulty as keyof typeof difficultyMultiplier] || 15
+  score += difficultyMultiplier[difficulty ?? 'medium'] ?? 15
 
   return Math.min(Math.round(score), 100)
 }
@@ -296,7 +330,7 @@ export function calculateComplexityScore(
 /**
  * Generate recipe summary statistics
  */
-export function generateRecipeSummary(recipe: Recipe, ingredients: RecipeIngredientWithDetails[]) {
+export function generateRecipeSummary(recipe: Recipe, ingredients: RecipeIngredientWithDetails[]): RecipeSummary {
   const prepTime = recipe.prep_time ?? 0
   const cookTime = recipe.cook_time ?? 0
   const totalTime = prepTime + cookTime

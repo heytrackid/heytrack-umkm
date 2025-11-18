@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Suspense, useCallback, useEffect, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
+import { LoadingState } from '@/components/ui/loading-state'
 import { useAuth } from '@/hooks/useAuth'
 import { createClientLogger } from '@/lib/client-logger'
 
@@ -115,9 +116,7 @@ const AIChatbotPage = (): JSX.Element => {
   if (authLoading) {
     return (
       <AppLayout pageTitle="AI Chatbot">
-        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-        </div>
+        <LoadingState size="md" />
       </AppLayout>
     )
   }

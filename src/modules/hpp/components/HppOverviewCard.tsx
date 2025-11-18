@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { useCurrency } from '@/hooks/useCurrency'
 
 
@@ -24,7 +24,6 @@ interface HppOverviewCardProps {
 export const HppOverviewCard = ({ overview }: HppOverviewCardProps): JSX.Element => {
     const { formatCurrency } = useCurrency()
     const router = useRouter()
-    const { toast } = useToast()
 
     const handleCalculateAll = async (): Promise<void> => {
         try {
@@ -33,18 +32,11 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps): JSX.Element
                 credentials: 'include', // Include cookies for authentication
             })
             if (response.ok) {
-                toast({
-                    title: 'Berhasil',
-                    description: 'Semua biaya produksi berhasil dihitung'
-                })
+                toast.success('Semua biaya produksi berhasil dihitung')
                 router.refresh()
             }
         } catch {
-            toast({
-                title: 'Gagal',
-                description: 'Gagal menghitung biaya',
-                variant: 'destructive'
-            })
+            toast.error('Gagal menghitung biaya')
         }
     }
 

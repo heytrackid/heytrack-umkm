@@ -11,12 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useRecipes } from '@/hooks/useRecipes'
 import { dbLogger } from '@/lib/logger'
-
-import type { Recipe } from '@/types/index'
 
 // Force dynamic rendering to avoid SSG issues (move to server wrapper if needed)
 
@@ -51,12 +49,10 @@ interface HppCalculationExtended {
 
 const HppCalculatorPage = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
-  const { toast } = useToast()
+
 
   // ✅ OPTIMIZED: Use TanStack Query for caching
-  const result = useRecipes({ limit: 1000 }) as { data?: { recipes?: Recipe[] }; isLoading: boolean }
-  const { data: recipesData, isLoading: loading } = result
-  const recipes = recipesData?.recipes ?? []
+  const { data: recipes = [], isLoading: loading } = useRecipes({ limit: 1000 })
 
   const [selectedRecipe, setSelectedRecipe] = useState<string>('')
   const [calculation, setCalculation] = useState<HppCalculationExtended | null>(null)
@@ -85,10 +81,7 @@ const HppCalculatorPage = (): JSX.Element => {
         const data = await response.json() as { calculation?: HppCalculationExtended }
         setCalculation(data.calculation ?? null)
 
-        toast({
-          title: 'Success',
-          description: 'HPP calculated successfully',
-        })
+        toast.success('HPP calculated successfully')
       } else {
         const errorData = await response.json().catch(() => ({}))
         let errorMessage = 'Failed to calculate HPP'
@@ -104,11 +97,7 @@ const HppCalculatorPage = (): JSX.Element => {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to calculate HPP'
       dbLogger.error({ error }, 'Failed to calculate HPP')
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive'
-      })
+      toast.error(errorMessage)
     } finally {
       setCalculating(false)
     }

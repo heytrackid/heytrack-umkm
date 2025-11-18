@@ -17,6 +17,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
+import { LoadingState } from '@/components/ui/loading-state'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
@@ -399,9 +400,7 @@ export const DataView = ({
       {/* Content */}
       <div className="relative">
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-          </div>
+          <LoadingState size="md" />
         ) : (children ?? emptyState ?? (
             <div className="text-center py-12 text-muted-foreground">
               Tidak ada data tersedia

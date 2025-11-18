@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { useSettings } from '@/contexts/settings-context'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { useResponsive } from '@/hooks/useResponsive'
 import { createLogger } from '@/lib/logger'
 
@@ -22,7 +22,6 @@ import type { Customer } from './types'
 const logger = createLogger('CustomersLayout')
 
 export const CustomersLayout = (): JSX.Element => {
-  const { toast } = useToast()
   const { isMobile } = useResponsive()
   const { formatCurrency } = useSettings()
 
@@ -53,15 +52,11 @@ export const CustomersLayout = (): JSX.Element => {
       setCustomers(data)
     } catch (error) {
       logger.error({ error }, 'Failed to fetch customers')
-      toast({
-        title: 'Error',
-        description: 'Gagal memuat data pelanggan',
-        variant: 'destructive'
-      })
+      toast.error('Gagal memuat data pelanggan')
     } finally {
       setIsLoading(false)
     }
-  }, [toast])
+   }, [])
 
   // Load customers on mount
   useEffect(() => {
@@ -108,22 +103,15 @@ export const CustomersLayout = (): JSX.Element => {
         throw new Error('Failed to delete customer')
       }
 
-      toast({
-        title: 'Berhasil',
-        description: 'Pelanggan berhasil dihapus'
-      })
+      toast.success('Pelanggan berhasil dihapus')
 
       fetchCustomers()
       setDeleteConfirm({ show: false, customer: null, bulk: false })
     } catch (error) {
       logger.error({ error }, 'Failed to delete customer')
-      toast({
-        title: 'Error',
-        description: 'Gagal menghapus pelanggan',
-        variant: 'destructive'
-      })
+      toast.error('Gagal menghapus pelanggan')
     }
-  }, [toast, fetchCustomers, deleteConfirm.customer])
+  }, [fetchCustomers, deleteConfirm.customer])
 
   const handleBulkDelete = useCallback(async () => {
     setDeleteConfirm({ show: true, customer: null, bulk: true })
@@ -137,23 +125,16 @@ export const CustomersLayout = (): JSX.Element => {
         )
       )
 
-      toast({
-        title: 'Berhasil',
-        description: `${selectedItems.length} pelanggan berhasil dihapus`
-      })
+      toast.success('${selectedItems.length} pelanggan berhasil dihapus')
 
       setSelectedItems([])
       fetchCustomers()
       setDeleteConfirm({ show: false, customer: null, bulk: false })
     } catch (error) {
       logger.error({ error }, 'Failed to delete customers')
-      toast({
-        title: 'Error',
-        description: 'Gagal menghapus pelanggan',
-        variant: 'destructive'
-      })
+      toast.error('Gagal menghapus pelanggan')
     }
-  }, [selectedItems, toast, fetchCustomers])
+  }, [selectedItems, fetchCustomers])
 
   const handleSelectItem = useCallback((itemId: string) => {
     setSelectedItems(prev =>

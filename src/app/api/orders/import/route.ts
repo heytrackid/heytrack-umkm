@@ -4,12 +4,14 @@ export const runtime = 'nodejs'
 
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { cacheInvalidation } from '@/lib/cache'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
-import type { Insert, OrderStatus, Row } from '@/types/database'
+import { ORDER_FIELDS } from '@/lib/database/query-fields'
+import type { Database, Insert, OrderStatus, Row } from '@/types/database'
 import { InputSanitizer, SecurityPresets, createSecureHandler } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
@@ -121,7 +123,7 @@ async function parseAndValidateRequest(request: NextRequest): Promise<{ orders: 
   return ImportOrdersSchema.parse(body)
 }
 
-async function fetchRecipes(supabase: any, userId: string): Promise<Map<string, string>> {
+async function fetchRecipes(supabase: SupabaseClient<Database>, userId: string): Promise<Map<string, string>> {
   const { data: recipes, error: recipesError } = await supabase
     .from('recipes')
     .select('id, name')
@@ -291,7 +293,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
           ...orderData.order,
           customer_id: customerId ?? null
         } as never)
-        .select()
+        .select(ORDER_FIELDS.LIST)
         .single()
 
       if (orderError) {

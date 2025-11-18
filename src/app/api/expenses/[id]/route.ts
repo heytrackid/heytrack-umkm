@@ -10,16 +10,13 @@ import { prepareUpdate } from '@/lib/supabase/insert-helpers';
 import { extractFirst, getErrorMessage, isRecord, isValidUUID, safeString } from '@/lib/type-guards';
 import { UpdateExpenseSchema } from '@/lib/validations/api-schemas';
 import type { Database } from '@/types/database';
-import { SecurityPresets, withSecurity } from '@/utils/security/index';
+import { createSecureRouteHandler, SecurityPresets } from '@/utils/security/index';
 import { createClient } from '@/utils/supabase/server';
 
-
-
-
-// Apply security middleware
-export const GET = withSecurity(async function GET(
+// GET handler for fetching a single expense
+async function getExpenseHandler(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<Record<string, string>> }
 ): Promise<NextResponse> {
   const { id } = await params;
 
@@ -70,8 +67,8 @@ export const GET = withSecurity(async function GET(
     }
 
     // ✅ V2: Safe extraction of supplier data
-     
-    const responseExpense: any = { ...(expense as Record<string, unknown>) };
+
+    const responseExpense: Record<string, unknown> = { ...(expense as Record<string, unknown>) };
     if ('supplier' in expense) {
       const supplier = extractFirst(expense['supplier'])
       if (supplier && isRecord(supplier) && 'name' in supplier) {
@@ -87,11 +84,12 @@ export const GET = withSecurity(async function GET(
     logError(apiLogger, error, 'GET /api/expenses/[id] - Unexpected error');
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
-}, SecurityPresets.enhanced())
+}
 
-export const PUT = withSecurity(async function PUT(
+// PUT handler for updating an expense
+async function updateExpenseHandler(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<Record<string, string>> }
 ): Promise<NextResponse> {
   const { id } = await params;
 
@@ -159,11 +157,12 @@ export const PUT = withSecurity(async function PUT(
     logError(apiLogger, error, 'PUT /api/expenses/[id] - Unexpected error');
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
-}, SecurityPresets.enhanced())
+}
 
-export const DELETE = withSecurity(async function DELETE(
+// DELETE handler for deleting an expense
+async function deleteExpenseHandler(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<Record<string, string>> }
 ): Promise<NextResponse> {
   const { id } = await params;
 
@@ -204,4 +203,9 @@ export const DELETE = withSecurity(async function DELETE(
     logError(apiLogger, error, 'DELETE /api/expenses/[id] - Unexpected error');
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
-}, SecurityPresets.enhanced())
+}
+
+// Apply security middleware
+export const GET = createSecureRouteHandler(getExpenseHandler, 'GET /api/expenses/[id]', SecurityPresets.enhanced())
+export const PUT = createSecureRouteHandler(updateExpenseHandler, 'PUT /api/expenses/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureRouteHandler(deleteExpenseHandler, 'DELETE /api/expenses/[id]', SecurityPresets.enhanced())

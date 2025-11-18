@@ -15,7 +15,7 @@ import { OrderInsertSchema } from '@/lib/validations/domains/order'
 import { createPaginationMeta } from '@/lib/validations/pagination'
 import type { Database, FinancialRecordInsert, FinancialRecordUpdate, OrderInsert, OrderStatus } from '@/types/database'
 import { typed } from '@/types/type-utilities'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -97,7 +97,7 @@ const fetchOrdersWithCache = async (supabase: SupabaseClient<Database>, params: 
  
 
 // GET /api/orders - Get all orders with caching
-async function GET(request: NextRequest): Promise<NextResponse> {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'GET /api/orders - Request received')
 
@@ -176,7 +176,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
 }
 
 // POST /api/orders - Create new order with cache invalidation
-async function POST(request: NextRequest): Promise<NextResponse> {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/orders - Request received')
 
@@ -316,8 +316,5 @@ async function POST(request: NextRequest): Promise<NextResponse> {
 }
 
 // Apply security middleware with enhanced security configuration
-const securedGET = withSecurity(GET, SecurityPresets.enhanced())
-const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
-
-// Export secured handlers
-export { securedGET as GET, securedPOST as POST }
+export const GET = createSecureHandler(getHandler, 'GET /api/orders', SecurityPresets.enhanced())
+export const POST = createSecureHandler(postHandler, 'POST /api/orders', SecurityPresets.enhanced())

@@ -3,11 +3,11 @@ export const runtime = 'nodejs'
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { hppRecommendationUpdateSchema } from '@/lib/validations/domains/hpp'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
-async function PATCH(
+async function patchHandler(
   request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
@@ -60,7 +60,7 @@ async function PATCH(
   }
 }
 
-async function DELETE(
+async function deleteHandler(
   request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
@@ -88,8 +88,6 @@ async function DELETE(
   }
 }
 
-const securedPATCH = withSecurity(PATCH, SecurityPresets.enhanced())
-const securedDELETE = withSecurity(DELETE, SecurityPresets.enhanced())
-
-export { securedDELETE as DELETE, securedPATCH as PATCH }
+export const PATCH = createSecureHandler(patchHandler, 'PATCH /api/hpp/recommendations/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureHandler(deleteHandler, 'DELETE /api/hpp/recommendations/[id]', SecurityPresets.enhanced())
 

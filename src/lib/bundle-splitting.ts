@@ -9,7 +9,7 @@ import { serializeError, uiLogger } from '@/lib/logger'
 
 // Lazy load with error boundary
  
-export function lazyLoad<T extends ComponentType<any>>(
+export function lazyLoad<T extends ComponentType<Record<string, unknown>>>(
   importFunc: () => Promise<{ default: T }>
 ): LazyExoticComponent<T> {
   return lazy(() =>

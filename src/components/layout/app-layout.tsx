@@ -8,6 +8,7 @@ import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBo
 import { SmartBottomNav } from '@/components/navigation/SmartNavigation'
 import { TabNavigation } from '@/components/navigation/TabNavigation'
 import { Button } from '@/components/ui/button'
+import { LoadingState } from '@/components/ui/loading-state'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -154,7 +155,7 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
   if (!mounted) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <LoadingState size="md" />
       </div>
     )
   }

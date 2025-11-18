@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { useCurrency } from '@/hooks/useCurrency'
 import { dbLogger } from '@/lib/logger'
 // No imports needed for now
@@ -42,7 +42,6 @@ interface BenchmarkData {
 
 const ComparisonAnalyticsPage = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
-  const { toast } = useToast()
   const [recipes, setRecipes] = useState<RecipeComparison[]>([])
   const [benchmark, setBenchmark] = useState<BenchmarkData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -81,11 +80,7 @@ const ComparisonAnalyticsPage = (): JSX.Element => {
       }
     } catch (_error) {
       dbLogger.error({ _error }, 'Failed to load comparison data')
-      toast({
-        title: 'Error',
-        description: 'Failed to load comparison data',
-        variant: 'destructive'
-      })
+      toast.error('Failed to load comparison data')
     } finally {
       setLoading(false)
     }

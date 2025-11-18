@@ -27,7 +27,7 @@ export function useGenericCRUD<TTable extends keyof TablesMap>(tableName: TTable
   const create = useCallback(async (data: TableInsert<TTable>) => {
     setLoading(true)
     try {
-      const result = await createRecord(data as any) // Type assertion for RLS
+      const result = await createRecord(data as never) // Type assertion for Supabase
       toast({
         title: "Berhasil",
         description: "Data berhasil ditambahkan",
@@ -48,7 +48,7 @@ export function useGenericCRUD<TTable extends keyof TablesMap>(tableName: TTable
   const update = useCallback(async (id: string, data: TableUpdate<TTable>) => {
     setLoading(true)
     try {
-      const result = await updateRecord(id, data as any) // Type assertion for RLS
+      const result = await updateRecord(id, data as never) // Type assertion for Supabase
       toast({
         title: "Berhasil",
         description: "Data berhasil diperbarui",

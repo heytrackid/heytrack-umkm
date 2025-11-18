@@ -1,22 +1,22 @@
 export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 
-import { createErrorResponse, handleAPIError } from '@/lib/api-core'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { cacheInvalidation } from '@/lib/cache'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
-import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
+import { isValidUUID } from '@/lib/type-guards'
 import { RecipeIngredientInsertSchema, RecipeUpdateSchema } from '@/lib/validations/domains/recipe'
 import type { Insert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
 
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureRouteHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 
 interface RouteContext {
-  params: Promise<{ id: string }>
+  params: Promise<Record<string, string>>
 }
 
 // GET /api/recipes/[id] - Get single recipe with ingredients
@@ -37,7 +37,7 @@ async function getRecipe(
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const _user = authResult
+    const user = authResult
 
     const supabase = typed(await createClient())
 
@@ -45,6 +45,7 @@ async function getRecipe(
       .from('recipes')
       .select(RECIPE_FIELDS.DETAIL)
       .eq('id', id)
+      .eq('user_id', user.id)
       .single()
 
     if (error) {
@@ -56,9 +57,8 @@ async function getRecipe(
 
     return NextResponse.json(recipe)
   } catch (error) {
-    apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/recipes/[id]')
-    const apiError = handleAPIError(error)
-    return createErrorResponse(apiError.message, apiError.statusCode)
+    apiLogger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error in GET /api/recipes/[id]')
+    return handleAPIError(error, 'GET /api/recipes/[id]')
   }
 }
 
@@ -80,17 +80,17 @@ async function updateRecipe(
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const _user = authResult
+    const user = authResult
 
     const supabase = typed(await createClient())
 
     const body = await request.json() as { recipe_ingredients?: unknown; ingredients?: unknown; [key: string]: unknown }
-    
+
     // Support both recipe_ingredients and ingredients field names
     const ingredientsField = body.ingredients ?? body.recipe_ingredients
 
     // Extract recipe data (without ingredients) - explicitly exclude these fields from recipe update
-     
+
     const { recipe_ingredients: _recipe_ingredients, ingredients: _ingredients, ...recipeData } = body
 
     // Validate recipe data if provided
@@ -99,8 +99,8 @@ async function updateRecipe(
       if (!recipeValidation.success) {
         apiLogger.warn({ errors: recipeValidation.error.issues }, 'Recipe update validation failed')
         return NextResponse.json(
-          { 
-            error: 'Invalid recipe data', 
+          {
+            error: 'Invalid recipe data',
             details: recipeValidation.error.issues.map(issue => ({
               path: issue.path.join('.'),
               message: issue.message
@@ -117,6 +117,7 @@ async function updateRecipe(
         .from('recipes')
         .update(recipeData)
         .eq('id', id)
+        .eq('user_id', user.id)
         .select('id, name')
         .single()
 
@@ -148,8 +149,8 @@ async function updateRecipe(
       const invalidIngredients = ingredientsValidation.filter(v => 'errors' in v)
       if (invalidIngredients.length > 0) {
         return NextResponse.json(
-          { 
-            error: 'Invalid ingredients data', 
+          {
+            error: 'Invalid ingredients data',
             details: invalidIngredients.map(v => ({
               index: v.index,
               errors: 'errors' in v ? v.errors : []
@@ -164,6 +165,7 @@ async function updateRecipe(
         .from('recipe_ingredients')
         .delete()
         .eq('recipe_id', id)
+        .eq('user_id', user.id)
 
       if (deleteError) {
         apiLogger.error({ error: deleteError }, 'Error deleting old ingredients')
@@ -171,7 +173,7 @@ async function updateRecipe(
 
       // Insert new ingredients
       if (ingredientsField.length > 0) {
-        const ingredientsToInsert: Array<Insert<'recipe_ingredients'>> = 
+        const ingredientsToInsert: Array<Insert<'recipe_ingredients'>> =
           ingredientsValidation.map((v) => {
             if ('data' in v) {
               return {
@@ -180,7 +182,7 @@ async function updateRecipe(
                 quantity: v.data!.quantity,
                 unit: v.data!.unit,
                 notes: v.data!.notes ?? null,
-                user_id: _user.id
+                user_id: user.id
               }
             }
             throw new Error('Invalid ingredient data')
@@ -205,6 +207,7 @@ async function updateRecipe(
       .from('recipes')
       .select(RECIPE_FIELDS.DETAIL)
       .eq('id', id)
+      .eq('user_id', user.id)
       .single()
 
     if (fetchError) {
@@ -217,8 +220,8 @@ async function updateRecipe(
 
     return NextResponse.json(completeRecipe)
   } catch (error) {
-    apiLogger.error({ error: getErrorMessage(error) }, 'Error in PUT /api/recipes/[id]')
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    apiLogger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error in PUT /api/recipes/[id]')
+    return handleAPIError(error, 'PUT /api/recipes/[id]')
   }
 }
 
@@ -240,7 +243,7 @@ async function deleteRecipe(
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const _user = authResult
+    const user = authResult
 
     const supabase = typed(await createClient())
 
@@ -249,6 +252,7 @@ async function deleteRecipe(
       .from('recipes')
       .delete()
       .eq('id', id)
+      .eq('user_id', user.id)
 
     if (error) {
       if (error['code'] === 'PGRST116') {
@@ -262,14 +266,13 @@ async function deleteRecipe(
 
     return NextResponse.json({ message: 'Recipe deleted successfully' })
   } catch (error) {
-    apiLogger.error({ error: getErrorMessage(error) }, 'Error in DELETE /api/recipes/[id]')
-    const apiError = handleAPIError(error)
-    return createErrorResponse(apiError.message, apiError.statusCode)
+    apiLogger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error in DELETE /api/recipes/[id]')
+    return handleAPIError(error, 'DELETE /api/recipes/[id]')
   }
 }
 
 // Apply security middleware
-export const GET = withSecurity(getRecipe, SecurityPresets.enhanced())
-export const PUT = withSecurity(updateRecipe, SecurityPresets.enhanced())
-export const DELETE = withSecurity(deleteRecipe, SecurityPresets.enhanced())
+export const GET = createSecureRouteHandler(getRecipe, 'GET /api/recipes/[id]', SecurityPresets.enhanced())
+export const PUT = createSecureRouteHandler(updateRecipe, 'PUT /api/recipes/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureRouteHandler(deleteRecipe, 'DELETE /api/recipes/[id]', SecurityPresets.enhanced())
 

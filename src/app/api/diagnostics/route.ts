@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
  import { handleAPIError } from '@/lib/errors/api-error-handler'
  import { apiLogger } from '@/lib/logger'
- import { SecurityPresets, withSecurity } from '@/utils/security/index'
+ import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 interface EnvVarDiagnostics {
   exists: boolean
@@ -112,4 +112,4 @@ async function diagnosticsGET(_request: NextRequest): Promise<NextResponse> {
   }
 }
 
-export const GET = withSecurity(diagnosticsGET, SecurityPresets.enhanced())
+export const GET = createSecureHandler(diagnosticsGET, 'GET /api/diagnostics', SecurityPresets.enhanced())

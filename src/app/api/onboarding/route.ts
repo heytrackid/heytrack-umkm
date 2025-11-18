@@ -2,12 +2,12 @@ export const runtime = 'nodejs'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
 // GET /api/onboarding - Get onboarding status
-async function GET(_request: NextRequest): Promise<NextResponse> {
+async function getHandler(_request: NextRequest): Promise<NextResponse> {
   try {
     const authResult = await requireAuth()
     if (isErrorResponse(authResult)) {
@@ -38,7 +38,7 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
           steps_completed: [],
           completed: false,
         })
-        .select()
+        .select('id, user_id, current_step, steps_completed, completed, created_at, updated_at')
         .single()
 
       if (insertError) throw insertError
@@ -59,7 +59,7 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
 }
 
 // PATCH /api/onboarding - Update onboarding progress
-async function PATCH(request: NextRequest): Promise<NextResponse> {
+async function patchHandler(request: NextRequest): Promise<NextResponse> {
   try {
     const authResult = await requireAuth()
     if (isErrorResponse(authResult)) {
@@ -92,7 +92,7 @@ async function PATCH(request: NextRequest): Promise<NextResponse> {
           onConflict: 'user_id',
         }
       )
-      .select()
+      .select('id, user_id, current_step, steps_completed, completed, created_at, updated_at')
       .single()
 
     if (error) throw error
@@ -107,7 +107,5 @@ async function PATCH(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-const securedGET = withSecurity(GET, SecurityPresets.enhanced())
-const securedPATCH = withSecurity(PATCH, SecurityPresets.enhanced())
-
-export { securedGET as GET, securedPATCH as PATCH }
+export const GET = createSecureHandler(getHandler, 'GET /api/onboarding', SecurityPresets.enhanced())
+export const PATCH = createSecureHandler(patchHandler, 'PATCH /api/onboarding', SecurityPresets.enhanced())

@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { apiLogger } from '@/lib/logger'
 
 import type { Row } from '@/types/database'
@@ -67,7 +67,6 @@ interface CustomerDialogProps {
 }
 
 export const CustomerDialog = ({ open, onOpenChange, customer, onSuccess }: CustomerDialogProps): JSX.Element => {
-    const { toast } = useToast()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const isEditMode = Boolean(customer)
 
@@ -140,23 +139,15 @@ export const CustomerDialog = ({ open, onOpenChange, customer, onSuccess }: Cust
                 throw new Error(errorData.error ?? 'Gagal menyimpan data pelanggan')
             }
 
-            toast({
-                title: 'Berhasil',
-                description: isEditMode
-                    ? 'Data pelanggan berhasil diperbarui'
-                    : 'Pelanggan baru berhasil ditambahkan',
-                variant: 'default',
-            })
+            toast.success(isEditMode
+                ? 'Data pelanggan berhasil diperbarui'
+                : 'Pelanggan baru berhasil ditambahkan')
 
             onSuccess()
             onOpenChange(false)
         } catch (error: unknown) {
             apiLogger.error({ error }, 'Error saving customer')
-            toast({
-                title: 'Gagal',
-                description: error instanceof Error ? error.message : 'Terjadi kesalahan saat menyimpan data',
-                variant: 'destructive',
-            })
+            toast.error(error instanceof Error ? error.message : 'Terjadi kesalahan saat menyimpan data')
         } finally {
             setIsSubmitting(false)
         }

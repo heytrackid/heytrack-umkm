@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import {
   FinancialRecordSchema,
   type FinancialRecordFormData
@@ -31,7 +31,7 @@ interface FinancialRecordFormProps {
 }
 
 export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: FinancialRecordFormProps) => {
-  const { toast } = useToast()
+
 
   const form = useForm<FinancialRecordFormData>({
     resolver: zodResolver(FinancialRecordSchema),
@@ -51,21 +51,20 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
   const handleSubmit = async (data: FinancialRecordFormData) => {
     try {
       await onSubmit(data)
-      toast({
-        title: 'Berhasil',
-        description: 'Catatan keuangan berhasil disimpan'
-      })
+      toast.success('Catatan keuangan berhasil disimpan')
       if (!initialData) {
         form.reset()
       }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Gagal menyimpan catatan keuangan',
-        variant: 'destructive'
-      })
+      toast.error(error instanceof Error ? error.message : 'Gagal menyimpan catatan keuangan')
     }
   }
+
+  // Extract watch values to avoid React Hook Form linting warnings
+  const watchedType = useWatch({ control: form.control, name: 'type' })
+  const watchedPaymentMethod = useWatch({ control: form.control, name: 'payment_method' })
+  const watchedIsRecurring = useWatch({ control: form.control, name: 'is_recurring' })
+  const watchedRecurringPeriod = useWatch({ control: form.control, name: 'recurring_period' })
 
   return (
     <Card>
@@ -81,7 +80,7 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
               {...(form.formState.errors['type']?.message ? { error: form.formState.errors['type'].message } : {})}
             >
               <Select
-                value={form.watch('type')}
+                value={watchedType}
                 onValueChange={(value) => {
                   if (value === 'INCOME' || value === 'EXPENSE') {
                     form.setValue('type', value)
@@ -137,7 +136,7 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
               error={form.formState.errors.payment_method?.message}
             >
               <Select
-                {...(form.watch('payment_method') ? { value: form.watch('payment_method') as string } : {})}
+                {...(watchedPaymentMethod ? { value: watchedPaymentMethod as string } : {})}
                 onValueChange={(value) => {
                   if (
                     value === 'CASH' ||
@@ -194,19 +193,19 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
 
           <div className="flex items-center space-x-2">
             <Checkbox
-              checked={form.watch('is_recurring') ?? false}
+              checked={watchedIsRecurring ?? false}
               onCheckedChange={(checked) => form.setValue('is_recurring', Boolean(checked))}
             />
             <Label>Transaksi Berulang</Label>
           </div>
 
-          {form.watch('is_recurring') && (
+          {watchedIsRecurring && (
             <FormField
               label="Periode Berulang"
               error={form.formState.errors.recurring_period?.message}
             >
               <Select
-                {...(form.watch('recurring_period') ? { value: form.watch('recurring_period') as string } : {})}
+                {...(watchedRecurringPeriod ? { value: watchedRecurringPeriod as string } : {})}
                 onValueChange={(value) => {
                   if (
                     value === 'DAILY' ||

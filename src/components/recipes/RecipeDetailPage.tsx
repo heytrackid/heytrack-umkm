@@ -21,25 +21,26 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DeleteModal } from '@/components/ui/index'
 import { useAuth } from '@/hooks/index'
-import { useToast } from '@/hooks/use-toast'
 import { useSupabase } from '@/providers/SupabaseProvider'
+import { toast } from 'sonner'
 
 import type { RecipeInstruction } from '@/app/recipes/ai-generator/components/types'
-import type { Row } from '@/types/database'
+import type { Ingredient, Recipe, RecipeIngredient } from '@/types/database'
+import { isNonNull } from '@/types/shared/guards'
 
+// Type for ingredient with only required fields for display
+type IngredientDisplay = Pick<Ingredient, 'id' | 'name' | 'price_per_unit' | 'unit'>
 
-
-type RecipeRow = Row<'recipes'>
-type RecipeIngredientRow = Row<'recipe_ingredients'>
-type IngredientRow = Row<'ingredients'>
-
-type RecipeIngredientWithDetails = RecipeIngredientRow & {
-    ingredient: Pick<IngredientRow, 'id' | 'name' | 'price_per_unit' | 'unit'> | null
+// Type for recipe ingredient with populated ingredient data
+type RecipeIngredientWithDetails = RecipeIngredient & {
+    ingredient: IngredientDisplay | null
 }
 
-type RecipeWithIngredients = RecipeRow & {
+// Type for recipe with all related data
+type RecipeWithIngredients = Recipe & {
     recipe_ingredients: RecipeIngredientWithDetails[]
     instructions: RecipeInstruction[] | null
+    image_url?: string | null
 }
 
 interface RecipeDetailPageProps {
@@ -48,7 +49,6 @@ interface RecipeDetailPageProps {
 
 export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
     const router = useRouter()
-    const { toast } = useToast()
     const { user, isLoading: authLoading } = useAuth()
     const { supabase } = useSupabase()
 
@@ -94,17 +94,13 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
 
             setRecipe(data as RecipeWithIngredients)
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Gagal memuat resep'
-            toast({
-                title: 'Kesalahan',
-                description: message,
-                variant: 'destructive',
-            })
-            setRecipe(null)
+              const message = error instanceof Error ? error.message : 'Gagal memuat resep'
+              toast.error(message)
+              setRecipe(null)
         } finally {
             setLoading(false)
         }
-    }, [recipeId, supabase, toast])
+    }, [recipeId, supabase])
 
     useEffect(() => {
         if (!user?.id) {
@@ -118,8 +114,10 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
         void loadRecipe(user['id'])
     }, [user, authLoading, loadRecipe])
 
-    const handleDelete = async () => {
-        if (!recipe || !user?.id) { return }
+    const handleDelete = useCallback(async (): Promise<void> => {
+        if (!recipe || !user?.id) { 
+            return 
+        }
 
         try {
             const { error } = await supabase
@@ -132,40 +130,41 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                 throw error
             }
 
-            toast({
-                title: 'Resep dihapus',
-                description: `${recipe.name} berhasil dihapus`,
-            })
+            toast.success(`${recipe.name} berhasil dihapus`)
             router.push('/recipes')
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Gagal menghapus resep'
-            toast({
-                title: 'Kesalahan',
-                description: message,
-                variant: 'destructive',
-            })
+            toast.error(message)
         }
-    }
+    }, [recipe, user?.id, supabase, recipeId, router])
 
 
 
-    const getDifficultyColor = (difficulty: string) => {
+    const getDifficultyColor = useCallback((difficulty: string | null | undefined): string => {
+        if (!difficulty) {
+            return 'bg-muted text-muted-foreground'
+        }
+        
         const colors: Record<string, string> = {
             easy: 'bg-muted text-muted-foreground',
             medium: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
             hard: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
         }
         return colors[difficulty] ?? 'bg-muted text-muted-foreground'
-    }
+    }, [])
 
-    const getDifficultyLabel = (difficulty: string) => {
+    const getDifficultyLabel = useCallback((difficulty: string | null | undefined): string => {
+        if (!difficulty) {
+            return 'Sedang'
+        }
+        
         const labels: Record<string, string> = {
             easy: 'Mudah',
             medium: 'Sedang',
             hard: 'Sulit',
         }
         return labels[difficulty] ?? difficulty
-    }
+    }, [])
 
     if (loading || authLoading) {
         return (
@@ -277,7 +276,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                         <h1 className="text-2xl sm:text-3xl font-bold truncate">
                             {recipe.name}
                         </h1>
-                        {recipe.description && (
+                        {recipe.description && isNonNull(recipe.description) && recipe.description.trim() !== '' && (
                             <p className="text-muted-foreground mt-1 text-sm sm:text-base">{recipe.description}</p>
                         )}
                     </div>
@@ -312,21 +311,31 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                             <Printer className="h-4 w-4 mr-2" />
                             Cetak
                         </Button>
-                        <Button variant="outline" onClick={() => {
-                            if (navigator.share) {
-                                navigator.share({
-                                    title: recipe.name,
-                                    text: recipe.description || `Resep ${recipe.name}`,
-                                    url: window.location.href,
-                                });
-                            } else {
-                                navigator.clipboard.writeText(window.location.href);
-                                toast({
-                                    title: 'Link disalin',
-                                    description: 'Link resep telah disalin ke clipboard',
-                                });
-                            }
-                        }} className="flex-1 sm:flex-none">
+                        <Button 
+                            variant="outline" 
+                            onClick={async (): Promise<void> => {
+                                try {
+                                    if (navigator.share) {
+                                        await navigator.share({
+                                            title: recipe.name,
+                                            text: recipe.description ?? `Resep ${recipe.name}`,
+                                            url: window.location.href,
+                                        })
+                                    } else {
+                                        await navigator.clipboard.writeText(window.location.href)
+                                        toast.success('Link disalin', {
+                                            description: 'Link resep telah disalin ke clipboard'
+                                        })
+                                    }
+                                } catch (error) {
+                                    // User cancelled share or clipboard access denied
+                                    if (error instanceof Error && error.name !== 'AbortError') {
+                                        toast.error('Gagal membagikan resep')
+                                    }
+                                }
+                            }} 
+                            className="flex-1 sm:flex-none"
+                        >
                             <Share2 className="h-4 w-4 mr-2" />
                             Bagikan
                         </Button>
@@ -381,8 +390,8 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs sm:text-sm font-medium text-muted-foreground">Kesulitan</p>
-                                <Badge className={`${getDifficultyColor(recipe.difficulty ?? 'medium')} text-xs sm:text-sm font-medium`}>
-                                    {getDifficultyLabel(recipe.difficulty ?? 'medium')}
+                                <Badge className={`${getDifficultyColor(recipe.difficulty)} text-xs sm:text-sm font-medium`}>
+                                    {getDifficultyLabel(recipe.difficulty)}
                                 </Badge>
                             </div>
                             <ChefHat className="h-6 w-6 sm:h-8 sm:w-8 text-primary/70" />
@@ -401,37 +410,48 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                 <CardContent className="p-4 sm:p-6">
                     {recipe.recipe_ingredients && recipe.recipe_ingredients.length > 0 ? (
                         <div className="space-y-3">
-                            {recipe.recipe_ingredients.map((ri) => (
-                                <div
-                                    key={ri['id']}
-                                    className="flex items-center justify-between p-3 border rounded-lg gap-3 hover:bg-muted/50 transition-colors"
-                                >
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-medium truncate">{ri.ingredient?.name ?? 'Unknown'}</p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {ri.quantity} {ri.unit}
-                                        </p>
-                                    </div>
-                                    {ri.ingredient?.price_per_unit && (
-                                        <div className="text-right flex-shrink-0">
-                                            <p className="text-sm font-medium text-primary">
-                                                Rp {(ri.ingredient.price_per_unit * ri.quantity).toLocaleString('id-ID')}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground hidden sm:block">
-                                                Rp {ri.ingredient.price_per_unit.toLocaleString('id-ID')}/{ri.ingredient.unit}
+                            {recipe.recipe_ingredients.filter(isNonNull).map((ri) => {
+                                const ingredient = ri.ingredient
+                                const ingredientName = ingredient?.name ?? 'Unknown'
+                                const pricePerUnit = ingredient?.price_per_unit ?? 0
+                                const unit = ingredient?.unit ?? ri.unit
+                                const totalPrice = pricePerUnit * ri.quantity
+                                
+                                return (
+                                    <div
+                                        key={ri.id}
+                                        className="flex items-center justify-between p-3 border rounded-lg gap-3 hover:bg-muted/50 transition-colors"
+                                    >
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-medium truncate">{ingredientName}</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {ri.quantity} {ri.unit}
                                             </p>
                                         </div>
-                                    )}
-                                </div>
-                            ))}
+                                        {pricePerUnit > 0 && (
+                                            <div className="text-right flex-shrink-0">
+                                                <p className="text-sm font-medium text-primary">
+                                                    Rp {totalPrice.toLocaleString('id-ID')}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground hidden sm:block">
+                                                    Rp {pricePerUnit.toLocaleString('id-ID')}/{unit}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            })}
                             {/* Total Cost */}
                             <div className="mt-6 pt-4 border-t-2 border-primary/20 bg-primary/5 rounded-lg p-4">
                                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                                     <p className="font-semibold text-primary">Total Biaya Bahan</p>
                                     <p className="text-xl sm:text-2xl font-bold text-primary">
                                         Rp {recipe.recipe_ingredients
-                                            .reduce((total, ri) =>
-                                                total + ((ri.ingredient?.price_per_unit ?? 0) * ri.quantity), 0)
+                                            .filter(isNonNull)
+                                            .reduce((total, ri) => {
+                                                const pricePerUnit = ri.ingredient?.price_per_unit ?? 0
+                                                return total + (pricePerUnit * ri.quantity)
+                                            }, 0)
                                             .toLocaleString('id-ID')}
                                     </p>
                                 </div>
@@ -448,7 +468,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
             </Card>
 
             {/* Instructions */}
-            {recipe.instructions && recipe.instructions.length > 0 && (
+            {recipe.instructions && Array.isArray(recipe.instructions) && recipe.instructions.length > 0 && (
                 <Card className="transition-all">
                     <CardHeader className="pb-4">
                         <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
@@ -457,34 +477,39 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                     </CardHeader>
                     <CardContent className="p-4 sm:p-6">
                         <ol className="space-y-4 sm:space-y-6">
-                            {recipe.instructions.map((step, index) => (
-                                <li key={step.step || index} className="flex gap-3 sm:gap-4 p-3 rounded-lg hover:bg-muted/30 transition-colors">
-                                    <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm transition-all">
-                                        {step.step || index + 1}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-sm sm:text-base text-primary">{step.title}</p>
-                                        <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                                            {step.description}
-                                        </p>
-                                        {(step.duration_minutes || step.temperature) && (
-                                            <div className="flex flex-wrap gap-2 mt-3 text-xs text-muted-foreground bg-muted/50 rounded-md p-2">
-                                                {step.duration_minutes && (
-                                                    <span className="flex items-center gap-1">
-                                                        <Clock className="h-3 w-3" />
-                                                        {step.duration_minutes} menit
-                                                    </span>
-                                                )}
-                                                {step.temperature && (
-                                                    <span className="flex items-center gap-1">
-                                                        🌡️ {step.temperature}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                </li>
-                            ))}
+                            {recipe.instructions.filter(isNonNull).map((step, index) => {
+                                const stepNumber = step.step ?? index + 1
+                                const hasMetadata = Boolean(step.duration_minutes) || Boolean(step.temperature)
+                                
+                                return (
+                                    <li key={stepNumber} className="flex gap-3 sm:gap-4 p-3 rounded-lg hover:bg-muted/30 transition-colors">
+                                        <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm transition-all">
+                                            {stepNumber}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-medium text-sm sm:text-base text-primary">{step.title}</p>
+                                            <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                                                {step.description}
+                                            </p>
+                                            {hasMetadata && (
+                                                <div className="flex flex-wrap gap-2 mt-3 text-xs text-muted-foreground bg-muted/50 rounded-md p-2">
+                                                    {step.duration_minutes && (
+                                                        <span className="flex items-center gap-1">
+                                                            <Clock className="h-3 w-3" />
+                                                            {step.duration_minutes} menit
+                                                        </span>
+                                                    )}
+                                                    {step.temperature && (
+                                                        <span className="flex items-center gap-1">
+                                                            🌡️ {step.temperature}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </li>
+                                )
+                            })}
                         </ol>
                     </CardContent>
                 </Card>

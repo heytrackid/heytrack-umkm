@@ -422,8 +422,7 @@ export type TypedSupabaseClient = SupabaseClient<Database>
   */
 
 export function typed(
-   
-  client: SupabaseClient<Database, any, any>
+  client: SupabaseClient<Database>
 ): TypedSupabaseClient {
   return client as unknown as TypedSupabaseClient
 }

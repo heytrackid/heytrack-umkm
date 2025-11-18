@@ -5,11 +5,12 @@ import { NextRequest, NextResponse } from 'next/server'
 
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, safeString } from '@/lib/type-guards'
 import type { Database, OrderStatus } from '@/types/database'
 import { typed } from '@/types/type-utilities'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -429,7 +430,7 @@ function buildDashboardResponse(
   }
 }
 
-async function GET(request: NextRequest): Promise<NextResponse> {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   const startedAt = Date.now()
   try {
     const url = new URL(request.url)
@@ -483,11 +484,8 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
     return response
   } catch (error) {
-    apiLogger.error({ error, durationTotalMs: Date.now() - startedAt }, 'Error fetching dashboard stats')
-    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
+    return handleAPIError(error, 'GET /api/dashboard/stats')
   }
 }
 
-const securedGET = withSecurity(GET, SecurityPresets.basic())
-
-export { securedGET as GET }
+export const GET = createSecureHandler(getHandler, 'GET /api/dashboard/stats', SecurityPresets.basic())

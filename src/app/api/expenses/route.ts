@@ -13,13 +13,13 @@ import { DateRangeQuerySchema, PaginationQuerySchema } from '@/lib/validations/d
 import { FinancialRecordInsertSchema, type FinancialRecordInsert } from '@/lib/validations/domains/finance'
 import type { Insert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 
 
 // Define the original GET function
-async function GET(request: NextRequest): Promise<NextResponse> {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(request.url)
 
   // Validate query parameters
@@ -177,7 +177,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
 }
 
 // Define the original POST function
-async function POST(request: NextRequest): Promise<NextResponse> {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // Authenticate with Stack Auth
     const authResult = await requireAuth()
@@ -247,8 +247,5 @@ async function POST(request: NextRequest): Promise<NextResponse> {
 }
 
 // Apply security middleware with enhanced security configuration
-const securedGET = withSecurity(GET, SecurityPresets.enhanced())
-const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
-
-// Export secured handlers
-export { securedGET as GET, securedPOST as POST }
+export const GET = createSecureHandler(getHandler, 'GET /api/expenses', SecurityPresets.enhanced())
+export const POST = createSecureHandler(postHandler, 'POST /api/expenses', SecurityPresets.enhanced())

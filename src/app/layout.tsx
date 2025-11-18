@@ -6,6 +6,7 @@ import { stackServerApp } from "../stack/server";
 import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SettingsProvider } from '@/contexts/settings-context';
+import { Toaster } from '@/components/ui/sonner';
 import { headers } from 'next/headers';
 
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
@@ -94,15 +95,16 @@ const RootLayout = async ({
                         🚧 Development Mode - Auth Disabled
                       </div>
                     </header> */}
-                      {children}
-                        </GlobalErrorBoundary>
-                      </PreloadingProvider>
-                    </SWRProvider>
-                  </SettingsProvider>
-                </QueryProvider>
-              </ThemeProvider>
-          </SupabaseProvider>
-        <Analytics />
+                       {children}
+                         </GlobalErrorBoundary>
+                       </PreloadingProvider>
+                     </SWRProvider>
+                   </SettingsProvider>
+                 </QueryProvider>
+               </ThemeProvider>
+           </SupabaseProvider>
+         <Analytics />
+         <Toaster />
       </StackTheme></StackProvider></body>
     </html>
   );

@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useCurrency } from '@/hooks/useCurrency'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { apiLogger } from '@/lib/logger'
 
 interface FinancialRecord {
@@ -39,7 +39,7 @@ interface CashFlowSummary {
 
 const CashFlowPage = () => {
   const { formatCurrency } = useCurrency()
-  const { toast } = useToast()
+
 
   const [records, setRecords] = useState<FinancialRecord[]>([])
   const [loading, setLoading] = useState(true)
@@ -101,15 +101,11 @@ const CashFlowPage = () => {
       }
     } catch (error) {
       apiLogger.error({ error }, 'Error fetching financial records')
-      toast({
-        title: 'Error',
-        description: 'Gagal memuat data arus kas',
-        variant: 'destructive'
-      })
+      toast.error('Gagal memuat data arus kas')
     } finally {
       setLoading(false)
     }
-  }, [dateFilter, typeFilter, toast])
+  }, [dateFilter, typeFilter])
 
   useEffect(() => {
     fetchRecords()
@@ -118,11 +114,7 @@ const CashFlowPage = () => {
   const handleAddTransaction = async () => {
     try {
       if (!newTransaction.description || !newTransaction.category || !newTransaction.amount) {
-        toast({
-          title: 'Error',
-          description: 'Mohon lengkapi semua field',
-          variant: 'destructive'
-        })
+        toast.error('Mohon lengkapi semua field')
         return
       }
 
@@ -141,10 +133,7 @@ const CashFlowPage = () => {
       })
 
       if (response.ok) {
-        toast({
-          title: 'Berhasil',
-          description: 'Transaksi berhasil ditambahkan'
-        })
+        toast.success('Transaksi berhasil ditambahkan')
         setIsAddDialogOpen(false)
         setNewTransaction({
           type: 'EXPENSE',
@@ -158,11 +147,7 @@ const CashFlowPage = () => {
         throw new Error('Failed to add transaction')
       }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Gagal menambahkan transaksi',
-        variant: 'destructive'
-      })
+      toast.error('Gagal menambahkan transaksi')
     }
   }
 

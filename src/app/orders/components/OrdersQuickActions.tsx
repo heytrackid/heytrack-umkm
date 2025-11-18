@@ -6,7 +6,7 @@ import { useState } from 'react'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { LoadingButton } from '@/components/ui/loading-button'
-import { useToast } from '@/hooks/index'
+import { toast } from 'sonner'
 
 
 
@@ -16,7 +16,6 @@ interface OrdersQuickActionsProps {
 
 const OrdersQuickActions = ({ _t: _ }: OrdersQuickActionsProps) => {
   const router = useRouter()
-  const { toast } = useToast()
   const [isExporting, setIsExporting] = useState(false)
 
   const handleNavigateToTemplates = (): void => {
@@ -46,16 +45,9 @@ const OrdersQuickActions = ({ _t: _ }: OrdersQuickActionsProps) => {
       anchor.remove()
       URL.revokeObjectURL(url)
 
-      toast({
-        title: 'Export berhasil',
-        description: 'File orders berhasil diunduh.',
-      })
+      toast.success('File orders berhasil diunduh.')
     } catch (error) {
-      toast({
-        title: 'Gagal mengekspor orders',
-        description: error instanceof Error ? error.message : 'Terjadi kesalahan saat mengekspor orders.',
-        variant: 'destructive',
-      })
+      toast.error(error instanceof Error ? error.message : 'Terjadi kesalahan saat mengekspor orders.')
     } finally {
       setIsExporting(false)
     }

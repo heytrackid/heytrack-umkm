@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { useCurrency } from '@/hooks/useCurrency'
 
 
@@ -35,7 +35,6 @@ interface RecipeBatchScalerProps {
 
 export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
     const { formatCurrency } = useCurrency()
-    const { toast } = useToast()
     const baseServings = Math.max(1, recipe.servings || 1)
     const baseCost = recipe.total_cost || 0
 
@@ -77,11 +76,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
     const hasStockIssues = stockIssues.length > 0
 
     const exportShoppingList = () => {
-        toast({
-            title: 'Fitur akan segera tersedia',
-            description: 'Export shopping list akan segera tersedia!',
-            variant: 'default'
-        })
+        toast.success('Export shopping list akan segera tersedia!')
     }
 
     const recipeIngredients = recipe.recipe_ingredients ?? []

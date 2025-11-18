@@ -2,15 +2,25 @@
 export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 
 import { cacheInvalidation, cacheKeys, withCache } from '@/lib/cache'
 import { apiLogger } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { PaginationQuerySchema } from '@/lib/validations'
 import type { HppRecommendation } from '@/types/database'
-import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets, InputSanitizer } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
+
+const CreateHppRecommendationSchema = z.object({
+  recipeId: z.string().uuid('Recipe ID harus valid'),
+  recommendationType: z.string().min(1, 'Tipe rekomendasi wajib diisi').max(50),
+  title: z.string().min(1, 'Judul wajib diisi').max(200),
+  description: z.string().min(1, 'Deskripsi wajib diisi').max(1000),
+  potentialSavings: z.number().min(0, 'Potensi penghematan harus >= 0').optional(),
+  priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).optional().default('MEDIUM'),
+}).strict()
 
 // GET /api/hpp/recommendations - Get HPP recommendations
 async function getHandler(request: NextRequest): Promise<NextResponse> {
@@ -137,22 +147,18 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
     // Create authenticated Supabase client
     const supabase = await createClient()
-    const body = await request.json() as {
-      recipeId?: string
-      recommendationType?: string
-      title?: string
-      description?: string
-      potentialSavings?: number
-      priority?: string
-    }
-    const { recipeId, recommendationType, title, description, potentialSavings, priority } = body
+    const body = await request.json() as Record<string, unknown>
+    const validatedData = CreateHppRecommendationSchema.parse(body)
 
-    if (!recipeId || !recommendationType || !title || !description) {
-      return NextResponse.json(
-        { error: 'recipeId, recommendationType, title, and description are required' },
-        { status: 400 }
-      )
+    // Sanitize text fields
+    const sanitizedData = {
+      ...validatedData,
+      title: InputSanitizer.sanitizeHtml(validatedData.title),
+      description: InputSanitizer.sanitizeHtml(validatedData.description),
+      recommendationType: InputSanitizer.sanitizeSQLInput(validatedData.recommendationType),
     }
+
+    const { recipeId, recommendationType, title, description, potentialSavings, priority } = sanitizedData
 
     // Create recommendation
     const insertData = {
@@ -163,12 +169,12 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
       potential_savings: potentialSavings ?? 0,
       priority: priority ?? 'MEDIUM',
       is_implemented: false,
-      user_id: user['id']
+      user_id: user.id
     }
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('hpp_recommendations')
       .insert(insertData)
-      .select()
+      .select('id, recipe_id, recommendation_type, title, description, potential_savings, priority, is_implemented, created_at, user_id')
       .single()
 
     if (error) {
@@ -179,8 +185,8 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     cacheInvalidation.hpp()
 
     apiLogger.info({
-      userId: user['id'],
-      recommendationId: data['id'],
+      userId: user.id,
+      recommendationId: data.id,
       recipeId
     }, 'HPP recommendation created successfully')
 

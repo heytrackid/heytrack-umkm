@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger, logError } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
-import { APISecurity, InputSanitizer, SecurityPresets, withSecurity } from '@/utils/security/index'
+import { APISecurity, InputSanitizer, createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 
 const OrderItemSchema = z.object({
@@ -88,4 +88,4 @@ async function calculatePricePOST(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-export const POST = withSecurity(calculatePricePOST, SecurityPresets.enhanced())
+export const POST = createSecureHandler(calculatePricePOST, 'POST /api/orders/calculate-price', SecurityPresets.enhanced())

@@ -9,12 +9,12 @@ import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isRecord, isValidUUID } from '@/lib/type-guards'
 import { OrderUpdateSchema } from '@/lib/validations/domains/order'
 import type { Row, Update } from '@/types/database'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureRouteHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 
 interface RouteContext {
-  params: Promise<{ id: string }>
+  params: Promise<Record<string, string>>
 }
 
 type OrderUpdate = Update<'orders'>
@@ -27,7 +27,7 @@ const normalizeDateValue = (value?: string | null) => {
 }
 
 // GET /api/orders/[id] - Get single order
-async function GET(
+async function getHandler(
   _request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -114,7 +114,7 @@ async function GET(
 }
 
 // PUT /api/orders/[id] - Update order
-async function PUT(
+async function putHandler(
   request: NextRequest,
   context: RouteContext
 ) {
@@ -259,7 +259,7 @@ async function PUT(
 }
 
 // DELETE /api/orders/[id] - Delete order
-async function DELETE(
+async function deleteHandler(
   _request: NextRequest,
   context: RouteContext
 ) {
@@ -336,10 +336,7 @@ async function DELETE(
 }
 
 // Apply security middleware
-const securedGET = withSecurity(GET, SecurityPresets.enhanced())
-const securedPUT = withSecurity(PUT, SecurityPresets.enhanced())
-const securedDELETE = withSecurity(DELETE, SecurityPresets.enhanced())
-
-// Export secured handlers
-export { securedDELETE as DELETE, securedGET as GET, securedPUT as PUT }
+export const GET = createSecureRouteHandler(getHandler, 'GET /api/orders/[id]', SecurityPresets.enhanced())
+export const PUT = createSecureRouteHandler(putHandler, 'PUT /api/orders/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureRouteHandler(deleteHandler, 'DELETE /api/orders/[id]', SecurityPresets.enhanced())
 

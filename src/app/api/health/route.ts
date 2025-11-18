@@ -5,7 +5,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
 import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 async function handleHealthCheck(_request: NextRequest): Promise<NextResponse> {
   try {
@@ -50,4 +50,4 @@ async function handleHealthCheck(_request: NextRequest): Promise<NextResponse> {
   }
 }
 
-export const GET = withSecurity(handleHealthCheck, SecurityPresets.basic())
+export const GET = createSecureHandler(handleHealthCheck, 'GET /api/health', SecurityPresets.basic())

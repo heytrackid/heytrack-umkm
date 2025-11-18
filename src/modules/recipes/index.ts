@@ -18,8 +18,8 @@ export { UMKMTooltip } from './components/UMKMTooltip'
 
 // Lazy loaded recipe components
 export {
-  LazySmartPricingAssistant,
-  preloadRecipeComponents
+    LazySmartPricingAssistant,
+    preloadRecipeComponents
 } from './components/LazyComponents'
 
 // Hooks
@@ -27,16 +27,24 @@ export { useRecipesData } from './hooks/useRecipesData'
 
 // Utils
 export {
-  calculateComplexityScore, calculateIngredientCost,
-  calculateProfitMargin,
-  formatRecipeServings, formatRecipeTime, generateRecipeSummary, getCategoryInfo, getDifficultyInfo, scaleRecipe,
-  validateRecipe
+    calculateComplexityScore, calculateIngredientCost,
+    calculateProfitMargin,
+    formatRecipeServings, formatRecipeTime, generateRecipeSummary, getCategoryInfo, getDifficultyInfo, scaleRecipe,
+    validateRecipe
 } from './utils'
 
 // Constants
 export {
-  DEFAULT_RECIPE, DIFFICULTY_LEVELS, LABOR_COSTS, MARGIN_PRESETS, MEASUREMENT_UNITS, OVERHEAD_RATES, RECIPE_CATEGORIES, VALIDATION_RULES
+    DEFAULT_RECIPE, DIFFICULTY_LEVELS, LABOR_COSTS, MARGIN_PRESETS, MEASUREMENT_UNITS, OVERHEAD_RATES, RECIPE_CATEGORIES, VALIDATION_RULES
 } from './constants'
 
-// Types - export interfaces from utils for now
-export type { Recipe, RecipeIngredient } from './utils'
+// Types - export all types from utils
+export type {
+    CategoryInfo,
+    DifficultyInfo,
+    HppCalculationResult,
+    RecipeIngredientWithDetails,
+    RecipeSummary,
+    ValidationResult
+} from './utils'
+

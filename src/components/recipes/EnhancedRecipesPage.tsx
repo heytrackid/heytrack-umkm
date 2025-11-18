@@ -1,13 +1,14 @@
- 
 'use client'
 
 import {
+    AlertCircle,
     Calculator,
     Clock,
     Edit,
     Eye,
     MoreVertical,
     Plus,
+    RefreshCw,
     Search,
     Sparkles,
     Trash2,
@@ -16,8 +17,12 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
 import { PageHeader } from '@/components/layout/PageHeader'
+import { MobileRecipeCard } from '@/components/recipes/MobileRecipeCard'
+import { RecipeFormDialog } from '@/components/recipes/RecipeFormDialog'
+import { RecipeStatsCards } from '@/components/recipes/RecipeStatsCards'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -32,7 +37,6 @@ import {
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { undoableToast } from '@/components/ui/enhanced-toast'
 import { FilterBadges, createFilterBadges } from '@/components/ui/filter-badges'
-
 import { DeleteModal } from '@/components/ui/index'
 import { Input } from '@/components/ui/input'
 import {
@@ -44,46 +48,34 @@ import {
 } from '@/components/ui/select'
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { useSupabaseCRUD } from '@/hooks/supabase/index'
-import { useToast } from '@/hooks/use-toast'
 import { usePagination } from '@/hooks/usePagination'
 import { useRecipes } from '@/hooks/useRecipes'
 import { useResponsive } from '@/hooks/useResponsive'
 
-import type { Row } from '@/types/database'
-
-import { MobileRecipeCard } from '@/components/recipes/MobileRecipeCard'
-import { RecipeFormDialog } from '@/components/recipes/RecipeFormDialog'
-import { RecipeStatsCards } from '@/components/recipes/RecipeStatsCards'
-
-
-
-
-// import { useSettings } from '@/contexts/settings-context'
-
-
-// UI Components
-
-// Feature Components
-
-// Hooks
-
-// Components
-
-// Types
-
-type Recipe = Row<'recipes'>
+import type { Recipe } from '@/types/database'
+import { isNonNull, isRecipe } from '@/types/shared/guards'
 
 type DifficultyFilter = 'all' | 'easy' | 'hard' | 'medium'
 
+// Type guard for recipe array
+const isRecipeArray = (data: unknown): data is Recipe[] => {
+    return Array.isArray(data) && data.every(isRecipe)
+}
+
 export const EnhancedRecipesPage = () => {
     const router = useRouter()
-    const { data: recipesResponse, isLoading: loading } = useRecipes()
+    const { data: recipesData = [], isLoading: loading, error, refetch, isFetching } = useRecipes()
     const { remove: deleteRecipe } = useSupabaseCRUD('recipes')
-    const { toast } = useToast()
+
     const { isMobile } = useResponsive()
 
-    // Extract recipes array from API response
-    const recipes = recipesResponse?.data ?? []
+    // Extract recipes array from API response with type guard
+    const recipes = useMemo(() => {
+        if (!recipesData || !isRecipeArray(recipesData)) {
+            return []
+        }
+        return recipesData
+    }, [recipesData])
 
     // Modal states
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -95,29 +87,54 @@ export const EnhancedRecipesPage = () => {
     const [searchTerm, setSearchTerm] = useState('')
 
     const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>('all')
+    const [prepTimeMin, setPrepTimeMin] = useState<number | ''>('')
+    const [prepTimeMax, setPrepTimeMax] = useState<number | ''>('')
     const [pageSize, setPageSize] = useState(12)
 
-    // Filter and sort data
+    // Filter and sort data with proper type guards
     const filteredData = useMemo(() => {
-        if (!recipes || !Array.isArray(recipes)) { return [] }
+        if (!recipes || !isRecipeArray(recipes)) { 
+            return [] 
+        }
 
         return recipes
             .filter((recipe: Recipe) => {
-                // Search filter
+                // Type guard for recipe
+                if (!isRecipe(recipe)) {
+                    return false
+                }
+
+                // Search filter with null safety
+                const recipeName = recipe.name ?? ''
+                const recipeDescription = recipe.description ?? ''
                 const matchesSearch =
                     !searchTerm ||
-                    recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    (recipe.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
+                    recipeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    recipeDescription.toLowerCase().includes(searchTerm.toLowerCase())
 
-                // Difficulty filter
+                // Difficulty filter with proper type narrowing
+                const recipeDifficulty = recipe.difficulty ?? 'medium'
                 const matchesDifficulty =
-                    difficultyFilter === 'all' || (recipe.difficulty ?? 'medium') === difficultyFilter
+                    difficultyFilter === 'all' || recipeDifficulty === difficultyFilter
 
-                // Only show active recipes
-                return matchesSearch && matchesDifficulty && recipe.is_active
+                // Prep time filter with null safety
+                const prepTime = recipe.prep_time ?? 0
+                const cookTime = recipe.cook_time ?? 0
+                const totalTime = prepTime + cookTime
+                const matchesPrepTime =
+                    (prepTimeMin === '' || totalTime >= prepTimeMin) &&
+                    (prepTimeMax === '' || totalTime <= prepTimeMax)
+
+                // Only show active recipes with null safety
+                const isActive = recipe.is_active ?? false
+                return matchesSearch && matchesDifficulty && matchesPrepTime && isActive
             })
-            .sort((a: Recipe, b: Recipe) => a.name.localeCompare(b.name))
-    }, [recipes, searchTerm, difficultyFilter])
+            .sort((a: Recipe, b: Recipe) => {
+                const nameA = a.name ?? ''
+                const nameB = b.name ?? ''
+                return nameA.localeCompare(nameB)
+            })
+    }, [recipes, searchTerm, difficultyFilter, prepTimeMin, prepTimeMax])
 
     // Pagination
     const pagination = usePagination({
@@ -138,11 +155,15 @@ export const EnhancedRecipesPage = () => {
     const activeFilters = createFilterBadges(
         {
             search: searchTerm,
-            difficulty: difficultyFilter
+            difficulty: difficultyFilter,
+            prepTimeMin: prepTimeMin ? `Min ${prepTimeMin}min` : '',
+            prepTimeMax: prepTimeMax ? `Max ${prepTimeMax}min` : ''
         },
         {
             search: 'Search',
-            difficulty: 'Difficulty'
+            difficulty: 'Difficulty',
+            prepTimeMin: 'Prep Time Min',
+            prepTimeMax: 'Prep Time Max'
         },
         (newFilters) => {
             if (newFilters.search !== undefined) {
@@ -151,55 +172,82 @@ export const EnhancedRecipesPage = () => {
             if (newFilters.difficulty !== undefined) {
                 setDifficultyFilter(newFilters.difficulty)
             }
+            if (newFilters.prepTimeMin !== undefined) {
+                setPrepTimeMin(newFilters.prepTimeMin ? parseInt(newFilters.prepTimeMin) : '')
+            }
+            if (newFilters.prepTimeMax !== undefined) {
+                setPrepTimeMax(newFilters.prepTimeMax ? parseInt(newFilters.prepTimeMax) : '')
+            }
         }
     )
 
     const handleClearAllFilters = useCallback(() => {
         setSearchTerm('')
         setDifficultyFilter('all')
+        setPrepTimeMin('')
+        setPrepTimeMax('')
     }, [])
 
-    // Handlers
-    const handleView = useCallback((recipe: Recipe) => {
-        router.push(`/recipes/${recipe['id']}`)
+    // Handlers with proper type annotations
+    const handleView = useCallback((recipe: Recipe): void => {
+        if (!isRecipe(recipe) || !recipe.id) {
+            return
+        }
+        router.push(`/recipes/${recipe.id}`)
     }, [router])
 
-    const handleAdd = useCallback(() => {
+    const handleAdd = useCallback((): void => {
         setEditingRecipe(undefined)
         setShowAddDialog(true)
     }, [])
 
-    const handleEdit = useCallback((recipe: Recipe) => {
+    const handleEdit = useCallback((recipe: Recipe): void => {
+        if (!isRecipe(recipe)) {
+            return
+        }
         setEditingRecipe(recipe)
         setShowAddDialog(true)
     }, [])
 
-    const handleDelete = useCallback((recipe: Recipe) => {
+    const handleDelete = useCallback((recipe: Recipe): void => {
+        if (!isRecipe(recipe)) {
+            return
+        }
         setSelectedRecipe(recipe)
         setIsDeleteDialogOpen(true)
     }, [])
 
-    const handleCalculateHPP = useCallback((recipe: Recipe) => {
-        router.push(`/hpp?recipe=${recipe['id']}`)
+    const handleCalculateHPP = useCallback((recipe: Recipe): void => {
+        if (!isRecipe(recipe) || !recipe.id) {
+            return
+        }
+        router.push(`/hpp?recipe=${recipe.id}`)
     }, [router])
 
-    const handleConfirmDelete = useCallback(async () => {
-        if (!selectedRecipe) { return }
+    const handleConfirmDelete = useCallback(async (): Promise<void> => {
+        if (!selectedRecipe || !isRecipe(selectedRecipe)) { 
+            return 
+        }
 
         try {
             const deletedRecipe = selectedRecipe
-            await deleteRecipe(selectedRecipe['id'])
+            const recipeId = deletedRecipe.id
+            const recipeName = deletedRecipe.name ?? 'Resep'
+
+            if (!recipeId) {
+                toast.error('ID resep tidak valid')
+                return
+            }
+
+            await deleteRecipe(recipeId)
 
             // Enhanced toast with undo
             undoableToast({
-                title: `${deletedRecipe.name} dihapus`,
+                title: `${recipeName} dihapus`,
                 description: 'Resep telah dihapus dari sistem',
-                onUndo: () => {
+                onUndo: (): void => {
                     // Note: Would need an undelete API endpoint
-                    toast({
-                        title: 'Fitur undo sedang dikembangkan',
-                        description: 'Anda bisa membuat ulang resep ini',
-                    })
+                    toast('Fitur undo sedang dikembangkan - Anda bisa membuat ulang resep ini')
                 },
                 duration: 6000
             })
@@ -208,27 +256,23 @@ export const EnhancedRecipesPage = () => {
             setSelectedRecipe(null)
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Gagal menghapus resep'
-            toast({
-                title: 'Gagal menghapus resep',
-                description: message,
-                variant: 'destructive',
-            })
+            toast.error(message)
         }
-    }, [selectedRecipe, deleteRecipe, toast])
+    }, [selectedRecipe, deleteRecipe])
 
-    const clearFilters = () => {
+    const clearFilters = (): void => {
         setSearchTerm('')
         setDifficultyFilter('all')
     }
 
     const hasActiveFilters =
-        searchTerm || difficultyFilter !== 'all'
+        searchTerm || difficultyFilter !== 'all' || prepTimeMin !== '' || prepTimeMax !== ''
 
-    // Helper functions
-
-
-    const getDifficultyColor = (difficulty: string) => {
-        switch (difficulty) {
+    // Helper functions with proper type annotations and null safety
+    const getDifficultyColor = (difficulty: string | null | undefined): string => {
+        const validDifficulty = difficulty ?? 'medium'
+        
+        switch (validDifficulty) {
             case 'easy':
                 return 'bg-muted text-muted-foreground'
             case 'medium':
@@ -240,8 +284,10 @@ export const EnhancedRecipesPage = () => {
         }
     }
 
-    const getDifficultyLabel = (difficulty: string) => {
-        switch (difficulty) {
+    const getDifficultyLabel = (difficulty: string | null | undefined): string => {
+        const validDifficulty = difficulty ?? 'medium'
+        
+        switch (validDifficulty) {
             case 'easy':
                 return 'Mudah'
             case 'medium':
@@ -249,9 +295,11 @@ export const EnhancedRecipesPage = () => {
             case 'hard':
                 return 'Sulit'
             default:
-                return difficulty
+                return validDifficulty
         }
     }
+
+    const errorMessage = error instanceof Error ? error.message : 'Terjadi kesalahan saat memuat data resep'
 
     return (
         <div className="space-y-6">
@@ -283,6 +331,31 @@ export const EnhancedRecipesPage = () => {
                 }
             />
 
+            {error ? (
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex items-start gap-3">
+                                <AlertCircle className="h-5 w-5 text-destructive" />
+                                <div>
+                                    <p className="font-semibold">Gagal memuat data resep</p>
+                                    <p className="text-sm text-muted-foreground">{errorMessage}</p>
+                                </div>
+                            </div>
+                            <Button
+                                variant="outline"
+                                onClick={() => { void refetch() }}
+                                disabled={isFetching}
+                                className="self-start"
+                            >
+                                <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
+                                Coba Lagi
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            ) : (
+                <>
             {/* Stats Cards */}
             <RecipeStatsCards recipes={recipes || []} />
 
@@ -296,7 +369,9 @@ export const EnhancedRecipesPage = () => {
                             <Input
                                 placeholder="Cari resep..."
                                 value={searchTerm}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>): void => {
+                                    setSearchTerm(e.target.value)
+                                }}
                                 className="pl-9"
                             />
                         </div>
@@ -307,7 +382,9 @@ export const EnhancedRecipesPage = () => {
 
                             <Select
                                 value={difficultyFilter}
-                                onValueChange={(value) => setDifficultyFilter(value as DifficultyFilter)}
+                                onValueChange={(value: string): void => {
+                                    setDifficultyFilter(value as DifficultyFilter)
+                                }}
                             >
                                 <SelectTrigger className="w-full sm:w-[180px]">
                                     <SelectValue placeholder="Tingkat Kesulitan" />
@@ -318,9 +395,32 @@ export const EnhancedRecipesPage = () => {
                                     <SelectItem value="medium">Sedang</SelectItem>
                                     <SelectItem value="hard">Sulit</SelectItem>
                                 </SelectContent>
-                            </Select>
+                             </Select>
 
-                            {hasActiveFilters && (
+                             <div className="flex gap-2">
+                                 <Input
+                                     type="number"
+                                     placeholder="Min waktu (menit)"
+                                     value={prepTimeMin}
+                                     onChange={(e: React.ChangeEvent<HTMLInputElement>): void => {
+                                         const value = e.target.value
+                                         setPrepTimeMin(value ? parseInt(value, 10) : '')
+                                     }}
+                                     className="w-32"
+                                 />
+                                 <Input
+                                     type="number"
+                                     placeholder="Max waktu (menit)"
+                                     value={prepTimeMax}
+                                     onChange={(e: React.ChangeEvent<HTMLInputElement>): void => {
+                                         const value = e.target.value
+                                         setPrepTimeMax(value ? parseInt(value, 10) : '')
+                                     }}
+                                     className="w-32"
+                                 />
+                             </div>
+
+                             {hasActiveFilters && (
                                 <Button variant="ghost" size="sm" onClick={handleClearAllFilters}>
                                     <X className="h-4 w-4 mr-2" />
                                     Clear
@@ -410,7 +510,7 @@ export const EnhancedRecipesPage = () => {
                 <div className="space-y-3">
                     {paginatedData.map((recipe: Recipe) => (
                         <MobileRecipeCard
-                            key={recipe['id']}
+                            key={recipe.id}
                             recipe={recipe}
                             onView={handleView}
                             onEdit={handleEdit}
@@ -426,9 +526,11 @@ export const EnhancedRecipesPage = () => {
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {paginatedData.map((recipe: Recipe) => (
                         <Card
-                            key={recipe['id']}
+                            key={recipe.id}
                             className="transition-all cursor-pointer"
-                            onClick={() => handleView(recipe)}
+                            onClick={(): void => {
+                                handleView(recipe)
+                            }}
                         >
                             <CardContent className="p-6">
                                 <div className="space-y-4">
@@ -438,14 +540,16 @@ export const EnhancedRecipesPage = () => {
                                             <div className="flex items-center gap-2 mb-1">
                                                 <h3 className="font-semibold text-lg">{recipe.name}</h3>
                                             </div>
-                                            {recipe.description && (
+                                            {isNonNull(recipe.description) && recipe.description && (
                                                 <p className="text-sm text-muted-foreground line-clamp-2">
                                                     {recipe.description}
                                                 </p>
                                             )}
                                         </div>
                                         <DropdownMenu>
-                                            <DropdownMenuTrigger asChild onClick={(e: React.MouseEvent<HTMLButtonElement>) => e.stopPropagation()}>
+                                            <DropdownMenuTrigger asChild onClick={(e: React.MouseEvent<HTMLButtonElement>): void => {
+                                                e.stopPropagation()
+                                            }}>
                                                 <Button variant="ghost" size="sm">
                                                     <MoreVertical className="h-4 w-4" />
                                                 </Button>
@@ -453,21 +557,21 @@ export const EnhancedRecipesPage = () => {
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                                                 <DropdownMenuSeparator />
-                                                <DropdownMenuItem onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                                                <DropdownMenuItem onClick={(e: React.MouseEvent<HTMLDivElement>): void => {
                                                     e.stopPropagation()
                                                     handleView(recipe)
                                                 }}>
                                                     <Eye className="h-4 w-4 mr-2" />
                                                     Lihat Detail
                                                 </DropdownMenuItem>
-                                                 <DropdownMenuItem onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                                                 <DropdownMenuItem onClick={(e: React.MouseEvent<HTMLDivElement>): void => {
                                                      e.stopPropagation()
                                                      handleEdit(recipe)
                                                  }}>
                                                     <Edit className="h-4 w-4 mr-2" />
                                                     Edit
                                                 </DropdownMenuItem>
-                                                  <DropdownMenuItem onClick={(e: React.MouseEvent<HTMLElement>) => {
+                                                  <DropdownMenuItem onClick={(e: React.MouseEvent<HTMLDivElement>): void => {
                                                       e.stopPropagation()
                                                       handleCalculateHPP(recipe)
                                                   }}>
@@ -476,7 +580,7 @@ export const EnhancedRecipesPage = () => {
                                                  </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                  <DropdownMenuItem
-                                                     onClick={(e: React.MouseEvent<HTMLElement>) => {
+                                                     onClick={(e: React.MouseEvent<HTMLDivElement>): void => {
                                                          e.stopPropagation()
                                                          handleDelete(recipe)
                                                      }}
@@ -499,12 +603,40 @@ export const EnhancedRecipesPage = () => {
                                             <Clock className="h-3 w-3" />
                                             {(recipe.prep_time ?? 0) + (recipe.cook_time ?? 0)} menit
                                         </Badge>
-                                        <Badge className={getDifficultyColor(recipe.difficulty ?? 'medium')}>
-                                            {getDifficultyLabel(recipe.difficulty ?? 'medium')}
-                                        </Badge>
-                                    </div>
-                                </div>
-                            </CardContent>
+                                         <Badge className={getDifficultyColor(recipe.difficulty ?? 'medium')}>
+                                             {getDifficultyLabel(recipe.difficulty ?? 'medium')}
+                                         </Badge>
+                                     </div>
+
+                                     {/* Quick Actions */}
+                                     <div className="flex gap-2 mt-3">
+                                         <Button
+                                             size="sm"
+                                             variant="outline"
+                                             onClick={(e: React.MouseEvent<HTMLButtonElement>): void => { 
+                                                 e.stopPropagation()
+                                                 handleEdit(recipe)
+                                             }}
+                                             className="flex-1"
+                                         >
+                                             <Edit className="h-3 w-3 mr-1" />
+                                             Edit
+                                         </Button>
+                                         <Button
+                                             size="sm"
+                                             variant="outline"
+                                             onClick={(e: React.MouseEvent<HTMLButtonElement>): void => { 
+                                                 e.stopPropagation()
+                                                 handleCalculateHPP(recipe)
+                                             }}
+                                             className="flex-1"
+                                         >
+                                             <Calculator className="h-3 w-3 mr-1" />
+                                             HPP
+                                         </Button>
+                                     </div>
+                                 </div>
+                             </CardContent>
                         </Card>
                     ))}
                 </div>
@@ -528,6 +660,8 @@ export const EnhancedRecipesPage = () => {
                     />
                 )
             }
+            </>
+            )}
 
             {/* Delete Confirmation Modal */}
             <DeleteModal
@@ -553,4 +687,5 @@ export const EnhancedRecipesPage = () => {
     )
 }
 
-
+// Default export for dynamic imports
+export default EnhancedRecipesPage

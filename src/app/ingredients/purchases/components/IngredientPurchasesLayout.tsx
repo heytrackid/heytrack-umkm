@@ -6,7 +6,7 @@ import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { BreadcrumbPatterns, PageBreadcrumb } from '@/components/ui/index'
 import { useAuth } from '@/hooks/index'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { useCreateIngredientPurchase, useIngredientPurchases } from '@/hooks/useIngredientPurchases'
 import { useIngredients } from '@/hooks/useIngredients'
 
@@ -23,18 +23,13 @@ const IngredientPurchasesLayout = (): JSX.Element => {
   const { data: ingredients = [], isLoading: _ingredientsLoading } = useIngredients()
   const createPurchase = useCreateIngredientPurchase()
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
-  const { toast } = useToast()
 
   // Handle auth errors
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
-      toast({
-        title: 'Sesi berakhir',
-        description: 'Sesi Anda telah berakhir. Silakan login kembali.',
-        variant: 'destructive',
-      })
+      toast.error('Sesi Anda telah berakhir. Silakan login kembali.')
     }
-  }, [isAuthLoading, isAuthenticated, toast])
+  }, [isAuthLoading, isAuthenticated])
 
   const handlePurchaseSubmit = async (formData: {
     ingredient_id: string;

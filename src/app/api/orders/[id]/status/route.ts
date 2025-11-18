@@ -8,8 +8,9 @@ import { z } from 'zod'
 import { triggerWorkflow } from '@/lib/automation/workflows/index'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
-import type { Database } from '@/types/database'
-import { APISecurity, InputSanitizer, SecurityPresets, withSecurity } from '@/utils/security/index'
+import { FINANCIAL_FIELDS } from '@/lib/database/query-fields'
+import type { Database, FinancialRecordInsert } from '@/types/database'
+import { APISecurity, InputSanitizer, createSecureRouteHandler, SecurityPresets } from '@/utils/security/index'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 
 const VALID_STATUSES = [
@@ -32,7 +33,7 @@ type TriggerWorkflow = typeof triggerWorkflow
 type ApiLogger = typeof apiLogger
 
 interface RouteContext {
-  params: Promise<{ id: string }>
+  params: Promise<Record<string, string>>
 }
 
 const UpdateStatusSchema = z.object({
@@ -81,8 +82,8 @@ async function createIncomeRecordIfNeeded(
         reference: `Order #${currentOrder['order_no'] || ''}${currentOrder['customer_name'] ? ` - ${currentOrder['customer_name']}` : ''}`,
         description: `Income from order ${currentOrder['order_no'] || ''}`,
         user_id: currentOrder.user_id
-      }] as any)
-      .select()
+      } as FinancialRecordInsert])
+      .select(FINANCIAL_FIELDS.LIST)
       .single()
 
     if (incomeError) {
@@ -333,5 +334,5 @@ function isAutomationEnabled(status: string): boolean {
   return ['DELIVERED', 'CANCELLED'].includes(status)
 }
 
-export const PUT = withSecurity(putHandler, SecurityPresets.enhanced())
-export const GET = withSecurity(getHandler, SecurityPresets.enhanced())
+export const PUT = createSecureRouteHandler(putHandler, 'PUT /api/orders/[id]/status', SecurityPresets.enhanced())
+export const GET = createSecureRouteHandler(getHandler, 'GET /api/orders/[id]/status', SecurityPresets.enhanced())

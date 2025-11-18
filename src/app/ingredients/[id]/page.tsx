@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { PageBreadcrumb } from '@/components/ui/page-breadcrumb'
 import { useSupabaseCRUD } from '@/hooks/supabase/index'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { apiLogger } from '@/lib/logger'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 import { useSupabase } from '@/providers/SupabaseProvider'
@@ -31,7 +31,7 @@ const EditIngredientPage = (): JSX.Element | null => {
     const params = useParams()
     const id = params['id'] as string
     const { update: updateIngredient } = useSupabaseCRUD('ingredients')
-    const { toast } = useToast()
+
     const { supabase } = useSupabase()
 
     const [loading, setLoading] = useState(false)
@@ -77,11 +77,7 @@ const EditIngredientPage = (): JSX.Element | null => {
                 }
             } catch (error) {
                 apiLogger.error({ error }, 'Failed to fetch ingredient:')
-                toast({
-                    title: 'Gagal',
-                    description: 'Gagal memuat data bahan baku',
-                    variant: 'destructive',
-                })
+                toast.error('Gagal memuat data bahan baku')
                 router.push('/ingredients')
             } finally {
                 setFetching(false)
@@ -91,7 +87,7 @@ const EditIngredientPage = (): JSX.Element | null => {
         if (id) {
             void fetchIngredient()
         }
-    }, [id, form, router, toast, supabase])
+    }, [id, form, router, supabase])
 
     const handleSubmit = async (data: SimpleIngredientFormData) => {
         try {
@@ -108,19 +104,12 @@ const EditIngredientPage = (): JSX.Element | null => {
 
             await updateIngredient(id, payload)
 
-            toast({
-                title: 'Berhasil',
-                description: `Bahan baku "${data.name}" berhasil diperbarui`,
-            })
+            toast.success(`Bahan baku "${data.name}" berhasil diperbarui`)
 
             router.push('/ingredients')
         } catch (error) {
             apiLogger.error({ error }, 'Failed to update ingredient:')
-            toast({
-                title: 'Gagal',
-                description: 'Gagal memperbarui bahan baku. Silakan coba lagi.',
-                variant: 'destructive',
-            })
+            toast.error('Gagal memperbarui bahan baku. Silakan coba lagi.')
         } finally {
             setLoading(false)
         }

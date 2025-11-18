@@ -3,9 +3,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState, useCallback, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import type { UseFormReturn } from 'react-hook-form'
 
 import { SupplierFormFields } from '@/components/forms/shared/SupplierFormFields'
-import { CreateModal, EditModal, DeleteModal } from '@/components/ui/index'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { DeleteModal } from '@/components/ui/index'
+import { LoadingButton } from '@/components/ui/loading-button'
 import { SimpleDataTable, type SimpleColumn } from '@/components/ui/simple-data-table'
 import { useSupabaseCRUD } from '@/hooks/supabase/index'
 import { createClientLogger } from '@/lib/client-logger'
@@ -16,6 +19,15 @@ import type { Row, Insert, Update } from '@/types/database'
 
 type Supplier = Row<'suppliers'>
 
+const getEmptySupplierForm = (): SupplierForm => ({
+  name: '',
+  contact_person: '',
+  phone: '',
+  email: '',
+  address: '',
+  notes: '',
+})
+
 export const SuppliersCRUD = (): JSX.Element => {
   const { data: suppliers, loading, error, create: createSupplier, update: updateSupplier, remove: deleteSupplier } = useSupabaseCRUD('suppliers')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -25,40 +37,19 @@ export const SuppliersCRUD = (): JSX.Element => {
 
   const createForm = useForm<SupplierForm>({
     resolver: zodResolver(SupplierFormSchema),
-    defaultValues: {
-      name: '',
-      contact_person: '',
-      phone: '',
-      email: '',
-      address: '',
-      notes: '',
-    }
+    defaultValues: getEmptySupplierForm()
   })
 
   // Reset create form when modal opens
   useEffect(() => {
     if (isCreateModalOpen) {
-      createForm.reset({
-        name: '',
-        contact_person: '',
-        phone: '',
-        email: '',
-        address: '',
-        notes: '',
-      })
+      createForm.reset(getEmptySupplierForm())
     }
   }, [isCreateModalOpen, createForm])
 
   const editForm = useForm<SupplierForm>({
     resolver: zodResolver(SupplierFormSchema),
-    defaultValues: {
-      name: '',
-      contact_person: '',
-      phone: '',
-      email: '',
-      address: '',
-      notes: '',
-    }
+    defaultValues: getEmptySupplierForm()
   })
 
   const columns: Array<SimpleColumn<Supplier>> = [
@@ -110,30 +101,24 @@ export const SuppliersCRUD = (): JSX.Element => {
     setIsDeleteDialogOpen(true)
   }, [])
 
-  const handleSubmitCreate = useCallback(async (data: Record<string, unknown>): Promise<void> => {
+  const handleSubmitCreate = useCallback(async (data: SupplierForm): Promise<void> => {
     try {
       await createSupplier(data as Insert<'suppliers'>)
       setIsCreateModalOpen(false)
+      createForm.reset(getEmptySupplierForm())
     } catch (error: unknown) {
       logger.error({ error }, 'Failed to create supplier')
     }
-  }, [createSupplier])
+  }, [createSupplier, createForm])
 
-  const handleSubmitEdit = useCallback(async (data: Record<string, unknown>) => {
+  const handleSubmitEdit = useCallback(async (data: SupplierForm) => {
     if (!selectedSupplier) return
 
     try {
       await updateSupplier(selectedSupplier.id, data as Update<'suppliers'>)
       setIsEditModalOpen(false)
       setSelectedSupplier(null)
-      editForm.reset({
-        name: '',
-        contact_person: '',
-        phone: '',
-        email: '',
-        address: '',
-        notes: '',
-      })
+      editForm.reset(getEmptySupplierForm())
     } catch (error: unknown) {
       logger.error({ error }, 'Failed to update supplier')
     }
@@ -150,6 +135,21 @@ export const SuppliersCRUD = (): JSX.Element => {
       logger.error({ error }, 'Failed to delete supplier')
     }
   }, [selectedSupplier, deleteSupplier])
+
+  const handleCreateDialogChange = useCallback((open: boolean) => {
+    setIsCreateModalOpen(open)
+    if (!open) {
+      createForm.reset(getEmptySupplierForm())
+    }
+  }, [createForm])
+
+  const handleEditDialogChange = useCallback((open: boolean) => {
+    setIsEditModalOpen(open)
+    if (!open) {
+      setSelectedSupplier(null)
+      editForm.reset(getEmptySupplierForm())
+    }
+  }, [editForm])
 
   if (error) {
     return (
@@ -173,33 +173,23 @@ export const SuppliersCRUD = (): JSX.Element => {
         emptyMessage="Belum ada supplier. Tambah supplier pertama Anda untuk memulai."
       />
 
-      <CreateModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        entityName="Supplier"
+      <SupplierDialog
+        open={isCreateModalOpen}
+        onOpenChange={handleCreateDialogChange}
+        title="Tambah Supplier Baru"
+        submitLabel="Tambah Supplier"
         form={createForm}
         onSubmit={handleSubmitCreate}
-        isLoading={loading}
-      >
-        <SupplierFormFields
-          register={createForm.register}
-          errors={createForm.formState.errors}
-        />
-      </CreateModal>
+      />
 
-      <EditModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        entityName="Supplier"
+      <SupplierDialog
+        open={isEditModalOpen}
+        onOpenChange={handleEditDialogChange}
+        title={selectedSupplier ? `Edit ${selectedSupplier.name}` : 'Edit Supplier'}
+        submitLabel="Simpan Perubahan"
         form={editForm}
         onSubmit={handleSubmitEdit}
-        isLoading={loading}
-      >
-        <SupplierFormFields
-          register={editForm.register}
-          errors={editForm.formState.errors}
-        />
-      </EditModal>
+      />
 
       <DeleteModal
         isOpen={isDeleteDialogOpen}
@@ -210,5 +200,64 @@ export const SuppliersCRUD = (): JSX.Element => {
         isLoading={loading}
       />
     </div>
+  )
+}
+
+interface SupplierDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  title: string
+  submitLabel: string
+  form: UseFormReturn<SupplierForm>
+  onSubmit: (values: SupplierForm) => Promise<void>
+}
+
+const SupplierDialog = ({
+  open,
+  onOpenChange,
+  title,
+  submitLabel,
+  form,
+  onSubmit
+}: SupplierDialogProps) => {
+  const isSubmitting = form.formState.isSubmitting
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="w-[calc(100%-2rem)] max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <SupplierFormFields
+            register={form.register}
+            errors={form.formState.errors}
+          />
+
+          <DialogFooter className="gap-2">
+            <LoadingButton
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
+              hapticFeedback
+              hapticType="light"
+            >
+              Batal
+            </LoadingButton>
+            <LoadingButton
+              type="submit"
+              loading={isSubmitting}
+              loadingText="Menyimpan..."
+              hapticFeedback
+              hapticType="medium"
+            >
+              {submitLabel}
+            </LoadingButton>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   )
 }

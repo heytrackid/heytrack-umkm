@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { cacheInvalidation, cacheKeys, withCache } from '@/lib/cache'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
@@ -12,13 +13,13 @@ import { createPaginationMeta } from '@/lib/validations/pagination'
 import type { RecipeIngredientInsert, RecipeInsert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
 
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 
 
 // GET /api/recipes - Get all recipes with ingredient relationships
-async function GET(request: NextRequest): Promise<NextResponse> {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // Authenticate with Stack Auth
     const authResult = await requireAuth()
@@ -64,28 +65,17 @@ async function GET(request: NextRequest): Promise<NextResponse> {
        let countQuery = supabase
          .from('recipes')
          .select('id', { count: 'exact', head: true })
-         .eq('created_by', user['id'])
-         .eq('is_active', true)
+         .eq('user_id', user['id'])
 
        if (search) {
          countQuery = countQuery.ilike('name', `%${search}%`)
        }
-       if (status) {
-        countQuery = countQuery.eq('status', status)
-      }
-
-      const { count, error: countError } = await countQuery
-
-      if (countError) {
-        throw new Error(`Database error: ${countError.message}`)
-      }
 
        // Get paginated data - only active recipes by default
        let query = supabase
          .from('recipes')
          .select(RECIPE_FIELDS.DETAIL) // Specific fields for better performance
-         .eq('created_by', user['id'])
-         .eq('is_active', true)
+         .eq('user_id', user['id'])
 
       // Add search filter
       if (search) {
@@ -94,7 +84,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
 
 
 
-       // Add status filter (overrides default is_active filter if specified)
+       // Apply status filter (or default active filter when status is not provided)
        if (status) {
          if (status === 'active') {
            query = query.eq('is_active', true)
@@ -106,7 +96,16 @@ async function GET(request: NextRequest): Promise<NextResponse> {
            query = query.eq('status', status)
            countQuery = countQuery.eq('status', status)
         }
+       } else {
+         query = query.eq('is_active', true)
+         countQuery = countQuery.eq('is_active', true)
        }
+
+      const { count, error: countError } = await countQuery
+
+      if (countError) {
+        throw new Error(`Database error: ${countError.message}`)
+      }
 
       // Add sorting
       const sortField = sort_by ?? 'name'
@@ -144,16 +143,12 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
     return response
   } catch (error) {
-    apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/recipes:')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return handleAPIError(error, 'GET /api/recipes')
   }
 }
 
 // POST /api/recipes - Create new recipe with ingredients
-async function POST(request: NextRequest): Promise<NextResponse> {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // Authenticate with Stack Auth
     const authResult = await requireAuth()
@@ -267,17 +262,10 @@ async function POST(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json(completeRecipe, { status: 201 })
   } catch (error) {
-    apiLogger.error({ error: getErrorMessage(error) }, 'Error in POST /api/recipes:')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return handleAPIError(error, 'POST /api/recipes')
   }
 }
 
 // Apply security middleware with enhanced security configuration
-const securedGET = withSecurity(GET, SecurityPresets.enhanced())
-const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
-
-// Export secured handlers
-export { securedGET as GET, securedPOST as POST }
+export const GET = createSecureHandler(getHandler, 'GET /api/recipes', SecurityPresets.enhanced())
+export const POST = createSecureHandler(postHandler, 'POST /api/recipes', SecurityPresets.enhanced())

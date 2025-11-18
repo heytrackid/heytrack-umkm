@@ -31,7 +31,7 @@ function isRecipeIngredientsResult(data: unknown): data is RecipeIngredientsQuer
   const recipe = data as RecipeIngredientsQueryResult
   return (
     typeof recipe['id'] === 'string' &&
-    Array.isArray((recipe as any).recipe_ingredients)
+    Array.isArray((recipe as RecipeIngredientsQueryResult).recipe_ingredients)
   )
 }
 
@@ -80,7 +80,7 @@ export class InventoryUpdateService {
         const typedRecipe = recipe
 
         // ✅ FIX: Only create stock transaction, let trigger handle stock update
-        for (const ri of (typedRecipe as any).recipe_ingredients || []) {
+        for (const ri of (typedRecipe as RecipeIngredientsQueryResult).recipe_ingredients || []) {
           // Supabase returns arrays for joined data, extract safely
           const ingredient = extractFirst(ri.ingredient)
           if (ingredient) {
@@ -96,7 +96,7 @@ export class InventoryUpdateService {
               user_id
             }
 
-            const { error: transactionError } = await (supabase as any)
+            const { error: transactionError } = await supabase
               .from('stock_transactions')
               .insert(stockTransaction)
 

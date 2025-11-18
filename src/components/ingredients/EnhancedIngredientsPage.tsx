@@ -34,7 +34,7 @@ import { SimplePagination } from '@/components/ui/simple-pagination'
 import { useSettings } from '@/contexts/settings-context'
 import { useIngredients, useDeleteIngredient } from '@/hooks/useIngredients'
 import { useIsMobile } from '@/hooks/use-mobile'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { usePagination } from '@/hooks/usePagination'
 import {
     genericErrorToast,
@@ -61,7 +61,7 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
     const { formatCurrency } = useSettings()
     const { data: ingredients, isLoading } = useIngredients()
     const deleteIngredient = useDeleteIngredient()
-    const { toast } = useToast()
+
     const isMobile = useIsMobile()
 
     // Modal states
@@ -74,7 +74,15 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
     const [searchTerm, setSearchTerm] = useState('')
     const [stockFilter, setStockFilter] = useState<StockFilter>('all')
     const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
+    const [supplierFilter, setSupplierFilter] = useState('all')
     const [pageSize, setPageSize] = useState(12)
+
+    // Get unique suppliers
+    const suppliers = useMemo(() => {
+        if (!ingredients) return ['all']
+        const unique = Array.from(new Set(ingredients.map(i => i.supplier).filter(s => s && s.trim()))) as string[]
+        return ['all', ...unique]
+    }, [ingredients])
 
     // Filter and sort data
     const filteredData = useMemo(() => {
@@ -101,9 +109,13 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
             const matchesCategory = categoryFilter === 'all' ||
                 (item.category ?? 'Lainnya') === categoryFilter
 
-            return matchesSearch && matchesStock && matchesCategory
+            // Supplier filter
+            const matchesSupplier = supplierFilter === 'all' ||
+                (item.supplier ?? '') === supplierFilter
+
+            return matchesSearch && matchesStock && matchesCategory && matchesSupplier
         }).sort((a, b) => a.name.localeCompare(b.name))
-    }, [ingredients, searchTerm, stockFilter, categoryFilter])
+    }, [ingredients, searchTerm, stockFilter, categoryFilter, supplierFilter])
 
     // Pagination
     const pagination = usePagination({
@@ -122,25 +134,30 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
 
     // Create filter badges
     const activeFilters = createFilterBadges(
-        { 
+        {
             search: searchTerm,
             stock: stockFilter,
-            category: categoryFilter
+            category: categoryFilter,
+            supplier: supplierFilter
         },
         {
             search: 'Search',
             stock: 'Stock',
-            category: 'Category'
+            category: 'Category',
+            supplier: 'Supplier'
         },
         (newFilters) => {
             if (newFilters.search !== undefined) {
                 setSearchTerm(newFilters.search)
             }
             if (newFilters.stock !== undefined) {
-                setStockFilter(newFilters.stock)
+                setStockFilter(newFilters.stock as StockFilter)
             }
             if (newFilters.category !== undefined) {
-                setCategoryFilter(newFilters.category)
+                setCategoryFilter(newFilters.category as CategoryFilter)
+            }
+            if (newFilters.supplier !== undefined) {
+                setSupplierFilter(newFilters.supplier)
             }
         }
     )
@@ -149,6 +166,7 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
         setSearchTerm('')
         setStockFilter('all')
         setCategoryFilter('all')
+        setSupplierFilter('all')
     }, [])
 
     // Handlers
@@ -187,10 +205,7 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
                 description: 'Bahan baku telah dihapus dari sistem',
                 onUndo: () => {
                     // Note: Would need an undelete API endpoint for real undo
-                    toast({
-                        title: 'Fitur undo sedang dikembangkan',
-                        description: 'Anda bisa menambahkan kembali bahan baku ini',
-                    })
+                    toast('Fitur undo sedang dikembangkan - Anda bisa menambahkan kembali bahan baku ini')
                 },
                 duration: 6000
             })
@@ -199,17 +214,11 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
             setSelectedIngredient(null)
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Gagal menghapus bahan baku'
-            toast(genericErrorToast('menghapus bahan baku', message))
+            toast.error(message || 'Gagal menghapus bahan baku')
         }
-    }, [selectedIngredient, deleteIngredient, toast])
+    }, [selectedIngredient, deleteIngredient])
 
-    const clearFilters = () => {
-        setSearchTerm('')
-        setStockFilter('all')
-        setCategoryFilter('all')
-    }
-
-    const hasActiveFilters = (searchTerm || false) || stockFilter !== 'all' || categoryFilter !== 'all'
+    const hasActiveFilters = Boolean(searchTerm) || stockFilter !== 'all' || categoryFilter !== 'all' || supplierFilter !== 'all'
 
     // Empty state
     if (!isLoading && (!ingredients || ingredients.length === 0)) {
@@ -271,7 +280,7 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={clearFilters}
+                                    onClick={handleClearAllFilters}
                                     className="shrink-0"
                                 >
                                     <X className="h-4 w-4" />
@@ -293,6 +302,23 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
                                 </Button>
                             ))}
                         </div>
+
+                        {/* Supplier Filter */}
+                        <Select
+                            value={supplierFilter}
+                            onValueChange={setSupplierFilter}
+                        >
+                            <SelectTrigger className="w-full sm:w-[180px]">
+                                <SelectValue placeholder="Supplier" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {suppliers.map((supplier) => (
+                                    <SelectItem key={supplier} value={supplier}>
+                                        {supplier === 'all' ? 'Semua Supplier' : supplier}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     {/* Active Filter Badges */}
@@ -343,7 +369,9 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
                                     {paginatedData.map((item) => {
                                         const currentStock = item.current_stock ?? 0
                                         const minStock = item.min_stock ?? 0
-                                        const totalValue = currentStock * item.price_per_unit
+                                        const resolvedUnitPrice = item.price_per_unit ?? item.weighted_average_cost
+                                        const unitPriceValue = typeof resolvedUnitPrice === 'number' ? resolvedUnitPrice : null
+                                        const totalValue = unitPriceValue !== null ? currentStock * unitPriceValue : null
                                         return (
                                             <tr key={item['id']} className="border-b hover:bg-muted/30 transition-colors">
                                                 <td className="p-4">
@@ -363,7 +391,7 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
                                                 </td>
                                                 <td className="p-4 text-sm">{item.unit}</td>
                                                 <td className="p-4 text-right text-sm font-medium">
-                                                    {formatCurrency(item.price_per_unit)}
+                                                    {unitPriceValue !== null ? formatCurrency(unitPriceValue) : '-'}
                                                 </td>
                                                 <td className="p-4">
                                                     <div className="flex flex-col items-center gap-1">
@@ -403,7 +431,7 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
                                                     </div>
                                                 </td>
                                                 <td className="p-4 text-right text-sm font-semibold">
-                                                    {formatCurrency(totalValue)}
+                                                    {totalValue !== null ? formatCurrency(totalValue) : '-'}
                                                 </td>
                                                 <td className="p-4">
                                                     <div className="flex justify-center">
@@ -456,7 +484,7 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
                                     actions={[
                                         {
                                             label: 'Hapus Filter',
-                                            onClick: clearFilters,
+                                            onClick: handleClearAllFilters,
                                             variant: 'outline',
                                             icon: X
                                         }

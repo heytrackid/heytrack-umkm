@@ -7,11 +7,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { GlobalExportService } from '@/lib/export/global-export'
 import { apiLogger } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 export const dynamic = 'force-dynamic'
 
-async function GET(_request: NextRequest): Promise<NextResponse> {
+async function getHandler(_request: NextRequest): Promise<NextResponse> {
   try {
     // 1. Authenticate with Stack Auth
     const authResult = await requireAuth()
@@ -46,6 +46,4 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
 }
 
 // Apply security middleware
-const securedGET = withSecurity(GET, SecurityPresets.enhanced())
-
-export { securedGET as GET }
+export const GET = createSecureHandler(getHandler, 'GET /api/export/global', SecurityPresets.enhanced())

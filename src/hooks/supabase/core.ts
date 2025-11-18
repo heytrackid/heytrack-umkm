@@ -42,7 +42,7 @@ export function useSupabaseQuery<T extends TableName>(
 
       const currentOptions = optionsRef.current
        
-      let _query = supabase.from(tableName as any).select(currentOptions.select ?? '*')
+      let _query = supabase.from(tableName).select(currentOptions.select ?? '*')
 
       // Apply filters
       if (currentOptions.filter) {

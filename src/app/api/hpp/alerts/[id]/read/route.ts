@@ -7,14 +7,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger, logError } from '@/lib/logger'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureRouteHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
-
-// Apply security middleware
-export const PUT = withSecurity(async function PUT(
+// PUT handler for marking HPP alert as read
+async function markAlertReadHandler(
   _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<Record<string, string>> }
 ): Promise<NextResponse> {
   try {
     const resolvedParams = await params
@@ -65,4 +64,7 @@ export const PUT = withSecurity(async function PUT(
   } catch (error) {
     return handleAPIError(error, 'PUT /api/hpp/alerts/[id]/read')
   }
-}, SecurityPresets.enhanced())
+}
+
+// Apply security middleware
+export const PUT = createSecureRouteHandler(markAlertReadHandler, 'PUT /api/hpp/alerts/[id]/read', SecurityPresets.enhanced())

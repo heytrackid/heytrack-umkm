@@ -9,12 +9,13 @@ import { PageHeader, SharedStatsCards } from '@/components/shared/index'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { LoadingState } from '@/components/ui/loading-state'
 
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useHppOverview } from '@/hooks/useHppData'
 import { useResponsive } from '@/hooks/useResponsive'
@@ -67,7 +68,7 @@ const reportsBreadcrumbs = [
 
 const HppReportsPage = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
-  const { toast } = useToast()
+
   const { isMobile } = useResponsive()
 
   const [config, setConfig] = useState<ReportConfig>({
@@ -122,18 +123,11 @@ const HppReportsPage = (): JSX.Element => {
       // Simulate report generation
       await new Promise(resolve => setTimeout(resolve, 2000))
 
-      toast({
-        title: 'Success',
-        description: `Report generated successfully in ${config.format.toUpperCase()} format`,
-      })
+      toast.success(`Report generated successfully in ${config.format.toUpperCase()} format`)
 
     } catch (error) {
       dbLogger.error({ error }, 'Failed to generate report')
-      toast({
-        title: 'Error',
-        description: 'Failed to generate report',
-        variant: 'destructive'
-      })
+      toast.error('Failed to generate report')
     } finally {
       setGenerating(false)
     }
@@ -142,19 +136,11 @@ const HppReportsPage = (): JSX.Element => {
   const exportData = (format: ExportFormat) => {
     try {
       setGenerating(true)
-      toast({
-        title: 'Export Not Available',
-        description: 'Export feature has been removed',
-        variant: 'destructive'
-      })
+      toast.error('Export feature has been removed')
 
     } catch (error) {
       dbLogger.error({ error }, `Failed to export ${format}`)
-      toast({
-        title: 'Export Failed',
-        description: `Failed to export ${format.toUpperCase()} file`,
-        variant: 'destructive'
-      })
+      toast.error(`Failed to export ${format.toUpperCase()} file`)
     } finally {
       setGenerating(false)
     }
@@ -230,11 +216,7 @@ const HppReportsPage = (): JSX.Element => {
           <SwipeableTabsContent value="analytics" className="space-y-6">
             {(() => {
               if (overviewLoading) {
-                return (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600" />
-                  </div>
-                )
+                return <LoadingState size="md" />
               }
 
               if (overviewError || !analytics) {

@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 import React, { type ComponentType } from 'react'
 
+import { LoadingState } from '@/components/ui/loading-state'
 import { createClientLogger } from '@/lib/client-logger'
 
 /**
@@ -55,11 +56,7 @@ export const RouteLoaders = {
   feature: (importFn: () => Promise<RouteComponent>) =>
     createLazyRoute(importFn, {
       ssr: false,
-      loading: () => (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-        </div>
-      )
+      loading: () => <LoadingState size="md" />
     }),
 
   // Heavy routes - lazy load with skeleton
@@ -81,14 +78,7 @@ export const RouteLoaders = {
   admin: (importFn: () => Promise<RouteComponent>) =>
     createLazyRoute(importFn, {
       ssr: false,
-      loading: () => (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading admin panel...</p>
-          </div>
-        </div>
-      )
+      loading: () => <LoadingState message="Loading admin panel..." size="md" />
     })
 }
 
@@ -124,14 +114,7 @@ export function createSmartRouteLoader(
 ) {
   const LazyComponent = createLazyRoute(importFn, {
     ...options,
-    loading: options.loading ?? (() => (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">Loading {routeName}...</p>
-        </div>
-      </div>
-    ))
+    loading: options.loading ?? (() => <LoadingState message={`Loading ${routeName}...`} size="sm" />)
   })
 
   // Wrap with performance monitoring

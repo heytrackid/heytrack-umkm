@@ -29,6 +29,32 @@ export const LoadingState = ({ message, size = 'md', className }: LoadingStatePr
   )
 }
 
+// Consistent LoadingSpinner component for inline usage
+interface LoadingSpinnerProps {
+  size?: 'lg' | 'md' | 'sm' | 'xs'
+  className?: string
+  color?: 'primary' | 'muted' | 'foreground'
+}
+
+export const LoadingSpinner = ({ size = 'md', className, color = 'primary' }: LoadingSpinnerProps) => {
+  const sizeClasses = {
+    xs: 'h-3 w-3',
+    sm: 'h-4 w-4',
+    md: 'h-5 w-5',
+    lg: 'h-6 w-6'
+  }
+
+  const colorClasses = {
+    primary: 'text-primary',
+    muted: 'text-muted-foreground',
+    foreground: 'text-foreground'
+  }
+
+  return (
+    <Loader2 className={cn('animate-spin', sizeClasses[size], colorClasses[color], className)} />
+  )
+}
+
 interface SuspenseLoaderProps {
   children: React.ReactNode
   fallbackMessage?: string

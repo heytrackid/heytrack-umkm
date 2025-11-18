@@ -7,14 +7,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
+import type { HppAlert } from '@/types/database'
 
 
 
 
 // GET /api/hpp/overview - Get comprehensive HPP overview data in one request
-async function GET(_request: NextRequest): Promise<NextResponse> {
+async function getHandler(_request: NextRequest): Promise<NextResponse> {
   try {
     // Authenticate with Stack Auth
     const authResult = await requireAuth()
@@ -96,28 +97,28 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
 
       // Process alerts data - handle Supabase join structure
        
-      const alertsData: any[] = alertsRaw.map((alert: any) => {
+      const alertsData = alertsRaw.map((alert: Record<string, unknown>) => {
         const alertWithRecipes = alert as { recipes: unknown }
         return {
-          ...(alert as Record<string, unknown>),
+          ...alert,
           recipes: Array.isArray(alertWithRecipes.recipes) ? alertWithRecipes.recipes[0] as { name: string } | null : alertWithRecipes.recipes as { name: string } | null
-        }
+        } as Record<string, unknown>
       })
 
       const totalAlerts = alertsData.length
-      const unreadAlerts = alertsData.filter(alert => !alert.is_read).length
+      const unreadAlerts = alertsData.filter((alert: Record<string, unknown>) => !(alert as { is_read: boolean }).is_read).length
 
-      const recentAlerts = alertsData.map(alert => ({
-        id: alert['id'],
-        recipe_id: alert.recipe_id,
-        recipe_name: alert.recipes?.name ?? 'Unknown Recipe',
-        alert_type: alert.alert_type,
-        title: alert.title,
-        message: alert.message,
-        severity: alert.severity,
-        is_read: alert.is_read,
-        new_value: alert.new_value,
-        created_at: alert.created_at
+      const recentAlerts = alertsData.map((alert: Record<string, unknown>) => ({
+        id: alert['id'] as string,
+        recipe_id: alert['recipe_id'] as string,
+        recipe_name: ((alert['recipes'] as { name: string } | null)?.name) ?? 'Unknown Recipe',
+        alert_type: alert['alert_type'] as string,
+        title: alert['title'] as string,
+        message: alert['message'] as string,
+        severity: alert['severity'] as string,
+        is_read: alert['is_read'] as boolean | null,
+        new_value: alert['new_value'] as number | null,
+        created_at: alert['created_at'] as string | null
       }))
 
       return {
@@ -146,7 +147,4 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
 }
 
 // Apply security middleware
-const securedGET = withSecurity(GET, SecurityPresets.enhanced())
-
-// Export secured handlers
-export { securedGET as GET }
+export const GET = createSecureHandler(getHandler, 'GET /api/hpp/overview', SecurityPresets.enhanced())

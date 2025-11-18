@@ -4,6 +4,7 @@ import { LineChart } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { LoadingState } from '@/components/ui/loading-state'
 import { Separator } from '@/components/ui/separator'
 
 interface HppAnalytics {
@@ -39,11 +40,7 @@ interface AnalyticsTabContentProps {
 
 const AnalyticsTabContent = ({ analytics, loading, formatCurrency }: AnalyticsTabContentProps): React.ReactNode => {
   if (loading) {
-    return (
-      <div className="flex justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600" />
-      </div>
-    )
+    return <LoadingState size="md" />
   }
 
   if (!analytics) {

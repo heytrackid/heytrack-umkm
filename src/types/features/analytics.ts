@@ -17,7 +17,18 @@ export interface SmartPricingAnalysis {
     standard: PricingTierOption
     premium: PricingTierOption
   }
+  analysis: ProfitabilityAnalysis[]
   recommendations: string[]
+}
+
+/**
+ * Profitability analysis for each pricing tier
+ */
+export interface ProfitabilityAnalysis {
+  tier: string
+  profitAmount: number
+  profitMargin: number
+  breakEvenVolume: number
 }
 
 /**

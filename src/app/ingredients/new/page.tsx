@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { BreadcrumbPatterns, PageBreadcrumb } from '@/components/ui/page-breadcrumb'
 import { useAuth, useSupabaseCRUD } from '@/hooks/index'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { apiLogger } from '@/lib/logger'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 import { useSupabase } from '@/providers/SupabaseProvider'
@@ -29,7 +29,7 @@ const NewIngredientPage = (): JSX.Element => {
   const router = useRouter()
   const { supabase } = useSupabase()
   const { create: createIngredient } = useSupabaseCRUD('ingredients')
-  const { toast } = useToast()
+
   const { user } = useAuth() // Get user from auth hook
 
   const [loading, setLoading] = useState(false)
@@ -69,19 +69,12 @@ const NewIngredientPage = (): JSX.Element => {
 
       await createIngredient(payload)
 
-      toast({
-        title: 'Berhasil',
-        description: `Bahan baku "${data.name}" berhasil ditambahkan`,
-      })
+      toast.success(`Bahan baku "${data.name}" berhasil ditambahkan`)
 
       router.push('/ingredients')
     } catch (error) {
       apiLogger.error({ error }, 'Failed to create ingredient:')
-      toast({
-        title: 'Gagal',
-        description: 'Gagal menambahkan bahan baku. Silakan coba lagi.',
-        variant: 'destructive',
-      })
+      toast.error('Gagal menambahkan bahan baku. Silakan coba lagi.')
     } finally {
       setLoading(false)
     }

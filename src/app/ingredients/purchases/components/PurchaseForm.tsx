@@ -3,14 +3,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { uiLogger } from '@/lib/logger'
 import { IngredientPurchaseInsertSchema, type IngredientPurchaseInsert } from '@/lib/validations/database-validations'
 
@@ -32,7 +32,6 @@ interface PurchaseFormProps {
 
 const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps): JSX.Element => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const { toast } = useToast()
 
   const form = useForm<IngredientPurchaseInsert>({
     resolver: zodResolver(IngredientPurchaseInsertSchema),
@@ -72,16 +71,13 @@ const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps): 
     } catch (error) {
       const normalizedError = error instanceof Error ? error : new Error(String(error))
       uiLogger.error({ error: normalizedError }, 'Error creating purchase')
-      toast({
-        title: 'Gagal',
-        description: normalizedError.message || 'Gagal menambahkan pembelian',
-        variant: 'destructive',
-      })
+      toast.error(normalizedError.message || 'Gagal menambahkan pembelian')
     }
   }
 
-  const watchedQty = form.watch('quantity')
-  const watchedPrice = form.watch('unit_price')
+  const watchedQty = useWatch({ control: form.control, name: 'quantity' })
+  const watchedPrice = useWatch({ control: form.control, name: 'unit_price' })
+  const watchedIngredientId = useWatch({ control: form.control, name: 'ingredient_id' })
   const total = watchedQty && watchedPrice ? watchedQty * watchedPrice : 0
 
   return (
@@ -105,7 +101,7 @@ const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps): 
             <div className="space-y-2">
               <Label htmlFor="ingredient_id">Bahan Baku *</Label>
               <Select
-                value={form.watch('ingredient_id')}
+                value={watchedIngredientId}
                 onValueChange={(value: string) => form.setValue('ingredient_id', value)}
               >
                 <SelectTrigger>

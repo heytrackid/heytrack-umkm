@@ -16,7 +16,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { useCurrency } from '@/hooks/useCurrency'
 
 interface RecipeIngredient {
@@ -77,7 +77,7 @@ export const RecipeEditor = ({
     onCancel
 }: RecipeEditorProps) => {
     const { formatCurrency } = useCurrency()
-    const { toast } = useToast()
+
     const [saving, setSaving] = useState(false)
     const [recipe, setRecipe] = useState<RecipeData>(initialData ?? {
         name: '',
@@ -193,20 +193,12 @@ export const RecipeEditor = ({
 
     const handleSave = async () => {
         if (!recipe.name.trim()) {
-            toast({
-                title: 'Validasi Gagal',
-                description: 'Nama resep harus diisi!',
-                variant: 'destructive',
-            })
+            toast.error('Nama resep harus diisi!')
             return
         }
 
         if (recipe.ingredients.length === 0) {
-            toast({
-                title: 'Validasi Gagal',
-                description: 'Minimal harus ada 1 bahan!',
-                variant: 'destructive',
-            })
+            toast.error('Minimal harus ada 1 bahan!')
             return
         }
 
