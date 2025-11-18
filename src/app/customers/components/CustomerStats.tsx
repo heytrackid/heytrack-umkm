@@ -31,14 +31,17 @@ const CustomerStats = ({
 }: CustomerStatsProps): JSX.Element => {
   const { formatCurrency, settings } = useSettings()
 
+  // Ensure customers is always an array
+  const customerArray = Array.isArray(customers) ? customers : []
+
   const stats: CustomerStatsData = {
-    total: customers.length,
-    active: customers.filter(c => c.is_active).length,
-    averageSpent: customers.length > 0
-      ? customers.reduce((sum, c) => sum + (c.total_spent ?? 0), 0) / customers.length
+    total: customerArray.length,
+    active: customerArray.filter(c => c.is_active).length,
+    averageSpent: customerArray.length > 0
+      ? customerArray.reduce((sum, c) => sum + (c.total_spent ?? 0), 0) / customerArray.length
       : 0,
-    averageOrders: customers.length > 0
-      ? customers.reduce((sum, c) => sum + (c.total_orders ?? 0), 0) / customers.length
+    averageOrders: customerArray.length > 0
+      ? customerArray.reduce((sum, c) => sum + (c.total_orders ?? 0), 0) / customerArray.length
       : 0
   }
 

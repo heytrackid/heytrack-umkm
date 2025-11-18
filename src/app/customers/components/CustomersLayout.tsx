@@ -48,8 +48,8 @@ export const CustomersLayout = (): JSX.Element => {
         throw new Error('Failed to fetch customers')
       }
 
-      const data = await response.json()
-      setCustomers(data)
+       const result = await response.json()
+       setCustomers(result.data?.customers ?? [])
     } catch (error) {
       logger.error({ error }, 'Failed to fetch customers')
       toast.error('Gagal memuat data pelanggan')
