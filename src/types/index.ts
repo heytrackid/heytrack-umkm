@@ -31,7 +31,7 @@ export type {
 // FEATURE TYPES (Application Features)
 // ==========================================================
 // Note: UserProfile is also exported from domain/auth, using that as primary
-// export type * from './features/auth' // TODO: File missing - using Stack Auth instead
+export type * from './features/auth'
 // Note: RateLimitError is also in shared/errors, using that as primary
 export type {
     BusinessContext, ChatContextCache, ChatError, ChatMessage, ChatSession, ContextType, FinancialSummary, HppSummary, IngredientSummary, MessageMetadata, OrderSummary, RecipeSummary

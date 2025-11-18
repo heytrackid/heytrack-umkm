@@ -36,8 +36,11 @@ export function useIngredientPurchases(options?: UseIngredientPurchasesOptions) 
       if (!response.ok) {
         throw new Error('Failed to fetch ingredient purchases')
       }
-      const result = await response.json() as { data?: IngredientPurchase[] }
-      return result['data'] ?? []
+      const result = await response.json() as { success: boolean; data: { ingredient_purchases: IngredientPurchase[]; pagination: unknown } }
+      if (!result.success) {
+        throw new Error('Failed to fetch ingredient purchases')
+      }
+      return result.data.ingredient_purchases ?? []
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000,

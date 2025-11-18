@@ -27,6 +27,7 @@
     "validate": "pnpm run type-check && pnpm run lint",
     "validate:all": "pnpm run type-check:all && pnpm run lint:all",
     "validate:quick": "pnpm run type-check && pnpm run lint:quick",
+    "api:test": "tsx scripts/test-api-routes.ts",
     "clean": "rm -rf .next .turbo node_modules/.cache",
     "clean:all": "rm -rf .next .turbo node_modules pnpm-lock.yaml",
     "clean:cache": "rm -rf .next/cache",
@@ -138,6 +139,7 @@
     "rimraf": "^6.1.0",
     "tailwindcss": "^4",
     "typescript": "5.9.3",
-    "vitest": "^4.0.7"
+    "vitest": "^4.0.7",
+    "tsx": "^4.19.2"
   }
 }

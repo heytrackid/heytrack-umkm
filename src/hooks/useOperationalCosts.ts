@@ -41,8 +41,11 @@ export function useOperationalCosts(options?: UseOperationalCostsOptions) {
       if (!response.ok) {
         throw new Error('Failed to fetch operational costs')
       }
-      const result = await response.json() as { data?: OperationalCost[] }
-      return result['data'] ?? []
+      const result = await response.json() as { success: boolean; data: { operational_costs: OperationalCost[]; pagination: unknown } }
+      if (!result.success) {
+        throw new Error('Failed to fetch operational costs')
+      }
+      return result.data.operational_costs ?? []
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000,

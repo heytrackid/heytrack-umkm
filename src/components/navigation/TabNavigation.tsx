@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import {
     Bot,
     Box,
@@ -141,6 +142,14 @@ const settingsItems = [
 export function TabNavigation() {
   const pathname = usePathname()
 
+  // State for controlling dropdown open/close on hover
+  const [utamaOpen, setUtamaOpen] = useState(false)
+  const [produksiOpen, setProduksiOpen] = useState(false)
+  const [pengadaanOpen, setPengadaanOpen] = useState(false)
+  const [keuanganOpen, setKeuanganOpen] = useState(false)
+  const [laporanOpen, setLaporanOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+
   // Function to check if a path is active
   const checkIsActive = (url: string) => {
     if (url === '/dashboard') {
@@ -148,6 +157,12 @@ export function TabNavigation() {
     }
     return pathname === url || pathname.startsWith(`${url}/`)
   }
+
+  const baseTabClasses =
+    "group/tab relative h-9 px-4 text-sm font-medium rounded-md whitespace-nowrap transition-colors duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+
+  const underlineClasses =
+    "after:pointer-events-none after:absolute after:bottom-0 after:left-1/2 after:h-0.5 after:w-3/4 after:-translate-x-1/2 after:rounded-full after:bg-primary after:opacity-0 after:scale-x-50 after:transition-[transform,opacity] after:duration-200 after:ease-out group-hover/tab:after:opacity-100 group-hover/tab:after:scale-x-100"
 
   // Function to check if a group has any active items
   const hasActiveItem = (items: { url: string }[]) => {
@@ -161,37 +176,61 @@ export function TabNavigation() {
           {navigationGroups.map((group) => {
             const groupHasActiveItem = hasActiveItem(group.items)
 
+            const getOpenState = () => {
+              switch (group.label) {
+                case 'Utama': return utamaOpen
+                case 'Produksi': return produksiOpen
+                case 'Pengadaan': return pengadaanOpen
+                case 'Keuangan': return keuanganOpen
+                case 'Laporan': return laporanOpen
+                default: return false
+              }
+            }
+
+            const getSetOpenState = () => {
+              switch (group.label) {
+                case 'Utama': return setUtamaOpen
+                case 'Produksi': return setProduksiOpen
+                case 'Pengadaan': return setPengadaanOpen
+                case 'Keuangan': return setKeuanganOpen
+                case 'Laporan': return setLaporanOpen
+                default: return () => {}
+              }
+            }
+
             return (
-              <DropdownMenu key={group.label}>
+              <DropdownMenu key={group.label} open={getOpenState()} onOpenChange={getSetOpenState()}>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
+                    onMouseEnter={() => getSetOpenState()(true)}
+                    onMouseLeave={() => getSetOpenState()(false)}
                     className={cn(
-                      "h-9 px-4 text-sm font-medium transition-all duration-200 whitespace-nowrap relative group rounded-md",
-                      // Base styles (inactive state)
-                      !groupHasActiveItem && "text-muted-foreground",
-                      // Active styles - when any item in the group is active
-                      groupHasActiveItem && [
-                        "bg-primary/10 text-primary",
-                        // Active indicator line
-                        "after:absolute after:bottom-0 after:left-1/2 after:opacity-100 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-200 after:-translate-x-1/2 after:content-['']",
-                        "after:w-full"
-                      ],
-                      // Hover styles - apply to both active and inactive tabs
-                      "hover:bg-accent/60",
-                      // If group is active, hover maintains primary color; if not active, hover changes to foreground color
-                      groupHasActiveItem ? "hover:text-primary" : "hover:text-accent-foreground"
+                      baseTabClasses,
+                      underlineClasses,
+                      groupHasActiveItem
+                        ? [
+                            "text-primary bg-primary/10 shadow-sm",
+                            "after:opacity-100 after:scale-x-100",
+                            "hover:text-primary",
+                          ]
+                        : [
+                            "text-muted-foreground",
+                            "hover:text-foreground",
+                            "hover:bg-accent/60",
+                          ]
                     )}
                   >
                     <span>{group.label}</span>
-                    <ChevronDown className="ml-1 h-3 w-3 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    <ChevronDown className="ml-1 h-3 w-3 transition-transform duration-200 ease-out group-data-[state=open]:rotate-180" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
                   className="min-w-[200px] p-1"
                   sideOffset={8}
+                  onMouseLeave={() => getSetOpenState()(false)}
                 >
                   {group.items.map((item) => {
                     const itemIsActive = checkIsActive(item.url)
@@ -201,16 +240,17 @@ export function TabNavigation() {
                         <Link
                           href={item.url}
                           className={cn(
-                            "flex items-center gap-3 px-3 py-2 cursor-pointer rounded-sm transition-colors",
-                            // Active styles for the individual item, with improved hover state
-                            itemIsActive ? 
-                              "bg-primary/10 text-primary font-medium" : 
-                              "hover:bg-accent/50"
+                            "group/item flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                            itemIsActive
+                              ? "bg-primary/10 text-primary font-semibold"
+                              : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                           )}
                         >
                           <item.icon className={cn(
-                            "h-4 w-4",
-                            itemIsActive ? "text-primary" : "text-muted-foreground"
+                            "h-4 w-4 transition-colors duration-150",
+                            itemIsActive
+                              ? "text-primary"
+                              : "text-muted-foreground group-hover/item:text-accent-foreground"
                           )} />
                           <span>{item.title}</span>
                         </Link>
@@ -223,26 +263,27 @@ export function TabNavigation() {
           })}
 
           {/* Settings Group - now using the same pattern as other groups */}
-          <DropdownMenu>
+          <DropdownMenu open={settingsOpen} onOpenChange={setSettingsOpen}>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="sm"
+                onMouseEnter={() => setSettingsOpen(true)}
+                onMouseLeave={() => setSettingsOpen(false)}
                 className={cn(
-                  "h-9 px-4 text-sm font-medium transition-all duration-200 whitespace-nowrap relative group rounded-md",
-                  // Base styles (inactive state)
-                  !(pathname === '/settings' || pathname.startsWith('/settings/')) && "text-muted-foreground",
-                  // Apply active state if any settings page is active
-                  (pathname === '/settings' || pathname.startsWith('/settings/')) && [
-                    "bg-primary/10 text-primary",
-                    // Active indicator line
-                    "after:absolute after:bottom-0 after:left-1/2 after:opacity-100 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-200 after:-translate-x-1/2 after:content-['']",
-                    "after:w-full"
-                  ],
-                  // Hover styles - apply to both active and inactive tabs
-                  "hover:bg-accent/60",
-                  // If group is active, hover maintains primary color; if not active, hover changes to foreground color
-                  (pathname === '/settings' || pathname.startsWith('/settings/')) ? "hover:text-primary" : "hover:text-accent-foreground"
+                  baseTabClasses,
+                  underlineClasses,
+                  pathname === '/settings' || pathname.startsWith('/settings/')
+                    ? [
+                        "text-primary bg-primary/10 shadow-sm",
+                        "after:opacity-100 after:scale-x-100",
+                        "hover:text-primary",
+                      ]
+                    : [
+                        "text-muted-foreground",
+                        "hover:text-foreground",
+                        "hover:bg-accent/60",
+                      ]
                 )}
               >
                 <span>Pengaturan</span>
@@ -253,6 +294,7 @@ export function TabNavigation() {
               align="start"
               className="min-w-[200px] p-1"
               sideOffset={8}
+              onMouseLeave={() => setSettingsOpen(false)}
             >
               {settingsItems.map((item) => {
                 const itemIsActive = checkIsActive(item.url)
@@ -262,16 +304,17 @@ export function TabNavigation() {
                     <Link
                       href={item.url}
                       className={cn(
-                        "flex items-center gap-3 px-3 py-2 cursor-pointer rounded-sm transition-colors",
-                        // Active styles for the individual item, with improved hover state
-                        itemIsActive ? 
-                          "bg-primary/10 text-primary font-medium" : 
-                          "hover:bg-accent/50"
+                        "group/item flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                        itemIsActive
+                          ? "bg-primary/10 text-primary font-semibold"
+                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                       )}
                     >
                       <item.icon className={cn(
-                        "h-4 w-4",
-                        itemIsActive ? "text-primary" : "text-muted-foreground"
+                        "h-4 w-4 transition-colors duration-150",
+                        itemIsActive
+                          ? "text-primary"
+                          : "text-muted-foreground group-hover/item:text-accent-foreground"
                       )} />
                       <span>{item.title}</span>
                     </Link>

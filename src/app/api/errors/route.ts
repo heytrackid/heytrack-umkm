@@ -155,9 +155,19 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
 
     const supabase = await createClient()
 
-    // Check if user has admin privileges (simplified check)
-    // TODO: Implement proper admin role checking
-    if (!user.email?.includes('admin')) {
+    // Admin authorization: check against configured admin emails with a fallback.
+    const adminEmailsRaw = process.env['ADMIN_EMAILS'] ?? ''
+    const adminEmails = adminEmailsRaw
+      .split(',')
+      .map(e => e.trim())
+      .filter(Boolean)
+
+    const isConfigured = adminEmails.length > 0
+    const isAdmin = isConfigured
+      ? adminEmails.includes(user.email ?? '')
+      : Boolean(user.email?.includes('admin'))
+
+    if (!isAdmin) {
       apiLogger.warn({
         userId: user.id,
         email: user.email

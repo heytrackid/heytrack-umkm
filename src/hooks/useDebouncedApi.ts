@@ -22,10 +22,17 @@ interface UseDebouncedApiReturn<T> {
  * Hook untuk debounce API calls
  * Auto-cancel previous request kalau ada request baru
  * 
+ * IMPORTANT: apiFunction should be wrapped in useCallback by the caller
+ * to prevent unnecessary re-renders. Example:
+ * 
  * @example
  * ```tsx
+ * const fetchData = useCallback(async () => {
+ *   return fetchUsers(searchQuery)
+ * }, [searchQuery])
+ * 
  * const { data, loading } = useDebouncedApi(
- *   async () => fetchUsers(searchQuery),
+ *   fetchData,
  *   [searchQuery],
  *   { delay: 300 }
  * )
@@ -51,6 +58,12 @@ export function useDebouncedApi<T>(
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
   const mountedRef = useRef(true)
+  
+  // Use ref to store the latest apiFunction to avoid dependency issues
+  const apiFunctionRef = useRef(apiFunction)
+  useEffect(() => {
+    apiFunctionRef.current = apiFunction
+  }, [apiFunction])
 
   // Cancel any pending requests
   const cancel = useCallback((): void => {
@@ -64,7 +77,7 @@ export function useDebouncedApi<T>(
     }
   }, [])
 
-  // Execute the API call
+  // Execute the API call - use stable reference
   const executeApi = useCallback((): void => {
     if (!enabled) { return }
 
@@ -81,7 +94,8 @@ export function useDebouncedApi<T>(
       abortControllerRef.current = controller
 
       try {
-        const result = await apiFunction()
+        // Use ref to get latest apiFunction
+        const result = await apiFunctionRef.current()
 
         // Only update state if still mounted and not aborted
         if (mountedRef.current && !controller.signal.aborted) {
@@ -103,7 +117,7 @@ export function useDebouncedApi<T>(
         }
       }
     }, delay)
-  }, [apiFunction, delay, enabled, cancel, onSuccess, onError])
+  }, [delay, enabled, cancel, onSuccess, onError])
 
   // Refetch function (no debounce)
   const refetch = useCallback(async (): Promise<void> => {
@@ -114,7 +128,8 @@ export function useDebouncedApi<T>(
     setError(null)
 
     try {
-      const result = await apiFunction()
+      // Use ref to get latest apiFunction
+      const result = await apiFunctionRef.current()
       if (mountedRef.current) {
         setData(result)
         setError(null)
@@ -131,7 +146,7 @@ export function useDebouncedApi<T>(
         setLoading(false)
       }
     }
-  }, [apiFunction, enabled, cancel, onSuccess, onError])
+  }, [enabled, cancel, onSuccess, onError])
 
   // Execute on dependency change
   useEffect(() => {

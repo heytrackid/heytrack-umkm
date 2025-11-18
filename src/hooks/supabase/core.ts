@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useSupabase } from '@/providers/SupabaseProvider'
 
@@ -26,11 +26,32 @@ export function useSupabaseQuery<T extends TableName>(
   const [loading, setLoading] = useState(!options.initial)
   const [error, setError] = useState<string | null>(null)
 
-  const optionsRef = useRef(options)
+  // Stabilize options to prevent infinite loops
+  // Serialize critical options for comparison by value instead of reference
+  const filterKey = JSON.stringify(options.filter)
+  const orderByKey = JSON.stringify(options.orderBy)
+  const selectKey = options.select ?? '*'
+  const limitKey = options.limit ?? 0
+  const realtimeKey = options.realtime ?? false
+  const refetchOnMountKey = options.refetchOnMount ?? true
+  const initialKey = JSON.stringify(options.initial)
+  
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableOptions = useMemo(() => options, [
+    filterKey,
+    orderByKey,
+    selectKey,
+    limitKey,
+    realtimeKey,
+    refetchOnMountKey,
+    initialKey,
+  ])
+
+  const optionsRef = useRef(stableOptions)
   const fetchIdRef = useRef<symbol | null>(null)
   useEffect(() => {
-    optionsRef.current = options
-  }, [options])
+    optionsRef.current = stableOptions
+  }, [stableOptions])
 
   const fetchData = useCallback(async (): Promise<void> => {
     const currentFetchId = Symbol('supabase-query')
@@ -98,14 +119,14 @@ export function useSupabaseQuery<T extends TableName>(
 
   useEffect(() => {
     // Skip initial fetch if we have initial data and refetchOnMount is false
-    if (options.initial && options.refetchOnMount === false) {
+    if (stableOptions.initial && stableOptions.refetchOnMount === false) {
       return undefined
     }
 
     void fetchData()
 
     // Setup realtime subscription if enabled
-    if (options.realtime === true) {
+    if (stableOptions.realtime === true) {
       const channel = supabase
         .channel(`${tableName}-changes`)
         .on(
@@ -149,7 +170,7 @@ export function useSupabaseQuery<T extends TableName>(
     return (): void => {
       fetchIdRef.current = null
     }
-  }, [tableName, fetchData, options.realtime, options.refetchOnMount, options.initial, supabase])
+  }, [tableName, fetchData, stableOptions.realtime, stableOptions.refetchOnMount, stableOptions.initial, supabase])
 
   return {
     data,

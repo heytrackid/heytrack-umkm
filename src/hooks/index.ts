@@ -24,7 +24,7 @@ export { useChatHistory } from './useChatHistory'
 export { useCurrency } from './useCurrency'
 export { useDebounce } from './useDebounce'
 export { useInstantNavigation } from './useInstantNavigation'
-// export { useLocalStorage } from './useLocalStorage' // TODO: File missing
+export { useLocalStorage } from './useLocalStorage'
 
 
 // Dashboard Hooks

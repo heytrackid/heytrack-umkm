@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SettingsProvider } from '@/contexts/settings-context';
 import { Toaster } from '@/components/ui/sonner';
 import { headers } from 'next/headers';
+import Script from 'next/script';
 
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
@@ -59,13 +60,9 @@ const RootLayout = async ({
         
         {/* CSP nonce for inline scripts */}
         {nonce && (
-          <script
-            nonce={nonce}
-            suppressHydrationWarning
-            dangerouslySetInnerHTML={{
-              __html: `window.__CSP_NONCE__ = '${nonce}';`,
-            }}
-          />
+          <Script id={"csp-nonce"} nonce={nonce}>
+            {`window.__CSP_NONCE__ = '${nonce}';`}
+          </Script>
         )}
       </head>
       <body

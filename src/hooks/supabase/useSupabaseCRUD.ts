@@ -1,7 +1,7 @@
 import { createClientLogger } from '@/lib/client-logger'
 import type { Database } from '@/types/database'
 import { createClient } from '@/utils/supabase/client'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 type TablesMap = Database['public']['Tables']
 type TableName = keyof TablesMap
@@ -33,8 +33,19 @@ export function useSupabaseCRUD<TTable extends TableName>(
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   
-  const supabase = createClient()
-  const logger = createClientLogger(`useSupabaseCRUD:${tableName}`)
+  // Memoize supabase client and logger to prevent recreation on every render
+  const supabase = useMemo(() => createClient(), [])
+  const logger = useMemo(() => createClientLogger(`useSupabaseCRUD:${tableName}`), [tableName])
+  
+  // Stabilize object dependencies to prevent infinite loops
+  // Serialize objects to compare by value instead of reference
+  const filtersKey = JSON.stringify(options?.filters)
+  const orderByKey = JSON.stringify(options?.orderBy)
+  
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const filters = useMemo(() => options?.filters, [filtersKey])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const orderBy = useMemo(() => options?.orderBy, [orderByKey])
 
   // Fetch data
   const fetchData = useCallback(async () => {
@@ -45,16 +56,16 @@ export function useSupabaseCRUD<TTable extends TableName>(
       let query = supabase.from(tableName).select('*')
 
        // Apply filters
-       if (options?.filters) {
-         Object.entries(options.filters).forEach(([key, value]) => {
+       if (filters) {
+         Object.entries(filters).forEach(([key, value]) => {
             query = query.eq(key as never, value as never) // Type assertion for RLS
          })
        }
 
       // Apply ordering
-      if (options?.orderBy) {
-        query = query.order(options.orderBy.column, {
-          ascending: options.orderBy.ascending ?? true
+      if (orderBy) {
+        query = query.order(orderBy.column, {
+          ascending: orderBy.ascending ?? true
         })
       }
 
@@ -70,7 +81,7 @@ export function useSupabaseCRUD<TTable extends TableName>(
     } finally {
       setLoading(false)
     }
-  }, [tableName, options?.filters, options?.orderBy, supabase, logger])
+  }, [tableName, filters, orderBy, supabase, logger])
 
   // Create
   const create = useCallback(async (newData: Partial<RowType>): Promise<RowType | null> => {

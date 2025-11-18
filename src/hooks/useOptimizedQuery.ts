@@ -1,12 +1,20 @@
 'use client'
 
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useQuery, type QueryKey, type UseQueryOptions } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 
 /**
  * Optimized Query Hook
  * Wrapper around React Query with performance optimizations
+ * 
+ * IMPORTANT: queryFn should be wrapped in useCallback by the caller
+ * to prevent unnecessary re-renders. Example:
+ * 
+ * const fetchData = useCallback(async () => {
+ *   // fetch logic
+ * }, [dependencies])
+ * 
+ * useOptimizedQuery(['key'], fetchData)
  */
 
 
@@ -32,17 +40,16 @@ export function useOptimizedQuery<T>(
     ...restOptions
   } = options
 
-  // Memoize query key
+  // Memoize query key to prevent unnecessary re-renders
   const queryKeyString = JSON.stringify(queryKey)
-   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const memoizedKey = useMemo(() => queryKey, [queryKeyString])
 
-  // Memoize query function - queryFn is expected to be stable
-  const memoizedFn = useCallback(queryFn, [queryFn])
-
+  // Note: queryFn should already be wrapped in useCallback by the caller
+  // React Query will handle the memoization internally
   return useQuery<T, Error, T, QueryKey>({
     queryKey: memoizedKey,
-    queryFn: memoizedFn,
+    queryFn,
     gcTime: enableCache ? cacheTime : 0,
     staleTime: enableCache ? staleTime : 0,
     refetchOnWindowFocus: false,
@@ -54,6 +61,7 @@ export function useOptimizedQuery<T>(
 
 /**
  * Optimized mutation hook
+ * Note: mutationFn should be wrapped in useCallback by the caller
  */
 export function useOptimizedMutation<TData, TVariables>(
   mutationFn: (variables: TVariables) => Promise<TData>,
@@ -65,10 +73,8 @@ export function useOptimizedMutation<TData, TVariables>(
 ) {
   const { onSuccess, onError, invalidateQueries = [] } = options
 
-  const memoizedFn = useCallback(mutationFn, [mutationFn])
-
   return {
-    mutate: memoizedFn,
+    mutate: mutationFn,
     onSuccess,
     onError,
     invalidateQueries
@@ -77,6 +83,7 @@ export function useOptimizedMutation<TData, TVariables>(
 
 /**
  * Prefetch query for faster navigation
+ * Note: queryFn should be wrapped in useCallback by the caller
  */
 export function usePrefetchQuery<T>(
   queryKey: string[],
@@ -84,12 +91,12 @@ export function usePrefetchQuery<T>(
   enabled = true
 ) {
   const queryKeyString = JSON.stringify(queryKey)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const memoizedKey = useMemo(() => queryKey, [queryKeyString])
-  const memoizedFn = useCallback(queryFn, [queryFn])
 
   return useQuery({
     queryKey: memoizedKey,
-    queryFn: memoizedFn,
+    queryFn,
     enabled,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000
@@ -109,8 +116,9 @@ export function useOptimizedInfiniteQuery<T>(
 ) {
   const { pageSize = 20, enabled = true } = options
 
-  const queryKeyString2 = JSON.stringify(queryKey)
-  const memoizedKey = useMemo(() => queryKey, [queryKeyString2])
+  const queryKeyString = JSON.stringify(queryKey)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const memoizedKey = useMemo(() => queryKey, [queryKeyString])
 
   return {
     queryKey: memoizedKey,

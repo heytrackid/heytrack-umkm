@@ -9,6 +9,12 @@ const withBundleAnalyzer =
     ? require('@next/bundle-analyzer')({ enabled: true })
     : (config: NextConfig) => config
 
+const buildIdTimestamp = Date.now()
+const resolvedBuildId =
+  process.env['VERCEL_GIT_COMMIT_SHA']?.slice(0, 10) ??
+  process.env['NEXT_BUILD_ID'] ??
+  `build-${buildIdTimestamp}`
+
 const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true, // Ignore Supabase type issues in build
@@ -23,8 +29,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
   output: 'standalone',
-  generateBuildId: async () =>
-    process.env['VERCEL_GIT_COMMIT_SHA']?.slice(0, 10) || `build-${Date.now()}`,
+  generateBuildId: async () => resolvedBuildId,
 
   // Exclude server-only packages from client bundle
   serverExternalPackages: [
