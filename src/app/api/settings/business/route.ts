@@ -1,136 +1,104 @@
 export const runtime = 'nodejs'
 
-import { isErrorResponse, requireAuth } from '@/lib/api-auth'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
-import { createClient } from '@/utils/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core'
+import type { NextResponse } from 'next/server'
 
-// Validation schema
-const businessSchema = z.object({
-  business_name: z.string().min(1, 'Nama bisnis wajib diisi').max(100),
+const BusinessSchema = z.object({
+  business_name: z.string().min(1).max(100),
   business_type: z.string().optional(),
   address: z.string().optional(),
   business_phone: z.string().optional(),
   tax_id: z.string().optional(),
 })
 
-// GET /api/settings/business - Get business settings
-async function GET(_request: NextRequest): Promise<NextResponse> {
-  try {
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
+// GET /api/settings/business - Get or create business settings
+async function getBusinessHandler(context: RouteContext): Promise<NextResponse> {
+  const { user, supabase } = context
 
-    const supabase = await createClient()
+  const { data: settings, error } = await supabase
+    .from('app_settings' as never)
+    .select('*')
+    .eq('user_id', user.id)
+    .maybeSingle()
 
-    // Get or create business settings using app_settings
-    const { data: settings, error } = await supabase
-      .from('app_settings')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('settings_data->>type', 'business')
-      .maybeSingle()
-
-    if (error) {
-      throw error
-    }
-
-    if (!settings) {
-      // Settings don't exist, create default
-      const { data: newSettings, error: insertError } = await supabase
-        .from('app_settings')
-        .insert({
-          user_id: user.id,
-          settings_data: {
-            type: 'business',
-            business_name: '',
-            business_type: '',
-            address: '',
-            business_phone: '',
-            tax_id: ''
-          }
-        })
-        .select()
-        .single()
-
-      if (insertError) throw insertError
-
-      return NextResponse.json({
-        success: true,
-        data: newSettings,
-      })
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: settings,
-    })
-  } catch (error) {
-    return handleAPIError(error, 'GET /api/settings/business')
+  if (error) {
+    return createErrorResponse('Failed to fetch settings', 500)
   }
-}
 
-// PUT /api/settings/business - Update business settings
-async function PUT(request: NextRequest): Promise<NextResponse> {
-  try {
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
-
-    const body = await request.json()
-    const validation = businessSchema.safeParse(body)
-
-    if (!validation.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Data tidak valid',
-          details: validation.error.issues,
-        },
-        { status: 400 }
-      )
-    }
-
-    const supabase = await createClient()
-
-    // Upsert business settings
-    const { data, error } = await supabase
-      .from('app_settings')
-      .upsert(
-        {
-          user_id: user.id,
-          settings_data: {
-            type: 'business',
-            ...validation.data,
-          }
-        },
-        {
-          onConflict: 'user_id',
-          ignoreDuplicates: false
+  if (!settings) {
+    // Create default settings
+    const { data: newSettings, error: insertError } = await supabase
+      .from('app_settings' as never)
+      .insert({
+        user_id: user.id,
+        settings_data: {
+          type: 'business',
+          business_name: '',
+          business_type: '',
+          address: '',
+          business_phone: '',
+          tax_id: ''
         }
-      )
+      } as never)
       .select()
       .single()
 
-    if (error) throw error
+    if (insertError) {
+      return createErrorResponse('Failed to create settings', 500)
+    }
 
-    return NextResponse.json({
-      success: true,
-      data,
-      message: 'Pengaturan bisnis berhasil diperbarui',
-    })
-  } catch (error) {
-    return handleAPIError(error, 'PUT /api/settings/business')
+    return createSuccessResponse(newSettings)
   }
+
+  return createSuccessResponse(settings)
 }
 
-const securedGET = withSecurity(GET, SecurityPresets.enhanced())
-const securedPUT = withSecurity(PUT, SecurityPresets.enhanced())
+export const GET = createApiRoute(
+  {
+    method: 'GET',
+    path: '/api/settings/business',
+  },
+  getBusinessHandler
+)
 
-export { securedGET as GET, securedPUT as PUT }
+// PUT /api/settings/business - Update business settings
+async function updateBusinessHandler(
+  context: RouteContext,
+  _query?: never,
+  body?: z.infer<typeof BusinessSchema>
+): Promise<NextResponse> {
+  const { user, supabase } = context
+
+  if (!body) {
+    return createErrorResponse('Request body is required', 400)
+  }
+
+  const { data, error } = await supabase
+    .from('app_settings' as never)
+    .update({
+      settings_data: {
+        type: 'business',
+        ...body
+      }
+    } as never)
+    .eq('user_id', user.id)
+    .select()
+    .single()
+
+  if (error) {
+    return createErrorResponse('Failed to update settings', 500)
+  }
+
+  return createSuccessResponse(data, 'Business settings updated successfully')
+}
+
+export const PUT = createApiRoute(
+  {
+    method: 'PUT',
+    path: '/api/settings/business',
+    bodySchema: BusinessSchema,
+  },
+  updateBusinessHandler
+)
