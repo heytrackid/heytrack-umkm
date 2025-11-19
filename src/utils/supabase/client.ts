@@ -7,19 +7,19 @@ const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL']!
 const supabaseAnonKey = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY']!
 
 /**
- * Create Supabase client for client-side usage with Stack Auth integration
- * Automatically injects JWT token for RLS authentication
+ * Create Supabase client for client-side usage
+ * Note: Auth token injection happens via middleware/interceptors
  */
-export function createClient() {
-  return createBrowserClient<Database>(
-    supabaseUrl,
-    supabaseAnonKey,
-    {
-      global: {
-        headers: {
-          // Headers will be set dynamically via auth state changes
-        }
+export function createClient(accessToken?: string | null) {
+  const options: any = {}
+  
+  if (accessToken) {
+    options.global = {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
       }
     }
-  )
+  }
+
+  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey, options)
 }
