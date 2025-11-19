@@ -2,6 +2,7 @@ import { StackProvider, StackTheme } from "@stackframe/stack";
 import { Analytics } from '@vercel/analytics/next';
 import { Poppins } from 'next/font/google';
 import { stackServerApp } from "../stack/server";
+import { Suspense } from 'react';
 
 import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary';
 import { ThemeProvider } from '@/components/providers/theme-provider';
@@ -70,37 +71,39 @@ const RootLayout = async ({
         className={`${poppins.variable} antialiased min-h-[100svh] m-0 p-0 w-full font-sans`}
         suppressHydrationWarning
       ><StackProvider app={stackServerApp}><StackTheme>
-        <SupabaseProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="dark"
-              enableSystem={false}
-              disableTransitionOnChange
-            >
-              <QueryProvider>
-                <SettingsProvider>
-                  <SWRProvider>
-                     <PreloadingProvider
-                       enableSmartPreloading={false}
-                       enableIdlePreloading={false}
-                       enableNetworkAware={false}
-                       debug={false}
-                       >
-                         <GlobalErrorBoundary>
-                       {/* Header temporarily disabled during development */}
-                      {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
-                      <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm font-medium text-orange-700 dark:text-orange-300">
-                        🚧 Development Mode - Auth Disabled
-                      </div>
-                    </header> */}
-                       {children}
-                         </GlobalErrorBoundary>
-                       </PreloadingProvider>
-                     </SWRProvider>
-                   </SettingsProvider>
-                 </QueryProvider>
-               </ThemeProvider>
-           </SupabaseProvider>
+        <Suspense fallback={null}>
+          <SupabaseProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="dark"
+                enableSystem={false}
+                disableTransitionOnChange
+              >
+                <QueryProvider>
+                  <SettingsProvider>
+                    <SWRProvider>
+                      <PreloadingProvider
+                        enableSmartPreloading={false}
+                        enableIdlePreloading={false}
+                        enableNetworkAware={false}
+                        debug={false}
+                        >
+                          <GlobalErrorBoundary>
+                        {/* Header temporarily disabled during development */}
+                        {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
+                        <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm font-medium text-orange-700 dark:text-orange-300">
+                          🚧 Development Mode - Auth Disabled
+                        </div>
+                      </header> */}
+                        {children}
+                          </GlobalErrorBoundary>
+                        </PreloadingProvider>
+                      </SWRProvider>
+                    </SettingsProvider>
+                  </QueryProvider>
+                </ThemeProvider>
+            </SupabaseProvider>
+          </Suspense>
          <Analytics />
          <Toaster />
       </StackTheme></StackProvider></body>
