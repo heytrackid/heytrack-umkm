@@ -453,6 +453,18 @@ export const SecurityPresets = {
     checkForXSS: false         // Explicit: No XSS checks (prevents body consumption)
   }),
 
+  // Polling security for high-frequency endpoints (notifications, polling, etc)
+  polling: (): SecurityConfig => ({
+    sanitizeInputs: true,
+    sanitizeQueryParams: true,
+    validateContentType: true,
+    allowedContentTypes: ['application/json'],
+    enableCSRFProtection: true,
+    rateLimit: { maxRequests: 300, windowMs: 15 * 60 * 1000 }, // 300 requests per 15 minutes (20/sec)
+    checkForSQLInjection: false, // Explicit: No SQL injection checks
+    checkForXSS: false         // Explicit: No XSS checks
+  }),
+
   // Enhanced security for sensitive routes - WITH deep body inspection
   enhanced: (): SecurityConfig => ({
     sanitizeInputs: true,

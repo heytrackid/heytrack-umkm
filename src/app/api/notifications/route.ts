@@ -46,7 +46,7 @@ export const GET = createApiRoute(
   {
     method: 'GET',
     path: '/api/notifications',
-    securityPreset: SecurityPresets.basic(), // Use basic preset to avoid aggressive rate limiting
+    securityPreset: SecurityPresets.polling(), // Use polling preset for high-frequency requests
   },
   getNotificationsHandler
 )
@@ -100,7 +100,7 @@ export const PATCH = createApiRoute(
     method: 'PATCH',
     path: '/api/notifications',
     bodySchema: MarkReadSchema,
-    securityPreset: SecurityPresets.basic(), // Use basic preset to avoid aggressive rate limiting
+    securityPreset: SecurityPresets.polling(), // Use polling preset for high-frequency requests
   },
   markReadHandler
 )

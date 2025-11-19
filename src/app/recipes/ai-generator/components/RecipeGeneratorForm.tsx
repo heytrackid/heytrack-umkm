@@ -224,14 +224,28 @@ const RecipeGeneratorForm = ({
           <Textarea
             placeholder="Contoh: coklat premium, keju cheddar, kismis"
             value={selectedIngredients.join(', ')}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setSelectedIngredients(
-              e.target.value.split(',').map(s => s.trim()).filter(Boolean)
-            )}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+              const rawValue = e.target.value
+              const parsed = rawValue
+                .split(',')
+                .map((item: string) => item.trim())
+                .filter((item: string) => item.length > 0)
+              setSelectedIngredients(parsed)
+            }}
+            onBlur={(e: React.FocusEvent<HTMLTextAreaElement>) => {
+              const rawValue = e.target.value
+              const parsed = rawValue
+                .split(',')
+                .map((item: string) => item.trim())
+                .filter((item: string) => item.length > 0)
+              setSelectedIngredients(parsed)
+            }}
             rows={3}
             className={selectedIngredients.length === 0 ? "border-red-500 focus:border-red-500" : ""}
+            disabled={false}
           />
           <p className="text-xs text-muted-foreground">
-            Pisahkan dengan koma. AI akan prioritaskan bahan ini.
+            Pisahkan dengan koma (contoh: tepung terigu, gula pasir, telur ayam). Dukungan simbol & spasi penuh.
           </p>
           {selectedIngredients.length === 0 && (
             <p className="text-sm text-red-500">Pilih minimal 1 bahan untuk generate resep</p>
