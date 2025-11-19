@@ -360,39 +360,69 @@ const AIRecipeGeneratorPage = () => {
         {/* Wizard Progress Indicator */}
         <Card className="mb-6">
           <CardContent className="pt-6">
-            {/* Mobile: Vertical Stack */}
-            <div className="lg:hidden space-y-4 mb-4">
-              {wizardSteps.map((step, index) => (
-                <div key={step.id} className="flex items-center space-x-3">
-                  <div
-                    className={`flex items-center justify-center w-10 h-10 rounded-full border-2 cursor-pointer transition-all ${getStepClassName(step.id)}`}
-                    onClick={() => handleStepClick(step.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        handleStepClick(step.id)
-                      }
-                    }}
-                    role="button"
-                    tabIndex={0}
-                  >
-                    {step.id < currentStep ? (
-                      <CheckCircle className="h-5 w-5" />
-                    ) : (
-                      <span className="text-sm font-medium">{step.id}</span>
+            {/* Mobile: Vertical Stack (Stacked) */}
+            <div className="lg:hidden flex flex-col space-y-0 mb-4">
+              {wizardSteps.map((step, index) => {
+                const isActive = step.id === currentStep
+                const isCompleted = step.id < currentStep
+
+                return (
+                  <div key={step.id} className="relative pl-4 pb-4 last:pb-0">
+                    {/* Vertical connecting line */}
+                    {index < wizardSteps.length - 1 && (
+                      <div className={`absolute left-[27px] top-10 bottom-0 w-[2px] ${
+                        isCompleted ? 'bg-primary' : 'bg-muted'
+                      }`} />
                     )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className={`text-sm font-medium truncate ${
-                      step.id <= currentStep ? 'text-foreground' : 'text-muted-foreground'
-                    }`}>
-                      {step.title}
+
+                    <div className="flex items-start gap-4 relative">
+                      {/* Step Circle */}
+                      <div
+                        className={`flex items-center justify-center w-6 h-6 rounded-full border-2 cursor-pointer transition-all z-10 mt-0.5 ${
+                          isActive ? 'bg-primary border-primary text-primary-foreground' :
+                          isCompleted ? 'bg-primary border-primary text-primary-foreground' :
+                          'bg-background border-muted text-muted-foreground'
+                        }`}
+                        onClick={() => handleStepClick(step.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            handleStepClick(step.id)
+                          }
+                        }}
+                        role="button"
+                        tabIndex={0}
+                      >
+                        {isCompleted ? (
+                          <CheckCircle className="h-3 w-3" />
+                        ) : (
+                          <span className="text-xs font-bold">{step.id}</span>
+                        )}
+                      </div>
+
+                      {/* Step Content */}
+                      <div 
+                        className={`flex-1 cursor-pointer transition-colors ${
+                          isActive ? 'opacity-100' : 
+                          isCompleted ? 'opacity-80' : 
+                          'opacity-50'
+                        }`}
+                        onClick={() => handleStepClick(step.id)}
+                      >
+                        <div className={`text-sm font-medium ${
+                          isActive ? 'text-foreground' : 'text-muted-foreground'
+                        }`}>
+                          {step.title}
+                        </div>
+                        {isActive && (
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            {step.description}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-xs text-muted-foreground truncate">
-                      {step.description}
-                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
 
             {/* Tablet/Desktop: Horizontal Layout */}
