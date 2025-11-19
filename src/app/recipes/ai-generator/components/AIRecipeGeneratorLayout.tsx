@@ -360,7 +360,43 @@ const AIRecipeGeneratorPage = () => {
         {/* Wizard Progress Indicator */}
         <Card className="mb-6">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between mb-4">
+            {/* Mobile: Vertical Stack */}
+            <div className="lg:hidden space-y-4 mb-4">
+              {wizardSteps.map((step, index) => (
+                <div key={step.id} className="flex items-center space-x-3">
+                  <div
+                    className={`flex items-center justify-center w-10 h-10 rounded-full border-2 cursor-pointer transition-all ${getStepClassName(step.id)}`}
+                    onClick={() => handleStepClick(step.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        handleStepClick(step.id)
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    {step.id < currentStep ? (
+                      <CheckCircle className="h-5 w-5" />
+                    ) : (
+                      <span className="text-sm font-medium">{step.id}</span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className={`text-sm font-medium truncate ${
+                      step.id <= currentStep ? 'text-foreground' : 'text-muted-foreground'
+                    }`}>
+                      {step.title}
+                    </div>
+                    <div className="text-xs text-muted-foreground truncate">
+                      {step.description}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Tablet/Desktop: Horizontal Layout */}
+            <div className="hidden lg:flex items-center justify-between mb-4">
               {wizardSteps.map((step, index) => (
                 <div key={step['id']} className="flex items-center flex-1">
                   <div
@@ -619,29 +655,58 @@ const AIRecipeGeneratorPage = () => {
 
         {/* Wizard Navigation */}
         {!generatedRecipe && (
-          <div className="flex items-center justify-between pt-6 border-t">
-            <Button
-              variant="outline"
-              onClick={handlePrevStep}
-              disabled={currentStep === 1}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Kembali
-            </Button>
-
-            <div className="text-sm text-muted-foreground">
-              Langkah {currentStep} dari {totalSteps}
+          <div className="pt-6 border-t">
+            {/* Mobile: Vertical Stack */}
+            <div className="lg:hidden space-y-4">
+              <div className="text-center text-sm text-muted-foreground">
+                Langkah {currentStep} dari {totalSteps}
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={handlePrevStep}
+                  disabled={currentStep === 1}
+                  className="flex-1 flex items-center justify-center gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Kembali
+                </Button>
+                <Button
+                  onClick={handleNextStep}
+                  disabled={currentStep >= totalSteps || !canProceedToNextStep()}
+                  className="flex-1 flex items-center justify-center gap-2"
+                >
+                  Selanjutnya
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
 
-            <Button
-              onClick={handleNextStep}
-              disabled={currentStep >= totalSteps || !canProceedToNextStep()}
-              className="flex items-center gap-2"
-            >
-              Selanjutnya
-              <ArrowRight className="h-4 w-4" />
-            </Button>
+            {/* Tablet/Desktop: Horizontal Layout */}
+            <div className="hidden lg:flex items-center justify-between">
+              <Button
+                variant="outline"
+                onClick={handlePrevStep}
+                disabled={currentStep === 1}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Kembali
+              </Button>
+
+              <div className="text-sm text-muted-foreground">
+                Langkah {currentStep} dari {totalSteps}
+              </div>
+
+              <Button
+                onClick={handleNextStep}
+                disabled={currentStep >= totalSteps || !canProceedToNextStep()}
+                className="flex items-center gap-2"
+              >
+                Selanjutnya
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         )}
       </div>
