@@ -95,9 +95,9 @@ async function getProfileHandler(context: RouteContext): Promise<NextResponse> {
     
     // Map to UserSettings shape, merging with any app_settings found (unlikely if profile is new, but possible)
     const mappedProfile = {
-        fullName: (newProfile as { full_name?: string; email?: string; role?: string })['full_name'] || '',
-        email: (newProfile as { full_name?: string; email?: string; role?: string }).email || user.email || '',
-        role: (newProfile as { full_name?: string; email?: string; role?: string }).role || 'Owner',
+        fullName: newProfile.full_name || '',
+        email: newProfile.email || user.email || '',
+        role: newProfile.role || 'Owner',
         avatar: null,
         phone: '',
         bio: '',
@@ -108,9 +108,9 @@ async function getProfileHandler(context: RouteContext): Promise<NextResponse> {
   
   // Map to UserSettings shape merging both sources
   const mappedProfile = {
-      fullName: (profile as { full_name?: string; email?: string; role?: string })['full_name'] || userSettings.fullName || '',
-      email: (profile as { full_name?: string; email?: string; role?: string }).email || userSettings.email || user.email || '',
-      role: (profile as { full_name?: string; email?: string; role?: string }).role || userSettings.role || 'Owner',
+      fullName: profile.full_name || userSettings.fullName || '',
+      email: profile.email || userSettings.email || user.email || '',
+      role: profile.role || userSettings.role || 'Owner',
       // Prefer settings for these extended fields
       avatar: userSettings.avatar || null,
       phone: userSettings.phone || '',
