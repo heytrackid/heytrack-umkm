@@ -170,7 +170,10 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
           </BreadcrumbList>
         </Breadcrumb>
 
-
+        <PageHeader
+          title="Laporan"
+          description="Lihat laporan bisnis Anda"
+        />
 
         {/* Summary Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

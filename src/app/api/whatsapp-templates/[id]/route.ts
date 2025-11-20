@@ -22,7 +22,7 @@ export const GET = createApiRoute(
   },
   createGetHandler({
     table: 'whatsapp_templates',
-    selectFields: 'id, user_id, name, message, category, template_content, is_active, is_default, created_at, updated_at',
+    selectFields: 'id, user_id, name, category, template_content, description, variables, is_active, is_default, created_at, updated_at',
   })
 )
 
@@ -36,7 +36,7 @@ export const PUT = createApiRoute(
   createUpdateHandler(
     {
       table: 'whatsapp_templates',
-      selectFields: 'id, user_id, name, message, category, template_content, is_active, is_default, updated_at',
+      selectFields: 'id, user_id, name, category, template_content, description, variables, is_active, is_default, updated_at',
     },
     'Template updated successfully'
   )

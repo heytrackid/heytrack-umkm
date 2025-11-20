@@ -15,7 +15,7 @@ export const GET = createApiRoute(
   },
   createListHandler({
     table: 'whatsapp_templates',
-    selectFields: 'id, user_id, name, message, category, template_content, is_active, is_default, created_at, updated_at',
+    selectFields: 'id, user_id, name, category, template_content, description, variables, is_active, is_default, created_at, updated_at',
     defaultSort: 'created_at',
     defaultOrder: 'desc',
     searchFields: ['name', 'category'],

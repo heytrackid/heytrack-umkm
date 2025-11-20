@@ -6,6 +6,7 @@ import { ArrowDownIcon, ArrowUpIcon, DollarSign, Filter, Plus, Search, TrendingD
 import { useCallback, useEffect, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -16,6 +17,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useCurrency } from '@/hooks/useCurrency'
+import { useFinancialRecords, useCreateFinancialRecord } from '@/hooks/useFinancialRecords'
 import { toast } from 'sonner'
 import { apiLogger } from '@/lib/logger'
 
@@ -40,13 +42,22 @@ interface CashFlowSummary {
 const CashFlowPage = () => {
   const { formatCurrency } = useCurrency()
 
-
-  const [records, setRecords] = useState<FinancialRecord[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [dateFilter, setDateFilter] = useState<string>('all')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+
+  // React Query hooks
+  const createMutation = useCreateFinancialRecord()
+
+  // Build query parameters for filtering
+  const queryParams = {
+    ...(typeFilter !== 'all' && typeFilter === 'income' && { type: 'income' as const }),
+    ...(typeFilter !== 'all' && typeFilter === 'expense' && { type: 'expense' as const }),
+    ...(searchTerm && { search: searchTerm }),
+  }
+
+  const { data: records = [], isLoading: loading, error } = useFinancialRecords(queryParams)
 
   // Form state for new transaction
   const [newTransaction, setNewTransaction] = useState({
@@ -57,117 +68,58 @@ const CashFlowPage = () => {
     date: new Date().toISOString().split('T')[0]
   })
 
-  const fetchRecords = useCallback(async () => {
-    try {
-      setLoading(true)
-      const params = new URLSearchParams()
-
-      if (dateFilter !== 'all') {
-        const today = new Date()
-        const startDate = new Date()
-
-        switch (dateFilter) {
-          case 'today':
-            // startDate is already today
-            break
-          case 'week':
-            startDate.setDate(today.getDate() - 7)
-            break
-          case 'month':
-            startDate.setMonth(today.getMonth() - 1)
-            break
-          case 'quarter':
-            startDate.setMonth(today.getMonth() - 3)
-            break
-          case 'year':
-            startDate.setFullYear(today.getFullYear() - 1)
-            break
-        }
-
-        params.set('start_date', startDate.toISOString().split('T')[0])
-        params.set('end_date', today.toISOString().split('T')[0])
-      }
-
-      if (typeFilter !== 'all') {
-        params.set('type', typeFilter)
-      }
-
-      const response = await fetch(`/api/financial/records?${params.toString()}`)
-      if (response.ok) {
-        const result = await response.json()
-        if (result.success && Array.isArray(result.data)) {
-          setRecords(result.data)
-        }
-      }
-    } catch (error) {
-      apiLogger.error({ error }, 'Error fetching financial records')
-      toast.error('Gagal memuat data arus kas')
-    } finally {
-      setLoading(false)
-    }
-  }, [dateFilter, typeFilter])
-
-  useEffect(() => {
-    fetchRecords()
-  }, [fetchRecords])
+  // Note: Date filtering is not yet implemented in the hook
+  // TODO: Add date range filtering to useFinancialRecords hook
 
   const handleAddTransaction = async () => {
     try {
       if (!newTransaction.description || !newTransaction.category || !newTransaction.amount) {
         toast.error('Mohon lengkapi semua field')
         return
+  }
+
+      const transactionData = {
+        type: newTransaction.type.toUpperCase() as 'INCOME' | 'EXPENSE',
+        description: newTransaction.description,
+        category: newTransaction.category,
+        amount: parseFloat(newTransaction.amount),
+        date: newTransaction.date,
+        user_id: 'current-user' // This should be from auth context
       }
 
-      const response = await fetch('/api/financial/records', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          type: newTransaction.type,
-          description: newTransaction.description,
-          category: newTransaction.category,
-          amount: parseFloat(newTransaction.amount),
-          date: newTransaction.date
-        })
+      await createMutation.mutateAsync(transactionData)
+
+      setIsAddDialogOpen(false)
+      setNewTransaction({
+        type: 'EXPENSE',
+        description: '',
+        category: '',
+        amount: '',
+        date: new Date().toISOString().split('T')[0]
       })
-
-      if (response.ok) {
-        toast.success('Transaksi berhasil ditambahkan')
-        setIsAddDialogOpen(false)
-        setNewTransaction({
-          type: 'EXPENSE',
-          description: '',
-          category: '',
-          amount: '',
-          date: new Date().toISOString().split('T')[0]
-        })
-        fetchRecords()
-      } else {
-        throw new Error('Failed to add transaction')
-      }
     } catch (error) {
+      // Error handling is done by the mutation
       toast.error('Gagal menambahkan transaksi')
     }
   }
 
-  const filteredRecords = records.filter(record => {
+  const filteredRecords = records.filter((record: FinancialRecord) => {
     const matchesSearch = record.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          record.category.toLowerCase().includes(searchTerm.toLowerCase())
     return matchesSearch
   })
 
   const summary: CashFlowSummary = {
-    totalIncome: filteredRecords.filter(r => r.type === 'INCOME').reduce((sum, r) => sum + r.amount, 0),
-    totalExpenses: filteredRecords.filter(r => r.type === 'EXPENSE').reduce((sum, r) => sum + r.amount, 0),
+    totalIncome: filteredRecords.filter((r: FinancialRecord) => r.type === 'INCOME').reduce((sum: number, r: FinancialRecord) => sum + r.amount, 0),
+    totalExpenses: filteredRecords.filter((r: FinancialRecord) => r.type === 'EXPENSE').reduce((sum: number, r: FinancialRecord) => sum + r.amount, 0),
     netCashFlow: 0,
     transactionCount: filteredRecords.length
   }
   summary.netCashFlow = summary.totalIncome - summary.totalExpenses
 
   const expenseCategories = filteredRecords
-    .filter(r => r.type === 'EXPENSE')
-    .reduce((acc, r) => {
+    .filter((r: FinancialRecord) => r.type === 'EXPENSE')
+    .reduce((acc: Record<string, number>, r: FinancialRecord) => {
       acc[r.category] = (acc[r.category] || 0) + r.amount
       return acc
     }, {} as Record<string, number>)
@@ -175,86 +127,80 @@ const CashFlowPage = () => {
   return (
     <AppLayout pageTitle="Arus Kas">
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
-              <DollarSign className="h-7 w-7 sm:h-8 sm:w-8 text-green-600" aria-label="Arus Kas" />
-              Arus Kas
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Kelola pemasukan dan pengeluaran bisnis Anda
-            </p>
-          </div>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Tambah Transaksi
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Tambah Transaksi Baru</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium">Tipe Transaksi</label>
-                  <Select
-                    value={newTransaction.type}
-                    onValueChange={(value: 'INCOME' | 'EXPENSE') => setNewTransaction(prev => ({ ...prev, type: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="INCOME">Pemasukan</SelectItem>
-                      <SelectItem value="EXPENSE">Pengeluaran</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Deskripsi</label>
-                  <Input
-                    value={newTransaction.description}
-                    onChange={(e) => setNewTransaction(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Deskripsi transaksi"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Kategori</label>
-                  <Input
-                    value={newTransaction.category}
-                    onChange={(e) => setNewTransaction(prev => ({ ...prev, category: e.target.value }))}
-                    placeholder="Kategori (contoh: Operasional, Penjualan)"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Jumlah</label>
-                  <Input
-                    type="number"
-                    value={newTransaction.amount}
-                    onChange={(e) => setNewTransaction(prev => ({ ...prev, amount: e.target.value }))}
-                    placeholder="0"
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Tanggal</label>
-                  <Input
-                    type="date"
-                    value={newTransaction.date}
-                    onChange={(e) => setNewTransaction(prev => ({ ...prev, date: e.target.value }))}
-                  />
-                </div>
-                <Button onClick={handleAddTransaction} className="w-full">
-                  Simpan Transaksi
+        <PageHeader
+          title="Arus Kas"
+          description="Kelola pemasukan dan pengeluaran bisnis Anda"
+          action={
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Tambah Transaksi
                 </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Tambah Transaksi Baru</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">Tipe Transaksi</label>
+                    <Select
+                      value={newTransaction.type}
+                      onValueChange={(value: 'INCOME' | 'EXPENSE') => setNewTransaction(prev => ({ ...prev, type: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="INCOME">Pemasukan</SelectItem>
+                        <SelectItem value="EXPENSE">Pengeluaran</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Deskripsi</label>
+                    <Input
+                      value={newTransaction.description}
+                      onChange={(e) => setNewTransaction(prev => ({ ...prev, description: e.target.value }))}
+                      placeholder="Deskripsi transaksi"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Kategori</label>
+                    <Input
+                      value={newTransaction.category}
+                      onChange={(e) => setNewTransaction(prev => ({ ...prev, category: e.target.value }))}
+                      placeholder="Kategori (contoh: Operasional, Penjualan)"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Jumlah</label>
+                    <Input
+                      type="number"
+                      value={newTransaction.amount}
+                      onChange={(e) => setNewTransaction(prev => ({ ...prev, amount: e.target.value }))}
+                      placeholder="0"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Tanggal</label>
+                    <Input
+                      type="date"
+                      value={newTransaction.date}
+                      onChange={(e) => setNewTransaction(prev => ({ ...prev, date: e.target.value }))}
+                    />
+                  </div>
+                  <Button onClick={handleAddTransaction} className="w-full">
+                    Simpan Transaksi
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          }
+        />
 
         {/* Summary Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -368,11 +314,11 @@ const CashFlowPage = () => {
             <CardContent>
               <div className="space-y-2">
                 {Object.entries(expenseCategories)
-                  .sort(([,a], [,b]) => b - a)
+                  .sort(([,a], [,b]) => (b as number) - (a as number))
                   .map(([category, amount]) => (
                     <div key={category} className="flex justify-between items-center">
                       <span className="text-sm">{category}</span>
-                      <span className="font-medium text-red-600">{formatCurrency(amount)}</span>
+                      <span className="font-medium text-red-600">{formatCurrency(amount as number)}</span>
                     </div>
                   ))}
               </div>
@@ -418,7 +364,7 @@ const CashFlowPage = () => {
                        </TableRow>
                      </TableHeader>
                      <TableBody>
-                       {filteredRecords.map((record) => (
+                        {filteredRecords.map((record: FinancialRecord) => (
                          <TableRow key={record.id}>
                            <TableCell>
                              {format(new Date(record.date), 'dd MMM yyyy', { locale: idLocale })}
@@ -443,7 +389,7 @@ const CashFlowPage = () => {
 
                  {/* Mobile Cards */}
                  <div className="md:hidden space-y-3">
-                   {filteredRecords.map((record) => (
+                    {filteredRecords.map((record: FinancialRecord) => (
                      <Card key={record.id} className="p-4">
                        <div className="flex justify-between items-start mb-2">
                          <div>

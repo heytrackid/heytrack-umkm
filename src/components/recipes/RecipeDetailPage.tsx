@@ -27,6 +27,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ListSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
 import { ProductionScaler } from '@/components/recipes/ProductionScaler'
 import { useAuth } from '@/hooks/index'
+import { useRecipe } from '@/hooks/useRecipes'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { toast, errorToast, successToast } from '@/components/ui/toast'
 
@@ -58,69 +59,23 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
     const { user, isLoading: authLoading } = useAuth()
     const { supabase } = useSupabase()
 
-    const [recipe, setRecipe] = useState<RecipeWithIngredients | null>(null)
-    const [loading, setLoading] = useState(true)
+
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const [showCostBreakdown, setShowCostBreakdown] = useState(false)
 
-    const loadRecipe = useCallback(async (userId: string) => {
-        try {
-            setLoading(true)
+    // React Query hook for recipe
+    const { data: recipe, isLoading: loading, error } = useRecipe(recipeId)
 
-            const { data, error } = await supabase
-                .from('recipes')
-                .select(`
-                    *,
-                    instructions,
-                    image_url,
-                    recipe_ingredients (
-                        id,
-                        ingredient_id,
-                        quantity,
-                        unit,
-                        ingredient:ingredients (
-                            id,
-                            name,
-                            price_per_unit,
-                            unit,
-                            weighted_average_cost
-                        )
-                    )
-                `)
-                .eq('id', recipeId)
-                .eq('user_id', userId)
-                .maybeSingle()
-
-            if (error) {
-                throw error
-            }
-
-            if (!data) {
-                setRecipe(null)
-                return
-            }
-
-            setRecipe(data as RecipeWithIngredients)
-        } catch (error) {
-              const message = error instanceof Error ? error.message : 'Gagal memuat resep'
-              errorToast(message)
-              setRecipe(null)
-        } finally {
-            setLoading(false)
-        }
-    }, [recipeId, supabase])
-
+    // Handle error state
     useEffect(() => {
-        if (!user?.id) {
-            if (!authLoading) {
-                setLoading(false)
-                setRecipe(null)
-            }
-            return
+        if (error) {
+            const message = error instanceof Error ? error.message : 'Gagal memuat resep'
+            errorToast(message)
+            router.push('/recipes')
         }
+    }, [error, router])
 
-        void loadRecipe(user['id'])
-    }, [user, authLoading, loadRecipe])
+
 
     const handleDelete = useCallback(async (): Promise<void> => {
         if (!recipe || !user?.id) { 

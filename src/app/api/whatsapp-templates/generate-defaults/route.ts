@@ -54,7 +54,7 @@ async function postHandler(): Promise<NextResponse> {
     // 4. Fetch created templates
     const { data: templates, error: fetchError } = await supabase
       .from('whatsapp_templates')
-      .select('id, user_id, name, message, is_active, created_at, updated_at')
+      .select('id, user_id, name, category, template_content, description, variables, is_active, is_default, created_at, updated_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: true })
 

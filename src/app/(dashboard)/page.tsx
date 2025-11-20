@@ -11,6 +11,7 @@ import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { useDashboardStats } from '@/hooks/api/useDashboard'
 import { AutoSyncFinancialDashboard } from '@/components/dashboard/AutoSyncFinancialDashboard'
 import { MobileHeader } from '@/components/layout/mobile-header'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 import { ProductionScheduleWidget } from '@/components/dashboard/ProductionScheduleWidget'
 import {
@@ -67,22 +68,18 @@ export default function DashboardPage(): JSX.Element {
       <MobileHeader title="Dashboard" showSearch={false} />
       <OnboardingWizard open={onboardingOpen} onOpenChange={setOnboardingOpen} />
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Selamat datang di HeyTrack - Kelola bisnis kuliner Anda
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Link href="/orders/new">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Pesanan Baru
-            </Button>
-          </Link>
-        </div>
-      </div>
+        <PageHeader
+          title="Dashboard"
+          description="Selamat datang di HeyTrack - Kelola bisnis kuliner Anda"
+          action={
+            <Link href="/orders/new">
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Pesanan Baru
+              </Button>
+            </Link>
+          }
+        />
 
       {/* Stats Cards */}
       {statsLoading ? (

@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/select'
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { useSettings } from '@/contexts/settings-context'
+import { useOrders } from '@/hooks/useOrdersQuery'
 import { toast } from 'sonner'
 import { usePagination } from '@/hooks/usePagination'
 
@@ -44,61 +45,31 @@ export const OrdersListWithPagination = (): JSX.Element => {
     const { formatCurrency } = useSettings()
     // const _supabase = createClient()
 
-    // State
-    const [orders, setOrders] = useState<OrderWithItems[]>([])
-    const [loading, setLoading] = useState(true)
+    // State for filters
     const [searchTerm, setSearchTerm] = useState('')
     const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all')
-    const [totalItems, setTotalItems] = useState(0)
 
     // Pagination
     const pagination = usePagination({
         initialPageSize: 10,
-        totalItems,
+        totalItems: 0, // Will be set by the hook
     })
 
-    // Fetch orders
-    const fetchOrders = async () => {
-        try {
-            setLoading(true)
+    // React Query hook for orders
+    const { data: ordersData, isLoading: loading } = useOrders({
+        page: pagination.page,
+        pageSize: pagination.pageSize,
+        searchTerm: searchTerm || '',
+        statusFilter: statusFilter,
+    })
 
-            const params = new URLSearchParams({
-                page: pagination.page.toString(),
-                limit: pagination.pageSize.toString(),
-            })
+    // Extract orders and total count
+    const orders = ordersData?.orders || []
+    const totalItems = ordersData?.totalCount || 0
 
-            if (searchTerm) {
-                params.append('search', searchTerm)
-            }
 
-            if (statusFilter !== 'all') {
-                params.append('status', statusFilter)
-            }
 
-            const response = await fetch(`/api/orders?${params.toString()}`, {
-                credentials: 'include', // Include cookies for authentication
-            })
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch orders')
-            }
-
-            const result = await response.json() as PaginatedResponse<OrderWithItems>
-
-            setOrders(result['data'])
-            setTotalItems(result.meta.total)
-        } catch (error) {
-            toast.error(error instanceof Error ? error.message : 'Gagal memuat data pesanan')
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    // Fetch on mount and when pagination/filters change
-    useEffect(() => {
-        void fetchOrders()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pagination.page, pagination.pageSize, searchTerm, statusFilter])
 
     // Handlers
     const handleSearch = useCallback((value: string) => {
@@ -217,7 +188,7 @@ export const OrdersListWithPagination = (): JSX.Element => {
                  <VirtualizedOrderCards orders={orders} onOrderClick={(orderId) => router.push(`/orders/${orderId}`)} formatCurrency={formatCurrency} />
              ) : (
                  <div className="space-y-3">
-                     {orders.map((order) => (
+                      {orders.map((order: OrderWithItems) => (
                          <Card
                              key={order['id']}
                              className="transition-all cursor-pointer"

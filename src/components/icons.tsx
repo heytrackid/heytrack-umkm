@@ -1,3 +1,6 @@
+'use client';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
 import React from 'react';
