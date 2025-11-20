@@ -240,8 +240,9 @@ export const HppWizardLayout = () => {
             onTouchEnd={onTouchEnd}
           >
             {/* Mobile: Vertical Stack (Stacked) */}
-            <div className="lg:hidden flex flex-col space-y-0 mb-4">
-              {wizardSteps.map((step, index) => {
+            <div className="md:hidden">
+              <div className="flex flex-col space-y-0 mb-4">
+                {wizardSteps.map((step, index) => {
                 const IconComponent = step.icon
                 const isActive = step.id === currentStep
                 const isCompleted = step.id < currentStep
@@ -304,9 +305,10 @@ export const HppWizardLayout = () => {
                 )
               })}
             </div>
+            </div>
 
-            {/* Tablet/Desktop: Horizontal Layout */}
-            <div className="hidden lg:flex items-center justify-between mb-4">
+             {/* Tablet/Desktop: Horizontal Layout */}
+             <div className="hidden md:flex items-center justify-between flex-nowrap mb-4">
               {wizardSteps.map((step, index) => {
                 const IconComponent = step.icon
                 return (
@@ -674,36 +676,9 @@ export const HppWizardLayout = () => {
           </div>
         </div>
 
-        {/* Wizard Navigation */}
-        <div className="pt-6 border-t">
-          {/* Mobile: Vertical Stack */}
-          <div className="lg:hidden space-y-4">
-            <div className="text-center text-sm text-muted-foreground">
-              Langkah {currentStep} dari {totalSteps}
-            </div>
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                onClick={handlePrevStep}
-                disabled={currentStep === 1}
-                className="flex-1 flex items-center justify-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Kembali
-              </Button>
-              <Button
-                onClick={handleNextStep}
-                disabled={currentStep >= totalSteps || !canProceedToNextStep()}
-                className="flex-1 flex items-center justify-center gap-2"
-              >
-                {currentStep === totalSteps ? 'Selesai' : 'Selanjutnya'}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Tablet/Desktop: Horizontal Layout */}
-          <div className="hidden lg:flex items-center justify-between">
+         {/* Wizard Navigation */}
+         <div className="pt-6 border-t">
+           <div className="flex items-center justify-between">
             <Button
               variant="outline"
               onClick={handlePrevStep}
