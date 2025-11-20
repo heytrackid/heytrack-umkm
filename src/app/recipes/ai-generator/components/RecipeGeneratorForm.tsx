@@ -1,3 +1,4 @@
+import React from 'react'
 import { AlertCircle, ChefHat, Loader2, Sparkles, CheckCircle, XCircle } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
@@ -60,12 +61,39 @@ const RecipeGeneratorForm = ({
   const isTargetPriceValid = targetPrice === '' || (!isNaN(parseFloat(targetPrice)) && parseFloat(targetPrice) > 0)
   const isFormValid = isProductNameValid && isProductTypeValid && isServingsValid && isTargetPriceValid && selectedIngredients.length > 0
 
+  const [internalIngredients, setInternalIngredients] = React.useState('')
+
   const toggleDietaryRestriction = (restriction: string) => {
     setDietaryRestrictions(
       dietaryRestrictions.includes(restriction)
         ? dietaryRestrictions.filter(r => r !== restriction)
         : [...dietaryRestrictions, restriction]
     )
+  }
+
+  // Sync internal state when props change (and input is not focused)
+  React.useEffect(() => {
+    const joined = selectedIngredients.join(', ')
+    // Only update if significantly different (e.g. cleared externally) to avoid cursor jumps
+    if (selectedIngredients.length === 0 && internalIngredients.length > 0) {
+        setInternalIngredients('')
+    } else if (selectedIngredients.length > 0 && internalIngredients === '') {
+        setInternalIngredients(joined)
+    }
+  }, [selectedIngredients, internalIngredients])
+  
+  const handleIngredientsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInternalIngredients(e.target.value)
+  }
+
+  const handleIngredientsBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
+    const rawValue = e.target.value
+    const parsed = rawValue
+        .split(',')
+        .map((item: string) => item.trim())
+        .filter((item: string) => item.length > 0)
+    
+    setSelectedIngredients(parsed)
   }
 
   return (
@@ -107,25 +135,13 @@ const RecipeGeneratorForm = ({
         {/* Product Type */}
         <div className="space-y-2">
           <Label htmlFor="productType">Jenis Produk *</Label>
-          <Select value={productType} onValueChange={setProductType}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {[
-                { value: 'bread', label: 'Roti' },
-                { value: 'cake', label: 'Kue' },
-                { value: 'pastry', label: 'Pastry' },
-                { value: 'cookies', label: 'Cookies' },
-                { value: 'donuts', label: 'Donat' },
-                { value: 'other', label: 'Lainnya' }
-              ].map(type => (
-                <SelectItem key={type.value} value={type.value}>
-                  {type.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Input
+            id="productType"
+            placeholder="Contoh: Roti, Kue, Donat"
+            value={productType}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProductType(e.target.value)}
+            className={productType === '' ? "border-red-500 focus:border-red-500" : ""}
+          />
         </div>
 
         {/* Servings */}
@@ -223,25 +239,11 @@ const RecipeGeneratorForm = ({
           </div>
           <Textarea
             placeholder="Contoh: coklat premium, keju cheddar, kismis"
-            value={selectedIngredients.join(', ')}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-              const rawValue = e.target.value
-              const parsed = rawValue
-                .split(',')
-                .map((item: string) => item.trim())
-                .filter((item: string) => item.length > 0)
-              setSelectedIngredients(parsed)
-            }}
-            onBlur={(e: React.FocusEvent<HTMLTextAreaElement>) => {
-              const rawValue = e.target.value
-              const parsed = rawValue
-                .split(',')
-                .map((item: string) => item.trim())
-                .filter((item: string) => item.length > 0)
-              setSelectedIngredients(parsed)
-            }}
+            value={internalIngredients}
+            onChange={handleIngredientsChange}
+            onBlur={handleIngredientsBlur}
             rows={3}
-            className={selectedIngredients.length === 0 ? "border-red-500 focus:border-red-500" : ""}
+            className={selectedIngredients.length === 0 && internalIngredients.length === 0 ? "border-red-500 focus:border-red-500" : ""}
             disabled={false}
           />
           <p className="text-xs text-muted-foreground">
