@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertCircle, ArrowDownIcon, ArrowUpIcon, Calendar, CheckCircle, DollarSign, Filter, Package, ShoppingCart, TrendingUp } from 'lucide-react'
+import { AlertCircle, ArrowDownIcon, ArrowUpIcon, Calendar, CheckCircle, DollarSign, Filter, Package, ShoppingCart, TrendingUp } from '@/components/icons'
 import dynamic from 'next/dynamic'
 import { useEffect, useState, type ReactNode } from 'react'
 

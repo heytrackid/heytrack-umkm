@@ -1,7 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-import { CheckCircle, ChefHat, Pause, Play, Timer } from 'lucide-react'
+import { CheckCircle, ChefHat, Pause, Play, Timer } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

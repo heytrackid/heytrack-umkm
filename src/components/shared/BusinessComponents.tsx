@@ -11,7 +11,7 @@ import {
     TrendingDown,
     TrendingUp,
     Users
-} from 'lucide-react'
+} from '@/components/icons'
 import { type ReactNode, useMemo } from 'react'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'

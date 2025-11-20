@@ -1,4 +1,4 @@
-import { Bot, Sparkles } from 'lucide-react'
+import { Bot, Sparkles } from '@/components/icons'
 import React, { useState, useEffect } from 'react'
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'

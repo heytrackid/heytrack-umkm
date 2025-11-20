@@ -1,6 +1,6 @@
 'use client'
 
-import { DollarSign, Package, TrendingUp, Upload, Users } from 'lucide-react'
+import { DollarSign, Package, TrendingUp, Upload, Users } from '@/components/icons'
 import { useState } from 'react'
 
 import { SuppliersCRUD } from '@/components/crud/suppliers-crud'

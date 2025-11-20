@@ -11,7 +11,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { useRecipes } from '@/hooks/api/use-recipes'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2 } from '@/components/icons'
 import { useState } from 'react'
 
 interface OrderItem {

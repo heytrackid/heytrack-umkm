@@ -2,7 +2,7 @@
 
 // Using Pino logger for all logging
 import { useQuery } from '@tanstack/react-query'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle } from '@/components/icons'
 import dynamic from 'next/dynamic'
 import { memo, useCallback, useState, type FormEvent } from 'react'
 

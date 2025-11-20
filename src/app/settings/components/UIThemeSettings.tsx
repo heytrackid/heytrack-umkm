@@ -1,6 +1,6 @@
 'use client'
 
-import { Palette } from 'lucide-react'
+import { Palette } from '@/components/icons'
 
 import type {
   AppSettingsState,

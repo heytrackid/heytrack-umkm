@@ -1,4 +1,4 @@
-import { Package, PackageCheck, AlertTriangle, ShoppingCart } from 'lucide-react'
+import { Package, PackageCheck, AlertTriangle, ShoppingCart } from '@/components/icons'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'

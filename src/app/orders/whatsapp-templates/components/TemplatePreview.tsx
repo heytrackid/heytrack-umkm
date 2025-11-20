@@ -1,6 +1,6 @@
 'use client'
 
-import { MessageCircle, RefreshCw } from 'lucide-react'
+import { MessageCircle, RefreshCw } from '@/components/icons'
 import { useState } from 'react'
 
 import { TEMPLATE_CATEGORIES, AVAILABLE_VARIABLES, type WhatsAppTemplate } from '@/app/orders/whatsapp-templates/components/types'

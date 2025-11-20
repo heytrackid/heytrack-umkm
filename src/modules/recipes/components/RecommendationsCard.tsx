@@ -1,6 +1,6 @@
 'use client'
 
-import { Lightbulb, Info } from 'lucide-react'
+import { Lightbulb, Info } from '@/components/icons'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

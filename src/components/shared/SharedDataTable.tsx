@@ -9,7 +9,7 @@ import {
   MoreVertical,
   Download,
   RefreshCw
-} from 'lucide-react'
+} from '@/components/icons'
 import { type ReactNode, useEffect, useState, useMemo } from 'react'
 
 import { Button } from '@/components/ui/button'

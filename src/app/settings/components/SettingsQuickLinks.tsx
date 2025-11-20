@@ -1,6 +1,6 @@
 'use client'
 
-import { Bell, Volume2 } from 'lucide-react'
+import { Bell, Volume2 } from '@/components/icons'
 import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'

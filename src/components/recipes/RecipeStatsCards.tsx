@@ -1,6 +1,6 @@
 'use client'
 
-import { ChefHat, TrendingUp, Calculator, BarChart3 } from 'lucide-react'
+import { ChefHat, TrendingUp, Calculator, BarChart3 } from '@/components/icons'
 
 import { Card, CardContent } from '@/components/ui/card'
 

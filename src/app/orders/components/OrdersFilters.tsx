@@ -1,7 +1,7 @@
 'use client'
 
 
-import { Search, Calendar } from 'lucide-react'
+import { Search, Calendar } from '@/components/icons'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'

@@ -1,6 +1,6 @@
 'use client'
 
-import { Calculator, TrendingUp, BarChart3, Bell, Plus, ArrowRight, Lightbulb } from 'lucide-react'
+import { Calculator, TrendingUp, BarChart3, Bell, Plus, ArrowRight, Lightbulb } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'

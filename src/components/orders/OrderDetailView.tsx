@@ -15,7 +15,7 @@ import {
     AlertCircle,
     Printer,
     Share2
-} from 'lucide-react'
+} from '@/components/icons'
 import { useState } from 'react'
 
 import type { OrderWithRelations } from '@/app/orders/types/orders.types'

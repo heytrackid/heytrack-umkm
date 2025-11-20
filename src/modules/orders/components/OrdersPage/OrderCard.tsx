@@ -1,6 +1,6 @@
 'use client'
 
-import { Edit, Eye } from 'lucide-react'
+import { Edit, Eye } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

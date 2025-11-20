@@ -1,7 +1,7 @@
 // Customer Search and Filters Component - Lazy Loaded
 // Handles search functionality and bulk actions for customers
 
-import { Edit2, Search, Trash2 } from 'lucide-react'
+import { Edit2, Search, Trash2 } from '@/components/icons'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

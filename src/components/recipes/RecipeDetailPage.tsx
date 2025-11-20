@@ -14,7 +14,7 @@ import {
     Factory,
     ChevronDown,
     ChevronUp,
-} from 'lucide-react'
+} from '@/components/icons'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'

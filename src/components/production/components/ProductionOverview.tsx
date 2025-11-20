@@ -1,4 +1,4 @@
-import { CheckCircle, Clock, Play } from 'lucide-react'
+import { CheckCircle, Clock, Play } from '@/components/icons'
 
 import { Card, CardContent } from '@/components/ui/card'
 

@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import { CheckCircle } from 'lucide-react'
+import { CheckCircle } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

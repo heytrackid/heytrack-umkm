@@ -7,7 +7,7 @@ import {
     Search,
     User,
     X
-} from 'lucide-react'
+} from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { type FormEvent, type ReactNode, useCallback, useEffect, useState } from 'react'
 

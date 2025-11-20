@@ -1,6 +1,6 @@
 'use client'
 
-import { HelpCircle } from 'lucide-react'
+import { HelpCircle } from '@/components/icons'
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 

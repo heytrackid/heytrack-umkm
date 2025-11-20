@@ -1,6 +1,6 @@
 'use client'
 
-import { BookOpen, Package, Plus, Video } from 'lucide-react'
+import { BookOpen, Package, Plus, Video } from '@/components/icons'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'

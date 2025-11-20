@@ -8,7 +8,7 @@ import {
     Package,
     XCircle,
     Truck
-} from 'lucide-react'
+} from '@/components/icons'
 import { memo } from 'react'
 
 import { Badge } from '@/components/ui/badge'

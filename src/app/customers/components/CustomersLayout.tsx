@@ -3,7 +3,7 @@
 
 'use client'
 
-import { Plus } from 'lucide-react'
+import { Plus } from '@/components/icons'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'

@@ -1,6 +1,6 @@
 'use client'
 
-import { Clock, DollarSign, Phone, Eye, Edit, Trash2 } from 'lucide-react'
+import { Clock, DollarSign, Phone, Eye, Edit, Trash2 } from '@/components/icons'
 import { memo, useMemo } from 'react'
 
 import { Badge } from '@/components/ui/badge'

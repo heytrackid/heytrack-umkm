@@ -1,6 +1,6 @@
 'use client'
 
-import { ChefHat, Sparkles, Package, Save, RotateCcw } from 'lucide-react'
+import { ChefHat, Sparkles, Package, Save, RotateCcw } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -48,10 +48,11 @@ const AIRecipeGeneratorPage = () => {
   const [loading, setLoading] = useState(false)
   const [generatedRecipe, setGeneratedRecipe] = useState<GeneratedRecipe | null>(null)
 
-  // UI state
-  const [activeTab, setActiveTab] = useState<'input' | 'preview'>('input')
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+   // UI state
+   const [activeTab, setActiveTab] = useState<'input' | 'preview'>('input')
+   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+   const [lastSaved, setLastSaved] = useState<Date | null>(null)
+   const [uiError, setUiError] = useState<string | null>(null)
 
   // Enhanced form validation
   const isProductNameValid = productName.trim().length >= 3
@@ -378,8 +379,7 @@ const AIRecipeGeneratorPage = () => {
     )
   }
 
-  // Error state for UI errors
-  const [uiError, setUiError] = useState<string | null>(null)
+
 
   return (
     <AppLayout>

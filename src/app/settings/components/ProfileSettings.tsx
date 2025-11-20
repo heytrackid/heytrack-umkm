@@ -1,6 +1,6 @@
 'use client'
 
-import { User, Upload } from 'lucide-react'
+import { User, Upload } from '@/components/icons'
 
 import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 import { Button } from '@/components/ui/button'

@@ -1,6 +1,6 @@
 'use client'
 
-import { BarChart3, Calendar, Download, FileImage, FileSpreadsheet, FileText, LineChart, Table, TrendingUp, type LucideIcon } from 'lucide-react'
+import { BarChart3, Calendar, Download, FileImage, FileSpreadsheet, FileText, LineChart, Table, TrendingUp, type LucideIcon } from '@/components/icons'
 import { useState } from 'react'
 import { type DateRange } from 'react-day-picker'
 

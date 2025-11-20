@@ -1,6 +1,6 @@
 'use client'
 
-import { Bot, DollarSign, Maximize2, MessageCircle, Minimize2, Package, Send, Trash2, TrendingUp, User, Users } from 'lucide-react';
+import { Bot, DollarSign, Maximize2, MessageCircle, Minimize2, Package, Send, Trash2, TrendingUp, User, Users } from '@/components/icons';
 import { useEffect, useRef, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';

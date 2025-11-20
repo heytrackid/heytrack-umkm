@@ -10,7 +10,7 @@ import {
   ChevronUp,
   SortAsc,
   SortDesc
-} from 'lucide-react'
+} from '@/components/icons'
 import { useState, useEffect, type ReactNode } from 'react'
 
 import { Badge } from '@/components/ui/badge'

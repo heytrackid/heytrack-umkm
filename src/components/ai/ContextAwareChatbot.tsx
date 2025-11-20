@@ -1,5 +1,5 @@
 'use client'
-import { MessageCircle, Send, Loader2, Plus, History, Sparkles, AlertCircle, Bot, User, X, Minimize2, Maximize2 } from 'lucide-react'
+import { MessageCircle, Send, Loader2, Plus, History, Sparkles, AlertCircle, Bot, User, X, Minimize2, Maximize2 } from '@/components/icons'
 import { useState, useRef, useEffect, type FormEvent } from 'react'
 
 import { Badge } from '@/components/ui/badge'

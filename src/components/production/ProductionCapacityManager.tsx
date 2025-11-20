@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertCircle, Clock, Minus, Plus, RotateCcw, Save, Settings, TrendingUp, Users, Zap } from 'lucide-react'
+import { AlertCircle, Clock, Minus, Plus, RotateCcw, Save, Settings, TrendingUp, Users, Zap } from '@/components/icons'
 import { useCallback, useEffect, useState } from 'react'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'

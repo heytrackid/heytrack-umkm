@@ -1,6 +1,6 @@
 'use client'
 
-import { Receipt, Plus, Zap, Lightbulb } from 'lucide-react'
+import { Receipt, Plus, Zap, Lightbulb } from '@/components/icons'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'

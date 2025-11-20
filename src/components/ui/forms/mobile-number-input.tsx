@@ -1,6 +1,6 @@
 'use client'
 
-import { Minus, Plus } from 'lucide-react'
+import { Minus, Plus } from '@/components/icons'
 import { useState } from 'react'
 
 import { useResponsive } from '@/hooks/useResponsive'

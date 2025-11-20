@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, ChefHat, Package, BarChart3, Users, Calculator, Zap } from 'lucide-react'
+import { Plus, ChefHat, Package, BarChart3, Users, Calculator, Zap } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'

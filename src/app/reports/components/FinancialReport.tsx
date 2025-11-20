@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, DollarSign, PiggyBank } from 'lucide-react'
+import { TrendingUp, TrendingDown, DollarSign, PiggyBank } from '@/components/icons'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSupabaseCRUD } from '@/hooks/supabase/index'

@@ -15,7 +15,7 @@ import {
     ShoppingCart,
     Trash2,
     User
-} from 'lucide-react'
+} from '@/components/icons'
 import { useCallback, useMemo, useState } from 'react'
 
 import { useOrderItemsController } from '@/components/orders/hooks/useOrderItemsController'

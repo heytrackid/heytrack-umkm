@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckCircle, ChevronDown, ChevronUp, DollarSign, Lightbulb, Loader2, TrendingDown, TrendingUp } from 'lucide-react'
+import { CheckCircle, ChevronDown, ChevronUp, DollarSign, Lightbulb, Loader2, TrendingDown, TrendingUp } from '@/components/icons'
 import { useEffect, useRef, useState, type ComponentType } from 'react'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'

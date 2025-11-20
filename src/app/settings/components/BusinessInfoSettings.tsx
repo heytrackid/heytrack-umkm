@@ -1,6 +1,6 @@
 'use client'
 
-import { Building } from 'lucide-react'
+import { Building } from '@/components/icons'
 import React, { useState, useLayoutEffect } from 'react'
 
 import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'

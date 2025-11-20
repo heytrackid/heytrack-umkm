@@ -1,7 +1,7 @@
  
 'use client'
 
-import { Check, Copy, MessageCircle, Send } from 'lucide-react';
+import { Check, Copy, MessageCircle, Send } from '@/components/icons';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 

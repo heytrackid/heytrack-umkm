@@ -1,6 +1,6 @@
 'use client'
 
-import { ChefHat, Package, DollarSign, Clock, Users, Star, Flame } from 'lucide-react'
+import { ChefHat, Package, DollarSign, Clock, Users, Star, Flame } from '@/components/icons'
 import { memo } from 'react'
 
 import { Badge } from '@/components/ui/badge'

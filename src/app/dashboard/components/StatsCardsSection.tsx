@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertCircle, DollarSign, HelpCircle, Package, ShoppingCart, TrendingDown, TrendingUp, Users } from 'lucide-react'
+import { AlertCircle, DollarSign, HelpCircle, Package, ShoppingCart, TrendingDown, TrendingUp, Users } from '@/components/icons'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'

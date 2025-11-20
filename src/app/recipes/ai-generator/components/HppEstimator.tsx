@@ -1,6 +1,6 @@
  'use client'
 
-import { Calculator, TrendingUp, AlertCircle, CheckCircle, Settings } from 'lucide-react'
+import { Calculator, TrendingUp, AlertCircle, CheckCircle, Settings } from '@/components/icons'
 import { useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'

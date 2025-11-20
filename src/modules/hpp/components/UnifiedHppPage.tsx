@@ -1,6 +1,6 @@
 'use client'
 
-import { BarChart3, Bell, Calculator, TrendingUp } from 'lucide-react'
+import { BarChart3, Bell, Calculator, TrendingUp } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { type LucideIcon, Info } from 'lucide-react'
+import { type LucideIcon, Info } from '@/components/icons'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'

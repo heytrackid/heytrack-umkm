@@ -1,6 +1,6 @@
 'use client'
 
-import { LineChart } from 'lucide-react'
+import { LineChart } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

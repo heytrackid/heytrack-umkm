@@ -1,7 +1,7 @@
 'use client'
  
 
-import { Info, BarChart3, TrendingUp, CheckCircle, AlertTriangle, Lightbulb, ArrowRight, TrendingDown } from 'lucide-react'
+import { Info, BarChart3, TrendingUp, CheckCircle, AlertTriangle, Lightbulb, ArrowRight, TrendingDown } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 
 import { Badge } from '@/components/ui/badge'

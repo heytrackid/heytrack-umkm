@@ -1,6 +1,6 @@
 'use client'
 
-import { Search, X, Filter, SortAsc, SortDesc } from 'lucide-react'
+import { Search, X, Filter, SortAsc, SortDesc } from '@/components/icons'
 import { type ReactNode, useEffect, useDeferredValue } from 'react'
 
 import { Badge } from '@/components/ui/badge'

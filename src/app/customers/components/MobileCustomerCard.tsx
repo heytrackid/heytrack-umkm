@@ -1,6 +1,6 @@
 'use client'
 
-import { Edit2, Eye, Mail, MoreHorizontal, Phone, Trash2 } from 'lucide-react'
+import { Edit2, Eye, Mail, MoreHorizontal, Phone, Trash2 } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

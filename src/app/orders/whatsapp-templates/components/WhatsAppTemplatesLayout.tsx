@@ -1,6 +1,6 @@
 'use client'
 
-import { MessageCircle, Plus } from 'lucide-react'
+import { MessageCircle, Plus } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
 

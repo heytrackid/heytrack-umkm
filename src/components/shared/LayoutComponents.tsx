@@ -5,7 +5,7 @@ import {
   Grid,
   List,
   Table,
-} from 'lucide-react'
+} from '@/components/icons'
 import { Fragment, useState, type ReactNode } from 'react'
 
 import {

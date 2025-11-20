@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown } from 'lucide-react'
+import { TrendingUp, TrendingDown } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'

@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, Trash2, Save, X, ChefHat, Clock, Users, DollarSign } from 'lucide-react'
+import { Plus, Trash2, Save, X, ChefHat, Clock, Users, DollarSign } from '@/components/icons'
 import { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'

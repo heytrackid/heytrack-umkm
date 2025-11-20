@@ -1,6 +1,6 @@
 'use client'
 
-import { Package, Plus, XCircle } from 'lucide-react'
+import { Package, Plus, XCircle } from '@/components/icons'
 
 import type { Order, OrderStatus } from '@/app/orders/types/orders.types'
 import { Button } from '@/components/ui/button'

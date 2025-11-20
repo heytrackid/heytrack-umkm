@@ -18,7 +18,7 @@ import {
     Truck,
     Users,
     Wallet
-} from 'lucide-react'
+} from '@/components/icons'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 

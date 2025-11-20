@@ -7,7 +7,7 @@ import { CONVERSATION_TEMPLATES } from '@/app/ai-chatbot/types/index'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ChevronDown, ChevronUp, Play } from 'lucide-react'
+import { ChevronDown, ChevronUp, Play } from '@/components/icons'
 
 interface ConversationTemplatesProps {
   onTemplateSelect: (template: ConversationTemplate) => void

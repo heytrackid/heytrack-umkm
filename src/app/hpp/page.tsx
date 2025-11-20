@@ -1,6 +1,6 @@
 'use client'
 
-import { Calculator } from 'lucide-react'
+import { Calculator } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 
 import { AppLayout } from '@/components/layout/app-layout'

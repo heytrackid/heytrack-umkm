@@ -326,7 +326,7 @@ export class InventoryWorkflowHandlers {
    * ✅ NEW: Creates stock transaction to increase inventory
    */
   private static async increaseInventoryFromPurchase(
-    purchase: any, // Will be properly typed when status field is added
+    purchase: IngredientPurchaseRow,
     supabase: SupabaseClient<Database>
   ): Promise<void> {
     automationLogger.debug('Increasing inventory from completed purchase')

@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, Calculator, DollarSign, Target, TrendingDown, TrendingUp } from 'lucide-react'
+import { AlertTriangle, Calculator, DollarSign, Target, TrendingDown, TrendingUp } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 

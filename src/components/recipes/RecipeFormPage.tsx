@@ -1,7 +1,7 @@
  
 'use client'
 
-import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react'
+import { ArrowLeft, Plus, Save, Trash2 } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -19,7 +19,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { uiLogger } from '@/lib/logger'
-import { useCreateRecipe, useUpdateRecipe } from '@/hooks/useRecipes'
+import { useCreateRecipeWithIngredients, useUpdateRecipeWithIngredients } from '@/hooks/useRecipes'
 
 import type { Row, Database } from '@/types/database'
 
@@ -45,8 +45,8 @@ interface RecipeIngredientForm {
 export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog = false }: RecipeFormPageProps) => {
     const router = useRouter()
 
-    const createMutation = useCreateRecipe()
-    const updateMutation = useUpdateRecipe()
+    const createMutation = useCreateRecipeWithIngredients()
+    const updateMutation = useUpdateRecipeWithIngredients()
     const loading = createMutation.isPending || updateMutation.isPending
     const [ingredients, setIngredients] = useState<Ingredient[]>([])
     const [formData, setFormData] = useState<Partial<RecipeInsert>>({
@@ -143,60 +143,30 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
         }
 
         try {
+            const ingredientData = recipeIngredients.map(ri => ({
+                ingredient_id: ri.ingredient_id,
+                quantity: ri.quantity,
+                unit: ri.unit,
+                notes: ri.notes,
+            }))
+
             if (mode === 'create') {
-                // Use API route for create (handles ingredients atomically)
-                const response = await fetch('/api/recipes', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        ...formData,
-                        recipe_ingredients: recipeIngredients.map(ri => ({
-                            ingredient_id: ri.ingredient_id,
-                            quantity: ri.quantity,
-                            unit: ri.unit,
-                            notes: ri.notes,
-                        })),
-                    }),
-                    credentials: 'include', // Include cookies for authentication
+                const result = await createMutation.mutateAsync({
+                    recipe: formData as RecipeInsert,
+                    ingredients: ingredientData
                 })
-
-                if (!response.ok) {
-                    const error = await response.json() as { error?: string }
-                    throw new Error(error.error ?? 'Gagal membuat resep')
-                }
-
-                const newRecipe = await response.json() as RecipeInsert
-
-                toast.success(`${formData.name} berhasil dibuat dengan ${recipeIngredients.length} bahan`)
 
                 if (isDialog && onSuccess) {
                     onSuccess()
                 } else {
-                    router.push(`/recipes/${newRecipe.id}`)
+                    router.push(`/recipes/${result?.id}`)
                 }
             } else if (recipeId) {
-                // Use API route for update (handles ingredients atomically)
-                const response = await fetch(`/api/recipes/${recipeId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        ...formData,
-                        recipe_ingredients: recipeIngredients.map(ri => ({
-                            ingredient_id: ri.ingredient_id,
-                            quantity: ri.quantity,
-                            unit: ri.unit,
-                            notes: ri.notes,
-                        })),
-                    }),
-                    credentials: 'include', // Include cookies for authentication
+                await updateMutation.mutateAsync({
+                    id: recipeId,
+                    recipe: formData,
+                    ingredients: ingredientData
                 })
-
-                if (!response.ok) {
-                    const error = await response.json() as { error?: string }
-                    throw new Error(error.error ?? 'Gagal memperbarui resep')
-                }
-
-                toast.success(`${formData.name} berhasil diperbarui dengan ${recipeIngredients.length} bahan`)
 
                 if (isDialog && onSuccess) {
                     onSuccess()
@@ -205,6 +175,7 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
                 }
             }
         } catch (error: unknown) {
+            // Error handling is done by the mutations
             const message = error instanceof Error ? error.message : 'Gagal menyimpan resep'
             toast.error(message)
         }

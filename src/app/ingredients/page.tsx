@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, Plus, ShoppingCart, Upload } from 'lucide-react'
+import { AlertTriangle, Plus, ShoppingCart, Upload } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 

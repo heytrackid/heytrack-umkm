@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ThumbsUp, ThumbsDown, MessageSquare, X } from 'lucide-react'
+import { ThumbsUp, ThumbsDown, MessageSquare, X } from '@/components/icons'
 
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'

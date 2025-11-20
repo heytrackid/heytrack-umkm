@@ -1,6 +1,6 @@
 'use client'
 
-import { DollarSign } from 'lucide-react'
+import { DollarSign } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

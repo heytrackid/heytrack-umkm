@@ -1,6 +1,6 @@
 'use client'
 
-import { Lock, Eye, EyeOff, Shield } from 'lucide-react'
+import { Lock, Eye, EyeOff, Shield } from '@/components/icons'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'

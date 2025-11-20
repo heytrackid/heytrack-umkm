@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, Trash2, CheckCircle, type LucideIcon } from 'lucide-react'
+import { AlertTriangle, Trash2, CheckCircle, type LucideIcon } from '@/components/icons'
 import { useState } from 'react'
 
 import {

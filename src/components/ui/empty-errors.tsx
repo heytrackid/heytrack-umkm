@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, FileX, Search, Package, Users, ShoppingCart, Calculator, RefreshCw, Plus, Home } from 'lucide-react'
+import { AlertTriangle, FileX, Search, Package, Users, ShoppingCart, Calculator, RefreshCw, Plus, Home } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'

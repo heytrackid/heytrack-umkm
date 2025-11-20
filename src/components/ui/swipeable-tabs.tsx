@@ -1,7 +1,7 @@
 'use client'
 
 import * as TabsPrimitive from '@radix-ui/react-tabs'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from '@/components/icons'
 import React, { type ComponentProps, useState, useEffect, useRef } from 'react'
 
 import { useSwipeableTabs } from '@/hooks/useSwipeableTabs'

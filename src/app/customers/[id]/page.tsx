@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, Edit, Mail, MapPin, Phone, ShoppingCart, Trash2, TrendingUp, User } from 'lucide-react'
+import { ArrowLeft, Edit, Mail, MapPin, Phone, ShoppingCart, Trash2, TrendingUp, User } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { use, useState } from 'react'
 import { toast } from 'react-hot-toast'

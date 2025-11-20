@@ -9,7 +9,7 @@ import {
     Plus,
     Search,
     Trash2
-} from 'lucide-react'
+} from '@/components/icons'
 import { type ReactNode, useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'

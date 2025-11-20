@@ -2,7 +2,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { AlertCircle, Package, Plus, Trash2 } from 'lucide-react'
+import { AlertCircle, Package, Plus, Trash2 } from '@/components/icons'
 import { memo, useCallback, useMemo, useState, type FormEvent } from 'react'
 
 import type { Order, OrderFormProps, OrderItemWithRecipe, PaymentMethod } from '@/app/orders/types/orders-db.types'

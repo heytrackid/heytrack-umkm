@@ -1,5 +1,5 @@
 'use client'
-import { AlertCircle, CheckCircle2, Download, FileText, Loader2, Upload } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Download, FileText, Loader2, Upload } from '@/components/icons'
 import { useRef, useState } from 'react'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'

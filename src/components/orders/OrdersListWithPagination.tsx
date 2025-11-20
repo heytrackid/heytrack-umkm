@@ -1,6 +1,6 @@
  
 'use client'
-import { CheckCircle, Clock, Package, Plus, Search, XCircle } from 'lucide-react'
+import { CheckCircle, Clock, Package, Plus, Search, XCircle } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 

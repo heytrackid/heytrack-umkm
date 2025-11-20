@@ -1,4 +1,4 @@
-import { ArrowLeft, Plus } from 'lucide-react'
+import { ArrowLeft, Plus } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'

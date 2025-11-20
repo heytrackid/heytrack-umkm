@@ -1,4 +1,4 @@
-import { Send, Loader2 } from 'lucide-react'
+import { Send, Loader2 } from '@/components/icons'
 import { type FormEvent } from 'react'
 import type { ChangeEvent, KeyboardEvent } from 'react'
 

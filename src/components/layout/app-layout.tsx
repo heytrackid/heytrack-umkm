@@ -1,6 +1,6 @@
 'use client'
 
-import { Download, User } from 'lucide-react'
+import { Download, User } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { memo, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 

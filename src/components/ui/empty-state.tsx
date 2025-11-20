@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, Zap, Package, ShoppingCart, type LucideIcon } from 'lucide-react'
+import { Plus, Zap, Package, ShoppingCart, type LucideIcon } from '@/components/icons'
 import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'

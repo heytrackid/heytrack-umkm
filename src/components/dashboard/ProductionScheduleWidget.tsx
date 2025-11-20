@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertCircle, Clock, Package, TrendingUp } from 'lucide-react'
+import { AlertCircle, Clock, Package, TrendingUp } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

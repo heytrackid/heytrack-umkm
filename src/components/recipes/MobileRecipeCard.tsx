@@ -1,7 +1,7 @@
  
 'use client'
 
-import { Calculator, Clock, DollarSign, Edit, Eye, MoreVertical, Trash2, Users } from 'lucide-react'
+import { Calculator, Clock, DollarSign, Edit, Eye, MoreVertical, Trash2, Users } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

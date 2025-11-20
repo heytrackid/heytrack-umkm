@@ -1,4 +1,4 @@
-import { Receipt } from 'lucide-react'
+import { Receipt } from '@/components/icons'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 

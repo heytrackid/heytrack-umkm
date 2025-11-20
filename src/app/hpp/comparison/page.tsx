@@ -1,6 +1,6 @@
 'use client'
 
-import { BarChart3, Package, Target, TrendingDown, TrendingUp, Users } from 'lucide-react'
+import { BarChart3, Package, Target, TrendingDown, TrendingUp, Users } from '@/components/icons'
 import { useEffect, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'

@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, Calculator, ChevronDown, ChevronUp, Loader2, ShoppingBag, TrendingDown, TrendingUp, Zap } from 'lucide-react'
+import { AlertTriangle, Calculator, ChevronDown, ChevronUp, Loader2, ShoppingBag, TrendingDown, TrendingUp, Zap } from '@/components/icons'
 import { useState } from 'react'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'

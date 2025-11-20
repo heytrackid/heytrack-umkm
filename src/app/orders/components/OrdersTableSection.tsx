@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronLeft, ChevronRight, Eye, Edit, Trash2, MoreVertical } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Eye, Edit, Trash2, MoreVertical } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { memo, useMemo, useState, useEffect } from 'react'
 

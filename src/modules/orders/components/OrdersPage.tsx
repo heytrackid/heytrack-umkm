@@ -4,7 +4,7 @@
 'use client'
 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { BarChart3, Calendar, Clock, DollarSign, Edit, Eye, Filter, MessageCircle, Plus, Search, ShoppingCart, TrendingUp, XCircle } from 'lucide-react'
+import { BarChart3, Calendar, Clock, DollarSign, Edit, Eye, Filter, MessageCircle, Plus, Search, ShoppingCart, TrendingUp, XCircle } from '@/components/icons'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'

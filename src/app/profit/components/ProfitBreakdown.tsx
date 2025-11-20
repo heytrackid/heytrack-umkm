@@ -1,4 +1,4 @@
-import { DollarSign, Package, TrendingUp, TrendingDown } from 'lucide-react'
+import { DollarSign, Package, TrendingUp, TrendingDown } from '@/components/icons'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 

@@ -1,4 +1,4 @@
-import { DollarSign, Package, ShoppingCart, TrendingUp, type LucideIcon } from 'lucide-react'
+import { DollarSign, Package, ShoppingCart, TrendingUp, type LucideIcon } from '@/components/icons'
 
 import { Card, CardContent } from '@/components/ui/card'
 

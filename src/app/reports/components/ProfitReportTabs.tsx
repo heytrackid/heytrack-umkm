@@ -1,7 +1,7 @@
 // Tabbed content components for Profit Report
 'use client'
 
-import { TrendingDown, TrendingUp } from 'lucide-react'
+import { TrendingDown, TrendingUp } from '@/components/icons'
 import React from 'react'
 
 import { Button } from '@/components/ui/button'

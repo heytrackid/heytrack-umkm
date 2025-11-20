@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertCircle, AlertTriangle, Info, ShoppingCart } from 'lucide-react'
+import { AlertCircle, AlertTriangle, Info, ShoppingCart } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

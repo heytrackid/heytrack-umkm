@@ -1,5 +1,5 @@
 import React from 'react'
-import { AlertCircle, ChefHat, Loader2, Sparkles, CheckCircle, XCircle } from 'lucide-react'
+import { AlertCircle, ChefHat, Loader2, Sparkles, CheckCircle, XCircle } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

@@ -1,6 +1,6 @@
 'use client'
 
-import { Bot, User, Copy, Check } from 'lucide-react'
+import { Bot, User, Copy, Check } from '@/components/icons'
 import { useState, Fragment } from 'react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'

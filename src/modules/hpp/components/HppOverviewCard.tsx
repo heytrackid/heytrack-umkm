@@ -1,6 +1,6 @@
 'use client'
 
-import { BarChart3, Bell, Calculator, CheckCircle, FileSpreadsheet, History, TrendingUp } from 'lucide-react'
+import { BarChart3, Bell, Calculator, CheckCircle, FileSpreadsheet, History, TrendingUp } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 
 import { Badge } from '@/components/ui/badge'

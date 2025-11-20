@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, Info, TrendingUp } from 'lucide-react'
+import { AlertTriangle, Info, TrendingUp } from '@/components/icons'
 import { useMemo } from 'react'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'

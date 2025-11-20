@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
+import { AlertTriangle, CheckCircle, XCircle } from '@/components/icons'
 import { memo } from 'react'
 
 import { Badge } from '@/components/ui/badge'

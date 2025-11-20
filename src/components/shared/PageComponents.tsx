@@ -8,7 +8,7 @@ import {
     Plus,
     RefreshCw,
     Trash2
-} from 'lucide-react'
+} from '@/components/icons'
 import { Fragment, type ReactNode } from 'react'
 
 import { Badge } from '@/components/ui/badge'

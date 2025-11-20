@@ -1,6 +1,6 @@
 'use client'
 
-import { TrendingUp, AlertCircle, Download, RefreshCw, FileText, Printer, BarChart3 } from 'lucide-react'
+import { TrendingUp, AlertCircle, Download, RefreshCw, FileText, Printer, BarChart3 } from '@/components/icons'
 import { useState, useEffect, useCallback } from 'react'
 
 import { Button } from '@/components/ui/button'

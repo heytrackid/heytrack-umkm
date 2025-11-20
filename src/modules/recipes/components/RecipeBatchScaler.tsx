@@ -1,6 +1,6 @@
 'use client'
 
-import { Scale, TrendingUp, Package, DollarSign, Download, Calculator } from 'lucide-react'
+import { Scale, TrendingUp, Package, DollarSign, Download, Calculator } from '@/components/icons'
 import { useMemo, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'

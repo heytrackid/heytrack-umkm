@@ -1,7 +1,7 @@
  
 'use client'
 
-import { X } from 'lucide-react'
+import { X } from '@/components/icons'
 import { useEffect, useState, type ReactNode } from 'react'
 
 import { cn } from '@/lib/utils'

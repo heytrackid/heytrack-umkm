@@ -1,7 +1,7 @@
  
 'use client'
 
-import { ChefHat, Plus, Sparkles, BookOpen } from 'lucide-react'
+import { ChefHat, Plus, Sparkles, BookOpen } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'

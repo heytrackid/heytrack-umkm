@@ -1,7 +1,7 @@
 'use client'
  
 
-import { AlertTriangle, Calculator, CheckCircle, DollarSign, Lightbulb, Target, TrendingUp } from 'lucide-react'
+import { AlertTriangle, Calculator, CheckCircle, DollarSign, Lightbulb, Target, TrendingUp } from '@/components/icons'
 import { useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'

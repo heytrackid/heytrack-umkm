@@ -10,7 +10,7 @@ import {
   Phone,
   Trash2,
   Plus
-} from 'lucide-react'
+} from '@/components/icons'
 import { memo, useCallback, useMemo, useState } from 'react'
 
 import type { OrderWithRelations } from '@/app/orders/types/orders.types'

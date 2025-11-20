@@ -13,7 +13,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown } from '@/components/icons'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'

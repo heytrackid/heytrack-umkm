@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertCircle, Package, Plus, Trash2 } from 'lucide-react'
+import { AlertCircle, Package, Plus, Trash2 } from '@/components/icons'
 
 import type { OrderItemWithRecipe } from '@/app/orders/types/orders-db.types'
 import { Button } from '@/components/ui/button'

@@ -1,6 +1,6 @@
 'use client'
 
-import { Loader2, RefreshCw } from 'lucide-react'
+import { Loader2, RefreshCw } from '@/components/icons'
 import { type ReactNode, type TouchEvent as ReactTouchEvent, useState, useEffect, useRef, useCallback } from 'react'
 
 import { createClientLogger } from '@/lib/client-logger'

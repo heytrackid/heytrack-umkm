@@ -1,6 +1,6 @@
 'use client'
 
-import { Loader2, Package } from 'lucide-react'
+import { Loader2, Package } from '@/components/icons'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'

@@ -1,6 +1,6 @@
 'use client'
 
-import { Calculator, Save } from 'lucide-react'
+import { Calculator, Save } from '@/components/icons'
 
 import type { OrderFormData, OrderItem } from '@/app/orders/new/hooks/useOrderLogic'
 import { Badge } from '@/components/ui/badge'

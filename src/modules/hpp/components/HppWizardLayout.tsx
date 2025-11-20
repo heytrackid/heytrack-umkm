@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, ArrowRight, Calculator, CheckCircle, DollarSign, Factory, Percent, Receipt } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Calculator, CheckCircle, DollarSign, Factory, Percent, Receipt } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 

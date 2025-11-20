@@ -1,6 +1,6 @@
 'use client'
 
-import { LayoutDashboard, ShoppingCart, Users, Package, Utensils, DollarSign, Settings, TrendingUp, Plus, Search, Truck, MoreHorizontal, Receipt, MessageSquare } from 'lucide-react'
+import { LayoutDashboard, ShoppingCart, Users, Package, Utensils, DollarSign, Settings, TrendingUp, Plus, Search, Truck, MoreHorizontal, Receipt, MessageSquare } from '@/components/icons'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Fragment, type ReactNode, useState } from 'react'

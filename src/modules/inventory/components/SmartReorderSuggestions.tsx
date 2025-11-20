@@ -1,7 +1,7 @@
 'use client'
 
 
-import { AlertCircle, Calendar, Package, ShoppingCart, Sparkles, TrendingUp } from 'lucide-react'
+import { AlertCircle, Calendar, Package, ShoppingCart, Sparkles, TrendingUp } from '@/components/icons'
 import { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'

@@ -2,7 +2,7 @@
 
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
-import { BarChart3, Calendar, CheckCircle, Clock, Download, Factory, Filter, Package, Play, Plus, RefreshCw, Search, TrendingUp, XCircle } from 'lucide-react'
+import { BarChart3, Calendar, CheckCircle, Clock, Download, Factory, Filter, Package, Play, Plus, RefreshCw, Search, TrendingUp, XCircle } from '@/components/icons'
 import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react'
 

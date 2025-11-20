@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, ShoppingCart, User, CreditCard, Truck, Package, AlertCircle } from 'lucide-react'
+import { ArrowLeft, ShoppingCart, User, CreditCard, Truck, Package, AlertCircle } from '@/components/icons'
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 

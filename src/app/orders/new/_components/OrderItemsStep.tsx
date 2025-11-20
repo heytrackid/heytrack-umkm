@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, Trash2, Package, GripVertical } from 'lucide-react'
+import { Plus, Trash2, Package, GripVertical } from '@/components/icons'
 import { useState } from 'react'
 
 import type { OrderItem } from '@/app/orders/new/hooks/useOrderLogic'

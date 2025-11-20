@@ -1,7 +1,7 @@
  
 'use client'
 
-import { AlertTriangle, ArrowRight, CheckCircle, Download, FileText, Upload, X } from 'lucide-react'
+import { AlertTriangle, ArrowRight, CheckCircle, Download, FileText, Upload, X } from '@/components/icons'
 import { useRef, useState } from 'react'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'

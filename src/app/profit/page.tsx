@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertCircle, Download, Loader2 } from 'lucide-react'
+import { AlertCircle, Download, Loader2 } from '@/components/icons'
 import { Suspense } from 'react'
 
 import { PageHeader } from '@/components/layout'

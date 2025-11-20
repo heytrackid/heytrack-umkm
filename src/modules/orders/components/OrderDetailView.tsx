@@ -1,7 +1,7 @@
  
 'use client'
 
-import { MapPin, Phone, Users } from 'lucide-react'
+import { MapPin, Phone, Users } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

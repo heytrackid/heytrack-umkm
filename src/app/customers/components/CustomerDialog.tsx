@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { FileText, Loader2, Mail, MapPin, Percent, Phone, Save, Tag, User } from 'lucide-react'
+import { FileText, Loader2, Mail, MapPin, Percent, Phone, Save, Tag, User } from '@/components/icons'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'

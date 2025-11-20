@@ -1,7 +1,7 @@
 'use client'
 
 
-import { Sparkles, Info, ChefHat } from 'lucide-react'
+import { Sparkles, Info, ChefHat } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

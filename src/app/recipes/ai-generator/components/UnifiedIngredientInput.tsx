@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Package, Search, Plus, X, Sparkles } from 'lucide-react'
+import { Package, Search, Plus, X, Sparkles } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

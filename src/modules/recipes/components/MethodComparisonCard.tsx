@@ -1,6 +1,6 @@
 'use client'
 
-import { BarChart3 } from 'lucide-react'
+import { BarChart3 } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

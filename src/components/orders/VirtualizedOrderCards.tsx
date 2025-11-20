@@ -1,7 +1,7 @@
 'use client'
 
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { Clock, CheckCircle, Package, XCircle } from 'lucide-react'
+import { Clock, CheckCircle, Package, XCircle } from '@/components/icons'
 import { memo, useRef, type ComponentType } from 'react'
 
 import { Badge } from '@/components/ui/badge'

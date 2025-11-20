@@ -147,7 +147,7 @@ export const performanceConfig: Partial<NextConfig> = {
   // Experimental features for performance
   experimental: {
     optimizePackageImports: [
-      'lucide-react',
+      '@iconify/react',
       '@radix-ui/react-icons',
       'date-fns'
     ],

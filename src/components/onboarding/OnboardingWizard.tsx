@@ -8,7 +8,7 @@ import {
   CheckCircle2,
   ArrowRight,
   X
-} from 'lucide-react'
+} from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 

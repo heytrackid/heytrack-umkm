@@ -1,7 +1,7 @@
  
 'use client'
 
-import { AlertTriangle, Package, RefreshCw, Search, ShoppingCart, TrendingUp } from 'lucide-react'
+import { AlertTriangle, Package, RefreshCw, Search, ShoppingCart, TrendingUp } from '@/components/icons'
 import { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'

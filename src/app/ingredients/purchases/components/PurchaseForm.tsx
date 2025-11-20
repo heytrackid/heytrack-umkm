@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Plus } from 'lucide-react'
+import { Plus } from '@/components/icons'
 import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 

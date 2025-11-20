@@ -14,7 +14,7 @@ import {
     Trash2,
     Users,
     X
-} from 'lucide-react'
+} from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'

@@ -1,4 +1,4 @@
-import { Scale } from 'lucide-react'
+import { Scale } from '@/components/icons'
 import { memo, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'

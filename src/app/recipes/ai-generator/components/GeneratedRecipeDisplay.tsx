@@ -1,4 +1,4 @@
-import { ChefHat, Clock, DollarSign } from 'lucide-react'
+import { ChefHat, Clock, DollarSign } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

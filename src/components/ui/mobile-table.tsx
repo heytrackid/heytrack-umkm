@@ -5,7 +5,7 @@ import {
     Search,
     SortAsc,
     SortDesc
-} from 'lucide-react'
+} from '@/components/icons'
 import { memo, type ReactNode, useCallback, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'

@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, Minus, Package } from 'lucide-react'
+import { Plus, Minus, Package } from '@/components/icons'
 import { useState } from 'react'
 
 import { cn } from '@/lib/utils'

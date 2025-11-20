@@ -1,6 +1,6 @@
 'use client'
 
-import { Bot, Sparkles, Wifi, WifiOff } from 'lucide-react'
+import { Bot, Sparkles, Wifi, WifiOff } from '@/components/icons'
 import { useState, useEffect } from 'react'
 
 export const ChatHeader = (): JSX.Element => {

@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, Calculator, Sparkles, TrendingDown, TrendingUp } from 'lucide-react'
+import { AlertTriangle, Calculator, Sparkles, TrendingDown, TrendingUp } from '@/components/icons'
 import { useState, useRef } from 'react'
 
 import { Badge } from '@/components/ui/badge'

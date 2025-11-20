@@ -1,6 +1,6 @@
 'use client'
 
-import { Package, AlertTriangle, CheckCircle, TrendingDown, TrendingUp, DollarSign } from 'lucide-react'
+import { Package, AlertTriangle, CheckCircle, TrendingDown, TrendingUp, DollarSign } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, CheckCircle, Lightbulb, Sparkles, TrendingUp } from 'lucide-react'
+import { AlertTriangle, CheckCircle, Lightbulb, Sparkles, TrendingUp } from '@/components/icons'
 import { useEffect, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'

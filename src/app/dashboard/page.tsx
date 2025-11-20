@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { BarChart3, Calculator, ChefHat, Package, ShoppingCart, Sparkles, Users } from 'lucide-react'
+import { BarChart3, Calculator, ChefHat, Package, ShoppingCart, Sparkles, Users } from '@/components/icons'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'

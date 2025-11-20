@@ -2,7 +2,7 @@
 
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
-import { ArrowDownIcon, ArrowUpIcon, DollarSign, Filter, Plus, Search, TrendingDown, TrendingUp } from 'lucide-react'
+import { ArrowDownIcon, ArrowUpIcon, DollarSign, Filter, Plus, Search, TrendingDown, TrendingUp } from '@/components/icons'
 import { useCallback, useEffect, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'

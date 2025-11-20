@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Package, Search, Sparkles, AlertCircle } from 'lucide-react'
+import { Package, Search, Sparkles, AlertCircle } from '@/components/icons'
 import { useEffect, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'

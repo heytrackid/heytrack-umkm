@@ -1,6 +1,6 @@
 'use client'
 
-import { MoreHorizontal, Edit2, Trash2, Eye } from 'lucide-react'
+import { MoreHorizontal, Edit2, Trash2, Eye } from '@/components/icons'
 import { type ReactNode, memo, useMemo, useCallback } from 'react'
 
 import { Badge } from '@/components/ui/badge'

@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react'
+import { AlertCircle, RefreshCw, ArrowLeft } from '@/components/icons'
 import { Component, type ComponentType, type ErrorInfo, type ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'

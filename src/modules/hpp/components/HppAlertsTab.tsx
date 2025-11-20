@@ -2,7 +2,7 @@
 
 import { formatDistanceToNow } from 'date-fns'
 import { id } from 'date-fns/locale'
-import { AlertTriangle, Bell, CheckCircle, Info, X } from 'lucide-react'
+import { AlertTriangle, Bell, CheckCircle, Info, X } from '@/components/icons'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'

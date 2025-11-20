@@ -9,7 +9,7 @@ import {
     Phone,
     MapPin,
     AlertCircle
-} from 'lucide-react'
+} from '@/components/icons'
 import { memo } from 'react'
 
 import type { OrderWithRelations } from '@/app/orders/types/orders.types'

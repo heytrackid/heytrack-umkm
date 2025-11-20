@@ -1,7 +1,7 @@
  
 'use client'
 
-import { CheckCircle2, Clock, Package, Truck, XCircle } from 'lucide-react'
+import { CheckCircle2, Clock, Package, Truck, XCircle } from '@/components/icons'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

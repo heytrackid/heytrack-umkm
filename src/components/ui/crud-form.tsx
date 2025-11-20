@@ -1,7 +1,7 @@
  
 'use client'
 
-import { AlertCircle, Check, ChevronDown, Eye, EyeOff } from 'lucide-react';
+import { AlertCircle, Check, ChevronDown, Eye, EyeOff } from '@/components/icons';
 import { useState, type ChangeEvent, type FormEvent, type InputHTMLAttributes, type ReactNode } from 'react';
 
 interface FormFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onBlur' | 'onChange' | 'value'> {

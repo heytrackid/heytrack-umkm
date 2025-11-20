@@ -1,6 +1,6 @@
 'use client'
 
-import { TrendingUp } from 'lucide-react'
+import { TrendingUp } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

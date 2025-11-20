@@ -8,7 +8,7 @@ import {
     TrendingUp,
     Users,
     Zap
-} from 'lucide-react'
+} from '@/components/icons'
 import { useMemo, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'

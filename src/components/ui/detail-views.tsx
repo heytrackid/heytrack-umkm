@@ -1,4 +1,4 @@
-import { ArrowLeft, Edit, Trash2, MoreHorizontal, Download, Share, Plus } from 'lucide-react'
+import { ArrowLeft, Edit, Trash2, MoreHorizontal, Download, Share, Plus } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

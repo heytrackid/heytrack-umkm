@@ -1,4 +1,4 @@
-import { RotateCcw, Save } from 'lucide-react'
+import { RotateCcw, Save } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import {

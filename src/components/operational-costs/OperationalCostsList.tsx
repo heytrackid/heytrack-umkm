@@ -9,7 +9,7 @@ import {
     Trash2,
     X,
     Zap,
-} from 'lucide-react'
+} from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState, useCallback } from 'react'
 

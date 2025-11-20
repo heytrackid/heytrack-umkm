@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, Trash2 } from 'lucide-react'
+import { AlertTriangle, Trash2 } from '@/components/icons'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

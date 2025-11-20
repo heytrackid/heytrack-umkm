@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { generateTemplate, parseCSV, type CSVParseResult } from '@/lib/import-export/csv-handler'
-import { AlertCircle, CheckCircle2, Download, FileText, Upload } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Download, FileText, Upload } from '@/components/icons'
 import { useRef, useState } from 'react'
 import { logger } from '@/lib/logger'
 

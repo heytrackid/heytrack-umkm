@@ -1,6 +1,6 @@
 'use client'
 
-import { Calculator, DollarSign, Percent, TrendingUp } from 'lucide-react'
+import { Calculator, DollarSign, Percent, TrendingUp } from '@/components/icons'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'

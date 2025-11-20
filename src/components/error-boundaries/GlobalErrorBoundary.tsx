@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, Home, RefreshCw } from 'lucide-react'
+import { AlertTriangle, Home, RefreshCw } from '@/components/icons'
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'

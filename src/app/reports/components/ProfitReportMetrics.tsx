@@ -1,7 +1,7 @@
 // Metric cards component for Profit Report
 'use client'
 
-import { TrendingUp, DollarSign, ShoppingCart, Package, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react'
+import { TrendingUp, DollarSign, ShoppingCart, Package, ArrowUpRight, ArrowDownRight, Minus } from '@/components/icons'
 import React from 'react'
 
 import { Badge } from '@/components/ui/badge'

@@ -3,7 +3,7 @@
 
 import type { DateRange } from 'react-day-picker'
 
-import { Calendar, Filter, ShoppingCart, X } from 'lucide-react'
+import { Calendar, Filter, ShoppingCart, X } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 

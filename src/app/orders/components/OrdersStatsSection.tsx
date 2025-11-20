@@ -1,6 +1,6 @@
 'use client'
 
-import { ShoppingCart, DollarSign, Package, Clock } from 'lucide-react'
+import { ShoppingCart, DollarSign, Package, Clock } from '@/components/icons'
 
 import { Card, CardContent } from '@/components/ui/card'
 

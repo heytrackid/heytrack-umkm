@@ -1,6 +1,6 @@
 'use client'
 
-import { TrendingUp, TrendingDown, DollarSign, Package, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react'
+import { TrendingUp, TrendingDown, DollarSign, Package, ArrowUpRight, ArrowDownRight, Minus } from '@/components/icons'
  
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 

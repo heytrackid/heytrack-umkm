@@ -1,6 +1,6 @@
 'use client'
 
-import { BarChart3, Clock, Plus, ShoppingCart } from 'lucide-react'
+import { BarChart3, Clock, Plus, ShoppingCart } from '@/components/icons'
 
 import type { Order } from '@/app/orders/types/orders.types'
 import { Badge } from '@/components/ui/badge'

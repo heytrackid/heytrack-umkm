@@ -1,6 +1,6 @@
 'use client'
 
-import { MoreVertical, Edit, Trash2 } from 'lucide-react'
+import { MoreVertical, Edit, Trash2 } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

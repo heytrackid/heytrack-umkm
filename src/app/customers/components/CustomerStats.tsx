@@ -1,7 +1,7 @@
 // Customer Stats Component - Lazy Loaded
 // Displays customer statistics and metrics cards
 
-import { UserPlus, Users } from 'lucide-react'
+import { UserPlus, Users } from '@/components/icons'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { StatsSkeleton } from '@/components/ui/skeleton-loader'

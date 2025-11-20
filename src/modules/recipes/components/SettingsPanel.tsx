@@ -1,6 +1,6 @@
 'use client'
 
-import { Calculator, Package } from 'lucide-react'
+import { Calculator, Package } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

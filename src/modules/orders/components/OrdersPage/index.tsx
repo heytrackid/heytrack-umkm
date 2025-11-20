@@ -2,7 +2,7 @@
 
 // Using Pino logger for all logging
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Calendar, MessageCircle, Plus, ShoppingCart, TrendingUp, XCircle } from 'lucide-react'
+import { Calendar, MessageCircle, Plus, ShoppingCart, TrendingUp, XCircle } from '@/components/icons'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'

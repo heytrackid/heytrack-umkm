@@ -1,6 +1,6 @@
 'use client'
 
-import { Receipt, TrendingUp, DollarSign, BarChart3 } from 'lucide-react'
+import { Receipt, TrendingUp, DollarSign, BarChart3 } from '@/components/icons'
 
 import { Card, CardContent } from '@/components/ui/card'
 

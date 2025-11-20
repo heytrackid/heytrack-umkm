@@ -1,6 +1,6 @@
 'use client'
 
-import { TrendingUp, TrendingDown, Package, ShoppingCart, AlertCircle, DollarSign, ChevronDown, ChevronUp, ExternalLink, Eye } from 'lucide-react'
+import { TrendingUp, TrendingDown, Package, ShoppingCart, AlertCircle, DollarSign, ChevronDown, ChevronUp, ExternalLink, Eye } from '@/components/icons'
 import { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'

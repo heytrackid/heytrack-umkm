@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { uiLogger } from '@/lib/client-logger'
-import { CheckCircle, Clock, DollarSign, ShoppingCart } from 'lucide-react'
+import { CheckCircle, Clock, DollarSign, ShoppingCart } from '@/components/icons'
 import { useEffect, useState } from 'react'
 
 interface SalesReportProps {

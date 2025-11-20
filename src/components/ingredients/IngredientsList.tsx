@@ -2,7 +2,7 @@
  
 
 
-import { Edit, Trash2, MoreVertical, ShoppingCart, Search, Filter, X, Plus } from 'lucide-react'
+import { Edit, Trash2, MoreVertical, ShoppingCart, Search, Filter, X, Plus } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { useState, useMemo, memo, useCallback } from 'react'
 

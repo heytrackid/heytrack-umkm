@@ -1,6 +1,6 @@
 'use client'
 
-import { Loader2 } from 'lucide-react'
+import { Loader2 } from '@/components/icons'
 import { useState, useEffect } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -66,29 +66,16 @@ export const OperationalCostFormDialog = ({
     const updateMutation = useUpdateOperationalCost()
     const isSubmitting = createMutation.isPending || updateMutation.isPending
 
-    const [formData, setFormData] = useState<Partial<Insert<'operational_costs'>>>({
-        description: '',
-        category: 'utilities',
-        amount: 0,
-        frequency: 'monthly',
-        recurring: false,
-        notes: '',
-    })
-
-    useEffect(() => {
-        if (cost) {
-            setFormData(cost)
-        } else {
-            setFormData({
-                description: '',
-                category: 'utilities',
-                amount: 0,
-                frequency: 'monthly',
-                recurring: false,
-                notes: '',
-            })
+    const [formData, setFormData] = useState<Partial<Insert<'operational_costs'>>>(() => {
+        return cost || {
+            description: '',
+            category: 'utilities',
+            amount: 0,
+            frequency: 'monthly',
+            recurring: false,
+            notes: '',
         }
-    }, [cost, open])
+    })
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -108,11 +95,11 @@ export const OperationalCostFormDialog = ({
                 // Update existing cost
                 await updateMutation.mutateAsync({
                     id: cost.id,
-                    data: formData as any
+                    data: formData as never
                 })
             } else {
                 // Create new cost
-                await createMutation.mutateAsync(formData as any)
+                await createMutation.mutateAsync(formData as never)
             }
 
             toast.success(`${formData.description} berhasil ${cost ? 'diperbarui' : 'ditambahkan'}`)
@@ -125,7 +112,7 @@ export const OperationalCostFormDialog = ({
     }
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog key={cost?.id || 'new'} open={open} onOpenChange={onOpenChange}>
             <DialogContent className="w-[calc(100%-2rem)] max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>

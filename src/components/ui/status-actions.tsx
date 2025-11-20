@@ -1,4 +1,4 @@
-import { Pencil, Trash2, Eye, MoreHorizontal, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react'
+import { Pencil, Trash2, Eye, MoreHorizontal, CheckCircle, XCircle, Clock, AlertCircle } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

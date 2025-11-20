@@ -1,6 +1,6 @@
 'use client'
 
-import { Settings, RotateCcw } from 'lucide-react'
+import { Settings, RotateCcw } from '@/components/icons'
 import { useState, useRef } from 'react'
 
 import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'

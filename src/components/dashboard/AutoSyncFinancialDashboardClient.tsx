@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckCircle2, AlertTriangle, XCircle, TrendingUp, TrendingDown, DollarSign, Activity, Clock, Zap, Info, RefreshCw, Eye, ArrowRight } from 'lucide-react'
+import { CheckCircle2, AlertTriangle, XCircle, TrendingUp, TrendingDown, DollarSign, Activity, Clock, Zap, Info, RefreshCw, Eye, ArrowRight } from '@/components/icons'
 import { useState, useEffect, type ReactNode } from 'react'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'

@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle } from '@/components/icons'
 
 import type { PaymentMethod } from '@/app/orders/types/orders-db.types'
 import { Input } from '@/components/ui/input'

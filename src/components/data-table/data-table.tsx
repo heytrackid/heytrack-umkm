@@ -11,7 +11,7 @@ import {
   getFilteredRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from '@/components/icons'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'

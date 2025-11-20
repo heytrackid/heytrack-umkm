@@ -1,7 +1,7 @@
 'use client'
  
 
-import { AlertTriangle, Calculator, CheckCircle, Lightbulb, Target, Zap } from 'lucide-react'
+import { AlertTriangle, Calculator, CheckCircle, Lightbulb, Target, Zap } from '@/components/icons'
 import { useCallback, useEffect, useState, type FC } from 'react'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'

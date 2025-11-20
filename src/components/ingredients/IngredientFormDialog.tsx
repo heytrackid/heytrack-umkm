@@ -64,11 +64,11 @@ export const IngredientFormDialog = ({
                 // Update existing ingredient
                 await updateMutation.mutateAsync({
                     id: ingredient.id,
-                    data: data as any // Type mismatch between form and database schema
+                    data: data as never // Type mismatch between form and database schema
                 })
             } else {
                 // Create new ingredient
-                await createMutation.mutateAsync(data as any) // Type mismatch between form and database schema
+                await createMutation.mutateAsync(data as never) // Type mismatch between form and database schema
             }
 
             toast.success(`${data.name} berhasil ${ingredient ? 'diperbarui' : 'ditambahkan'}`)

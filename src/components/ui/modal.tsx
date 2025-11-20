@@ -1,6 +1,6 @@
 'use client'
 
-import { X } from 'lucide-react';
+import { X } from '@/components/icons';
 import { useEffect, useRef, type MouseEvent, type ReactNode } from 'react';
 
 

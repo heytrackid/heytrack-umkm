@@ -1,7 +1,7 @@
 'use client'
 
 
-import { BarChart3, Clock, DollarSign, ShoppingCart } from 'lucide-react'
+import { BarChart3, Clock, DollarSign, ShoppingCart } from '@/components/icons'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'

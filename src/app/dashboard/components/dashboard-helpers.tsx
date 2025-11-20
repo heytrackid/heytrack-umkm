@@ -1,4 +1,4 @@
-import { Calculator, ChefHat, Package, Plus } from 'lucide-react'
+import { Calculator, ChefHat, Package, Plus } from '@/components/icons'
 
 
 import { Card, CardContent } from '@/components/ui/card'

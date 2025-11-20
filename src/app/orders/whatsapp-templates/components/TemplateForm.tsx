@@ -1,6 +1,6 @@
 'use client'
 
-import { Info, Copy, Check } from 'lucide-react'
+import { Info, Copy, Check } from '@/components/icons'
 import { useState, useLayoutEffect, useRef, type FormEvent } from 'react'
 
 import { TEMPLATE_CATEGORIES, AVAILABLE_VARIABLES, DEFAULT_TEMPLATES, type WhatsAppTemplate, type TemplateFormData } from '@/app/orders/whatsapp-templates/components/types'

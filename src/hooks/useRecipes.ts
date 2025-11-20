@@ -3,9 +3,10 @@ import { useEffect } from 'react'
 
 import { useToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
+import { getErrorMessage } from '@/lib/type-guards'
+import type { ApiErrorResponse, ApiSuccessResponse } from '@/lib/api-core'
 
 const logger = createClientLogger('Hook')
-import { getErrorMessage } from '@/lib/type-guards'
 
 import type { Insert, Row, Update } from '@/types/database'
 
@@ -283,6 +284,154 @@ export function useDeleteRecipe() {
       toast({
         title: 'Error',
         description: message || 'Gagal menghapus resep',
+        variant: 'destructive',
+      })
+    },
+  })
+}
+
+/**
+ * Custom mutation for creating recipes with nested ingredients
+ * Handles complex recipe creation with recipe_ingredients
+ */
+export function useCreateRecipeWithIngredients() {
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+  const logger = createClientLogger('useCreateRecipeWithIngredients')
+
+  return useMutation({
+    mutationFn: async (data: {
+      recipe: RecipeInsert
+      ingredients: Array<{
+        ingredient_id: string
+        quantity: number
+        unit: string
+        notes?: string
+      }>
+    }) => {
+      const abortController = new AbortController()
+      const timeoutId = setTimeout(() => abortController.abort(), 30000)
+
+      try {
+        const response = await fetch('/api/recipes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...data.recipe,
+            recipe_ingredients: data.ingredients,
+          }),
+          credentials: 'include',
+          signal: abortController.signal,
+        })
+
+        clearTimeout(timeoutId)
+
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.message ?? 'Failed to create recipe')
+        }
+
+        const payload = await response.json() as ApiSuccessResponse<Recipe> | ApiErrorResponse
+        if (!('success' in payload) || !payload.success) {
+          throw new Error(payload?.error ?? 'Failed to create recipe')
+        }
+        return payload.data
+      } catch (error) {
+        clearTimeout(timeoutId)
+        throw error
+      }
+    },
+    onSuccess: (data) => {
+      // Invalidate recipes list
+      void queryClient.invalidateQueries({ queryKey: ['recipes'] })
+
+      toast({
+        title: 'Berhasil ✓',
+        description: `Resep ${data?.name} berhasil dibuat`,
+      })
+    },
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error)
+      logger.error({ error: message }, 'Failed to create recipe with ingredients')
+
+      toast({
+        title: 'Error',
+        description: message || 'Gagal membuat resep',
+        variant: 'destructive',
+      })
+    },
+  })
+}
+
+/**
+ * Custom mutation for updating recipes with nested ingredients
+ * Handles complex recipe updates with recipe_ingredients
+ */
+export function useUpdateRecipeWithIngredients() {
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+  const logger = createClientLogger('useUpdateRecipeWithIngredients')
+
+  return useMutation({
+    mutationFn: async (data: {
+      id: string
+      recipe: Partial<RecipeInsert>
+      ingredients: Array<{
+        ingredient_id: string
+        quantity: number
+        unit: string
+        notes?: string
+      }>
+    }) => {
+      const abortController = new AbortController()
+      const timeoutId = setTimeout(() => abortController.abort(), 30000)
+
+      try {
+        const response = await fetch(`/api/recipes/${data.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...data.recipe,
+            recipe_ingredients: data.ingredients,
+          }),
+          credentials: 'include',
+          signal: abortController.signal,
+        })
+
+        clearTimeout(timeoutId)
+
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.message ?? 'Failed to update recipe')
+        }
+
+        const payload = await response.json() as ApiSuccessResponse<Recipe> | ApiErrorResponse
+        if (!('success' in payload) || !payload.success) {
+          throw new Error(payload?.error ?? 'Failed to update recipe')
+        }
+        return payload.data
+      } catch (error) {
+        clearTimeout(timeoutId)
+        throw error
+      }
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate recipes list and specific recipe
+      void queryClient.invalidateQueries({ queryKey: ['recipes'] })
+      void queryClient.invalidateQueries({ queryKey: ['recipe', variables.id] })
+
+      toast({
+        title: 'Berhasil ✓',
+        description: `Resep ${data?.name} berhasil diperbarui`,
+      })
+    },
+    onError: (error: unknown, variables) => {
+      const message = getErrorMessage(error)
+      logger.error({ error: message, recipeId: variables.id }, 'Failed to update recipe with ingredients')
+
+      toast({
+        title: 'Error',
+        description: message || 'Gagal memperbarui resep',
         variant: 'destructive',
       })
     },

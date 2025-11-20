@@ -1,6 +1,6 @@
 'use client'
 
-import { MoreHorizontal, Eye, Edit, Trash2, Star, StarOff, Copy, MessageCircle } from 'lucide-react'
+import { MoreHorizontal, Eye, Edit, Trash2, Star, StarOff, Copy, MessageCircle } from '@/components/icons'
 
 import { TEMPLATE_CATEGORIES, type WhatsAppTemplate } from '@/app/orders/whatsapp-templates/components/types'
 import { Badge } from '@/components/ui/badge'

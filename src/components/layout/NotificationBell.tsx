@@ -1,6 +1,6 @@
 'use client'
 
-import { Bell, CheckCheck } from 'lucide-react'
+import { Bell, CheckCheck } from '@/components/icons'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'

@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronLeft, ChevronRight, Edit2, Eye, Mail, MoreHorizontal, Phone, Plus, Trash2, Users } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Edit2, Eye, Mail, MoreHorizontal, Phone, Plus, Trash2, Users } from '@/components/icons'
 import { useMemo, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'

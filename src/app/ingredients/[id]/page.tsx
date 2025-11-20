@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, Package, Loader2 } from 'lucide-react'
+import { ArrowLeft, Package, Loader2 } from '@/components/icons'
 import { useRouter, useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'

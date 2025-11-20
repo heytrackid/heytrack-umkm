@@ -1,6 +1,6 @@
 'use client'
 
-import { DollarSign, Package, RefreshCw, TrendingUp } from 'lucide-react'
+import { DollarSign, Package, RefreshCw, TrendingUp } from '@/components/icons'
 import { useEffect as _useEffect, useRef, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'

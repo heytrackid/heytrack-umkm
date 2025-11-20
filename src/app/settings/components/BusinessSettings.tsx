@@ -1,6 +1,6 @@
 'use client'
 
-import { DollarSign } from 'lucide-react'
+import { DollarSign } from '@/components/icons'
 
 import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
