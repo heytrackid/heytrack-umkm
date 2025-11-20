@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { LoadingButton } from '@/components/ui/loading-button'
 import { toast } from 'sonner'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
+import { useCreateIngredient, useUpdateIngredient } from '@/hooks/useIngredients'
 
 import type { Row } from '@/types/database'
 
@@ -33,8 +34,10 @@ export const IngredientFormDialog = ({
     onSuccess
 }: IngredientFormDialogProps) => {
 
-    const [isSubmitting, setIsSubmitting] = useState(false)
     const mode = ingredient ? 'edit' : 'create'
+    const createMutation = useCreateIngredient()
+    const updateMutation = useUpdateIngredient()
+    const isSubmitting = createMutation.isPending || updateMutation.isPending
 
     const form = useForm<SimpleIngredientFormData>({
         resolver: zodResolver(IngredientFormSchema),
@@ -56,20 +59,16 @@ export const IngredientFormDialog = ({
     })
 
     const handleSubmit = async (data: SimpleIngredientFormData) => {
-        setIsSubmitting(true)
         try {
-            const url = ingredient ? `/api/ingredients/${ingredient['id']}` : '/api/ingredients'
-            const method = ingredient ? 'PUT' : 'POST'
-
-            const response = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-
-            if (!response.ok) {
-                const error = await response.json() as { error?: string }
-                throw new Error(error.error ?? 'Gagal menyimpan bahan baku')
+            if (ingredient) {
+                // Update existing ingredient
+                await updateMutation.mutateAsync({
+                    id: ingredient.id,
+                    data: data as any // Type mismatch between form and database schema
+                })
+            } else {
+                // Create new ingredient
+                await createMutation.mutateAsync(data as any) // Type mismatch between form and database schema
             }
 
             toast.success(`${data.name} berhasil ${ingredient ? 'diperbarui' : 'ditambahkan'}`)
@@ -78,9 +77,8 @@ export const IngredientFormDialog = ({
             onOpenChange(false)
             void onSuccess?.()
         } catch (error: unknown) {
+            // Error handling is done by the mutations
             toast.error(error instanceof Error ? error.message : 'Terjadi kesalahan')
-        } finally {
-            setIsSubmitting(false)
         }
     }
 

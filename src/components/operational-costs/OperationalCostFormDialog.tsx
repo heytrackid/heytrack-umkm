@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
+import { useCreateOperationalCost, useUpdateOperationalCost } from '@/hooks/useOperationalCosts'
 
 import type { Row, Insert } from '@/types/database'
 
@@ -60,8 +61,10 @@ export const OperationalCostFormDialog = ({
     onSuccess
 }: OperationalCostFormDialogProps) => {
 
-    const [isSubmitting, setIsSubmitting] = useState(false)
     const mode = cost ? 'edit' : 'create'
+    const createMutation = useCreateOperationalCost()
+    const updateMutation = useUpdateOperationalCost()
+    const isSubmitting = createMutation.isPending || updateMutation.isPending
 
     const [formData, setFormData] = useState<Partial<Insert<'operational_costs'>>>({
         description: '',
@@ -100,21 +103,16 @@ export const OperationalCostFormDialog = ({
             return
         }
 
-        setIsSubmitting(true)
         try {
-            const url = cost ? `/api/operational-costs/${cost['id']}` : '/api/operational-costs'
-            const method = cost ? 'PUT' : 'POST'
-
-            const response = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            })
-
-            if (!response.ok) {
-                const errorPayload: unknown = await response.json()
-                const errorMessage = isApiErrorPayload(errorPayload) ? errorPayload.error : undefined
-                throw new Error(errorMessage ?? 'Gagal menyimpan biaya')
+            if (cost) {
+                // Update existing cost
+                await updateMutation.mutateAsync({
+                    id: cost.id,
+                    data: formData as any
+                })
+            } else {
+                // Create new cost
+                await createMutation.mutateAsync(formData as any)
             }
 
             toast.success(`${formData.description} berhasil ${cost ? 'diperbarui' : 'ditambahkan'}`)
@@ -123,8 +121,6 @@ export const OperationalCostFormDialog = ({
             onSuccess?.()
         } catch (error: unknown) {
             toast.error(error instanceof Error ? error.message : 'Terjadi kesalahan')
-        } finally {
-            setIsSubmitting(false)
         }
     }
 

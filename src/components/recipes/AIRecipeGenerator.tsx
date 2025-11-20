@@ -10,6 +10,7 @@ import { Loader2, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
+import { useCreateRecipe } from '@/hooks/useRecipes'
 
 interface GeneratedRecipe {
   name: string

@@ -19,6 +19,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { uiLogger } from '@/lib/logger'
+import { useCreateRecipe, useUpdateRecipe } from '@/hooks/useRecipes'
 
 import type { Row, Database } from '@/types/database'
 
@@ -44,7 +45,9 @@ interface RecipeIngredientForm {
 export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog = false }: RecipeFormPageProps) => {
     const router = useRouter()
 
-    const [loading, setLoading] = useState(false)
+    const createMutation = useCreateRecipe()
+    const updateMutation = useUpdateRecipe()
+    const loading = createMutation.isPending || updateMutation.isPending
     const [ingredients, setIngredients] = useState<Ingredient[]>([])
     const [formData, setFormData] = useState<Partial<RecipeInsert>>({
         name: '',
@@ -87,8 +90,6 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
         if (!recipeId) { return }
 
         try {
-            setLoading(true)
-
             // Fetch recipe with ingredients from API
             const response = await fetch(`/api/recipes/${recipeId}`, {
                 credentials: 'include', // Include cookies for authentication
@@ -113,11 +114,9 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
                 )
             }
         } catch (error: unknown) {
-             const message = error instanceof Error ? error.message : 'Gagal memuat resep'
-             toast.error(message)
-             router.push('/recipes')
-        } finally {
-            setLoading(false)
+              const message = error instanceof Error ? error.message : 'Gagal memuat resep'
+              toast.error(message)
+              router.push('/recipes')
         }
     }
 
@@ -144,8 +143,6 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
         }
 
         try {
-            setLoading(true)
-
             if (mode === 'create') {
                 // Use API route for create (handles ingredients atomically)
                 const response = await fetch('/api/recipes', {
@@ -210,8 +207,6 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : 'Gagal menyimpan resep'
             toast.error(message)
-        } finally {
-            setLoading(false)
         }
     }
 
