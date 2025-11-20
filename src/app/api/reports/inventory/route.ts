@@ -18,7 +18,7 @@ async function getHandler(_request: NextRequest): Promise<NextResponse> {
 
     const { data: ingredients, error } = await supabase
       .from('ingredients')
-      .select('*')
+      .select('id, name, category, current_stock, reorder_point, price_per_unit, unit')
       .eq('user_id', user.id)
       .order('name')
 

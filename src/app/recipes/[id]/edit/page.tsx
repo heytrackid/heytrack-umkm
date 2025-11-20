@@ -3,7 +3,7 @@
 import { Suspense, lazy } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
-import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
+import { FormSkeleton } from '@/components/ui/skeleton-loader'
 
 // Lazy load the heavy RecipeFormPage component
 // ✅ Correct pattern for named exports with React.lazy
@@ -24,7 +24,7 @@ interface EditRecipePageProps {
 const EditRecipePage = ({ params }: EditRecipePageProps) => (
     <AppLayout pageTitle="Edit Resep">
         <div className="p-6">
-            <Suspense fallback={<DataGridSkeleton rows={6} />}>
+            <Suspense fallback={<FormSkeleton fields={6} />}>
                 <RecipeFormPage mode="edit" recipeId={params['id']} />
             </Suspense>
         </div>

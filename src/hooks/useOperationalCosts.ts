@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
 
-const logger = createClientLogger('Hook')
+const logger = createClientLogger('OperationalCosts')
 import { getErrorMessage } from '@/lib/type-guards'
 
 import type { Row, Insert, Update } from '@/types/database'
@@ -29,7 +29,7 @@ interface UseOperationalCostsOptions {
 export function useOperationalCosts(options?: UseOperationalCostsOptions) {
   return useQuery({
     queryKey: ['operational_costs', options],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const params = new URLSearchParams()
       if (options?.limit) {params.set('limit', options.limit.toString())}
       if (options?.offset) {params.set('offset', options.offset.toString())}
@@ -37,13 +37,14 @@ export function useOperationalCosts(options?: UseOperationalCostsOptions) {
 
       const response = await fetch(`/api/operational-costs?${params}`, {
         credentials: 'include', // Include cookies for authentication
+        signal, // React Query provides signal automatically
       })
       if (!response.ok) {
-        throw new Error('Failed to fetch operational costs')
+        throw new Error('Gagal mengambil data biaya operasional')
       }
       const result = await response.json() as { success: boolean; data: { operational_costs: OperationalCost[]; pagination: unknown } }
       if (!result.success) {
-        throw new Error('Failed to fetch operational costs')
+        throw new Error('Gagal mengambil data biaya operasional')
       }
       return result.data.operational_costs ?? []
     },
@@ -59,14 +60,15 @@ export function useOperationalCosts(options?: UseOperationalCostsOptions) {
 export function useOperationalCost(id: string | null) {
   return useQuery({
     queryKey: ['operational_cost', id],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       if (!id) {return null}
 
       const response = await fetch(`/api/operational-costs/${id}`, {
         credentials: 'include', // Include cookies for authentication
+        signal, // React Query provides signal automatically
       })
       if (!response.ok) {
-        throw new Error('Failed to fetch operational cost')
+        throw new Error('Gagal mengambil data biaya operasional')
       }
       return response.json()
     },
@@ -85,19 +87,33 @@ export function useCreateOperationalCost() {
 
   return useMutation({
     mutationFn: async (data: OperationalCostInsert) => {
-      const response = await fetch('/api/operational-costs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-        credentials: 'include', // Include cookies for authentication
-      })
+      const abortController = new AbortController()
+      const timeoutId = setTimeout(() => abortController.abort(), 30000)
 
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message ?? 'Failed to create operational cost')
+      try {
+        const response = await fetch('/api/operational-costs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+          credentials: 'include',
+          signal: abortController.signal,
+        })
+
+        clearTimeout(timeoutId)
+
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.message ?? 'Gagal menambahkan biaya operasional')
+        }
+
+        return response.json()
+      } catch (error) {
+        clearTimeout(timeoutId)
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new Error('Request timeout - please try again')
+        }
+        throw error
       }
-
-      return response.json()
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['operational_costs'] })
@@ -109,7 +125,7 @@ export function useCreateOperationalCost() {
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
-      logger.error({ error: message }, 'Failed to create operational cost')
+      logger.error({ error: message }, 'Gagal menambahkan biaya operasional')
 
       toast({
         title: 'Error',
@@ -129,19 +145,33 @@ export function useUpdateOperationalCost() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: OperationalCostUpdate }) => {
-      const response = await fetch(`/api/operational-costs/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-        credentials: 'include', // Include cookies for authentication
-      })
+      const abortController = new AbortController()
+      const timeoutId = setTimeout(() => abortController.abort(), 30000)
 
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message ?? 'Failed to update operational cost')
+      try {
+        const response = await fetch(`/api/operational-costs/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+          credentials: 'include',
+          signal: abortController.signal,
+        })
+
+        clearTimeout(timeoutId)
+
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.message ?? 'Gagal memperbarui biaya operasional')
+        }
+
+        return response.json()
+      } catch (error) {
+        clearTimeout(timeoutId)
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new Error('Request timeout - please try again')
+        }
+        throw error
       }
-
-      return response.json()
     },
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({ queryKey: ['operational_cost', variables['id']] })
@@ -154,7 +184,7 @@ export function useUpdateOperationalCost() {
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
-      logger.error({ error: message }, 'Failed to update operational cost')
+      logger.error({ error: message }, 'Gagal memperbarui biaya operasional')
 
       toast({
         title: 'Error',
@@ -174,17 +204,31 @@ export function useDeleteOperationalCost() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(`/api/operational-costs/${id}`, {
-        method: 'DELETE',
-        credentials: 'include', // Include cookies for authentication
-      })
+      const abortController = new AbortController()
+      const timeoutId = setTimeout(() => abortController.abort(), 30000)
 
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message ?? 'Failed to delete operational cost')
+      try {
+        const response = await fetch(`/api/operational-costs/${id}`, {
+          method: 'DELETE',
+          credentials: 'include',
+          signal: abortController.signal,
+        })
+
+        clearTimeout(timeoutId)
+
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.message ?? 'Gagal menghapus biaya operasional')
+        }
+
+        return response.json()
+      } catch (error) {
+        clearTimeout(timeoutId)
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new Error('Request timeout - please try again')
+        }
+        throw error
       }
-
-      return response.json()
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['operational_costs'] })
@@ -196,7 +240,7 @@ export function useDeleteOperationalCost() {
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
-      logger.error({ error: message }, 'Failed to delete operational cost')
+      logger.error({ error: message }, 'Gagal menghapus biaya operasional')
 
       toast({
         title: 'Error',

@@ -5,7 +5,7 @@ import { Edit2, Search, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { SearchFormSkeleton } from '@/components/ui/skeletons/table-skeletons'
+import { FormSkeleton } from '@/components/ui/skeleton-loader'
 
 import type { Customer } from '@/app/customers/components/types'
 
@@ -31,7 +31,7 @@ const CustomerSearchFilters = ({
   isLoading
 }: CustomerSearchFiltersProps): JSX.Element => {
   if (isLoading) {
-    return <SearchFormSkeleton />
+    return <FormSkeleton fields={2} />
   }
 
   return (

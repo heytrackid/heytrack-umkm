@@ -119,7 +119,7 @@ export async function getOrderReservations(
 
   const { data, error } = await supabase
     .from('stock_reservations')
-    .select('*')
+    .select('id, order_id, ingredient_id, quantity, status, user_id, created_at, updated_at')
     .eq('order_id', orderId)
     .eq('user_id', userId)
 

@@ -2,32 +2,15 @@
 
 import { lazy, Suspense, type ComponentProps, type ComponentType } from 'react'
 
-import { Card, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { CardSkeleton as SharedCardSkeleton, TableSkeleton as SharedTableSkeleton } from '@/components/ui/skeleton-loader'
 
 // Loading skeletons for different components
 export const TableSkeleton = (): JSX.Element => (
-  <div className="space-y-3">
-    <Skeleton className="h-10 w-full" />
-    <Skeleton className="h-8 w-full" />
-    <Skeleton className="h-8 w-full" />
-    <Skeleton className="h-8 w-full" />
-  </div>
+  <SharedTableSkeleton rows={6} columns={4} />
 )
 
 export const CardSkeleton = (): JSX.Element => (
-  <Card>
-    <CardContent className="p-6">
-      <div className="space-y-3">
-        <Skeleton className="h-6 w-3/4" />
-        <Skeleton className="h-4 w-1/2" />
-        <div className="flex gap-2">
-          <Skeleton className="h-8 w-16" />
-          <Skeleton className="h-8 w-20" />
-        </div>
-      </div>
-    </CardContent>
-  </Card>
+  <SharedCardSkeleton rows={3} />
 )
 
 

@@ -23,7 +23,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     // Get ingredient
     const { data: _ingredient, error: ingredientError } = await supabase
       .from('ingredients')
-      .select('*')
+      .select('id, name, current_stock, reorder_point, unit')
       .eq('id', ingredientId)
       .eq('user_id', user.id)
       .single()

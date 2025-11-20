@@ -78,9 +78,15 @@ export function useHppCalculatorWorker() {
 
         setIsCalculating(true)
         setError(null)
+        let isResolved = false
 
         const handleMessage = (e: MessageEvent) => {
+          if (isResolved) return
+
+          isResolved = true
           setIsCalculating(false)
+          workerRef.current?.removeEventListener('message', handleMessage)
+
           if (e['data'].success) {
             resolve(e['data']['data'])
           } else {
@@ -88,11 +94,28 @@ export function useHppCalculatorWorker() {
             setError(errorMsg)
             reject(new Error(errorMsg))
           }
-          workerRef.current?.removeEventListener('message', handleMessage)
         }
+
+        // Timeout cleanup to prevent memory leak
+        const timeoutId = setTimeout(() => {
+          if (!isResolved) {
+            isResolved = true
+            setIsCalculating(false)
+            workerRef.current?.removeEventListener('message', handleMessage)
+            const errorMsg = 'Calculation timeout'
+            setError(errorMsg)
+            reject(new Error(errorMsg))
+          }
+        }, 30000)
 
         workerRef.current.addEventListener('message', handleMessage)
         workerRef.current.postMessage(input)
+
+        // Attach cleanup function for external abort
+        ;(resolve as unknown as { abort?: () => void }).abort = () => {
+          clearTimeout(timeoutId)
+          workerRef.current?.removeEventListener('message', handleMessage)
+        }
       }),
     []
   )

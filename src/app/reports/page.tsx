@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
 import { Skeleton } from '@/components/ui/skeleton'
-import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
+import { GridSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
 import { useAuth } from '@/hooks/index'
 import { toast } from 'sonner'
 
@@ -48,18 +48,10 @@ const ReportsPage = () => {
     return (
       <div className="space-y-6 p-6">
         {/* Stats skeleton */}
-        <div className="grid gap-4 md:grid-cols-4">
-          {Array.from({ length: 4 }, (_, i) => (
-            <StatsCardSkeleton key={`skeleton-${i}`} />
-          ))}
-        </div>
+        <StatsSkeleton count={4} />
 
         {/* Report cards skeleton */}
-        <div className="grid gap-6 md:grid-cols-2">
-          {[1, 2, 3, 4].map(i => (
-            <Skeleton key={`card-skeleton-${i}`} className="h-64 rounded-lg" />
-          ))}
-        </div>
+        <GridSkeleton columns={2} items={4} />
       </div>
     )
   }

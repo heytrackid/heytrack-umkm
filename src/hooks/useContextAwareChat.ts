@@ -40,14 +40,71 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
 
   // Load sessions on mount
   useEffect(() => {
-    void loadSessions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const abortController = new AbortController();
+    
+    const fetchSessions = async (): Promise<void> => {
+      try {
+        const response = await fetch('/api/ai/sessions', {
+          credentials: 'include',
+          signal: abortController.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to load sessions');
+        }
+
+        const _data = await response.json() as { sessions?: SessionListItem[] };
+        setSessions(_data.sessions ?? []);
+      } catch (error: unknown) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          return; // Request was aborted, ignore
+        }
+        const message = getErrorMessage(error);
+        logger.error({ error: message }, 'Failed to load sessions');
+      }
+    };
+
+    void fetchSessions();
+
+    return () => {
+      abortController.abort();
+    };
   }, []);
 
   // Load suggestions when page changes
   useEffect(() => {
-    void loadSuggestions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const abortController = new AbortController();
+    
+    const fetchSuggestions = async (): Promise<void> => {
+      try {
+        const response = await fetch(
+          `/api/ai/suggestions?page=${encodeURIComponent(pathname)}`,
+          {
+            credentials: 'include',
+            signal: abortController.signal,
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to load suggestions');
+        }
+
+        const _data = await response.json() as { suggestions?: ChatSuggestion[] };
+        setSuggestions(_data.suggestions ?? []);
+      } catch (error: unknown) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          return; // Request was aborted, ignore
+        }
+        const message = getErrorMessage(error);
+        logger.error({ error: message }, 'Failed to load suggestions');
+      }
+    };
+
+    void fetchSuggestions();
+
+    return () => {
+      abortController.abort();
+    };
   }, [pathname]);
 
   const loadSessions = useCallback(async () => {
@@ -108,8 +165,15 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
 
       setMessages((prev) => [...prev, userMessage]);
 
+      const abortController = new AbortController();
+      
+      // Store abort controller for potential cancellation
+      const timeoutId = setTimeout(() => {
+        abortController.abort();
+      }, 60000); // 60s timeout for AI responses
+
       try {
-        const response = await fetch('/api/ai/chat-enhanced', {
+        const response = await fetch('/api/ai/chat', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -120,7 +184,10 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
             currentPage: pathname,
           }),
           credentials: 'include', // Include cookies for authentication
+          signal: abortController.signal,
         });
+
+        clearTimeout(timeoutId);
 
          if (!response.ok) {
            const errorData = await response.json() as { message?: string };

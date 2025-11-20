@@ -208,7 +208,6 @@ export function showLoadingToast(
   return toast({
     title: API_TOASTS.LOADING.title,
     description: message ?? API_TOASTS.LOADING.description,
-    duration: Infinity // Keep showing until manually dismissed
   })
 }
 

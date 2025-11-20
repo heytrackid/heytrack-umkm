@@ -2,9 +2,7 @@ import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
 
 import { SUGGESTIONS, type Message } from '@/app/ai-chatbot/types/index'
 import { createLogger } from '@/lib/logger'
-import { ChatSessionService } from '@/lib/services/ChatSessionService'
-import { useSupabase } from '@/providers/SupabaseProvider'
-import type { MessageMetadata } from '@/types/features/chat'
+import type { MessageMetadata, SessionListItem } from '@/types/features/chat'
 
 interface OrderRow { id: string; status: string; total_amount: number; created_at: string }
 interface InventoryRow { id: string; current_stock: number; min_stock: number }
@@ -20,104 +18,77 @@ interface UseChatMessagesResult {
 }
 
 export function useChatMessages(): UseChatMessagesResult {
-  const { supabase } = useSupabase()
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [hasShownWelcome, setHasShownWelcome] = useState(false)
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const logger = createLogger('useChatMessages')
 
-  const fetchBusinessStats = useCallback(async (userId: string): Promise<BusinessStats> => {
-    const [ordersResult, inventoryResult] = await Promise.all([
-      supabase
-        .from('orders')
-        .select('id, status, total_amount')
-        .eq('user_id', userId)
-        .limit(10),
-      supabase
-        .from('ingredients')
-        .select('id, current_stock, min_stock')
-        .eq('user_id', userId)
-        .limit(50)
-    ])
-
-    const orders = (ordersResult.data ?? []) as OrderRow[]
-    const inventory = (inventoryResult.data ?? []) as InventoryRow[]
-
-    const totalOrders = orders.length
-    const pendingOrders = orders.filter(o => o.status === 'PENDING').length
-    const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
-    const criticalItems = inventory.filter(i =>
-      typeof i.current_stock === 'number' &&
-      typeof i.min_stock === 'number' &&
-      i.current_stock < i.min_stock
-    ).length
-
-    return { totalOrders, pendingOrders, totalRevenue, criticalItems }
-  }, [supabase])
-
-  const initializeSession = useCallback(async (userId: string): Promise<void> => {
+  const fetchBusinessStats = useCallback(async (): Promise<BusinessStats> => {
     try {
-      // Try to get the most recent session for this user
-      const sessions = await ChatSessionService.listSessions(supabase, userId, 1)
-      if (sessions.length > 0 && sessions[0]) {
-        const recentSession = sessions[0]
-        setCurrentSessionId(recentSession.id)
+      const response = await fetch('/api/dashboard/stats')
+      if (!response.ok) {
+        return { totalOrders: 0, pendingOrders: 0, totalRevenue: 0, criticalItems: 0 }
+      }
 
-        // Load existing messages from the session
-        const existingMessages = await ChatSessionService.getMessages(supabase, recentSession.id, userId)
-        if (existingMessages.length > 0) {
-          const formattedMessages: Message[] = existingMessages.map(msg => ({
-            id: msg.id,
-            role: msg.role as 'user' | 'assistant' | 'system',
-            content: msg.content,
-            timestamp: new Date(msg.created_at),
-            suggestions: msg.role === 'assistant' ? [] : undefined, // Could be enhanced to store suggestions in metadata
-            data: msg.metadata as Record<string, unknown>
-          }))
-          setMessages(formattedMessages)
-          setHasShownWelcome(true) // Skip welcome message if there are existing messages
-          return
+      const data = await response.json() as {
+        stats?: {
+          total_orders?: number
+          pending_orders?: number
+          total_revenue?: number
+          critical_items?: number
         }
       }
 
-      // Create new session if no recent session or no messages
-      const newSession = await ChatSessionService.createSession(supabase, userId, 'AI Chat Conversation')
-      setCurrentSessionId(newSession.id)
+      const stats = data.stats || {}
+      return {
+        totalOrders: stats.total_orders || 0,
+        pendingOrders: stats.pending_orders || 0,
+        totalRevenue: stats.total_revenue || 0,
+        criticalItems: stats.critical_items || 0
+      }
     } catch (error) {
-      const logger = createLogger('useChatMessages')
-      logger.error({ error: error as unknown }, 'Failed to initialize chat session')
-       // Continue without session persistence for now
-     }
-   }, [supabase])
+      logger.error({ error }, 'Failed to fetch business stats')
+      return { totalOrders: 0, pendingOrders: 0, totalRevenue: 0, criticalItems: 0 }
+    }
+  }, [logger])
+
+  const initializeSession = useCallback(async (): Promise<void> => {
+    try {
+      // Fetch sessions from API
+      const response = await fetch('/api/ai/sessions?limit=1')
+      if (!response.ok) {
+        logger.error({ status: response.status }, 'Failed to fetch sessions')
+        return
+      }
+
+      const data = await response.json() as { data?: SessionListItem[] }
+      const sessions = data.data || []
+
+      if (sessions.length > 0 && sessions[0]) {
+        setCurrentSessionId(sessions[0].id)
+        setHasShownWelcome(true)
+      }
+    } catch (error) {
+      logger.error({ error }, 'Failed to initialize session')
+    }
+  }, [logger])
 
   const saveMessageToSession = useCallback(async (message: Message): Promise<void> => {
     if (!currentSessionId) return
 
     try {
-      // Get user_id from JWT token in cookies (Stack Auth)
-      const response = await fetch('/api/auth/me')
-      if (!response.ok) return
-      
-      const { userId } = await response.json()
-      if (!userId) return
-
       // Only store user and assistant messages, not system messages
-      if (message.role === 'user' || message.role === 'assistant') {
-        await ChatSessionService.addMessage(
-          supabase,
-          currentSessionId,
-          message.role as 'user' | 'assistant',
-          message.content,
-          message.data as MessageMetadata
-        )
-      }
+      if (message.role !== 'user' && message.role !== 'assistant') return
+
+      // Server will handle saving via the API route (called from ChatbotInterface)
+      // This is left as a no-op for compatibility
     } catch (error) {
-      const logger = createLogger('useChatMessages')
-      logger.error({ error: error as unknown }, 'Failed to save message to session')
+      logger.error({ error }, 'Failed to save message to session')
       // Continue without saving - don't break the chat experience
     }
-  }, [currentSessionId, supabase])
+  }, [currentSessionId, logger])
 
   const createWelcomeMessage = useCallback((stats: BusinessStats): Message => {
     const { totalOrders, pendingOrders, totalRevenue, criticalItems } = stats
@@ -170,53 +141,23 @@ export function useChatMessages(): UseChatMessagesResult {
 
   // Initialize session and show welcome message on mount
   useEffect(() => {
-    if (hasShownWelcome) { return }
+    if (hasShownWelcome) return
 
     const initializeChat = async (): Promise<void> => {
       try {
-        // Get user_id from JWT token in cookies (Stack Auth)
-        const response = await fetch('/api/auth/me')
-        if (!response.ok) {
-          // Fallback generic welcome
-          setMessages([{
-            id: 'welcome',
-            role: 'assistant',
-            content: '👋 **Halo!** Selamat datang di HeyTrack! 😊\n\nSaya AI assistant yang siap bantu bisnis kuliner kamu makin sukses. Mau nanya apa hari ini? Bisa tentang resep, stok, harga, atau strategi jualan! 🚀',
-            timestamp: new Date(),
-            suggestions: SUGGESTIONS.slice(0, 3).map(s => s.text)
-          }])
-          setHasShownWelcome(true)
-          return
-        }
-
-        const { userId } = await response.json()
-        if (!userId) {
-          // Fallback generic welcome
-          setMessages([{
-            id: 'welcome',
-            role: 'assistant',
-            content: '👋 **Halo!** Selamat datang di HeyTrack! 😊\n\nSaya AI assistant yang siap bantu bisnis kuliner kamu makin sukses. Mau nanya apa hari ini? Bisa tentang resep, stok, harga, atau strategi jualan! 🚀',
-            timestamp: new Date(),
-            suggestions: SUGGESTIONS.slice(0, 3).map(s => s.text)
-          }])
-          setHasShownWelcome(true)
-          return
-        }
-
         // Initialize session first
-        await initializeSession(userId)
+        await initializeSession()
 
         // Only show welcome if no existing messages
         if (messages.length === 0) {
-          const stats = await fetchBusinessStats(userId)
+          const stats = await fetchBusinessStats()
           const welcomeMessage = createWelcomeMessage(stats)
           setMessages([welcomeMessage])
         }
 
         setHasShownWelcome(true)
       } catch (error) {
-        const logger = createLogger('useChatMessages')
-        logger.error({ error: error as unknown }, 'Failed to initialize chat')
+        logger.error({ error }, 'Failed to initialize chat')
         // Show fallback welcome
         setMessages([{
           id: 'welcome',
@@ -230,7 +171,7 @@ export function useChatMessages(): UseChatMessagesResult {
     }
 
     void initializeChat()
-  }, [hasShownWelcome, createWelcomeMessage, fetchBusinessStats, initializeSession, messages.length])
+  }, [hasShownWelcome, createWelcomeMessage, fetchBusinessStats, initializeSession, messages.length, logger])
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {

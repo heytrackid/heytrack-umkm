@@ -1,21 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
-import { createClientLogger } from '@/lib/client-logger'
 
-import type { Row } from '@/types/database'
+import { createClientLogger } from '@/lib/client-logger'
+import type { RecipeCostPreview } from '@/types/recipes/cost'
 
 const logger = createClientLogger('RecipeCostPreview')
-
-type Recipe = Row<'recipes'>
-type RecipeIngredient = Row<'recipe_ingredients'>
-type Ingredient = Row<'ingredients'>
-
-interface RecipeCostPreview {
-  recipeId: string
-  materialCost: number
-  costPerServing: number
-  lastUpdated: string
-  ingredientsCount: number
-}
 
 /**
  * Hook for getting simplified cost preview for recipes
@@ -54,8 +42,10 @@ export function useRecipeCostPreview(recipeId: string | null) {
  * Used in recipe lists
  */
 export function useRecipesCostPreviews(recipeIds: string[]) {
+  const sortedIds = [...recipeIds].sort()
+
   return useQuery({
-    queryKey: ['recipes-cost-previews', recipeIds.sort()],
+    queryKey: ['recipes-cost-previews', sortedIds],
     queryFn: async (): Promise<Record<string, RecipeCostPreview>> => {
       if (recipeIds.length === 0) return {}
 
@@ -63,7 +53,7 @@ export function useRecipesCostPreviews(recipeIds: string[]) {
         const response = await fetch('/api/recipes/cost-previews', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ recipeIds }),
+          body: JSON.stringify({ recipeIds: sortedIds }),
           credentials: 'include',
         })
 
@@ -71,8 +61,8 @@ export function useRecipesCostPreviews(recipeIds: string[]) {
           throw new Error('Failed to fetch recipes cost previews')
         }
 
-        const data = await response.json()
-        return data as Record<string, RecipeCostPreview>
+        const data = (await response.json()) as Record<string, RecipeCostPreview>
+        return data
       } catch (error) {
         logger.error({ error, recipeIds }, 'Failed to fetch recipes cost previews')
         throw error

@@ -10,5 +10,5 @@ export * from './dashboard-skeletons'
 // Export all form skeletons
 export * from './form-skeletons'
 
-// Export all table skeletons
-export * from './table-skeletons'
+// Re-export shared skeleton primitives
+export * from '../skeleton-loader'

@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { Package, Search, Sparkles, AlertCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
@@ -8,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { useCurrency } from '@/hooks/useCurrency'
 import { getSmartIngredientSuggestions } from '@/lib/utils/recipe-helpers'
 
@@ -30,20 +32,30 @@ interface SmartIngredientSelectorProps {
     selectedIngredients: string[]
     onSelectionChange: (selected: string[]) => void
     productType: string
+    customIngredients?: string[]
+    onCustomIngredientsChange?: (custom: string[]) => void
 }
 
 export const SmartIngredientSelector = ({
     availableIngredients,
     selectedIngredients,
     onSelectionChange,
-    productType
+    productType,
+    customIngredients = [],
+    onCustomIngredientsChange
 }: SmartIngredientSelectorProps) => {
     const [searchQuery, setSearchQuery] = useState('')
     const [ingredientQuantities, setIngredientQuantities] = useState<Record<string, number>>({})
+    const [customIngredientsText, setCustomIngredientsText] = useState('')
     const { formatCurrency } = useCurrency()
 
     // Get smart suggestions based on product type
     const suggestions = getSmartIngredientSuggestions(productType)
+
+    // Sync custom ingredients text when props change
+    React.useEffect(() => {
+        setCustomIngredientsText(customIngredients.join(', '))
+    }, [customIngredients])
 
     // Auto-select suggested ingredients on product type change
     useEffect(() => {
@@ -132,6 +144,21 @@ export const SmartIngredientSelector = ({
         onSelectionChange([])
     }
 
+    const handleCustomIngredientsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setCustomIngredientsText(e.target.value)
+    }
+
+    const handleCustomIngredientsBlur = () => {
+        const parsed = customIngredientsText
+            .split(',')
+            .map(item => item.trim())
+            .filter(item => item.length > 0)
+
+        if (onCustomIngredientsChange) {
+            onCustomIngredientsChange(parsed)
+        }
+    }
+
     const getStockStatus = (ingredient: typeof availableIngredients[0]) => {
         if ((ingredient.current_stock || 0) === 0) {
             return { label: 'Habis', color: 'bg-red-500' }
@@ -151,7 +178,7 @@ export const SmartIngredientSelector = ({
                         <Package className="h-5 w-5" />
                         Pilih Bahan
                     </CardTitle>
-                    <div className="flex gap-2">
+                     <div className="flex flex-wrap gap-2">
                         {suggestedIngredients.length > 0 && (
                             <Button
                                 size="sm"
@@ -176,10 +203,10 @@ export const SmartIngredientSelector = ({
                     </div>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>{selectedIngredients.length} bahan dipilih</span>
-                    {selectedIngredients.length > 0 && (
+                    <span>{selectedIngredients.length + customIngredients.length} bahan dipilih</span>
+                    {selectedIngredients.length + customIngredients.length > 0 && (
                         <Badge variant="secondary" className="text-xs">
-                            {selectedIngredients.length >= 3 ? '✓ Cukup' : '⚠️ Minimal 3 bahan'}
+                            {selectedIngredients.length + customIngredients.length >= 3 ? '✓ Cukup' : '⚠️ Minimal 3 bahan'}
                         </Badge>
                     )}
                 </div>
@@ -194,6 +221,27 @@ export const SmartIngredientSelector = ({
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                         className="pl-9"
                     />
+                </div>
+
+                {/* Custom Ingredients Input */}
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <label className="text-sm font-medium">Bahan Tambahan (Opsional)</label>
+                        <Badge variant="outline" className="text-xs">
+                            {customIngredients.length} bahan custom
+                        </Badge>
+                    </div>
+                    <Textarea
+                        placeholder="Ketik bahan tambahan yang tidak ada di inventory, pisahkan dengan koma (contoh: ekstrak vanila, pewarna makanan merah)"
+                        value={customIngredientsText}
+                        onChange={handleCustomIngredientsChange}
+                        onBlur={handleCustomIngredientsBlur}
+                        rows={2}
+                        className="resize-none"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                        Bahan ini akan digunakan AI untuk generate resep, meskipun belum ada di inventory Anda
+                    </p>
                 </div>
 
                 {/* Suggested Ingredients */}
@@ -213,10 +261,10 @@ export const SmartIngredientSelector = ({
                                 const isSelected = selectedIngredients.includes(ingredient['id'])
 
                                 return (
-                                    <div
-                                        key={ingredient['id']}
-                                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors ${isSelected ? 'bg-primary/5 border-primary' : 'border-border/20'
-                                            }`}
+                                     <div
+                                         key={ingredient['id']}
+                                         className={`flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors ${isSelected ? 'bg-primary/5 border-primary' : 'border-border/20'
+                                             }`}
                                         onClick={() => toggleIngredient(ingredient['id'])}
                                         onKeyDown={(e) => {
                                           if (e.key === 'Enter' || e.key === ' ') {
@@ -265,10 +313,10 @@ export const SmartIngredientSelector = ({
                                 const isSelected = selectedIngredients.includes(ingredient['id'])
 
                                 return (
-                                    <div
-                                        key={ingredient['id']}
-                                        className={`flex items-center gap-3 p-2 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors ${isSelected ? 'bg-primary/5 border-primary' : 'border-border/20'
-                                            }`}
+                                     <div
+                                         key={ingredient['id']}
+                                         className={`flex items-center gap-2 sm:gap-3 p-2 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors ${isSelected ? 'bg-primary/5 border-primary' : 'border-border/20'
+                                             }`}
                                         onClick={() => toggleIngredient(ingredient['id'])}
                                         onKeyDown={(e) => {
                                           if (e.key === 'Enter' || e.key === ' ') {
@@ -376,7 +424,7 @@ export const SmartIngredientSelector = ({
                 )}
 
                 {/* Warning if no ingredients selected */}
-                {selectedIngredients.length === 0 && (
+                {selectedIngredients.length + customIngredients.length === 0 && (
                     <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
                         <div className="flex items-start gap-2">
                             <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
@@ -384,7 +432,7 @@ export const SmartIngredientSelector = ({
                                 <div className="font-semibold mb-1">Pilih minimal 3 bahan</div>
                                 <div>
                                     AI butuh minimal 3 bahan untuk generate resep yang bagus.
-                                    Klik &#34;Pilih Semua Saran&#34; untuk quick start!
+                                    Klik &#34;Pilih Semua Saran&#34; untuk quick start, atau ketik bahan tambahan di atas!
                                 </div>
                             </div>
                         </div>

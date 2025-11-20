@@ -174,16 +174,6 @@ export {
 } from './alert'
 
 export {
-    Toast,
-    ToastAction,
-    ToastClose,
-    ToastDescription,
-    ToastProvider,
-    ToastTitle,
-    ToastViewport
-} from './toast'
-
-export {
     Toaster
 } from './sonner'
 
@@ -352,5 +342,4 @@ export * from './skeleton-loader'
 export { StepSkeleton } from './StepSkeleton'
 export * from './tabs'
 export * from './textarea'
-export * from './toast'
 

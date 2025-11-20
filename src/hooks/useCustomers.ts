@@ -24,7 +24,7 @@ interface UseCustomersOptions {
 export function useCustomers(options?: UseCustomersOptions) {
   return useQuery({
     queryKey: ['customers', options],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const params = new URLSearchParams()
       if (options?.limit) params.set('limit', options.limit.toString())
       if (options?.offset) params.set('offset', options.offset.toString())
@@ -32,6 +32,7 @@ export function useCustomers(options?: UseCustomersOptions) {
 
       const response = await fetch(`/api/customers?${params}`, {
         credentials: 'include', // Include cookies for authentication
+        signal, // React Query provides signal automatically
       })
       if (!response.ok) {
         throw new Error('Failed to fetch customers')
@@ -54,11 +55,12 @@ export function useCustomers(options?: UseCustomersOptions) {
 export function useCustomer(id: string | null) {
   return useQuery({
     queryKey: ['customer', id],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       if (!id) return null
 
       const response = await fetch(`/api/customers/${id}`, {
         credentials: 'include', // Include cookies for authentication
+        signal, // React Query provides signal automatically
       })
       if (!response.ok) {
         throw new Error('Failed to fetch customer')
@@ -84,23 +86,37 @@ export function useCreateCustomer() {
 
   return useMutation({
     mutationFn: async (data: CustomerInsert) => {
-      const response = await fetch('/api/customers', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-        credentials: 'include', // Include cookies for authentication
-      })
+      const abortController = new AbortController()
+      const timeoutId = setTimeout(() => abortController.abort(), 30000)
 
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message ?? 'Failed to create customer')
-      }
+      try {
+        const response = await fetch('/api/customers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+          credentials: 'include',
+          signal: abortController.signal,
+        })
 
-      const result = await response.json()
-      if (!result.success) {
-        throw new Error(result.error ?? 'Failed to create customer')
+        clearTimeout(timeoutId)
+
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.message ?? 'Failed to create customer')
+        }
+
+        const result = await response.json()
+        if (!result.success) {
+          throw new Error(result.error ?? 'Failed to create customer')
+        }
+        return result.data
+      } catch (error) {
+        clearTimeout(timeoutId)
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new Error('Request timeout - please try again')
+        }
+        throw error
       }
-      return result.data
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['customers'] })
@@ -123,23 +139,37 @@ export function useUpdateCustomer() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: CustomerUpdate }) => {
-      const response = await fetch(`/api/customers/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-        credentials: 'include', // Include cookies for authentication
-      })
+      const abortController = new AbortController()
+      const timeoutId = setTimeout(() => abortController.abort(), 30000)
 
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message ?? 'Failed to update customer')
-      }
+      try {
+        const response = await fetch(`/api/customers/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+          credentials: 'include',
+          signal: abortController.signal,
+        })
 
-      const result = await response.json()
-      if (!result.success) {
-        throw new Error(result.error ?? 'Failed to update customer')
+        clearTimeout(timeoutId)
+
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.message ?? 'Failed to update customer')
+        }
+
+        const result = await response.json()
+        if (!result.success) {
+          throw new Error(result.error ?? 'Failed to update customer')
+        }
+        return result.data
+      } catch (error) {
+        clearTimeout(timeoutId)
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new Error('Request timeout - please try again')
+        }
+        throw error
       }
-      return result.data
     },
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({ queryKey: ['customer', variables.id] })
@@ -163,21 +193,35 @@ export function useDeleteCustomer() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(`/api/customers/${id}`, {
-        method: 'DELETE',
-        credentials: 'include', // Include cookies for authentication
-      })
+      const abortController = new AbortController()
+      const timeoutId = setTimeout(() => abortController.abort(), 30000)
 
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message ?? 'Failed to delete customer')
-      }
+      try {
+        const response = await fetch(`/api/customers/${id}`, {
+          method: 'DELETE',
+          credentials: 'include',
+          signal: abortController.signal,
+        })
 
-      const result = await response.json()
-      if (!result.success) {
-        throw new Error(result.error ?? 'Failed to delete customer')
+        clearTimeout(timeoutId)
+
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.message ?? 'Failed to delete customer')
+        }
+
+        const result = await response.json()
+        if (!result.success) {
+          throw new Error(result.error ?? 'Failed to delete customer')
+        }
+        return result.data
+      } catch (error) {
+        clearTimeout(timeoutId)
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new Error('Request timeout - please try again')
+        }
+        throw error
       }
-      return result.data
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['customers'] })

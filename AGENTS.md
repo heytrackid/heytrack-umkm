@@ -206,7 +206,7 @@ HeyTrack is a comprehensive culinary business management system designed to help
 ### Technical Architecture
 
 **Frontend**:
-- Next.js 14 with App Router
+- Next.js 16 with App Router
 - TypeScript for type safety
 - Tailwind CSS for styling
 - React Query for data management

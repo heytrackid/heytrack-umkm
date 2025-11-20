@@ -24,24 +24,57 @@ export const getSmartIngredientSuggestions = (
   _category?: string
 ): IngredientSuggestion[] => {
   const suggestions: Record<string, IngredientSuggestion[]> = {
-    // Bakery
-    cake: [
-      { name: 'tepung terigu', typical_quantity: 250, unit: 'g', priority: 'essential' },
+    // Main Dishes
+    'main-dish': [
+      { name: 'ayam', typical_quantity: 500, unit: 'g', priority: 'essential' },
+      { name: 'bawang merah', typical_quantity: 5, unit: 'siung', priority: 'essential' },
+      { name: 'bawang putih', typical_quantity: 3, unit: 'siung', priority: 'essential' },
+      { name: 'cabai', typical_quantity: 2, unit: 'buah', priority: 'recommended' },
+      { name: 'garam', typical_quantity: 5, unit: 'g', priority: 'essential' },
+      { name: 'minyak goreng', typical_quantity: 50, unit: 'ml', priority: 'essential' },
+      { name: 'kecap manis', typical_quantity: 30, unit: 'ml', priority: 'recommended' }
+    ],
+
+    // Side Dishes
+    'side-dish': [
+      { name: 'tempe', typical_quantity: 200, unit: 'g', priority: 'essential' },
+      { name: 'tahu', typical_quantity: 200, unit: 'g', priority: 'essential' },
+      { name: 'bawang putih', typical_quantity: 2, unit: 'siung', priority: 'essential' },
+      { name: 'ketumbar', typical_quantity: 5, unit: 'g', priority: 'recommended' },
+      { name: 'minyak goreng', typical_quantity: 100, unit: 'ml', priority: 'essential' },
+      { name: 'garam', typical_quantity: 3, unit: 'g', priority: 'essential' }
+    ],
+
+    // Snacks
+    'snack': [
+      { name: 'tepung terigu', typical_quantity: 200, unit: 'g', priority: 'essential' },
+      { name: 'telur', typical_quantity: 2, unit: 'butir', priority: 'essential' },
+      { name: 'minyak goreng', typical_quantity: 500, unit: 'ml', priority: 'essential' },
+      { name: 'garam', typical_quantity: 3, unit: 'g', priority: 'essential' },
+      { name: 'bawang putih', typical_quantity: 2, unit: 'siung', priority: 'recommended' }
+    ],
+
+    // Beverages
+    'beverage': [
+      { name: 'gula pasir', typical_quantity: 100, unit: 'g', priority: 'essential' },
+      { name: 'air', typical_quantity: 1000, unit: 'ml', priority: 'essential' },
+      { name: 'es batu', typical_quantity: 200, unit: 'g', priority: 'recommended' },
+      { name: 'jeruk', typical_quantity: 2, unit: 'buah', priority: 'recommended' },
+      { name: 'teh', typical_quantity: 10, unit: 'g', priority: 'optional' }
+    ],
+
+    // Desserts
+    'dessert': [
+      { name: 'gula pasir', typical_quantity: 150, unit: 'g', priority: 'essential' },
       { name: 'telur', typical_quantity: 3, unit: 'butir', priority: 'essential' },
-      { name: 'gula', typical_quantity: 200, unit: 'g', priority: 'essential' },
-      { name: 'mentega', typical_quantity: 150, unit: 'g', priority: 'essential' },
-      { name: 'baking powder', typical_quantity: 10, unit: 'g', priority: 'essential' },
-      { name: 'susu', typical_quantity: 100, unit: 'ml', priority: 'recommended' },
-      { name: 'vanilla', typical_quantity: 5, unit: 'ml', priority: 'optional' }
+      { name: 'tepung terigu', typical_quantity: 200, unit: 'g', priority: 'essential' },
+      { name: 'susu', typical_quantity: 200, unit: 'ml', priority: 'recommended' },
+      { name: 'mentega', typical_quantity: 100, unit: 'g', priority: 'recommended' },
+      { name: 'coklat', typical_quantity: 100, unit: 'g', priority: 'optional' }
     ],
-    cookies: [
-      { name: 'tepung terigu', typical_quantity: 300, unit: 'g', priority: 'essential' },
-      { name: 'mentega', typical_quantity: 200, unit: 'g', priority: 'essential' },
-      { name: 'gula', typical_quantity: 150, unit: 'g', priority: 'essential' },
-      { name: 'telur', typical_quantity: 1, unit: 'butir', priority: 'essential' },
-      { name: 'vanilla', typical_quantity: 5, unit: 'ml', priority: 'recommended' }
-    ],
-    bread: [
+
+    // Bakery (keeping for backward compatibility)
+    'bread': [
       { name: 'tepung terigu', typical_quantity: 500, unit: 'g', priority: 'essential' },
       { name: 'ragi', typical_quantity: 10, unit: 'g', priority: 'essential' },
       { name: 'gula', typical_quantity: 50, unit: 'g', priority: 'essential' },
@@ -49,43 +82,52 @@ export const getSmartIngredientSuggestions = (
       { name: 'mentega', typical_quantity: 50, unit: 'g', priority: 'essential' },
       { name: 'susu', typical_quantity: 250, unit: 'ml', priority: 'recommended' }
     ],
-    pastry: [
-      { name: 'tepung terigu', typical_quantity: 300, unit: 'g', priority: 'essential' },
-      { name: 'mentega', typical_quantity: 200, unit: 'g', priority: 'essential' },
-      { name: 'telur', typical_quantity: 2, unit: 'butir', priority: 'essential' },
-      { name: 'gula', typical_quantity: 100, unit: 'g', priority: 'essential' }
-    ],
 
-    // Snacks & Fried
-    fried: [
-      { name: 'tepung terigu', typical_quantity: 200, unit: 'g', priority: 'essential' },
-      { name: 'telur', typical_quantity: 2, unit: 'butir', priority: 'essential' },
-      { name: 'bawang putih', typical_quantity: 3, unit: 'siung', priority: 'recommended' },
-      { name: 'garam', typical_quantity: 5, unit: 'g', priority: 'essential' },
-      { name: 'tepung panir', typical_quantity: 100, unit: 'g', priority: 'optional' }
-    ],
-
-    // Beverages
-    drink: [
-      { name: 'gula', typical_quantity: 100, unit: 'g', priority: 'essential' },
-      { name: 'es batu', typical_quantity: 200, unit: 'g', priority: 'essential' },
-      { name: 'susu', typical_quantity: 100, unit: 'ml', priority: 'recommended' }
-    ],
-
-    // Main Dishes
-    rice: [
+    // Legacy mappings for backward compatibility
+    'rice': [
       { name: 'nasi', typical_quantity: 500, unit: 'g', priority: 'essential' },
       { name: 'telur', typical_quantity: 2, unit: 'butir', priority: 'essential' },
       { name: 'bawang merah', typical_quantity: 5, unit: 'siung', priority: 'essential' },
       { name: 'bawang putih', typical_quantity: 3, unit: 'siung', priority: 'essential' },
       { name: 'kecap manis', typical_quantity: 30, unit: 'ml', priority: 'essential' }
     ],
-    noodles: [
+    'noodles': [
       { name: 'mie', typical_quantity: 500, unit: 'g', priority: 'essential' },
       { name: 'ayam', typical_quantity: 200, unit: 'g', priority: 'essential' },
       { name: 'bawang putih', typical_quantity: 3, unit: 'siung', priority: 'essential' },
       { name: 'kecap', typical_quantity: 30, unit: 'ml', priority: 'essential' },
       { name: 'sawi', typical_quantity: 100, unit: 'g', priority: 'recommended' }
+    ],
+    'cake': [
+      { name: 'tepung terigu', typical_quantity: 250, unit: 'g', priority: 'essential' },
+      { name: 'telur', typical_quantity: 3, unit: 'butir', priority: 'essential' },
+      { name: 'gula', typical_quantity: 200, unit: 'g', priority: 'essential' },
+      { name: 'mentega', typical_quantity: 150, unit: 'g', priority: 'essential' },
+      { name: 'baking powder', typical_quantity: 10, unit: 'g', priority: 'essential' },
+      { name: 'susu', typical_quantity: 100, unit: 'ml', priority: 'recommended' }
+    ],
+    'cookies': [
+      { name: 'tepung terigu', typical_quantity: 300, unit: 'g', priority: 'essential' },
+      { name: 'mentega', typical_quantity: 200, unit: 'g', priority: 'essential' },
+      { name: 'gula', typical_quantity: 150, unit: 'g', priority: 'essential' },
+      { name: 'telur', typical_quantity: 1, unit: 'butir', priority: 'essential' }
+    ],
+    'pastry': [
+      { name: 'tepung terigu', typical_quantity: 300, unit: 'g', priority: 'essential' },
+      { name: 'mentega', typical_quantity: 200, unit: 'g', priority: 'essential' },
+      { name: 'telur', typical_quantity: 2, unit: 'butir', priority: 'essential' },
+      { name: 'gula', typical_quantity: 100, unit: 'g', priority: 'essential' }
+    ],
+    'fried': [
+      { name: 'tepung terigu', typical_quantity: 200, unit: 'g', priority: 'essential' },
+      { name: 'telur', typical_quantity: 2, unit: 'butir', priority: 'essential' },
+      { name: 'bawang putih', typical_quantity: 3, unit: 'siung', priority: 'recommended' },
+      { name: 'garam', typical_quantity: 5, unit: 'g', priority: 'essential' }
+    ],
+    'drink': [
+      { name: 'gula', typical_quantity: 100, unit: 'g', priority: 'essential' },
+      { name: 'es batu', typical_quantity: 200, unit: 'g', priority: 'essential' },
+      { name: 'susu', typical_quantity: 100, unit: 'ml', priority: 'recommended' }
     ]
   }
 

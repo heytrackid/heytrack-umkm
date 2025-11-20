@@ -102,8 +102,8 @@ export function preloadSkeletonComponents() {
     import('./dashboard-skeletons').catch((error) => {
       logger.warn({ error }, 'Failed to preload dashboard skeletons')
     })
-    import('./table-skeletons').catch((error) => {
-      logger.warn({ error }, 'Failed to preload table skeletons')
+    import('../skeleton-loader').catch((error) => {
+      logger.warn({ error }, 'Failed to preload shared skeletons')
     })
     import('./form-skeletons').catch((error) => {
       logger.warn({ error }, 'Failed to preload form skeletons')

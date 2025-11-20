@@ -2,7 +2,6 @@
 // Components
 export { OrdersList } from './OrdersList'
 export { OrderForm } from './OrderForm'
-export { EnhancedOrderForm } from './EnhancedOrderForm'
 export { OrderDetailView } from './OrderDetailView'
 export { OrderStatusTimeline } from './OrderStatusTimeline'
 export { OrderQuickActions } from './OrderQuickActions'

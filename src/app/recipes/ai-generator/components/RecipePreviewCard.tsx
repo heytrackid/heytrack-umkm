@@ -20,6 +20,7 @@ interface RecipePreviewCardProps {
   servings: number
   targetPrice: string
   selectedIngredients: string[]
+  customIngredients?: string[]
   availableIngredients: AvailableIngredient[]
 }
 
@@ -48,13 +49,21 @@ const RecipePreviewCard = memo(({
   servings,
   targetPrice,
   selectedIngredients,
-  availableIngredients,
+  customIngredients = [],
+  availableIngredients
 }: RecipePreviewCardProps) => {
   const hasInput = productName || servings > 0
   const estimatedCost = targetPrice ? parseFloat(targetPrice) * 0.45 : null
-  const ingredients = selectedIngredients.length > 0
-    ? selectedIngredients
+  // Get ingredient names from selected IDs and custom ingredients
+  const selectedIngredientNames = selectedIngredients
+    .map(id => availableIngredients.find(ing => ing.id === id)?.name)
+    .filter(Boolean) as string[]
+
+  const allIngredients = selectedIngredients.length > 0 || customIngredients.length > 0
+    ? [...selectedIngredientNames, ...customIngredients]
     : estimatedIngredients[productType] ?? []
+
+  const ingredients = allIngredients
 
   if (!hasInput) {
     return (

@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Skeleton } from '@/components/ui/skeleton'
+import { CardSkeleton as SharedCardSkeleton, FormSkeleton as SharedFormSkeleton, TableSkeleton as SharedTableSkeleton } from '@/components/ui/skeleton-loader'
 import { cn } from '@/lib/utils'
 
 // Search Component
@@ -304,45 +304,9 @@ export const BulkActions = ({
 }
 
 // Loading Skeletons
-export const TableSkeleton = ({ rows = 5, columns = 4 }: { rows?: number; columns?: number }) => (
-  <div className="space-y-4">
-    {Array.from({ length: rows }).map((_, i) => (
-      <div key={i} className="flex items-center space-x-4">
-        {Array.from({ length: columns }).map((_, j) => (
-          <Skeleton key={j} className="h-4 flex-1" />
-        ))}
-      </div>
-    ))}
-  </div>
-)
-
-export const CardSkeleton = ({ count = 4 }: { count?: number }) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-    {Array.from({ length: count }).map((_, i) => (
-      <Card key={i}>
-        <CardContent className="p-6">
-          <Skeleton className="h-4 w-20 mb-2" />
-          <Skeleton className="h-8 w-16" />
-        </CardContent>
-      </Card>
-    ))}
-  </div>
-)
-
-export const FormSkeleton = ({ fields = 4 }: { fields?: number }) => (
-  <div className="space-y-6">
-    {Array.from({ length: fields }).map((_, i) => (
-      <div key={i} className="space-y-2">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-10 w-full" />
-      </div>
-    ))}
-    <div className="flex gap-2">
-      <Skeleton className="h-10 w-24" />
-      <Skeleton className="h-10 w-20" />
-    </div>
-  </div>
-)
+export const TableSkeleton = SharedTableSkeleton
+export const CardSkeleton = SharedCardSkeleton
+export const FormSkeleton = SharedFormSkeleton
 
 // Empty States
 interface EmptyStateProps {

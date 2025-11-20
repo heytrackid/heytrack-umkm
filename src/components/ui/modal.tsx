@@ -94,7 +94,7 @@ export const Modal = ({
         tabIndex={0}
       >
         <div
-          className="fixed inset-0 bg-black/50 dark:bg-black/70 transition-opacity"
+          className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm transition-opacity"
           aria-hidden="true"
         />
 
@@ -233,7 +233,7 @@ export const Drawer = ({
         role="button"
         tabIndex={0}
       >
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 transition-opacity" aria-hidden="true" />
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm transition-opacity" aria-hidden="true" />
 
         <div
           ref={drawerRef}

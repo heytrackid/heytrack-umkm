@@ -29,6 +29,21 @@ export function handleAPIError(error: unknown): APIError {
     }
   }
 
+  // Handle Supabase/Postgres error objects
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    const err = error as { message: string; code?: string; details?: string; hint?: string }
+    return {
+      message: err.message,
+      statusCode: 500,
+      code: err.code || 'DATABASE_ERROR',
+      details: {
+        details: err.details,
+        hint: err.hint,
+        ...((error as Record<string, unknown>) || {})
+      }
+    }
+  }
+
   return {
     message: 'An unexpected error occurred',
     statusCode: 500,

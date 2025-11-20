@@ -14,14 +14,15 @@ type TableKey = keyof Database['public']['Tables']
 export class useSupabaseBulk {
   static async createMultiple<T extends TableName>(
     table: T,
-    records: Array<Insert<T>>
+    records: Array<Insert<T>>,
+    columns?: string
   ): Promise<Array<Row<T>>> {
     const supabase = typed(createClient())
 
     const { data, error } = await supabase
       .from(table as never)
       .insert(records as never)
-      .select('*')
+      .select(columns || '*')
 
     if (error) {
       throw new Error((error instanceof Error ? error.message : String(error)))
@@ -32,7 +33,8 @@ export class useSupabaseBulk {
 
   static async updateMultiple<T extends TableName>(
     table: T,
-    updates: Array<BulkUpdateItem<TableKey>>
+    updates: Array<BulkUpdateItem<TableKey>>,
+    columns?: string
   ): Promise<Array<Row<T>>> {
     const supabase = typed(createClient())
     const results: Array<Row<T>> = []
@@ -42,7 +44,7 @@ export class useSupabaseBulk {
         .from(table as never)
         .update(update.data as never)
         .eq('id', update.id)
-        .select('*')
+        .select(columns || '*')
         .single()
 
       if (error) {
@@ -76,14 +78,15 @@ export class useSupabaseBulk {
   static async upsertMultiple<T extends TableName>(
     table: T,
     records: Array<Insert<T>>,
-    conflictColumns: string[] = ['id']
+    conflictColumns: string[] = ['id'],
+    columns?: string
   ): Promise<Array<Row<T>>> {
     const supabase = typed(createClient())
 
     const { data, error } = await supabase
       .from(table as never)
       .upsert(records as never, { onConflict: conflictColumns.join(',') })
-      .select('*')
+      .select(columns || '*')
 
     if (error) {
       throw new Error((error instanceof Error ? error.message : String(error)))

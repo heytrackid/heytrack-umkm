@@ -37,6 +37,8 @@ interface MonitoringServiceConfig {
 class ErrorMonitoringService {
   private config: MonitoringServiceConfig
   private enabled: boolean
+  private globalErrorHandler: ((event: globalThis.ErrorEvent) => void) | null = null
+  private globalRejectionHandler: ((event: globalThis.PromiseRejectionEvent) => void) | null = null
 
   constructor(config?: MonitoringServiceConfig) {
     this.config = {
@@ -237,7 +239,7 @@ class ErrorMonitoringService {
     if (typeof window === 'undefined') {return}
     
     // Global error handler for uncaught errors
-    window.addEventListener('error', (event) => {
+    this.globalErrorHandler = (event: globalThis.ErrorEvent): void => {
       const errorEvent = event as unknown as { error: Error; filename?: string; lineno?: number; colno?: number }
       if (errorEvent.error) {
         this.captureException(errorEvent.error, {
@@ -249,10 +251,11 @@ class ErrorMonitoringService {
           }
         })
       }
-    })
+    }
+    window.addEventListener('error', this.globalErrorHandler)
 
     // Global promise rejection handler
-    window.addEventListener('unhandledrejection', (event) => {
+    this.globalRejectionHandler = (event: globalThis.PromiseRejectionEvent): void => {
       const rejectionEvent = event as unknown as { reason: unknown }
       const error = rejectionEvent.reason instanceof Error 
         ? rejectionEvent.reason 
@@ -265,7 +268,28 @@ class ErrorMonitoringService {
           reason: rejectionEvent.reason
         }
       })
-    })
+    }
+    window.addEventListener('unhandledrejection', this.globalRejectionHandler)
+  }
+
+  /**
+   * Cleanup global error handlers
+   * Call this when destroying the service instance
+   */
+  destroy(): void {
+    if (typeof window === 'undefined') {return}
+    
+    if (this.globalErrorHandler) {
+      window.removeEventListener('error', this.globalErrorHandler)
+      this.globalErrorHandler = null
+    }
+    
+    if (this.globalRejectionHandler) {
+      window.removeEventListener('unhandledrejection', this.globalRejectionHandler)
+      this.globalRejectionHandler = null
+    }
+    
+    this.enabled = false
   }
 
   /**

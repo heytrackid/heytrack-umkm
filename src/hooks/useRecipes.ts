@@ -40,7 +40,7 @@ export function useRecipes(options?: UseRecipesOptions) {
 
   const queryResult = useQuery<RecipesResponse, Error, Recipe[]>({
     queryKey: ['recipes', options],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const params = new URLSearchParams()
       if (options?.limit) {params.set('limit', options.limit.toString())}
       if (options?.offset) {params.set('offset', options.offset.toString())}
@@ -50,6 +50,7 @@ export function useRecipes(options?: UseRecipesOptions) {
       
       const response = await fetch(queryString ? `/api/recipes?${queryString}` : '/api/recipes', {
         credentials: 'include', // Include cookies for authentication
+        signal, // React Query provides signal automatically
       })
       let payload: RecipesResponse | null = null
       try {
@@ -94,11 +95,12 @@ export function useRecipes(options?: UseRecipesOptions) {
 export function useRecipe(id: string | null) {
   return useQuery({
     queryKey: ['recipe', id],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       if (!id) {return null}
       
       const response = await fetch(`/api/recipes/${id}`, {
         credentials: 'include', // Include cookies for authentication
+        signal, // React Query provides signal automatically
       })
       if (!response.ok) {
         throw new Error('Failed to fetch recipe')
@@ -120,19 +122,33 @@ export function useCreateRecipe() {
   
   return useMutation({
     mutationFn: async (data: RecipeInsert) => {
-      const response = await fetch('/api/recipes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-        credentials: 'include', // Include cookies for authentication
-      })
-      
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message ?? 'Failed to create recipe')
+      const abortController = new AbortController()
+      const timeoutId = setTimeout(() => abortController.abort(), 30000) // 30s timeout
+
+      try {
+        const response = await fetch('/api/recipes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+          credentials: 'include', // Include cookies for authentication
+          signal: abortController.signal,
+        })
+        
+        clearTimeout(timeoutId)
+        
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.message ?? 'Failed to create recipe')
+        }
+        
+        return response.json()
+      } catch (error) {
+        clearTimeout(timeoutId)
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new Error('Request timeout - please try again')
+        }
+        throw error
       }
-      
-      return response.json()
     },
     onSuccess: () => {
       // Invalidate and refetch recipes list
@@ -165,19 +181,33 @@ export function useUpdateRecipe() {
   
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: RecipeUpdate }) => {
-      const response = await fetch(`/api/recipes/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-        credentials: 'include', // Include cookies for authentication
-      })
-      
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message ?? 'Failed to update recipe')
+      const abortController = new AbortController()
+      const timeoutId = setTimeout(() => abortController.abort(), 30000) // 30s timeout
+
+      try {
+        const response = await fetch(`/api/recipes/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+          credentials: 'include', // Include cookies for authentication
+          signal: abortController.signal,
+        })
+        
+        clearTimeout(timeoutId)
+        
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.message ?? 'Failed to update recipe')
+        }
+        
+        return response.json()
+      } catch (error) {
+        clearTimeout(timeoutId)
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new Error('Request timeout - please try again')
+        }
+        throw error
       }
-      
-      return response.json()
     },
     onSuccess: (_, variables) => {
       // Invalidate specific recipe and list
@@ -211,17 +241,31 @@ export function useDeleteRecipe() {
   
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(`/api/recipes/${id}`, {
-        method: 'DELETE',
-        credentials: 'include', // Include cookies for authentication
-      })
-      
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message ?? 'Failed to delete recipe')
+      const abortController = new AbortController()
+      const timeoutId = setTimeout(() => abortController.abort(), 30000) // 30s timeout
+
+      try {
+        const response = await fetch(`/api/recipes/${id}`, {
+          method: 'DELETE',
+          credentials: 'include', // Include cookies for authentication
+          signal: abortController.signal,
+        })
+        
+        clearTimeout(timeoutId)
+        
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.message ?? 'Failed to delete recipe')
+        }
+        
+        return response.json()
+      } catch (error) {
+        clearTimeout(timeoutId)
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new Error('Request timeout - please try again')
+        }
+        throw error
       }
-      
-      return response.json()
     },
     onSuccess: () => {
       // Invalidate recipes list

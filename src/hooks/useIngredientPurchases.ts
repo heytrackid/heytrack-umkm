@@ -6,7 +6,7 @@ import { getErrorMessage } from '@/lib/type-guards'
 
 import type { Row, Insert, Update } from '@/types/database'
 
-const logger = createClientLogger('Hook')
+const logger = createClientLogger('IngredientPurchases')
 
 type IngredientPurchase = Row<'ingredient_purchases'>
 type IngredientPurchaseInsert = Insert<'ingredient_purchases'>
@@ -34,11 +34,11 @@ export function useIngredientPurchases(options?: UseIngredientPurchasesOptions) 
         credentials: 'include',
       })
       if (!response.ok) {
-        throw new Error('Failed to fetch ingredient purchases')
+        throw new Error('Gagal mengambil data pembelian bahan')
       }
       const result = await response.json() as { success: boolean; data: { ingredient_purchases: IngredientPurchase[]; pagination: unknown } }
       if (!result.success) {
-        throw new Error('Failed to fetch ingredient purchases')
+        throw new Error('Gagal mengambil data pembelian bahan')
       }
       return result.data.ingredient_purchases ?? []
     },
@@ -66,7 +66,7 @@ export function useCreateIngredientPurchase() {
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message ?? 'Failed to create ingredient purchase')
+        throw new Error(error.message ?? 'Gagal menambahkan pembelian bahan')
       }
 
       return response.json()
@@ -81,7 +81,7 @@ export function useCreateIngredientPurchase() {
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
-      logger.error({ error: message }, 'Failed to create ingredient purchase')
+      logger.error({ error: message }, 'Gagal menambahkan pembelian bahan')
 
       toast({
         title: 'Error',
@@ -110,7 +110,7 @@ export function useUpdateIngredientPurchase() {
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message ?? 'Failed to update ingredient purchase')
+        throw new Error(error.message ?? 'Gagal memperbarui pembelian bahan')
       }
 
       return response.json()
@@ -126,7 +126,7 @@ export function useUpdateIngredientPurchase() {
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
-      logger.error({ error: message }, 'Failed to update ingredient purchase')
+      logger.error({ error: message }, 'Gagal memperbarui pembelian bahan')
 
       toast({
         title: 'Error',
@@ -153,7 +153,7 @@ export function useDeleteIngredientPurchase() {
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message ?? 'Failed to delete ingredient purchase')
+        throw new Error(error.message ?? 'Gagal menghapus pembelian bahan')
       }
 
       return response.json()
@@ -168,7 +168,7 @@ export function useDeleteIngredientPurchase() {
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
-      logger.error({ error: message }, 'Failed to delete ingredient purchase')
+      logger.error({ error: message }, 'Gagal menghapus pembelian bahan')
 
       toast({
         title: 'Error',

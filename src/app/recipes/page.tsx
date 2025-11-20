@@ -4,13 +4,13 @@ import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
-import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
+import { TableSkeleton } from '@/components/ui/skeleton-loader'
 
 // Lazy load the heavy recipes page component
-const EnhancedRecipesPage = dynamic(
-  () => import('@/components/recipes/EnhancedRecipesPage'),
+const RecipesList = dynamic(
+  () => import('@/components/recipes/RecipesList'),
   {
-    loading: () => <DataGridSkeleton rows={8} />,
+    loading: () => <TableSkeleton rows={8} columns={5} />,
     ssr: false
   }
 )
@@ -18,8 +18,8 @@ const EnhancedRecipesPage = dynamic(
 const RecipesPage = () => (
     <AppLayout pageTitle="Resep Produk">
         <div className="p-6">
-            <Suspense fallback={<DataGridSkeleton rows={8} />}>
-                <EnhancedRecipesPage />
+            <Suspense fallback={<TableSkeleton rows={8} columns={5} />}>
+                <RecipesList />
             </Suspense>
         </div>
     </AppLayout>

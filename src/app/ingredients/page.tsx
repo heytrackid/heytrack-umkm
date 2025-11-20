@@ -4,33 +4,36 @@ import { AlertTriangle, Plus, ShoppingCart, Upload } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
-import { IngredientsCRUDSkeleton as ImportedIngredientsCRUDSkeleton } from '@/app/ingredients/components/IngredientsCRUDSkeleton'
 import { generateIngredientsTemplate, parseIngredientsCSV } from '@/components/import/csv-helpers'
 import { ImportDialog } from '@/components/import/ImportDialog'
-import { EnhancedIngredientsPage } from '@/components/ingredients/EnhancedIngredientsPage'
+import { IngredientsList } from '@/components/ingredients/IngredientsList'
 import { IngredientFormDialog } from '@/components/ingredients/IngredientFormDialog'
 import { PageHeader } from '@/components/layout'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatCardPatterns, StatsCards } from '@/components/ui/index'
+import { ListSkeleton, StatsSkeleton, TableSkeleton } from '@/components/ui/skeleton-loader'
 import { useIngredients } from '@/hooks/useIngredients'
+import { useIsMobile } from '@/hooks/use-mobile'
+import { useCostChangeAlerts } from '@/hooks/useCostAlerts'
 import { useQuery } from '@tanstack/react-query'
 import { useSettings } from '@/contexts/settings-context'
-import { toast } from 'sonner'
-
+import { errorToast } from '@/components/ui/toast'
 import type { Row } from '@/types/database'
 
 const IngredientsPage = () => {
   const { data: ingredients, isLoading: loading, error } = useIngredients();
   const { formatCurrency } = useSettings();
   const router = useRouter();
+  const { hasSignificantChanges } = useCostChangeAlerts();
+  const isMobile = useIsMobile();
 
   // Fetch recent purchases
   const { data: purchases } = useQuery({
     queryKey: ['purchases', 'recent'],
     queryFn: async () => {
-      const response = await fetch('/api/purchases?page=1&limit=5', {
+      const response = await fetch('/api/ingredient-purchases?page=1', {
         credentials: 'include'
       })
       if (!response.ok) return []
@@ -51,10 +54,10 @@ const IngredientsPage = () => {
   // Handle auth errors
   useEffect(() => {
     if (error && typeof error === 'object' && (error).message?.includes('401')) {
-      toast.error(typeof error === 'string' ? error : (error).message || 'Terjadi kesalahan autentikasi');
+      errorToast(typeof error === 'string' ? error : (error).message || 'Terjadi kesalahan autentikasi');
       router.push('/auth/login');
     } else if (error) {
-      toast.error('Gagal memuat data bahan baku. Silakan coba lagi.');
+      errorToast('Gagal memuat data bahan baku', 'Silakan coba lagi.');
     }
   }, [error, router]);
 
@@ -97,25 +100,11 @@ const IngredientsPage = () => {
           />
 
           {/* Stats skeleton */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[1, 2, 3, 4].map(i => (
-              <div key={`skeleton-${i}`} className="p-6 bg-card rounded-lg border">
-                <div className="animate-pulse space-y-3">
-                  <div className="h-4 bg-muted rounded w-2/3" />
-                  <div className="h-8 bg-muted rounded w-1/2" />
-                </div>
-              </div>
-            ))}
-          </div>
+          <StatsSkeleton count={4} />
 
           {/* Table skeleton */}
           <div className="border rounded-lg p-6">
-            <div className="animate-pulse space-y-4">
-              <div className="h-10 bg-muted rounded" />
-              {[1, 2, 3, 4, 5].map(i => (
-                <div key={`row-${i}`} className="h-16 bg-muted rounded" />
-              ))}
-            </div>
+            {isMobile ? <ListSkeleton items={5} /> : <TableSkeleton rows={5} columns={5} />}
           </div>
         </div>
       </AppLayout>
@@ -190,11 +179,30 @@ const IngredientsPage = () => {
           </div>
         )}
 
+        {/* Alert for Cost Changes */}
+        {hasSignificantChanges && (
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-blue-900 text-sm mb-1">
+                  Perubahan Harga Bahan
+                </h3>
+                <p className="text-sm text-blue-700">
+                  Beberapa bahan mengalami perubahan harga signifikan. Periksa resep yang terpengaruh untuk update HPP.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Main Content */}
-        {loading ? (
-          <ImportedIngredientsCRUDSkeleton />
+        {loading && !ingredients ? (
+          <div className="border rounded-lg p-6">
+            {isMobile ? <ListSkeleton items={5} /> : <TableSkeleton rows={5} columns={5} />}
+          </div>
         ) : (
-          <EnhancedIngredientsPage onAdd={() => setShowAddDialog(true)} />
+          <IngredientsList onAdd={() => setShowAddDialog(true)} />
         )}
 
         {/* Recent Purchases */}

@@ -5,11 +5,11 @@ import { Suspense, lazy, useEffect, type ComponentType, type ReactNode } from 'r
 import { globalLazyLoadingUtils } from '@/components/lazy/index'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import {
-  DataTableSkeleton,
   ChartSkeleton,
   DashboardCardSkeleton,
   AvatarSkeleton
 } from '@/components/ui/skeletons'
+import { TableSkeleton } from '@/components/ui/skeleton-loader'
 
 
 // Type for window with lazy loading metrics
@@ -30,6 +30,8 @@ interface SkeletonProps {
   type?: 'login' | 'register'
 }
 
+const DefaultTableSkeleton: ComponentType = () => <TableSkeleton rows={6} columns={4} />
+
 // Loading components mapped to skeleton types
 const loadingComponents: Record<string, ComponentType<Record<string, unknown>>> = {
   // Page-level skeletons
@@ -39,18 +41,18 @@ const loadingComponents: Record<string, ComponentType<Record<string, unknown>>> 
       {Array.from({ length: 4 }).map((_, i) => <DashboardCardSkeleton key={i} />)}
     </div>
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <DataTableSkeleton />
+      <TableSkeleton rows={6} columns={4} />
       <ChartSkeleton />
     </div>
   </div>,
 
   // Table skeletons
-  table: DataTableSkeleton,
-  ordersTable: DataTableSkeleton,
-  customersTable: DataTableSkeleton,
-  inventoryTable: DataTableSkeleton,
-  recipesTable: DataTableSkeleton,
-  recipeTable: DataTableSkeleton,
+  table: () => <TableSkeleton rows={8} columns={4} />,
+  ordersTable: () => <TableSkeleton rows={10} columns={5} />,
+  customersTable: () => <TableSkeleton rows={8} columns={4} />,
+  inventoryTable: () => <TableSkeleton rows={10} columns={4} />,
+  recipesTable: () => <TableSkeleton rows={8} columns={4} />,
+  recipeTable: () => <TableSkeleton rows={6} columns={4} />,
 
   // Form skeletons
   form: () => <div className="space-y-4 p-4">
@@ -97,7 +99,7 @@ const loadingComponents: Record<string, ComponentType<Record<string, unknown>>> 
     <DashboardCardSkeleton />
     <DashboardCardSkeleton />
   </div>,
-  recentOrders: DataTableSkeleton,
+  recentOrders: () => <TableSkeleton rows={6} columns={4} />,
   stockAlert: ChartSkeleton,
   hppResults: ChartSkeleton,
   dashboardHeader: DashboardCardSkeleton,
@@ -122,7 +124,7 @@ export const SuspenseWrapper = ({
   loadingType = 'default',
   errorFallback
 }: SuspenseWrapperProps) => {
-  const LoadingComponent = loadingComponents[loadingType] ?? DataTableSkeleton
+  const LoadingComponent = loadingComponents[loadingType] ?? DefaultTableSkeleton
 
   return (
     <ErrorBoundary fallback={errorFallback}>

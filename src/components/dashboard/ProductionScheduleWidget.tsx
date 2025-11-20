@@ -5,6 +5,7 @@ import { AlertCircle, Clock, Package, TrendingUp } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ListSkeleton } from '@/components/ui/skeleton-loader'
 import { useDashboardSchedule } from '@/hooks/useDashboardSchedule'
 
 
@@ -22,11 +23,7 @@ export const ProductionScheduleWidget = (): JSX.Element => {
                     <CardTitle>Today&apos;s Production Schedule</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="space-y-4">
-                        <Skeleton className="h-20 w-full" />
-                        <Skeleton className="h-20 w-full" />
-                        <Skeleton className="h-20 w-full" />
-                    </div>
+                    <ListSkeleton items={3} />
                 </CardContent>
             </Card>
         )

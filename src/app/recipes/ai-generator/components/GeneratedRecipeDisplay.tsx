@@ -113,16 +113,16 @@ const GeneratedRecipeDisplay = ({
           <CardTitle className="text-lg">Bahan-Bahan</CardTitle>
         </CardHeader>
         <CardContent>
-          <ul className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {recipe.ingredients?.map((ing, index) => (
-              <li key={index} className="flex justify-between items-center py-2 border-b last:border-0">
-                <span className="font-medium">{ing.name}</span>
-                <span className="text-sm text-muted-foreground">
+              <div key={index} className="flex justify-between items-center py-3 px-4 bg-muted/30 rounded-lg">
+                <span className="font-medium truncate max-w-[60%]">{ing.name}</span>
+                <span className="text-sm text-muted-foreground bg-background px-2 py-1 rounded">
                   {ing.quantity} {ing.unit}
                 </span>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         </CardContent>
       </Card>
 
@@ -132,27 +132,35 @@ const GeneratedRecipeDisplay = ({
           <CardTitle className="text-lg">Cara Membuat</CardTitle>
         </CardHeader>
         <CardContent>
-          <ol className="space-y-4">
+          <div className="space-y-4">
             {recipe.instructions?.map((step, index) => (
-              <li key={index} className="flex gap-3">
-                <div className="flex-shrink-0 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
+              <div key={index} className="flex gap-4 p-4 border rounded-lg bg-muted/10">
+                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg">
                   {step.step}
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium">{step.title}</p>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <h4 className="font-semibold text-base">{step.title}</h4>
+                  <p className="text-sm text-muted-foreground mt-2">
                     {step.description}
                   </p>
                   {step.duration_minutes && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      ⏱️ {step.duration_minutes} menit
-                      {step.temperature && ` • 🌡️ ${step.temperature}`}
-                    </p>
+                    <div className="flex gap-2 mt-3">
+                      {step.duration_minutes && (
+                        <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded">
+                          ⏱️ {step.duration_minutes} menit
+                        </span>
+                      )}
+                      {step.temperature && (
+                        <span className="text-xs px-2 py-1 bg-secondary text-secondary-foreground rounded">
+                          🌡️ {step.temperature}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
-              </li>
+              </div>
             ))}
-          </ol>
+          </div>
         </CardContent>
       </Card>
 
@@ -163,14 +171,14 @@ const GeneratedRecipeDisplay = ({
             <CardTitle className="text-lg">Tips Profesional</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2">
+            <div className="grid grid-cols-1 gap-3">
               {recipe.tips.map((tip, index) => (
-                <li key={index} className="flex gap-2">
-                  <span className="text-primary">💡</span>
+                <div key={index} className="flex gap-3 p-3 bg-blue-50/30 dark:bg-blue-950/20 rounded-lg border border-blue-100 dark:border-blue-900/50">
+                  <span className="text-primary flex-shrink-0">💡</span>
                   <span className="text-sm">{tip}</span>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           </CardContent>
         </Card>
       )}

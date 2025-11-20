@@ -62,6 +62,7 @@ function buildEnvVarReport(): Record<string, EnvVarDiagnostics> {
 async function checkSupabaseConnectivity(): Promise<DiagnosticsPayload['supabase_connectivity']> {
   const url = process['env']['NEXT_PUBLIC_SUPABASE_URL']
   const anonKey = process['env']['NEXT_PUBLIC_SUPABASE_ANON_KEY']
+  const serviceRoleKey = process['env']['SUPABASE_SERVICE_ROLE_KEY']
 
   if (!url || !anonKey) {
     return 'missing_credentials'
@@ -69,8 +70,16 @@ async function checkSupabaseConnectivity(): Promise<DiagnosticsPayload['supabase
 
   try {
     const { createClient } = await import('@supabase/supabase-js')
-    const client = createClient(url, anonKey)
-    const { error } = await client.from('users').select('count').limit(1).single()
+    const client = createClient(url, serviceRoleKey ?? anonKey, {
+      auth: { persistSession: false },
+      global: serviceRoleKey ? { headers: { Authorization: `Bearer ${serviceRoleKey}` } } : undefined,
+    })
+
+    const { error } = await client
+      .from('user_profiles')
+      .select('id', { head: true, count: 'exact' })
+      .limit(1)
+
     return error ? 'error' : 'connected'
   } catch {
     return 'connection_failed'

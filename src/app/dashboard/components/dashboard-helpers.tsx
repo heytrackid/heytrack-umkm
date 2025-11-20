@@ -3,17 +3,16 @@ import { Calculator, ChefHat, Package, Plus } from 'lucide-react'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { LoadingButton } from '@/components/ui/loading-button'
-import { DashboardHeaderSkeleton, RecentOrdersSkeleton, StatsCardSkeleton, StockAlertSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
+import { StatsSkeleton } from '@/components/ui/skeleton-loader'
+import { DashboardHeaderSkeleton, RecentOrdersSkeleton, StockAlertSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useCurrency } from '@/hooks/useCurrency'
 
 import type { useRouter } from 'next/navigation'
 import type { JSX } from 'react'
 
 export const StatsCardsGridSkeleton = (): JSX.Element => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    {Array.from({ length: 4 }).map((_, i) => (
-      <StatsCardSkeleton key={`stats-${i}`} />
-    ))}
+  <div className="mb-8">
+    <StatsSkeleton count={4} />
   </div>
 )
 

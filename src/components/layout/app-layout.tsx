@@ -17,6 +17,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { NotificationBell } from '@/components/layout/NotificationBell'
+import { NotificationProvider } from '@/contexts/notification-context'
 import { useAuth } from '@/hooks/useAuth'
 import { useInstantNavigation } from '@/hooks/useInstantNavigation'
 
@@ -162,8 +164,9 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
 
   return (
     <GlobalErrorBoundary>
-      <div className="min-h-screen bg-background">
-        {/* Top Header */}
+      <NotificationProvider>
+        <div className="min-h-screen bg-background">
+          {/* Top Header */}
         <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-4 md:px-6">
           <div className="flex items-center gap-2">
             {!isMobile && (
@@ -209,6 +212,7 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
                 <Download className="h-4 w-4" />
               </Button>
               <ThemeToggle />
+              {!loading && user && <NotificationBell />}
 
               {/* User Authentication */}
               {loading && <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />}
@@ -270,7 +274,8 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
 
         {/* Bottom Navigation for Mobile */}
         {isMobile && <SmartBottomNav />}
-      </div>
+        </div>
+      </NotificationProvider>
     </GlobalErrorBoundary>
   )
 })

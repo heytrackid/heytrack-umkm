@@ -65,6 +65,7 @@ export const ProfileSettings = ({ settings, onSettingChange }: ProfileSettingsPr
               <option value="Manager">Manajer</option>
               <option value="Staff">Staff</option>
               <option value="Admin">Admin</option>
+              <option value="Viewer">Viewer</option>
             </select>
           </div>
         </div>

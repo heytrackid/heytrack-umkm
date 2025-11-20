@@ -2,7 +2,7 @@
 
 import { lazy, Suspense } from 'react'
 
-import { DataTableSkeleton } from '@/components/ui/skeletons'
+import { TableSkeleton } from '@/components/ui/skeleton-loader'
 
 import type { DataTableProps } from '@/components/data-table/data-table'
 
@@ -19,7 +19,7 @@ const LazyDataTableComponent = lazy(() =>
  */
 export const LazyDataTable = <TData, TValue>(props: DataTableProps<TData, TValue>) => {
   return (
-    <Suspense fallback={<DataTableSkeleton />}>
+    <Suspense fallback={<TableSkeleton rows={8} columns={4} />}>
       <LazyDataTableComponent {...(props as DataTableProps<unknown, unknown>)} />
     </Suspense>
   )

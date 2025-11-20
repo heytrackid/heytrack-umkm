@@ -1,134 +1,182 @@
 'use client'
 
-import * as ToastPrimitives from '@radix-ui/react-toast'
-import { cva, type VariantProps } from 'class-variance-authority'
-import { X } from 'lucide-react'
-import { forwardRef, type ComponentPropsWithoutRef, type ElementRef, type ReactElement } from 'react'
+import { CheckCircle2, XCircle, AlertCircle, Info, Undo2 } from 'lucide-react'
+import { toast as sonnerToast } from 'sonner'
 
-import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
+export type ToastProps = {
+  id: string
+  title?: React.ReactNode
+  description?: React.ReactNode
+  action?: React.ReactNode
+  variant?: 'default' | 'destructive' | 'success' | 'warning'
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+}
 
+export type ToastActionElement = React.ReactElement
 
+export interface ToastAction {
+  label: string
+  onClick: () => void
+}
 
-const ToastProvider = ToastPrimitives.Provider
+export interface ToastOptions {
+  title: string
+  description?: string
+  action?: ToastAction
+  duration?: number
+  type?: 'error' | 'info' | 'success' | 'warning'
+}
 
-const ToastViewport = forwardRef<
-  ElementRef<typeof ToastPrimitives.Viewport>,
-  ComponentPropsWithoutRef<typeof ToastPrimitives.Viewport>
->(({ className, ...props }, ref) => (
-  <ToastPrimitives.Viewport
-    ref={ref}
-    className={cn(
-      'fixed bottom-0 right-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]',
-      className
-    )}
-    {...props}
-  />
-))
-ToastViewport.displayName = ToastPrimitives.Viewport.displayName
-
-const toastVariants = cva(
-  'group pointer-events-auto relative flex w-full items-center justify-between space-x-2 overflow-hidden rounded-md border p-4 pr-6  transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full',
-  {
-    variants: {
-      variant: {
-        default: 'border bg-background text-foreground',
-        destructive:
-          'destructive group border-destructive bg-destructive text-destructive-foreground',
-        success:
-          'border-border/20  bg-secondary text-foreground dark:border-green-700 dark:bg-gray-900 dark:text-gray-100',
-        warning:
-          'border-border/20  bg-secondary text-yellow-900 dark:border-yellow-700 dark:bg-yellow-900 dark:text-yellow-100',
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-    },
+const getIcon = (type: string) => {
+  switch (type) {
+    case 'success':
+      return <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
+    case 'error':
+      return <XCircle className="h-5 w-5 text-red-600" />
+    case 'warning':
+      return <AlertCircle className="h-5 w-5 text-orange-600" />
+    case 'info':
+      return <Info className="h-5 w-5 text-muted-foreground" />
+    default:
+      return null
   }
-)
+}
 
-const Toast = forwardRef<
-  ElementRef<typeof ToastPrimitives.Root>,
-  ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
-    VariantProps<typeof toastVariants>
->(({ className, variant, ...props }, ref) => (
-    <ToastPrimitives.Root
-      ref={ref}
-      className={cn(toastVariants({ variant }), className)}
-      {...props}
-    />
-  ))
-Toast.displayName = ToastPrimitives.Root.displayName
+export function toast({
+  title,
+  description,
+  action,
+  duration = 4000,
+  type = 'info'
+}: ToastOptions) {
+  return sonnerToast.custom(
+    (t) => (
+      <div className="bg-background border rounded-lg  p-4 min-w-[300px] max-w-[500px] animate-in slide-in-from-bottom-5">
+        <div className="flex items-start gap-3">
+          {getIcon(type)}
+          <div className="flex-1 space-y-1">
+            <p className="font-semibold text-sm">{title}</p>
+            {description && (
+              <p className="text-sm text-muted-foreground">{description}</p>
+            )}
+            {action && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  action.onClick()
+                  sonnerToast.dismiss(t)
+                }}
+                className="mt-2"
+              >
+                {action.label}
+              </Button>
+            )}
+          </div>
+          <button
+            onClick={() => sonnerToast.dismiss(t)}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <XCircle className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    ),
+    { duration }
+  )
+}
 
-const ToastAction = forwardRef<
-  ElementRef<typeof ToastPrimitives.Action>,
-  ComponentPropsWithoutRef<typeof ToastPrimitives.Action>
->(({ className, ...props }, ref) => (
-  <ToastPrimitives.Action
-    ref={ref}
-    className={cn(
-      'inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium transition-colors hover:bg-secondary focus:outline-none focus:ring-1 focus:ring-ring disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive',
-      className
-    )}
-    {...props}
-  />
-))
-ToastAction.displayName = ToastPrimitives.Action.displayName
+// Specialized toast for delete operations with undo
+export function deleteToast({
+  itemName,
+  onUndo,
+  duration = 5000
+}: {
+  itemName: string
+  onUndo: () => Promise<void>
+  duration?: number
+}) {
+  return toast({
+    title: `${itemName} dihapus`,
+    description: 'Item telah dihapus dari sistem',
+    type: 'success',
+    duration,
+    action: {
+      label: 'Undo',
+      onClick: onUndo
+    }
+  })
+}
 
-const ToastClose = forwardRef<
-  ElementRef<typeof ToastPrimitives.Close>,
-  ComponentPropsWithoutRef<typeof ToastPrimitives.Close>
->(({ className, ...props }, ref) => (
-  <ToastPrimitives.Close
-    ref={ref}
-    className={cn(
-      'absolute right-1 top-1 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-1 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600',
-      className
-    )}
-    toast-close=""
-    {...props}
-  >
-    <X className="h-4 w-4" />
-  </ToastPrimitives.Close>
-))
-ToastClose.displayName = ToastPrimitives.Close.displayName
+// Quick success toast
+export function successToast(title: string, description?: string) {
+  return toast({
+    title,
+    description,
+    type: 'success',
+    duration: 3000
+  })
+}
 
-const ToastTitle = forwardRef<
-  ElementRef<typeof ToastPrimitives.Title>,
-  ComponentPropsWithoutRef<typeof ToastPrimitives.Title>
->(({ className, ...props }, ref) => (
-  <ToastPrimitives.Title
-    ref={ref}
-    className={cn('text-sm font-semibold [&+div]:text-xs', className)}
-    {...props}
-  />
-))
-ToastTitle.displayName = ToastPrimitives.Title.displayName
+// Quick error toast
+export function errorToast(title: string, description?: string) {
+  return toast({
+    title,
+    description,
+    type: 'error',
+    duration: 5000
+  })
+}
 
-const ToastDescription = forwardRef<
-  ElementRef<typeof ToastPrimitives.Description>,
-  ComponentPropsWithoutRef<typeof ToastPrimitives.Description>
->(({ className, ...props }, ref) => (
-  <ToastPrimitives.Description
-    ref={ref}
-    className={cn('text-sm opacity-90', className)}
-    {...props}
-  />
-))
-ToastDescription.displayName = ToastPrimitives.Description.displayName
-
-type ToastProps = ComponentPropsWithoutRef<typeof Toast>
-
-type ToastActionElement = ReactElement<typeof ToastAction>
-
-export {
-  type ToastProps,
-  type ToastActionElement,
-  ToastProvider,
-  ToastViewport,
-  Toast,
-  ToastTitle,
-  ToastDescription,
-  ToastClose,
-  ToastAction,
+// Toast with undo action
+export function undoableToast({
+  title,
+  description,
+  onUndo,
+  duration = 5000
+}: {
+  title: string
+  description?: string
+  onUndo: () => Promise<void> | void
+  duration?: number
+}) {
+  return sonnerToast.custom(
+    (t) => (
+      <div className="bg-background border rounded-lg  p-4 min-w-[350px] animate-in slide-in-from-bottom-5">
+        <div className="flex items-start gap-3">
+          <CheckCircle2 className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+          <div className="flex-1 space-y-2">
+            <div>
+              <p className="font-semibold text-sm">{title}</p>
+              {description && (
+                <p className="text-sm text-muted-foreground mt-1">{description}</p>
+              )}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                await onUndo()
+                sonnerToast.dismiss(t)
+              }}
+              className="w-full"
+            >
+              <Undo2 className="h-4 w-4 mr-2" />
+              Undo
+            </Button>
+          </div>
+          <button
+            onClick={() => sonnerToast.dismiss(t)}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <XCircle className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    ),
+    { duration }
+  )
 }

@@ -2,6 +2,7 @@ import { CacheInvalidator } from '@/lib/cache/cache-manager'
 import { sendNotification } from '@/lib/communications/index'
 import { automationLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
+import { triggerWorkflow } from '@/lib/automation/workflows/index'
 
 import type {WorkflowResult, WorkflowContext } from '@/types/features/automation'
 
@@ -13,9 +14,9 @@ import type {WorkflowResult, WorkflowContext } from '@/types/features/automation
 
 export class FinancialWorkflowHandlers {
   /**
-   * Handle ingredient price change event
-   */
-  static handleIngredientPriceChanged(context: WorkflowContext): WorkflowResult {
+    * Handle ingredient price change event
+    */
+  static async handleIngredientPriceChanged(context: WorkflowContext): Promise<WorkflowResult> {
     const { event, logger } = context
 
     if (!event['data'] || typeof event['data'] !== 'object') {
@@ -50,13 +51,29 @@ export class FinancialWorkflowHandlers {
         this.sendPriceChangeNotification(data)
       }
 
+      // Trigger HPP recalculation for affected recipes
+      if (affectedRecipes && affectedRecipes.length > 0) {
+        logger.info({ ingredientId, affectedRecipesCount: affectedRecipes.length }, 'Triggering HPP recalculation due to price change')
+        try {
+          await triggerWorkflow('hpp.recalculation_needed', ingredientId, {
+            affectedRecipeIds: affectedRecipes,
+            priceChange,
+            ingredientId
+          })
+        } catch (hppError) {
+          logger.error({ ingredientId, hppError: getErrorMessage(hppError) }, 'Failed to trigger HPP recalculation')
+          // Don't fail the main operation
+        }
+      }
+
       return {
         success: true,
         message: `Price change processed for ingredient ${ingredientId}`,
         data: {
           ingredientId,
           priceChange,
-          notificationsSent: Math.abs(priceChange) > 10
+          notificationsSent: Math.abs(priceChange) > 10,
+          hppRecalculationTriggered: Boolean(affectedRecipes?.length)
         }
       }
 
@@ -75,9 +92,9 @@ export class FinancialWorkflowHandlers {
   }
 
   /**
-   * Handle operational cost change event
-   */
-  static handleOperationalCostChanged(context: WorkflowContext): WorkflowResult {
+    * Handle operational cost change event
+    */
+  static async handleOperationalCostChanged(context: WorkflowContext): Promise<WorkflowResult> {
     const { event, logger } = context
 
     if (!event['data'] || typeof event['data'] !== 'object') {
@@ -111,14 +128,28 @@ export class FinancialWorkflowHandlers {
       // Send notifications
       this.sendCostChangeNotification(data, costChange)
 
-      // Trigger pricing reviews for significant changes
-      if (Math.abs(costChange) > 10) {
-        logger.warn('Significant operational cost change detected', {
-          costChange: costChange.toFixed(1)
-        })
+        // Trigger pricing reviews for significant changes
+        if (Math.abs(costChange) > 10) {
+          logger.warn('Significant operational cost change detected', {
+            costChange: costChange.toFixed(1)
+          })
 
-        this.triggerPricingReviewNotification(context, data, costChange)
-      }
+          this.triggerPricingReviewNotification(context, data, costChange)
+
+          // Trigger HPP recalculation for all recipes due to operational cost change
+          logger.info({ costChange }, 'Triggering HPP recalculation due to operational cost change')
+          try {
+            await triggerWorkflow('hpp.recalculation_needed', costId, {
+              operationalCostChange: costChange,
+              costId,
+              costName,
+              affectedAllRecipes: true
+            })
+          } catch (hppError) {
+            logger.error({ costId, hppError: getErrorMessage(hppError) }, 'Failed to trigger HPP recalculation for operational cost change')
+            // Don't fail the main operation
+          }
+        }
 
       return {
         success: true,

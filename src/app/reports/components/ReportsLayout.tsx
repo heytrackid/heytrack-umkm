@@ -69,9 +69,9 @@ const FinancialReport = dynamic(
   }
 )
 
-const EnhancedProfitReport = dynamic(
-  () => import('./EnhancedProfitReport')
-    .then(m => ({ default: m.EnhancedProfitReport }))
+const ProfitReport = dynamic(
+  () => import('./ProfitReport')
+    .then(m => ({ default: m.ProfitReport }))
     .catch(() => {
       return { default: () => <div className="p-4 text-center text-red-600">Failed to load profit report</div> }
     }),
@@ -459,7 +459,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
             </SwipeableTabsList>
 
           <SwipeableTabsContent value="profit">
-            <EnhancedProfitReport dateRange={dateRange} />
+            <ProfitReport dateRange={dateRange} />
           </SwipeableTabsContent>
 
           <SwipeableTabsContent value="sales">

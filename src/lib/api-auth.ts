@@ -20,7 +20,7 @@ export interface AuthenticatedUser {
  */
 export async function getAuthenticatedUser(): Promise<AuthenticatedUser | null> {
   try {
-    const user = await stackServerApp.getUser()
+    const user = await stackServerApp.getUser({ or: 'redirect' })
     
     if (!user) {
       return null
@@ -42,16 +42,29 @@ export async function getAuthenticatedUser(): Promise<AuthenticatedUser | null> 
  * Returns user object or 401 response
  */
 export async function requireAuth(): Promise<AuthenticatedUser | NextResponse> {
-  const user = await getAuthenticatedUser()
-  
-  if (!user) {
+  try {
+    const user = await stackServerApp.getUser({ or: 'throw' })
+    
+    if (!user) {
+      apiLogger.warn('Authentication failed - no user found')
+      return NextResponse.json(
+        { error: 'Unauthorized - Please sign in' },
+        { status: 401 }
+      )
+    }
+    
+    return {
+      id: user.id,
+      email: user.primaryEmail ?? null,
+      displayName: user.displayName ?? null
+    }
+  } catch (error) {
+    apiLogger.error({ error }, 'Authentication error')
     return NextResponse.json(
       { error: 'Unauthorized - Please sign in' },
       { status: 401 }
     )
   }
-  
-  return user
 }
 
 /**

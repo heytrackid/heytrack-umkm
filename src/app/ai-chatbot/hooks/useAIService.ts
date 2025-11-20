@@ -1,12 +1,19 @@
-import { apiLogger } from '@/lib/logger';
+import { apiLogger } from '@/lib/logger'
 
-
-
-export function useAIService(sessionId?: string | null): { processAIQuery: (query: string) => Promise<{ message: string; suggestions: string[]; data?: Record<string, unknown> }> } {
-  // const { supabase } = useSupabase()
-
-
-  const processAIQuery = async (query: string): Promise<{ message: string; suggestions: string[]; data?: Record<string, unknown> }> => {
+export function useAIService(sessionId?: string | null): {
+  processAIQuery: (query: string) => Promise<{
+    message: string
+    suggestions: string[]
+    data?: Record<string, unknown>
+  }>
+} {
+  const processAIQuery = async (
+    query: string
+  ): Promise<{
+    message: string
+    suggestions: string[]
+    data?: Record<string, unknown>
+  }> => {
     // Get current user ID from Stack Auth
     let userId: string | undefined
     try {
@@ -23,14 +30,14 @@ export function useAIService(sessionId?: string | null): { processAIQuery: (quer
       apiLogger.warn('AI Chatbot accessed without authentication')
       return {
         message: '❌ **Error:** Anda perlu login untuk menggunakan AI Chatbot',
-        suggestions: ['Login terlebih dahulu', 'Refresh halaman']
+        suggestions: ['Login terlebih dahulu', 'Refresh halaman'],
       }
     }
 
     const startTime = Date.now()
 
     try {
-      const response = await fetch('/api/ai/chat-enhanced', {
+      const response = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -45,17 +52,31 @@ export function useAIService(sessionId?: string | null): { processAIQuery: (quer
       const responseTime = Date.now() - startTime
 
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`)
+        const errorData = await response.json().catch(() => ({}))
+        const errorMessage = errorData.error || `API request failed: ${response.status}`
+        apiLogger.error(
+          {
+            status: response.status,
+            error: errorMessage,
+            errors: errorData.errors,
+            fullResponse: errorData
+          },
+          'AI Chat API Error'
+        )
+        throw new Error(errorMessage)
       }
 
       const data = await response.json()
 
       return {
         message: data.message,
-        suggestions: (data.suggestions || []).map((s: string | { text: string }) => typeof s === 'string' ? s : s.text),
+        suggestions: (data.suggestions || []).map((s: string | { text: string }) =>
+          typeof s === 'string' ? s : s.text
+        ),
         data: {
           businessContext: data.metadata,
-          responseTimeMs: responseTime
+          responseTimeMs: responseTime,
+          sessionId: data.session_id,
         },
       }
     } catch (error) {
@@ -67,14 +88,24 @@ export function useAIService(sessionId?: string | null): { processAIQuery: (quer
       let suggestions = ['Coba lagi', 'Refresh halaman']
 
       if (error instanceof Error) {
-        if (error.message.includes('rate limit') || error.message.includes('429')) {
-          errorMessage = '🤖 Saya sedang sibuk menjawab banyak pertanyaan. Silakan tunggu sebentar ya!'
+        if (
+          error.message.includes('rate limit') ||
+          error.message.includes('429') ||
+          error.message.includes('batas')
+        ) {
+          errorMessage =
+            '🤖 Saya sedang sibuk menjawab banyak pertanyaan. Silakan tunggu sebentar ya!'
           suggestions = ['Tunggu 1 menit', 'Coba pertanyaan yang berbeda']
-        } else if (error.message.includes('network') || error.message.includes('fetch')) {
-          errorMessage = '📡 Sepertinya ada masalah koneksi. Periksa internet Anda dan coba lagi.'
+        } else if (
+          error.message.includes('network') ||
+          error.message.includes('fetch')
+        ) {
+          errorMessage =
+            '📡 Sepertinya ada masalah koneksi. Periksa internet Anda dan coba lagi.'
           suggestions = ['Periksa koneksi internet', 'Coba lagi dalam beberapa saat']
         } else if (error.message.includes('timeout')) {
-          errorMessage = '⏰ Respons saya terlalu lama. Mari coba dengan pertanyaan yang lebih spesifik.'
+          errorMessage =
+            '⏰ Respons saya terlalu lama. Mari coba dengan pertanyaan yang lebih spesifik.'
           suggestions = ['Buat pertanyaan lebih singkat', 'Tanyakan hal spesifik']
         }
       }
@@ -82,7 +113,7 @@ export function useAIService(sessionId?: string | null): { processAIQuery: (quer
       return {
         message: `${errorMessage}\n\n💡 **Alternatif**: Anda juga bisa cek langsung di menu yang relevan atau hubungi support jika urgent.`,
         suggestions,
-        data: { responseTimeMs: responseTime }
+        data: { responseTimeMs: responseTime },
       }
     }
   }

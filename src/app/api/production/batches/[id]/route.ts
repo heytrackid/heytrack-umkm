@@ -6,6 +6,7 @@ import {
   ProductionBatchUpdateSchema,
   VALID_PRODUCTION_STATUS_TRANSITIONS,
 } from '@/lib/validations/domains/production'
+import { triggerWorkflow } from '@/lib/automation/workflows/index'
 import type { ProductionBatchUpdate } from '@/types/database'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
@@ -129,6 +130,16 @@ async function putHandler(
         return NextResponse.json({ error: 'Batch produksi tidak ditemukan' }, { status: 404 })
       }
       throw error
+    }
+
+    // Trigger workflow if status changed to completed
+    if (validation.data.status === 'completed') {
+      try {
+        await triggerWorkflow('production.completed', id)
+      } catch (workflowError) {
+        // Log but don't fail the main operation
+        console.error('Failed to trigger production completion workflow:', workflowError)
+      }
     }
 
     return NextResponse.json(data)

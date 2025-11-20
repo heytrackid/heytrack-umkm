@@ -10,6 +10,7 @@ export interface UseSupabaseCRUDOptions {
   strategy?: 'swr' | 'query'
   orderBy?: { column: string; ascending?: boolean }
   filters?: Record<string, unknown>
+  columns?: string
 }
 
 export interface UseSupabaseCRUDResult<T> {
@@ -46,6 +47,8 @@ export function useSupabaseCRUD<TTable extends TableName>(
   const filters = useMemo(() => options?.filters, [filtersKey])
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const orderBy = useMemo(() => options?.orderBy, [orderByKey])
+   
+  const columns = useMemo(() => options?.columns, [options?.columns])
 
   // Fetch data
   const fetchData = useCallback(async () => {
@@ -53,7 +56,7 @@ export function useSupabaseCRUD<TTable extends TableName>(
       setLoading(true)
       setError(null)
 
-      let query = supabase.from(tableName).select('*')
+      let query = supabase.from(tableName).select(columns ?? '*')
 
        // Apply filters
        if (filters) {
@@ -81,7 +84,7 @@ export function useSupabaseCRUD<TTable extends TableName>(
     } finally {
       setLoading(false)
     }
-  }, [tableName, filters, orderBy, supabase, logger])
+   }, [tableName, filters, orderBy, columns, supabase, logger])
 
   // Create
   const create = useCallback(async (newData: Partial<RowType>): Promise<RowType | null> => {

@@ -43,6 +43,22 @@ interface AppSettingsRow {
   };
 }
 
+const mapDbRoleToDisplay = (role?: string | null): string | undefined => {
+  switch (role) {
+    case 'super_admin':
+    case 'admin':
+      return 'Admin'
+    case 'manager':
+      return 'Manager'
+    case 'staff':
+      return 'Staff'
+    case 'viewer':
+      return 'Viewer'
+    default:
+      return undefined
+  }
+}
+
 // GET /api/settings/profile - Get or create user profile
 async function getProfileHandler(context: RouteContext): Promise<NextResponse> {
   const { user, supabase } = context
@@ -81,7 +97,7 @@ async function getProfileHandler(context: RouteContext): Promise<NextResponse> {
         user_id: user.id,
         full_name: '',
         email: user.email,
-        role: 'owner', // Default role (lowercase to match enum)
+        role: 'admin',
       } as never)
       .select()
       .single()
@@ -95,24 +111,24 @@ async function getProfileHandler(context: RouteContext): Promise<NextResponse> {
     
     // Map to UserSettings shape, merging with any app_settings found (unlikely if profile is new, but possible)
     const mappedProfile = {
-        fullName: newProfile.full_name || '',
-        email: newProfile.email || user.email || '',
-        role: newProfile.role || 'Owner',
-        avatar: null,
-        phone: '',
-        bio: '',
-        ...userSettings
+        ...userSettings,
+        fullName: userSettings.fullName || newProfile.full_name || '',
+        email: userSettings.email || newProfile.email || user.email || '',
+        role: userSettings.role || 'Owner',
+        avatar: userSettings.avatar ?? null,
+        phone: userSettings.phone || '',
+        bio: userSettings.bio || ''
     }
     return createSuccessResponse(mappedProfile)
   }
   
   // Map to UserSettings shape merging both sources
   const mappedProfile = {
-      fullName: profile.full_name || userSettings.fullName || '',
-      email: profile.email || userSettings.email || user.email || '',
-      role: profile.role || userSettings.role || 'Owner',
-      // Prefer settings for these extended fields
-      avatar: userSettings.avatar || null,
+      ...userSettings,
+      fullName: userSettings.fullName || profile.full_name || '',
+      email: userSettings.email || profile.email || user.email || '',
+      role: userSettings.role || mapDbRoleToDisplay(profile.role) || 'Owner',
+      avatar: userSettings.avatar ?? null,
       phone: userSettings.phone || '',
       bio: userSettings.bio || ''
   }

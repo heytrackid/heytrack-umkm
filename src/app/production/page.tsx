@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { Skeleton } from '@/components/ui/skeleton'
+import { CardSkeleton, GridSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
 import { logger } from '@/lib/logger'
 
 // Dynamically import the production page to optimize initial load
@@ -30,14 +31,7 @@ const EnhancedProductionPage = dynamic(
         </div>
 
         {/* Stats cards skeleton */}
-        <div className="grid gap-4 md:grid-cols-5">
-          {Array.from({ length: 5 }, (_, index) => index).map((skeletonIndex) => (
-            <div key={`stats-skeleton-${skeletonIndex}`} className="p-6 border rounded-lg">
-              <Skeleton className="h-4 w-1/2 mx-auto" />
-              <Skeleton className="h-8 w-3/4 mx-auto mt-2" />
-            </div>
-          ))}
-        </div>
+        <StatsSkeleton count={5} />
 
         {/* Filters skeleton */}
         <div className="p-6 border rounded-lg">
@@ -45,15 +39,7 @@ const EnhancedProductionPage = dynamic(
         </div>
 
         {/* Production cards skeleton */}
-        <div className="grid gap-4 md:grid-cols-3">
-          {Array.from({ length: 3 }, (_, index) => index).map((skeletonIndex) => (
-            <div key={`card-skeleton-${skeletonIndex}`} className="p-6 border rounded-lg">
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-3 w-1/2 mt-2" />
-              <Skeleton className="h-10 w-full mt-4" />
-            </div>
-          ))}
-        </div>
+        <GridSkeleton columns={3} items={3} />
       </div>
     ),
     ssr: false

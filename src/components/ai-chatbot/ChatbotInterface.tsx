@@ -137,7 +137,7 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
       }
 
       // Call AI chat API with enhanced NLP
-      const response = await fetch('/api/ai/chat-enhanced', {
+      const response = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

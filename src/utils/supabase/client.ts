@@ -11,7 +11,7 @@ const supabaseAnonKey = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY']!
  * Note: Auth token injection happens via middleware/interceptors
  */
 export function createClient(accessToken?: string | null) {
-  const options: any = {}
+  const options: { global?: { headers: Record<string, string> } } = {}
   
   if (accessToken) {
     options.global = {

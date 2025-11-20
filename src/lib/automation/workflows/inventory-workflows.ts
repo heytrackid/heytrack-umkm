@@ -3,10 +3,24 @@ import { getErrorMessage } from '@/lib/type-guards'
 
 import type { Insert, Database, Json } from '@/types/database'
 import type {WorkflowResult,
-  WorkflowContext
+   WorkflowContext
 } from '@/types/features/automation'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+
+type StockTransactionInsert = Insert<'stock_transactions'>
+type IngredientPurchaseRow = {
+  id: string
+  ingredient_id: string
+  quantity: number
+  cost_per_unit: number | null
+  user_id: string
+  ingredient: {
+    id: string
+    name: string
+    unit: string
+  } | null
+}
 
 /**
  * Inventory Workflow Handlers
@@ -248,8 +262,117 @@ export class InventoryWorkflowHandlers {
   }
 
   /**
-   * Create inventory notification in database
+   * Handle purchase completed event
+   * ✅ NEW: Auto-increase inventory when purchase is completed/received
    */
+  static async handlePurchaseCompleted(context: WorkflowContext): Promise<WorkflowResult> {
+    const { event, logger, supabase } = context
+    const purchaseId = event.entityId
+
+    logger.info({ purchaseId }, 'Processing purchase completed workflow')
+
+    try {
+      if (!supabase) {
+        throw new Error('Supabase client is not available in workflow context')
+      }
+
+      // Get purchase with ingredient details
+      const { data: purchase, error: purchaseError } = await supabase
+        .from('ingredient_purchases')
+        .select(`
+          *,
+          ingredient:ingredients (*)
+        `)
+        .eq('id', purchaseId)
+        .single()
+
+      if (purchaseError || !purchase) {
+        throw new Error(`Purchase not found: ${purchaseError?.message}`)
+      }
+
+      const purchaseData = purchase as IngredientPurchaseRow
+
+      // Auto-increase inventory for completed purchase
+      await this.increaseInventoryFromPurchase(purchaseData, supabase)
+
+      logger.info({
+        purchaseId,
+        ingredientId: purchaseData.ingredient_id,
+        quantity: purchaseData.quantity
+      }, 'Purchase completed workflow finished - inventory increased')
+
+      return {
+        success: true,
+        message: `Purchase ${purchaseId} completed - inventory updated`,
+        data: {
+          purchaseId,
+          ingredientId: purchaseData.ingredient_id,
+          quantityReceived: purchaseData.quantity
+        }
+      }
+
+    } catch (error) {
+      logger.error({ purchaseId, error: getErrorMessage(error) }, 'Purchase completed workflow failed')
+      return {
+        success: false,
+        message: 'Failed to process purchase completion',
+        error: getErrorMessage(error)
+      }
+    }
+  }
+
+  /**
+   * Increase inventory when purchase is completed
+   * ✅ NEW: Creates stock transaction to increase inventory
+   */
+  private static async increaseInventoryFromPurchase(
+    purchase: any, // Will be properly typed when status field is added
+    supabase: SupabaseClient<Database>
+  ): Promise<void> {
+    automationLogger.debug('Increasing inventory from completed purchase')
+
+    if (!purchase.ingredient) {
+      automationLogger.warn({ purchaseId: purchase.id }, 'No ingredient found for purchase')
+      return
+    }
+
+    const ingredient = purchase.ingredient
+    const quantityReceived = purchase.quantity ?? 0
+    const unitPrice = purchase.cost_per_unit ?? 0
+    const totalCost = quantityReceived * unitPrice
+
+    // Create stock transaction to increase inventory
+    const stockTransaction: StockTransactionInsert = {
+      ingredient_id: ingredient.id,
+      quantity: quantityReceived, // Positive quantity = increase stock
+      reference: `PURCHASE-${purchase.id}`,
+      total_price: totalCost,
+      type: 'PURCHASE',
+      unit_price: unitPrice,
+      user_id: purchase.user_id || 'automation-system',
+      notes: `Purchase received - ${ingredient.name} (${quantityReceived} ${ingredient.unit || 'units'})`
+    }
+
+    const { error: transactionError } = await supabase
+      .from('stock_transactions')
+      .insert(stockTransaction)
+
+    if (transactionError) {
+      automationLogger.error({ transactionError }, 'Failed to create purchase completion stock transaction')
+      throw new Error(`Stock transaction creation failed: ${transactionError.message}`)
+    }
+
+    automationLogger.info({
+      purchaseId: purchase.id,
+      ingredientName: ingredient.name,
+      quantityReceived,
+      totalCost
+    }, 'Purchase completion inventory increase recorded')
+  }
+
+  /**
+     * Create inventory notification in database
+     */
   private static async createInventoryNotification(
     supabase: SupabaseClient<Database>,
     notificationData: {

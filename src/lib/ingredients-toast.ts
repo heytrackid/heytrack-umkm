@@ -1,6 +1,8 @@
 import { createElement } from 'react'
 
-import { ToastAction, type ToastActionElement } from '@/components/ui/toast'
+import type { ReactElement } from 'react'
+
+type ToastActionElement = ReactElement
 
 
 /**
@@ -49,7 +51,7 @@ export const ingredientDeletedToast = (name: string, onUndo?: () => void): Toast
   description: `"${name}" telah dihapus dari daftar`,
   variant: 'default',
   action: onUndo
-    ? createElement(ToastAction, { altText: 'Undo', onClick: onUndo }, 'Batalkan') as unknown as ToastActionElement
+    ? createElement('button', { onClick: onUndo }, 'Batalkan') as unknown as ToastActionElement
     : undefined
 })
 

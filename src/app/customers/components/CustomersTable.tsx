@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { CustomerSkeleton } from '@/components/ui/skeletons/table-skeletons'
+import { TableSkeleton } from '@/components/ui/skeleton-loader'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
 import { useResponsive } from '@/hooks/useResponsive'
 
@@ -181,7 +181,7 @@ const Customer = ({
   }
 
   if (isLoading) {
-    return <CustomerSkeleton rows={10} />
+    return <TableSkeleton rows={10} columns={7} />
   }
 
   return (

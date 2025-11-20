@@ -1,11 +1,12 @@
  
 'use client'
 
-import { Calculator, Clock, Edit, Eye, MoreVertical, Trash2, Users } from 'lucide-react'
+import { Calculator, Clock, DollarSign, Edit, Eye, MoreVertical, Trash2, Users } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { useSettings } from '@/contexts/settings-context'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -17,8 +18,15 @@ import {
 
 import type { Recipe } from '@/types/database'
 
+interface RecipeCostPreview {
+    materialCost: number
+    costPerServing: number
+    ingredientsCount: number
+}
+
 interface MobileRecipeCardProps {
     recipe: Recipe
+    costPreview?: RecipeCostPreview | null
     onView: (recipe: Recipe) => void
     onEdit: (recipe: Recipe) => void
     onDelete: (recipe: Recipe) => void
@@ -29,18 +37,22 @@ interface MobileRecipeCardProps {
 
 export const MobileRecipeCard = ({
     recipe,
+    costPreview,
     onView,
     onEdit,
     onDelete,
     onCalculateHPP,
     getDifficultyColor,
     getDifficultyLabel,
-}: MobileRecipeCardProps): JSX.Element => (
-    <Card className="transition-all" onClick={(): void => {
-        onView(recipe)
-    }}>
-        <CardContent className="p-4">
-            <div className="space-y-3">
+}: MobileRecipeCardProps): JSX.Element => {
+    const { formatCurrency } = useSettings()
+
+    return (
+        <Card className="transition-all" onClick={(): void => {
+            onView(recipe)
+        }}>
+            <CardContent className="p-4">
+                <div className="space-y-3">
                 {/* Header */}
                 <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -101,22 +113,29 @@ export const MobileRecipeCard = ({
                     </DropdownMenu>
                 </div>
 
-                {/* Info Badges */}
-                <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline" className="flex items-center gap-1">
-                        <Users className="h-3 w-3" />
-                        {recipe.servings} porsi
-                    </Badge>
-                    <Badge variant="outline" className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {(recipe.prep_time ?? 0) + (recipe.cook_time ?? 0)} menit
-                    </Badge>
-                    <Badge className={getDifficultyColor(recipe.difficulty ?? 'medium')}>
-                        {getDifficultyLabel(recipe.difficulty ?? 'medium')}
-                    </Badge>
+                    {/* Info Badges */}
+                    <div className="flex flex-wrap gap-2">
+                        <Badge variant="outline" className="flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            {recipe.servings} porsi
+                        </Badge>
+                        <Badge variant="outline" className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {(recipe.prep_time ?? 0) + (recipe.cook_time ?? 0)} menit
+                        </Badge>
+                        {costPreview && (
+                            <Badge variant="outline" className="flex items-center gap-1">
+                                <DollarSign className="h-3 w-3" />
+                                {formatCurrency(costPreview.costPerServing)}/porsi
+                            </Badge>
+                        )}
+                        <Badge className={getDifficultyColor(recipe.difficulty ?? 'medium')}>
+                            {getDifficultyLabel(recipe.difficulty ?? 'medium')}
+                        </Badge>
+                    </div>
                 </div>
-            </div>
-        </CardContent>
-    </Card>
-)
+            </CardContent>
+        </Card>
+    )
+}
 

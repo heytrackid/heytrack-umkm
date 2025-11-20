@@ -7,6 +7,7 @@ import { FinancialWorkflowHandlers } from '@/lib/automation/workflows/financial-
 import { HPPWorkflowHandlers } from '@/lib/automation/workflows/hpp-workflows'
 import { InventoryWorkflowHandlers } from '@/lib/automation/workflows/inventory-workflows'
 import { OrderWorkflowHandlers } from '@/lib/automation/workflows/order-workflows'
+import { ProductionWorkflowHandlers } from '@/lib/automation/workflows/production-workflows'
 
 
 /**
@@ -56,6 +57,12 @@ export class WorkflowAutomation extends BaseWorkflowAutomation {
         return InventoryWorkflowHandlers.handleLowStock(context)
       case 'inventory.out_of_stock':
         return InventoryWorkflowHandlers.handleOutOfStock(context)
+      case 'purchase.completed':
+        return InventoryWorkflowHandlers.handlePurchaseCompleted(context)
+
+      // Production events
+      case 'production.completed':
+        return ProductionWorkflowHandlers.handleProductionCompleted(context)
 
       // Financial events
       case 'ingredient.price_changed':

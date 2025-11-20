@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { LoadingSpinner } from '@/components/ui/loading-state'
 import { Skeleton } from '@/components/ui/skeleton'
+import { TableSkeleton } from '@/components/ui/skeleton-loader'
 
 
 
@@ -129,8 +130,10 @@ export const ProgressiveDataTable = <T extends Record<string, ReactNode>>({
 
   if (shouldVirtualize) {
     // For very large datasets, load virtualized table
+    const columnCount = columns?.length ?? 4
+
     return (
-      <Suspense fallback={<DataTableSkeleton />}>
+      <Suspense fallback={<TableSkeleton rows={8} columns={columnCount} />}>
         <div className="text-center p-4">
           <p className="text-sm text-muted-foreground mb-4">
             Large dataset detected ({data.length} items). Using optimized virtual table.
@@ -166,67 +169,6 @@ export const ProgressiveDataTable = <T extends Record<string, ReactNode>>({
     </div>
   )
 }
-
-// Skeleton components untuk different loading states
-export const DataTableSkeleton = (): JSX.Element => (
-  <div className="space-y-4">
-    <div className="flex justify-between">
-      <Skeleton className="h-8 w-32" />
-      <Skeleton className="h-8 w-24" />
-    </div>
-    <div className="border rounded-lg">
-      <div className="grid grid-cols-4 gap-4 p-4 border-b">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-4 w-20" />
-        ))}
-      </div>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="grid grid-cols-4 gap-4 p-4 border-b last:border-b-0">
-          {Array.from({ length: 4 }).map((_, j) => (
-            <Skeleton key={j} className="h-4 w-full" />
-          ))}
-        </div>
-      ))}
-    </div>
-  </div>
-)
-
-export const FormSkeleton = (): JSX.Element => (
-  <div className="space-y-4">
-    <div className="grid grid-cols-2 gap-4">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="space-y-2">
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-10 w-full" />
-        </div>
-      ))}
-    </div>
-    <div className="space-y-2">
-      <Skeleton className="h-4 w-16" />
-      <Skeleton className="h-24 w-full" />
-    </div>
-    <div className="flex justify-end gap-2">
-      <Skeleton className="h-10 w-20" />
-      <Skeleton className="h-10 w-24" />
-    </div>
-  </div>
-)
-
-export const StatsCardSkeleton = (): JSX.Element => (
-  <Card>
-    <CardHeader className="pb-2">
-      <div className="flex justify-between">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-4 w-4" />
-      </div>
-    </CardHeader>
-    <CardContent>
-      <Skeleton className="h-8 w-32 mb-1" />
-      <Skeleton className="h-3 w-20" />
-      <Skeleton className="h-8 w-full mt-2" />
-    </CardContent>
-  </Card>
-)
 
 // Virtual table loader for heavy datasets
 const VirtualizedTableLoader = <T extends { length?: number }>({ data }: { data?: T; columns?: unknown }) =>

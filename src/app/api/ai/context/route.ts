@@ -1,76 +1,84 @@
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-// API Route: Business Context Loading
+import { z } from 'zod'
+import { NextResponse } from 'next/server'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { apiLogger } from '@/lib/logger'
+import { BusinessContextService } from '@/lib/services/BusinessContextService'
+import { InputSanitizer } from '@/utils/security/index'
 
-import { NextRequest, NextResponse } from 'next/server';
-
-import { logger } from '@/lib/logger';
-import { requireAuth, isErrorResponse } from '@/lib/api-auth'
-import { BusinessContextService } from '@/lib/services/BusinessContextService';
-import { createSecureHandler, InputSanitizer, SecurityPresets } from '@/utils/security/index';
+const ContextQuerySchema = z.object({
+  page: z.string().trim().max(200).optional(),
+})
 
 /**
  * GET /api/ai/context - Load business context for AI chat
  */
-async function getHandler(request: NextRequest): Promise<NextResponse> {
+async function getContextHandler(
+  context: RouteContext,
+  query?: z.infer<typeof ContextQuerySchema>
+): Promise<NextResponse> {
+  const { user } = context
+
   try {
-    // Authenticate with Stack Auth
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
+    const sanitizedPage = query?.page
+      ? InputSanitizer.sanitizeHtml(query.page).slice(0, 200).trim() || undefined
+      : undefined
 
-    const {searchParams} = request.nextUrl;
-    const rawPage = searchParams.get('page') ?? undefined;
-    const sanitizedPage = rawPage ? InputSanitizer.sanitizeHtml(rawPage).slice(0, 200).trim() : undefined;
-    const currentPage = sanitizedPage && sanitizedPage.length > 0 ? sanitizedPage : undefined;
+    const businessContext = await BusinessContextService.loadContext(user.id, sanitizedPage)
 
-    const context = await BusinessContextService.loadContext(
-      user.id,
-      currentPage
-    );
+    apiLogger.info({ userId: user.id, page: sanitizedPage }, 'GET /api/ai/context - Success')
 
     return NextResponse.json({
-      context,
-      cached: false, // Cache detection not yet implemented
+      context: businessContext,
+      cached: false,
       expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-    });
+    })
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error({ error: errorMessage }, 'Failed to load context');
+    apiLogger.error({ error, userId: user.id }, 'GET /api/ai/context - Error')
     return NextResponse.json(
       { error: 'Failed to load context' },
       { status: 500 }
-    );
+    )
   }
 }
 
 /**
  * DELETE /api/ai/context - Invalidate context cache
  */
-async function deleteHandler(): Promise<NextResponse> {
+async function deleteContextHandler(context: RouteContext): Promise<NextResponse> {
+  const { user } = context
+
   try {
-    // Authenticate with Stack Auth
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
+    await BusinessContextService.invalidateCache(user.id)
 
-    await BusinessContextService.invalidateCache(user.id);
+    apiLogger.info({ userId: user.id }, 'DELETE /api/ai/context - Success')
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true })
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error({ error: errorMessage }, 'Failed to invalidate context');
+    apiLogger.error({ error, userId: user.id }, 'DELETE /api/ai/context - Error')
     return NextResponse.json(
       { error: 'Failed to invalidate context' },
       { status: 500 }
-    );
+    )
   }
 }
 
-export const GET = createSecureHandler(getHandler, 'GET /api/ai/context', SecurityPresets.enhanced())
-export const DELETE = createSecureHandler(deleteHandler, 'DELETE /api/ai/context', SecurityPresets.enhanced())
+export const GET = createApiRoute(
+  {
+    method: 'GET',
+    path: '/api/ai/context',
+    querySchema: ContextQuerySchema,
+    requireAuth: true,
+  },
+  getContextHandler
+)
+
+export const DELETE = createApiRoute(
+  {
+    method: 'DELETE',
+    path: '/api/ai/context',
+    requireAuth: true,
+  },
+  deleteContextHandler
+)

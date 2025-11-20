@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { LoadingButton } from '@/components/ui/loading-button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { OrderSkeleton } from '@/components/ui/skeletons/table-skeletons'
+import { TableSkeleton } from '@/components/ui/skeleton-loader'
 import { toast } from 'sonner'
 
 import type { Row } from '@/types/database'
@@ -110,7 +110,7 @@ const OrderSection = ({
   }
 
   if (isLoading) {
-    return <OrderSkeleton rows={10} />
+    return <TableSkeleton rows={10} columns={8} />
   }
 
   return (

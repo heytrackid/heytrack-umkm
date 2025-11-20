@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useSupabase } from '@/providers/SupabaseProvider'
+import { createClientLogger } from '@/lib/client-logger'
 
 import type { Row, TableName } from '@/types/database'
 
@@ -21,6 +22,7 @@ export function useSupabaseQuery<T extends TableName>(
   tableName: T,
   options: UseSupabaseQueryOptions<T & TableName> = {}
 ): UseSupabaseQueryResult<T & TableName> {
+  const logger = createClientLogger('SupabaseQuery')
   const { supabase } = useSupabase()
   const [data, setData] = useState<Array<Row<T>>>((options.initial ?? []) as Array<Row<T>>)
   const [loading, setLoading] = useState(!options.initial)
@@ -108,6 +110,7 @@ export function useSupabaseQuery<T extends TableName>(
         return
       }
       const normalizedError = error instanceof Error ? error.message : 'An error occurred'
+      logger.error({ error, tableName }, 'Failed to fetch data from Supabase')
       setError(normalizedError)
     } finally {
       if (fetchIdRef.current === currentFetchId) {
@@ -115,7 +118,7 @@ export function useSupabaseQuery<T extends TableName>(
         setLoading(false)
       }
     }
-  }, [tableName, supabase])
+  }, [tableName, supabase, logger])
 
   useEffect(() => {
     // Skip initial fetch if we have initial data and refetchOnMount is false

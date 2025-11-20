@@ -4,7 +4,7 @@
 import { UserPlus, Users } from 'lucide-react'
 
 import { Card, CardContent } from '@/components/ui/card'
-import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
+import { StatsSkeleton } from '@/components/ui/skeleton-loader'
 import { useSettings } from '@/contexts/settings-context'
 
 import type { Row } from '@/types/database'
@@ -46,13 +46,7 @@ const CustomerStats = ({
   }
 
   if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 4 }, (_, i) => (
-          <StatsCardSkeleton key={i} />
-        ))}
-      </div>
-    )
+    return <StatsSkeleton count={4} />
   }
 
   return (

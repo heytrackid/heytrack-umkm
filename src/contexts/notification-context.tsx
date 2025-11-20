@@ -33,10 +33,15 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
+  const userId = user?.id
   const unreadCount = notifications.filter((n) => !n.read).length
 
   const fetchNotifications = useCallback(async () => {
-    if (!user) {return}
+    if (!userId) {
+      setNotifications([])
+      setIsLoading(false)
+      return
+    }
     try {
       const res = await fetch('/api/notifications')
       if (res.ok) {
@@ -48,7 +53,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false)
     }
-  }, [user])
+  }, [userId])
 
   const markAsRead = async (id: string) => {
     // Optimistic update
@@ -57,6 +62,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     )
 
     try {
+      if (!userId) {
+        return
+      }
       await fetch('/api/notifications', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -74,6 +82,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
 
     try {
+      if (!userId) {
+        return
+      }
       await fetch('/api/notifications', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -87,8 +98,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    if (!user) {
+    if (!userId) {
       setNotifications([])
+      setIsLoading(false)
       return
     }
 
@@ -96,14 +108,14 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
     // Real-time subscription
     const channel = supabase
-      .channel('notifications')
+      .channel(`notifications-${userId}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'notifications',
-          filter: `user_id=eq.${user.id}`,
+          filter: `user_id=eq.${userId}`,
         },
         (payload) => {
           const newNotification = payload.new as Notification
@@ -118,7 +130,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [user, supabase, fetchNotifications])
+  }, [userId, supabase, fetchNotifications])
 
   return (
     <NotificationContext.Provider

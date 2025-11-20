@@ -1,5 +1,5 @@
 
-export { default as EnhancedRecipesPage } from './EnhancedRecipesPage'
+export { default as RecipesList } from './RecipesList'
 export { RecipeDetailPage } from './RecipeDetailPage'
 export { RecipeFormPage } from './RecipeFormPage'
 export { EnhancedEmptyState } from './EnhancedEmptyState'

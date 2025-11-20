@@ -30,7 +30,7 @@ interface UseIngredientsOptions {
 export function useIngredients(options?: UseIngredientsOptions) {
   return useQuery({
     queryKey: ['ingredients', options],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const params = new URLSearchParams()
       if (options?.limit) {params.set('limit', options.limit.toString())}
       if (options?.offset) {params.set('offset', options.offset.toString())}
@@ -38,6 +38,7 @@ export function useIngredients(options?: UseIngredientsOptions) {
       
       const response = await fetch(`/api/ingredients?${params}`, {
         credentials: 'include', // Include cookies for authentication
+        signal, // React Query provides signal automatically
       })
       if (!response.ok) {
         throw new Error('Failed to fetch ingredients')
@@ -61,11 +62,12 @@ export function useIngredients(options?: UseIngredientsOptions) {
 export function useIngredient(id: string | null) {
   return useQuery({
     queryKey: ['ingredient', id],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       if (!id) {return null}
       
       const response = await fetch(`/api/ingredients/${id}`, {
         credentials: 'include', // Include cookies for authentication
+        signal, // React Query provides signal automatically
       })
       if (!response.ok) {
         throw new Error('Failed to fetch ingredient')
@@ -91,23 +93,37 @@ export function useCreateIngredient() {
   
   return useMutation({
     mutationFn: async (data: IngredientInsert) => {
-      const response = await fetch('/api/ingredients', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-        credentials: 'include', // Include cookies for authentication
-      })
-      
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message ?? 'Failed to create ingredient')
+      const abortController = new AbortController()
+      const timeoutId = setTimeout(() => abortController.abort(), 30000)
+
+      try {
+        const response = await fetch('/api/ingredients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+          credentials: 'include',
+          signal: abortController.signal,
+        })
+        
+        clearTimeout(timeoutId)
+        
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.message ?? 'Failed to create ingredient')
+        }
+        
+        const payload = await response.json() as ApiSuccessResponse<Ingredient> | ApiErrorResponse
+        if (!('success' in payload) || !payload.success) {
+          throw new Error(payload?.error ?? 'Failed to create ingredient')
+        }
+        return payload.data
+      } catch (error) {
+        clearTimeout(timeoutId)
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new Error('Request timeout - please try again')
+        }
+        throw error
       }
-      
-      const payload = await response.json() as ApiSuccessResponse<Ingredient> | ApiErrorResponse
-      if (!('success' in payload) || !payload.success) {
-        throw new Error(payload?.error ?? 'Failed to create ingredient')
-      }
-      return payload.data
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
@@ -139,23 +155,37 @@ export function useUpdateIngredient() {
   
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: IngredientUpdate }) => {
-      const response = await fetch(`/api/ingredients/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-        credentials: 'include', // Include cookies for authentication
-      })
-      
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message ?? 'Failed to update ingredient')
+      const abortController = new AbortController()
+      const timeoutId = setTimeout(() => abortController.abort(), 30000)
+
+      try {
+        const response = await fetch(`/api/ingredients/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+          credentials: 'include',
+          signal: abortController.signal,
+        })
+        
+        clearTimeout(timeoutId)
+        
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.message ?? 'Failed to update ingredient')
+        }
+        
+        const payload = await response.json() as ApiSuccessResponse<Ingredient> | ApiErrorResponse
+        if (!('success' in payload) || !payload.success) {
+          throw new Error(payload?.error ?? 'Failed to update ingredient')
+        }
+        return payload.data
+      } catch (error) {
+        clearTimeout(timeoutId)
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new Error('Request timeout - please try again')
+        }
+        throw error
       }
-      
-      const payload = await response.json() as ApiSuccessResponse<Ingredient> | ApiErrorResponse
-      if (!('success' in payload) || !payload.success) {
-        throw new Error(payload?.error ?? 'Failed to update ingredient')
-      }
-      return payload.data
     },
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({ queryKey: ['ingredient', variables['id']] })
@@ -188,21 +218,35 @@ export function useDeleteIngredient() {
   
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(`/api/ingredients/${id}`, {
-        method: 'DELETE',
-        credentials: 'include', // Include cookies for authentication
-      })
-      
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message ?? 'Failed to delete ingredient')
+      const abortController = new AbortController()
+      const timeoutId = setTimeout(() => abortController.abort(), 30000)
+
+      try {
+        const response = await fetch(`/api/ingredients/${id}`, {
+          method: 'DELETE',
+          credentials: 'include',
+          signal: abortController.signal,
+        })
+        
+        clearTimeout(timeoutId)
+        
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.message ?? 'Failed to delete ingredient')
+        }
+        
+        const payload = await response.json() as ApiSuccessResponse<null> | ApiErrorResponse
+        if (!('success' in payload) || !payload.success) {
+          throw new Error(payload?.error ?? 'Failed to delete ingredient')
+        }
+        return payload.data
+      } catch (error) {
+        clearTimeout(timeoutId)
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new Error('Request timeout - please try again')
+        }
+        throw error
       }
-      
-      const payload = await response.json() as ApiSuccessResponse<null> | ApiErrorResponse
-      if (!('success' in payload) || !payload.success) {
-        throw new Error(payload?.error ?? 'Failed to delete ingredient')
-      }
-      return payload.data
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['ingredients'] })

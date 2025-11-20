@@ -91,26 +91,49 @@ export function useHppWorker() {
       }
 
       setIsCalculating(true)
+      let isResolved = false
 
       const handleMessage = (e: MessageEvent) => {
         const { type, data: result, error } = e['data']
 
         if (type === 'CALCULATE_HPP_SUCCESS') {
-          setIsCalculating(false)
-          workerRef.current?.removeEventListener('message', handleMessage)
-          resolve(result)
+          if (!isResolved) {
+            isResolved = true
+            setIsCalculating(false)
+            workerRef.current?.removeEventListener('message', handleMessage)
+            resolve(result)
+          }
         } else if (type === 'ERROR') {
-          setIsCalculating(false)
-          workerRef.current?.removeEventListener('message', handleMessage)
-          reject(new Error(error))
+          if (!isResolved) {
+            isResolved = true
+            setIsCalculating(false)
+            workerRef.current?.removeEventListener('message', handleMessage)
+            reject(new Error(error))
+          }
         }
       }
+
+      // Set up cleanup timeout - if promise doesn't resolve in 30s, clean up
+      const timeoutId = setTimeout(() => {
+        if (!isResolved) {
+          isResolved = true
+          setIsCalculating(false)
+          workerRef.current?.removeEventListener('message', handleMessage)
+          reject(new Error('Worker calculation timeout'))
+        }
+      }, 30000)
 
       workerRef.current.addEventListener('message', handleMessage)
       workerRef.current.postMessage({
         type: 'CALCULATE_HPP',
         data
       })
+
+      // Store cleanup function for external abort if needed
+      ;(resolve as unknown as { abort?: () => void }).abort = () => {
+        clearTimeout(timeoutId)
+        workerRef.current?.removeEventListener('message', handleMessage)
+      }
     })
 
   const calculateBatchHPP = (recipes: Array<{ id: string; name: string }>): Promise<HppWorkerResult[]> => new Promise((resolve, reject) => {
@@ -120,26 +143,47 @@ export function useHppWorker() {
       }
 
       setIsCalculating(true)
+      let isResolved = false
 
       const handleMessage = (e: MessageEvent) => {
         const { type, data: result, error } = e['data']
 
         if (type === 'CALCULATE_BATCH_HPP_SUCCESS') {
-          setIsCalculating(false)
-          workerRef.current?.removeEventListener('message', handleMessage)
-          resolve(result)
+          if (!isResolved) {
+            isResolved = true
+            setIsCalculating(false)
+            workerRef.current?.removeEventListener('message', handleMessage)
+            resolve(result)
+          }
         } else if (type === 'ERROR') {
-          setIsCalculating(false)
-          workerRef.current?.removeEventListener('message', handleMessage)
-          reject(new Error(error))
+          if (!isResolved) {
+            isResolved = true
+            setIsCalculating(false)
+            workerRef.current?.removeEventListener('message', handleMessage)
+            reject(new Error(error))
+          }
         }
       }
+
+      const timeoutId = setTimeout(() => {
+        if (!isResolved) {
+          isResolved = true
+          setIsCalculating(false)
+          workerRef.current?.removeEventListener('message', handleMessage)
+          reject(new Error('Batch calculation timeout'))
+        }
+      }, 60000) // 60s for batch
 
       workerRef.current.addEventListener('message', handleMessage)
       workerRef.current.postMessage({
         type: 'CALCULATE_BATCH_HPP',
         data: { recipes }
       })
+
+      ;(resolve as unknown as { abort?: () => void }).abort = () => {
+        clearTimeout(timeoutId)
+        workerRef.current?.removeEventListener('message', handleMessage)
+      }
     })
 
   const calculateWAC = (purchases: Array<{ ingredient_id: string; quantity: number; unit_price: number; total_value: number }>): Promise<{ wac: number; total_quantity: number; total_value: number }> => new Promise((resolve, reject) => {
@@ -149,26 +193,47 @@ export function useHppWorker() {
       }
 
       setIsCalculating(true)
+      let isResolved = false
 
       const handleMessage = (e: MessageEvent) => {
         const { type, data: result, error } = e['data']
 
         if (type === 'CALCULATE_WAC_SUCCESS') {
-          setIsCalculating(false)
-          workerRef.current?.removeEventListener('message', handleMessage)
-          resolve(result)
+          if (!isResolved) {
+            isResolved = true
+            setIsCalculating(false)
+            workerRef.current?.removeEventListener('message', handleMessage)
+            resolve(result)
+          }
         } else if (type === 'ERROR') {
-          setIsCalculating(false)
-          workerRef.current?.removeEventListener('message', handleMessage)
-          reject(new Error(error))
+          if (!isResolved) {
+            isResolved = true
+            setIsCalculating(false)
+            workerRef.current?.removeEventListener('message', handleMessage)
+            reject(new Error(error))
+          }
         }
       }
+
+      const timeoutId = setTimeout(() => {
+        if (!isResolved) {
+          isResolved = true
+          setIsCalculating(false)
+          workerRef.current?.removeEventListener('message', handleMessage)
+          reject(new Error('WAC calculation timeout'))
+        }
+      }, 30000)
 
       workerRef.current.addEventListener('message', handleMessage)
       workerRef.current.postMessage({
         type: 'CALCULATE_WAC',
         data: { purchases }
       })
+
+      ;(resolve as unknown as { abort?: () => void }).abort = () => {
+        clearTimeout(timeoutId)
+        workerRef.current?.removeEventListener('message', handleMessage)
+      }
     })
 
   return {

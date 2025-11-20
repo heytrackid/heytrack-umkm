@@ -7,44 +7,6 @@ interface SkeletonProps {
   className?: string
 }
 
-// Skeleton untuk Stats Cards di Dashboard
-export const StatsCardSkeleton = ({ className }: SkeletonProps) => (
-  <div className={cn("rounded-lg border border-border/20  p-6 space-y-3", className)}>
-    <div className="flex items-center justify-between">
-      <Skeleton className="h-4 w-32" />
-      <Skeleton className="h-4 w-4" />
-    </div>
-    <div className="space-y-2">
-      <Skeleton className="h-8 w-24" />
-      <div className="flex items-center space-x-1">
-        <Skeleton className="h-3 w-3" />
-        <Skeleton className="h-3 w-20" />
-      </div>
-    </div>
-  </div>
-)
-
-// Skeleton untuk Quick Actions
-export const QuickActionsSkeleton = ({ className }: SkeletonProps) => (
-  <div className={cn("", className)}>
-    <div className="rounded-lg border border-border/20  p-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Skeleton className="h-5 w-5" />
-        <Skeleton className="h-5 w-24" />
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }, (_, i) => (
-          <div key={i} className="h-20 border border-border/20  rounded-md p-4 flex flex-col items-center justify-center space-y-2">
-            <Skeleton className="h-6 w-6" />
-            <Skeleton className="h-4 w-16" />
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-)
-
-// Skeleton untuk Recent Orders Card
 export const RecentOrdersSkeleton = ({ className }: SkeletonProps) => (
   <div className={cn("rounded-lg border border-border/20  p-6", className)}>
     <div className="flex items-center gap-2 mb-6">

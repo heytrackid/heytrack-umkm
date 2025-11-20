@@ -38,6 +38,9 @@ export const IngredientInsertSchema = z.object({
 
 export const IngredientUpdateSchema = IngredientInsertSchema.partial()
 
+// Ingredient purchase status enum
+export const IngredientPurchaseStatus = z.enum(['pending', 'ordered', 'received', 'cancelled'])
+
 // Ingredient purchase schemas
 export const IngredientPurchaseInsertSchema = z.object({
   ingredient_id: UUIDSchema,
@@ -46,6 +49,7 @@ export const IngredientPurchaseInsertSchema = z.object({
   unit_price: PositiveNumberSchema,
   total_cost: PositiveNumberSchema,
   purchase_date: z.string().datetime(),
+  status: IngredientPurchaseStatus.default('pending'),
   expiry_date: z.string().datetime().optional(),
   batch_number: z.string().max(100).optional(),
   notes: z.string().max(500).optional(),

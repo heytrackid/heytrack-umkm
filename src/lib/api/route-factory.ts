@@ -1,13 +1,13 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import type { NextRequest, NextResponse } from 'next/server'
 import type { ZodSchema } from 'zod'
-import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { createErrorResponse, handleAPIError, withQueryValidation } from '@/lib/api-core'
 import { apiLogger } from '@/lib/logger'
+import type { Database } from '@/types/supabase'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
-import type { Database } from '@/types/supabase'
 
 export interface RouteContext {
   user: { id: string; email: string | null }
@@ -58,11 +58,14 @@ export function createApiRoute<TQuery = unknown, TBody = unknown>(
       // 1. Authentication
       let user: { id: string; email: string | null } | undefined
       if (requireAuthFlag) {
+        apiLogger.debug({ path, method }, 'Attempting authentication')
         const authResult = await requireAuth()
         if (isErrorResponse(authResult)) {
+          apiLogger.warn({ path, method }, 'Authentication failed')
           return authResult
         }
         user = authResult
+        apiLogger.debug({ path, method, userId: user.id }, 'Authentication successful')
       }
 
       // 2. Query validation

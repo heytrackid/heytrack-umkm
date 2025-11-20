@@ -20,7 +20,7 @@ async function getHandler(_request: NextRequest): Promise<NextResponse> {
     // Get or create onboarding record
     const { data: onboarding, error } = await supabase
       .from('user_onboarding')
-      .select('*')
+      .select('id, user_id, current_step, steps_completed, completed, created_at, updated_at')
       .eq('user_id', user.id)
       .maybeSingle()
 

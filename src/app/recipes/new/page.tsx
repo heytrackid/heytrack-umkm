@@ -4,14 +4,14 @@ import { Suspense } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { RecipeFormPage } from '@/components/recipes/RecipeFormPage'
-import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
+import { FormSkeleton } from '@/components/ui/skeleton-loader'
 
 
 
 const NewRecipePage = () => (
     <AppLayout pageTitle="Tambah Resep Baru">
         <div className="p-6">
-            <Suspense fallback={<DataGridSkeleton rows={6} />}>
+            <Suspense fallback={<FormSkeleton fields={6} />}>
                 <RecipeFormPage mode="create" />
             </Suspense>
         </div>

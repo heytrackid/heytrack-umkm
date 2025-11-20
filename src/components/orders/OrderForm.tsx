@@ -1,10 +1,23 @@
  
 'use client'
 
-import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import {
+    AlertCircle,
+    ArrowLeft,
+    Calendar,
+    Clock,
+    MapPin,
+    Package,
+    Phone,
+    Plus,
+    Save,
+    Search,
+    ShoppingCart,
+    Trash2,
+    User
+} from 'lucide-react'
+import { useCallback, useMemo, useState } from 'react'
 
-import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 import { useOrderItemsController } from '@/components/orders/hooks/useOrderItemsController'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,363 +25,582 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { LabelWithTooltip } from '@/components/ui/tooltip-helper'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useResponsive } from '@/hooks/useResponsive'
 import { validateOrderData } from '@/lib/validations/form-validations'
 
 
+import type { Row } from '@/types/database'
+
 import { calculateOrderTotal, normalizePriority } from '@/components/orders/utils'
 
 import type { Order, OrderFormData, OrderFormItem, Priority } from '@/components/orders/types'
 
-
-
 interface OrderFormProps {
-  order?: Order // For editing existing order
-  onSave: (orderData: OrderFormData) => void
-  onCancel: () => void
-  loading?: boolean
+    order?: Order
+    onSave: (orderData: OrderFormData) => void
+    onCancel: () => void
+    loading?: boolean
 }
 
+type Recipe = Row<'recipes'>
+
 export const OrderForm = ({
-  order,
-  onSave,
-  onCancel,
-  loading = false
+    order,
+    onSave,
+    onCancel,
+    loading = false
 }: OrderFormProps) => {
-  const { isMobile } = useResponsive()
-  const { formatCurrency } = useCurrency()
-  const [formData, setFormData] = useState<OrderFormData>(() => {
-    if (order) {
-      return {
-        customer_name: order['customer_name'] ?? '',
-        customer_phone: order.customer_phone ?? '',
-        customer_address: order.customer_address ?? '',
-        delivery_date: order.delivery_date?.split('T')[0] ?? '',
-        delivery_time: order.delivery_time ?? '10:00',
-        priority: normalizePriority(order.priority),
-        notes: order.notes ?? '',
-        order_items: (order as OrderWithRelations).items?.map(item => ({
-          recipe_id: item.recipe_id,
-          product_name: item.product_name ?? null,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          total_price: item.total_price,
-          special_requests: item.special_requests ?? null
-        })) ?? []
-      }
+    const { isMobile } = useResponsive()
+    const { formatCurrency } = useCurrency()
+
+    const [formData, setFormData] = useState<OrderFormData>(() => {
+        if (order) {
+            return {
+                customer_name: order['customer_name'] ?? '',
+                customer_phone: order.customer_phone ?? '',
+                customer_address: order.customer_address ?? '',
+                delivery_date: order.delivery_date ? (order.delivery_date.split('T')[0] as string) : '',
+                delivery_time: order.delivery_time ?? '10:00',
+                priority: normalizePriority(order.priority),
+                notes: order.notes ?? '',
+                order_items: []
+            }
+        }
+        return {
+            customer_name: '',
+            customer_phone: '',
+            customer_address: '',
+            delivery_date: '',
+            delivery_time: '10:00',
+            priority: 'normal',
+            notes: '',
+            order_items: []
+        }
+    })
+
+
+    const [searchTerm, setSearchTerm] = useState('')
+    const [errors, setErrors] = useState<string[]>([])
+    const [currentStep, setCurrentStep] = useState(1)
+
+
+
+    const createEmptyOrderItem = useCallback((): OrderFormItem => ({
+        recipe_id: '',
+        product_name: null,
+        quantity: 1,
+        special_requests: null,
+        total_price: 0,
+        unit_price: 0
+    }), [])
+
+    const {
+        recipes,
+        addItem: addOrderItem,
+        updateItem: updateOrderItem,
+        removeItem: removeOrderItem
+    } = useOrderItemsController<OrderFormItem>({
+        items: formData.order_items,
+        onItemsChange: (nextItems) => setFormData(prev => ({ ...prev, order_items: nextItems })),
+        createEmptyItem: createEmptyOrderItem,
+        onRecipeSelected: (recipe, item) => {
+            const unitPrice = recipe.selling_price ?? item.unit_price
+            return {
+                ...item,
+                unit_price: unitPrice,
+                total_price: unitPrice * item.quantity
+            }
+        }
+    })
+
+    const filteredRecipes = useMemo(() => {
+        if (searchTerm) {
+            return recipes.filter(r =>
+                r.name.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+        } else {
+            return recipes
+        }
+    }, [searchTerm, recipes])
+
+    const handleInputChange = <K extends keyof OrderFormData>(
+        field: K,
+        value: OrderFormData[K]
+    ) => {
+        setFormData(prev => ({ ...prev, [field]: value }))
+        if (errors.length > 0) {
+            setErrors([])
+        }
     }
-    return {
-      customer_name: '',
-      customer_phone: '',
-      customer_address: '',
-      delivery_date: '',
-      delivery_time: '10:00',
-      priority: 'normal',
-      notes: '',
-      order_items: []
-    }
-  })
-  const [errors, setErrors] = useState<string[]>([])
 
-  // Form data is initialized in useState above
+    const addRecipeToOrder = (recipe: Recipe) => {
+        const existingIndex = formData.order_items.findIndex(
+            item => item.recipe_id === recipe['id']
+        )
 
-  const createEmptyOrderItem = useCallback((): OrderFormItem => ({
-    recipe_id: '',
-    product_name: null,
-    quantity: 1,
-    unit_price: 0,
-    total_price: 0,
-    special_requests: null
-  }), [])
+        if (existingIndex >= 0) {
+            // Increase quantity if already exists
+            setFormData(prev => ({
+                ...prev,
+                order_items: prev.order_items.map((item, i) =>
+                    i === existingIndex
+                        ? { ...item, quantity: item.quantity + 1 }
+                        : item
+                )
+            }))
+        } else {
+            // Add new item
+            const newItem: OrderFormItem = {
+                recipe_id: recipe['id'],
+                product_name: recipe.name,
+                quantity: 1,
+                unit_price: recipe.selling_price ?? 0,
+                total_price: recipe.selling_price ?? 0,
+                special_requests: null
+            }
 
-  const {
-    recipes,
-    addItem: addOrderItem,
-    updateItem: updateOrderItem,
-    removeItem: removeOrderItem,
-    selectRecipe: handleRecipeSelect
-  } = useOrderItemsController<OrderFormItem>({
-    items: formData.order_items,
-    onItemsChange: (nextItems) => setFormData(prev => ({ ...prev, order_items: nextItems })),
-    createEmptyItem: createEmptyOrderItem,
-    onRecipeSelected: (recipe, item) => {
-      const unitPrice = recipe.selling_price ?? item.unit_price
-      return {
-        ...item,
-        unit_price: unitPrice,
-        total_price: unitPrice * item.quantity
-      }
-    }
-  })
-
-  const handleInputChange = <K extends keyof OrderFormData>(
-    field: K,
-    value: OrderFormData[K]
-  ) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-    if (errors.length > 0) {
-      setErrors([]) // Clear errors when user starts typing
-    }
-  }
-
-  const handleSubmit = () => {
-    const validationErrors = validateOrderData(formData)
-    if (validationErrors.length > 0) {
-      setErrors(validationErrors)
-      return
+            setFormData(prev => ({
+                ...prev,
+                order_items: [...prev.order_items, newItem]
+            }))
+        }
+        setSearchTerm('')
     }
 
-    onSave(formData)
-  }
+    const handleSubmit = () => {
+        const validationErrors = validateOrderData(formData)
+        if (validationErrors.length > 0) {
+            setErrors(validationErrors)
+            return
+        }
+        onSave(formData)
+    }
 
-  const totalAmount = calculateOrderTotal(formData.order_items)
+    const canProceedToNextStep = () => {
+        if (currentStep === 1) {
+            return formData['customer_name'] && formData.customer_phone
+        }
+        if (currentStep === 2) {
+            return formData.delivery_date
+        }
+        return true
+    }
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onCancel}
-          className="p-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          <h2 className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-            {order ? 'Edit Pesanan' : 'Buat Pesanan Baru'}
-          </h2>
-          <p className="text-muted-foreground">
-            {order ? 'Perbarui informasi dan detail pesanan' : 'Isi informasi pelanggan dan detail pesanan'}
-          </p>
+    const totalAmount = calculateOrderTotal(formData.order_items)
+    const totalItems = formData.order_items.reduce((sum, item) => sum + item.quantity, 0)
+
+    // Step 1: Customer Info
+     
+
+
+    // Step 2: Delivery Info
+     
+
+
+    // Step 3: Order Items
+     
+
+
+    return (
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex items-center gap-3">
+                <Button variant="ghost" size="sm" onClick={onCancel} className="p-2">
+                    <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <div>
+                    <h2 className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
+                        {order ? 'Edit Pesanan' : 'Buat Pesanan Baru'}
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                        {order ? 'Perbarui informasi pesanan' : 'Lengkapi form untuk membuat pesanan'}
+                    </p>
+                </div>
+            </div>
+
+            {/* Progress Steps */}
+            {!order && (
+                <div className="flex items-center justify-center gap-2">
+                    {[1, 2, 3].map((step) => (
+                        <div key={step} className="flex items-center">
+                            <button
+                                onClick={() => setCurrentStep(step)}
+                                className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${currentStep === step
+                                    ? 'border-primary bg-primary text-white'
+                                    : currentStep > step
+                                        ? 'border-green-500 bg-muted0 text-white'
+                                        : 'border-border/20 text-muted-foreground'
+                                    }`}
+                            >
+                                {step}
+                            </button>
+                            {step < 3 && (
+                                <div className={`w-12 h-0.5 ${currentStep > step ? 'bg-muted0' : 'bg-muted'}`} />
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* Validation Errors */}
+            {errors.length > 0 && (
+                <Card className="border-red-200 bg-red-50">
+                    <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                            <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
+                            <div>
+                                <h4 className="font-medium text-red-800 mb-2">Kesalahan Validasi</h4>
+                                <ul className="list-disc list-inside text-sm text-red-700 space-y-1">
+                                    {errors.map((error, index) => (
+                                        <li key={index}>{error}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* Form Steps */}
+            {(currentStep === 1 || order) && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <User className="h-5 w-5" />
+                            Informasi Pelanggan
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label className="flex items-center gap-2">
+                                <User className="h-4 w-4" />
+                                Nama Pelanggan *
+                            </Label>
+                            <Input
+                                value={formData['customer_name']}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('customer_name', e.target.value)}
+                                placeholder="Masukkan nama pelanggan"
+                                className="text-base"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="flex items-center gap-2">
+                                <Phone className="h-4 w-4" />
+                                Nomor Telepon *
+                            </Label>
+                            <Input
+                                value={formData.customer_phone}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('customer_phone', e.target.value)}
+                                placeholder="08xx xxxx xxxx"
+                                className="text-base"
+                            />
+                        </div>
+
+                        {/* Email field removed - not in database schema */}
+
+                        <div className="space-y-2">
+                            <Label className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4" />
+                                Alamat Pengiriman (Opsional)
+                            </Label>
+                            <Textarea
+                                value={formData.customer_address ?? ''}
+                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('customer_address', e.target.value)}
+                                placeholder="Masukkan alamat lengkap"
+                                rows={3}
+                                className="text-base"
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+            {(currentStep === 2 || order) && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Calendar className="h-5 w-5" />
+                            Informasi Pengiriman
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4" />
+                                <LabelWithTooltip
+                                    label="Tanggal Pengiriman"
+                                    tooltip="Kapan pesanan ini harus dikirim ke pelanggan"
+                                    required
+                                />
+                            </div>
+                            <Input
+                                type="date"
+                                value={formData.delivery_date}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('delivery_date', e.target.value)}
+                                min={new Date().toISOString().split('T')[0]}
+                                className="text-base"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4" />
+                                <LabelWithTooltip
+                                    label="Waktu Pengiriman"
+                                    tooltip="Jam berapa pesanan harus sampai ke pelanggan"
+                                />
+                            </div>
+                            <Input
+                                type="time"
+                                value={formData.delivery_time}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('delivery_time', e.target.value)}
+                                className="text-base"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                                <AlertCircle className="h-4 w-4" />
+                                <LabelWithTooltip
+                                    label="Tingkat Prioritas"
+                                    tooltip="Tingkat kepentingan pesanan: Rendah (biasa), Normal (standar), Tinggi (penting/mendesak)"
+                                />
+                            </div>
+                            <Select
+                                value={formData.priority ?? 'normal'}
+                                onValueChange={(value: Priority) => handleInputChange('priority', value)}
+                            >
+                                <SelectTrigger className="text-base">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="low">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-2 w-2 rounded-full bg-muted" />
+                                            Biasa
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="normal">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-2 w-2 rounded-full bg-blue-400" />
+                                            Standar
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="high">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-2 w-2 rounded-full bg-red-400" />
+                                            Penting/Mendesak
+                                        </div>
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Catatan Pesanan (Opsional)</Label>
+                            <Textarea
+                                value={formData.notes ?? ''}
+                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('notes', e.target.value)}
+                                placeholder="Tambahkan catatan khusus untuk pesanan ini"
+                                rows={3}
+                                className="text-base"
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+            {(currentStep === 3 || order) && (
+                <div className="space-y-4">
+                    {/* Product Search */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Search className="h-5 w-5" />
+                                Cari Produk
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    value={searchTerm}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                                    placeholder="Cari produk..."
+                                    className="pl-10 text-base"
+                                />
+                            </div>
+
+                            {searchTerm && filteredRecipes.length > 0 && (
+                                <div className="mt-3 max-h-60 overflow-y-auto space-y-2">
+                                    {filteredRecipes.map((recipe) => (
+                                        <button
+                                            key={recipe['id']}
+                                            onClick={() => addRecipeToOrder(recipe)}
+                                            className="w-full flex items-center justify-between p-3 border rounded-lg hover:bg-muted transition-colors text-left"
+                                        >
+                                            <div>
+                                                <p className="font-medium">{recipe.name}</p>
+                                                {recipe.category && (
+                                                    <p className="text-sm text-muted-foreground">{recipe.category}</p>
+                                                )}
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="font-medium">{formatCurrency(recipe.selling_price ?? 0)}</p>
+                                                <Plus className="h-4 w-4 text-primary ml-auto" />
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Order Items List */}
+                    <Card>
+                        <CardHeader>
+                            <div className="flex justify-between items-center">
+                                <CardTitle className="flex items-center gap-2">
+                                    <ShoppingCart className="h-5 w-5" />
+                                    Item Pesanan ({formData.order_items.length})
+                                </CardTitle>
+                                <Button onClick={addOrderItem} size="sm" variant="outline">
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Tambah Manual
+                                </Button>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            {formData.order_items.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                                    <p className="text-muted-foreground mb-2">Belum ada item ditambahkan</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Cari produk di atas atau tambah manual
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {formData.order_items.map((item, index) => (
+                                        <div key={index} className="border rounded-lg p-4 space-y-3">
+                                            <div className="flex justify-between items-start gap-3">
+                                                <div className="flex-1">
+                                                    <p className="font-medium">{item.product_name ?? 'Produk belum dipilih'}</p>
+                                                    <div className="flex items-center gap-4 mt-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                onClick={() => updateOrderItem(index, 'quantity', Math.max(1, item.quantity - 1))}
+                                                            >
+                                                                -
+                                                            </Button>
+                                                            <span className="w-12 text-center font-medium">{item.quantity}</span>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                onClick={() => updateOrderItem(index, 'quantity', item.quantity + 1)}
+                                                            >
+                                                                +
+                                                            </Button>
+                                                        </div>
+                                                        <div className="text-sm text-muted-foreground">
+                                                            × {formatCurrency(item.unit_price)}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="font-bold text-lg">
+                                                        {formatCurrency(item.unit_price * item.quantity)}
+                                                    </p>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => removeOrderItem(index)}
+                                                        className="text-red-500 hover:text-red-700 mt-1"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label className="text-sm">Catatan Item (Opsional)</Label>
+                                                <Input
+                                                    value={item.special_requests ?? ''}
+                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateOrderItem(index, 'special_requests', e.target.value)}
+                                                    placeholder="Contoh: Tanpa gula, extra pedas"
+                                                    className="text-sm"
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Order Summary */}
+                    {formData.order_items.length > 0 && (
+                        <Card className="border-primary">
+                            <CardContent className="pt-6">
+                                <div className="space-y-3">
+                                    <div className="flex justify-between text-muted-foreground">
+                                        <span>Total Item</span>
+                                        <span>{totalItems} item</span>
+                                    </div>
+                                    <div className="flex justify-between text-muted-foreground">
+                                        <span>Subtotal</span>
+                                        <span>{formatCurrency(totalAmount)}</span>
+                                    </div>
+                                    <div className="border-t pt-3 flex justify-between text-xl font-bold">
+                                        <span>Total</span>
+                                        <span className="text-primary">{formatCurrency(totalAmount)}</span>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
+            )}
+
+            {/* Navigation Buttons */}
+            <div className="flex gap-3">
+                {!order && currentStep > 1 && (
+                    <Button
+                        variant="outline"
+                        onClick={() => setCurrentStep(currentStep - 1)}
+                        disabled={loading}
+                    >
+                        Kembali
+                    </Button>
+                )}
+
+                {!order && currentStep < 3 ? (
+                    <Button
+                        onClick={() => setCurrentStep(currentStep + 1)}
+                        disabled={!canProceedToNextStep()}
+                        className="flex-1"
+                    >
+                        Lanjut
+                    </Button>
+                ) : (
+                    <Button
+                        onClick={handleSubmit}
+                        disabled={loading || formData.order_items.length === 0}
+                        className="flex-1"
+                    >
+                        <Save className="h-4 w-4 mr-2" />
+                        {loading ? 'Menyimpan...' : (order ? 'Perbarui Pesanan' : 'Buat Pesanan')}
+                    </Button>
+                )}
+
+                <Button variant="outline" onClick={onCancel} disabled={loading}>
+                    Batal
+                </Button>
+            </div>
         </div>
-      </div>
-
-      {/* Validation Errors */}
-      {errors.length > 0 && (
-        <Card className="border-red-200 bg-red-50">
-          <CardContent className="p-4">
-            <h4 className="font-medium text-red-800 mb-2">Kesalahan Validasi</h4>
-            <ul className="list-disc list-inside text-sm text-red-700">
-              {errors.map((error, index: number) => (
-                <li key={index}>{error}</li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'lg:grid-cols-2'}`}>
-        {/* Customer Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Informasi Pelanggan</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Nama Pelanggan *</Label>
-              <Input
-                value={formData['customer_name']}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('customer_name', e.target.value)}
-                placeholder=""
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Nomor Telepon *</Label>
-              <Input
-                value={formData.customer_phone}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('customer_phone', e.target.value)}
-                placeholder=""
-              />
-            </div>
-
-            {/* Email field removed - not in database schema */}
-
-            <div className="space-y-2">
-              <Label>Alamat Pengiriman</Label>
-              <Textarea
-                value={formData.customer_address ?? ''}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('customer_address', e.target.value)}
-                placeholder=""
-                rows={3}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Order Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Detail Pesanan</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Tanggal Pengiriman *</Label>
-                <Input
-                  type="date"
-                  value={formData.delivery_date}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('delivery_date', e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Waktu Pengiriman</Label>
-                <Input
-                  type="time"
-                  value={formData.delivery_time}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('delivery_time', e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Tingkat Prioritas</Label>
-              <Select
-                value={formData.priority ?? 'normal'}
-                onValueChange={(value: Priority) => handleInputChange('priority', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Rendah</SelectItem>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="high">Tinggi</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Catatan Pesanan</Label>
-              <Textarea
-                value={formData.notes ?? ''}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('notes', e.target.value)}
-                placeholder=""
-                rows={3}
-              />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Order Items */}
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Item Pesanan</CardTitle>
-            <Button onClick={addOrderItem} size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Tambah Item
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {formData.order_items.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <p>Belum ada item ditambahkan</p>
-              <p className="text-sm">Klik &#34;Tambah Item&#34; untuk mulai membuat pesanan</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {formData.order_items.map((item, index: number) => (
-                <div key={index} className="border rounded-lg p-4">
-                  <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-5'}`}>
-                    <div className="col-span-2">
-                      <Label>Produk</Label>
-                      <Select
-                        value={item.recipe_id}
-                        onValueChange={(value) => handleRecipeSelect(index, value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="placeholder" disabled>
-                            Pilih produk
-                          </SelectItem>
-                          {recipes.map((recipe) => (
-                            <SelectItem key={recipe['id']} value={recipe['id']}>
-                              {recipe.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label>Jumlah</Label>
-                      <Input
-                        type="number"
-                        value={item.quantity}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateOrderItem(index, 'quantity', parseInt(e.target.value) || 0)}
-                        min="1"
-                      />
-                    </div>
-
-                    <div>
-                      <Label>Harga</Label>
-                      <Input
-                        type="number"
-                        value={item.unit_price}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateOrderItem(index, 'unit_price', parseFloat(e.target.value.replace(',', '.')) || 0)}
-                        min="0"
-                      />
-                    </div>
-
-                    <div className="flex items-end">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeOrderItem(index)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="mt-3">
-                    <Label>Catatan (Opsional)</Label>
-                    <Input
-                      value={item.special_requests ?? ''}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateOrderItem(index, 'special_requests', e.target.value)}
-                      placeholder=""
-                    />
-                  </div>
-                </div>
-              ))}
-
-              <div className="border-t pt-4">
-                <div className="flex justify-between items-center text-lg font-bold">
-                  <span>Total Harga:</span>
-                  <span>{formatCurrency(totalAmount)}</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Action Buttons */}
-      <div className="flex gap-3">
-        <Button
-          onClick={handleSubmit}
-          disabled={loading || formData.order_items.length === 0}
-          className="flex-1"
-        >
-          <Save className="h-4 w-4 mr-2" />
-          {loading ? 'Menyimpan...' : (order ? 'Perbarui Pesanan' : 'Buat Pesanan')}
-        </Button>
-        <Button variant="outline" onClick={onCancel} disabled={loading}>
-          Batal
-        </Button>
-      </div>
-    </div>
-  )
+    )
 }
 

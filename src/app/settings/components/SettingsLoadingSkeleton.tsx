@@ -1,16 +1,12 @@
 import { Card, CardContent } from '@/components/ui/card'
-import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
+import { StatsSkeleton } from '@/components/ui/skeleton-loader'
 import { FormFieldSkeleton } from '@/components/ui/skeletons/form-skeletons'
 
 
 export const SettingsLoadingSkeleton = () => (
     <div className="space-y-4">
       {/* Quick Links Skeleton */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }, (_, i) => (
-          <StatsCardSkeleton key={i} />
-        ))}
-      </div>
+      <StatsSkeleton count={4} />
 
       {/* Tabs Skeleton */}
       <Card>

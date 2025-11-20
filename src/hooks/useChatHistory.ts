@@ -49,7 +49,7 @@ export function useChatHistory(userId: string) {
       // Get most recent active session
       const { data: sessions, error: sessionError} = await supabase
         .from('chat_sessions')
-        .select('*')
+        .select('id, user_id, title, context_snapshot, created_at, updated_at, deleted_at')
         .eq('user_id', userId)
         .order('updated_at', { ascending: false })
         .limit(1)
@@ -67,7 +67,7 @@ export function useChatHistory(userId: string) {
         // Load messages from this session
         const { data: messagesData, error: messagesError } = await supabase
           .from('chat_messages')
-          .select('*')
+          .select('id, session_id, role, content, metadata, created_at')
           .eq('session_id', sessionId)
           .order('created_at', { ascending: true })
 

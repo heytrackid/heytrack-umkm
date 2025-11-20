@@ -11,6 +11,9 @@ import {
     Share2,
     Trash2,
     Users,
+    Factory,
+    ChevronDown,
+    ChevronUp,
 } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -20,16 +23,19 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DeleteModal } from '@/components/ui/index'
+import { Skeleton } from '@/components/ui/skeleton'
+import { ListSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
+import { ProductionScaler } from '@/components/recipes/ProductionScaler'
 import { useAuth } from '@/hooks/index'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { toast } from 'sonner'
+import { toast, errorToast, successToast } from '@/components/ui/toast'
 
 import type { RecipeInstruction } from '@/app/recipes/ai-generator/components/types'
 import type { Ingredient, Recipe, RecipeIngredient } from '@/types/database'
 import { isNonNull } from '@/types/shared/guards'
 
 // Type for ingredient with only required fields for display
-type IngredientDisplay = Pick<Ingredient, 'id' | 'name' | 'price_per_unit' | 'unit'>
+type IngredientDisplay = Pick<Ingredient, 'id' | 'name' | 'price_per_unit' | 'unit' | 'weighted_average_cost'>
 
 // Type for recipe ingredient with populated ingredient data
 type RecipeIngredientWithDetails = RecipeIngredient & {
@@ -55,6 +61,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
     const [recipe, setRecipe] = useState<RecipeWithIngredients | null>(null)
     const [loading, setLoading] = useState(true)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+    const [showCostBreakdown, setShowCostBreakdown] = useState(false)
 
     const loadRecipe = useCallback(async (userId: string) => {
         try {
@@ -74,8 +81,9 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                         ingredient:ingredients (
                             id,
                             name,
+                            price_per_unit,
                             unit,
-                            price_per_unit
+                            weighted_average_cost
                         )
                     )
                 `)
@@ -95,7 +103,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
             setRecipe(data as RecipeWithIngredients)
         } catch (error) {
               const message = error instanceof Error ? error.message : 'Gagal memuat resep'
-              toast.error(message)
+              errorToast(message)
               setRecipe(null)
         } finally {
             setLoading(false)
@@ -130,11 +138,11 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                 throw error
             }
 
-            toast.success(`${recipe.name} berhasil dihapus`)
+            successToast(`${recipe.name} berhasil dihapus`)
             router.push('/recipes')
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Gagal menghapus resep'
-            toast.error(message)
+            errorToast(message)
         }
     }, [recipe, user?.id, supabase, recipeId, router])
 
@@ -172,74 +180,38 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                 {/* Header Skeleton */}
                 <div className="space-y-4">
                     <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 bg-muted rounded animate-pulse" />
+                        <Skeleton className="h-8 w-8 rounded" />
                         <div className="flex-1 space-y-2">
-                            <div className="h-8 bg-muted rounded animate-pulse w-3/4" />
-                            <div className="h-4 bg-muted rounded animate-pulse w-1/2" />
+                            <Skeleton className="h-8 w-3/4" />
+                            <Skeleton className="h-4 w-1/2" />
                         </div>
                     </div>
                     {/* Image Skeleton */}
                     <div className="w-full max-w-md mx-auto">
-                        <div className="w-full h-48 sm:h-64 bg-muted rounded-lg animate-pulse" />
+                        <Skeleton className="w-full h-48 sm:h-64 rounded-lg" />
                     </div>
                     {/* Action Buttons Skeleton */}
                     <div className="flex flex-wrap gap-2">
-                        <div className="h-10 bg-muted rounded animate-pulse flex-1 sm:w-32" />
-                        <div className="h-10 bg-muted rounded animate-pulse flex-1 sm:w-32" />
-                        <div className="h-10 bg-muted rounded animate-pulse flex-1 sm:w-32" />
-                        <div className="h-10 bg-muted rounded animate-pulse w-full sm:w-32 sm:ml-auto" />
+                        <Skeleton className="h-10 flex-1 sm:w-32" />
+                        <Skeleton className="h-10 flex-1 sm:w-32" />
+                        <Skeleton className="h-10 flex-1 sm:w-32" />
+                        <Skeleton className="h-10 w-full sm:w-32 sm:ml-auto" />
                     </div>
                 </div>
 
                 {/* Info Cards Skeleton */}
-                <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-                    {[...Array(4)].map((_, i) => (
-                        <div key={i} className="p-4 sm:p-6 border rounded-lg">
-                            <div className="flex items-center justify-between">
-                                <div className="space-y-2">
-                                    <div className="h-3 bg-muted rounded animate-pulse w-16" />
-                                    <div className="h-6 bg-muted rounded animate-pulse w-12" />
-                                </div>
-                                <div className="h-6 w-6 sm:h-8 sm:w-8 bg-muted rounded animate-pulse" />
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                <StatsSkeleton count={4} />
 
                 {/* Ingredients Skeleton */}
                 <div className="border rounded-lg p-4 sm:p-6">
-                    <div className="h-6 bg-muted rounded animate-pulse w-32 mb-4" />
-                    <div className="space-y-3">
-                        {[...Array(5)].map((_, i) => (
-                            <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
-                                <div className="space-y-1 flex-1">
-                                    <div className="h-4 bg-muted rounded animate-pulse w-24" />
-                                    <div className="h-3 bg-muted rounded animate-pulse w-16" />
-                                </div>
-                                <div className="space-y-1">
-                                    <div className="h-4 bg-muted rounded animate-pulse w-20" />
-                                    <div className="h-3 bg-muted rounded animate-pulse w-16" />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    <Skeleton className="h-6 w-32 mb-4" />
+                    <ListSkeleton items={5} />
                 </div>
 
                 {/* Instructions Skeleton */}
                 <div className="border rounded-lg p-4 sm:p-6">
-                    <div className="h-6 bg-muted rounded animate-pulse w-32 mb-4" />
-                    <div className="space-y-4">
-                        {[...Array(4)].map((_, i) => (
-                            <div key={i} className="flex gap-3 sm:gap-4">
-                                <div className="h-8 w-8 sm:h-10 sm:w-10 bg-muted rounded-full animate-pulse flex-shrink-0" />
-                                <div className="flex-1 space-y-2">
-                                    <div className="h-4 bg-muted rounded animate-pulse w-32" />
-                                    <div className="h-3 bg-muted rounded animate-pulse w-full" />
-                                    <div className="h-3 bg-muted rounded animate-pulse w-3/4" />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    <Skeleton className="h-6 w-32 mb-4" />
+                    <ListSkeleton items={4} />
                 </div>
             </div>
         )
@@ -311,6 +283,17 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                             <Printer className="h-4 w-4 mr-2" />
                             Cetak
                         </Button>
+                        <Button
+                            variant="default"
+                            onClick={() => {
+                                // Navigate to production batch creation with this recipe
+                                router.push(`/production/new?recipeId=${recipeId}`)
+                            }}
+                            className="flex-1 sm:flex-none"
+                        >
+                            <Factory className="h-4 w-4 mr-2" />
+                            Mulai Produksi
+                        </Button>
                         <Button 
                             variant="outline" 
                             onClick={async (): Promise<void> => {
@@ -323,14 +306,12 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                                         })
                                     } else {
                                         await navigator.clipboard.writeText(window.location.href)
-                                        toast.success('Link disalin', {
-                                            description: 'Link resep telah disalin ke clipboard'
-                                        })
+                                        successToast('Link disalin', 'Link resep telah disalin ke clipboard')
                                     }
                                 } catch (error) {
                                     // User cancelled share or clipboard access denied
                                     if (error instanceof Error && error.name !== 'AbortError') {
-                                        toast.error('Gagal membagikan resep')
+                                        errorToast('Gagal membagikan resep')
                                     }
                                 }
                             }} 
@@ -444,7 +425,21 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                             {/* Total Cost */}
                             <div className="mt-6 pt-4 border-t-2 border-primary/20 bg-primary/5 rounded-lg p-4">
                                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                                    <p className="font-semibold text-primary">Total Biaya Bahan</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-semibold text-primary">Total Biaya Bahan</p>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => setShowCostBreakdown(!showCostBreakdown)}
+                                            className="h-6 w-6 p-0"
+                                        >
+                                            {showCostBreakdown ? (
+                                                <ChevronUp className="h-4 w-4" />
+                                            ) : (
+                                                <ChevronDown className="h-4 w-4" />
+                                            )}
+                                        </Button>
+                                    </div>
                                     <p className="text-xl sm:text-2xl font-bold text-primary">
                                         Rp {recipe.recipe_ingredients
                                             .filter(isNonNull)
@@ -455,6 +450,44 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                                             .toLocaleString('id-ID')}
                                     </p>
                                 </div>
+
+                                {/* Cost Breakdown */}
+                                {showCostBreakdown && (
+                                    <div className="mt-4 pt-4 border-t border-primary/10">
+                                        <p className="text-sm font-medium text-primary mb-3">Rincian Biaya per Bahan:</p>
+                                        <div className="space-y-2">
+                                            {recipe.recipe_ingredients
+                                                .filter(isNonNull)
+                                                .map((ri) => {
+                                                    const ingredient = ri.ingredient
+                                                    const pricePerUnit = ingredient?.price_per_unit ?? 0
+                                                    const totalPrice = pricePerUnit * ri.quantity
+                                                    const costPercentage = totalPrice / (recipe.recipe_ingredients
+                                                        .filter(isNonNull)
+                                                        .reduce((total, ri) => {
+                                                            const price = ri.ingredient?.price_per_unit ?? 0
+                                                            return total + (price * ri.quantity)
+                                                        }, 0)) * 100
+
+                                                    return (
+                                                        <div key={ri.id} className="flex justify-between items-center text-sm">
+                                                            <span className="flex-1 truncate mr-2">
+                                                                {ingredient?.name ?? 'Unknown'} ({ri.quantity} {ri.unit})
+                                                            </span>
+                                                            <div className="flex items-center gap-2 flex-shrink-0">
+                                                                <span className="text-muted-foreground">
+                                                                    {costPercentage.toFixed(1)}%
+                                                                </span>
+                                                                <span className="font-medium">
+                                                                    Rp {totalPrice.toLocaleString('id-ID')}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                })}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ) : (
@@ -465,9 +498,28 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                         </div>
                     )}
                 </CardContent>
-            </Card>
+             </Card>
 
-            {/* Instructions */}
+             {/* Production Scaler */}
+             {recipe.recipe_ingredients && recipe.recipe_ingredients.length > 0 && (
+                 <ProductionScaler
+                     baseBatchSize={recipe.servings || 1}
+                     ingredients={recipe.recipe_ingredients
+                         .filter(isNonNull)
+                         .map(ri => ({
+                             id: ri.ingredient?.id || '',
+                             name: ri.ingredient?.name || 'Unknown',
+                             quantity: ri.quantity,
+                             unit: ri.unit,
+                             price_per_unit: ri.ingredient?.price_per_unit || 0,
+                             weighted_average_cost: ri.ingredient?.weighted_average_cost
+                         }))
+                         .filter(ing => ing.id !== '')
+                     }
+                 />
+             )}
+
+             {/* Instructions */}
             {recipe.instructions && Array.isArray(recipe.instructions) && recipe.instructions.length > 0 && (
                 <Card className="transition-all">
                     <CardHeader className="pb-4">

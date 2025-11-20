@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { QuickActionsSkeleton, StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
+import { GridSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
 import { toast } from 'sonner'
 import { useCurrency } from '@/hooks/useCurrency'
 import { uiLogger } from '@/lib/logger'
@@ -81,11 +81,8 @@ const HppDashboardWidget = (): JSX.Element | null => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <StatsCardSkeleton />
-              <StatsCardSkeleton />
-            </div>
-            <QuickActionsSkeleton className="h-32" />
+            <StatsSkeleton count={4} />
+            <GridSkeleton columns={2} items={2} />
           </div>
         </CardContent>
       </Card>

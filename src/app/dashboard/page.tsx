@@ -11,7 +11,8 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LoadingButton } from '@/components/ui/loading-button'
-import { DashboardHeaderSkeleton, RecentOrdersSkeleton, StatsCardSkeleton, StockAlertSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
+import { StatsSkeleton } from '@/components/ui/skeleton-loader'
+import { DashboardHeaderSkeleton, RecentOrdersSkeleton, StockAlertSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 
 // Toast hook available for future use
 // import { toast } from 'sonner'
@@ -119,11 +120,7 @@ const DashboardPage = () => {
       <AppLayout>
         <div className="space-y-6">
           <DashboardHeaderSkeleton />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {Array.from({ length: 4 }, (_, i) => (
-              <StatsCardSkeleton key={`skeleton-${i}`} />
-            ))}
-          </div>
+          <StatsSkeleton count={4} />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <RecentOrdersSkeleton />
             <StockAlertSkeleton />

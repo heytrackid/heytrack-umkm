@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { InventoryTableSkeleton } from '@/components/ui/skeletons/table-skeletons'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 import type { IngredientPurchase } from '@/app/ingredients/purchases/components/types'
@@ -21,7 +21,7 @@ const PurchasesTable = ({ purchases, isLoading = false }: PurchasesTableProps): 
           <CardTitle>Riwayat Pembelian</CardTitle>
         </CardHeader>
         <CardContent>
-          <InventoryTableSkeleton rows={5} />
+          <TableSkeleton rows={5} columns={6} />
         </CardContent>
       </Card>
     )
