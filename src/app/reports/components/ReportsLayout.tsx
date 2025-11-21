@@ -1,8 +1,8 @@
 'use client'
 
-import { AlertCircle, ArrowDownIcon, ArrowUpIcon, Calendar, CheckCircle, DollarSign, Filter, Package, ShoppingCart, TrendingUp } from '@/components/icons'
+import { ArrowDownIcon, ArrowUpIcon, CheckCircle, DollarSign, Filter, Package, ShoppingCart, TrendingUp } from '@/components/icons'
 import dynamic from 'next/dynamic'
-import { useState, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 
 import { PageHeader } from '@/components/layout'
 import { AppLayout } from '@/components/layout/app-layout'
@@ -14,7 +14,6 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -81,38 +80,7 @@ const FinancialReport = dynamic(
   }
 )
 
-const ProfitReport = dynamic(
-  () => import('./ProfitReport')
-    .then(m => ({ default: m.ProfitReport }))
-    .catch((error) => {
-      logDynamicImportError('Profit report', error)
-      // Return a component that triggers a reload
-      return { 
-        default: () => (
-          <div className="p-8 text-center">
-            <div className="text-red-600 mb-4">Failed to load profit report</div>
-            <Button onClick={() => window.location.reload()}>
-              Reload Page
-            </Button>
-          </div>
-        )
-      }
-    }),
-  {
-    loading: () => (
-      <div className="space-y-4">
-        <Skeleton className="h-16 rounded" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }, (_, i) => (
-            <Skeleton key={i} className="h-24 rounded" />
-          ))}
-        </div>
-        <Skeleton className="h-96 rounded" />
-      </div>
-    ),
-    ssr: false
-  }
-)
+// ProfitReport removed - use dedicated /profit menu instead for comprehensive profit analysis
 
 // Reports Layout - Main structure and navigation
 // Contains breadcrumbs, header, and date range picker
@@ -177,7 +145,9 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
                   <Skeleton className="h-4 w-3/4" />
                 </div>
               ) : statsError ? (
-                <div className="text-sm text-red-600">Error loading data</div>
+                <div className="text-xs text-red-600">
+                  {statsError instanceof Error ? statsError.message : 'Error loading data'}
+                </div>
               ) : (
                 <>
                   <div className="text-2xl font-bold">
@@ -298,12 +268,8 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
 
         {/* Reports Tabs */}
         <div className="w-full overflow-hidden">
-          <SwipeableTabs defaultValue="profit" className="space-y-4">
+          <SwipeableTabs defaultValue="sales" className="space-y-4">
             <SwipeableTabsList className="h-12 w-full">
-              <SwipeableTabsTrigger value="profit" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:">
-                <TrendingUp className="h-4 w-4 mr-2" />
-                {getTabLabel('Laba Rugi', 'Laba')}
-              </SwipeableTabsTrigger>
               <SwipeableTabsTrigger value="sales" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:">
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 {getTabLabel('Penjualan', 'Sales')}
@@ -317,10 +283,6 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
                 {getTabLabel('Keuangan', 'Fin')}
               </SwipeableTabsTrigger>
             </SwipeableTabsList>
-
-           <SwipeableTabsContent value="profit">
-             <ProfitReport />
-           </SwipeableTabsContent>
 
            <SwipeableTabsContent value="sales">
              <SalesReport />

@@ -1,7 +1,7 @@
 // Metric cards component for Profit Report
 'use client'
 
-import { TrendingUp, DollarSign, ShoppingCart, Package, ArrowUpRight, ArrowDownRight, Minus } from '@/components/icons'
+import { ArrowDownRight, ArrowUpRight, DollarSign, Minus, Package, ShoppingCart, TrendingUp } from '@/components/icons'
 import React from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -38,6 +38,25 @@ const getTrendColor = (value: number) => {
 // Metric cards component
 export const ProfitMetrics: React.FC<ProfitMetricsProps> = ({ summary, isMobile = false }) => {
     const { formatCurrency } = useCurrency()
+
+    // Early return if summary is undefined
+    if (!summary) {
+        return (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                {Array.from({ length: 4 }, (_, i) => (
+                    <Card key={i} className="animate-pulse">
+                        <CardHeader className="pb-2">
+                            <div className="h-4 bg-muted rounded w-24" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="h-8 bg-muted rounded w-32 mb-2" />
+                            <div className="h-3 bg-muted rounded w-20" />
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+        )
+    }
 
     const gridClass = isMobile ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-4'
 
@@ -141,7 +160,26 @@ interface ProfitBreakdownProps {
     formatCurrency: (amount: number) => string
 }
 
-export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProps) => (
+export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProps) => {
+    // Early return if summary is undefined
+    if (!summary) {
+        return (
+            <Card className="border-0">
+                <CardHeader>
+                    <div className="h-6 bg-muted rounded w-32 animate-pulse" />
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-4">
+                        {Array.from({ length: 5 }, (_, i) => (
+                            <div key={i} className="h-16 bg-muted rounded animate-pulse" />
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    return (
         <Card className="border-0 ">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -182,4 +220,5 @@ export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProp
                 </div>
             </CardContent>
         </Card>
-)
+    )
+}
