@@ -1,7 +1,8 @@
 'use client'
 
 // Using Pino logger for all logging
-import { useQuery } from '@tanstack/react-query'
+import { useRecipes } from '@/hooks/useRecipes'
+import { useCustomers } from '@/hooks/useCustomers'
 import { AlertCircle } from '@/components/icons'
 import dynamic from 'next/dynamic'
 import { memo, useCallback, useState, type FormEvent } from 'react'
@@ -130,55 +131,10 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     )
 
     // Fetch recipes
-    const { data: recipesData = [] } = useQuery({
-        queryKey: ['recipes', 'active'],
-        queryFn: async () => {
-            const response = await fetch('/api/recipes', {
-                credentials: 'include', // Include cookies for authentication
-            })
-            if (!response.ok) { throw new Error('Failed to fetch recipes') }
-            const result = await response.json() as unknown
-            
-            // Handle both formats: direct array or { data: array }
-            let data: Array<Row<'recipes'>>
-            if (Array.isArray(result)) {
-                data = result as Array<Row<'recipes'>>
-            } else if (result && typeof result === 'object' && 'data' in result) {
-                const extracted = (result as { data: unknown }).data
-                data = Array.isArray(extracted) ? (extracted as Array<Row<'recipes'>>) : []
-            } else {
-                data = []
-            }
-            
-            return data.filter(recipe => recipe.is_active)
-        },
-        staleTime: 5 * 60 * 1000,
-    })
+    const { data: recipesData = [] } = useRecipes()
 
     // Fetch customers
-    const { data: customersData = [] } = useQuery({
-        queryKey: ['customers', 'all'],
-        queryFn: async () => {
-            const response = await fetch('/api/customers', {
-                credentials: 'include', // Include cookies for authentication
-            })
-            if (!response.ok) { throw new Error('Failed to fetch customers') }
-            const result = await response.json() as unknown
-            
-            // Handle both formats: direct array or { data: array }
-            if (Array.isArray(result)) {
-                return result as Customer[]
-            }
-            
-            if (result && typeof result === 'object' && 'data' in result) {
-                const data = (result as { data: unknown }).data
-                return Array.isArray(data) ? (data as Customer[]) : []
-            }
-            
-            return []
-        },
-        staleTime: 5 * 60 * 1000,
-    })
+    const { data: customersData = [] } = useCustomers()
 
     const createEmptyOrderItem = useCallback((): OrderItemWithRecipe => {
         const firstRecipe = recipesData[0]

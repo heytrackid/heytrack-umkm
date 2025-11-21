@@ -1,17 +1,17 @@
 'use client'
 
+import { AutoSyncFinancialDashboard } from '@/components/dashboard/AutoSyncFinancialDashboard'
+import { MobileHeader } from '@/components/layout/mobile-header'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
-import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { useDashboardStats } from '@/hooks/api/useDashboard'
-import { AutoSyncFinancialDashboard } from '@/components/dashboard/AutoSyncFinancialDashboard'
-import { MobileHeader } from '@/components/layout/mobile-header'
-import { PageHeader } from '@/components/layout/PageHeader'
 
 import { ProductionScheduleWidget } from '@/components/dashboard/ProductionScheduleWidget'
 import {
@@ -195,7 +195,7 @@ export default function DashboardPage(): JSX.Element {
           <p className="text-muted-foreground">Memuat...</p>
         ) : stats?.orders.recent && stats.orders.recent.length > 0 ? (
           <div className="space-y-3">
-            {stats.orders.recent.map((order, index) => (
+            {stats.orders.recent?.map((order, index) => (
               <div
                 key={index}
                 className="flex items-center justify-between p-4 bg-muted rounded-lg"

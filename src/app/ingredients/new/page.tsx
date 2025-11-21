@@ -11,6 +11,7 @@ import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { BreadcrumbPatterns, PageBreadcrumb } from '@/components/ui/page-breadcrumb'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { useAuth, useSupabaseCRUD } from '@/hooks/index'
 import { toast } from 'sonner'
 import { apiLogger } from '@/lib/logger'
@@ -85,26 +86,24 @@ const NewIngredientPage = (): JSX.Element => {
       <div className="space-y-6 p-6">
         <PageBreadcrumb items={BreadcrumbPatterns.ingredientNew} />
 
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.back()}
-            className="shrink-0"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
-              <Package className="h-7 w-7 sm:h-8 sm:w-8" />
-              Tambah Bahan Baku
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Tambahkan bahan baku baru ke dalam sistem
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title="Tambah Bahan Baku"
+          description="Tambahkan bahan baku baru ke dalam sistem"
+          breadcrumbs={[
+            { label: 'Dashboard', href: '/' },
+            { label: 'Bahan Baku', href: '/ingredients' },
+            { label: 'Tambah Bahan Baku' }
+          ]}
+          action={
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.back()}
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          }
+        />
 
         {/* Form */}
         <div className="max-w-3xl">

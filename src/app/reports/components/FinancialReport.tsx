@@ -13,21 +13,19 @@ import type { Row } from '@/types/database'
 type FinancialRecord = Row<'financial_records'>
 
 interface FinancialReportProps {
-  dateRange: {
+  dateRange?: {
     start: string | undefined
     end: string | undefined
   }
 }
 
-export const FinancialReport = ({ dateRange }: FinancialReportProps) => {
+export const FinancialReport = ({ dateRange }: FinancialReportProps = {}) => {
   const { formatCurrency } = useCurrency()
   const { data: financialRecords } = useSupabaseCRUD<'financial_records'>('financial_records')
 
   // Calculate financial report
   const financialData = (financialRecords ?? []).filter((record): record is FinancialRecord & { date: string } => {
-    if (!record.date) { return false }
-    const recordDate = new Date(record.date).toISOString().split('T')[0] as string
-    return recordDate >= (dateRange.start ?? '') && recordDate <= (dateRange.end ?? '')
+    return !!record.date
   })
 
   const financialStats = financialData.reduce<{ totalIncome: number; totalExpense: number }>(
@@ -43,30 +41,8 @@ export const FinancialReport = ({ dateRange }: FinancialReportProps) => {
     { totalIncome: 0, totalExpense: 0 }
   )
 
-  // Calculate previous period stats
-  const previousFinancialData = (financialRecords ?? []).filter((record): record is FinancialRecord & { date: string } => {
-    if (!record.date || !dateRange.start || !dateRange.end) { return false }
-    const startDate = new Date(dateRange.start)
-    const endDate = new Date(dateRange.end)
-    const periodLength = endDate.getTime() - startDate.getTime()
-    const previousEnd = new Date(startDate.getTime() - 1)
-    const previousStart = new Date(previousEnd.getTime() - periodLength)
-    const recordDate = new Date(record.date).toISOString().split('T')[0] as string
-    return recordDate >= previousStart.toISOString().split('T')[0] && recordDate <= previousEnd.toISOString().split('T')[0]
-  })
-
-  const previousStats = previousFinancialData.reduce<{ totalIncome: number; totalExpense: number }>(
-    (stats, record) => {
-      if (record['type'] === 'INCOME') {
-        stats.totalIncome += record.amount
-      }
-      if (record['type'] === 'EXPENSE') {
-        stats.totalExpense += record.amount
-      }
-      return stats
-    },
-    { totalIncome: 0, totalExpense: 0 }
-  )
+  // Since date filtering is removed, no previous period comparison
+  const previousStats = { totalIncome: 0, totalExpense: 0 }
 
   const netProfit = financialStats.totalIncome - financialStats.totalExpense
   const profitMargin = financialStats.totalIncome > 0

@@ -1,6 +1,7 @@
 export const runtime = 'nodejs'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
@@ -43,15 +44,15 @@ async function getHandler(_request: NextRequest): Promise<NextResponse> {
 
       if (insertError) throw insertError
 
-      return NextResponse.json({
-        success: true,
+      return createSuccessResponse({
         data: newOnboarding,
+        message: 'Onboarding record created'
       })
     }
 
-    return NextResponse.json({
-      success: true,
+    return createSuccessResponse({
       data: onboarding,
+      message: 'Onboarding status retrieved'
     })
   } catch (error) {
     return handleAPIError(error, 'GET /api/onboarding')
@@ -97,10 +98,9 @@ async function patchHandler(request: NextRequest): Promise<NextResponse> {
 
     if (error) throw error
 
-    return NextResponse.json({
-      success: true,
+    return createSuccessResponse({
       data,
-      message: 'Onboarding progress updated',
+      message: 'Onboarding progress updated'
     })
   } catch (error) {
     return handleAPIError(error, 'PATCH /api/onboarding')

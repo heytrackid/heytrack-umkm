@@ -11,6 +11,8 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
 import { useCreateRecipe } from '@/hooks/useRecipes'
+import { useMutation } from '@tanstack/react-query'
+import { postApi } from '@/lib/query/query-helpers'
 
 interface GeneratedRecipe {
   name: string
@@ -36,13 +38,30 @@ interface AIRecipeGeneratorProps {
 
 export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps): JSX.Element {
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [prompt, setPrompt] = useState('')
   const [servings, setServings] = useState('4')
   const [cuisine, setCuisine] = useState('')
   const [generatedRecipe, setGeneratedRecipe] = useState<GeneratedRecipe | null>(null)
 
-  const handleGenerate = async (): Promise<void> => {
+  // ✅ Use React Query mutation instead of manual fetch
+  const generateRecipeMutation = useMutation({
+    mutationFn: (data: { prompt: string; servings: number; cuisine?: string }) =>
+      postApi<{ recipe: GeneratedRecipe }>('/recipes/generate', data),
+    onSuccess: (data) => {
+      setGeneratedRecipe(data.recipe)
+      toast.success('Resep berhasil dibuat!', {
+        description: 'AI telah membuat resep untuk Anda',
+      })
+    },
+    onError: (error) => {
+      logger.error({ error }, 'AI Generation Error')
+      toast.error('Gagal membuat resep', {
+        description: error instanceof Error ? error.message : 'Terjadi kesalahan saat membuat resep',
+      })
+    }
+  })
+
+  const handleGenerate = (): void => {
     if (!prompt.trim()) {
       toast.error('Prompt diperlukan', {
         description: 'Silakan masukkan deskripsi resep yang ingin dibuat',
@@ -50,42 +69,12 @@ export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps)
       return
     }
 
-    setLoading(true)
     setGeneratedRecipe(null)
-
-    try {
-      const response = await fetch('/api/recipes/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt,
-          servings: parseInt(servings),
-          cuisine: cuisine || undefined,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || data.message || 'Failed to generate recipe')
-      }
-
-      if (data.success && data.recipe) {
-        setGeneratedRecipe(data.recipe)
-        toast.success('Resep berhasil dibuat!', {
-          description: 'AI telah membuat resep untuk Anda',
-        })
-      } else {
-        throw new Error('Invalid response from AI')
-      }
-    } catch (error) {
-      logger.error({ error }, 'AI Generation Error')
-      toast.error('Gagal membuat resep', {
-        description: error instanceof Error ? error.message : 'Terjadi kesalahan saat membuat resep',
-      })
-    } finally {
-      setLoading(false)
-    }
+    generateRecipeMutation.mutate({
+      prompt,
+      servings: parseInt(servings),
+      cuisine: cuisine || undefined,
+    })
   }
 
   const handleUseRecipe = (): void => {
@@ -135,7 +124,7 @@ export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps)
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     rows={4}
-                    disabled={loading}
+                    disabled={generateRecipeMutation.isPending}
                   />
                   <p className="text-xs text-muted-foreground">
                     Jelaskan resep yang ingin Anda buat dengan detail
@@ -152,13 +141,13 @@ export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps)
                       max="100"
                       value={servings}
                       onChange={(e) => setServings(e.target.value)}
-                      disabled={loading}
+                      disabled={generateRecipeMutation.isPending}
                     />
                   </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor="cuisine">Jenis Masakan (Opsional)</Label>
-                    <Select value={cuisine} onValueChange={setCuisine} disabled={loading}>
+                    <Select value={cuisine} onValueChange={setCuisine} disabled={generateRecipeMutation.isPending}>
                       <SelectTrigger>
                         <SelectValue placeholder="Pilih jenis" />
                       </SelectTrigger>
@@ -176,8 +165,8 @@ export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps)
               </div>
 
               <div className="flex gap-2">
-                <Button onClick={handleGenerate} disabled={loading} className="flex-1">
-                  {loading ? (
+                <Button onClick={handleGenerate} disabled={generateRecipeMutation.isPending} className="flex-1">
+                  {generateRecipeMutation.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Membuat Resep...

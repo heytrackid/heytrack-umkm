@@ -10,6 +10,7 @@ import type { Row } from '@/types/database'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 
 type RecipeIngredient = Row<'recipe_ingredients'>
 type Ingredient = Row<'ingredients'>
@@ -83,11 +84,11 @@ async function postHandler(request: NextRequest, { params }: { params: Promise<{
 
       if (error) {
         apiLogger.error({ error, recipeId }, 'Database error fetching recipe')
-        return NextResponse.json({ error: 'Failed to fetch recipe data' }, { status: 500 })
+        return createErrorResponse('Failed to fetch recipe data', 500)
       }
 
       if (!data) {
-        return NextResponse.json({ error: 'Recipe not found' }, { status: 404 })
+        return createErrorResponse('Recipe not found', 404)
       }
 
       recipeData = data as unknown as RecipeWithIngredients
@@ -110,11 +111,7 @@ async function postHandler(request: NextRequest, { params }: { params: Promise<{
     ) || []
 
     if (ingredientsWithPrice.length === 0) {
-      return NextResponse.json({
-        success: false,
-        error: 'Tidak ada bahan dengan harga yang tersedia. Harap lengkapi harga bahan terlebih dahulu.',
-        data: null
-      }, { status: 400 })
+      return createErrorResponse('Tidak ada bahan dengan harga yang tersedia. Harap lengkapi harga bahan terlebih dahulu.', 400)
     }
 
     // Calculate pricing using the sanitized recipe data
@@ -123,17 +120,11 @@ async function postHandler(request: NextRequest, { params }: { params: Promise<{
       recipe_ingredients: ingredientsWithPrice as Array<RecipeIngredient & { ingredient: Ingredient }>
     })
 
-    return NextResponse.json({
-      success: true,
-      data: pricingAnalysis
-    })
+    return createSuccessResponse({ success: true, data: pricingAnalysis })
   } catch (error) {
     const normalizedError = error instanceof Error ? error : new Error(String(error))
     apiLogger.error({ error: normalizedError }, 'Error calculating pricing')
-    return NextResponse.json({
-      error: 'Internal server error',
-      message: normalizedError.message
-    }, { status: 500 })
+    return createErrorResponse('Internal server error', 500)
   }
 }
 

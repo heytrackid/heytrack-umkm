@@ -9,7 +9,8 @@ import { ImportDialog } from '@/components/import/ImportDialog'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 
-import { BreadcrumbPatterns, PageBreadcrumb, PageHeader, StatsCards } from '@/components/ui/index'
+import { BreadcrumbPatterns, PageBreadcrumb, StatsCards } from '@/components/ui/index'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { useSupabaseCRUD } from '@/hooks/supabase/index'
 
 import type { Row } from '@/types/database'

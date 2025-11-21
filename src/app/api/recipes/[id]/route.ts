@@ -1,9 +1,10 @@
 export const runtime = 'nodejs'
 
-import { z } from 'zod'
+import { createDeleteHandler, createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
 import { createApiRoute } from '@/lib/api/route-factory'
-import { createGetHandler, createUpdateHandler, createDeleteHandler } from '@/lib/api/crud-helpers'
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
+import { z } from 'zod'
 
 const RecipeUpdateSchema = z.object({
   name: z.string().min(1).optional(),
@@ -38,7 +39,7 @@ export const PUT = createApiRoute(
   createUpdateHandler({
     table: 'recipes',
     selectFields: RECIPE_FIELDS.DETAIL,
-  })
+  }, SUCCESS_MESSAGES.RECIPE_UPDATED)
 )
 
 // DELETE /api/recipes/[id] - Delete recipe
@@ -51,6 +52,6 @@ export const DELETE = createApiRoute(
     {
       table: 'recipes',
     },
-    'Recipe deleted successfully'
+    SUCCESS_MESSAGES.RECIPE_DELETED
   )
 )

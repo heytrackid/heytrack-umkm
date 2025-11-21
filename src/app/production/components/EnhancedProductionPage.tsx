@@ -1,11 +1,14 @@
 'use client'
 
+import { BarChart3, Calendar, CheckCircle, Clock, Download, Factory, Filter, Package, Play, Plus, Search, TrendingUp, XCircle } from '@/components/icons'
+import { useProductionBatches } from '@/hooks/useProduction'
+import { useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
-import { BarChart3, Calendar, CheckCircle, Clock, Download, Factory, Filter, Package, Play, Plus, RefreshCw, Search, TrendingUp, XCircle } from '@/components/icons'
 import dynamic from 'next/dynamic'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
+import { PageHeader } from '@/components/layout/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -105,46 +108,16 @@ const STATUS_CONFIG = {
 const EnhancedProductionPage = () => {
     const { formatCurrency } = useCurrency()
     const { isMobile } = useResponsive()
-    const [productions, setProductions] = useState<ProductionWithRecipe[]>([])
-    const [loading, setLoading] = useState(true)
+    const queryClient = useQueryClient()
     const [searchTerm, setSearchTerm] = useState('')
     const [statusFilter, setStatusFilter] = useState<string>('all')
-    const [dateFilter, setDateFilter] = useState<string>('all')
     const [isFormOpen, setIsFormOpen] = useState(false)
 
-    useEffect(() => {
-        void fetchProductions()
-    }, [])
-
-    const fetchProductions = async () => {
-        try {
-            setLoading(true)
-            const response = await fetch('/api/production-batches')
-            if (response.ok) {
-                const result: unknown = await response.json()
-                
-                // Handle both formats: direct array or { data: array }
-                let payload: unknown
-                if (Array.isArray(result)) {
-                    payload = result
-                } else if (result && typeof result === 'object' && 'data' in result) {
-                    payload = (result as { data: unknown }).data
-                } else {
-                    payload = []
-                }
-                
-                if (isProductionWithRecipeArray(payload)) {
-                    setProductions(payload)
-                } else {
-                    setProductions([])
-                }
-            }
-        } catch (error) {
-            apiLogger.error({ error }, 'Error fetching productions')
-        } finally {
-            setLoading(false)
-        }
-    }
+    // Fetch productions with standardized hook
+    const { data, isLoading: loading } = useProductionBatches()
+    
+    // Type-safe productions array with proper assertion
+    const productions: ProductionWithRecipe[] = (data && isProductionWithRecipeArray(data)) ? data : []
 
     const filteredProductions = productions.filter(prod => {
         // Safe search with null checks
@@ -157,36 +130,7 @@ const EnhancedProductionPage = () => {
 
         const matchesStatus = statusFilter === 'all' || prod['status'] === statusFilter
 
-        // Date filter
-        let matchesDate = true
-        if (dateFilter !== 'all') {
-            const prodDate = new Date(prod.planned_date)
-            const today = new Date()
-            today.setHours(0, 0, 0, 0)
-
-            switch (dateFilter) {
-                case 'today':
-                    matchesDate = prodDate.toDateString() === today.toDateString()
-                    break
-                case 'week': {
-                    const weekAgo = new Date(today)
-                    weekAgo.setDate(weekAgo.getDate() - 7)
-                    matchesDate = prodDate >= weekAgo
-                    break
-                }
-                case 'month': {
-                    const monthAgo = new Date(today)
-                    monthAgo.setMonth(monthAgo.getMonth() - 1)
-                    matchesDate = prodDate >= monthAgo
-                    break
-                }
-                default:
-                    matchesDate = true
-                    break
-            }
-        }
-
-        return matchesSearch && matchesStatus && matchesDate
+        return matchesSearch && matchesStatus
     })
 
     // Calculate stats
@@ -227,7 +171,7 @@ const EnhancedProductionPage = () => {
             })
 
             if (response.ok) {
-                await fetchProductions()
+                queryClient.invalidateQueries({ queryKey: ['production-batches'] })
             }
         } catch (error) {
             apiLogger.error({ error }, 'Error starting production')
@@ -246,7 +190,7 @@ const EnhancedProductionPage = () => {
             })
 
             if (response.ok) {
-                await fetchProductions()
+                queryClient.invalidateQueries({ queryKey: ['production-batches'] })
             }
         } catch (error) {
             apiLogger.error({ error }, 'Error completing production')
@@ -257,27 +201,19 @@ const EnhancedProductionPage = () => {
         return (
             <div className="space-y-6 p-6">
                 {/* Header - Always visible with disabled buttons */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
-                            <Factory className="h-7 w-7 sm:h-8 sm:w-8" />
-                            Production Tracking
-                        </h1>
-                        <p className="text-sm text-muted-foreground mt-1">
-                            Kelola dan monitor produksi batch
-                        </p>
-                    </div>
-                    <div className="flex gap-2">
-                        <Button variant="outline" disabled className="flex-1 sm:flex-none">
-                            <RefreshCw className="h-4 w-4 mr-2" />
-                            Refresh
-                        </Button>
-                        <Button disabled className="flex-1 sm:flex-none">
-                            <Plus className="h-4 w-4 mr-2" />
-                            Produksi Baru
-                        </Button>
-                    </div>
-                </div>
+                <PageHeader
+                    title="Production Tracking"
+                    description="Kelola dan monitor produksi batch"
+                    icon={<Factory className="h-7 w-7 sm:h-8 sm:w-8" />}
+                    action={
+                        <div className="flex gap-2">
+                            <Button disabled className="flex-1 sm:flex-none">
+                                <Plus className="h-4 w-4 mr-2" />
+                                Produksi Baru
+                            </Button>
+                        </div>
+                    }
+                />
 
                 {/* Stats Cards - Match actual layout: 5 cards */}
                 <div className={`grid gap-4 ${isMobile ? 'grid-cols-2' : 'md:grid-cols-5'}`}>
@@ -333,31 +269,20 @@ const EnhancedProductionPage = () => {
 
     return (
         <div className="space-y-6 p-6">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
-                        <Factory className="h-7 w-7 sm:h-8 sm:w-8" />
-                        Production Tracking
-                    </h1>
-                    <p className="text-sm text-muted-foreground mt-1">
-                        Kelola dan monitor produksi batch
-                    </p>
-                </div>
-                <div className="flex gap-2">
-                    <Button variant="outline" onClick={fetchProductions} className="flex-1 sm:flex-none">
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        Refresh
-                    </Button>
-                    <Button
-                        onClick={() => setIsFormOpen(true)}
-                        className="flex-1 sm:flex-none"
-                    >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Produksi Baru
-                    </Button>
-                </div>
-            </div>
+            <PageHeader
+                title="Production Tracking"
+                description="Kelola dan monitor produksi batch"
+                icon={<Factory className="h-7 w-7 sm:h-8 sm:w-8" />}
+                actions={
+                    <>
+
+                        <Button onClick={() => setIsFormOpen(true)}>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Produksi Baru
+                        </Button>
+                    </>
+                }
+            />
 
             {/* Stats Cards */}
             <div className={`grid gap-4 ${isMobile ? 'grid-cols-2' : 'md:grid-cols-5'}`}>
@@ -450,21 +375,9 @@ const EnhancedProductionPage = () => {
                                     <SelectItem value="COMPLETED">Selesai</SelectItem>
                                     <SelectItem value="CANCELLED">Dibatalkan</SelectItem>
                                 </SelectContent>
-                            </Select>
+                             </Select>
 
-                            <Select value={dateFilter} onValueChange={setDateFilter}>
-                                <SelectTrigger className="w-full sm:w-[180px]">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Semua Tanggal</SelectItem>
-                                    <SelectItem value="today">Hari Ini</SelectItem>
-                                    <SelectItem value="week">7 Hari Terakhir</SelectItem>
-                                    <SelectItem value="month">30 Hari Terakhir</SelectItem>
-                                </SelectContent>
-                            </Select>
-
-                            <Button variant="outline" size="icon">
+                             <Button variant="outline" size="icon">
                                 <Download className="h-4 w-4" />
                             </Button>
                         </div>
@@ -474,16 +387,15 @@ const EnhancedProductionPage = () => {
                             <div className="text-muted-foreground">
                                 Menampilkan <span className="font-semibold text-foreground">{filteredProductions.length}</span> dari {productions.length} batch
                             </div>
-                            {(searchTerm || statusFilter !== 'all' || dateFilter !== 'all') && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {
-                                        setSearchTerm('')
-                                        setStatusFilter('all')
-                                        setDateFilter('all')
-                                    }}
-                                >
+                             {(searchTerm || statusFilter !== 'all') && (
+                                 <Button
+                                     variant="ghost"
+                                     size="sm"
+                                     onClick={() => {
+                                         setSearchTerm('')
+                                         setStatusFilter('all')
+                                     }}
+                                 >
                                     <Filter className="h-4 w-4 mr-2" />
                                     Reset Filter
                                 </Button>
@@ -607,7 +519,7 @@ const EnhancedProductionPage = () => {
             <LazyProductionFormDialog
                 open={isFormOpen}
                 onOpenChange={(open) => setIsFormOpen(open)}
-                onSuccess={fetchProductions}
+                onSuccess={() => queryClient.invalidateQueries({ queryKey: ['production-batches'] })}
             />
         </div>
     )

@@ -6,6 +6,7 @@ import { use, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import {
   Breadcrumb,
@@ -122,28 +123,30 @@ const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }): JS
           </BreadcrumbList>
         </Breadcrumb>
 
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => router.back()}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold">{customer.name}</h1>
-              <p className="text-muted-foreground">Detail Pelanggan</p>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => router.push(`/customers/${id}/edit`)}>
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
-            <Button variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
-              <Trash2 className="h-4 w-4 mr-2" />
-              Hapus
-            </Button>
-          </div>
-        </div>
+        <PageHeader
+          title={customer.name}
+          description="Detail Pelanggan"
+          breadcrumbs={[
+            { label: 'Dashboard', href: '/' },
+            { label: 'Pelanggan', href: '/customers' },
+            { label: customer.name }
+          ]}
+          actions={
+            <>
+              <Button variant="outline" onClick={() => router.push(`/customers/${id}/edit`)}>
+                <Edit className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+              <Button variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Hapus
+              </Button>
+              <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            </>
+          }
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Customer Info */}

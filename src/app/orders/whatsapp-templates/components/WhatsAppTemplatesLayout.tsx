@@ -6,6 +6,7 @@ import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
 
 import { type WhatsAppTemplate } from '@/app/orders/whatsapp-templates/components/types'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
@@ -15,21 +16,9 @@ import { toast } from 'sonner'
 import { uiLogger } from '@/lib/client-logger'
 
 // Lazy load heavy components
-const TemplatesTable = lazy(() => import('./TemplatesTable')
-  .then(module => ({ default: module.TemplatesTable }))
-  .catch(() => {
-    return { default: () => <div className="p-4 text-center text-red-600">Failed to load templates table</div> }
-  }))
-const TemplateForm = lazy(() => import('./TemplateForm')
-  .then(module => ({ default: module.TemplateForm }))
-  .catch(() => {
-    return { default: () => <div className="p-4 text-center text-red-600">Failed to load template form</div> }
-  }))
-const TemplatePreview = lazy(() => import('./TemplatePreview')
-  .then(module => ({ default: module.TemplatePreview }))
-  .catch(() => {
-    return { default: () => <div className="p-4 text-center text-red-600">Failed to load template preview</div> }
-  }))
+const TemplatesTable = lazy(() => import('./TemplatesTable'))
+const TemplateForm = lazy(() => import('./TemplateForm'))
+const TemplatePreview = lazy(() => import('./TemplatePreview'))
 
 
 const WhatsAppTemplatesLayout = () => {
@@ -247,25 +236,19 @@ const WhatsAppTemplatesLayout = () => {
                     </BreadcrumbList>
                 </Breadcrumb>
 
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold flex items-center gap-2">
-                            <MessageCircle className="h-8 w-8" />
-                            WhatsApp Templates
-                        </h1>
-                        <p className="text-muted-foreground mt-1">
-                            Kelola template pesan WhatsApp untuk komunikasi dengan pelanggan
-                        </p>
-                    </div>
-                    <Button onClick={() => {
-                        setEditingTemplate(null)
-                        setShowDialog(true)
-                    }}>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Tambah Template
-                    </Button>
-                </div>
+                <PageHeader
+                    title="WhatsApp Templates"
+                    description="Kelola template pesan WhatsApp untuk komunikasi dengan pelanggan"
+                    action={
+                        <Button onClick={() => {
+                            setEditingTemplate(null)
+                            setShowDialog(true)
+                        }}>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Tambah Template
+                        </Button>
+                    }
+                />
 
                 {/* Info Card - Show only if no templates */}
                 {templates.length === 0 && !loading && (

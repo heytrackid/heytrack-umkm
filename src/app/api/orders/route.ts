@@ -1,15 +1,16 @@
 export const runtime = 'nodejs'
 
-import { z } from 'zod'
+import { createPaginationMeta } from '@/lib/api-core'
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { cacheInvalidation, cacheKeys, withCache } from '@/lib/cache'
 import { ORDER_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
-import { createPaginationMeta } from '@/lib/validations/pagination'
-import type { Database, FinancialRecordInsert, FinancialRecordUpdate, OrderInsert, OrderStatus } from '@/types/database'
-import { NextResponse } from 'next/server'
 import { OrderInsertSchema } from '@/lib/validations/domains/order'
+import type { Database, FinancialRecordInsert, FinancialRecordUpdate, OrderInsert, OrderStatus } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server'
+import { z } from 'zod'
 
 const OrderListQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional().default(1),
@@ -95,10 +96,8 @@ async function getOrdersHandler(
 
   apiLogger.info({ userId: user.id, count: orders?.length, totalCount: count, cached: true }, 'GET /api/orders - Success')
 
-  return NextResponse.json({
-    data: orders,
-    meta: createPaginationMeta(page, limit, count ?? 0)
-  })
+  const pagination = createPaginationMeta(count ?? 0, page, limit)
+  return createSuccessResponse(orders, undefined, pagination)
 }
 
 export const GET = createApiRoute(
@@ -115,7 +114,7 @@ async function createOrderHandler(
   const { user, supabase } = context
 
   if (!body) {
-    return NextResponse.json({ error: 'Request body is required' }, { status: 400 })
+    return createErrorResponse('Request body is required', 400)
   }
 
   const orderStatus = body.status || 'PENDING'
@@ -142,7 +141,7 @@ async function createOrderHandler(
 
     if (incomeError) {
       apiLogger.error({ error: incomeError }, 'Failed to create income record')
-      return NextResponse.json({ error: 'Failed to create income record' }, { status: 500 })
+      return createErrorResponse('Failed to create income record', 500)
     }
 
     incomeRecordId = (incomeRecord as { id: string }).id
@@ -170,7 +169,7 @@ async function createOrderHandler(
     if (incomeRecordId) {
       await supabase.from('financial_records' as never).delete().eq('id', incomeRecordId).eq('user_id', user.id)
     }
-    return NextResponse.json({ error: 'Failed to create order' }, { status: 500 })
+    return createErrorResponse('Failed to create order', 500)
   }
 
   const createdOrder = orderData as { id: string; order_no: string; customer_name: string | null }
@@ -202,14 +201,14 @@ async function createOrderHandler(
       if (incomeRecordId) {
         await supabase.from('financial_records' as never).delete().eq('id', incomeRecordId).eq('user_id', user.id)
       }
-      return NextResponse.json({ error: 'Failed to create order items' }, { status: 500 })
+      return createErrorResponse('Failed to create order items', 500)
     }
   }
 
   cacheInvalidation.orders()
   apiLogger.info({ userId: user.id, orderId: createdOrder.id, incomeRecorded: Boolean(incomeRecordId) }, 'POST /api/orders - Success')
 
-  return NextResponse.json({ ...createdOrder, income_recorded: Boolean(incomeRecordId) }, { status: 201 })
+  return createSuccessResponse({ ...createdOrder, income_recorded: Boolean(incomeRecordId) }, 'Order created successfully', undefined, 201)
 }
 
 export const POST = createApiRoute(

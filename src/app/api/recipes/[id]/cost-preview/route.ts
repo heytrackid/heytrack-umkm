@@ -5,6 +5,7 @@ import { buildRecipeCostPreview } from '@/lib/costs/cost-calculations'
 import { apiLogger } from '@/lib/logger'
 import { isRecipeCostRecord } from '@/types/recipes/cost'
 import type { RecipeCostRecord } from '@/types/recipes/cost'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 
 /**
  * GET /api/recipes/[id]/cost-preview
@@ -19,7 +20,7 @@ export const GET = createApiRoute(
   async ({ supabase, params }) => {
     const recipeId = params?.['id']
     if (!recipeId) {
-      return NextResponse.json({ error: 'Recipe ID required' }, { status: 400 })
+      return createErrorResponse('Recipe ID required', 400)
     }
 
     try {
@@ -46,29 +47,20 @@ export const GET = createApiRoute(
         .single()
 
       if (recipeError || !data) {
-        return NextResponse.json(
-          { error: 'Recipe not found' },
-          { status: 404 }
-        )
+        return createErrorResponse('Recipe not found', 404)
       }
 
       const recipe = data as RecipeCostRecord
 
       if (!isRecipeCostRecord(recipe)) {
-        return NextResponse.json(
-          { error: 'Recipe not found' },
-          { status: 404 }
-        )
+        return createErrorResponse('Recipe not found', 404)
       }
       const preview = buildRecipeCostPreview(recipe)
 
-      return NextResponse.json(preview)
+      return createSuccessResponse(preview)
     } catch (error) {
       apiLogger.error({ error, recipeId }, 'Failed to build recipe cost preview')
-      return NextResponse.json(
-        { error: 'Internal server error' },
-        { status: 500 }
-      )
+      return createErrorResponse('Internal server error', 500)
     }
   }
 )

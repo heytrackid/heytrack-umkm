@@ -132,7 +132,7 @@ const AnalyticsTabContent = ({ analytics, loading, formatCurrency }: AnalyticsTa
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {analytics.topCostDrivers.map((driver, index) => (
+            {analytics.topCostDrivers?.map((driver, index) => (
               <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-sm font-semibold">

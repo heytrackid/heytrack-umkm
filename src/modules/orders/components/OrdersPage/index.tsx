@@ -1,7 +1,8 @@
 'use client'
 
 // Using Pino logger for all logging
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import { useAllOrders } from '@/hooks/useOrdersQuery'
 import { Calendar, MessageCircle, Plus, ShoppingCart, TrendingUp, XCircle } from '@/components/icons'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
@@ -66,8 +67,6 @@ const OrderDetailView = dynamic(
 interface OrdersPageFilters {
     status: OrderStatus[]
     payment_status: string[]
-    date_from: string
-    date_to: string
     customer_search?: string
 }
 
@@ -104,26 +103,12 @@ const OrdersPage = (_props: OrdersPageProps) => {
     const [filters, setFilters] = useState<OrdersPageFilters>({
         status: [],
         payment_status: [],
-        date_from: '',
-        date_to: '',
         customer_search: ''
     })
     const hasFiltersApplied = (filters['status']?.length || 0) > 0 || Boolean(filters.customer_search?.trim())
 
     // Fetch orders
-    const { data: ordersData, isLoading: loading, error: queryError } = useQuery({
-        queryKey: ['orders', 'all'],
-        queryFn: async () => {
-            const response = await fetch(`/api/orders?${(() => { const p=new URLSearchParams(); const u=new URLSearchParams(typeof window!== 'undefined' ? window.location.search : ''); const f=u.get('from'); const t=u.get('to'); if (f) p.set('from', f); if (t) p.set('to', t); return p.toString(); })()}`, {
-                credentials: 'include', // Include cookies for authentication
-            })
-            if (!response.ok) { throw new Error('Failed to fetch orders') }
-            const _data = await response.json()
-            return Array.isArray(_data) ? _data : []
-        },
-        staleTime: 2 * 60 * 1000,
-        gcTime: 5 * 60 * 1000,
-    })
+    const { data: ordersData, isLoading: loading, error: queryError } = useAllOrders()
 
     // Ensure orders is always an array
     const orders = useMemo(() => {
@@ -196,7 +181,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
     }, [queryClient])
 
     const handleClearFilters = useCallback(() => {
-        setFilters({ status: [], payment_status: [], date_from: '', date_to: '', customer_search: '' })
+        setFilters({ status: [], payment_status: [], customer_search: '' })
     }, [])
 
     // Loading state

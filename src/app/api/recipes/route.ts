@@ -1,14 +1,15 @@
 export const runtime = 'nodejs'
 
-import { z } from 'zod'
+import { createPaginationMeta } from '@/lib/api-core'
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { cacheInvalidation, cacheKeys, withCache } from '@/lib/cache'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
-import { createPaginationMeta } from '@/lib/validations/pagination'
 import { RecipeInsertSchema } from '@/lib/validations/domains/recipe'
 import type { RecipeIngredientInsert, RecipeInsert } from '@/types/database'
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 
 const RecipeListQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional().default(1),
@@ -71,13 +72,13 @@ async function getRecipesHandler(
 
     return {
       data: recipes ?? [],
-      meta: createPaginationMeta(page, limit, count ?? 0)
+      pagination: createPaginationMeta(page, limit, count ?? 0)
     }
   }, cacheKey, 10 * 60 * 1000)
 
   apiLogger.info({ userId: user.id, cached: true, page, limit, resultCount: result.data.length }, 'Recipes fetched')
 
-  const response = NextResponse.json(result)
+  const response = createSuccessResponse(result.data, undefined, result.pagination)
   response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
   return response
 }
@@ -96,7 +97,7 @@ async function createRecipeHandler(
   const { user, supabase } = context
 
   if (!body) {
-    return NextResponse.json({ error: 'Request body is required' }, { status: 400 })
+    return createErrorResponse('Request body is required', 400)
   }
 
   const { ingredients, ...recipeData } = body
@@ -116,7 +117,7 @@ async function createRecipeHandler(
 
   if (recipeError) {
     apiLogger.error({ error: recipeError }, 'Error creating recipe')
-    return NextResponse.json({ error: 'Failed to create recipe' }, { status: 500 })
+    return createErrorResponse('Failed to create recipe', 500)
   }
 
   const createdRecipe = recipe as { id: string }
@@ -138,14 +139,14 @@ async function createRecipeHandler(
     if (ingredientsError) {
       apiLogger.error({ error: ingredientsError }, 'Error creating recipe ingredients')
       await supabase.from('recipes' as never).delete().eq('id', createdRecipe.id).eq('user_id', user.id)
-      return NextResponse.json({ error: 'Failed to create recipe ingredients' }, { status: 500 })
+      return createErrorResponse('Failed to create recipe ingredients', 500)
     }
   }
 
   cacheInvalidation.recipes()
   apiLogger.info({ userId: user.id, recipeId: createdRecipe.id }, 'Recipe created')
 
-  return NextResponse.json(recipe, { status: 201 })
+  return createSuccessResponse(recipe, 'Recipe created successfully', undefined, 201)
 }
 
 export const POST = createApiRoute(

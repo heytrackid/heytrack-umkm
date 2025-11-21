@@ -4,9 +4,12 @@
 'use client'
 
 import { Plus } from '@/components/icons'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useCustomers } from '@/hooks/useCustomers'
 
 import { Button } from '@/components/ui/button'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { useSettings } from '@/contexts/settings-context'
 import { toast } from 'sonner'
 import { useResponsive } from '@/hooks/useResponsive'
@@ -24,10 +27,9 @@ const logger = createLogger('CustomersLayout')
 export const CustomersLayout = (): JSX.Element => {
   const { isMobile } = useResponsive()
   const { formatCurrency } = useSettings()
+  const queryClient = useQueryClient()
 
   // State
-  const [customers, setCustomers] = useState<Customer[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -38,30 +40,47 @@ export const CustomersLayout = (): JSX.Element => {
     bulk: false
   })
 
-  // Fetch customers
-  const fetchCustomers = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      const response = await fetch('/api/customers')
-      
+  // Fetch customers with standardized hook
+  const { data: customers = [], isLoading } = useCustomers()
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (customerId: string) => {
+      const response = await fetch(`/api/customers/${customerId}`, {
+        method: 'DELETE'
+      })
+
       if (!response.ok) {
-        throw new Error('Failed to fetch customers')
+        throw new Error('Failed to delete customer')
       }
-
-       const result = await response.json()
-       setCustomers(result.data?.customers ?? [])
-    } catch (error) {
-      logger.error({ error }, 'Failed to fetch customers')
-      toast.error('Gagal memuat data pelanggan')
-    } finally {
-      setIsLoading(false)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['customers'] })
+      toast.success('Pelanggan berhasil dihapus')
+    },
+    onError: () => {
+      toast.error('Gagal menghapus pelanggan')
     }
-   }, [])
+  })
 
-  // Load customers on mount
-  useEffect(() => {
-    void fetchCustomers()
-  }, [fetchCustomers])
+  // Bulk delete mutation
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (customerIds: string[]) => {
+      await Promise.all(
+        customerIds.map(id =>
+          fetch(`/api/customers/${id}`, { method: 'DELETE' })
+        )
+      )
+    },
+    onSuccess: (_, customerIds) => {
+      queryClient.invalidateQueries({ queryKey: ['customers'] })
+      toast.success(`${customerIds.length} pelanggan berhasil dihapus`)
+      setSelectedItems([])
+    },
+    onError: () => {
+      toast.error('Gagal menghapus pelanggan')
+    }
+  })
 
   // Filter customers
   const filteredCustomers = useMemo(() => {
@@ -90,51 +109,27 @@ export const CustomersLayout = (): JSX.Element => {
     setDeleteConfirm({ show: true, customer, bulk: false })
   }, [])
 
-  const confirmDelete = useCallback(async () => {
+  const confirmDelete = useCallback(() => {
     if (!deleteConfirm.customer) return
 
-    try {
-      const customer = deleteConfirm.customer
-      const response = await fetch(`/api/customers/${customer.id}`, {
-        method: 'DELETE'
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to delete customer')
+    deleteMutation.mutate(deleteConfirm.customer.id, {
+      onSuccess: () => {
+        setDeleteConfirm({ show: false, customer: null, bulk: false })
       }
-
-      toast.success('Pelanggan berhasil dihapus')
-
-      fetchCustomers()
-      setDeleteConfirm({ show: false, customer: null, bulk: false })
-    } catch (error) {
-      logger.error({ error }, 'Failed to delete customer')
-      toast.error('Gagal menghapus pelanggan')
-    }
-  }, [fetchCustomers, deleteConfirm.customer])
+    })
+  }, [deleteConfirm.customer, deleteMutation])
 
   const handleBulkDelete = useCallback(async () => {
     setDeleteConfirm({ show: true, customer: null, bulk: true })
   }, [])
 
-  const confirmBulkDelete = useCallback(async () => {
-    try {
-      await Promise.all(
-        selectedItems.map(id =>
-          fetch(`/api/customers/${id}`, { method: 'DELETE' })
-        )
-      )
-
-      toast.success('${selectedItems.length} pelanggan berhasil dihapus')
-
-      setSelectedItems([])
-      fetchCustomers()
-      setDeleteConfirm({ show: false, customer: null, bulk: false })
-    } catch (error) {
-      logger.error({ error }, 'Failed to delete customers')
-      toast.error('Gagal menghapus pelanggan')
-    }
-  }, [selectedItems, fetchCustomers])
+  const confirmBulkDelete = useCallback(() => {
+    bulkDeleteMutation.mutate(selectedItems, {
+      onSuccess: () => {
+        setDeleteConfirm({ show: false, customer: null, bulk: false })
+      }
+    })
+  }, [selectedItems, bulkDeleteMutation])
 
   const handleSelectItem = useCallback((itemId: string) => {
     setSelectedItems(prev =>
@@ -155,24 +150,21 @@ export const CustomersLayout = (): JSX.Element => {
   const handleDialogSuccess = useCallback(() => {
     setDialogOpen(false)
     setEditingCustomer(null)
-    fetchCustomers()
-  }, [fetchCustomers])
+    queryClient.invalidateQueries({ queryKey: ['customers'] })
+  }, [queryClient])
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Pelanggan</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Kelola data pelanggan Anda
-          </p>
-        </div>
-        <Button onClick={handleAddNew} size={isMobile ? 'default' : 'default'}>
-          <Plus className="h-4 w-4 mr-2" />
-          Tambah Pelanggan
-        </Button>
-      </div>
+      <PageHeader
+        title="Pelanggan"
+        description="Kelola data pelanggan Anda"
+        action={
+          <Button onClick={handleAddNew}>
+            <Plus className="h-4 w-4 mr-2" />
+            Tambah Pelanggan
+          </Button>
+        }
+      />
 
       {/* Stats */}
       <CustomerStats

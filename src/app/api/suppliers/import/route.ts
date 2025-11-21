@@ -5,6 +5,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
@@ -42,10 +44,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     const validation = SuppliersImportSchema.safeParse(body)
 
     if (!validation.success) {
-      return NextResponse.json(
-        { error: 'Invalid request data', details: validation.error.issues },
-        { status: 400 }
-      )
+      return createErrorResponse('Invalid request data', 400, validation.error.issues.map(i => i.message))
     }
 
     const { suppliers } = validation.data
@@ -112,7 +111,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
     if (insertError) {
       apiLogger.error({ error: insertError }, 'POST /api/suppliers/import - Database error')
-      return NextResponse.json({ error: 'Failed to import suppliers' }, { status: 500 })
+      return createErrorResponse('Failed to import suppliers', 500)
     }
 
     apiLogger.info({
@@ -120,11 +119,10 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
       count: validSuppliers.length
     }, 'POST /api/suppliers/import - Success')
 
-    return NextResponse.json({
-      success: true,
+    return createSuccessResponse({
       count: validSuppliers.length,
       data
-    })
+    }, SUCCESS_MESSAGES.SUPPLIER_IMPORTED, undefined, 201)
   } catch (error) {
     apiLogger.error({ error }, 'POST /api/suppliers/import - Unexpected error')
     return handleAPIError(error, 'POST /api/suppliers/import')

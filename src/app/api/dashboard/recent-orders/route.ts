@@ -3,6 +3,7 @@ export const runtime = 'nodejs'
 import { z } from 'zod'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { NextResponse } from 'next/server'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 
 const RecentOrdersQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(50).optional().default(5),
@@ -33,10 +34,10 @@ async function getRecentOrdersHandler(
     .limit(limit)
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to fetch recent orders' }, { status: 500 })
+    return createErrorResponse('Failed to fetch recent orders', 500)
   }
 
-  return NextResponse.json({ success: true, data })
+  return createSuccessResponse(data)
 }
 
 export const GET = createApiRoute(

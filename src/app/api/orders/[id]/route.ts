@@ -1,8 +1,8 @@
 export const runtime = 'nodejs'
 
-import { z } from 'zod'
+import { createDeleteHandler, createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
 import { createApiRoute } from '@/lib/api/route-factory'
-import { createGetHandler, createUpdateHandler, createDeleteHandler } from '@/lib/api/crud-helpers'
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { OrderUpdateSchema } from '@/lib/validations/domains/order'
 
 // GET /api/orders/[id] - Get single order with items
@@ -53,7 +53,7 @@ export const PUT = createApiRoute(
         total_price
       )
     `,
-  })
+  }, SUCCESS_MESSAGES.ORDER_UPDATED)
 )
 
 // DELETE /api/orders/[id] - Delete order
@@ -66,6 +66,6 @@ export const DELETE = createApiRoute(
     {
       table: 'orders',
     },
-    'Order deleted successfully'
+    SUCCESS_MESSAGES.ORDER_DELETED
   )
 )

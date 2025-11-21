@@ -1,3 +1,5 @@
+"use client"
+
 import { createClientLogger } from '@/lib/client-logger'
 import type { Database } from '@/types/database'
 import { createClient } from '@/utils/supabase/client'

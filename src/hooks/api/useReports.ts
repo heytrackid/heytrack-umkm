@@ -1,5 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 
+import { buildApiUrl, fetchApi } from '@/lib/query/query-helpers'
+import { queryConfig } from '@/lib/query/query-config'
+
 interface SalesReport {
   summary: {
     totalRevenue: number
@@ -67,24 +70,30 @@ interface ProfitReport {
   }>
 }
 
+interface SalesReportApiResponse {
+  data: SalesReport
+}
+
+interface InventoryReportApiResponse {
+  data: InventoryReport
+}
+
+interface ProfitReportApiResponse {
+  data: ProfitReport
+}
+
 export function useSalesReport(startDate?: string, endDate?: string) {
   return useQuery({
     queryKey: ['reports', 'sales', startDate, endDate],
     queryFn: async (): Promise<SalesReport> => {
-      const params = new URLSearchParams()
-      if (startDate) params.append('startDate', startDate)
-      if (endDate) params.append('endDate', endDate)
-
-      const response = await fetch(`/api/reports/sales?${params.toString()}`)
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to fetch sales report')
-      }
-
-      const result = await response.json()
-      return result.data
+      const url = buildApiUrl('/api/reports/sales', {
+        startDate,
+        endDate,
+      })
+      const response = await fetchApi<SalesReportApiResponse>(url)
+      return response.data
     },
+    ...queryConfig.queries.analytics,
   })
 }
 
@@ -92,16 +101,10 @@ export function useInventoryReport() {
   return useQuery({
     queryKey: ['reports', 'inventory'],
     queryFn: async (): Promise<InventoryReport> => {
-      const response = await fetch('/api/reports/inventory')
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to fetch inventory report')
-      }
-
-      const result = await response.json()
-      return result.data
+      const response = await fetchApi<InventoryReportApiResponse>('/api/reports/inventory')
+      return response.data
     },
+    ...queryConfig.queries.analytics,
   })
 }
 
@@ -109,19 +112,13 @@ export function useProfitReport(startDate?: string, endDate?: string) {
   return useQuery({
     queryKey: ['reports', 'profit', startDate, endDate],
     queryFn: async (): Promise<ProfitReport> => {
-      const params = new URLSearchParams()
-      if (startDate) params.append('startDate', startDate)
-      if (endDate) params.append('endDate', endDate)
-
-      const response = await fetch(`/api/reports/profit?${params.toString()}`)
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to fetch profit report')
-      }
-
-      const result = await response.json()
-      return result.data
+      const url = buildApiUrl('/api/reports/profit', {
+        startDate,
+        endDate,
+      })
+      const response = await fetchApi<ProfitReportApiResponse>(url)
+      return response.data
     },
+    ...queryConfig.queries.analytics,
   })
 }

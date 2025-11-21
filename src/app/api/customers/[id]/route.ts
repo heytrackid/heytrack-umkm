@@ -2,11 +2,12 @@ export const runtime = 'nodejs'
 
 import type { NextResponse } from 'next/server'
 
-import { CustomerUpdateSchema } from '@/lib/validations/domains/customer'
-import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
-import { createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
 import { createErrorResponse, createSuccessResponse } from '@/lib/api-core'
+import { createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { apiLogger } from '@/lib/logger'
+import { CustomerUpdateSchema } from '@/lib/validations/domains/customer'
 
 // GET /api/customers/[id] - Get single customer
 export const GET = createApiRoute(
@@ -32,7 +33,7 @@ export const PUT = createApiRoute(
       table: 'customers',
       selectFields: 'id, name, email, phone, address, customer_type, discount_percentage, notes, is_active, loyalty_points, updated_at',
     },
-    'Customer updated successfully'
+    SUCCESS_MESSAGES.CUSTOMER_UPDATED
   )
 )
 
@@ -74,7 +75,7 @@ async function deleteCustomerHandler(context: RouteContext): Promise<NextRespons
     return createErrorResponse('Failed to delete customer', 500)
   }
 
-  return createSuccessResponse({ id }, 'Customer deleted successfully')
+  return createSuccessResponse({ id }, SUCCESS_MESSAGES.CUSTOMER_DELETED)
 }
 
 export const DELETE = createApiRoute(

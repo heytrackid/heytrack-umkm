@@ -6,6 +6,7 @@ import { Suspense } from 'react'
 
 import { useOrderLogic } from '@/app/orders/new/hooks/useOrderLogic'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
@@ -211,9 +212,14 @@ const NewOrderPage = () => {
           </BreadcrumbList>
         </Breadcrumb>
 
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <PageHeader
+          title="Buat Pesanan Baru"
+          description="Tambahkan pesanan baru dari pelanggan"
+          breadcrumbs={[
+            { label: 'Pesanan', href: '/orders' },
+            { label: 'Pesanan Baru' }
+          ]}
+          action={
             <Button
               size="sm"
               onClick={() => router.back()}
@@ -221,18 +227,8 @@ const NewOrderPage = () => {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Kembali
             </Button>
-
-            <div>
-              <h1 className="text-3xl font-bold flex items-center gap-2">
-                <ShoppingCart className="h-8 w-8" />
-                Buat Pesanan Baru
-              </h1>
-              <p className="text-muted-foreground">
-                Tambahkan pesanan baru dari pelanggan
-              </p>
-            </div>
-          </div>
-        </div>
+          }
+        />
 
         {/* Form */}
         <form onSubmit={handleSubmit}>

@@ -43,7 +43,9 @@ export function useDashboardStats(startDate?: string, endDate?: string) {
       if (!response.ok) {
         throw new Error('Failed to fetch dashboard stats')
       }
-      return response.json()
+      const result = await response.json()
+      // Extract data from API response wrapper
+      return result.data || result
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes

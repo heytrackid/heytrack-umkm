@@ -10,6 +10,7 @@ import { typed } from '@/types/type-utilities'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 
 type TypedSupabaseClient = ReturnType<typeof typed>
 
@@ -225,10 +226,10 @@ async function getHandler(): Promise<NextResponse> {
       fetchAlerts(supabase, userId)
     ])
 
-    return NextResponse.json(buildResponse(recipes, hppCalculations, alerts))
+    return createSuccessResponse(buildResponse(recipes, hppCalculations, alerts))
   } catch (error) {
     apiLogger.error({ error }, 'Error fetching HPP dashboard summary')
-    return NextResponse.json({ error: 'Failed to fetch HPP summary' }, { status: 500 })
+    return createErrorResponse('Failed to fetch HPP summary', 500)
   }
 }
 

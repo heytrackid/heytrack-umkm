@@ -35,7 +35,6 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
-import { undoableToast } from '@/components/ui/toast'
 import { FilterBadges, createFilterBadges } from '@/components/ui/filter-badges'
 import { DeleteModal } from '@/components/ui/index'
 import { Input } from '@/components/ui/input'
@@ -47,10 +46,11 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { SimplePagination } from '@/components/ui/simple-pagination'
+import { undoableToast } from '@/components/ui/toast'
 import { useSupabaseCRUD } from '@/hooks/supabase/index'
 import { usePagination } from '@/hooks/usePagination'
-import { useRecipes } from '@/hooks/useRecipes'
 import { useRecipesCostPreviews } from '@/hooks/useRecipeCostPreview'
+import { useRecipes } from '@/hooks/useRecipes'
 import { useResponsive } from '@/hooks/useResponsive'
 import { createClientLogger } from '@/lib/client-logger'
 

@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { fetchApi } from '@/lib/query/query-helpers'
 
 import { useToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
@@ -16,17 +17,9 @@ import { getErrorMessage } from '@/lib/type-guards'
  * Fetch all production batches
  */
 export function useProductionBatches() {
-  return useQuery({
+  return useQuery<unknown[]>({
     queryKey: ['production-batches'],
-    queryFn: async () => {
-      const response = await fetch('/api/production-batches', {
-        credentials: 'include', // Include cookies for authentication
-      })
-      if (!response.ok) {
-        throw new Error('Failed to fetch production batches')
-      }
-      return response.json()
-    },
+    queryFn: () => fetchApi<unknown[]>('/api/production-batches'),
     staleTime: 2 * 60 * 1000, // 2 minutes (production data changes frequently)
     refetchOnWindowFocus: true, // Refetch on focus for production
     refetchInterval: 30 * 1000, // Auto-refetch every 30 seconds

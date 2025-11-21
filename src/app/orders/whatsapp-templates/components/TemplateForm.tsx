@@ -3,7 +3,7 @@
 import { Info, Copy, Check } from '@/components/icons'
 import { useState, useLayoutEffect, useRef, type FormEvent } from 'react'
 
-import { TEMPLATE_CATEGORIES, AVAILABLE_VARIABLES, DEFAULT_TEMPLATES, type WhatsAppTemplate, type TemplateFormData } from '@/app/orders/whatsapp-templates/components/types'
+import { TEMPLATE_CATEGORIES, AVAILABLE_VARIABLES, DEFAULT_TEMPLATES, type WhatsAppTemplate, type TemplateFormData, type TemplateVariable } from '@/app/orders/whatsapp-templates/components/types'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -15,11 +15,55 @@ import { Textarea } from '@/components/ui/textarea'
 import { uiLogger } from '@/lib/client-logger'
 
 interface TemplateFormProps {
-    showDialog: boolean
-    onOpenChange: (open: boolean) => void
-    editingTemplate: WhatsAppTemplate | null
-    onSuccess: () => void
+  showDialog: boolean
+  editingTemplate?: WhatsAppTemplate | null
+  onOpenChange: (open: boolean) => void
+  onSuccess: () => void
 }
+
+interface VariableGroupProps {
+  title: string
+  icon: string
+  variables: TemplateVariable[]
+  copiedVariable: string | null
+  onCopy: (name: string) => void
+}
+
+const VariableGroup = ({ title, icon, variables, copiedVariable, onCopy }: VariableGroupProps) => (
+  <AccordionItem value={title.toLowerCase().replace(' ', '')}>
+    <AccordionTrigger className="text-sm font-medium">
+      {icon} {title}
+    </AccordionTrigger>
+    <AccordionContent>
+      <div className="space-y-2">
+        {variables.map((variable) => (
+          <div key={variable.name} className="text-xs space-y-1 pb-2 border-b last:border-0">
+            <div className="flex items-center justify-between">
+              <code className="bg-white px-2 py-1 rounded border font-mono">
+                {`{${variable.name}}`}
+              </code>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0"
+                onClick={() => onCopy(variable.name)}
+              >
+                {copiedVariable === variable.name ? (
+                  <Check className="h-3 w-3 text-muted-foreground" />
+                ) : (
+                  <Copy className="h-3 w-3" />
+                )}
+              </Button>
+            </div>
+            <p className="text-muted-foreground">{variable.description}</p>
+            <p className="text-muted-foreground">Contoh: {variable.example}</p>
+          </div>
+        ))}
+      </div>
+    </AccordionContent>
+  </AccordionItem>
+)
 
 const TemplateForm = ({
     showDialog,
@@ -288,187 +332,53 @@ const TemplateForm = ({
                         {/* Available Variables */}
                         <div className="space-y-2">
                             <Label>Variabel yang Tersedia</Label>
-                            <div className="border rounded-lg p-3 max-h-[400px] overflow-y-auto bg-muted">
-                                <Accordion type="single" collapsible className="w-full">
-                                    <AccordionItem value="order">
-                                        <AccordionTrigger className="text-sm font-medium">
-                                            📦 Data Pesanan
-                                        </AccordionTrigger>
-                                        <AccordionContent>
-                                            <div className="space-y-2">
-                                                {AVAILABLE_VARIABLES.filter(v =>
-                                                    ['order_no', 'order_date', 'order_items', 'total_amount', 'notes'].includes(v.name)
-                                                ).map((variable) => (
-                                                    <div key={variable.name} className="text-xs space-y-1 pb-2 border-b last:border-0">
-                                                        <div className="flex items-center justify-between">
-                                                            <code className="bg-white px-2 py-1 rounded border font-mono">
-                                                                {`{${variable.name}}`}
-                                                            </code>
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="h-6 w-6 p-0"
-                                                                onClick={() => copyVariable(variable.name)}
-                                                            >
-                                                                {copiedVariable === variable.name ? (
-                                                                    <Check className="h-3 w-3 text-muted-foreground" />
-                                                                ) : (
-                                                                    <Copy className="h-3 w-3" />
-                                                                )}
-                                                            </Button>
-                                                        </div>
-                                                        <p className="text-muted-foreground">{variable.description}</p>
-                                                        <p className="text-muted-foreground">Contoh: {variable.example}</p>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </AccordionContent>
-                                    </AccordionItem>
-
-                                    <AccordionItem value="customer">
-                                        <AccordionTrigger className="text-sm font-medium">
-                                            👤 Data Pelanggan
-                                        </AccordionTrigger>
-                                        <AccordionContent>
-                                            <div className="space-y-2">
-                                                {AVAILABLE_VARIABLES.filter(v =>
-                                                    ['customer_name', 'customer_phone'].includes(v.name)
-                                                ).map((variable) => (
-                                                    <div key={variable.name} className="text-xs space-y-1 pb-2 border-b last:border-0">
-                                                        <div className="flex items-center justify-between">
-                                                            <code className="bg-white px-2 py-1 rounded border font-mono">
-                                                                {`{${variable.name}}`}
-                                                            </code>
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="h-6 w-6 p-0"
-                                                                onClick={() => copyVariable(variable.name)}
-                                                            >
-                                                                {copiedVariable === variable.name ? (
-                                                                    <Check className="h-3 w-3 text-muted-foreground" />
-                                                                ) : (
-                                                                    <Copy className="h-3 w-3" />
-                                                                )}
-                                                            </Button>
-                                                        </div>
-                                                        <p className="text-muted-foreground">{variable.description}</p>
-                                                        <p className="text-muted-foreground">Contoh: {variable.example}</p>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </AccordionContent>
-                                    </AccordionItem>
-
-                                    <AccordionItem value="delivery">
-                                        <AccordionTrigger className="text-sm font-medium">
-                                            🚚 Data Pengiriman
-                                        </AccordionTrigger>
-                                        <AccordionContent>
-                                            <div className="space-y-2">
-                                                {AVAILABLE_VARIABLES.filter(v =>
-                                                    ['delivery_date', 'delivery_address', 'delivery_status', 'estimated_time', 'driver_name', 'driver_phone'].includes(v.name)
-                                                ).map((variable) => (
-                                                    <div key={variable.name} className="text-xs space-y-1 pb-2 border-b last:border-0">
-                                                        <div className="flex items-center justify-between">
-                                                            <code className="bg-white px-2 py-1 rounded border font-mono">
-                                                                {`{${variable.name}}`}
-                                                            </code>
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="h-6 w-6 p-0"
-                                                                onClick={() => copyVariable(variable.name)}
-                                                            >
-                                                                {copiedVariable === variable.name ? (
-                                                                    <Check className="h-3 w-3 text-muted-foreground" />
-                                                                ) : (
-                                                                    <Copy className="h-3 w-3" />
-                                                                )}
-                                                            </Button>
-                                                        </div>
-                                                        <p className="text-muted-foreground">{variable.description}</p>
-                                                        <p className="text-muted-foreground">Contoh: {variable.example}</p>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </AccordionContent>
-                                    </AccordionItem>
-
-                                    <AccordionItem value="payment">
-                                        <AccordionTrigger className="text-sm font-medium">
-                                            💳 Data Pembayaran
-                                        </AccordionTrigger>
-                                        <AccordionContent>
-                                            <div className="space-y-2">
-                                                {AVAILABLE_VARIABLES.filter(v =>
-                                                    ['payment_method', 'payment_deadline', 'payment_account'].includes(v.name)
-                                                ).map((variable) => (
-                                                    <div key={variable.name} className="text-xs space-y-1 pb-2 border-b last:border-0">
-                                                        <div className="flex items-center justify-between">
-                                                            <code className="bg-white px-2 py-1 rounded border font-mono">
-                                                                {`{${variable.name}}`}
-                                                            </code>
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="h-6 w-6 p-0"
-                                                                onClick={() => copyVariable(variable.name)}
-                                                            >
-                                                                {copiedVariable === variable.name ? (
-                                                                    <Check className="h-3 w-3 text-muted-foreground" />
-                                                                ) : (
-                                                                    <Copy className="h-3 w-3" />
-                                                                )}
-                                                            </Button>
-                                                        </div>
-                                                        <p className="text-muted-foreground">{variable.description}</p>
-                                                        <p className="text-muted-foreground">Contoh: {variable.example}</p>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </AccordionContent>
-                                    </AccordionItem>
-
-                                    <AccordionItem value="business">
-                                        <AccordionTrigger className="text-sm font-medium">
-                                            🏪 Data Bisnis
-                                        </AccordionTrigger>
-                                        <AccordionContent>
-                                            <div className="space-y-2">
-                                                {AVAILABLE_VARIABLES.filter(v =>
-                                                    ['business_name', 'business_phone'].includes(v.name)
-                                                ).map((variable) => (
-                                                    <div key={variable.name} className="text-xs space-y-1 pb-2 border-b last:border-0">
-                                                        <div className="flex items-center justify-between">
-                                                            <code className="bg-white px-2 py-1 rounded border font-mono">
-                                                                {`{${variable.name}}`}
-                                                            </code>
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="h-6 w-6 p-0"
-                                                                onClick={() => copyVariable(variable.name)}
-                                                            >
-                                                                {copiedVariable === variable.name ? (
-                                                                    <Check className="h-3 w-3 text-muted-foreground" />
-                                                                ) : (
-                                                                    <Copy className="h-3 w-3" />
-                                                                )}
-                                                            </Button>
-                                                        </div>
-                                                        <p className="text-muted-foreground">{variable.description}</p>
-                                                        <p className="text-muted-foreground">Contoh: {variable.example}</p>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </AccordionContent>
-                                    </AccordionItem>
+                             <div className="border rounded-lg p-3 max-h-[400px] overflow-y-auto bg-muted">
+                                 <Accordion type="single" collapsible className="w-full">
+                                     <VariableGroup
+                                       title="Data Pesanan"
+                                       icon="📦"
+                                       variables={AVAILABLE_VARIABLES.filter(v =>
+                                         ['order_no', 'order_date', 'order_items', 'total_amount', 'notes'].includes(v.name)
+                                       )}
+                                       copiedVariable={copiedVariable}
+                                       onCopy={copyVariable}
+                                     />
+                                     <VariableGroup
+                                       title="Data Pelanggan"
+                                       icon="👤"
+                                       variables={AVAILABLE_VARIABLES.filter(v =>
+                                         ['customer_name', 'customer_phone'].includes(v.name)
+                                       )}
+                                       copiedVariable={copiedVariable}
+                                       onCopy={copyVariable}
+                                     />
+                                     <VariableGroup
+                                       title="Data Pengiriman"
+                                       icon="🚚"
+                                       variables={AVAILABLE_VARIABLES.filter(v =>
+                                         ['delivery_date', 'delivery_address', 'delivery_status', 'estimated_time', 'driver_name', 'driver_phone'].includes(v.name)
+                                       )}
+                                       copiedVariable={copiedVariable}
+                                       onCopy={copyVariable}
+                                     />
+                                     <VariableGroup
+                                       title="Data Pembayaran"
+                                       icon="💳"
+                                       variables={AVAILABLE_VARIABLES.filter(v =>
+                                         ['payment_method', 'payment_deadline', 'payment_account'].includes(v.name)
+                                       )}
+                                       copiedVariable={copiedVariable}
+                                       onCopy={copyVariable}
+                                     />
+                                     <VariableGroup
+                                       title="Data Bisnis"
+                                       icon="🏪"
+                                       variables={AVAILABLE_VARIABLES.filter(v =>
+                                         ['business_name', 'business_phone'].includes(v.name)
+                                       )}
+                                       copiedVariable={copiedVariable}
+                                       onCopy={copyVariable}
+                                     />
                                 </Accordion>
                             </div>
                         </div>
@@ -510,4 +420,4 @@ const TemplateForm = ({
     )
 }
 
-export { TemplateForm }
+export default TemplateForm

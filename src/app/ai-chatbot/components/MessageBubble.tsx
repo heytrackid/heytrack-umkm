@@ -1,16 +1,16 @@
 'use client'
 
-import { Bot, User, Copy, Check } from '@/components/icons'
-import { useState, Fragment } from 'react'
+import { Bot, Check, Copy, User } from '@/components/icons'
+import { Fragment, useState } from 'react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 import type { Message } from '@/app/ai-chatbot/types/index'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { createLogger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
 import { useTheme } from 'next-themes'
-import { createLogger } from '@/lib/logger'
 
 import { DataCard } from '@/app/ai-chatbot/components/DataCard'
 import { FeedbackWidget } from '@/app/ai-chatbot/components/FeedbackWidget'
@@ -281,7 +281,7 @@ export const MessageBubble = ({ message, onSuggestionClick, onFeedbackSubmit }: 
               ⚡ Aksi Cepat:
             </p>
             <div className="flex flex-wrap gap-2">
-              {message.quickActions.map((action) => (
+              {message.quickActions?.map((action) => (
                 <Button
                   key={`${message['id']}-action-${action.label}`}
                   variant="default"
@@ -310,7 +310,7 @@ export const MessageBubble = ({ message, onSuggestionClick, onFeedbackSubmit }: 
               💡 Coba tanyakan:
             </p>
             <div className="flex flex-wrap gap-2">
-              {message.suggestions.map((suggestion) => (
+              {message.suggestions?.map((suggestion) => (
                 <Button
                   key={`${message['id']}-${suggestion}`}
                   variant="outline"

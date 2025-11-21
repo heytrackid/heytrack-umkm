@@ -125,8 +125,6 @@ export interface OrderFilters {
   payment_status?: PaymentStatus[]
   delivery_method?: DeliveryMethod[]
   priority?: Array<'high' | 'low' | 'normal' | 'urgent'>
-  date_from?: string
-  date_to?: string
   customer_search?: string
   order_no_search?: string
   min_amount?: number

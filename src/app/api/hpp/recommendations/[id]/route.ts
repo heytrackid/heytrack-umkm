@@ -6,6 +6,7 @@ import { hppRecommendationUpdateSchema } from '@/lib/validations/domains/hpp'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 
 async function patchHandler(
   request: NextRequest,
@@ -23,10 +24,7 @@ async function patchHandler(
     const validation = hppRecommendationUpdateSchema.safeParse(body)
 
     if (!validation.success) {
-      return NextResponse.json(
-        { error: 'Invalid data', details: validation.error.issues },
-        { status: 400 }
-      )
+      return createErrorResponse('Invalid data', 400, validation.error.issues.map(i => i.message))
     }
 
     const supabase = await createClient()
@@ -49,12 +47,12 @@ async function patchHandler(
 
     if (error) {
       if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Recommendation not found' }, { status: 404 })
+        return createErrorResponse('Recommendation not found', 404)
       }
       throw error
     }
 
-    return NextResponse.json({ data })
+    return createSuccessResponse(data)
   } catch (error) {
     return handleAPIError(error, 'PATCH /api/hpp/recommendations/[id]')
   }

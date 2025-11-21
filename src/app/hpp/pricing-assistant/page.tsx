@@ -5,17 +5,18 @@ import { AlertTriangle, Calculator, CheckCircle, DollarSign, Lightbulb, Target, 
 import { useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
-import { PageHeader, SharedStatsCards } from '@/components/shared/index'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { SharedStatsCards } from '@/components/shared/index'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { toast } from 'sonner'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useRecipes } from '@/hooks/useRecipes'
 import { dbLogger } from '@/lib/logger'
+import { toast } from 'sonner'
 
 const pricingBreadcrumbs = [
   { label: 'Dashboard', href: '/' },
@@ -327,7 +328,7 @@ const PricingAssistantPage = (): JSX.Element => {
                   <Badge variant={getRiskColor(recommendation.riskAssessment.riskLevel)}>
                     {recommendation.riskAssessment.riskLevel} risk
                   </Badge>
-                  {recommendation.riskAssessment.riskFactors.length > 0 && (
+                  {recommendation.riskAssessment?.riskFactors?.length > 0 && (
                     <ul className="text-xs text-muted-foreground mt-2 space-y-1">
                       {recommendation.riskAssessment.riskFactors.map((factor, index) => (
                         <li key={index}>• {factor}</li>
@@ -348,7 +349,7 @@ const PricingAssistantPage = (): JSX.Element => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-3">
-                {recommendation.reasoning.map((reason, index) => (
+                {recommendation.reasoning?.map((reason, index) => (
                   <div key={index} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <span className="text-sm">{reason}</span>

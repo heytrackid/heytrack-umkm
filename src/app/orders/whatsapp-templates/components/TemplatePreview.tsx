@@ -181,4 +181,4 @@ const TemplatePreview = ({
     )
 }
 
-export { TemplatePreview }
+export default TemplatePreview

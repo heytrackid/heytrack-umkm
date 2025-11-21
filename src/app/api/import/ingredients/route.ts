@@ -2,9 +2,10 @@ export const runtime = 'nodejs'
 
 import { z } from 'zod'
 
-import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
-import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { createErrorResponse, createSuccessResponse } from '@/lib/api-core'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
+import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 import { typed } from '@/types/type-utilities'
 
@@ -83,7 +84,7 @@ async function importIngredientsHandler(
     total: ingredients.length,
     failed: ingredients.length - results.length,
     errors,
-  }, `Berhasil mengimpor ${results.length} bahan baku`)
+  }, SUCCESS_MESSAGES.INGREDIENT_IMPORTED)
 }
 
 export const POST = createApiRoute(

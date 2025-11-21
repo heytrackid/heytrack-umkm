@@ -17,6 +17,7 @@ export type PaginationQuery = z.infer<typeof PaginationQuerySchema>
 /**
  * Pagination Metadata
  * Standard pagination response metadata
+ * @deprecated Use PaginationMeta from @/lib/api-core/types instead
  */
 export interface PaginationMeta {
   page: number
@@ -30,38 +31,11 @@ export interface PaginationMeta {
 /**
  * Paginated Response
  * Standard structure for paginated API responses
+ * @deprecated Use PaginatedResponse from @/lib/api-core/types instead
  */
 export interface PaginatedResponse<T> {
   data: T[]
   meta: PaginationMeta
-}
-
-/**
- * Create pagination metadata
- * Helper function to generate pagination metadata
- */
-export function createPaginationMeta(
-  page: number,
-  limit: number,
-  total: number
-): PaginationMeta {
-  const totalPages = Math.max(1, Math.ceil(total / limit))
-  
-  return {
-    page,
-    limit,
-    total,
-    totalPages,
-    hasNextPage: page < totalPages,
-    hasPrevPage: page > 1,
-  }
-}
-
-/**
- * Calculate offset from page and limit
- */
-export function calculateOffset(page: number, limit: number): number {
-  return (page - 1) * limit
 }
 
 /**

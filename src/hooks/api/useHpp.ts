@@ -1,6 +1,9 @@
 import type { HppCalculationInput, HppRecommendationInput, HppRecommendationUpdate } from '@/lib/validations/domains/hpp'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
+import { buildApiUrl, deleteApi, fetchApi, patchApi, postApi } from '@/lib/query/query-helpers'
+import { queryConfig } from '@/lib/query/query-config'
+
 interface HppCalculation {
   recipeId: string
   recipeName: string
@@ -70,22 +73,23 @@ interface HppRecommendation {
   updated_at: string
 }
 
+interface HppCalculationApiResponse {
+  data: HppCalculation
+}
+
+interface HppOverviewApiResponse {
+  data: HppOverview
+}
+
+interface HppRecommendationsApiResponse {
+  data: HppRecommendation[]
+}
+
 export function useCalculateHpp() {
   return useMutation({
     mutationFn: async (input: HppCalculationInput): Promise<HppCalculation> => {
-      const response = await fetch('/api/hpp/calculate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(input),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to calculate HPP')
-      }
-
-      const result = await response.json()
-      return result.data
+      const response = await postApi<HppCalculationApiResponse>('/api/hpp/calculate', input)
+      return response.data
     },
   })
 }
@@ -94,16 +98,10 @@ export function useHppOverview() {
   return useQuery({
     queryKey: ['hpp', 'overview'],
     queryFn: async (): Promise<HppOverview> => {
-      const response = await fetch('/api/hpp/overview')
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to fetch HPP overview')
-      }
-
-      const result = await response.json()
-      return result.data
+      const response = await fetchApi<HppOverviewApiResponse>('/api/hpp/overview')
+      return response.data
     },
+    ...queryConfig.queries.moderate,
   })
 }
 
@@ -111,20 +109,11 @@ export function useHppRecommendations(recipeId?: string) {
   return useQuery({
     queryKey: ['hpp', 'recommendations', recipeId],
     queryFn: async (): Promise<HppRecommendation[]> => {
-      const url = recipeId
-        ? `/api/hpp/recommendations?recipeId=${recipeId}`
-        : '/api/hpp/recommendations'
-
-      const response = await fetch(url)
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to fetch recommendations')
-      }
-
-      const result = await response.json()
-      return result.data
+      const url = buildApiUrl('/api/hpp/recommendations', { recipeId })
+      const response = await fetchApi<HppRecommendationsApiResponse>(url)
+      return response.data
     },
+    ...queryConfig.queries.moderate,
   })
 }
 
@@ -133,18 +122,7 @@ export function useCreateHppRecommendation() {
 
   return useMutation({
     mutationFn: async (input: HppRecommendationInput): Promise<HppRecommendation> => {
-      const response = await fetch('/api/hpp/recommendations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(input),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to create recommendation')
-      }
-
-      return response.json()
+      return postApi<HppRecommendation>('/api/hpp/recommendations', input)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hpp', 'recommendations'] })
@@ -157,19 +135,8 @@ export function useUpdateHppRecommendation() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: HppRecommendationUpdate }): Promise<HppRecommendation> => {
-      const response = await fetch(`/api/hpp/recommendations/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to update recommendation')
-      }
-
-      const result = await response.json()
-      return result.data
+      const response = await patchApi<{ data: HppRecommendation }>(`/api/hpp/recommendations/${id}`, data)
+      return response.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hpp', 'recommendations'] })
@@ -182,14 +149,7 @@ export function useDeleteHppRecommendation() {
 
   return useMutation({
     mutationFn: async (id: string): Promise<void> => {
-      const response = await fetch(`/api/hpp/recommendations/${id}`, {
-        method: 'DELETE',
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to delete recommendation')
-      }
+      await deleteApi(`/api/hpp/recommendations/${id}`)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hpp', 'recommendations'] })

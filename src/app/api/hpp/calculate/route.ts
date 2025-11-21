@@ -5,6 +5,7 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { cacheInvalidation } from '@/lib/cache'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
@@ -31,10 +32,9 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     const { recipeId } = body
 
     if (!recipeId) {
-      return NextResponse.json(
-        { error: 'Recipe ID is required' },
-        { status: 400 }
-      )
+      return createErrorResponse({
+        error: 'Recipe ID is required'
+      }, 400)
     }
 
     // Get recipe with ingredients
@@ -102,8 +102,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
       costPerUnit
     }, 'HPP calculated successfully')
 
-    return NextResponse.json({
-      success: true,
+    return createSuccessResponse({
       calculation: {
         recipe_id: recipeId,
         material_cost: materialCost,
@@ -113,7 +112,8 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
         total_hpp: totalHpp,
         cost_per_unit: costPerUnit,
         ingredients_count: calculation.material_breakdown.length
-      }
+      },
+      message: 'HPP calculated successfully'
     })
   } catch (error) {
     return handleAPIError(error, 'POST /api/hpp/calculate')
@@ -174,11 +174,11 @@ async function putHandler(request: NextRequest): Promise<NextResponse> {
       }
     })
 
-    return NextResponse.json({
-      success: true,
+    return createSuccessResponse({
       total: recipes?.length || 0,
       successCount,
-      errorCount
+      errorCount,
+      message: `HPP calculated for ${successCount} recipes (${errorCount} errors)`
     })
   } catch (error) {
     return handleAPIError(error, 'PUT /api/hpp/calculate')

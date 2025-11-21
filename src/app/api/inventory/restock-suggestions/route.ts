@@ -9,6 +9,7 @@ import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 
 
 interface RestockSuggestion {
@@ -46,8 +47,8 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
       criticalCount: suggestions.filter((s: RestockSuggestion) => s.urgency === 'CRITICAL').length
     }, 'Restock suggestions fetched')
 
-    return NextResponse.json({
-      data: suggestions,
+    return createSuccessResponse({
+      suggestions,
       summary: {
         total: suggestions.length,
         critical: suggestions.filter((s: RestockSuggestion) => s.urgency === 'CRITICAL').length,
@@ -62,7 +63,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     })
   } catch (error) {
     logError(apiLogger, error, 'Failed to get restock suggestions')
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return createErrorResponse('Internal server error', 500)
   }
 }
 

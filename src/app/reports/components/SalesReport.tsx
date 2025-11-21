@@ -7,7 +7,7 @@ import { CheckCircle, Clock, DollarSign, ShoppingCart } from '@/components/icons
 import { useEffect, useState } from 'react'
 
 interface SalesReportProps {
-  dateRange: {
+  dateRange?: {
     start: string | undefined
     end: string | undefined
   }
@@ -25,7 +25,7 @@ interface OrderSummary {
   status?: string | null
 }
 
-export const SalesReport = ({ dateRange }: SalesReportProps) => {
+export const SalesReport = ({ dateRange }: SalesReportProps = {}) => {
   const [salesStats, setSalesStats] = useState<SalesStats>({
     totalOrders: 0,
     totalRevenue: 0,
@@ -41,18 +41,10 @@ export const SalesReport = ({ dateRange }: SalesReportProps) => {
   useEffect(() => {
     const fetchSalesData = async () => {
       setIsLoading(true)
-      if (!dateRange.start || !dateRange.end) {
-        setSalesStats({ totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 })
-        setPreviousStats({ totalOrders: 0, totalRevenue: 0 })
-        setIsLoading(false)
-        return
-      }
 
       try {
-        const buildParams = (start: string, end: string) => {
+        const buildParams = () => {
           const params = new URLSearchParams()
-          params.set('from', start)
-          params.set('to', end)
           params.set('limit', '500')
           params.set('page', '1')
           params.set('sort_order', 'desc')
@@ -78,7 +70,7 @@ export const SalesReport = ({ dateRange }: SalesReportProps) => {
           return Number.isFinite(parsed) ? parsed : 0
         }
 
-        const response = await fetch(`/api/orders?${buildParams(dateRange.start, dateRange.end).toString()}`)
+        const response = await fetch(`/api/orders?${buildParams().toString()}`)
 
         if (!response.ok) {
           throw new Error('Failed to fetch sales data')
@@ -102,35 +94,8 @@ export const SalesReport = ({ dateRange }: SalesReportProps) => {
         )
 
         setSalesStats(currentTotals)
-
-        // Fetch previous period for growth calculation
-        const startDate = new Date(dateRange.start)
-        const endDate = new Date(dateRange.end)
-        const periodLength = endDate.getTime() - startDate.getTime()
-
-        const previousEnd = new Date(startDate.getTime() - 1)
-        const previousStart = new Date(previousEnd.getTime() - periodLength)
-
-        const prevResponse = await fetch(
-          `/api/orders?${buildParams(
-            previousStart.toISOString().split('T')[0],
-            previousEnd.toISOString().split('T')[0]
-          ).toString()}`
-        )
-        if (prevResponse.ok) {
-          const previousOrders = parseOrders(await prevResponse.json())
-          const previousTotals = previousOrders.reduce(
-            (acc, order) => {
-              acc.totalOrders += 1
-              acc.totalRevenue += toNumber(order.total_amount)
-              return acc
-            },
-            { totalOrders: 0, totalRevenue: 0 }
-          )
-          setPreviousStats(previousTotals)
-        } else {
-          setPreviousStats({ totalOrders: 0, totalRevenue: 0 })
-        }
+        // Since date filtering is removed, no previous period comparison
+        setPreviousStats({ totalOrders: 0, totalRevenue: 0 })
       } catch (error) {
         uiLogger.error({ error }, 'Failed to fetch sales data')
         setSalesStats({ totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 })
@@ -141,7 +106,7 @@ export const SalesReport = ({ dateRange }: SalesReportProps) => {
     }
 
     void fetchSalesData()
-  }, [dateRange.start, dateRange.end])
+  }, [])
 
   const revenueGrowth = previousStats.totalRevenue > 0
     ? Math.round(((salesStats.totalRevenue - previousStats.totalRevenue) / previousStats.totalRevenue) * 100)

@@ -24,7 +24,7 @@ export const RECIPE_FIELDS = {
       id,
       quantity,
       unit,
-      ingredient:ingredients (
+      ingredients (
         id,
         name,
         unit,

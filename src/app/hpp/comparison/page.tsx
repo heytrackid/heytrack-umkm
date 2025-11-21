@@ -4,7 +4,8 @@ import { BarChart3, Package, Target, TrendingDown, TrendingUp, Users } from '@/c
 import { useEffect, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
-import { PageHeader, SharedStatsCards } from '@/components/shared/index'
+import { SharedStatsCards } from '@/components/shared/index'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

@@ -9,6 +9,7 @@ import {
 import { apiLogger } from '@/lib/logger'
 import { isRecipeCostRecord } from '@/types/recipes/cost'
 import type { RecipeCostImpact, RecipeCostImpactChange, RecipeCostRecord } from '@/types/recipes/cost'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 
 /**
  * GET /api/recipes/[id]/cost-impact
@@ -23,7 +24,7 @@ export const GET = createApiRoute(
   async ({ supabase, params }) => {
     const recipeId = params?.['id']
     if (!recipeId) {
-      return NextResponse.json({ error: 'Recipe ID required' }, { status: 400 })
+      return createErrorResponse('Recipe ID required', 400)
     }
 
     try {
@@ -52,7 +53,7 @@ export const GET = createApiRoute(
       const recipe = data as RecipeCostRecord | null
 
       if (recipeError || !recipe || !isRecipeCostRecord(recipe)) {
-        return NextResponse.json({ error: 'Recipe not found' }, { status: 404 })
+        return createErrorResponse('Recipe not found', 404)
       }
 
       const contributions = extractIngredientContributions(recipe)
@@ -128,13 +129,10 @@ export const GET = createApiRoute(
         changes
       }
 
-      return NextResponse.json(result)
+      return createSuccessResponse(result)
     } catch (error) {
       apiLogger.error({ error }, 'Error fetching recipe cost impact')
-      return NextResponse.json(
-        { error: 'Internal server error' },
-        { status: 500 }
-      )
+      return createErrorResponse('Internal server error', 500)
     }
   }
 )

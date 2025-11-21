@@ -10,7 +10,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { useRecipes } from '@/hooks/api/use-recipes'
+import { useRecipes } from '@/hooks/useRecipes'
 import { Plus, Trash2 } from '@/components/icons'
 import { useState } from 'react'
 

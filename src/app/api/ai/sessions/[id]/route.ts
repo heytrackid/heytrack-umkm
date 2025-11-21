@@ -15,6 +15,7 @@ import { typed } from '@/types/type-utilities'
 import { createSecureRouteHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 
 interface RouteContext {
   params: Promise<Record<string, string>>
@@ -33,7 +34,7 @@ async function getHandler(_request: NextRequest, context: RouteContext): Promise
 
     const { id } = await context.params
     if (!id) {
-      return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+      return createErrorResponse('ID is required', 400)
     }
     const sessionId = id
 
@@ -48,7 +49,7 @@ async function getHandler(_request: NextRequest, context: RouteContext): Promise
       'Session loaded'
     )
 
-    return NextResponse.json({ session, messages })
+    return createSuccessResponse({ session, messages })
   } catch (error) {
     return handleAPIError(error)
   }
@@ -67,7 +68,7 @@ async function deleteHandler(_request: NextRequest, context: RouteContext): Prom
 
     const { id } = await context.params
     if (!id) {
-      return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+      return createErrorResponse('ID is required', 400)
     }
     const sessionId = id
 
@@ -75,7 +76,7 @@ async function deleteHandler(_request: NextRequest, context: RouteContext): Prom
     await ChatSessionService.deleteSession(typed(supabase), sessionId, user.id)
 
     apiLogger.info({ userId: user.id, sessionId }, 'Session deleted')
-    return NextResponse.json({ success: true })
+    return createSuccessResponse(null, 'Session deleted successfully')
   } catch (error) {
     return handleAPIError(error)
   }

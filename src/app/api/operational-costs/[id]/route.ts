@@ -10,6 +10,8 @@ import { OperationalCostUpdateSchema } from '@/lib/validations/domains/finance'
 import type { Update } from '@/types/database'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { createClient } from '@/utils/supabase/server'
 
 // GET /api/operational-costs/[id] - Get single operational cost
@@ -43,13 +45,13 @@ async function getHandler(
 
     if (error) {
       if (error['code'] === 'PGRST116') {
-        return NextResponse.json({ error: 'Operational cost not found' }, { status: 404 })
+        return createErrorResponse('Operational cost not found', 404)
       }
       apiLogger.error({ error }, 'Error fetching operational cost')
-      return NextResponse.json({ error: 'Failed to fetch operational cost' }, { status: 500 })
+      return createErrorResponse('Failed to fetch operational cost', 500)
     }
 
-    return NextResponse.json(data)
+    return createSuccessResponse(data)
   } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/operational-costs/[id]')
     return NextResponse.json(
@@ -69,7 +71,7 @@ async function putHandler(
     
     // Validate UUID format
     if (!isValidUUID(id)) {
-      return NextResponse.json({ error: 'Invalid operational cost ID format' }, { status: 400 })
+      return createErrorResponse('Invalid operational cost ID format', 400)
     }
     
     // Authenticate with Stack Auth
@@ -121,13 +123,13 @@ async function putHandler(
 
     if (error) {
       if (error['code'] === 'PGRST116') {
-        return NextResponse.json({ error: 'Operational cost not found' }, { status: 404 })
+        return createErrorResponse('Operational cost not found', 404)
       }
       apiLogger.error({ error }, 'Error updating operational cost')
-      return NextResponse.json({ error: 'Failed to update operational cost' }, { status: 500 })
+      return createErrorResponse('Failed to update operational cost', 500)
     }
 
-    return NextResponse.json(data)
+    return createSuccessResponse(data, SUCCESS_MESSAGES.OPERATIONAL_COST_UPDATED)
   } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in PUT /api/operational-costs/[id]')
     return NextResponse.json(
@@ -147,7 +149,7 @@ async function deleteHandler(
     
     // Validate UUID format
     if (!isValidUUID(id)) {
-      return NextResponse.json({ error: 'Invalid operational cost ID format' }, { status: 400 })
+      return createErrorResponse('Invalid operational cost ID format', 400)
     }
     
     // Authenticate with Stack Auth
@@ -167,13 +169,13 @@ async function deleteHandler(
 
     if (error) {
       if (error['code'] === 'PGRST116') {
-        return NextResponse.json({ error: 'Operational cost not found' }, { status: 404 })
+        return createErrorResponse('Operational cost not found', 404)
       }
       apiLogger.error({ error }, 'Error deleting operational cost')
-      return NextResponse.json({ error: 'Failed to delete operational cost' }, { status: 500 })
+      return createErrorResponse('Failed to delete operational cost', 500)
     }
 
-    return NextResponse.json({ message: 'Operational cost deleted successfully' })
+    return createSuccessResponse(null, SUCCESS_MESSAGES.OPERATIONAL_COST_DELETED)
   } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in DELETE /api/operational-costs/[id]')
     return NextResponse.json(

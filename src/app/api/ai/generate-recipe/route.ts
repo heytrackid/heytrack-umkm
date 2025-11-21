@@ -8,6 +8,7 @@ import { validateRequestOrRespond } from '@/lib/validations/validate-request'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 
 import { MAX_RETRIES } from './constants'
 import { callAIServiceWithRetry } from './services/ai-service'
@@ -71,8 +72,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     finalRecipe = await handleDuplicateRecipeName(supabase, finalRecipe, userId)
     const hppCalculation = await calculateRecipeHPP(finalRecipe, typedIngredients, userId)
 
-    return NextResponse.json({
-      success: true,
+    return createSuccessResponse({
       recipe: {
         ...finalRecipe,
         hpp: {
@@ -84,11 +84,11 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
           estimatedMargin: hppCalculation.estimatedMargin,
         }
       }
-    })
+    }, 'Recipe generated successfully')
   } catch (error) {
     apiLogger.error({ error }, 'Error generating recipe')
     const errorMessage = error instanceof Error ? error.message : 'Failed to generate recipe'
-    return NextResponse.json({ error: errorMessage }, { status: 500 })
+    return createErrorResponse(errorMessage, 500)
   }
 }
 

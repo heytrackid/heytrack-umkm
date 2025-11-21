@@ -1,10 +1,10 @@
 import type { NextResponse } from 'next/server'
 import { z } from 'zod'
 
-import type { RouteContext } from './route-factory'
-import { PaginationSchema, calculateOffset, createPaginationMeta, createSuccessResponse, createErrorResponse, handleAPIError } from '@/lib/api-core'
+import { PaginationSchema, calculateOffset, createErrorResponse, createPaginationMeta, createSuccessResponse, handleAPIError } from '@/lib/api-core'
 import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase'
+import type { RouteContext } from './route-factory'
 
 type TableName = keyof Database['public']['Tables']
 
@@ -78,10 +78,7 @@ export function createListHandler<TTable extends TableName>(config: CrudConfig<T
 
       const pagination = createPaginationMeta(count ?? 0, page, limit)
 
-      const response = createSuccessResponse({
-        [table]: data,
-        pagination,
-      })
+      const response = createSuccessResponse(data, undefined, pagination)
 
       // Add cache headers
       response.headers.set('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=300')
@@ -132,7 +129,7 @@ export function createCreateHandler<TTable extends TableName, TInsert = unknown>
         return createErrorResponse(apiError.message, apiError['statusCode'])
       }
 
-      return createSuccessResponse(data, successMessage)
+      return createSuccessResponse(data, successMessage, undefined, 201)
     } catch (error) {
       apiLogger.error({ error, table }, 'Unhandled error in create handler')
       const apiError = handleAPIError(error)

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSettings } from '@/contexts/settings-context'
 
-import type { GeneratedRecipe, AvailableIngredient } from '@/app/recipes/ai-generator/components/types'
+import type { AvailableIngredient, GeneratedRecipe } from '@/app/recipes/ai-generator/components/types'
 
 // Generated Recipe Display Component - Lazy Loaded
 // Displays the complete AI-generated recipe with all sections
@@ -172,7 +172,7 @@ const GeneratedRecipeDisplay = ({
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 gap-3">
-              {recipe.tips.map((tip, index) => (
+              {recipe.tips?.map((tip, index) => (
                 <div key={index} className="flex gap-3 p-3 bg-blue-50/30 dark:bg-blue-950/20 rounded-lg border border-blue-100 dark:border-blue-900/50">
                   <span className="text-primary flex-shrink-0">💡</span>
                   <span className="text-sm">{tip}</span>

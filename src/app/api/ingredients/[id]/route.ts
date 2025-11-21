@@ -1,10 +1,11 @@
 export const runtime = 'nodejs'
 
+import { createErrorResponse, createSuccessResponse, handleAPIError } from '@/lib/api-core'
+import { createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
+import { createApiRoute } from '@/lib/api/route-factory'
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
 import { IngredientUpdateSchema } from '@/lib/validations/domains/ingredient'
-import { createApiRoute } from '@/lib/api/route-factory'
-import { createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
-import { createErrorResponse, createSuccessResponse, handleAPIError } from '@/lib/api-core'
 
 // GET /api/ingredients/[id] - Get single ingredient
 export const GET = createApiRoute(
@@ -30,7 +31,7 @@ export const PUT = createApiRoute(
       table: 'ingredients',
       selectFields: INGREDIENT_FIELDS.LIST,
     },
-    'Bahan baku berhasil diperbarui'
+    SUCCESS_MESSAGES.INGREDIENT_UPDATED
   )
 )
 
@@ -58,7 +59,7 @@ export const DELETE = createApiRoute(
       // Check for Foreign Key Violation
       if (error.code === '23503') {
         return createErrorResponse(
-          'Bahan baku tidak dapat dihapus karena sedang digunakan (misalnya dalam resep, pembelian, atau riwayat stok).',
+          'Cannot delete ingredient because it is currently in use (e.g., in recipes, purchases, or stock history).',
           409 // Conflict
         )
       }
@@ -67,7 +68,7 @@ export const DELETE = createApiRoute(
       return createErrorResponse(apiError.message, apiError['statusCode'])
     }
 
-    return createSuccessResponse({ id }, 'Bahan baku berhasil dihapus')
+    return createSuccessResponse({ id }, SUCCESS_MESSAGES.INGREDIENT_DELETED)
   }
 )
 

@@ -1,60 +1,13 @@
-// Types and constants for Profit Report
+import type { ProfitData as ProfitReportResponse } from '@/types/features/profit-report'
 
 export interface ProfitReportProps {
-    dateRange: {
+    dateRange?: {
         start: string | undefined
         end: string | undefined
     }
 }
 
-export interface ProfitData {
-    summary: {
-        period: {
-            start: string
-            end: string
-            type?: string
-        }
-        total_revenue: number
-        total_cogs: number
-        gross_profit: number
-        gross_profit_margin: number
-        total_operating_expenses: number
-        net_profit: number
-        net_profit_margin: number
-        orders_count: number
-    }
-    profit_by_period: Array<{
-        period: string
-        revenue: number
-        cogs: number
-        gross_profit: number
-        gross_margin: number
-        orders_count: number
-    }>
-    product_profitability?: Array<{
-        product_name: string
-        total_revenue: number
-        total_cogs: number
-        gross_profit: number
-        gross_margin: number
-        total_quantity: number
-    }>
-    top_profitable_products: Array<{
-        product_name: string
-        gross_profit: number
-        gross_margin: number
-    }>
-    least_profitable_products: Array<{
-        product_name: string
-        gross_profit: number
-        gross_margin: number
-    }>
-    operating_expenses_breakdown: Array<{
-        category: string
-        total: number
-        percentage: number
-    }>
-}
+export type ProfitData = ProfitReportResponse
 
 // Chart data types
 export interface ChartDataPoint {

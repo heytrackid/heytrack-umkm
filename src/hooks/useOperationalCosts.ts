@@ -2,11 +2,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
+import { getErrorMessage } from '@/lib/type-guards'
+import { fetchApi, buildApiUrl } from '@/lib/query/query-helpers'
+import { cachePresets } from '@/lib/query/query-config'
+import type { Row, Insert, Update } from '@/types/database'
 
 const logger = createClientLogger('OperationalCosts')
-import { getErrorMessage } from '@/lib/type-guards'
-
-import type { Row, Insert, Update } from '@/types/database'
 
 /**
  * React Query hooks for Operational Costs
@@ -25,28 +26,15 @@ interface UseOperationalCostsOptions {
 
 /**
  * Fetch all operational costs with caching
+ * ✅ Refactored to use fetchApi helper for consistency
  */
 export function useOperationalCosts(options?: UseOperationalCostsOptions) {
   return useQuery({
     queryKey: ['operational_costs', options],
-    queryFn: async ({ signal }) => {
-      const params = new URLSearchParams()
-      if (options?.limit) {params.set('limit', options.limit.toString())}
-      if (options?.offset) {params.set('offset', options.offset.toString())}
-      if (options?.search) {params.set('search', options.search)}
-
-      const response = await fetch(`/api/operational-costs?${params}`, {
-        credentials: 'include', // Include cookies for authentication
-        signal, // React Query provides signal automatically
-      })
-      if (!response.ok) {
-        throw new Error('Gagal mengambil data biaya operasional')
-      }
-      const result = await response.json() as { success: boolean; data: { operational_costs: OperationalCost[]; pagination: unknown } }
-      if (!result.success) {
-        throw new Error('Gagal mengambil data biaya operasional')
-      }
-      return result.data.operational_costs ?? []
+    queryFn: async () => {
+      const url = buildApiUrl('/operational-costs', options as Record<string, string | number | boolean | null | undefined>)
+      const result = await fetchApi<{ operational_costs: OperationalCost[]; pagination: unknown }>(url)
+      return result.operational_costs ?? []
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000,

@@ -4,7 +4,7 @@ import { DollarSign, Package, RefreshCw, TrendingUp } from '@/components/icons'
 import { useEffect as _useEffect, useRef, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
-import { PageHeader } from '@/components/shared/index'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'

@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState } from 'react';
 
 import type { ConversationTemplate } from '@/app/ai-chatbot/types/index';
-import { CONVERSATION_TEMPLATES } from '@/app/ai-chatbot/types/index'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { ChevronDown, ChevronUp, Play } from '@/components/icons'
+import { CONVERSATION_TEMPLATES } from '@/app/ai-chatbot/types/index';
+import { ChevronDown, ChevronUp, Play } from '@/components/icons';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface ConversationTemplatesProps {
   onTemplateSelect: (template: ConversationTemplate) => void
@@ -111,7 +111,7 @@ export const ConversationTemplates = ({
                 <div className="mt-3 pt-3 border-t border-border/50 space-y-2">
                   <p className="text-xs text-muted-foreground font-medium">Alur percakapan:</p>
                   <div className="space-y-1">
-                    {template.messages.map((message, index) => (
+                    {template.messages?.map((message, index) => (
                       <div
                         key={index}
                         className="text-xs bg-muted/50 rounded px-2 py-1 text-muted-foreground"
@@ -121,7 +121,7 @@ export const ConversationTemplates = ({
                     ))}
                   </div>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {template.tags.map((tag) => (
+                    {template.tags?.map((tag) => (
                       <Badge
                         key={tag}
                         variant="outline"

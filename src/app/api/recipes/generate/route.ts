@@ -1,6 +1,7 @@
 export const runtime = 'nodejs'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { NextRequest, NextResponse } from 'next/server'
@@ -24,10 +25,10 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     const validation = generateRecipeSchema.safeParse(body)
 
     if (!validation.success) {
-      return NextResponse.json(
-        { error: 'Invalid input', details: validation.error.issues },
-        { status: 400 }
-      )
+      return createErrorResponse({
+        error: 'Invalid input',
+        details: validation.error.issues
+      }, 400)
     }
 
     const { prompt, servings = 4, cuisine, dietary } = validation.data
@@ -35,13 +36,10 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     // Check if OpenRouter API key is configured
     const apiKey = process.env['OPENROUTER_API_KEY']
     if (!apiKey) {
-      return NextResponse.json(
-        {
-          error: 'AI Recipe Generator belum dikonfigurasi',
-          message: 'Silakan tambahkan OPENROUTER_API_KEY di environment variables',
-        },
-        { status: 503 }
-      )
+      return createErrorResponse({
+        error: 'AI Recipe Generator belum dikonfigurasi',
+        message: 'Silakan tambahkan OPENROUTER_API_KEY di environment variables'
+      }, 503)
     }
 
     // Build the AI prompt
@@ -123,17 +121,17 @@ Please provide the recipe in the following JSON format:
       recipe = JSON.parse(jsonString)
     } catch {
       // If parsing fails, return raw response
-      return NextResponse.json({
+      return createErrorResponse({
         error: 'Failed to parse AI response',
-        raw_response: aiResponse,
         message: 'AI generated a response but it could not be parsed. Please try again.',
-      }, { status: 500 })
+        details: { raw_response: aiResponse }
+      }, 500)
     }
 
-    return NextResponse.json({
-      success: true,
+    return createSuccessResponse({
       recipe,
       usage: data.usage,
+      message: 'Recipe generated successfully'
     })
   } catch (error) {
     return handleAPIError(error, 'POST /api/recipes/generate')

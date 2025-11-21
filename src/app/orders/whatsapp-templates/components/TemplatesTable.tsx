@@ -197,4 +197,4 @@ const TemplatesTable = ({
     )
 }
 
-export { TemplatesTable }
+export default TemplatesTable

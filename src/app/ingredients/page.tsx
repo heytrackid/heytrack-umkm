@@ -17,7 +17,8 @@ import { ListSkeleton, StatsSkeleton, TableSkeleton } from '@/components/ui/skel
 import { useIngredients } from '@/hooks/useIngredients'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useCostChangeAlerts } from '@/hooks/useCostAlerts'
-import { useQuery } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import { useIngredientPurchases } from '@/hooks/useIngredientPurchases'
 import { useSettings } from '@/contexts/settings-context'
 import { errorToast } from '@/components/ui/toast'
 import type { Row } from '@/types/database'
@@ -26,21 +27,12 @@ const IngredientsPage = () => {
   const { data: ingredients, isLoading: loading, error } = useIngredients();
   const { formatCurrency } = useSettings();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { hasSignificantChanges } = useCostChangeAlerts();
   const isMobile = useIsMobile();
 
   // Fetch recent purchases
-  const { data: purchases } = useQuery({
-    queryKey: ['purchases', 'recent'],
-    queryFn: async () => {
-      const response = await fetch('/api/ingredient-purchases?page=1', {
-        credentials: 'include'
-      })
-      if (!response.ok) return []
-      const result = await response.json()
-      return result.data || []
-    }
-  })
+  const { data: purchases } = useIngredientPurchases({ limit: 10 })
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
 
@@ -264,8 +256,8 @@ const IngredientsPage = () => {
                 }
               }
 
-              // Refresh data
-              router.refresh()
+               // Refresh data
+               queryClient.invalidateQueries({ queryKey: ['ingredients'] })
 
               return {
                 success: true,
@@ -282,10 +274,10 @@ const IngredientsPage = () => {
 
         {/* Add/Edit Dialog */}
         <IngredientFormDialog
-          open={showAddDialog}
-          onOpenChange={setShowAddDialog}
-          onSuccess={() => router.refresh()}
-        />
+           open={showAddDialog}
+           onOpenChange={setShowAddDialog}
+           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['ingredients'] })}
+         />
       </div>
     </AppLayout>
   );

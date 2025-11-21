@@ -3,6 +3,8 @@
  * Centralized exports for all code-split components
  */
 
+import { createClientLogger } from '@/lib/client-logger'
+
 
 
 // Chart Lazy Loading
@@ -160,8 +162,9 @@ export const LazyLoadingMetrics = {
     LazyLoadingMetrics.loadingTimes.set(componentName, loadTime)
 
     if (loadTime > 1000 && typeof window !== 'undefined') {
-      // eslint-disable-next-line no-console
-      console.warn(`Slow component load: ${componentName} (${loadTime.toFixed(2)}ms)`)
+      // Use client logger instead of console
+      const logger = createClientLogger('LazyLoading')
+      logger.warn({ componentName, loadTime: loadTime.toFixed(2) }, 'Slow component load')
     }
   },
 
@@ -171,12 +174,13 @@ export const LazyLoadingMetrics = {
     LazyLoadingMetrics.failedComponents.set(componentName, currentFailures + 1)
 
     if (typeof window !== 'undefined') {
-      // eslint-disable-next-line no-console
-      console.error('Component load failure:', {
+      // Use client logger instead of console
+      const logger = createClientLogger('LazyLoading')
+      logger.error({
         componentName,
         failureCount: currentFailures + 1,
         error: error instanceof Error ? error.message : String(error)
-      })
+      }, 'Component load failure')
     }
   },
 

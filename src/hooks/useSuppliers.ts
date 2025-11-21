@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage } from '@/lib/type-guards'
+import { fetchApi, buildApiUrl } from '@/lib/query/query-helpers'
+import { cachePresets } from '@/lib/query/query-config'
 import type { Insert, Update } from '@/types/database'
 
 /**
@@ -20,31 +22,13 @@ interface UseSuppliersOptions {
 
 /**
  * Fetch all suppliers with caching
+ * ✅ Refactored to use fetchApi helper for consistency
  */
 export function useSuppliers(options?: UseSuppliersOptions) {
   return useQuery({
     queryKey: ['suppliers', options],
-    queryFn: async () => {
-      const params = new URLSearchParams()
-      if (options?.limit) params.set('limit', options.limit.toString())
-      if (options?.offset) params.set('offset', options.offset.toString())
-      if (options?.search) params.set('search', options.search)
-
-      const response = await fetch(`/api/suppliers?${params}`, {
-        credentials: 'include', // Include cookies for authentication
-      })
-      if (!response.ok) {
-        throw new Error('Failed to fetch suppliers')
-      }
-      const result = await response.json()
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to fetch suppliers')
-      }
-      return result.data ?? []
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    queryFn: () => fetchApi<unknown[]>(buildApiUrl('/suppliers', options as Record<string, string | number | boolean | null | undefined>)),
+    ...cachePresets.moderatelyUpdated,
   })
 }
 
@@ -54,21 +38,7 @@ export function useSuppliers(options?: UseSuppliersOptions) {
 export function useSupplier(id: string | null) {
   return useQuery({
     queryKey: ['supplier', id],
-    queryFn: async () => {
-      if (!id) return null
-
-      const response = await fetch(`/api/suppliers/${id}`, {
-        credentials: 'include', // Include cookies for authentication
-      })
-      if (!response.ok) {
-        throw new Error('Failed to fetch supplier')
-      }
-      const result = await response.json()
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to fetch supplier')
-      }
-      return result.data ?? null
-    },
+    queryFn: () => fetchApi(`/api/suppliers/${id}`),
     enabled: Boolean(id),
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,

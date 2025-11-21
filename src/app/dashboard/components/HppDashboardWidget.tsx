@@ -8,9 +8,9 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { GridSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
-import { toast } from 'sonner'
 import { useCurrency } from '@/hooks/useCurrency'
 import { uiLogger } from '@/lib/logger'
+import { toast } from 'sonner'
 
 // Using uiLogger for client-side logging
 const logger = uiLogger 
@@ -142,32 +142,34 @@ const HppDashboardWidget = (): JSX.Element | null => {
         </div>
 
         {/* Top Recipes */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="font-semibold">Top Recipes by Margin</h4>
-            <Button variant="ghost" size="sm" onClick={() => router.push('/hpp/calculator')}>
-              View All
-            </Button>
-          </div>
-          <div className="space-y-2">
-            {data.topRecipes.map((recipe) => (
-              <div key={recipe['id']} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                <div>
-                  <div className="font-medium">{recipe.name}</div>
-                  <div className="text-sm text-muted-foreground">
-                    HPP: {formatCurrency(recipe.hpp_value)}
+        {data.topRecipes && data.topRecipes.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="font-semibold">Top Recipes by Margin</h4>
+              <Button variant="ghost" size="sm" onClick={() => router.push('/hpp/calculator')}>
+                View All
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {data.topRecipes?.map((recipe) => (
+                <div key={recipe['id']} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                  <div>
+                    <div className="font-medium">{recipe.name}</div>
+                    <div className="text-sm text-muted-foreground">
+                      HPP: {formatCurrency(recipe.hpp_value)}
+                    </div>
                   </div>
+                  <Badge variant="secondary">
+                    {recipe.margin_percentage}% margin
+                  </Badge>
                 </div>
-                <Badge variant="secondary">
-                  {recipe.margin_percentage}% margin
-                </Badge>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Recent Changes */}
-        {data.recentChanges.length > 0 && (
+        {data.recentChanges && data.recentChanges.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-3">
               <h4 className="font-semibold">Recent HPP Changes</h4>
@@ -176,7 +178,7 @@ const HppDashboardWidget = (): JSX.Element | null => {
               </Button>
             </div>
             <div className="space-y-2">
-              {data.recentChanges.map((change, index) => (
+              {data.recentChanges?.map((change, index) => (
                 <div key={index} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                   <div>
                     <div className="font-medium">{change['recipe_name']}</div>

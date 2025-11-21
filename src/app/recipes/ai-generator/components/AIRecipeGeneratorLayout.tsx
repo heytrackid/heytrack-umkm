@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -415,21 +416,19 @@ const AIRecipeGeneratorPage = () => {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 p-4 space-y-6">
           {/* Header */}
-          <div className="text-center space-y-4">
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <PageHeader
+            title={
+              <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                AI Resep UMKM
+              </span>
+            }
+            description="✨ Buat resep kuliner UMKM profesional dengan AI dalam hitungan detik"
+            icon={
               <div className="h-16 w-16 rounded-3xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
                 <ChefHat className="h-8 w-8 text-white" />
               </div>
-              <div className="text-center sm:text-left">
-                <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                  AI Resep UMKM
-                </h1>
-                <p className="text-muted-foreground text-base sm:text-lg">
-                  ✨ Buat resep kuliner UMKM profesional dengan AI dalam hitungan detik
-                </p>
-              </div>
-            </div>
-          </div>
+            }
+          />
 
           {/* Status Bar */}
           <div className="flex flex-col sm:flex-row items-center justify-between bg-card/50 rounded-xl p-4 border shadow-sm gap-2">

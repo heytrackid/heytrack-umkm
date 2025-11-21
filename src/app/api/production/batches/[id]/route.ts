@@ -1,12 +1,15 @@
 export const runtime = 'nodejs'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
-import {
-  ProductionBatchUpdateSchema,
-  VALID_PRODUCTION_STATUS_TRANSITIONS,
-} from '@/lib/validations/domains/production'
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
 import { triggerWorkflow } from '@/lib/automation/workflows/index'
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/lib/constants/messages'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { apiLogger } from '@/lib/logger'
+import {
+    ProductionBatchUpdateSchema,
+    VALID_PRODUCTION_STATUS_TRANSITIONS,
+} from '@/lib/validations/domains/production'
 import type { ProductionBatchUpdate } from '@/types/database'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
@@ -47,12 +50,12 @@ async function getHandler(
 
     if (error) {
       if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Batch produksi tidak ditemukan' }, { status: 404 })
+        return createErrorResponse(ERROR_MESSAGES.PRODUCTION_BATCH_NOT_FOUND, 404)
       }
       throw error
     }
 
-    return NextResponse.json({ data })
+    return createSuccessResponse(data)
   } catch (error) {
     return handleAPIError(error, 'GET /api/production/batches/[id]')
   }
@@ -75,13 +78,7 @@ async function putHandler(
     // Validate input
     const validation = ProductionBatchUpdateSchema.safeParse(body)
     if (!validation.success) {
-      return NextResponse.json(
-        {
-          error: 'Data tidak valid',
-          details: validation.error.issues,
-        },
-        { status: 400 }
-      )
+      return createErrorResponse('Data tidak valid', 400, validation.error.issues.map(i => i.message))
     }
 
     const supabase = await createClient()
@@ -97,7 +94,7 @@ async function putHandler(
 
       if (fetchError) {
         if (fetchError.code === 'PGRST116') {
-          return NextResponse.json({ error: 'Batch produksi tidak ditemukan' }, { status: 404 })
+          return createErrorResponse(ERROR_MESSAGES.PRODUCTION_BATCH_NOT_FOUND, 404)
         }
         throw fetchError
       }
@@ -105,13 +102,9 @@ async function putHandler(
       const batchData = currentBatch as { status: string }
       const allowedTransitions = VALID_PRODUCTION_STATUS_TRANSITIONS[batchData.status]
       if (!allowedTransitions.includes(validation.data.status)) {
-        return NextResponse.json(
-          {
-            error: `Tidak dapat mengubah status dari "${batchData.status}" ke "${validation.data.status}"`,
-            current_status: batchData.status,
-            allowed_transitions: allowedTransitions,
-          },
-          { status: 400 }
+        return createErrorResponse(
+          `Tidak dapat mengubah status dari "${batchData.status}" ke "${validation.data.status}"`,
+          400
         )
       }
     }
@@ -127,7 +120,7 @@ async function putHandler(
 
     if (error) {
       if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Batch produksi tidak ditemukan' }, { status: 404 })
+        return createErrorResponse(ERROR_MESSAGES.PRODUCTION_BATCH_NOT_FOUND, 404)
       }
       throw error
     }
@@ -138,11 +131,11 @@ async function putHandler(
         await triggerWorkflow('production.completed', id)
       } catch (workflowError) {
         // Log but don't fail the main operation
-        console.error('Failed to trigger production completion workflow:', workflowError)
+        apiLogger.error({ error: workflowError, batchId: id }, 'Failed to trigger production completion workflow')
       }
     }
 
-    return NextResponse.json(data)
+    return createSuccessResponse(data, SUCCESS_MESSAGES.PRODUCTION_BATCH_UPDATED)
   } catch (error) {
     return handleAPIError(error, 'PUT /api/production/batches/[id]')
   }
@@ -172,19 +165,16 @@ async function deleteHandler(
 
     if (fetchError) {
       if (fetchError.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Batch produksi tidak ditemukan' }, { status: 404 })
+        return createErrorResponse(ERROR_MESSAGES.PRODUCTION_BATCH_NOT_FOUND, 404)
       }
       throw fetchError
     }
 
     const batchData = batch as { status: string }
     if (batchData.status === 'in_progress' || batchData.status === 'completed') {
-      return NextResponse.json(
-        {
-          error: `Tidak dapat menghapus batch dengan status "${batchData.status}"`,
-          hint: 'Hanya batch dengan status "planned" atau "cancelled" yang dapat dihapus',
-        },
-        { status: 400 }
+      return createErrorResponse(
+        `Tidak dapat menghapus batch dengan status "${batchData.status}"`,
+        400
       )
     }
 
@@ -197,7 +187,7 @@ async function deleteHandler(
 
     if (error) throw error
 
-    return NextResponse.json({ message: 'Batch produksi berhasil dihapus' })
+    return createSuccessResponse(null, SUCCESS_MESSAGES.PRODUCTION_BATCH_DELETED)
   } catch (error) {
     return handleAPIError(error, 'DELETE /api/production/batches/[id]')
   }

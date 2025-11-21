@@ -1,9 +1,9 @@
 export const runtime = 'nodejs'
 
+import { ListQuerySchema, createCreateHandler, createListHandler } from '@/lib/api/crud-helpers'
+import { createApiRoute } from '@/lib/api/route-factory'
 import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
 import { IngredientInsertSchema } from '@/lib/validations/domains/ingredient'
-import { createApiRoute } from '@/lib/api/route-factory'
-import { ListQuerySchema, createListHandler, createCreateHandler } from '@/lib/api/crud-helpers'
 
 // GET /api/ingredients - List all ingredients with pagination, search, and sorting
 export const GET = createApiRoute(
@@ -21,6 +21,8 @@ export const GET = createApiRoute(
   })
 )
 
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
+
 // POST /api/ingredients - Create new ingredient
 export const POST = createApiRoute(
   {
@@ -33,6 +35,6 @@ export const POST = createApiRoute(
       table: 'ingredients',
       selectFields: INGREDIENT_FIELDS.LIST,
     },
-    'Bahan baku berhasil ditambahkan'
+    SUCCESS_MESSAGES.INGREDIENT_CREATED
   )
 )

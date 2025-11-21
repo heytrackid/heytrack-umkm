@@ -10,63 +10,23 @@ import { useCurrency } from '@/hooks/useCurrency'
 
 import { COLORS, type ProfitData, type SelectedDataPoint } from '@/app/reports/components/ProfitReportTypes'
 
-interface PartialProfitData {
-    summary: {
-        period: {
-            start: string
-            end: string
-            type?: string
-        }
-        total_revenue: number
-        total_cogs: number
-        gross_profit: number
-        gross_profit_margin: number
-        total_operating_expenses: number
-        net_profit: number
-        net_profit_margin: number
-        orders_count: number
-    }
-    profit_by_period: Array<{
-        period: string
-        revenue: number
-        cogs: number
-        gross_profit: number
-        gross_margin: number
-        orders_count: number
-    }>
-    product_profitability?: Array<{
-        product_name: string
-        total_revenue: number
-        total_cogs: number
-        gross_profit: number
-        gross_margin: number
-        total_quantity: number
-    }>
-    top_profitable_products: Array<{
-        product_name: string
-        gross_profit: number
-        gross_margin: number
-    }>
-    least_profitable_products: Array<{
-        product_name: string
-        gross_profit: number
-        gross_margin: number
-    }>
-    operating_expenses_breakdown: Array<{
-        category: string
-        total: number
-        percentage: number
-    }>
-}
+type PartialProfitData = Pick<ProfitData,
+    'summary' |
+    'profit_by_period' |
+    'product_profitability' |
+    'top_profitable_products' |
+    'least_profitable_products' |
+    'operating_expenses_breakdown'
+>
 
 interface ProfitReportTabsProps {
     // Data props
-    profitData: PartialProfitData
+    profitData: ProfitData
     // State props
     selectedDataPoint: SelectedDataPoint | null
     setSelectedDataPoint: (dataPoint: SelectedDataPoint | null) => void
     compareMode: boolean
-    comparisonData: PartialProfitData | null
+    comparisonData: ProfitData | null
 }
 
 // Trend tab content
@@ -76,10 +36,7 @@ const TrendTab: React.FC<{
     setSelectedDataPoint: (dataPoint: SelectedDataPoint | null) => void
 }> = ({ profitData, selectedDataPoint, setSelectedDataPoint }) => {
     const { formatCurrency } = useCurrency()
-
-    const handleDataPointSelect = (dataPoint: SelectedDataPoint) => {
-        setSelectedDataPoint(dataPoint)
-    }
+    const periods = profitData.profit_by_period ?? []
 
     return (
         <Card>
@@ -106,19 +63,38 @@ const TrendTab: React.FC<{
                 )}
             </CardHeader>
             <CardContent>
-                <div className="space-y-4">
-                    {profitData.profit_by_period.map((period, index) => (
-                        <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
-                            <span className="font-medium">{period.period}</span>
-                            <div className="text-right">
-                                <p className="font-bold">{formatCurrency(period.revenue)}</p>
-                                <p className="text-sm text-muted-foreground">
-                                    Laba: {formatCurrency(period.gross_profit)}
-                                </p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                {periods.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center">Belum ada data periode untuk rentang tanggal ini.</p>
+                ) : (
+                    <div className="space-y-4">
+                        {periods.map((period, index) => {
+                            const isSelected = selectedDataPoint?.period === period.period
+                            return (
+                                <div
+                                    key={index}
+                                    className={`flex justify-between items-center p-3 border rounded-lg cursor-pointer transition ${isSelected ? 'border-blue-500 bg-blue-50 dark:bg-blue-950' : ''}`}
+                                    onClick={() => setSelectedDataPoint(period)}
+                                    onKeyDown={(event) => {
+                                        if (event.key === 'Enter' || event.key === ' ') {
+                                            event.preventDefault()
+                                            setSelectedDataPoint(period)
+                                        }
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
+                                >
+                                    <span className="font-medium">{period.period}</span>
+                                    <div className="text-right">
+                                        <p className="font-bold">{formatCurrency(period.revenue)}</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            Laba: {formatCurrency(period.gross_profit)}
+                                        </p>
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+                )}
             </CardContent>
         </Card>
     )
@@ -129,6 +105,8 @@ const ProductsTab: React.FC<{
     profitData: ProfitData
 }> = ({ profitData }) => {
     const { formatCurrency } = useCurrency()
+    const topProducts = profitData.top_profitable_products ?? []
+    const leastProducts = profitData.least_profitable_products ?? []
 
     return (
         <div className="grid gap-4 md:grid-cols-2">
@@ -140,21 +118,25 @@ const ProductsTab: React.FC<{
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="space-y-3">
-                        {profitData.top_profitable_products.map((product: ProfitData['top_profitable_products'][0], index: number) => (
-                            <div key={index} className="flex justify-between items-center p-3 bg-muted dark:bg-green-950 rounded-lg">
-                                <div>
-                                    <p className="font-medium">{product.product_name}</p>
-                                    <p className="text-sm text-muted-foreground">
-                                        Margin: {product.gross_margin.toFixed(1)}%
+                    {topProducts.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">Belum ada produk yang terjual pada periode ini.</p>
+                    ) : (
+                        <div className="space-y-3">
+                            {topProducts.map((product, index) => (
+                                <div key={index} className="flex justify-between items-center p-3 bg-muted dark:bg-green-950 rounded-lg">
+                                    <div>
+                                        <p className="font-medium">{product.product_name}</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            Margin: {product.gross_margin.toFixed(1)}%
+                                        </p>
+                                    </div>
+                                    <p className="font-bold text-muted-foreground">
+                                        {formatCurrency(product.gross_profit)}
                                     </p>
                                 </div>
-                                <p className="font-bold text-muted-foreground">
-                                    {formatCurrency(product.gross_profit)}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 
@@ -166,21 +148,25 @@ const ProductsTab: React.FC<{
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="space-y-3">
-                        {profitData.least_profitable_products.map((product: ProfitData['least_profitable_products'][0], index: number) => (
-                            <div key={index} className="flex justify-between items-center p-3 bg-red-50 dark:bg-red-950 rounded-lg">
-                                <div>
-                                    <p className="font-medium">{product.product_name}</p>
-                                    <p className="text-sm text-muted-foreground">
-                                        Margin: {product.gross_margin.toFixed(1)}%
+                    {leastProducts.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">Tidak ada produk dengan margin rendah pada periode ini.</p>
+                    ) : (
+                        <div className="space-y-3">
+                            {leastProducts.map((product, index) => (
+                                <div key={index} className="flex justify-between items-center p-3 bg-red-50 dark:bg-red-950 rounded-lg">
+                                    <div>
+                                        <p className="font-medium">{product.product_name}</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            Margin: {product.gross_margin.toFixed(1)}%
+                                        </p>
+                                    </div>
+                                    <p className="font-bold text-red-600">
+                                        {formatCurrency(product.gross_profit)}
                                     </p>
                                 </div>
-                                <p className="font-bold text-red-600">
-                                    {formatCurrency(product.gross_profit)}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         </div>
@@ -192,6 +178,7 @@ const ExpensesTab: React.FC<{
     profitData: ProfitData
 }> = ({ profitData }) => {
     const { formatCurrency } = useCurrency()
+    const breakdown = profitData.operating_expenses_breakdown ?? []
 
     return (
         <Card>
@@ -199,25 +186,29 @@ const ExpensesTab: React.FC<{
                 <CardTitle>Breakdown Biaya Operasional</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="space-y-3">
-                    {profitData.operating_expenses_breakdown.map((expense: ProfitData['operating_expenses_breakdown'][0], index: number) => (
-                        <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
-                            <div className="flex items-center gap-3">
-                                <div
-                                    className="w-4 h-4 rounded-full"
-                                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                                />
-                                <span className="font-medium">{expense.category}</span>
+                {breakdown.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center">Belum ada data biaya operasional.</p>
+                ) : (
+                    <div className="space-y-3">
+                        {breakdown.map((expense, index) => (
+                            <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
+                                <div className="flex items-center gap-3">
+                                    <div
+                                        className="w-4 h-4 rounded-full"
+                                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                                    />
+                                    <span className="font-medium">{expense.category}</span>
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-bold">{formatCurrency(expense.total)}</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {expense.percentage.toFixed(1)}%
+                                    </p>
+                                </div>
                             </div>
-                            <div className="text-right">
-                                <p className="font-bold">{formatCurrency(expense.total)}</p>
-                                <p className="text-sm text-muted-foreground">
-                                    {expense.percentage.toFixed(1)}%
-                                </p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
             </CardContent>
         </Card>
     )
@@ -230,8 +221,27 @@ const ComparisonTab: React.FC<{
     comparisonData: PartialProfitData | null
 }> = ({ profitData, compareMode, comparisonData }) => {
     const { formatCurrency } = useCurrency()
+    const formatDateLabel = (value?: string) => {
+        if (!value) { return null }
+        const parsed = new Date(value)
+        return Number.isNaN(parsed.getTime()) ? null : parsed.toLocaleDateString('id-ID')
+    }
+    const formatPeriodRange = (period?: { start: string; end: string }) => {
+        if (!period) { return 'Periode tidak tersedia' }
+        const startLabel = formatDateLabel(period.start)
+        const endLabel = formatDateLabel(period.end)
+        if (startLabel && endLabel) { return `${startLabel} - ${endLabel}` }
+        return startLabel || endLabel || 'Periode tidak tersedia'
+    }
+    const calculateGrowth = (current: number, previous: number) => {
+        if (previous === 0) { return current > 0 ? 100 : 0 }
+        return ((current - previous) / previous) * 100
+    }
 
     if (compareMode && comparisonData) {
+        const revenueGrowth = calculateGrowth(profitData.summary.total_revenue, comparisonData.summary.total_revenue)
+        const grossGrowth = calculateGrowth(profitData.summary.gross_profit, comparisonData.summary.gross_profit)
+        const netGrowth = calculateGrowth(profitData.summary.net_profit, comparisonData.summary.net_profit)
         return (
             <div className="space-y-6">
                 {/* Period Comparison Summary */}
@@ -240,7 +250,7 @@ const ComparisonTab: React.FC<{
                         <CardHeader>
                             <CardTitle className="text-lg">Periode Saat Ini</CardTitle>
                             <p className="text-sm text-muted-foreground">
-                                {new Date(profitData.summary.period.start).toLocaleDateString('id-ID')} - {new Date(profitData.summary.period.end).toLocaleDateString('id-ID')}
+                                {formatPeriodRange(profitData.summary.period)}
                             </p>
                         </CardHeader>
                          <CardContent className="space-y-2">
@@ -263,7 +273,7 @@ const ComparisonTab: React.FC<{
                         <CardHeader>
                             <CardTitle className="text-lg">Periode Sebelumnya</CardTitle>
                             <p className="text-sm text-muted-foreground">
-                                {new Date(comparisonData.summary.period.start).toLocaleDateString('id-ID')} - {new Date(comparisonData.summary.period.end).toLocaleDateString('id-ID')}
+                                {formatPeriodRange(comparisonData.summary.period)}
                             </p>
                         </CardHeader>
                         <CardContent className="space-y-2">
@@ -292,12 +302,11 @@ const ComparisonTab: React.FC<{
                         <div className="grid gap-4 md:grid-cols-3">
                             <div className="text-center p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
                                 <div className="text-2xl font-bold text-blue-600">
-                                    {profitData.summary.total_revenue > comparisonData.summary.total_revenue ? '+' : ''}
-                                    {(((profitData.summary.total_revenue - comparisonData.summary.total_revenue) / comparisonData.summary.total_revenue) * 100).toFixed(1)}%
+                                    {revenueGrowth > 0 ? '+' : ''}{revenueGrowth.toFixed(1)}%
                                 </div>
                                 <div className="text-sm text-muted-foreground">Pertumbuhan Pendapatan</div>
                                 <div className="flex justify-center mt-2">
-                                    {profitData.summary.total_revenue > comparisonData.summary.total_revenue ?
+                                    {revenueGrowth > 0 ?
                                         <TrendingUp className="h-5 w-5 text-green-600" /> :
                                         <TrendingDown className="h-5 w-5 text-red-600" />
                                     }
@@ -306,12 +315,11 @@ const ComparisonTab: React.FC<{
 
                             <div className="text-center p-4 bg-green-50 dark:bg-green-950 rounded-lg">
                                 <div className="text-2xl font-bold text-green-600">
-                                    {profitData.summary.gross_profit > comparisonData.summary.gross_profit ? '+' : ''}
-                                    {(((profitData.summary.gross_profit - comparisonData.summary.gross_profit) / comparisonData.summary.gross_profit) * 100).toFixed(1)}%
+                                    {grossGrowth > 0 ? '+' : ''}{grossGrowth.toFixed(1)}%
                                 </div>
                                 <div className="text-sm text-muted-foreground">Pertumbuhan Laba Kotor</div>
                                 <div className="flex justify-center mt-2">
-                                    {profitData.summary.gross_profit > comparisonData.summary.gross_profit ?
+                                    {grossGrowth > 0 ?
                                         <TrendingUp className="h-5 w-5 text-green-600" /> :
                                         <TrendingDown className="h-5 w-5 text-red-600" />
                                     }
@@ -320,12 +328,11 @@ const ComparisonTab: React.FC<{
 
                             <div className="text-center p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
                                 <div className="text-2xl font-bold text-purple-600">
-                                    {profitData.summary.net_profit > comparisonData.summary.net_profit ? '+' : ''}
-                                    {(((profitData.summary.net_profit - comparisonData.summary.net_profit) / comparisonData.summary.net_profit) * 100).toFixed(1)}%
+                                    {netGrowth > 0 ? '+' : ''}{netGrowth.toFixed(1)}%
                                 </div>
                                 <div className="text-sm text-muted-foreground">Pertumbuhan Laba Bersih</div>
                                 <div className="flex justify-center mt-2">
-                                    {profitData.summary.net_profit > comparisonData.summary.net_profit ?
+                                    {netGrowth > 0 ?
                                         <TrendingUp className="h-5 w-5 text-green-600" /> :
                                         <TrendingDown className="h-5 w-5 text-red-600" />
                                     }
@@ -335,6 +342,19 @@ const ComparisonTab: React.FC<{
                     </CardContent>
                 </Card>
             </div>
+        )
+    }
+
+    if (compareMode) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Perbandingan Pendapatan vs HPP vs Laba</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground text-center">Data perbandingan sedang dimuat atau tidak tersedia.</p>
+                </CardContent>
+            </Card>
         )
     }
 

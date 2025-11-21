@@ -1,10 +1,6 @@
 'use client'
 
-import { Calendar } from '@/components/icons'
-import { format } from 'date-fns'
-import type { DateRange } from 'react-day-picker'
 
-import { calculateProfitDateRange } from '@/app/profit/utils'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,30 +13,7 @@ import type { PeriodType, ProfitFilters, ProfitFiltersProps } from '@/app/profit
 
 export const ProfitFiltersComponent = ({ filters, onFiltersChange, onApplyFilters, isMobile }: ProfitFiltersProps) => {
   const handlePeriodChange = (value: PeriodType) => {
-    const newFilters: Partial<ProfitFilters> = { selectedPeriod: value }
-    if (value !== 'custom') {
-      const { startDate, endDate } = calculateProfitDateRange(value)
-      if (startDate) {newFilters.startDate = startDate}
-      if (endDate) {newFilters.endDate = endDate}
-      newFilters.dateRange = null
-    } else {
-      newFilters.dateRange = null
-    }
-    onFiltersChange(newFilters)
-  }
-
-  const _handleDateRangeChange = (dateRange: DateRange | undefined) => {
-    if (!dateRange?.from || !dateRange?.to) {
-      onFiltersChange({ dateRange: null })
-      return
-    }
-
-    const newFilters: Partial<ProfitFilters> = {
-      dateRange,
-      startDate: format(dateRange.from, 'yyyy-MM-dd'),
-      endDate: format(dateRange.to, 'yyyy-MM-dd')
-    }
-    onFiltersChange(newFilters)
+    onFiltersChange({ selectedPeriod: value })
   }
 
 
@@ -48,8 +21,7 @@ export const ProfitFiltersComponent = ({ filters, onFiltersChange, onApplyFilter
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Calendar className="h-5 w-5" />
+        <CardTitle className="text-lg">
           Filter Periode
         </CardTitle>
       </CardHeader>
@@ -69,17 +41,11 @@ export const ProfitFiltersComponent = ({ filters, onFiltersChange, onApplyFilter
                 <SelectItem value="month">Bulan Ini</SelectItem>
                 <SelectItem value="quarter">Kuartal Ini</SelectItem>
                 <SelectItem value="year">Tahun Ini</SelectItem>
-                <SelectItem value="custom">Kustom</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {filters.selectedPeriod === 'custom' && (
-            <div>
-              <label htmlFor="date-range" className="text-sm font-medium mb-2 block">Rentang Tanggal</label>
 
-            </div>
-          )}
 
           <div className="flex items-end col-span-full">
             <Button onClick={onApplyFilters} className="w-full">

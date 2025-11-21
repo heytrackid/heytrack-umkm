@@ -3,6 +3,7 @@ export const runtime = 'nodejs'
 import { z } from 'zod'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { NextResponse } from 'next/server'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 
 const SalesReportQuerySchema = z.object({
   startDate: z.string().optional(),
@@ -45,7 +46,7 @@ async function getSalesReportHandler(
   const { data: orders, error } = await queryBuilder.order('created_at', { ascending: false })
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to fetch sales data' }, { status: 500 })
+    return createErrorResponse('Failed to fetch sales data', 500)
   }
 
   const ordersList = orders || []
@@ -96,7 +97,7 @@ async function getSalesReportHandler(
       .slice(0, 10),
   }
 
-  return NextResponse.json({ success: true, data: report })
+  return createSuccessResponse(report)
 }
 
 export const GET = createApiRoute(

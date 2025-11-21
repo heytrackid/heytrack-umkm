@@ -1,17 +1,106 @@
 export const runtime = 'nodejs'
 
-import { z } from 'zod'
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { apiLogger } from '@/lib/logger'
-import { calculateRecipeCOGS, toNumber } from '@/lib/supabase/query-helpers'
+import { calculateRecipeCOGS, toNumber, transformRecipeWithIngredients } from '@/lib/supabase/query-helpers'
+import type {
+    IngredientCost,
+    OperatingExpense,
+    OperatingExpenseBreakdownEntry,
+    ProductProfit,
+    ProductProfitabilityEntry,
+    ProfitByPeriodEntry,
+    ProfitData,
+    ProfitTrends,
+} from '@/types/features/profit-report'
 import type { RecipeWithIngredients } from '@/types/query-results'
-import type { ProfitData, ProductProfit, IngredientCost, OperatingExpense, ProfitTrends } from '@/app/profit/constants'
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
+
+type RawRecipeWithIngredients = Parameters<typeof transformRecipeWithIngredients>[0]
+
+type AggregationPeriod = 'daily' | 'weekly' | 'monthly'
+
+const periodNormalizationMap: Record<string, AggregationPeriod> = {
+  daily: 'daily',
+  day: 'daily',
+  harian: 'daily',
+  weekly: 'weekly',
+  week: 'weekly',
+  mingguan: 'weekly',
+  monthly: 'monthly',
+  month: 'monthly',
+  bulanan: 'monthly',
+  quarter: 'monthly',
+  quarterly: 'monthly',
+  year: 'monthly',
+  yearly: 'monthly',
+  custom: 'monthly'
+}
+
+const normalizeAggregationPeriod = (value?: string | null): AggregationPeriod => {
+  if (!value) { return 'monthly' }
+  const key = value.toLowerCase()
+  return periodNormalizationMap[key] ?? 'monthly'
+}
+
+const parseDateOrToday = (value?: string | null): Date => {
+  if (!value) { return new Date() }
+  const parsed = new Date(value)
+  return Number.isNaN(parsed.getTime()) ? new Date() : parsed
+}
+
+const startOfDayUTC = (date: Date): Date => new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
+
+const startOfWeekUTC = (date: Date): Date => {
+  const normalized = startOfDayUTC(date)
+  const day = normalized.getUTCDay()
+  const diff = day === 0 ? -6 : 1 - day
+  normalized.setUTCDate(normalized.getUTCDate() + diff)
+  return normalized
+}
+
+const formatDate = (date: Date, options?: Intl.DateTimeFormatOptions): string =>
+  date.toLocaleDateString('id-ID', options)
+
+interface PeriodBucketInfo {
+  key: string
+  label: string
+  sortValue: number
+}
+
+const getPeriodBucketInfo = (date: Date, period: AggregationPeriod): PeriodBucketInfo => {
+  if (period === 'daily') {
+    const bucketDate = startOfDayUTC(date)
+    return {
+      key: bucketDate.toISOString().split('T')[0],
+      label: formatDate(bucketDate, { day: '2-digit', month: 'short', year: 'numeric' }),
+      sortValue: bucketDate.getTime()
+    }
+  }
+
+  if (period === 'weekly') {
+    const weekStart = startOfWeekUTC(date)
+    const weekEnd = new Date(weekStart)
+    weekEnd.setUTCDate(weekStart.getUTCDate() + 6)
+    return {
+      key: weekStart.toISOString().split('T')[0],
+      label: `${formatDate(weekStart, { day: '2-digit', month: 'short' })} - ${formatDate(weekEnd, { day: '2-digit', month: 'short', year: 'numeric' })}`,
+      sortValue: weekStart.getTime()
+    }
+  }
+
+  const monthStart = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1))
+  return {
+    key: `${monthStart.getUTCFullYear()}-${String(monthStart.getUTCMonth() + 1).padStart(2, '0')}`,
+    label: formatDate(monthStart, { month: 'long', year: 'numeric' }),
+    sortValue: monthStart.getTime()
+  }
+}
 
 const ProfitReportQuerySchema = z.object({
-  start_date: z.string().optional(),
-  end_date: z.string().optional(),
-  period: z.enum(['daily', 'weekly', 'monthly', 'yearly']).optional().default('monthly'),
+  period: z.string().optional(),
   include_breakdown: z.enum(['true', 'false']).optional(),
 })
 
@@ -22,12 +111,11 @@ async function getProfitReportHandler(
 ): Promise<NextResponse> {
   const { user, supabase } = context
 
-  const startDate = query?.start_date || new Date(new Date().setDate(1)).toISOString().split('T')[0]
-  const endDate = query?.end_date || new Date().toISOString().split('T')[0]
-  // const period = query?.period || 'monthly'
+  const aggregationPeriod = normalizeAggregationPeriod(query?.period)
+  const summaryPeriodType = query?.period ?? aggregationPeriod
 
   try {
-    // Get all DELIVERED orders with items in date range
+    // Get all DELIVERED orders with items
     const { data: orders, error: ordersError } = await supabase
       .from('orders' as never)
       .select(`
@@ -43,13 +131,11 @@ async function getProfitReportHandler(
       `)
       .eq('user_id', user.id)
       .eq('status', 'DELIVERED')
-      .gte('delivery_date', startDate)
-      .lte('delivery_date', endDate)
       .order('delivery_date', { ascending: true })
 
     if (ordersError) {
       apiLogger.error({ error: ordersError }, 'Error fetching orders')
-      return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 })
+      return createErrorResponse('Failed to fetch orders', 500)
     }
 
     // Get all recipes with ingredients and their current WAC
@@ -66,54 +152,47 @@ async function getProfitReportHandler(
 
     if (recipesError) {
       apiLogger.error({ error: recipesError }, 'Error fetching recipes')
-      return NextResponse.json({ error: 'Failed to fetch recipes data' }, { status: 500 })
+      return createErrorResponse('Failed to fetch recipes data', 500)
     }
 
     // Transform recipes - handle Supabase join structure
     const recipes: RecipeWithIngredients[] = Array.isArray(recipesRaw)
-      ? recipesRaw.map((recipe) => {
-          const typedRecipe = recipe as Record<string, unknown>
-          return {
-            ...(typedRecipe as object),
-            recipe_ingredients: Array.isArray(typedRecipe['recipe_ingredients'])
-              ? (typedRecipe['recipe_ingredients'] as unknown[]).map((ri: unknown) => {
-                  const riRecord = ri as Record<string, unknown>
-                  return {
-                    ...riRecord,
-                    ingredient: riRecord['ingredients'] // Use 'ingredients' key from Supabase join
-                  }
-                })
-              : []
-          }
-        }) as RecipeWithIngredients[]
+      ? (recipesRaw as RawRecipeWithIngredients[]).map((recipe) => transformRecipeWithIngredients(recipe))
       : []
 
     // Get all expenses from financial_records
     const { data: expenses, error: expensesError } = await supabase
       .from('financial_records' as never)
-      .select('id, user_id, type, amount, date, description, category_id')
+      .select('id, user_id, type, amount, date, description, category')
       .eq('user_id', user.id)
       .eq('type', 'EXPENSE')
-      .gte('date', startDate)
-      .lte('date', endDate)
 
     if (expensesError) {
       apiLogger.error({ error: expensesError }, 'Error fetching expenses')
-      return NextResponse.json({ error: 'Failed to fetch expenses' }, { status: 500 })
+      return createErrorResponse('Failed to fetch expenses', 500)
     }
 
     // Calculate total revenue
-    const ordersData = (orders || []) as Array<{ total_amount: number | null }>
-    const totalRevenue = ordersData.reduce((sum, order) => sum + toNumber(order.total_amount), 0)
+    type OrderWithItems = {
+      delivery_date?: string | null
+      created_at?: string | null
+      total_amount: number | null
+      order_items?: Array<{ recipe_id: string | null; quantity: number; product_name: string | null; unit_price: number | null; total_price: number | null }> | null
+    }
+    const ordersWithItems = (orders || []) as OrderWithItems[]
+    const totalRevenue = ordersWithItems.reduce((sum, order) => sum + toNumber(order.total_amount), 0)
+    const ordersCount = ordersWithItems.length
 
     // Calculate products breakdown and total COGS
-    type OrderWithItems = { order_items: Array<{ recipe_id: string | null; quantity: number; product_name: string | null; unit_price: number | null; total_price: number | null }> }
-    const ordersWithItems = (orders || []) as OrderWithItems[]
     const productMap = new Map<string, { quantity: number; revenue: number; cogs: number }>()
+    const periodStatsMap = new Map<string, { revenue: number; cogs: number; orders: number; label: string; sortValue: number }>()
     let totalCOGS = 0
 
     ordersWithItems.forEach((order) => {
-      (order.order_items || []).forEach((item) => {
+      let orderCOGSTotal = 0
+      const orderItems = order.order_items ?? []
+
+      orderItems.forEach((item) => {
         if (!item.recipe_id) return
         const recipe = recipes.find(r => r.id === item.recipe_id)
         if (!recipe) return
@@ -122,6 +201,7 @@ async function getProfitReportHandler(
           const recipeCOGS = calculateRecipeCOGS(recipe)
           const itemCOGS = recipeCOGS * item.quantity
           totalCOGS += itemCOGS
+          orderCOGSTotal += itemCOGS
 
           const productName = item.product_name || recipe.name || 'Unknown Product'
           const existing = productMap.get(productName) || { quantity: 0, revenue: 0, cogs: 0 }
@@ -135,6 +215,18 @@ async function getProfitReportHandler(
           // Continue processing other items
         }
       })
+
+      const orderRevenue = toNumber(order.total_amount)
+      const orderDate = parseDateOrToday(order.delivery_date ?? order.created_at)
+      const bucket = getPeriodBucketInfo(orderDate, aggregationPeriod)
+      const existing = periodStatsMap.get(bucket.key) || { revenue: 0, cogs: 0, orders: 0, label: bucket.label, sortValue: bucket.sortValue }
+      periodStatsMap.set(bucket.key, {
+        revenue: existing.revenue + orderRevenue,
+        cogs: existing.cogs + orderCOGSTotal,
+        orders: existing.orders + 1,
+        label: bucket.label,
+        sortValue: existing.sortValue
+      })
     })
 
     // Convert product map to array
@@ -146,6 +238,37 @@ async function getProfitReportHandler(
       profit: data.revenue - data.cogs,
       profit_margin: data.revenue > 0 ? ((data.revenue - data.cogs) / data.revenue) * 100 : 0
     }))
+
+    const profitByPeriod: ProfitByPeriodEntry[] = Array.from(periodStatsMap.values())
+      .sort((a, b) => a.sortValue - b.sortValue)
+      .map((stats) => {
+        const grossProfitValue = stats.revenue - stats.cogs
+        return {
+          period: stats.label,
+          revenue: stats.revenue,
+          cogs: stats.cogs,
+          gross_profit: grossProfitValue,
+          gross_margin: stats.revenue > 0 ? (grossProfitValue / stats.revenue) * 100 : 0,
+          orders_count: stats.orders
+        }
+      })
+
+    const productProfitability: ProductProfitabilityEntry[] = products.map((product) => ({
+      product_name: product.product_name,
+      total_revenue: product.revenue,
+      total_cogs: product.cogs,
+      gross_profit: product.profit,
+      gross_margin: product.profit_margin,
+      total_quantity: product.quantity_sold
+    }))
+
+    const topProfitableProducts: ProductProfitabilityEntry[] = [...productProfitability]
+      .sort((a, b) => b.gross_profit - a.gross_profit)
+      .slice(0, 5)
+
+    const leastProfitableProducts: ProductProfitabilityEntry[] = [...productProfitability]
+      .sort((a, b) => a.gross_profit - b.gross_profit)
+      .slice(0, 5)
 
     // Calculate ingredients breakdown
     const ingredientMap = new Map<string, { quantity: number; wac_cost: number; total_cost: number }>()
@@ -188,9 +311,9 @@ async function getProfitReportHandler(
 
     // Calculate operating expenses breakdown
     const expenseMap = new Map<string, number>()
-    const expensesData = (expenses || []) as Array<{ amount: number | null; category_id: string | null }>
+    const expensesData = (expenses || []) as Array<{ amount: number | null; category: string | null }>
     expensesData.forEach((expense) => {
-      const category = expense.category_id || 'Uncategorized'
+      const category = expense.category || 'Uncategorized'
       const amount = toNumber(expense.amount)
       expenseMap.set(category, (expenseMap.get(category) || 0) + amount)
     })
@@ -201,6 +324,11 @@ async function getProfitReportHandler(
     }))
 
     const operationalExpenses = operating_expenses.reduce((sum, exp) => sum + exp.total_amount, 0)
+    const operatingExpensesBreakdown: OperatingExpenseBreakdownEntry[] = operating_expenses.map((expense) => ({
+      category: expense.category,
+      total: expense.total_amount,
+      percentage: operationalExpenses > 0 ? (expense.total_amount / operationalExpenses) * 100 : 0
+    }))
 
     // Calculate profit metrics
     const grossProfit = totalRevenue - totalCOGS
@@ -208,80 +336,44 @@ async function getProfitReportHandler(
     const grossProfitMargin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0
     const netProfitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0
 
-    // Calculate trends by comparing with previous period
-    const periodDuration = new Date(endDate).getTime() - new Date(startDate).getTime()
-    const previousStartDate = new Date(new Date(startDate).getTime() - periodDuration - 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-    const previousEndDate = new Date(new Date(startDate).getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-
-    // Get previous period orders
-    const { data: previousOrders, error: previousOrdersError } = await supabase
-      .from('orders' as never)
-      .select(`
-        total_amount,
-        order_items (
-          recipe_id,
-          quantity,
-          total_price
-        )
-      `)
-      .eq('user_id', user.id)
-      .eq('status', 'DELIVERED')
-      .gte('delivery_date', previousStartDate)
-      .lte('delivery_date', previousEndDate)
-
-    let previousRevenue = 0
-    let previousCOGS = 0
-
-    if (previousOrders && !previousOrdersError) {
-      const previousOrdersData = (previousOrders || []) as Array<{ total_amount: number | null; order_items: Array<{ recipe_id: string | null; quantity: number }> }>
-      previousRevenue = previousOrdersData.reduce((sum, order) => sum + toNumber(order.total_amount), 0)
-
-      previousOrdersData.forEach((order) => {
-        (order.order_items || []).forEach((item) => {
-          if (!item.recipe_id) return
-          const recipe = recipes.find(r => r.id === item.recipe_id)
-          if (recipe) {
-            try {
-              const recipeCOGS = calculateRecipeCOGS(recipe)
-              previousCOGS += recipeCOGS * item.quantity
-            } catch (error) {
-              apiLogger.error({ error, recipeId: item.recipe_id }, 'Failed to calculate recipe COGS for previous period')
-              // Continue with other items
-            }
-          }
-        })
-      })
-    }
-
-    const previousProfit = previousRevenue - previousCOGS
-    const currentProfit = grossProfit
-
+    // Since date filtering is removed, no trend calculation
     const trends: ProfitTrends = {
-      revenue_trend: previousRevenue > 0 ? ((totalRevenue - previousRevenue) / previousRevenue) * 100 : 0,
-      profit_trend: previousProfit > 0 ? ((currentProfit - previousProfit) / previousProfit) * 100 : 0
+      revenue_trend: 0,
+      profit_trend: 0
     }
 
     const profitReport: ProfitData = {
       summary: {
+        period: {
+          start: '',
+          end: '',
+          type: summaryPeriodType
+        },
         total_revenue: totalRevenue,
         total_cogs: totalCOGS,
         gross_profit: grossProfit,
         gross_profit_margin: Number(grossProfitMargin.toFixed(2)),
         total_operating_expenses: operationalExpenses,
         net_profit: netProfit,
-        net_profit_margin: Number(netProfitMargin.toFixed(2))
+        net_profit_margin: Number(netProfitMargin.toFixed(2)),
+        orders_count: ordersCount
       },
+      profit_by_period: profitByPeriod,
+      product_profitability: productProfitability,
+      top_profitable_products: topProfitableProducts,
+      least_profitable_products: leastProfitableProducts,
+      operating_expenses_breakdown: operatingExpensesBreakdown,
       products,
       ingredients,
       operating_expenses,
       trends
     }
 
-    apiLogger.info({ userId: user.id, startDate, endDate }, 'Profit report generated')
-    return NextResponse.json(profitReport)
+    apiLogger.info({ userId: user.id }, 'Profit report generated')
+    return createSuccessResponse(profitReport)
   } catch (error) {
     apiLogger.error({ error, userId: user.id }, 'Profit report error')
-    return NextResponse.json({ error: 'Failed to generate profit report' }, { status: 500 })
+    return createErrorResponse('Failed to generate profit report', 500)
   }
 }
 

@@ -4,6 +4,8 @@ import { useToast } from '@/hooks/use-toast'
 import type { ApiErrorResponse, ApiSuccessResponse } from '@/lib/api-core'
 import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage } from '@/lib/type-guards'
+import { fetchApi, buildApiUrl } from '@/lib/query/query-helpers'
+import { cachePresets } from '@/lib/query/query-config'
 import type { Row, Insert, Update } from '@/types/database'
 
 const logger = createClientLogger('Hook')
@@ -30,29 +32,12 @@ interface UseIngredientsOptions {
 export function useIngredients(options?: UseIngredientsOptions) {
   return useQuery({
     queryKey: ['ingredients', options],
-    queryFn: async ({ signal }) => {
-      const params = new URLSearchParams()
-      if (options?.limit) {params.set('limit', options.limit.toString())}
-      if (options?.offset) {params.set('offset', options.offset.toString())}
-      if (options?.search) {params.set('search', options.search)}
-      
-      const response = await fetch(`/api/ingredients?${params}`, {
-        credentials: 'include', // Include cookies for authentication
-        signal, // React Query provides signal automatically
-      })
-      if (!response.ok) {
-        throw new Error('Failed to fetch ingredients')
-      }
-      const result = await response.json() as ApiSuccessResponse<{ ingredients?: Ingredient[]; pagination?: unknown }> | ApiErrorResponse
-      if (!('success' in result) || !result.success) {
-        throw new Error(result?.error ?? 'Failed to fetch ingredients')
-      }
-      return result.data ?? { ingredients: [], pagination: null }
-    },
+    queryFn: () => fetchApi<{ ingredients?: Ingredient[], pagination?: unknown }>(buildApiUrl('/ingredients', options as Record<string, string | number | boolean | null | undefined>)),
+    ...cachePresets.moderatelyUpdated,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
-    select: (result) => result.ingredients ?? [],
+    select: (result: { ingredients?: Ingredient[] }) => result.ingredients ?? [],
   })
 }
 
@@ -62,22 +47,7 @@ export function useIngredients(options?: UseIngredientsOptions) {
 export function useIngredient(id: string | null) {
   return useQuery({
     queryKey: ['ingredient', id],
-    queryFn: async ({ signal }) => {
-      if (!id) {return null}
-      
-      const response = await fetch(`/api/ingredients/${id}`, {
-        credentials: 'include', // Include cookies for authentication
-        signal, // React Query provides signal automatically
-      })
-      if (!response.ok) {
-        throw new Error('Failed to fetch ingredient')
-      }
-      const payload = await response.json() as ApiSuccessResponse<Ingredient> | ApiErrorResponse
-      if (!('success' in payload) || !payload.success) {
-        throw new Error(payload?.error ?? 'Failed to fetch ingredient')
-      }
-      return payload.data ?? null
-    },
+    queryFn: () => fetchApi<Ingredient>(`/api/ingredients/${id}`),
     enabled: Boolean(id),
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,

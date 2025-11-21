@@ -1,16 +1,17 @@
 export const runtime = 'nodejs'
 
-import { z } from 'zod'
-import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
 import { ListQuerySchema, createListHandler } from '@/lib/api/crud-helpers'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 
 const FinancialRecordSchema = z.object({
   description: z.string().min(1),
   category: z.string().min(1),
   amount: z.number().positive(),
   date: z.string(),
-  type: z.enum(['income', 'expense']),
+  type: z.enum(['INCOME', 'EXPENSE']),  // Uppercase to match database
 })
 
 // GET /api/financial/records - List financial records
@@ -38,14 +39,14 @@ async function createFinancialRecordHandler(
   const { user, supabase } = context
 
   if (!body) {
-    return NextResponse.json({ error: 'Request body is required' }, { status: 400 })
+    return createErrorResponse('Request body is required', 400)
   }
 
   const insertData = {
     user_id: user.id,
-    type: body.type.toUpperCase() as 'INCOME' | 'EXPENSE',
+    type: body.type as 'INCOME' | 'EXPENSE',
     description: body.description,
-    category: body.type === 'income' ? 'Revenue' : body.category,
+    category: body.type === 'INCOME' ? 'Revenue' : body.category,
     amount: body.amount,
     date: body.date,
     reference: `MANUAL-${Date.now()}`,
@@ -60,10 +61,10 @@ async function createFinancialRecordHandler(
     .single()
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to create financial record' }, { status: 500 })
+    return createErrorResponse('Failed to create financial record', 500)
   }
 
-  return NextResponse.json({ success: true, data }, { status: 201 })
+  return createSuccessResponse(data, 'Financial record created successfully', undefined, 201)
 }
 
 export const POST = createApiRoute(

@@ -12,7 +12,7 @@ import { headers } from 'next/headers';
 
 
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
-import { QueryProvider } from '@/providers/QueryProvider';
+import { Providers } from '@/providers';
 import { SupabaseProvider } from '@/providers/SupabaseProvider';
 import { SWRProvider } from '@/providers/SWRProvider';
 
@@ -73,13 +73,7 @@ const RootLayout = async ({
       ><StackProvider app={stackServerApp}><StackTheme>
         <Suspense fallback={null}>
           <SupabaseProvider>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="dark"
-                enableSystem={false}
-                disableTransitionOnChange
-              >
-                <QueryProvider>
+            <Providers>
                   <SettingsProvider>
                     <SWRProvider>
                       <PreloadingProvider
@@ -100,8 +94,7 @@ const RootLayout = async ({
                         </PreloadingProvider>
                       </SWRProvider>
                     </SettingsProvider>
-                  </QueryProvider>
-                </ThemeProvider>
+            </Providers>
             </SupabaseProvider>
           </Suspense>
          <Analytics />

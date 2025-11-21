@@ -10,7 +10,7 @@ import { useCurrency } from '@/hooks/useCurrency'
 
 
 interface InventoryReportProps {
-  dateRange: {
+  dateRange?: {
     start: string | undefined
     end: string | undefined
   }
@@ -22,21 +22,12 @@ interface InventoryStats {
   outOfStock: number
 }
 
-export const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps) => {
+export const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps = {}) => {
   const { formatCurrency } = useCurrency()
   const { data: ingredients } = useSupabaseCRUD<'ingredients'>('ingredients')
 
   // Calculate inventory report
-  const ingredientList = (ingredients ?? []).filter(ingredient => {
-    if (!_dateRange.start || !_dateRange.end) {
-      return true
-    }
-    const updatedAt = ingredient.updated_at
-    if (!updatedAt) {
-      return true
-    }
-    return updatedAt >= _dateRange.start && updatedAt <= _dateRange.end
-  })
+  const ingredientList = ingredients ?? []
 
   const inventoryStats = ingredientList.reduce<InventoryStats>(
     (stats, ingredient) => {

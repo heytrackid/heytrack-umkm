@@ -6,6 +6,7 @@ import { apiLogger } from '@/lib/logger'
 import type { Database, OrderStatus } from '@/types/database'
 import { NextResponse } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 
 type TypedSupabaseClient = SupabaseClient<Database>
 
@@ -182,10 +183,10 @@ async function getDashboardStatsHandler(
     }
 
     apiLogger.info({ userId: user.id }, 'Dashboard stats fetched')
-    return NextResponse.json(response)
+    return createSuccessResponse(response)
   } catch (error) {
     apiLogger.error({ error, userId: user.id }, 'Dashboard stats error')
-    return NextResponse.json({ error: 'Failed to fetch dashboard stats' }, { status: 500 })
+    return createErrorResponse('Failed to fetch dashboard stats', 500)
   }
 }
 

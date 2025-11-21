@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { fetchApi, buildApiUrl } from '@/lib/query/query-helpers'
 
 import { useToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
@@ -25,26 +26,11 @@ export function useIngredientPurchases(options?: UseIngredientPurchasesOptions) 
   return useQuery({
     queryKey: ['ingredient-purchases', options],
     queryFn: async () => {
-      const params = new URLSearchParams()
-      if (options?.limit) { params.set('limit', options.limit.toString()) }
-      if (options?.offset) { params.set('offset', options.offset.toString()) }
-      if (options?.ingredientId) { params.set('ingredientId', options.ingredientId) }
-
-      const response = await fetch(`/api/ingredient-purchases?${params}`, {
-        credentials: 'include',
-      })
-      if (!response.ok) {
-        throw new Error('Gagal mengambil data pembelian bahan')
-      }
-      const result = await response.json() as { success: boolean; data: { ingredient_purchases: IngredientPurchase[]; pagination: unknown } }
-      if (!result.success) {
-        throw new Error('Gagal mengambil data pembelian bahan')
-      }
-      return result.data.ingredient_purchases ?? []
+      const result = await fetchApi<{ ingredient_purchases?: IngredientPurchase[] }>(buildApiUrl('/ingredient-purchases', options as Record<string, string | number | boolean | null | undefined>))
+      return result?.ingredient_purchases ?? []
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    gcTime: 10 * 60 * 1000, // 10 minutes
   })
 }
 

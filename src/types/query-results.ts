@@ -54,7 +54,7 @@ export interface RecipeWithIngredients extends Recipe {
 }
 
 export interface RecipeIngredientWithDetails extends RecipeIngredient {
-  ingredient: Ingredient
+  ingredients: Ingredient
 }
 
 export interface IngredientWithStock extends Ingredient {

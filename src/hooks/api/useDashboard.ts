@@ -3,7 +3,7 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query'
 
 import { createClientLogger } from '@/lib/client-logger'
-import { cachePresets } from '@/providers/QueryProvider'
+import { cachePresets } from '@/lib/query/query-config'
 import { createClient } from '@/utils/supabase/client'
 
 

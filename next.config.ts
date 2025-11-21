@@ -24,6 +24,7 @@ const nextConfig: NextConfig = {
     removeConsole: isProd ? { exclude: ['error'] } : false
   },
 
+
   // Build configuration for production
   // ⚡ Build Performance Optimizations (SWC is default in Next.js 15+)
   poweredByHeader: false,

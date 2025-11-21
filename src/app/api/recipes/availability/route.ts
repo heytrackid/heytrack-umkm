@@ -10,6 +10,7 @@ import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailability
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 
 const CheckMultipleRecipesSchema = z.object({
   recipes: z.array(z.object({
@@ -26,10 +27,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     const quantity = parseInt(searchParams.get('quantity') ?? '1', 10)
 
     if (!recipeId) {
-      return NextResponse.json(
-        { error: 'recipe_id is required' },
-        { status: 400 }
-      )
+      return createErrorResponse('recipe_id is required', 400)
     }
 
     // Authenticate with Stack Auth
@@ -49,10 +47,10 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
       isAvailable: result.is_available
     }, 'Recipe availability checked')
 
-    return NextResponse.json(result)
+    return createSuccessResponse(result)
   } catch (error) {
     logError(apiLogger, error, 'Failed to check recipe availability')
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return createErrorResponse('Internal server error', 500)
   }
 }
 
@@ -79,7 +77,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
       availableCount: results.filter(r => r.is_available).length
     }, 'Multiple recipes checked')
 
-    return NextResponse.json({
+    return createSuccessResponse({
       results,
       summary: {
         total: results.length,
@@ -89,7 +87,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     })
   } catch (error) {
     logError(apiLogger, error, 'Failed to check multiple recipes')
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return createErrorResponse('Internal server error', 500)
   }
 }
 

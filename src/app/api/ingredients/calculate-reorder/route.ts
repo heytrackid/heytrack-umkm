@@ -6,6 +6,7 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { NextRequest, NextResponse } from 'next/server'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 
 async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
@@ -30,7 +31,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
     if (ingredientError) {
       if (ingredientError.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Ingredient not found' }, { status: 404 })
+        return createErrorResponse('Ingredient not found', 404)
       }
       throw ingredientError
     }
@@ -72,16 +73,14 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
     if (updateError) throw updateError
 
-    return NextResponse.json({
-      data: {
-        ingredientId,
-        averageDailyUsage,
-        leadTimeDays,
-        safetyStockDays,
-        calculatedReorderPoint: reorderPoint,
-        ingredient: updated,
-      },
-    })
+    return createSuccessResponse({
+      ingredientId,
+      averageDailyUsage,
+      leadTimeDays,
+      safetyStockDays,
+      calculatedReorderPoint: reorderPoint,
+      ingredient: updated,
+    }, 'Reorder point calculated successfully')
   } catch (error) {
     return handleAPIError(error, 'POST /api/ingredients/calculate-reorder')
   }

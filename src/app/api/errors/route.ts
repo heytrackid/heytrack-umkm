@@ -11,6 +11,7 @@ import { getErrorMessage } from '@/lib/type-guards'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 import type { ErrorLogInsert } from '@/types/database'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 
 interface ErrorBody {
   message?: string
@@ -119,11 +120,11 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
       errorBody = await parseErrorBody(request)
     } catch (error: unknown) {
       apiLogger.error({ error: getErrorMessage(error) }, 'Failed to parse error report body')
-      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+      return createErrorResponse('Invalid request body', 400)
     }
 
     if (!errorBody.message && !errorBody.msg) {
-      return NextResponse.json({ error: 'Message is required' }, { status: 400 })
+      return createErrorResponse('Message is required', 400)
     }
 
     const sanitized = sanitizeErrorBody(errorBody)
@@ -136,10 +137,10 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
       apiLogger.info({ ...sanitized, userId }, 'Client-side error reported')
     }
 
-    return NextResponse.json({ success: true })
+    return createSuccessResponse(null, 'Error reported successfully')
   } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in POST /api/errors')
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return createErrorResponse('Internal server error', 500)
   }
 }
 
@@ -198,13 +199,10 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
       )
     }
 
-    return NextResponse.json({ errors })
+    return createSuccessResponse({ errors })
   } catch (error) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/errors')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return createErrorResponse('Internal server error', 500)
   }
 }
 

@@ -2,12 +2,13 @@ export const runtime = 'nodejs'
 
 import type { NextResponse } from 'next/server'
 
-import { SupplierUpdateSchema } from '@/lib/validations/domains/supplier'
-import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-core'
 import { createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
-import { createErrorResponse } from '@/lib/api-core'
-import { apiLogger } from '@/lib/logger'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { cacheInvalidation } from '@/lib/cache'
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
+import { apiLogger } from '@/lib/logger'
+import { SupplierUpdateSchema } from '@/lib/validations/domains/supplier'
 
 
 
@@ -35,7 +36,7 @@ export const PUT = createApiRoute(
       table: 'suppliers',
       selectFields: 'id, name, contact_person, email, phone, address, notes, is_active, updated_at',
     },
-    'Supplier updated successfully'
+    SUCCESS_MESSAGES.SUPPLIER_UPDATED
   )
 )
 
@@ -73,7 +74,7 @@ async function deleteSupplierHandler(context: RouteContext): Promise<NextRespons
   }
 
   cacheInvalidation.suppliers()
-  return createErrorResponse('Supplier deleted successfully', 200) as never
+  return createSuccessResponse({ id }, SUCCESS_MESSAGES.SUPPLIER_DELETED)
 }
 
 export const DELETE = createApiRoute(

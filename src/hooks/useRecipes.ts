@@ -5,10 +5,13 @@ import { useToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import type { ApiErrorResponse, ApiSuccessResponse } from '@/lib/api-core'
+import { buildApiUrl, deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
+import { queryConfig } from '@/lib/query/query-config'
 
 const logger = createClientLogger('Hook')
 
 import type { Insert, Row, Update } from '@/types/database'
+import type { RecipeWithIngredients } from '@/types/database'
 
 /**
  * React Query hooks for Recipes
@@ -41,36 +44,19 @@ export function useRecipes(options?: UseRecipesOptions) {
 
   const queryResult = useQuery<RecipesResponse, Error, Recipe[]>({
     queryKey: ['recipes', options],
-    queryFn: async ({ signal }) => {
-      const params = new URLSearchParams()
-      if (options?.limit) {params.set('limit', options.limit.toString())}
-      if (options?.offset) {params.set('offset', options.offset.toString())}
-      if (options?.search) {params.set('search', options.search)}
-      if (options?.status) {params.set('status', options.status)}
-      const queryString = params.toString()
-      
-      const response = await fetch(queryString ? `/api/recipes?${queryString}` : '/api/recipes', {
-        credentials: 'include', // Include cookies for authentication
-        signal, // React Query provides signal automatically
+    queryFn: async () => {
+      const url = buildApiUrl('/api/recipes', {
+        limit: options?.limit,
+        offset: options?.offset,
+        search: options?.search,
+        status: options?.status,
       })
-      let payload: RecipesResponse | null = null
-      try {
-        payload = await response.json() as RecipesResponse
-      } catch {
-        // ignore parsing error, handled below
-      }
-
-      if (!response.ok || payload === null || typeof payload !== 'object') {
-        const errorMessage = payload && typeof payload === 'object' && 'error' in payload && typeof (payload as { error?: unknown }).error === 'string'
-          ? (payload as { error: string }).error
-          : 'Failed to fetch recipes'
-        throw new Error(errorMessage)
-      }
+      
+      const payload = await fetchApi<RecipesResponse>(url)
       return payload
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
-    refetchOnWindowFocus: false,
+    ...queryConfig.queries.moderate,
+    refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes
     select: (result: RecipesResponse) => result.data ?? [],
   })
 
@@ -90,27 +76,23 @@ export function useRecipes(options?: UseRecipesOptions) {
   return queryResult
 }
 
+interface RecipeApiResponse {
+  data: RecipeWithIngredients
+}
+
 /**
  * Fetch single recipe by ID
  */
 export function useRecipe(id: string | null) {
-  return useQuery({
+  return useQuery<RecipeApiResponse['data'] | null>({
     queryKey: ['recipe', id],
-    queryFn: async ({ signal }) => {
+    queryFn: async () => {
       if (!id) {return null}
-      
-      const response = await fetch(`/api/recipes/${id}`, {
-        credentials: 'include', // Include cookies for authentication
-        signal, // React Query provides signal automatically
-      })
-      if (!response.ok) {
-        throw new Error('Failed to fetch recipe')
-      }
-      return response.json()
+      const response = await fetchApi<RecipeApiResponse>(`/api/recipes/${id}`)
+      return response.data
     },
     enabled: Boolean(id),
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    ...queryConfig.queries.moderate,
   })
 }
 
@@ -123,33 +105,7 @@ export function useCreateRecipe() {
   
   return useMutation({
     mutationFn: async (data: RecipeInsert) => {
-      const abortController = new AbortController()
-      const timeoutId = setTimeout(() => abortController.abort(), 30000) // 30s timeout
-
-      try {
-        const response = await fetch('/api/recipes', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-          credentials: 'include', // Include cookies for authentication
-          signal: abortController.signal,
-        })
-        
-        clearTimeout(timeoutId)
-        
-        if (!response.ok) {
-          const error = await response.json()
-          throw new Error(error.message ?? 'Failed to create recipe')
-        }
-        
-        return response.json()
-      } catch (error) {
-        clearTimeout(timeoutId)
-        if (error instanceof Error && error.name === 'AbortError') {
-          throw new Error('Request timeout - please try again')
-        }
-        throw error
-      }
+      return postApi('/api/recipes', data)
     },
     onSuccess: () => {
       // Invalidate and refetch recipes list
@@ -182,33 +138,7 @@ export function useUpdateRecipe() {
   
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: RecipeUpdate }) => {
-      const abortController = new AbortController()
-      const timeoutId = setTimeout(() => abortController.abort(), 30000) // 30s timeout
-
-      try {
-        const response = await fetch(`/api/recipes/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-          credentials: 'include', // Include cookies for authentication
-          signal: abortController.signal,
-        })
-        
-        clearTimeout(timeoutId)
-        
-        if (!response.ok) {
-          const error = await response.json()
-          throw new Error(error.message ?? 'Failed to update recipe')
-        }
-        
-        return response.json()
-      } catch (error) {
-        clearTimeout(timeoutId)
-        if (error instanceof Error && error.name === 'AbortError') {
-          throw new Error('Request timeout - please try again')
-        }
-        throw error
-      }
+      return putApi(`/api/recipes/${id}`, data)
     },
     onSuccess: (_, variables) => {
       // Invalidate specific recipe and list
@@ -242,31 +172,7 @@ export function useDeleteRecipe() {
   
   return useMutation({
     mutationFn: async (id: string) => {
-      const abortController = new AbortController()
-      const timeoutId = setTimeout(() => abortController.abort(), 30000) // 30s timeout
-
-      try {
-        const response = await fetch(`/api/recipes/${id}`, {
-          method: 'DELETE',
-          credentials: 'include', // Include cookies for authentication
-          signal: abortController.signal,
-        })
-        
-        clearTimeout(timeoutId)
-        
-        if (!response.ok) {
-          const error = await response.json()
-          throw new Error(error.message ?? 'Failed to delete recipe')
-        }
-        
-        return response.json()
-      } catch (error) {
-        clearTimeout(timeoutId)
-        if (error instanceof Error && error.name === 'AbortError') {
-          throw new Error('Request timeout - please try again')
-        }
-        throw error
-      }
+      return deleteApi(`/api/recipes/${id}`)
     },
     onSuccess: () => {
       // Invalidate recipes list
@@ -309,37 +215,16 @@ export function useCreateRecipeWithIngredients() {
         notes?: string
       }>
     }) => {
-      const abortController = new AbortController()
-      const timeoutId = setTimeout(() => abortController.abort(), 30000)
-
-      try {
-        const response = await fetch('/api/recipes', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...data.recipe,
-            recipe_ingredients: data.ingredients,
-          }),
-          credentials: 'include',
-          signal: abortController.signal,
-        })
-
-        clearTimeout(timeoutId)
-
-        if (!response.ok) {
-          const error = await response.json()
-          throw new Error(error.message ?? 'Failed to create recipe')
-        }
-
-        const payload = await response.json() as ApiSuccessResponse<Recipe> | ApiErrorResponse
-        if (!('success' in payload) || !payload.success) {
-          throw new Error(payload?.error ?? 'Failed to create recipe')
-        }
-        return payload.data
-      } catch (error) {
-        clearTimeout(timeoutId)
-        throw error
+      const payload = {
+        ...data.recipe,
+        recipe_ingredients: data.ingredients,
       }
+      const response = await postApi<ApiSuccessResponse<Recipe> | ApiErrorResponse>('/api/recipes', payload)
+      
+      if (!('success' in response) || !response.success) {
+        throw new Error(response?.error ?? 'Failed to create recipe')
+      }
+      return response.data
     },
     onSuccess: (data) => {
       // Invalidate recipes list
@@ -383,37 +268,16 @@ export function useUpdateRecipeWithIngredients() {
         notes?: string
       }>
     }) => {
-      const abortController = new AbortController()
-      const timeoutId = setTimeout(() => abortController.abort(), 30000)
-
-      try {
-        const response = await fetch(`/api/recipes/${data.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...data.recipe,
-            recipe_ingredients: data.ingredients,
-          }),
-          credentials: 'include',
-          signal: abortController.signal,
-        })
-
-        clearTimeout(timeoutId)
-
-        if (!response.ok) {
-          const error = await response.json()
-          throw new Error(error.message ?? 'Failed to update recipe')
-        }
-
-        const payload = await response.json() as ApiSuccessResponse<Recipe> | ApiErrorResponse
-        if (!('success' in payload) || !payload.success) {
-          throw new Error(payload?.error ?? 'Failed to update recipe')
-        }
-        return payload.data
-      } catch (error) {
-        clearTimeout(timeoutId)
-        throw error
+      const payload = {
+        ...data.recipe,
+        recipe_ingredients: data.ingredients,
       }
+      const response = await putApi<ApiSuccessResponse<Recipe> | ApiErrorResponse>(`/api/recipes/${data.id}`, payload)
+      
+      if (!('success' in response) || !response.success) {
+        throw new Error(response?.error ?? 'Failed to update recipe')
+      }
+      return response.data
     },
     onSuccess: (data, variables) => {
       // Invalidate recipes list and specific recipe

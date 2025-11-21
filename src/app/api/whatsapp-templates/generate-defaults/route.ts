@@ -7,6 +7,8 @@ import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { createClient } from '@/utils/supabase/server'
 
 /**
@@ -35,10 +37,7 @@ async function postHandler(): Promise<NextResponse> {
     }
 
     if (existingTemplates && existingTemplates.length > 0) {
-      return NextResponse.json(
-        { error: 'User already has templates', message: 'Kamu sudah punya template. Hapus dulu kalau mau reset.' },
-        { status: 409 }
-      )
+      return createErrorResponse('Kamu sudah punya template. Hapus dulu kalau mau reset.', 409)
     }
 
     // 3. Create default templates using database function
@@ -65,14 +64,10 @@ async function postHandler(): Promise<NextResponse> {
 
     apiLogger.info({ userId: user.id, count: templates?.length }, 'Default templates created successfully')
 
-    return NextResponse.json({
-      success: true,
-      message: 'Template default berhasil dibuat!',
-      templates,
-    })
+    return createSuccessResponse({ templates }, SUCCESS_MESSAGES.WHATSAPP_DEFAULTS_GENERATED)
   } catch (error) {
     apiLogger.error({ error }, 'Error in POST /api/whatsapp-templates/generate-defaults')
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return createErrorResponse('Internal server error', 500)
   }
 }
 

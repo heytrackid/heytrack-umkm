@@ -23,8 +23,6 @@ import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
 interface OrderFiltersInterface {
     status: OrderStatus[]
     payment_status: string[]
-    date_from: string
-    date_to: string
     customer_search?: string
 }
 

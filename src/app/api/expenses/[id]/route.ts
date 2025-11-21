@@ -1,8 +1,9 @@
 export const runtime = 'nodejs'
 
-import { z } from 'zod'
+import { createDeleteHandler, createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
 import { createApiRoute } from '@/lib/api/route-factory'
-import { createGetHandler, createUpdateHandler, createDeleteHandler } from '@/lib/api/crud-helpers'
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
+import { z } from 'zod'
 
 const UpdateExpenseSchema = z.object({
   description: z.string().min(1).optional(),
@@ -35,7 +36,7 @@ export const PUT = createApiRoute(
   createUpdateHandler({
     table: 'financial_records',
     selectFields: '*',
-  })
+  }, SUCCESS_MESSAGES.EXPENSE_UPDATED)
 )
 
 // DELETE /api/expenses/[id] - Delete expense
@@ -48,6 +49,6 @@ export const DELETE = createApiRoute(
     {
       table: 'financial_records',
     },
-    'Expense deleted successfully'
+    SUCCESS_MESSAGES.EXPENSE_DELETED
   )
 )

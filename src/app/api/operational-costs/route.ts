@@ -1,8 +1,9 @@
 export const runtime = 'nodejs'
 
-import { OperationalCostInsertSchema } from '@/lib/validations/domains/finance'
+import { ListQuerySchema, createCreateHandler, createListHandler } from '@/lib/api/crud-helpers'
 import { createApiRoute } from '@/lib/api/route-factory'
-import { ListQuerySchema, createListHandler, createCreateHandler } from '@/lib/api/crud-helpers'
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
+import { OperationalCostInsertSchema } from '@/lib/validations/domains/finance'
 
 
 // GET /api/operational-costs - List all operational costs with pagination
@@ -33,6 +34,6 @@ export const POST = createApiRoute(
       table: 'operational_costs',
       selectFields: '*',
     },
-    'Operational cost created successfully'
+    SUCCESS_MESSAGES.OPERATIONAL_COST_CREATED
   )
 )

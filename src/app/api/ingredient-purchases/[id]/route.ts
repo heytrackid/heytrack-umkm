@@ -1,9 +1,12 @@
 export const runtime = 'nodejs'
 
 import { z } from 'zod'
-import { createApiRoute } from '@/lib/api/route-factory'
+import { createApiRoute, type RouteHandler } from '@/lib/api/route-factory'
 import { createGetHandler, createUpdateHandler, createDeleteHandler } from '@/lib/api/crud-helpers'
 import { triggerWorkflow } from '@/lib/automation/workflows/index'
+import { apiLogger } from '@/lib/logger'
+import type { RouteContext } from '@/lib/api/route-factory'
+import type { IngredientPurchaseUpdate } from '@/types/database'
 
 const UpdatePurchaseSchema = z.object({
   quantity: z.number().positive().optional(),
@@ -29,12 +32,16 @@ export const GET = createApiRoute(
 
 // PUT /api/ingredient-purchases/[id] - Update purchase
 async function updatePurchaseHandler(
-  context: any,
+  context: RouteContext,
   _query?: never,
   body?: z.infer<typeof UpdatePurchaseSchema>
-): Promise<any> {
+): Promise<{ data?: unknown; error?: string; status?: number }> {
   const { user, supabase, params } = context
   const id = params?.['id']
+
+  if (!id) {
+    return { error: 'Purchase ID is required', status: 400 }
+  }
 
   if (!body) {
     return { error: 'Request body is required', status: 400 }
@@ -46,7 +53,7 @@ async function updatePurchaseHandler(
   // Update purchase
   const { data, error } = await supabase
     .from('ingredient_purchases')
-    .update(body as any)
+    .update(body as IngredientPurchaseUpdate)
     .eq('id', id)
     .eq('user_id', user.id)
     .select('*, ingredient:ingredients(id, name, unit)')
@@ -61,7 +68,7 @@ async function updatePurchaseHandler(
     try {
       await triggerWorkflow('purchase.completed', id)
     } catch (workflowError) {
-      console.error('Failed to trigger purchase completion workflow:', workflowError)
+      apiLogger.error({ error: workflowError, purchaseId: id }, 'Failed to trigger purchase completion workflow')
       // Don't fail the main operation
     }
   }
@@ -75,7 +82,7 @@ export const PUT = createApiRoute(
     path: '/api/ingredient-purchases/[id]',
     bodySchema: UpdatePurchaseSchema,
   },
-  updatePurchaseHandler
+  updatePurchaseHandler as RouteHandler<never, z.infer<typeof UpdatePurchaseSchema>>
 )
 
 // DELETE /api/ingredient-purchases/[id] - Delete purchase

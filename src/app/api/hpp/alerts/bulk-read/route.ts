@@ -4,6 +4,8 @@ export const runtime = 'nodejs'
 import { NextResponse } from 'next/server'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
+import { createSuccessResponse } from '@/lib/api-core/responses'
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
@@ -44,11 +46,7 @@ async function postHandler(): Promise<NextResponse> {
 
     apiLogger.info({ updatedCount }, 'All alerts marked as read successfully')
 
-    return NextResponse.json({
-      success: true,
-      message: `Marked ${updatedCount} alerts as read`,
-      updatedCount
-    })
+    return createSuccessResponse({ updatedCount }, SUCCESS_MESSAGES.HPP_ALERTS_READ)
   } catch (error) {
     return handleAPIError(error, 'POST /api/hpp/alerts/bulk-read')
   }

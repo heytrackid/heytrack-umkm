@@ -1,9 +1,9 @@
 export const runtime = 'nodejs'
 
-import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
+import { ListQuerySchema, createCreateHandler, createListHandler } from '@/lib/api/crud-helpers'
 import { createApiRoute } from '@/lib/api/route-factory'
-import { ListQuerySchema, createListHandler, createCreateHandler } from '@/lib/api/crud-helpers'
-
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
+import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
 
 
 // GET /api/suppliers - List all suppliers with pagination, search, and sorting
@@ -34,6 +34,6 @@ export const POST = createApiRoute(
       table: 'suppliers',
       selectFields: 'id, name, contact_person, email, phone, address, notes, is_active, created_at, updated_at',
     },
-    'Supplier created successfully'
+    SUCCESS_MESSAGES.SUPPLIER_CREATED
   )
 )

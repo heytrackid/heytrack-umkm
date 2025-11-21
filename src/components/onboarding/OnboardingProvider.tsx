@@ -1,36 +1,37 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { OnboardingWizard } from './OnboardingWizard'
 import { logger } from '@/lib/logger'
+import { fetchApi } from '@/lib/query/query-helpers'
+import { useState, useEffect } from 'react'
+
+interface OnboardingStatus {
+  completed: boolean
+  skipped: boolean
+}
 
 export function OnboardingProvider({ children }: { children: React.ReactNode }): JSX.Element {
-  const [showOnboarding, setShowOnboarding] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [isOnboardingDismissed, setIsOnboardingDismissed] = useState(false)
 
+  // ✅ Use React Query instead of manual fetch
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['onboarding', 'status'],
+    queryFn: () => fetchApi<OnboardingStatus>('/onboarding'),
+    staleTime: 5 * 60 * 1000, // 5 minutes - status doesn't change often
+  })
+
+  // Compute whether to show onboarding (no setState in effect)
+  const shouldShowOnboarding = Boolean(!isLoading && data && !data.completed && !data.skipped && !isOnboardingDismissed)
+
+  // Handle error logging
   useEffect(() => {
-    checkOnboardingStatus()
-  }, [])
-
-  const checkOnboardingStatus = async (): Promise<void> => {
-    try {
-      const response = await fetch('/api/onboarding')
-      const result = await response.json()
-
-      if (result.success && result.data) {
-        // Show onboarding if not completed and not skipped
-        if (!result.data.completed && !result.data.skipped) {
-          setShowOnboarding(true)
-        }
-      }
-    } catch (error) {
+    if (error) {
       logger.error({ error }, 'Failed to check onboarding status')
-    } finally {
-      setLoading(false)
     }
-  }
+  }, [error])
 
-  if (loading) {
+  if (isLoading) {
     return <>{children}</>
   }
 
@@ -38,8 +39,8 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }):
     <>
       {children}
       <OnboardingWizard 
-        open={showOnboarding} 
-        onOpenChange={setShowOnboarding}
+        open={shouldShowOnboarding} 
+        onOpenChange={setIsOnboardingDismissed}
       />
     </>
   )

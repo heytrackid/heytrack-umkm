@@ -1,12 +1,15 @@
 
-
-/* eslint-disable no-console */
 /**
  * Client-Side Logger
  *
- * Console-based logger for client components
- * Uses console methods for proper browser compatibility
+ * Structured logger for client components
+ * Uses console methods for browser compatibility but with structured format
+ * 
+ * Note: Console usage is intentional here for client-side logging
+ * This is a wrapper that provides structured logging interface
  */
+
+/* eslint-disable no-console */
 
 type LogContext = Record<string, unknown>
 

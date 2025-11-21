@@ -1,8 +1,8 @@
 'use client';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
+import { Icon } from '@iconify/react';
 import React from 'react';
 
 export type LucideIcon = React.FC<{

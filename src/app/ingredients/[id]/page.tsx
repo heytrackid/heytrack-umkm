@@ -11,11 +11,12 @@ import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { PageBreadcrumb } from '@/components/ui/page-breadcrumb'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { useSupabaseCRUD } from '@/hooks/supabase/index'
 import { toast } from 'sonner'
 import { apiLogger } from '@/lib/logger'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
-import { useSupabase } from '@/providers/SupabaseProvider'
+import { useIngredient } from '@/hooks/useIngredients'
 
 
 import type { Row, Update } from '@/types/database'
@@ -32,11 +33,10 @@ const EditIngredientPage = (): JSX.Element | null => {
     const id = params['id'] as string
     const { update: updateIngredient } = useSupabaseCRUD('ingredients')
 
-    const { supabase } = useSupabase()
-
     const [loading, setLoading] = useState(false)
-    const [fetching, setFetching] = useState(true)
-    const [ingredient, setIngredient] = useState<Ingredient | null>(null)
+
+    // ✅ Use React Query instead of manual Supabase query
+    const { data: ingredient, isLoading: fetching, error: fetchError } = useIngredient(id)
 
     const form = useForm<SimpleIngredientFormData>({
         resolver: zodResolver(IngredientFormSchema),
@@ -50,44 +50,28 @@ const EditIngredientPage = (): JSX.Element | null => {
         }
     })
 
-    // Fetch ingredient data
+    // Update form when ingredient data is loaded
     useEffect(() => {
-        const fetchIngredient = async () => {
-            try {
-                setFetching(true)
-
-                const { data, error } = await supabase
-                    .from('ingredients')
-                    .select('id, name, unit, price_per_unit, current_stock, min_stock, description, category, supplier, weighted_average_cost, created_at, updated_at')
-                    .eq('id', id)
-                    .single<Ingredient>()
-
-                if (error) { throw error }
-
-                if (data) {
-                    setIngredient(data)
-                    form.reset({
-                        name: data.name,
-                        unit: data.unit as 'dozen' | 'g' | 'kg' | 'l' | 'ml' | 'pcs',
-                        price_per_unit: data.price_per_unit,
-                        current_stock: data.current_stock ?? 0,
-                        min_stock: data.min_stock ?? 0,
-                        description: data.description ?? ''
-                    })
-                }
-            } catch (error) {
-                apiLogger.error({ error }, 'Failed to fetch ingredient:')
-                toast.error('Gagal memuat data bahan baku')
-                router.push('/ingredients')
-            } finally {
-                setFetching(false)
-            }
+        if (ingredient) {
+            form.reset({
+                name: ingredient.name,
+                unit: ingredient.unit as 'dozen' | 'g' | 'kg' | 'l' | 'ml' | 'pcs',
+                price_per_unit: ingredient.price_per_unit,
+                current_stock: ingredient.current_stock ?? 0,
+                min_stock: ingredient.min_stock ?? 0,
+                description: ingredient.description ?? ''
+            })
         }
+    }, [ingredient, form])
 
-        if (id) {
-            void fetchIngredient()
+    // Handle fetch error
+    useEffect(() => {
+        if (fetchError) {
+            apiLogger.error({ error: fetchError }, 'Failed to fetch ingredient:')
+            toast.error('Gagal memuat data bahan baku')
+            router.push('/ingredients')
         }
-    }, [id, form, router, supabase])
+    }, [fetchError, router])
 
     const handleSubmit = async (data: SimpleIngredientFormData) => {
         try {
@@ -143,26 +127,24 @@ const EditIngredientPage = (): JSX.Element | null => {
             <div className="space-y-6 p-6">
                 <PageBreadcrumb items={breadcrumbItems} />
 
-                {/* Header */}
-                <div className="flex items-center gap-4">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => router.back()}
-                        className="shrink-0"
-                    >
-                        <ArrowLeft className="h-5 w-5" />
-                    </Button>
-                    <div>
-                        <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
-                            <Package className="h-7 w-7 sm:h-8 sm:w-8" />
-                            Edit Bahan Baku
-                        </h1>
-                        <p className="text-sm text-muted-foreground mt-1">
-                            Perbarui informasi bahan baku
-                        </p>
-                    </div>
-                </div>
+                <PageHeader
+                    title="Edit Bahan Baku"
+                    description="Perbarui informasi bahan baku"
+                    breadcrumbs={[
+                        { label: 'Dashboard', href: '/' },
+                        { label: 'Bahan Baku', href: '/ingredients' },
+                        { label: ingredient?.name ?? 'Edit Bahan Baku' }
+                    ]}
+                    action={
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => router.back()}
+                        >
+                            <ArrowLeft className="h-5 w-5" />
+                        </Button>
+                    }
+                />
 
                 {/* Form */}
                 <div className="max-w-3xl">

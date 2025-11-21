@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 
 import type {
     ChartDataPoint,
@@ -9,6 +10,8 @@ import type {
 import { calculateProfitDateRange, exportProfitReport, prepareProductChartData, validateProfitData } from '@/app/profit/utils'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
+import { buildApiUrl } from '@/lib/query/query-helpers'
+import { cachePresets } from '@/lib/query/query-config'
 
 
 interface UseProfitReportReturn {
@@ -36,55 +39,52 @@ interface UseProfitReportReturn {
   setEndDate: (date: string) => void
 
   // API methods
-  fetchProfitData: () => Promise<void>
+  refetch: () => void
   exportReport: (format: 'csv' | 'pdf' | 'xlsx') => Promise<void>
 }
 
 export function useProfitReport(): UseProfitReportReturn {
   const { toast } = useToast()
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [profitData, setProfitData] = useState<ProfitData | null>(null)
 
   // Filters
   const [selectedPeriod, setSelectedPeriod] = useState<ProfitPeriodType>('month')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
 
-  // Fetch profit data
-  const fetchProfitData = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+  // Calculate date range
+  const { startDate: calculatedStartDate, endDate: calculatedEndDate } = useMemo(
+    () => calculateProfitDateRange(selectedPeriod, startDate, endDate),
+    [selectedPeriod, startDate, endDate]
+  )
 
-    try {
-      const { startDate: calculatedStartDate, endDate: calculatedEndDate } = calculateProfitDateRange(
-        selectedPeriod,
-        startDate,
-        endDate
-      )
+  // ✅ Use React Query instead of manual fetch
+  const { data: profitData, isLoading: loading, error: queryError, refetch } = useQuery({
+    queryKey: ['reports', 'profit', { selectedPeriod, startDate: calculatedStartDate, endDate: calculatedEndDate }],
+    queryFn: async () => {
+      const url = buildApiUrl('/reports/profit', {
+        start_date: calculatedStartDate,
+        end_date: calculatedEndDate
+      })
 
-      const params = new URLSearchParams()
-      if (calculatedStartDate) {params.append('start_date', calculatedStartDate)}
-      if (calculatedEndDate) {params.append('end_date', calculatedEndDate)}
-
-      const response = await fetch(`/api/reports/profit?${params.toString()}`)
+      const response = await fetch(url)
 
       if (!response.ok) {
         throw new Error('Gagal mengambil data laporan laba')
       }
 
-       const data = await response.json() as unknown as ProfitData
+      const data = await response.json() as unknown as ProfitData
 
-       if (!validateProfitData(data)) {
+      if (!validateProfitData(data)) {
         throw new Error('Data laporan laba tidak valid')
-       }
+      }
 
-       setProfitData(data)
-     } catch (error) {
-       apiLogger.error({ error }, 'Error fetching profit data:')
-       setError(error instanceof Error ? error.message : 'Terjadi kesalahan saat mengambil data')
-     }
-  }, [selectedPeriod, startDate, endDate])
+      return data
+    },
+    ...cachePresets.analytics, // 5min stale, 20min gc
+    enabled: !!(calculatedStartDate && calculatedEndDate)
+  })
+
+  const error = queryError ? (queryError instanceof Error ? queryError.message : 'Terjadi kesalahan saat mengambil data') : null
 
   // Handle export report
   const exportReport = (format: 'csv' | 'pdf' | 'xlsx') => {
@@ -114,16 +114,11 @@ export function useProfitReport(): UseProfitReportReturn {
   const trends = useMemo(() => profitData?.trends ?? null, [profitData])
   const productChartData = useMemo(() => prepareProductChartData(products), [products])
 
-  // Load data on mount and when filters change
-  useEffect(() => {
-    void fetchProfitData()
-  }, [selectedPeriod, startDate, endDate, fetchProfitData])
-
   return {
     // State
     loading,
     error,
-    profitData,
+    profitData: profitData ?? null,
 
     // Filters
     selectedPeriod,
@@ -144,7 +139,7 @@ export function useProfitReport(): UseProfitReportReturn {
     setEndDate,
 
     // API methods
-    fetchProfitData,
+    refetch: () => { void refetch() },
     exportReport
   }
 }

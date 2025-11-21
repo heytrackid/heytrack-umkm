@@ -11,12 +11,65 @@ import type { ChatAction, ChatContext } from '@/lib/ai-chatbot/types';
 import { createClientLogger } from '@/lib/client-logger';
 
 import { useChatHistory } from '@/hooks/useChatHistory';
+import { useMutation } from '@tanstack/react-query';
+import { postApi } from '@/lib/query/query-helpers';
 
 
 const logger = createClientLogger('ChatbotInterface')
 
+// QuickActions component moved outside to avoid render-time creation
+interface QuickActionsProps {
+  onSendMessage: (message: string) => void;
+  isLoading: boolean;
+}
 
-
+const QuickActions = ({ onSendMessage, isLoading }: QuickActionsProps): JSX.Element => (
+  <div className="p-3 bg-gradient-to-r from-gray-50 to-gray-100 border-t">
+    <p className="text-xs font-medium text-muted-foreground mb-2">💡 Coba tanyakan:</p>
+    <div className="flex flex-wrap gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onSendMessage('Resep apa yang paling menguntungkan?')}
+        disabled={isLoading}
+        className="text-xs h-8 bg-background hover:bg-muted"
+      >
+        <TrendingUp className="h-3 w-3 mr-1" />
+        Analisis Profit
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onSendMessage('Gimana cara ningkatin penjualan?')}
+        disabled={isLoading}
+        className="text-xs h-8 bg-background hover:bg-muted"
+      >
+        <Users className="h-3 w-3 mr-1" />
+        Strategi Marketing
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onSendMessage('Stok bahan apa yang harus direstock?')}
+        disabled={isLoading}
+        className="text-xs h-8 bg-background hover:bg-muted"
+      >
+        <Package className="h-3 w-3 mr-1" />
+        Cek Stok
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onSendMessage('Harga jual yang pas untuk produk baru berapa?')}
+        disabled={isLoading}
+        className="text-xs h-8 bg-background hover:bg-muted"
+      >
+        <DollarSign className="h-3 w-3 mr-1" />
+        Pricing Strategy
+      </Button>
+    </div>
+  </div>
+);
 
 // Extended message type for UI with additional properties
 interface ExtendedChatMessage {
@@ -53,10 +106,87 @@ export const ChatbotInterface = ({
   } = useChatHistory(userId);
   
   const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [context, setContext] = useState<ChatContext | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // ✅ Use React Query mutation for AI chat
+  const chatMutation = useMutation({
+    mutationFn: (data: { message: string; session_id?: string; currentPage: string }) =>
+      postApi<{ message: string; suggestions?: Array<{ text: string; action: string }>; session_id?: string }>('/ai/chat', data),
+    onSuccess: (result, variables) => {
+      if (result.message) {
+        const assistantMessage: ExtendedChatMessage = {
+          id: `assistant_${Date.now()}`,
+          role: 'assistant' as const,
+          content: result.message,
+          timestamp: new Date(),
+          ...(result.suggestions && {
+            actions: result.suggestions.map((s) => ({
+              type: s.action as ChatAction['type'],
+              label: s.text
+            }))
+          })
+        };
+
+        setMessages(prev => [...prev, assistantMessage]);
+        void saveMessage(assistantMessage);
+
+        // Update session context
+        if (result.session_id) {
+          setContext({
+            userId,
+            sessionId: result.session_id,
+            conversationHistory: [...messages, assistantMessage]
+              .filter(m => m.role !== 'system')
+              .map(({ role, content, timestamp }) => ({
+                role: role as 'assistant' | 'user',
+                content,
+                timestamp
+              })),
+          });
+        }
+      }
+    },
+    onError: (error) => {
+      logger.error({ error }, 'Error sending message:');
+      const errorMessage: ExtendedChatMessage = {
+        id: `error_${Date.now()}`,
+        role: 'assistant' as const,
+        content: 'Maaf, terjadi kesalahan saat menghubungi AI. Silakan coba lagi.',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    }
+  });
+
+  // ✅ Use React Query mutation for AI actions
+  const actionMutation = useMutation({
+    mutationFn: (data: { action: ChatAction; context: ChatContext }) =>
+      postApi<{ success: boolean; message: string }>('/ai/actions', data),
+    onSuccess: (result) => {
+      if (result.message) {
+        const assistantMessage: ExtendedChatMessage = {
+          id: `assistant_${Date.now()}`,
+          role: 'assistant' as const,
+          content: result.message,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        void saveMessage(assistantMessage);
+      }
+    },
+    onError: (error) => {
+      logger.error({ error }, 'Error executing action:');
+      const errorMessage: ExtendedChatMessage = {
+        id: `error_${Date.now()}`,
+        role: 'assistant' as const,
+        content: 'Maaf, terjadi kesalahan saat mengeksekusi aksi. Silakan coba lagi.',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    }
+  });
 
   // Auto scroll to bottom when new messages arrive
   const scrollToBottom = (): void => {
@@ -116,168 +246,38 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
   }, [isHistoryLoading, messages.length, saveMessage, setMessages]);
 
   // Handle sending messages via API
-  const handleSendMessage = async (message?: string): Promise<void> => {
+  const handleSendMessage = (message?: string): void => {
     const messageToSend = message ?? inputValue.trim();
-    if (!messageToSend || isLoading) { return; }
+    if (!messageToSend || chatMutation.isPending) { return; }
 
-    setIsLoading(true);
     setInputValue('');
 
-    try {
-      // Add user message to UI and database
-      if (!message) { // Only add user message if it's not an auto-greeting
-        const userMessage: ExtendedChatMessage = {
-          id: `user_${Date.now()}`,
-          role: 'user' as const,
-          content: messageToSend,
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, userMessage]);
-        void saveMessage(userMessage);
-      }
-
-      // Call AI chat API with enhanced NLP
-      const response = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: messageToSend,
-          session_id: context?.sessionId,
-          currentPage: 'chatbot'
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response['status']}`);
-      }
-
-      const result = await response.json() as { message?: string; suggestions?: Array<{ text: string; action: string }>; session_id?: string; error?: string };
-
-      if (result.message) {
-        // Create assistant message with NLP response
-        const assistantMessage: ExtendedChatMessage = {
-          id: `assistant_${Date.now()}`,
-          role: 'assistant' as const,
-          content: result.message,
-          timestamp: new Date(),
-          ...(result.suggestions && {
-            actions: result.suggestions.map((s) => ({
-              type: s.action as ChatAction['type'],
-              label: s.text
-            }))
-          })
-        };
-
-        setMessages(prev => [...prev, assistantMessage]);
-        void saveMessage(assistantMessage);
-
-        // Update session context with updated messages
-        if (result.session_id) {
-          setContext({
-            userId,
-            sessionId: result.session_id,
-            conversationHistory: [...messages, assistantMessage]
-              .filter(m => m.role !== 'system')
-              .map(({ role, content, timestamp }) => ({
-                role: role as 'assistant' | 'user',
-                content,
-                timestamp
-              })),
-          });
-        }
-      } else {
-        throw new Error(result.error ?? 'Unknown API error');
-      }
-
-    } catch (error) {
-      logger.error({ error }, 'Error sending message:');
-      const errorMessage: ExtendedChatMessage = {
-        id: `error_${Date.now()}`,
-        role: 'assistant' as const,
-        content: 'Maaf, terjadi kesalahan saat menghubungi AI. Silakan coba lagi.',
+    // Add user message to UI and database
+    if (!message) { // Only add user message if it's not an auto-greeting
+      const userMessage: ExtendedChatMessage = {
+        id: `user_${Date.now()}`,
+        role: 'user' as const,
+        content: messageToSend,
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
+      setMessages(prev => [...prev, userMessage]);
+      void saveMessage(userMessage);
     }
+
+    // Call AI chat API with React Query mutation
+    chatMutation.mutate({
+      message: messageToSend,
+      session_id: context?.sessionId,
+      currentPage: 'chatbot'
+    });
   };
 
   // Handle action button clicks via API
-  const handleActionClick = async (action: ChatAction): Promise<void> => {
-    if (!context) { return; }
+  const handleActionClick = (action: ChatAction): void => {
+    if (!context || actionMutation.isPending) { return; }
 
-    try {
-      setIsLoading(true);
-
-      const response = await fetch('/api/ai/actions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          actionId: action['type'],
-          contextId: context.sessionId,
-          userId
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Action API error: ${response['status']}`);
-      }
-
-      const apiResult = await response.json() as { success: boolean; result?: { message?: string; aiRecommendations?: string; businessInsights?: unknown }; error?: string };
-
-      if (apiResult.success) {
-        const { result } = apiResult;
-
-        // Create system message with enhanced content
-        let content = result?.message ?? `Aksi"${action.label}" berhasil dijalankan.`;
-
-        // Add AI recommendations if available
-        if (result?.aiRecommendations) {
-          content += `\n\n🤖 **AI Recommendations:**\n${result.aiRecommendations}`;
-        }
-
-        const systemMessage: ExtendedChatMessage = {
-          id: `system_${Date.now()}`,
-          role: 'system',
-          content,
-          timestamp: new Date(),
-          data: {
-            ...result,
-            actionType: action['type'],
-            aiEnhanced: Boolean(result?.aiRecommendations ?? result?.businessInsights),
-            metadata: {
-              actionType: action['type'],
-              aiEnhanced: Boolean(result?.aiRecommendations ?? result?.businessInsights)
-            }
-          }
-        };
-
-        setMessages(prev => [...prev, systemMessage]);
-        void saveMessage(systemMessage);
-      } else {
-        throw new Error(apiResult.error ?? 'Unknown action error');
-      }
-
-    } catch (error) {
-      logger.error({ error }, 'Error executing action:');
-      const errorMessage: ExtendedChatMessage = {
-        id: `error_${Date.now()}`,
-        role: 'assistant' as const,
-        content: 'Gagal menjalankan aksi AI. Silakan coba lagi.',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-    }
+    actionMutation.mutate({ action, context });
   };
-
-
 
   // Get icon for action type
   const getActionIcon = (type: string): JSX.Element => {
@@ -334,7 +334,7 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
                     variant="secondary"
                     size="sm"
                     onClick={() => handleActionClick(action as ChatAction)}
-                    disabled={isLoading}
+                    disabled={chatMutation.isPending || actionMutation.isPending}
                     className="text-xs h-8"
                   >
                     {getActionIcon(action.type)}
@@ -360,53 +360,7 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
 
   // Quick action buttons with smart suggestions
    
-  const QuickActions = (): JSX.Element => (
-    <div className="p-3 bg-gradient-to-r from-gray-50 to-gray-100 border-t">
-      <p className="text-xs font-medium text-muted-foreground mb-2">💡 Coba tanyakan:</p>
-      <div className="flex flex-wrap gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handleSendMessage('Resep apa yang paling menguntungkan?')}
-          disabled={isLoading}
-          className="text-xs h-8 bg-background hover:bg-muted"
-        >
-          <TrendingUp className="h-3 w-3 mr-1" />
-          Analisis Profit
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handleSendMessage('Gimana cara ningkatin penjualan?')}
-          disabled={isLoading}
-          className="text-xs h-8 bg-background hover:bg-muted"
-        >
-          <Users className="h-3 w-3 mr-1" />
-          Strategi Marketing
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handleSendMessage('Stok bahan apa yang harus direstock?')}
-          disabled={isLoading}
-          className="text-xs h-8 bg-background hover:bg-muted"
-        >
-          <Package className="h-3 w-3 mr-1" />
-          Cek Stok
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handleSendMessage('Harga jual yang pas untuk produk baru berapa?')}
-          disabled={isLoading}
-          className="text-xs h-8 bg-background hover:bg-muted"
-        >
-          <DollarSign className="h-3 w-3 mr-1" />
-          Pricing Strategy
-        </Button>
-      </div>
-    </div>
-  );
+
 
   if (isMinimized) {
     return (
@@ -516,7 +470,7 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
             ))}
 
             {/* Loading indicator with AI thinking animation */}
-            {isLoading && (
+            {(chatMutation.isPending || actionMutation.isPending) && (
               <div className="flex justify-start mb-4">
                 <div className="flex items-start space-x-2">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center animate-pulse">
@@ -541,7 +495,7 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
         </div>
 
         {/* Quick actions */}
-        {messages.length > 1 && <QuickActions />}
+        {messages.length > 1 && <QuickActions onSendMessage={handleSendMessage} isLoading={chatMutation.isPending || actionMutation.isPending} />}
 
         {/* Input area */}
         <div className="p-4 border-t bg-background flex-shrink-0">
@@ -556,12 +510,12 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
                   void handleSendMessage();
                 }
               }}
-              disabled={isLoading}
+                        disabled={chatMutation.isPending || actionMutation.isPending}
               className="flex-1"
             />
             <Button
               onClick={() => handleSendMessage()}
-              disabled={!inputValue.trim() || isLoading}
+              disabled={!inputValue.trim() || chatMutation.isPending || actionMutation.isPending}
               size="sm"
               className="px-3"
             >

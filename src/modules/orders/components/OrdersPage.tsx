@@ -3,7 +3,8 @@
 // Using Pino logger for all logging
 'use client'
 
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import { useAllOrders } from '@/hooks/useOrdersQuery'
 import { BarChart3, Calendar, Clock, DollarSign, Edit, Eye, Filter, MessageCircle, Plus, Search, ShoppingCart, TrendingUp, XCircle } from '@/components/icons'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
@@ -66,8 +67,6 @@ const OrderDetailView = dynamic(
 interface OrderFilters {
   status: OrderStatus[]
   payment_status: string[]
-  date_from: string
-  date_to: string
   customer_search?: string
 }
 
@@ -107,43 +106,12 @@ const OrdersPage = (_props: OrdersPageProps) => {
   const [filters, setFilters] = useState<OrderFilters>({
     status: [],
     payment_status: [],
-    date_from: '',
-    date_to: '',
     customer_search: ''
   })
    const hasFiltersApplied = filters.status.length > 0 || Boolean(filters.customer_search?.trim())
 
-  // ✅ Use TanStack Query for automatic caching
-  const { data: ordersData, isLoading: loading, error: queryError } = useQuery<Order[]>({
-    queryKey: ['orders', 'all'],
-    queryFn: async (): Promise<Order[]> => {
-      logger.info('Fetching orders from API...')
-      const response = await fetch(`/api/orders?${(() => { const p=new URLSearchParams(); const u=new URLSearchParams(typeof window!== 'undefined' ? window.location.search : ''); const f=u.get('from'); const t=u.get('to'); if (f) p.set('from', f); if (t) p.set('to', t); return p.toString(); })()}`, {
-        credentials: 'include', // Include cookies for authentication
-      })
-      if (!response.ok) { 
-        logger.error({ status: response.status }, 'Failed to fetch orders')
-        throw new Error('Failed to fetch orders') 
-      }
-      const result: unknown = await response.json()
-      
-      // Handle both formats: direct array or { data: array }
-      if (Array.isArray(result)) {
-        return result as Order[]
-      }
-
-      if (result && typeof result === 'object' && 'data' in result) {
-        const data = (result as { data: unknown }).data
-        const orders = Array.isArray(data) ? (data as Order[]) : []
-        return orders
-      }
-
-      logger.warn('Orders data format not recognized, returning empty array')
-      return []
-    },
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
-  })
+  // ✅ Use standardized hook for automatic caching
+  const { data: ordersData, isLoading: loading, error: queryError, refetch } = useAllOrders()
 
   const orders = useMemo(() => ordersData ?? [], [ordersData])
 
@@ -242,29 +210,23 @@ const OrdersPage = (_props: OrdersPageProps) => {
         body: JSON.stringify({ status: newStatus }),
         credentials: 'include', // Include cookies for authentication
       })
-      // Refetch orders after update
-      // Note: TanStack Query will handle cache invalidation
+      // Invalidate and refetch orders after update
+      await queryClient.invalidateQueries({ queryKey: ['orders'] })
     } catch (error: unknown) {
       const message = getErrorMessage(error)
       logger.error({ error: message }, 'Failed to update status')
     }
-  }, [])
+  }, [queryClient])
 
   // Only show loading skeleton on initial load (when no data yet)
   if (loading && orders.length === 0) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <ShoppingCart className="h-8 w-8" />
-              Order Management
-            </h1>
-            <p className="text-muted-foreground">
-              Kelola pesanan dan penjualan dengan sistem terintegrasi
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title="Kelola Pesanan"
+          description="Kelola pesanan dan penjualan dengan sistem terintegrasi"
+          icon={<ShoppingCart className="h-8 w-8" />}
+        />
 
         <div className="grid gap-6 lg:grid-cols-4">
           {[1, 2, 3, 4].map(i => (
@@ -283,7 +245,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
             <XCircle className="h-12 w-12 text-gray-600 dark:text-gray-400 mx-auto mb-4" />
             <h3 className="font-medium mb-2">Gagal Memuat Data</h3>
             <p className="text-sm text-muted-foreground mb-4">{error}</p>
-            <Button onClick={() => router.refresh()}>Coba Lagi</Button>
+            <Button onClick={() => refetch()}>Coba Lagi</Button>
           </div>
         </CardContent>
       </Card>
@@ -296,6 +258,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
       <PageHeader
         title="Kelola Pesanan"
         description="Kelola pesanan dan penjualan dengan sistem terintegrasi"
+        icon={<ShoppingCart className="h-8 w-8 text-muted-foreground" />}
         action={
           <Button onClick={handleCreateOrder}>
             <Plus className="h-4 w-4 mr-2" />
@@ -567,7 +530,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setFilters({ status: [], payment_status: [], date_from: '', date_to: '', customer_search: '' })}
+                      onClick={() => setFilters({ status: [], payment_status: [], customer_search: '' })}
                       className="h-8"
                     >
                       <XCircle className="h-3 w-3 mr-1" />
@@ -599,7 +562,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
                     {hasFiltersApplied ? (
                       <Button
                         variant="outline"
-                        onClick={() => setFilters({ status: [], payment_status: [], date_from: '', date_to: '', customer_search: '' })}
+                      onClick={() => setFilters({ status: [], payment_status: [], customer_search: '' })}
                       >
                         <XCircle className="h-4 w-4 mr-2" />
                         Hapus Filter

@@ -1,8 +1,9 @@
 export const runtime = 'nodejs'
 
-import { z } from 'zod'
+import { ListQuerySchema, createCreateHandler, createListHandler } from '@/lib/api/crud-helpers'
 import { createApiRoute } from '@/lib/api/route-factory'
-import { ListQuerySchema, createListHandler, createCreateHandler } from '@/lib/api/crud-helpers'
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
+import { z } from 'zod'
 
 const CreateProductionSchema = z.object({
   recipe_id: z.string().uuid(),
@@ -40,5 +41,5 @@ export const POST = createApiRoute(
   createCreateHandler({
     table: 'productions',
     selectFields: '*, recipe:recipes(name, cook_time)',
-  })
+  }, SUCCESS_MESSAGES.PRODUCTION_BATCH_CREATED)
 )

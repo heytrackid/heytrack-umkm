@@ -1,4 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
+import { fetchApi } from '@/lib/query/query-helpers'
+import type { Order } from '@/app/orders/types/orders.types'
 
 interface UseOrdersOptions {
   page?: number
@@ -61,25 +63,21 @@ export function useOrders({
 export function useOrder(orderId: string, enabled = true) {
   return useQuery({
     queryKey: ['order', orderId],
-    queryFn: async () => {
-      const response = await fetch(`/api/orders/${orderId}`, {
-        credentials: 'include', // Include cookies for authentication
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch order')
-      }
-
-      const result = await response.json()
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to fetch order')
-      }
-
-      return result.data
-    },
+    queryFn: () => fetchApi(`/api/orders/${orderId}`),
     enabled: enabled && Boolean(orderId),
     staleTime: 60000, // 1 minute - single order details
     gcTime: 600000, // 10 minutes cache
+  })
+}
+
+// Simple hook for fetching all orders (non-paginated)
+export function useAllOrders(enabled = true) {
+  return useQuery<Order[]>({
+    queryKey: ['orders', 'all'],
+    queryFn: () => fetchApi<Order[]>('/api/orders?limit=1000'),
+    enabled,
+    staleTime: 30000, // 30 seconds - orders change frequently
+    gcTime: 300000, // 5 minutes cache
   })
 }
 

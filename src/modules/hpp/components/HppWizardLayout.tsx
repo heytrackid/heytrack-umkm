@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -196,14 +197,14 @@ export const HppWizardLayout = () => {
     return (
       <AppLayout>
         <div className="space-y-6 max-w-6xl mx-auto">
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center">
-              <Calculator className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold">HPP Calculator Wizard</h1>
-            </div>
-          </div>
+          <PageHeader
+            title="HPP Calculator Wizard"
+            icon={
+              <div className="h-12 w-12 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center">
+                <Calculator className="h-6 w-6 text-white" />
+              </div>
+            }
+          />
           <div className="h-96 bg-muted rounded animate-pulse" />
         </div>
       </AppLayout>
@@ -214,17 +215,15 @@ export const HppWizardLayout = () => {
     <AppLayout>
       <div className="space-y-6 max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center">
-            <Calculator className="h-7 w-7 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold">HPP Calculator Wizard</h1>
-            <p className="text-muted-foreground text-sm mt-1">
-              Panduan langkah demi langkah untuk menghitung biaya produksi yang akurat
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title="HPP Calculator Wizard"
+          description="Panduan langkah demi langkah untuk menghitung biaya produksi yang akurat"
+          icon={
+            <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center">
+              <Calculator className="h-7 w-7 text-white" />
+            </div>
+          }
+        />
 
         {/* Wizard Progress Indicator */}
         <Card className="mb-6">

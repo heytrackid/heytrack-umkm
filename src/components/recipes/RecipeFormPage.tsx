@@ -20,6 +20,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { uiLogger } from '@/lib/logger'
 import { useCreateRecipeWithIngredients, useUpdateRecipeWithIngredients } from '@/hooks/useRecipes'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 import type { Row, Database } from '@/types/database'
 
@@ -221,7 +222,7 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
             {!isDialog && (
                 <>
                     {/* Breadcrumb */}
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
                         <button onClick={() => router.push('/recipes')} className="hover:text-foreground">
                             Resep Produk
                         </button>
@@ -232,21 +233,17 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
                     </div>
 
                     {/* Header */}
-                    <div className="flex items-center gap-3">
-                        <Button variant="ghost" size="sm" onClick={() => router.push('/recipes')}>
-                            <ArrowLeft className="h-4 w-4" />
-                        </Button>
-                        <div>
-                            <h1 className="text-3xl font-bold">
-                                {mode === 'create' ? 'Tambah Resep Baru' : 'Edit Resep'}
-                            </h1>
-                            <p className="text-muted-foreground mt-1">
-                                {mode === 'create'
-                                    ? 'Buat resep baru untuk produk Anda'
-                                    : 'Perbarui informasi resep'}
-                            </p>
-                        </div>
-                    </div>
+                    <PageHeader
+                        title={mode === 'create' ? 'Tambah Resep Baru' : 'Edit Resep'}
+                        description={mode === 'create'
+                            ? 'Buat resep baru untuk produk Anda'
+                            : 'Perbarui informasi resep'}
+                        icon={
+                            <Button variant="ghost" size="sm" onClick={() => router.push('/recipes')}>
+                                <ArrowLeft className="h-4 w-4" />
+                            </Button>
+                        }
+                    />
                 </>
             )}
 

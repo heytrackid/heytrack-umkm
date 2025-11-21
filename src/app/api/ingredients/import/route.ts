@@ -8,6 +8,8 @@ import { apiLogger } from '@/lib/logger'
 import type { Insert } from '@/types/database'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
+import { createSuccessResponse } from '@/lib/api-core/responses'
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 
 type IngredientInsert = Insert<'ingredients'>
@@ -42,7 +44,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
     if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0) {
       return NextResponse.json(
-        { error: 'Data bahan baku tidak valid' },
+        { error: ERROR_MESSAGES.INVALID_DATA },
         { status: 400 }
       )
     }
@@ -99,7 +101,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     if (errors.length > 0) {
       return NextResponse.json(
         {
-          error: 'Validasi gagal',
+          error: ERROR_MESSAGES.VALIDATION_FAILED,
           details: errors,
           validCount: validIngredients.length,
           errorCount: errors.length
@@ -117,7 +119,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     if (error) {
       apiLogger.error({ error, userId: user['id'] }, 'Failed to import ingredients')
       return NextResponse.json(
-        { error: 'Gagal menyimpan data bahan baku' },
+        { error: ERROR_MESSAGES.SAVE_FAILED },
         { status: 500 }
       )
     }
@@ -127,16 +129,12 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
       'Ingredients imported successfully'
     )
 
-    return NextResponse.json({
-      success: true,
-      count: data.length,
-      data
-    })
+    return createSuccessResponse({ count: data.length, data }, SUCCESS_MESSAGES.INGREDIENT_IMPORTED, undefined, 201)
 
   } catch (error) {
     apiLogger.error({ error }, 'Error in POST /api/ingredients/import')
     return NextResponse.json(
-      { error: 'Terjadi kesalahan saat import' },
+      { error: ERROR_MESSAGES.IMPORT_ERROR },
       { status: 500 }
     )
   }

@@ -10,6 +10,7 @@ import { typed } from '@/types/type-utilities'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 
 type TypedSupabaseClient = ReturnType<typeof typed>
 
@@ -218,10 +219,10 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
       lowStockCount: lowStockAlerts.length
     }, 'Dashboard data fetched')
 
-    return NextResponse.json(response)
+    return createSuccessResponse(response)
   } catch (error) {
     logError(apiLogger, error, 'Unexpected error')
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return createErrorResponse('Internal server error', 500)
   }
 }
 

@@ -2,15 +2,17 @@
 export const runtime = 'nodejs'
 
 
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
-import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
+import { createSuccessResponse } from '@/lib/api-core/responses'
 import { cacheInvalidation } from '@/lib/cache'
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/lib/constants/messages'
+import { ORDER_FIELDS } from '@/lib/database/query-fields'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
-import { ORDER_FIELDS } from '@/lib/database/query-fields'
 import type { Database, Insert, OrderStatus, Row } from '@/types/database'
 import { InputSanitizer, SecurityPresets, createSecureHandler } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
@@ -131,7 +133,7 @@ async function fetchRecipes(supabase: SupabaseClient<Database>, userId: string):
 
   if (recipesError) {
     apiLogger.error({ error: recipesError }, 'Failed to fetch recipes')
-    throw new APIError('Gagal memuat data resep', { status: 500, code: 'RECIPES_FETCH_FAILED' })
+    throw new APIError(ERROR_MESSAGES.RECIPES_FETCH_FAILED, { status: 500, code: 'RECIPES_FETCH_FAILED' })
   }
 
   return new Map(recipes?.map((r: { id: string; name: string }) => [r.name.toLowerCase(), r.id]) ?? [])
@@ -165,7 +167,7 @@ function processOrders(
 
     const recipeId = recipeMap.get(order.recipe_name.toLowerCase())
     if (!recipeId) {
-      errors.push({ row: rowNum, error: `Resep "${order.recipe_name}" tidak ditemukan` })
+      errors.push({ row: rowNum, error: `${ERROR_MESSAGES.RECIPE_NOT_FOUND_IN_IMPORT}: "${order.recipe_name}"` })
       continue
     }
 
@@ -230,7 +232,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     if (errors.length > 0) {
       return NextResponse.json(
         {
-          error: 'Validasi gagal',
+          error: ERROR_MESSAGES.VALIDATION_FAILED,
           details: errors,
           validCount: ordersToCreate.length,
           errorCount: errors.length
@@ -263,7 +265,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
         if (customerError) {
           apiLogger.error({ error: customerError }, 'Failed to create customer')
-          throw new APIError(`Gagal membuat customer: ${customerData.name}`, {
+          throw new APIError(`${ERROR_MESSAGES.CUSTOMER_CREATE_FAILED_IN_IMPORT}: ${customerData.name}`, {
             status: 500,
             code: 'CUSTOMER_CREATION_FAILED'
           })
@@ -276,7 +278,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     try {
       await Promise.all(customerPromises)
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Gagal membuat customer baru'
+      const message = error instanceof Error ? error.message : ERROR_MESSAGES.CUSTOMER_CREATE_FAILED_IN_IMPORT
       throw new APIError(message, { status: 500, code: 'CUSTOMER_CREATION_FAILED' })
     }
 
@@ -335,15 +337,10 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
       'Orders imported successfully'
     )
 
-    // Invalidate cache after bulk import
     cacheInvalidation.orders()
     cacheInvalidation.customers()
 
-    return NextResponse.json({
-      success: true,
-      message: `Successfully imported ${createdOrders.length} orders`,
-      data: createdOrders
-    })
+    return createSuccessResponse({ count: createdOrders.length, data: createdOrders }, SUCCESS_MESSAGES.ORDERS_IMPORTED, undefined, 201)
   } catch (error) {
     apiLogger.error({ error }, 'Error in POST /api/orders/import')
     return handleAPIError(error, 'POST /api/orders/import')

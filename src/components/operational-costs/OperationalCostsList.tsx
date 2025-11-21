@@ -12,6 +12,8 @@ import {
 } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState, useCallback } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { postApi } from '@/lib/query/query-helpers'
 
 import { PageHeader } from '@/components/layout/PageHeader'
 import { GridSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
@@ -51,7 +53,7 @@ import { MobileOperationalCostCard } from '@/components/operational-costs/Mobile
 import { OperationalCostFormDialog } from '@/components/operational-costs/OperationalCostFormDialog'
 import { OperationalCostStats } from '@/components/operational-costs/OperationalCostStats'
 
-import type { DateRange } from 'react-day-picker'
+
 
 type OperationalCost = Row<'operational_costs'>
 type CategoryFilter =
@@ -108,6 +110,7 @@ const DEFAULT_CATEGORY: CostCategory =
 export const OperationalCostsList = () => {
     const _router = useRouter()
     const { formatCurrency } = useSettings()
+    const queryClient = useQueryClient()
 
     // Use query hook for fetching data
     const { data: costs, isLoading: loading, refetch } = useOperationalCosts()
@@ -115,13 +118,27 @@ export const OperationalCostsList = () => {
     // Use delete mutation
     const deleteCostMutation = useDeleteOperationalCost()
 
+    // ✅ Use React Query mutation for quick setup
+    const quickSetupMutation = useMutation({
+        mutationFn: () => postApi<{ count: number }>('/operational-costs/quick-setup', {}),
+        onSuccess: (data) => {
+            const templatesAdded = data.count ?? COST_CATEGORIES.length
+            toast.success(`${templatesAdded} template biaya operasional berhasil ditambahkan`)
+            
+            // Invalidate and refetch costs
+            void queryClient.invalidateQueries({ queryKey: ['operational-costs'] })
+            _router.refresh()
+        },
+        onError: (error) => {
+            const message = error instanceof Error ? error.message : 'Gagal menambahkan template'
+            toast.error(message)
+        }
+    })
+
     const { isMobile } = useResponsive()
     const { confirm, ConfirmDialog } = useConfirm()
 
-    const [isMounted, setIsMounted] = useState(false)
-    useEffect(() => {
-        setIsMounted(true)
-    }, [])
+
 
     // Modal states
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -132,7 +149,6 @@ export const OperationalCostsList = () => {
     // Filter states
     const [searchTerm, setSearchTerm] = useState('')
     const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
-    const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
     const [pageSize, setPageSize] = useState(12)
 
     // Filter and sort data
@@ -151,30 +167,14 @@ export const OperationalCostsList = () => {
                 // Category filter
                 const matchesCategory = categoryFilter === 'all' || cost.category === categoryFilter
 
-                // Date filter
-                let matchesDate = true
-                if (dateRange?.from && cost.created_at) {
-                    const costDate = new Date(cost.created_at)
-                    const fromDate = new Date(dateRange.from)
-                    fromDate.setHours(0, 0, 0, 0)
-                    
-                    if (dateRange.to) {
-                        const toDate = new Date(dateRange.to)
-                        toDate.setHours(23, 59, 59, 999)
-                        matchesDate = costDate >= fromDate && costDate <= toDate
-                    } else {
-                        matchesDate = costDate >= fromDate
-                    }
-                }
-
-                return matchesSearch && matchesCategory && matchesDate
+                return matchesSearch && matchesCategory
             })
             .sort((a: OperationalCost, b: OperationalCost) => {
                 const dateA = new Date(a.created_at ?? 0).getTime()
                 const dateB = new Date(b.created_at ?? 0).getTime()
                 return dateB - dateA
             })
-    }, [costs, searchTerm, categoryFilter, dateRange])
+    }, [costs, searchTerm, categoryFilter])
 
     // Pagination
     const pagination = usePagination({
@@ -220,51 +220,24 @@ export const OperationalCostsList = () => {
     }, [selectedCost, deleteCostMutation])
 
     const handleQuickSetup = useCallback(async () => {
-        try {
-            const confirmed = await confirm({
-                title: 'Tambahkan Template Biaya Operasional?',
-                description: 'Ini akan menambahkan 8 kategori biaya yang umum digunakan.',
-                confirmText: 'Tambahkan',
-                variant: 'default'
-            })
+        const confirmed = await confirm({
+            title: 'Tambahkan Template Biaya Operasional?',
+            description: 'Ini akan menambahkan 8 kategori biaya yang umum digunakan.',
+            confirmText: 'Tambahkan',
+            variant: 'default'
+        })
 
-            if (!confirmed) { return }
+        if (!confirmed) { return }
 
-            const response = await fetch('/api/operational-costs/quick-setup', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-
-            if (!response.ok) {
-                const errorPayload: unknown = await response.json()
-                const errorMessage = isQuickSetupErrorPayload(errorPayload) ? errorPayload.error : undefined
-                throw new Error(errorMessage ?? 'Failed to setup')
-            }
-
-            const resultPayload: unknown = await response.json()
-            const templatesAdded = isQuickSetupResultPayload(resultPayload)
-                ? resultPayload.count ?? COST_CATEGORIES.length
-                : COST_CATEGORIES.length
-
-            toast.success(`${templatesAdded} template biaya operasional berhasil ditambahkan`)
-
-            // Force refresh page to show new data
-            _router.refresh()
-        } catch (error) {
-            const message = error instanceof Error ? error.message : 'Gagal menambahkan template'
-            toast.error(message)
-        }
-    }, [confirm, _router])
+        quickSetupMutation.mutate()
+    }, [confirm, quickSetupMutation])
 
     const clearFilters = () => {
         setSearchTerm('')
         setCategoryFilter('all')
-        setDateRange(undefined)
     }
 
-    const hasActiveFilters = Boolean(searchTerm || categoryFilter !== 'all' || dateRange !== undefined)
+    const hasActiveFilters = Boolean(searchTerm || categoryFilter !== 'all')
 
     // Helper functions
     const getCategoryInfo = (categoryId: string): CostCategory =>
@@ -298,24 +271,7 @@ export const OperationalCostsList = () => {
         return labels[frequency] ?? frequency
     }
 
-    // Prevent hydration mismatch - wait for client mount
-    if (!isMounted) {
-        return (
-            <div className="space-y-6">
-                {/* Breadcrumb */}
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>Dashboard</span>
-                    <span>/</span>
-                    <span className="text-foreground font-medium">Biaya Operasional</span>
-                </div>
-                {/* Loading skeleton */}
-                <div className="animate-pulse space-y-4">
-                    <div className="h-20 bg-muted rounded" />
-                    <div className="h-40 bg-muted rounded" />
-                </div>
-            </div>
-        )
-    }
+
 
     return (
         <div className="space-y-6">

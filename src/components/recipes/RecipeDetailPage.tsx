@@ -1,4 +1,3 @@
- 
 'use client'
 
 import {
@@ -34,14 +33,14 @@ import { toast, errorToast, successToast } from '@/components/ui/toast'
 import type { RecipeInstruction } from '@/app/recipes/ai-generator/components/types'
 import type { Ingredient, Recipe, RecipeIngredient } from '@/types/database'
 import { isNonNull } from '@/types/shared/guards'
+import type { RecipeIngredientWithDetails } from '@/types/query-results'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 // Type for ingredient with only required fields for display
 type IngredientDisplay = Pick<Ingredient, 'id' | 'name' | 'price_per_unit' | 'unit' | 'weighted_average_cost'>
 
-// Type for recipe ingredient with populated ingredient data
-type RecipeIngredientWithDetails = RecipeIngredient & {
-    ingredient: IngredientDisplay | null
-}
+// Use the imported type for recipe ingredient with details
+type RecipeIngredientWithIngredient = RecipeIngredientWithDetails
 
 // Type for recipe with all related data
 type RecipeWithIngredients = Recipe & {
@@ -184,32 +183,22 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
 
     return (
         <div className="space-y-6 sm:space-y-8">
-            {/* Breadcrumb */}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <button onClick={() => router.push('/recipes')} className="hover:text-foreground">
-                    Resep Produk
-                </button>
-                <span>/</span>
-                <span className="text-foreground font-medium">{recipe.name}</span>
-            </div>
-
-            {/* Header */}
-            <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                    <Button variant="ghost" size="sm" onClick={() => router.push('/recipes')} className="no-print">
-                        <ArrowLeft className="h-4 w-4" />
+            <PageHeader
+                title={recipe.name}
+                description={recipe.description || undefined}
+                breadcrumbs={[
+                    { label: 'Resep', href: '/recipes' },
+                    { label: recipe.name }
+                ]}
+                action={
+                    <Button variant="ghost" onClick={() => router.push('/recipes')}>
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Kembali
                     </Button>
-                    <div className="min-w-0 flex-1">
-                        <h1 className="text-2xl sm:text-3xl font-bold truncate">
-                            {recipe.name}
-                        </h1>
-                        {recipe.description && isNonNull(recipe.description) && recipe.description.trim() !== '' && (
-                            <p className="text-muted-foreground mt-1 text-sm sm:text-base">{recipe.description}</p>
-                        )}
-                    </div>
-                </div>
+                }
+            />
 
-                {/* Recipe Image */}
+            <div className="space-y-6">
                 {recipe.image_url && (
                     <div className="w-full max-w-md mx-auto">
                         <Image
@@ -346,8 +335,8 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                 <CardContent className="p-4 sm:p-6">
                     {recipe.recipe_ingredients && recipe.recipe_ingredients.length > 0 ? (
                         <div className="space-y-3">
-                            {recipe.recipe_ingredients.filter(isNonNull).map((ri) => {
-                                const ingredient = ri.ingredient
+                            {recipe.recipe_ingredients.filter(isNonNull).map((ri: RecipeIngredientWithDetails) => {
+                                const ingredient = ri.ingredients
                                 const ingredientName = ingredient?.name ?? 'Unknown'
                                 const pricePerUnit = ingredient?.price_per_unit ?? 0
                                 const unit = ingredient?.unit ?? ri.unit
@@ -398,8 +387,8 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                                     <p className="text-xl sm:text-2xl font-bold text-primary">
                                         Rp {recipe.recipe_ingredients
                                             .filter(isNonNull)
-                                            .reduce((total, ri) => {
-                                                const pricePerUnit = ri.ingredient?.price_per_unit ?? 0
+                                            .reduce((total: number, ri: RecipeIngredientWithDetails) => {
+                                                const pricePerUnit = ri.ingredients?.price_per_unit ?? 0
                                                 return total + (pricePerUnit * ri.quantity)
                                             }, 0)
                                             .toLocaleString('id-ID')}
@@ -413,16 +402,16 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                                         <div className="space-y-2">
                                             {recipe.recipe_ingredients
                                                 .filter(isNonNull)
-                                                .map((ri) => {
-                                                    const ingredient = ri.ingredient
+                                                .map((ri: RecipeIngredientWithDetails) => {
+                                                    const ingredient = ri.ingredients
                                                     const pricePerUnit = ingredient?.price_per_unit ?? 0
                                                     const totalPrice = pricePerUnit * ri.quantity
-                                                    const costPercentage = totalPrice / (recipe.recipe_ingredients
-                                                        .filter(isNonNull)
-                                                        .reduce((total, ri) => {
-                                                            const price = ri.ingredient?.price_per_unit ?? 0
-                                                            return total + (price * ri.quantity)
-                                                        }, 0)) * 100
+                                                     const costPercentage = totalPrice / (recipe.recipe_ingredients
+                                                         .filter(isNonNull)
+                                                         .reduce((total: number, ri: RecipeIngredientWithDetails) => {
+                                                             const price = ri.ingredients?.price_per_unit ?? 0
+                                                             return total + (price * ri.quantity)
+                                                         }, 0)) * 100
 
                                                     return (
                                                         <div key={ri.id} className="flex justify-between items-center text-sm">
@@ -459,17 +448,17 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
              {recipe.recipe_ingredients && recipe.recipe_ingredients.length > 0 && (
                  <ProductionScaler
                      baseBatchSize={recipe.servings || 1}
-                     ingredients={recipe.recipe_ingredients
-                         .filter(isNonNull)
-                         .map(ri => ({
-                             id: ri.ingredient?.id || '',
-                             name: ri.ingredient?.name || 'Unknown',
+                       ingredients={recipe.recipe_ingredients
+                           .filter(isNonNull)
+                           .map((ri: RecipeIngredientWithDetails) => ({
+                             id: ri.ingredients?.id || '',
+                             name: ri.ingredients?.name || 'Unknown',
                              quantity: ri.quantity,
                              unit: ri.unit,
-                             price_per_unit: ri.ingredient?.price_per_unit || 0,
-                             weighted_average_cost: ri.ingredient?.weighted_average_cost
-                         }))
-                         .filter(ing => ing.id !== '')
+                             price_per_unit: ri.ingredients?.price_per_unit || 0,
+                             weighted_average_cost: ri.ingredients?.weighted_average_cost
+                          }))
+                           .filter((ing: IngredientDisplay) => ing.id !== '')
                      }
                  />
              )}
@@ -484,7 +473,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                     </CardHeader>
                     <CardContent className="p-4 sm:p-6">
                         <ol className="space-y-4 sm:space-y-6">
-                            {recipe.instructions.filter(isNonNull).map((step, index) => {
+                            {recipe.instructions.filter(isNonNull).map((step: RecipeInstruction, index: number) => {
                                 const stepNumber = step.step ?? index + 1
                                 const hasMetadata = Boolean(step.duration_minutes) || Boolean(step.temperature)
                                 

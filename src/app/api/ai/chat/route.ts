@@ -12,6 +12,7 @@ import { ChatSessionService } from '@/lib/services/ChatSessionService'
 import { RateLimiter, RATE_LIMITS } from '@/lib/services/RateLimiter'
 import { SuggestionEngine } from '@/lib/services/SuggestionEngine'
 import { InputSanitizer } from '@/utils/security/index'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 
 const ChatRequestSchema = z.object({
   message: z.string().min(1, 'Message is required'),
@@ -120,7 +121,7 @@ async function chatHandler(
 
   if (!body) {
     apiLogger.error({ userId: user.id }, 'Missing request body')
-    return NextResponse.json({ error: 'Request body is required' }, { status: 400 })
+    return createErrorResponse('Request body is required', 400)
   }
 
   try {
@@ -131,10 +132,7 @@ async function chatHandler(
     const { message, session_id, currentPage } = body
     const trimmedMessage = message.trim()
     if (!trimmedMessage) {
-      return NextResponse.json(
-        { error: 'Message cannot be empty' },
-        { status: 400 }
-      )
+      return createErrorResponse('Message cannot be empty', 400)
     }
     const sanitizedMessage = validateMessage(trimmedMessage, user.id)
     const safeCurrentPage = currentPage
@@ -245,7 +243,7 @@ async function chatHandler(
       'POST /api/ai/chat - Success'
     )
 
-    return NextResponse.json({
+    return createSuccessResponse({
       message: fallbackResult.response,
       session_id: sessionId,
       suggestions: suggestions.map(s => s.text),
@@ -258,13 +256,8 @@ async function chatHandler(
     const errorMessage = error instanceof Error ? error.message : 'Maaf, terjadi kesalahan saat memproses permintaan Anda.'
     apiLogger.error({ error, userId: user.id }, 'POST /api/ai/chat - Error')
 
-    return NextResponse.json(
-      {
-        error: errorMessage,
-        suggestions: ['Coba lagi', 'Refresh halaman'],
-      },
-      { status: error instanceof Error && error.message.includes('rate limit') ? 429 : 500 }
-    )
+    const statusCode = error instanceof Error && error.message.includes('rate limit') ? 429 : 500
+    return createErrorResponse(errorMessage, statusCode)
   }
 }
 

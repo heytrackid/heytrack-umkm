@@ -79,6 +79,18 @@ export interface PaginationState {
   pages: number
 }
 
+/**
+ * Standard pagination metadata for API responses
+ */
+export interface PaginationMeta {
+  total: number
+  page: number
+  limit: number
+  pages: number
+  hasNext: boolean
+  hasPrev: boolean
+}
+
 // ==========================================================
 // MIDDLEWARE TYPES
 // ==========================================================

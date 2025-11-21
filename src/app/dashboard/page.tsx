@@ -1,6 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import { fetchApi } from '@/lib/query/query-helpers'
 import { BarChart3, Calculator, ChefHat, Package, ShoppingCart, Sparkles, Users } from '@/components/icons'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -62,15 +63,7 @@ interface DashboardData {
 }
 
 const fetchDashboardData = async (): Promise<DashboardData> => {
-  const response = await fetch('/api/dashboard/stats', {
-    credentials: 'include',
-  })
-
-  if (!response.ok) {
-    throw new Error('Gagal memuat data dashboard')
-  }
-
-  return response.json()
+  return fetchApi<DashboardData>('/api/dashboard/stats')
 }
 
 const DashboardPage = () => {
@@ -97,10 +90,10 @@ const DashboardPage = () => {
 
   const hasNoData = useMemo(() => {
     if (!dashboardData) return false
-    return (dashboardData.revenue.total ?? 0) === 0 &&
-      (dashboardData.orders.total ?? 0) === 0 &&
-      (dashboardData.inventory.total ?? 0) === 0 &&
-      (dashboardData.customers.total ?? 0) === 0
+    return (dashboardData.revenue?.total ?? 0) === 0 &&
+      (dashboardData.orders?.total ?? 0) === 0 &&
+      (dashboardData.inventory?.total ?? 0) === 0 &&
+      (dashboardData.customers?.total ?? 0) === 0
   }, [dashboardData])
 
   useEffect(() => {

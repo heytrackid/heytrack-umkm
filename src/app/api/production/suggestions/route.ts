@@ -4,9 +4,10 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
+import { ERROR_MESSAGES } from '@/lib/constants/messages'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger, logError } from '@/lib/logger'
-import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { ProductionBatchService } from '@/services/production/ProductionBatchService'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
@@ -86,7 +87,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     )
 
     if (!result.success) {
-      throw new APIError(result.message ?? 'Gagal membuat batch produksi', {
+      throw new APIError(result.message ?? ERROR_MESSAGES.PRODUCTION_BATCH_CREATE_FAILED, {
         status: 400,
         code: 'BATCH_CREATION_FAILED'
       })

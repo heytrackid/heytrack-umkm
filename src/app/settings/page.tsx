@@ -7,10 +7,13 @@ import { AppLayout } from '@/components/layout/app-layout'
 import { SettingsLoadingSkeleton } from '@/app/settings/components/index'
 
 // Import core components directly for better performance
-import { SettingsHeader } from '@/app/settings/components/layout/SettingsHeader'
 import { SettingsQuickLinks } from '@/app/settings/components/SettingsQuickLinks'
 import { UnsavedChangesPrompt } from '@/app/settings/components/UnsavedChangesPrompt'
 import { useSettingsManager } from '@/app/settings/hooks/index'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { RotateCcw, Save } from '@/components/icons'
 
 // Only lazy load the heavy tabs component
 // ✅ Correct pattern for named exports with React.lazy
@@ -32,11 +35,26 @@ const SettingsPage = () => {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <SettingsHeader
-          isUnsavedChanges={isUnsavedChanges}
-          isSaving={isSaving}
-          onSave={handleSave}
-          onReset={handleReset}
+        <PageHeader
+          title="Pengaturan"
+          description="Kelola konfigurasi aplikasi Anda"
+          actions={
+            <>
+              {isUnsavedChanges && (
+                <Badge variant="outline" className="text-orange-600 border-orange-600">
+                  Perubahan belum disimpan
+                </Badge>
+              )}
+              <Button variant="outline" onClick={handleReset}>
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Reset
+              </Button>
+              <Button onClick={handleSave} disabled={isSaving}>
+                <Save className="h-4 w-4 mr-2" />
+                {isSaving ? 'Menyimpan...' : 'Simpan'}
+              </Button>
+            </>
+          }
         />
 
         {isSkeletonLoading ? (

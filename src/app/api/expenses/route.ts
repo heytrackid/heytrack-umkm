@@ -1,10 +1,11 @@
 export const runtime = 'nodejs'
 
-import { z } from 'zod'
-import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
-import { ListQuerySchema } from '@/lib/api/crud-helpers'
 import { calculateOffset, createPaginationMeta } from '@/lib/api-core'
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
+import { ListQuerySchema } from '@/lib/api/crud-helpers'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 
 const ExpenseQuerySchema = ListQuerySchema.extend({
   category: z.string().optional(),
@@ -68,15 +69,12 @@ async function listExpensesHandler(
   const { data, error, count } = await supabaseQuery
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to fetch expenses' }, { status: 500 })
+    return createErrorResponse('Failed to fetch expenses', 500)
   }
 
   const pagination = createPaginationMeta(count ?? 0, page, limit)
 
-  return NextResponse.json({
-    success: true,
-    data: { financial_records: data, pagination },
-  })
+  return createSuccessResponse(data, undefined, pagination)
 }
 
 export const GET = createApiRoute(
@@ -97,7 +95,7 @@ async function createExpenseHandler(
   const { user, supabase } = context
 
   if (!body) {
-    return NextResponse.json({ error: 'Request body is required' }, { status: 400 })
+    return createErrorResponse('Request body is required', 400)
   }
 
   const insertData = {
@@ -116,10 +114,10 @@ async function createExpenseHandler(
     .single()
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to create expense' }, { status: 500 })
+    return createErrorResponse('Failed to create expense', 500)
   }
 
-  return NextResponse.json({ success: true, data }, { status: 201 })
+  return createSuccessResponse(data, 'Expense created successfully', undefined, 201)
 }
 
 export const POST = createApiRoute(
