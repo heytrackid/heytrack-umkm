@@ -1,12 +1,12 @@
 export const runtime = 'nodejs'
 
-import { z } from 'zod'
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { apiLogger } from '@/lib/logger'
 import type { Database, OrderStatus } from '@/types/database'
-import { NextResponse } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
+import { NextResponse } from 'next/server'
+import { z } from 'zod'
 
 type TypedSupabaseClient = SupabaseClient<Database>
 
@@ -82,14 +82,15 @@ async function getDashboardStatsHandler(
     }
 
     // Fetch all data in parallel
-    const [ordersResult, currentPeriodResult, comparisonResult, customersResult, ingredientsResult, recipesResult, expensesResult] = await Promise.all([
+    const [ordersResult, currentPeriodResult, comparisonResult, customersResult, ingredientsResult, recipesResult, expensesResult, recipeIngredientsResult] = await Promise.all([
       typedSupabase.from('orders').select('id, total_amount, status, order_date, customer_name, created_at').eq('user_id', user.id),
       currentPeriodQuery,
       comparisonQuery,
       typedSupabase.from('customers').select('id, customer_type').eq('user_id', user.id),
       typedSupabase.from('ingredients').select('id, name, current_stock, min_stock, category, reorder_point').eq('user_id', user.id),
       typedSupabase.from('recipes').select('id, name, times_made').eq('user_id', user.id),
-      typedSupabase.from('financial_records').select('amount').eq('user_id', user.id).eq('type', 'EXPENSE')
+      typedSupabase.from('financial_records').select('amount').eq('user_id', user.id).eq('type', 'EXPENSE'),
+      typedSupabase.from('recipe_ingredients').select('quantity, ingredients(price_per_unit)').eq('user_id', user.id)
     ])
 
     // Check for errors
@@ -100,6 +101,7 @@ async function getDashboardStatsHandler(
     if (ingredientsResult.error) throw new Error(`Ingredients query failed: ${ingredientsResult.error.message}`)
     if (recipesResult.error) throw new Error(`Recipes query failed: ${recipesResult.error.message}`)
     if (expensesResult.error) throw new Error(`Expenses query failed: ${expensesResult.error.message}`)
+    if (recipeIngredientsResult.error) throw new Error(`Recipe ingredients query failed: ${recipeIngredientsResult.error.message}`)
 
     const orders = ordersResult.data || []
     const currentPeriodOrders = currentPeriodResult.data || []
@@ -108,6 +110,18 @@ async function getDashboardStatsHandler(
     const ingredients = ingredientsResult.data || []
     const recipes = recipesResult.data || []
     const expenses = expensesResult.data || []
+    const recipeIngredients = recipeIngredientsResult.data || []
+
+    // Calculate average HPP from recipe costs
+    type RecipeIngredient = { quantity: number; ingredients: { price_per_unit: number } | null }
+    const recipeCosts = recipeIngredients.map((ri: RecipeIngredient) => {
+      const ingredient = ri.ingredients
+      if (!ingredient) return 0
+      return (ri.quantity || 0) * (ingredient.price_per_unit || 0)
+    })
+    const averageHpp = recipeCosts.length > 0 
+      ? recipeCosts.reduce((sum, cost) => sum + cost, 0) / recipeCosts.length 
+      : 0
 
     // Calculate stats
     const totalRevenue = orders.reduce((sum, o) => sum + (o.total_amount || 0), 0)
@@ -171,8 +185,13 @@ async function getDashboardStatsHandler(
         total: recipes.length,
         popular: recipes.sort((a, b) => (b.times_made || 0) - (a.times_made || 0)).slice(0, 5)
       },
+      hpp: {
+        average: averageHpp,
+        total: recipeCosts.reduce((sum, cost) => sum + cost, 0)
+      },
       expenses: {
         today: expensesTotal,
+        total: expensesTotal,
         netProfit: currentPeriodRevenue - expensesTotal
       },
       alerts: {
