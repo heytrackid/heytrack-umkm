@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2, Sparkles } from '@/components/icons'
 import { useState } from 'react'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { logger } from '@/lib/logger'
 import { useCreateRecipe } from '@/hooks/useRecipes'
 import { useMutation } from '@tanstack/react-query'
@@ -49,23 +49,17 @@ export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps)
       postApi<{ recipe: GeneratedRecipe }>('/recipes/generate', data),
     onSuccess: (data) => {
       setGeneratedRecipe(data.recipe)
-      toast.success('Resep berhasil dibuat!', {
-        description: 'AI telah membuat resep untuk Anda',
-      })
+      toast.success('Resep berhasil dibuat!', 'AI telah membuat resep untuk Anda')
     },
     onError: (error) => {
       logger.error({ error }, 'AI Generation Error')
-      toast.error('Gagal membuat resep', {
-        description: error instanceof Error ? error.message : 'Terjadi kesalahan saat membuat resep',
-      })
+      toast.error('Gagal membuat resep', error instanceof Error ? error.message : 'Terjadi kesalahan saat membuat resep')
     }
   })
 
   const handleGenerate = (): void => {
     if (!prompt.trim()) {
-      toast.error('Prompt diperlukan', {
-        description: 'Silakan masukkan deskripsi resep yang ingin dibuat',
-      })
+      toast.error('Prompt diperlukan', 'Silakan masukkan deskripsi resep yang ingin dibuat')
       return
     }
 
@@ -83,9 +77,7 @@ export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps)
       setOpen(false)
       setPrompt('')
       setGeneratedRecipe(null)
-      toast.success('Resep siap digunakan', {
-        description: 'Silakan lengkapi informasi tambahan dan simpan resep',
-      })
+      toast.success('Resep siap digunakan', 'Silakan lengkapi informasi tambahan dan simpan resep')
     }
   }
 

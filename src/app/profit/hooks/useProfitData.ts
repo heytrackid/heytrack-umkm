@@ -3,7 +3,7 @@ import useSWR from 'swr'
 
 import type { ExportFormat, ProfitData, ProfitFilters } from '@/app/profit/components/types'
 
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/lib/toast'
 import { apiLogger } from '@/lib/logger'
 
 

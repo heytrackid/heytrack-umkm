@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { type UseFormProps, type UseFormReturn, type FieldValues, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/lib/toast'
 
 
 /* eslint-disable */

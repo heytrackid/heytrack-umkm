@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server'
 
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
+import { createSuccessResponse } from '@/lib/api-core'
 
 async function handleHealthCheck(_request: NextRequest): Promise<NextResponse> {
   try {
@@ -36,7 +37,7 @@ async function handleHealthCheck(_request: NextRequest): Promise<NextResponse> {
       supabaseStatus = 'error'
     }
 
-    return NextResponse.json({
+    return createSuccessResponse({
       status: 'ok',
       timestamp: new Date().toISOString(),
       environment: envStatus,
@@ -44,7 +45,7 @@ async function handleHealthCheck(_request: NextRequest): Promise<NextResponse> {
         supabase: supabaseStatus
       },
       version: '1.0.0'
-    }, { status: 200 })
+    }, undefined, undefined, 200)
   } catch (error) {
     return handleAPIError(error, 'GET /api/health')
   }

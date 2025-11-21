@@ -18,7 +18,7 @@ import {
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { useSettings } from '@/contexts/settings-context'
 import { useOrders } from '@/hooks/useOrdersQuery'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { usePagination } from '@/hooks/usePagination'
 
 

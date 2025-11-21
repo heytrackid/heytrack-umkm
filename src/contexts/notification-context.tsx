@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 import { useAuth } from '@/hooks/useAuth'
 import { logger } from '@/lib/logger'
@@ -120,9 +120,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         (payload) => {
           const newNotification = payload.new as Notification
           setNotifications((prev) => [newNotification, ...prev])
-          toast(newNotification.title, {
-            description: newNotification.message,
-          })
+          toast.info(newNotification.title, newNotification.message)
         }
       )
       .subscribe()

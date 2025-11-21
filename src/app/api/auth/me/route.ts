@@ -2,7 +2,7 @@ export const runtime = 'nodejs'
 
 import { NextResponse } from 'next/server'
 
-import { createErrorResponse } from '@/lib/api-core'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { apiLogger } from '@/lib/logger'
 import { SecurityPresets } from '@/utils/security/api-middleware'
@@ -17,7 +17,7 @@ async function getAuthStatusHandler(context: RouteContext): Promise<NextResponse
   try {
     const { user } = context
 
-    return NextResponse.json<AuthResponse>({
+    return createSuccessResponse({
       userId: user.id,
       email: user.email ?? null,
       isAuthenticated: true,

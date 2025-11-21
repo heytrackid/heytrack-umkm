@@ -7,7 +7,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 import { cacheInvalidation } from '@/lib/cache'
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { ORDER_FIELDS } from '@/lib/database/query-fields'
@@ -230,14 +230,14 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
     // Return validation errors if any
     if (errors.length > 0) {
-      return NextResponse.json(
+      return createErrorResponse(
         {
-          error: ERROR_MESSAGES.VALIDATION_FAILED,
+          error: 'Validation failed',
           details: errors,
           validCount: ordersToCreate.length,
           errorCount: errors.length
         },
-        { status: 400 }
+        400
       )
     }
 

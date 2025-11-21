@@ -3,7 +3,7 @@
 import { differenceInMinutes, format } from 'date-fns'
 import { useEffect, useState } from 'react'
 
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { createClientLogger } from '@/lib/client-logger'
 
 import type { ProductionBatchWithDetails as ProductionBatch } from '@/services/production/BatchSchedulingService'

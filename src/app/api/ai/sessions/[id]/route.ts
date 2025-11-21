@@ -6,22 +6,28 @@ export const runtime = 'nodejs'
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
 import { typed } from '@/types/type-utilities'
 import { createSecureRouteHandler, SecurityPresets } from '@/utils/security/index'
+import type { Json } from '@/types/database'
 
 import { createClient } from '@/utils/supabase/server'
-import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 
-interface RouteContext {
-  params: Promise<Record<string, string>>
-}
+const SaveMessageBodySchema = z.object({
+  role: z.string().refine((val) => ['assistant', 'system', 'user'].includes(val), {
+    message: 'Role must be assistant, system, or user'
+  }),
+  content: z.string().min(1),
+  metadata: z.record(z.string(), z.unknown()).optional()
+})
 
-async function getHandler(_request: NextRequest, context: RouteContext): Promise<NextResponse> {
+async function getHandler(_request: NextRequest, { params }: { params: Promise<Record<string, string>> }): Promise<NextResponse> {
   try {
     // Authenticate with Stack Auth
     const authResult = await requireAuth()
@@ -32,7 +38,8 @@ async function getHandler(_request: NextRequest, context: RouteContext): Promise
 
     const supabase = await createClient()
 
-    const { id } = await context.params
+    const resolvedParams = await params
+    const id = resolvedParams?.['id']
     if (!id) {
       return createErrorResponse('ID is required', 400)
     }
@@ -55,7 +62,7 @@ async function getHandler(_request: NextRequest, context: RouteContext): Promise
   }
 }
 
-async function deleteHandler(_request: NextRequest, context: RouteContext): Promise<NextResponse> {
+async function postHandler(request: NextRequest, { params }: { params: Promise<Record<string, string>> }): Promise<NextResponse> {
   try {
     // Authenticate with Stack Auth
     const authResult = await requireAuth()
@@ -66,7 +73,63 @@ async function deleteHandler(_request: NextRequest, context: RouteContext): Prom
 
     const supabase = await createClient()
 
-    const { id } = await context.params
+    const { id } = await params
+    if (!id) {
+      return createErrorResponse('ID is required', 400)
+    }
+    const sessionId = id
+
+    // Parse body
+    const body = await request.json()
+    const validation = SaveMessageBodySchema.safeParse(body)
+    if (!validation.success) {
+      return createErrorResponse('Invalid request body', 400)
+    }
+    const { role, content, metadata } = validation.data
+
+    // Save message
+    const { error } = await typed(supabase)
+      .from('chat_messages')
+      .insert({
+        session_id: sessionId,
+        user_id: user.id,
+        role,
+        content,
+        metadata: metadata as Json
+      })
+
+    if (error) {
+      throw error
+    }
+
+    // Update session's updated_at
+    await typed(supabase)
+      .from('chat_sessions')
+      .update({
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', sessionId)
+      .eq('user_id', user.id)
+
+    apiLogger.info({ userId: user.id, sessionId }, 'Message saved')
+    return createSuccessResponse(null, 'Message saved successfully')
+  } catch (error) {
+    return handleAPIError(error)
+  }
+}
+
+async function deleteHandler(_request: NextRequest, { params }: { params: Promise<Record<string, string>> }): Promise<NextResponse> {
+  try {
+    // Authenticate with Stack Auth
+    const authResult = await requireAuth()
+    if (isErrorResponse(authResult)) {
+      return authResult
+    }
+    const user = authResult
+
+    const supabase = await createClient()
+
+    const { id } = await params
     if (!id) {
       return createErrorResponse('ID is required', 400)
     }
@@ -83,4 +146,5 @@ async function deleteHandler(_request: NextRequest, context: RouteContext): Prom
 }
 
 export const GET = createSecureRouteHandler(getHandler, 'GET /api/ai/sessions/[id]', SecurityPresets.enhanced())
+export const POST = createSecureRouteHandler(postHandler, 'POST /api/ai/sessions/[id]', SecurityPresets.enhanced())
 export const DELETE = createSecureRouteHandler(deleteHandler, 'DELETE /api/ai/sessions/[id]', SecurityPresets.enhanced())

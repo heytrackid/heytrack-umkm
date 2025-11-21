@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { Slider } from '@/components/ui/slider'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { createClientLogger } from '@/lib/client-logger'
 import {
     batchSchedulingService,

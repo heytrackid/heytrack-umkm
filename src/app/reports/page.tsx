@@ -6,7 +6,7 @@ import { useEffect } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { GridSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
 import { useAuth } from '@/hooks/index'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 import { ReportsLayout } from '@/app/reports/components/ReportsLayout'
 

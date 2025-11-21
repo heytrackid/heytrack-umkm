@@ -28,7 +28,7 @@ import { ProductionScaler } from '@/components/recipes/ProductionScaler'
 import { useAuth } from '@/hooks/index'
 import { useRecipe } from '@/hooks/useRecipes'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { toast, errorToast, successToast } from '@/components/ui/toast'
+import { toast, errorToast, successToast } from '@/lib/toast'
 
 import type { RecipeInstruction } from '@/app/recipes/ai-generator/components/types'
 import type { Ingredient, Recipe, RecipeIngredient } from '@/types/database'

@@ -24,7 +24,7 @@ async function getHandler(
     
     // Validate UUID format
     if (!isValidUUID(id)) {
-      return NextResponse.json({ error: 'Invalid operational cost ID format' }, { status: 400 })
+      return createErrorResponse('Invalid operational cost ID format', 400)
     }
     
     // Authenticate with Stack Auth
@@ -88,12 +88,12 @@ async function putHandler(
     // Validate request body
     const validation = OperationalCostUpdateSchema.safeParse(body)
     if (!validation.success) {
-      return NextResponse.json(
+    return createErrorResponse(
         {
           error: 'Invalid request data',
           details: validation.error.issues
         },
-        { status: 400 }
+        400
       )
     }
 

@@ -4,6 +4,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core'
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger, logError } from '@/lib/logger'
@@ -49,15 +50,15 @@ async function markAlertReadHandler(
     }
 
     if (!data) {
-      return NextResponse.json(
-        { error: 'Alert not found' },
-        { status: 404 }
-      )
+  return createErrorResponse(
+    { error: 'Alert not found' },
+    404
+  )
     }
 
     apiLogger.info({ alertId, userId: user.id }, 'Alert marked as read successfully')
 
-    return NextResponse.json({
+    return createSuccessResponse({
       success: true,
       data
     })

@@ -1,5 +1,6 @@
-import { toast } from '@/hooks/use-toast'
+import { toast } from '@/lib/toast'
 import { createClientLogger } from '@/lib/client-logger'
+import { errorToast } from '@/lib/toast'
 
 const logger = createClientLogger('ClientFile')
 
@@ -121,11 +122,7 @@ export class ApiErrorHandler {
 
     // Show toast notification if requested
     if (showNotification) {
-      toast({
-        title: 'Error',
-        description: message,
-        variant: 'destructive',
-      });
+      errorToast('Error', message);
     }
 
     return {

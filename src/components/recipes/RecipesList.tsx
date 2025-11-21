@@ -17,7 +17,7 @@ import {
 } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 import { PageHeader } from '@/components/layout/PageHeader'
 import { MobileRecipeCard } from '@/components/recipes/MobileRecipeCard'
@@ -46,7 +46,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { SimplePagination } from '@/components/ui/simple-pagination'
-import { undoableToast } from '@/components/ui/toast'
+import { undoableToast } from '@/lib/toast'
 import { useSupabaseCRUD } from '@/hooks/supabase/index'
 import { usePagination } from '@/hooks/usePagination'
 import { useRecipesCostPreviews } from '@/hooks/useRecipeCostPreview'
@@ -259,7 +259,7 @@ export const RecipesList = () => {
                 description: 'Resep telah dihapus dari sistem',
                 onUndo: (): void => {
                     // Note: Would need an undelete API endpoint
-                    toast('Fitur undo sedang dikembangkan - Anda bisa membuat ulang resep ini')
+                    toast.info('Fitur undo sedang dikembangkan - Anda bisa membuat ulang resep ini')
                 },
                 duration: 6000
             })

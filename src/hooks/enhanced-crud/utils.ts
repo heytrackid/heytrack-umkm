@@ -1,4 +1,4 @@
-import { errorToast } from '@/hooks/use-toast'
+import { errorToast } from '@/lib/toast'
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('Hook')

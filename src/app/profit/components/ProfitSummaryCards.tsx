@@ -1,6 +1,6 @@
 'use client'
 
-import { TrendingUp, TrendingDown, DollarSign, Package, ArrowUpRight, ArrowDownRight, Minus } from '@/components/icons'
+import { ArrowDownRight, ArrowUpRight, DollarSign, Minus, Package, TrendingDown, TrendingUp } from '@/components/icons'
  
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -32,12 +32,12 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
   };
 
   // Function to get trend color
-  const getTrendColor = (_value: number) => 'text-muted-foreground';
+  const getTrendColor = (value: number) => value > 0 ? 'text-green-600' : value < 0 ? 'text-destructive' : 'text-muted-foreground';
 
   return (
     <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-4'}`}>
       {/* Total Revenue */}
-      <Card className="hover: ">
+      <Card className="group backdrop-blur-md bg-card/80 border-border/50 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Total Pendapatan
@@ -61,7 +61,7 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
       </Card>
 
       {/* Gross Profit */}
-      <Card className="hover: ">
+      <Card className="group backdrop-blur-md bg-card/80 border-border/50 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Laba Kotor
@@ -77,6 +77,16 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
               <p className="text-xs text-muted-foreground">
                 Margin: {summary.gross_profit_margin.toFixed(1)}%
               </p>
+              <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
+                <div
+                  className={`h-full transition-all duration-700 rounded-full shadow-inner ${
+                    summary.gross_profit_margin >= 30 ? 'bg-gradient-to-r from-green-400 to-emerald-500' :
+                    summary.gross_profit_margin >= 15 ? 'bg-gradient-to-r from-yellow-400 to-amber-500' :
+                    'bg-gradient-to-r from-orange-400 to-red-500'
+                  }`}
+                  style={{ width: `${Math.min(100, summary.gross_profit_margin)}%` }}
+                />
+              </div>
               {grossProfitGrowth !== 0 && (
                 <p className={`text-xs flex items-center gap-1 ${getTrendColor(grossProfitGrowth)}`}>
                   {getTrendElement(grossProfitGrowth)}
@@ -89,7 +99,7 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
       </Card>
 
       {/* Net Profit */}
-      <Card className="hover: ">
+      <Card className="group backdrop-blur-md bg-card/80 border-border/50 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Laba Bersih
@@ -111,6 +121,15 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
               <p className="text-xs text-muted-foreground">
                 Margin: {summary.net_profit_margin.toFixed(1)}%
               </p>
+              <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
+                <div
+                  className={`h-full transition-all duration-700 rounded-full shadow-inner ${
+                    summary.net_profit_margin > 0 ? 'bg-gradient-to-r from-green-400 to-emerald-500' :
+                    'bg-gradient-to-r from-red-400 to-rose-500'
+                  }`}
+                  style={{ width: `${Math.min(100, Math.max(0, summary.net_profit_margin))}%` }}
+                />
+              </div>
               {netProfitGrowth !== 0 && (
                 <p className={`text-xs flex items-center gap-1 ${getTrendColor(netProfitGrowth)}`}>
                   {getTrendElement(netProfitGrowth)}
@@ -123,7 +142,7 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
       </Card>
 
       {/* COGS */}
-      <Card className="hover: ">
+      <Card className="group backdrop-blur-md bg-card/80 border-border/50 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Harga Pokok Penjualan

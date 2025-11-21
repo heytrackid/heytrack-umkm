@@ -16,7 +16,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { useCreateOperationalCost, useUpdateOperationalCost } from '@/hooks/useOperationalCosts'
 
 import type { Row, Insert } from '@/types/database'

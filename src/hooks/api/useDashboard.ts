@@ -200,42 +200,27 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
   }
 }
 
-// Fetch weekly sales data
+// Fetch weekly sales data from API
 const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
   try {
-    const today = new Date()
-    const weekData: WeeklySalesData[] = []
-    
-    // Get data for last 7 days
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(today.getTime() - i * 24 * 60 * 60 * 1000)
-      const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
-      const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000)
+    const response = await fetch('/api/dashboard/stats', {
+      credentials: 'include',
+    })
 
-      const supabase = createClient()
-      const { data: orders, error } = await supabase
-        .from('orders')
-        .select('total_amount')
-        .gte('created_at', dayStart.toISOString())
-        .lt('created_at', dayEnd.toISOString())
-
-      if (error) {throw error}
-
-      type OrderAmount = { total_amount: number | null }
-      const revenue = orders?.reduce((sum: number, order: OrderAmount) => sum + ((order.total_amount as number) || 0), 0) || 0
-
-      weekData.push({
-        day: date.toLocaleDateString('id-ID', { weekday: 'short' }),
-        revenue,
-        isToday: i === 0
-      })
+    if (!response.ok) {
+      throw new Error('Failed to fetch dashboard stats')
     }
-    
-    return weekData
-   } catch (error) {
-     logger.error({ error }, 'Error fetching weekly sales:')
-     return []
-   }
+
+    const result = await response.json()
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to fetch dashboard stats')
+    }
+
+    return result.data.revenue.revenueTrend || []
+  } catch (error) {
+    logger.error({ error }, 'Error fetching weekly sales:')
+    return []
+  }
 }
 
 // Fetch top products data

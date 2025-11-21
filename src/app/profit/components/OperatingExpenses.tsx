@@ -1,6 +1,6 @@
 import { Receipt } from '@/components/icons'
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 import type { ProfitData } from '@/app/profit/components/types'
 
@@ -26,7 +26,7 @@ export const OperatingExpenses = ({
     <CardContent>
       <div className="space-y-3">
         {(operating_expenses || []).map((expense, index) => (
-          <div key={index} className="flex items-center justify-between py-2 border-b last:border-0">
+          <div key={index} className="flex items-center justify-between py-3 px-4 border-b last:border-b-0 hover:bg-accent/50 transition-colors even:bg-muted/30 rounded-lg -mx-6">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
                 <Receipt className="h-5 w-5 text-red-600 dark:text-red-400" />
@@ -38,7 +38,7 @@ export const OperatingExpenses = ({
             </span>
           </div>
         ))}
-        <div className="flex items-center justify-between py-3 border-t-2 font-bold">
+        <div className="flex items-center justify-between py-4 px-4 border-t-2 font-bold bg-accent/30 rounded-xl -mx-6 mt-2 shadow-sm">
           <span>Total Biaya Operasional</span>
           <span className="text-lg text-red-600">
             {formatCurrency(summary.total_operating_expenses)}

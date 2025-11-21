@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { logger } from '@/lib/logger'
 
 import { DEFAULT_APP_SETTINGS, normalizeSettings, type AppSettingsState, type SettingsUpdateHandler } from '@/app/settings/types'

@@ -2,11 +2,10 @@
  
 
 
-import { Edit, Trash2, MoreVertical, ShoppingCart, Search, Filter, X, Plus } from '@/components/icons'
+import { Edit, Filter, MoreVertical, Plus, Search, ShoppingCart, Trash2, X } from '@/components/icons'
 import { useRouter } from 'next/navigation'
-import { useState, useMemo, memo, useCallback } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 
-import { DeleteModal } from '@/components/ui/index'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -19,8 +18,9 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
-import { undoableToast } from '@/components/ui/toast'
 import { FilterBadges, createFilterBadges } from '@/components/ui/filter-badges'
+import { DeleteModal } from '@/components/ui/index'
+import { undoableToast } from '@/lib/toast'
 
 import { Input } from '@/components/ui/input'
 import {
@@ -32,11 +32,11 @@ import {
 } from '@/components/ui/select'
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { useSettings } from '@/contexts/settings-context'
-import { useIngredients, useDeleteIngredient } from '@/hooks/useIngredients'
-import { useResponsive } from '@/hooks/useResponsive'
-import { toast } from 'sonner'
+import { useDeleteIngredient, useIngredients } from '@/hooks/useIngredients'
 import { usePagination } from '@/hooks/usePagination'
+import { useResponsive } from '@/hooks/useResponsive'
 import type { Row } from '@/types/database'
+import { toast } from '@/lib/toast'
 
 import { IngredientFormDialog } from '@/components/ingredients/IngredientFormDialog'
 import { MobileIngredientList } from '@/components/ingredients/MobileIngredientCard'
@@ -71,7 +71,6 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
     const [stockFilter, setStockFilter] = useState<StockFilter>('all')
     const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
     const [supplierFilter, setSupplierFilter] = useState('all')
-    const [pageSize, setPageSize] = useState(12)
 
     // Get unique suppliers
     const suppliers = useMemo(() => {
@@ -115,18 +114,14 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
 
     // Pagination
     const pagination = usePagination({
-        initialPageSize: pageSize,
+        initialPageSize: 12,
         totalItems: filteredData.length,
     })
 
     // Get paginated data
     const paginatedData = useMemo(() => filteredData.slice(pagination.startIndex, pagination.endIndex), [filteredData, pagination.startIndex, pagination.endIndex])
 
-    // Update page size
-    const handlePageSizeChange = useCallback((newSize: number) => {
-        setPageSize(newSize)
-        pagination.setPageSize(newSize)
-    }, [pagination])
+    const handlePageSizeChange = pagination.setPageSize
 
     // Create filter badges
     const activeFilters = createFilterBadges(
@@ -201,7 +196,7 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                 description: 'Bahan baku telah dihapus dari sistem',
                 onUndo: () => {
                     // Note: Would need an undelete API endpoint for real undo
-                    toast('Fitur undo sedang dikembangkan - Anda bisa menambahkan kembali bahan baku ini')
+                    toast.info('Fitur undo sedang dikembangkan - Anda bisa menambahkan kembali bahan baku ini')
                 },
                 duration: 6000
             })

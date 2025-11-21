@@ -16,7 +16,7 @@ import { StatsSkeleton } from '@/components/ui/skeleton-loader'
 import { DashboardHeaderSkeleton, RecentOrdersSkeleton, StockAlertSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 
 // Toast hook available for future use
-// import { toast } from 'sonner'
+// import { toast } from '@/lib/toast'
 import { useAuth } from '@/hooks/useAuth'
 import { useCurrency } from '@/hooks/useCurrency'
 

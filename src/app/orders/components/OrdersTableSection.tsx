@@ -10,7 +10,7 @@ import { LoadingButton } from '@/components/ui/loading-button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { TableSkeleton } from '@/components/ui/skeleton-loader'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 import type { Row } from '@/types/database'
 

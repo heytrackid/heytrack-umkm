@@ -99,7 +99,6 @@
     "react-day-picker": "^9.11.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.65.0",
-    "react-hot-toast": "^2.6.0",
     "react-resizable-panels": "^3.0.6",
     "react-syntax-highlighter": "^16.1.0",
     "react-window": "^2.2.2",

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core'
 import { createApiRoute } from '@/lib/api/route-factory'
 import { buildRecipeCostPreview } from '@/lib/costs/cost-calculations'
 import { apiLogger } from '@/lib/logger'
@@ -28,7 +29,7 @@ export const POST = createApiRoute(
     const { recipeIds } = body as CostPreviewsRequest
 
     if (!recipeIds || recipeIds.length === 0) {
-      return NextResponse.json({})
+      return createSuccessResponse({})
     }
 
     try {
@@ -68,12 +69,12 @@ export const POST = createApiRoute(
         result[recipe.id] = buildRecipeCostPreview(recipe)
       }
 
-      return NextResponse.json(result)
+      return createSuccessResponse(result)
     } catch (error) {
       apiLogger.error({ error }, 'Failed to build recipe cost previews')
-      return NextResponse.json(
+      return createErrorResponse(
         { error: 'Internal server error' },
-        { status: 500 }
+        500
       )
     }
   }

@@ -96,11 +96,11 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
     // If there are validation errors, return them
     if (errors.length > 0) {
-      return NextResponse.json({
+      return createErrorResponse({
         success: false,
         error: `Found ${errors.length} validation errors`,
         details: errors
-      }, { status: 400 })
+      }, 400)
     }
 
     // Insert suppliers

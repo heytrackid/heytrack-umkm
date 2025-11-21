@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 
-import { errorToast, infoToast, successToast } from '@/hooks/use-toast'
+import { errorToast, infoToast, successToast } from '@/lib/toast'
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('Hook')

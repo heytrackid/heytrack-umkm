@@ -3,6 +3,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core'
 import { apiLogger } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import type { Row } from '@/types/database'
@@ -144,16 +145,16 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
       category: category ?? 'all'
     }, 'Recipe comparison data retrieved successfully')
 
-    return NextResponse.json({
+    return createSuccessResponse({
       recipes: comparisonData,
       benchmark,
       total: totalRecipes
     })
   } catch (error) {
     apiLogger.error({ error }, 'Error fetching recipe comparison data')
-    return NextResponse.json(
+    return createErrorResponse(
       { error: 'Internal server error' },
-      { status: 500 }
+      500
     )
   }
 }

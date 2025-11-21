@@ -11,7 +11,7 @@ import { useCustomers } from '@/hooks/useCustomers'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { useSettings } from '@/contexts/settings-context'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { useResponsive } from '@/hooks/useResponsive'
 import { createLogger } from '@/lib/logger'
 
@@ -38,10 +38,11 @@ export const CustomersLayout = (): JSX.Element => {
     show: false,
     customer: null,
     bulk: false
-  })
+   })
 
   // Fetch customers with standardized hook
-  const { data: customers = [], isLoading } = useCustomers()
+  const { data, isLoading } = useCustomers()
+  const customers = useMemo(() => data || [], [data])
 
   // Delete mutation
   const deleteMutation = useMutation({

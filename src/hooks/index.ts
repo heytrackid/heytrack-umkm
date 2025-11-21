@@ -34,6 +34,5 @@ export type { DashboardStats, TopProductsData, WeeklySalesData } from './api/use
 export { useSupabaseQuery } from './supabase/core'
 export { useSupabaseCRUD } from './supabase/useSupabaseCRUD'
 
-// Re-export from shadcn/ui
-export { useToast } from './use-toast'
+// Toast utilities now available from @/lib/toast
 

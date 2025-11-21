@@ -7,8 +7,8 @@ import { ListQuerySchema, createListHandler, createCreateHandler } from '@/lib/a
 const IngredientPurchaseSchema = z.object({
   ingredient_id: z.string().uuid(),
   quantity: z.number().positive(),
-  price_per_unit: z.number().positive(),
-  total_cost: z.number().positive(),
+  unit_price: z.number().positive(),
+  total_price: z.number().positive(),
   supplier: z.string().min(1),
   purchase_date: z.string(),
   notes: z.string().optional(),

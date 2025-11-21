@@ -3,9 +3,10 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
- import { handleAPIError } from '@/lib/errors/api-error-handler'
- import { apiLogger } from '@/lib/logger'
- import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { apiLogger } from '@/lib/logger'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
+import { createSuccessResponse } from '@/lib/api-core'
 
 interface EnvVarDiagnostics {
   exists: boolean
@@ -108,14 +109,11 @@ async function diagnosticsGET(_request: NextRequest): Promise<NextResponse> {
     diagnostics.supabase_connectivity = await checkSupabaseConnectivity()
     diagnostics.deployment_status = 'operational'
 
-    return NextResponse.json(diagnostics, {
-      status: 200,
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET',
-      },
-    })
+    const response = createSuccessResponse(diagnostics, undefined, undefined, 200)
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+    response.headers.set('Access-Control-Allow-Origin', '*')
+    response.headers.set('Access-Control-Allow-Methods', 'GET')
+    return response
   } catch (error) {
     return handleAPIError(error, 'GET /api/diagnostics')
   }

@@ -5,6 +5,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import 'server-only'
 import { z } from 'zod'
 
+import { createSuccessResponse } from '@/lib/api-core'
 import { triggerWorkflow } from '@/lib/automation/workflows/index'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
@@ -180,7 +181,7 @@ function buildResponse(
   incomeRecordId: string | null,
   currentOrder: PartialOrderRow
 ) {
-  return NextResponse.json({
+  return createSuccessResponse({
     success: true,
     order: updatedOrder,
     status_change: {
@@ -277,7 +278,7 @@ async function getHandler(
       updated_at: typedOrder.updated_at
     }
 
-    return NextResponse.json({
+  return createSuccessResponse({
       order_id: order['id'],
       order_no: order['order_no'],
       status_info: statusInfo

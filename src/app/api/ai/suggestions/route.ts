@@ -7,6 +7,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { createSuccessResponse } from '@/lib/api-core'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
@@ -37,7 +38,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     // Generate suggestions
     const suggestions = SuggestionEngine.generateSuggestions(context)
 
-    return NextResponse.json({ suggestions })
+    return createSuccessResponse({ suggestions })
   } catch (error) {
     return handleAPIError(error)
   }

@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 
-import { successToast } from '@/hooks/use-toast'
+import { successToast } from '@/lib/toast'
 import type { Insert, Row, TableName, Update } from '@/types/database'
 import { getErrorMessage, typed } from '@/types/type-utilities'
 import { createClient as createSupabaseClient } from '@/utils/supabase/client'

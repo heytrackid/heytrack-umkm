@@ -4,6 +4,7 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core'
 import { apiLogger } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { PricingAssistantService } from '@/services/orders/PricingAssistantService'
@@ -42,16 +43,16 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
       confidence: recommendation.confidence
     }, 'Pricing recommendation generated successfully')
 
-    return NextResponse.json({
+    return createSuccessResponse({
       success: true,
       recommendation
     })
 
   } catch (error) {
     apiLogger.error({ error }, 'Error generating pricing recommendation')
-    return NextResponse.json(
+    return createErrorResponse(
       { error: 'Internal server error' },
-      { status: 500 }
+      500
     )
   }
 }

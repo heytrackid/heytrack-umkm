@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { Slider } from '@/components/ui/slider'
 import { useAuth } from '@/hooks/index'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 import { RecipeSelector } from '@/modules/hpp/components/RecipeSelector'
 import { useUnifiedHpp } from '@/modules/hpp/hooks/useUnifiedHpp'

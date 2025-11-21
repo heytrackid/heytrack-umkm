@@ -45,7 +45,7 @@ const getIcon = (type: string) => {
   }
 }
 
-export function toast({
+function customToast({
   title,
   description,
   action,
@@ -54,7 +54,7 @@ export function toast({
 }: ToastOptions) {
   return sonnerToast.custom(
     (t) => (
-      <div className="bg-background border rounded-lg  p-4 min-w-[300px] max-w-[500px] animate-in slide-in-from-bottom-5">
+      <div className="bg-background border rounded-lg p-4 min-w-[300px] max-w-[500px] animate-in slide-in-from-bottom-5">
         <div className="flex items-start gap-3">
           {getIcon(type)}
           <div className="flex-1 space-y-1">
@@ -99,7 +99,7 @@ export function deleteToast({
   onUndo: () => Promise<void>
   duration?: number
 }) {
-  return toast({
+  return customToast({
     title: `${itemName} dihapus`,
     description: 'Item telah dihapus dari sistem',
     type: 'success',
@@ -113,7 +113,7 @@ export function deleteToast({
 
 // Quick success toast
 export function successToast(title: string, description?: string) {
-  return toast({
+  return customToast({
     title,
     description,
     type: 'success',
@@ -123,11 +123,31 @@ export function successToast(title: string, description?: string) {
 
 // Quick error toast
 export function errorToast(title: string, description?: string) {
-  return toast({
+  return customToast({
     title,
     description,
     type: 'error',
     duration: 5000
+  })
+}
+
+// Quick warning toast
+export function warningToast(title: string, description?: string) {
+  return customToast({
+    title,
+    description,
+    type: 'warning',
+    duration: 4000
+  })
+}
+
+// Quick info toast
+export function infoToast(title: string, description?: string) {
+  return customToast({
+    title,
+    description,
+    type: 'info',
+    duration: 4000
   })
 }
 
@@ -145,7 +165,7 @@ export function undoableToast({
 }) {
   return sonnerToast.custom(
     (t) => (
-      <div className="bg-background border rounded-lg  p-4 min-w-[350px] animate-in slide-in-from-bottom-5">
+      <div className="bg-background border rounded-lg p-4 min-w-[350px] animate-in slide-in-from-bottom-5">
         <div className="flex items-start gap-3">
           <CheckCircle2 className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
           <div className="flex-1 space-y-2">
@@ -180,3 +200,50 @@ export function undoableToast({
     { duration }
   )
 }
+
+// Legacy compatibility - direct sonner exports for gradual migration
+export { sonnerToast as sonner }
+
+// Backward compatibility object with methods for existing code
+export const toastCompat = {
+  success: successToast,
+  error: errorToast,
+  info: infoToast,
+  warning: warningToast,
+  custom: sonnerToast.custom,
+  dismiss: sonnerToast.dismiss,
+  promise: sonnerToast.promise,
+}
+
+// Hook-style toast function for compatibility with existing useToast hook
+export function useToast() {
+  return {
+    toast: ({ title, description, variant, ...options }: {
+      title: string
+      description?: string
+      variant?: 'default' | 'destructive' | 'success' | 'warning'
+      duration?: number
+    }) => {
+      const type = variant === 'destructive' ? 'error' :
+                   variant === 'success' ? 'success' :
+                   variant === 'warning' ? 'warning' : 'info'
+
+      return customToast({
+        title,
+        description,
+        type,
+        ...options
+      })
+    },
+    successToast,
+    errorToast,
+    warningToast,
+    infoToast
+  }
+}
+
+// Export the compatibility object as the main toast export
+export { toastCompat as toast }
+
+// Also export the custom toast function for advanced usage
+export { customToast as toastFunction }

@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { GlobalExportService } from '@/lib/export/global-export'
 import { apiLogger } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 export const dynamic = 'force-dynamic'
@@ -38,10 +39,10 @@ async function getHandler(_request: NextRequest): Promise<NextResponse> {
     })
   } catch (error) {
     apiLogger.error({ error }, 'Error in GET /api/export/global')
-    return NextResponse.json(
-      { error: 'Failed to generate export' },
-      { status: 500 }
-    )
+     return createErrorResponse(
+       'Failed to generate export',
+       500
+     )
   }
 }
 

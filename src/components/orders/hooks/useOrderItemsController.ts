@@ -116,7 +116,7 @@ export const useOrderItemsController = <TItem extends OrderItemBase>(
     deriveItemTotals
   } = options
 
-  const [recipes, setRecipes] = useState<Recipe[]>(availableRecipes ?? [])
+  const [fetchedRecipes, setFetchedRecipes] = useState<Recipe[]>([])
   const [loadingRecipes, setLoadingRecipes] = useState(false)
   const [recipeError, setRecipeError] = useState<string | null>(null)
 
@@ -129,9 +129,7 @@ export const useOrderItemsController = <TItem extends OrderItemBase>(
     return availableRecipes ? normalizeRecipes(availableRecipes) : []
   }, [availableRecipes, normalizeRecipes])
 
-  useEffect(() => {
-    setRecipes(normalizedRecipes)
-  }, [normalizedRecipes])
+  const recipes = availableRecipes ? normalizedRecipes : fetchedRecipes
 
   const fetchRecipes = useCallback(async () => {
     if (!autoFetchRecipes) {
@@ -152,7 +150,7 @@ export const useOrderItemsController = <TItem extends OrderItemBase>(
         ? (payload as Recipe[]).filter((item) => isRecipe(item))
         : []
 
-      setRecipes(normalizeRecipes(recipeList))
+      setFetchedRecipes(normalizeRecipes(recipeList))
     } catch (error) {
       orderFormLogger.error({ error }, 'Failed to fetch recipes')
       setRecipeError((error as Error).message)
@@ -245,7 +243,7 @@ export const useOrderItemsController = <TItem extends OrderItemBase>(
       loadingRecipes,
       recipeError
     }),
-    [recipes, loadingRecipes, recipeError]
+    [recipes, loadingRecipes, recipeError]  
   )
 
   return {

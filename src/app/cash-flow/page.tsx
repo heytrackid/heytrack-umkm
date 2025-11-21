@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useFinancialRecords, useCreateFinancialRecord } from '@/hooks/useFinancialRecords'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { apiLogger } from '@/lib/logger'
 
 interface FinancialRecord {

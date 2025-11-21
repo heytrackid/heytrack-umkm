@@ -3,6 +3,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core'
 import { apiLogger } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
@@ -32,15 +33,15 @@ async function putHandler(
     const alertService = new InventoryAlertService()
     await alertService.acknowledgeAlert(id, _user.id)
 
-    return NextResponse.json({ 
+    return createSuccessResponse({
       message: 'Alert acknowledged successfully' 
     })
 
   } catch (error: unknown) {
     apiLogger.error({ error, alertId: id }, 'Error in PATCH /api/inventory/alerts/[id]')
-    return NextResponse.json(
+    return createErrorResponse(
       { error: 'Internal server error' },
-      { status: 500 }
+      500
     )
   }
 }

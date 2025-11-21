@@ -1,4 +1,4 @@
-import { Package, PackageCheck, AlertTriangle, ShoppingCart } from '@/components/icons'
+import { AlertTriangle, Package, PackageCheck, ShoppingCart } from '@/components/icons'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -24,10 +24,11 @@ interface InventoryStats {
 
 export const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps = {}) => {
   const { formatCurrency } = useCurrency()
-  const { data: ingredients } = useSupabaseCRUD<'ingredients'>('ingredients')
+  const ingredientsResult = useSupabaseCRUD<'ingredients'>('ingredients')
+  const ingredients = ingredientsResult.data ?? []
 
   // Calculate inventory report
-  const ingredientList = ingredients ?? []
+  const ingredientList = ingredients.filter((ingredient): ingredient is NonNullable<typeof ingredient> => Boolean(ingredient))
 
   const inventoryStats = ingredientList.reduce<InventoryStats>(
     (stats, ingredient) => {

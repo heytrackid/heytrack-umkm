@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { useCurrency } from '@/hooks/useCurrency'
 
 

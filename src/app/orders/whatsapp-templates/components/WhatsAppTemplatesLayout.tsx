@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { useAuth } from '@/hooks/index'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { uiLogger } from '@/lib/client-logger'
 
 // Lazy load heavy components
@@ -170,15 +170,11 @@ const WhatsAppTemplatesLayout = () => {
 
             if (response.ok) {
                 const _data = await response.json() as { templates?: unknown[] }
-                toast.success(`🎉 Template Siap Digunakan!`, {
-                    description: `${_data.templates?.length ?? 8} template WhatsApp sudah dibuat dan siap kamu edit!`
-                })
+                toast.success(`🎉 Template Siap Digunakan!`, `${_data.templates?.length ?? 8} template WhatsApp sudah dibuat dan siap kamu edit!`)
                 await fetchTemplates()
             } else {
                 const errorBody = await response.json() as { message?: string }
-                toast.error('Gagal membuat template', {
-                    description: errorBody.message ?? 'Terjadi kesalahan'
-                })
+                toast.error('Gagal membuat template', errorBody.message ?? 'Terjadi kesalahan')
             }
         } catch (error: unknown) {
             uiLogger.error({ error: String(error) }, 'Error generating default templates')

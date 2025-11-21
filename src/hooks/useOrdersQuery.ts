@@ -86,37 +86,20 @@ export function useOrderStats(enabled = true) {
   return useQuery({
     queryKey: ['order-stats'],
     queryFn: async () => {
-      // Fetch all orders to calculate stats (since no dedicated stats API endpoint)
-      const response = await fetch('/api/orders?limit=1000', {
+      const response = await fetch('/api/orders/stats', {
         credentials: 'include', // Include cookies for authentication
       })
 
       if (!response.ok) {
-        throw new Error('Failed to fetch orders for stats')
+        throw new Error('Failed to fetch order stats')
       }
 
       const result = await response.json()
       if (!result.success) {
-        throw new Error(result.error || 'Failed to fetch orders for stats')
+        throw new Error(result.error || 'Failed to fetch order stats')
       }
 
-      const orders = result.data?.orders || []
-
-      const stats = {
-        total: orders.length,
-        pending: orders.filter((order: OrderStats) => order.status === 'PENDING').length,
-        confirmed: orders.filter((order: OrderStats) => order.status === 'CONFIRMED').length,
-        inProgress: orders.filter((order: OrderStats) => order.status === 'IN_PROGRESS').length,
-        completed: orders.filter((order: OrderStats) => order.status === 'READY').length,
-        delivered: orders.filter((order: OrderStats) => order.status === 'DELIVERED').length,
-        cancelled: orders.filter((order: OrderStats) => order.status === 'CANCELLED').length,
-        totalRevenue: orders.reduce((sum: number, order: OrderStats) => sum + (order.total_amount ?? 0), 0),
-        recentOrders: orders
-          .sort((a: OrderStats, b: OrderStats) => new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime())
-          .slice(0, 5)
-      }
-
-      return stats
+      return result.data
     },
     enabled,
     staleTime: 300000, // 5 minutes - stats don't change as frequently

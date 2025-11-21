@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { LoadingButton } from '@/components/ui/loading-button'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 import { useCreateIngredient, useUpdateIngredient } from '@/hooks/useIngredients'
 

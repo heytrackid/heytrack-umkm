@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
 
 import { createClientLogger } from '@/lib/client-logger'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/lib/toast'
 import type { CostChangeAlert, RecipeCostImpact } from '@/types/recipes/cost'
 
 const logger = createClientLogger('CostAlerts')

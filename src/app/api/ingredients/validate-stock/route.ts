@@ -1,5 +1,6 @@
 export const runtime = 'nodejs'
 
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core'
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { isLowStock, validateStockAvailability } from '@/lib/business-rules/inventory'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
@@ -19,9 +20,9 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     const { items } = body // Array of { ingredientId, requiredQuantity }
 
     if (!Array.isArray(items) || items.length === 0) {
-      return NextResponse.json(
-        { error: 'Items array is required' },
-        { status: 400 }
+      return createErrorResponse(
+        'Items array is required',
+        400
       )
     }
 
@@ -79,7 +80,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     const allValid = validationResults.every((result) => result.available)
     const lowStockItems = validationResults.filter((result) => result.lowStock)
 
-    return NextResponse.json({
+    return createSuccessResponse({
       data: {
         valid: allValid,
         items: validationResults,

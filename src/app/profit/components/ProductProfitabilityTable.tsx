@@ -1,7 +1,7 @@
-import { TrendingUp, TrendingDown } from '@/components/icons'
+import { TrendingDown, TrendingUp } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 import type { ProfitData } from '@/app/profit/components/types'
 
@@ -58,7 +58,7 @@ export const ProductProfitabilityTable = ({
       <CardContent>
         <div className="overflow-x-auto rounded-lg border">
           <table className="w-full">
-            <thead className="bg-muted">
+            <thead className="bg-background/80 backdrop-blur-sm shadow-sm sticky top-0 z-10">
               <tr>
                 <th className="text-left py-3 px-4 font-medium rounded-l-lg">Produk</th>
                 <th className="text-right py-3 px-4 font-medium">Terjual</th>
@@ -71,8 +71,8 @@ export const ProductProfitabilityTable = ({
             <tbody>
               {(products || []).map((product, index) => (
                 <tr 
-                  key={index} 
-                  className="border-b hover:bg-muted/30 transition-colors last:border-b-0"
+                  key={index}
+                  className="border-b hover:bg-accent transition-colors last:border-b-0 even:bg-muted/30"
                 >
                   <td className="py-3 px-4 font-medium">
                     <div className="flex items-center gap-2">

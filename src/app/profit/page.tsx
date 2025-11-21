@@ -25,6 +25,8 @@ import {
     useProfitData
 } from '@/app/profit/components/index'
 
+import { ProfitEmptyState } from './components/ProfitEmptyState'
+
 const ProfitReportPage = () => {
   const { isMobile } = useResponsive()
 
@@ -123,6 +125,8 @@ const ProfitReportPage = () => {
     ingredients = [],
     operating_expenses = []
   } = profitData ?? {}
+
+  const noData = !profitData || (summary.total_revenue === 0 && products.length === 0)
 
   return (
     <AppLayout>
@@ -224,6 +228,8 @@ const ProfitReportPage = () => {
               </Card>
             ))}
           </div>
+        ) : noData ? (
+          <ProfitEmptyState />
         ) : (
           <Suspense fallback={
             <div className="space-y-6">

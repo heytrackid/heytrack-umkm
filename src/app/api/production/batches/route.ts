@@ -1,6 +1,7 @@
 export const runtime = 'nodejs'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { PRODUCTION_FIELDS } from '@/lib/database/query-fields'
 import { ProductionBatchCreateSchema } from '@/lib/validations/domains/production'
@@ -45,7 +46,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
 
     if (error) throw error
 
-    return NextResponse.json({ data })
+    return createSuccessResponse(data)
   } catch (error) {
     return handleAPIError(error, 'GET /api/production/batches')
   }
@@ -64,13 +65,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     // Validate input
     const validation = ProductionBatchCreateSchema.safeParse(body)
     if (!validation.success) {
-      return NextResponse.json(
-        {
-          error: 'Data tidak valid',
-          details: validation.error.issues,
-        },
-        { status: 400 }
-      )
+      return createErrorResponse('Data tidak valid', 400)
     }
 
     const supabase = await createClient()
@@ -89,7 +84,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
     if (error) throw error
 
-    return NextResponse.json(data, { status: 201 })
+    return createSuccessResponse(data, undefined, undefined, 201)
   } catch (error) {
     return handleAPIError(error, 'POST /api/production/batches')
   }

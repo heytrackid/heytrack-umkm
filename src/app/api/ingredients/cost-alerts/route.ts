@@ -1,5 +1,8 @@
+export const runtime = 'nodejs'
+
 import { NextResponse } from 'next/server'
 
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core'
 import { createApiRoute } from '@/lib/api/route-factory'
 import { apiLogger } from '@/lib/logger'
 import type { CostChangeAlert } from '@/types/recipes/cost'
@@ -147,12 +150,12 @@ export const GET = createApiRoute(
         })
       }
 
-      return NextResponse.json({ alerts })
+      return createSuccessResponse({ alerts })
     } catch (error) {
       apiLogger.error({ error }, 'Error fetching ingredient cost alerts')
-      return NextResponse.json(
+      return createErrorResponse(
         { error: 'Internal server error' },
-        { status: 500 }
+        500
       )
     }
   }

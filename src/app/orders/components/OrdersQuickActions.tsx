@@ -6,7 +6,7 @@ import { useState } from 'react'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { LoadingButton } from '@/components/ui/loading-button'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 
 

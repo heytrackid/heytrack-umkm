@@ -3,7 +3,7 @@
 
 import { Check, Copy, MessageCircle, Send } from '@/components/icons';
 import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
+import { successToast, errorToast } from '@/lib/toast';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -129,7 +129,7 @@ export const WhatsAppFollowUp = ({
       setGeneratedMessage(message);
     } catch (error: unknown) {
       logger.error({ error }, 'Error generating message:');
-      toast.error('Gagal generate pesan. Coba template lain.');
+      errorToast('Gagal generate pesan', 'Coba template lain.');
     }
   };
 
@@ -151,10 +151,10 @@ export const WhatsAppFollowUp = ({
     try {
       await navigator.clipboard.writeText(text);
       setCopied(type);
-      toast.success('Berhasil disalin!');
+      successToast('Berhasil disalin');
       setTimeout(() => setCopied(null), 2000);
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'Gagal menyalin text');
+      errorToast('Gagal menyalin text', error instanceof Error ? error.message : undefined);
     }
   };
 
@@ -172,7 +172,7 @@ export const WhatsAppFollowUp = ({
       onSent(type, message);
     }
 
-    toast.success(`WhatsApp ${type === 'business' ? 'Business' : ''} terbuka!`);
+    successToast(`WhatsApp ${type === 'business' ? 'Business' : ''} terbuka!`);
   };
 
   useEffect(() => {

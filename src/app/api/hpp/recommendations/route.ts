@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { cacheInvalidation, cacheKeys, withCache } from '@/lib/cache'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core'
 import { apiLogger } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { PaginationQuerySchema } from '@/lib/validations'
@@ -47,9 +48,9 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     })
 
     if (!queryValidation.success) {
-      return NextResponse.json(
+      return createErrorResponse(
         { error: 'Invalid query parameters', details: queryValidation.error.issues },
-        { status: 400 }
+        400
       )
     }
 
@@ -125,7 +126,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
       total: result.total
     }, 'HPP recommendations retrieved successfully')
 
-    return NextResponse.json(result)
+    return createSuccessResponse(result)
   } catch (error) {
     apiLogger.error({ error }, 'Error fetching HPP recommendations')
     return NextResponse.json(
@@ -190,7 +191,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
       recipeId
     }, 'HPP recommendation created successfully')
 
-    return NextResponse.json({
+    return createSuccessResponse({
       success: true,
       recommendation: data
     })

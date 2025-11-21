@@ -1,33 +1,33 @@
 'use client'
 
-import { useRef, useState } from 'react'
 import {
-    Bot,
-    Box,
-    ChefHat,
-    ChevronDown,
-    DollarSign,
-    FileText,
-    Home,
-    Package,
-    Receipt,
-    Settings,
-    ShoppingCart,
-    Store,
-    TrendingUp,
-    Truck,
-    Users,
-    Wallet
+  Bot,
+  Box,
+  ChefHat,
+  ChevronDown,
+  DollarSign,
+  Factory,
+  FileText,
+  Home,
+  Package,
+  Receipt,
+  Settings,
+  ShoppingCart,
+  TrendingUp,
+  Truck,
+  Users,
+  Wallet
 } from '@/components/icons'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
@@ -59,6 +59,7 @@ const navigationGroups = [
   },
   {
     label: 'Produksi',
+    icon: Factory,
     items: [
       {
         title: 'Resep',
@@ -84,11 +85,6 @@ const navigationGroups = [
         title: 'Supplier',
         url: '/suppliers',
         icon: Truck
-      },
-      {
-        title: 'Pembelian',
-        url: '/ingredients/purchases',
-        icon: Store
       }
     ]
   },
@@ -248,6 +244,14 @@ export function TabNavigation() {
                           ]
                     )}
                   >
+                    {group.icon && (
+                      <group.icon
+                        className={cn(
+                          "h-4 w-4 mr-2 flex-shrink-0",
+                          groupHasActiveItem ? "text-primary" : "text-muted-foreground"
+                        )}
+                      />
+                    )}
                     <span>{group.label}</span>
                     <ChevronDown className="ml-1 h-3 w-3 transition-transform duration-200 ease-out group-data-[state=open]:rotate-180" />
                   </Button>

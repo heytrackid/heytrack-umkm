@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/lib/toast'
 import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import type { ApiErrorResponse, ApiSuccessResponse } from '@/lib/api-core'

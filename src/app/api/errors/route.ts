@@ -6,12 +6,12 @@ import { NextRequest, NextResponse } from 'next/server'
 
 // import { checkAdminPrivileges } from '@/lib/admin-check' // Removed - not implemented
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 import type { ErrorLogInsert } from '@/types/database'
-import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 
 interface ErrorBody {
   message?: string
@@ -174,10 +174,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
         email: user.email
       }, 'Unauthorized access attempt to error logs')
       
-      return NextResponse.json(
-        { error: 'Forbidden - Admin access required' },
-        { status: 403 }
-      )
+      return createErrorResponse('Forbidden - Admin access required', 403)
     }
 
     const { searchParams } = new URL(request.url)
@@ -193,10 +190,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
 
     if (queryError) {
       apiLogger.error({ error: queryError }, 'Failed to fetch error logs')
-      return NextResponse.json(
-        { error: 'Failed to fetch error logs' },
-        { status: 500 }
-      )
+      return createSuccessResponse(errors)
     }
 
     return createSuccessResponse({ errors })

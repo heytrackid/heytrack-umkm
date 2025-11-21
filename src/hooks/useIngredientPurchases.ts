@@ -1,11 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchApi, buildApiUrl } from '@/lib/query/query-helpers'
+import { buildApiUrl, fetchApi } from '@/lib/query/query-helpers'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/lib/toast'
 import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage } from '@/lib/type-guards'
 
-import type { Row, Insert, Update } from '@/types/database'
+import type { Insert, Row, Update } from '@/types/database'
 
 const logger = createClientLogger('IngredientPurchases')
 
@@ -26,11 +26,12 @@ export function useIngredientPurchases(options?: UseIngredientPurchasesOptions) 
   return useQuery({
     queryKey: ['ingredient-purchases', options],
     queryFn: async () => {
-      const result = await fetchApi<{ ingredient_purchases?: IngredientPurchase[] }>(buildApiUrl('/ingredient-purchases', options as Record<string, string | number | boolean | null | undefined>))
+      const result = await fetchApi<{ ingredient_purchases?: IngredientPurchase[] }>(buildApiUrl('/api/ingredient-purchases', options as Record<string, string | number | boolean | null | undefined>))
       return result?.ingredient_purchases ?? []
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: false, // Disable retries to prevent render loops on API errors
   })
 }
 

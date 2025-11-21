@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { GridSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
 import { useCurrency } from '@/hooks/useCurrency'
 import { uiLogger } from '@/lib/logger'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 // Using uiLogger for client-side logging
 const logger = uiLogger 

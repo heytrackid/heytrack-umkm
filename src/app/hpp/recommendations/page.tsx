@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { useCurrency } from '@/hooks/useCurrency'
 import { dbLogger } from '@/lib/logger'
 
@@ -78,7 +78,7 @@ const HppRecommendationsPage = (): JSX.Element => {
   const markAsImplemented = (recommendationId: string) => {
     try {
       // In a real implementation, this would call an API to update the recommendation
-      toast(`Implementation tracking for recommendation ${recommendationId} will be available in the API`)
+      toast.info(`Implementation tracking for recommendation ${recommendationId} will be available in the API`)
     } catch (error) {
       dbLogger.error({ error }, 'Failed to mark recommendation as implemented')
       toast.error('Failed to update recommendation')

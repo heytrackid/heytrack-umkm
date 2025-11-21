@@ -8,7 +8,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useIngredients } from '@/hooks/useIngredients'
 import { dbLogger } from '@/lib/logger'
@@ -47,7 +47,7 @@ const WacEnginePage = (): JSX.Element => {
       setCalculating(true)
       // This would normally call a WAC API endpoint
       // For now, we'll simulate the calculation
-      toast('WAC calculation endpoint not yet implemented')
+      toast.info('WAC calculation endpoint not yet implemented')
     } catch (error) {
       dbLogger.error({ error }, 'Failed to calculate WAC')
       toast.error('Failed to calculate WAC')
@@ -60,7 +60,7 @@ const WacEnginePage = (): JSX.Element => {
   const recalculateAll = () => {
     try {
       setRecalculating(true)
-      toast('Full WAC recalculation started')
+      toast.info('Full WAC recalculation started')
 
       // Simulate recalculation
       timeoutRef.current = setTimeout(() => {

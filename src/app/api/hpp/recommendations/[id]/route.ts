@@ -80,7 +80,7 @@ async function deleteHandler(
 
     if (error) throw error
 
-    return NextResponse.json({ success: true })
+    return createSuccessResponse({ success: true })
   } catch (error) {
     return handleAPIError(error, 'DELETE /api/hpp/recommendations/[id]')
   }

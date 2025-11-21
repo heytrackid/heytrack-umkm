@@ -44,66 +44,63 @@ export function useChatHistory(userId: string) {
   const initializeSession = useCallback(async () => {
     try {
       setIsLoading(true)
-      const supabase = createClient()
 
       // Get most recent active session
-      const { data: sessions, error: sessionError} = await supabase
-        .from('chat_sessions')
-        .select('id, user_id, title, context_snapshot, created_at, updated_at, deleted_at')
-        .eq('user_id', userId)
-        .order('updated_at', { ascending: false })
-        .limit(1)
+      const sessionsResponse = await fetch('/api/ai/sessions?limit=1', {
+        credentials: 'include',
+      })
 
-      if (sessionError) throw sessionError
+      if (!sessionsResponse.ok) {
+        throw new Error('Failed to fetch sessions')
+      }
 
-      let sessionId: string
+      const sessionsResult = await sessionsResponse.json()
+      if (!sessionsResult.data || sessionsResult.data.length === 0) {
+        // Create new session
+        const createResponse = await fetch('/api/ai/sessions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            title: 'New Conversation',
+            context_snapshot: {}
+          })
+        })
 
-      if (sessions && sessions.length > 0) {
+        if (!createResponse.ok) {
+          throw new Error('Failed to create session')
+        }
+
+        const createResult = await createResponse.json()
+        const sessionId = createResult.data.id
+        setCurrentSessionId(sessionId)
+        setMessages([])
+      } else {
         // Use existing session
-        const session = sessions[0] as unknown as ChatSessionRow
-        sessionId = session.id
+        const session = sessionsResult.data[0]
+        const sessionId = session.id
         setCurrentSessionId(sessionId)
 
         // Load messages from this session
-        const { data: messagesData, error: messagesError } = await supabase
-          .from('chat_messages')
-          .select('id, session_id, role, content, metadata, created_at')
-          .eq('session_id', sessionId)
-          .order('created_at', { ascending: true })
+        const messagesResponse = await fetch(`/api/ai/sessions/${sessionId}`, {
+          credentials: 'include',
+        })
 
-        if (messagesError) throw messagesError
-
-        if (messagesData && messagesData.length > 0) {
-          const formattedMessages: ExtendedChatMessage[] = (messagesData as ChatMessageRow[]).map(msg => {
-            const metadata = msg.metadata as Record<string, unknown> | null
-            return {
+        if (messagesResponse.ok) {
+          const messagesResult = await messagesResponse.json()
+          if (messagesResult.data?.messages) {
+            const formattedMessages: ExtendedChatMessage[] = messagesResult.data.messages.map((msg: ChatMessageRow) => ({
               id: msg.id,
               role: msg.role as 'assistant' | 'system' | 'user',
               content: msg.content,
               timestamp: new Date(msg.created_at),
-              actions: metadata?.['actions'] as Array<{ type: string; label: string }> | undefined,
-              data: metadata?.['data'] as Record<string, unknown> | undefined
-            }
-          })
-          setMessages(formattedMessages)
-        }
-      } else {
-        // Create new session
-        const { data: newSession, error: createError } = await supabase
-          .from('chat_sessions')
-          .insert({
-            user_id: userId,
-            title: 'New Conversation',
-            context_snapshot: {}
-          } as never)
-          .select()
-          .single()
-
-        if (createError) throw createError
-        if (newSession) {
-          const session = newSession as ChatSessionRow
-          sessionId = session.id
-          setCurrentSessionId(sessionId)
+              actions: (msg.metadata as { actions?: Array<{ type: string; label: string }> })?.actions,
+              data: (msg.metadata as { data?: Record<string, unknown> })?.data
+            }))
+            setMessages(formattedMessages)
+          }
         }
       }
     } catch (error) {
@@ -111,37 +108,32 @@ export function useChatHistory(userId: string) {
     } finally {
       setIsLoading(false)
     }
-  }, [userId])
+  }, [])
 
   // Save message to database
   const saveMessage = useCallback(async (message: ExtendedChatMessage) => {
     if (!currentSessionId) return
 
     try {
-      const supabase = createClient()
-      
-      const { error } = await supabase
-        .from('chat_messages')
-        .insert({
-          session_id: currentSessionId,
+      const response = await fetch(`/api/ai/sessions/${currentSessionId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
           role: message.role,
           content: message.content,
           metadata: {
             actions: message.actions,
             data: message.data
-          } as Json
-        } as never)
+          }
+        })
+      })
 
-      if (error) throw error
-
-      // Update session's updated_at
-      await supabase
-        .from('chat_sessions')
-        .update({
-          updated_at: new Date().toISOString()
-        } as never)
-        .eq('id', currentSessionId)
-
+      if (!response.ok) {
+        throw new Error('Failed to save message')
+      }
     } catch (error) {
       logger.error({ error }, 'Error saving message')
     }
@@ -152,38 +144,31 @@ export function useChatHistory(userId: string) {
     if (!currentSessionId) return
 
     try {
-      const supabase = createClient()
-      // Delete all messages in current session
-      await supabase
-        .from('chat_messages')
-        .delete()
-        .eq('session_id', currentSessionId)
-
       // Create new session
-      const { data: newSession, error: newSessionError } = await supabase
-        .from('chat_sessions')
-        .insert({
-          user_id: userId,
+      const createResponse = await fetch('/api/ai/sessions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
           title: 'New Conversation',
           context_snapshot: {}
-        } as never)
-        .select()
-        .single()
+        })
+      })
 
-      if (newSessionError) {
-        logger.error({ error: newSessionError }, 'Error creating new session')
-        return
+      if (!createResponse.ok) {
+        throw new Error('Failed to create new session')
       }
 
-      if (newSession) {
-        const session = newSession as ChatSessionRow
-        setCurrentSessionId(session.id)
-        setMessages([])
-      }
+      const createResult = await createResponse.json()
+      const newSessionId = createResult.data.id
+      setCurrentSessionId(newSessionId)
+      setMessages([])
     } catch (error) {
       logger.error({ error }, 'Error clearing chat history')
     }
-  }, [currentSessionId, userId])
+  }, [currentSessionId])
 
   // Initialize on mount
   useEffect(() => {

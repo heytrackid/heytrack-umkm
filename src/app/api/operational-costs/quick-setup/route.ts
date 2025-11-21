@@ -3,6 +3,7 @@ export const runtime = 'nodejs'
 
 import { NextResponse } from 'next/server'
 
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-core'
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import type { Insert } from '@/types/database'
@@ -116,24 +117,24 @@ async function postHandler(): Promise<NextResponse> {
 
     if (error) {
       apiLogger.error({ error, userId: user.id }, 'Failed to create template costs')
-      return NextResponse.json(
+      return createErrorResponse(
         { error: 'Failed to create template costs' },
-        { status: 500 }
+        500
       )
     }
 
     apiLogger.info({ userId: user['id'], count: data.length }, 'Template costs created')
 
-    return NextResponse.json({
+    return createSuccessResponse({
       message: 'Template costs created successfully',
       count: data.length,
       costs: data
-    }, { status: 201 })
+    }, undefined, undefined, 201)
   } catch (error) {
     apiLogger.error({ error }, 'Error in POST /api/operational-costs/quick-setup')
-    return NextResponse.json(
+    return createErrorResponse(
       { error: 'Internal server error' },
-      { status: 500 }
+      500
     )
   }
 }

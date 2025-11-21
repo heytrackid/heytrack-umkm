@@ -137,13 +137,36 @@ async function getDashboardStatsHandler(
     const growthPercent = comparisonRevenue > 0 ? ((revenueChange / comparisonRevenue) * 100).toFixed(1) : '0.0'
     const trend: 'up' | 'down' = revenueChange >= 0 ? 'up' : 'down'
 
+    // Calculate revenue trend for last 7 days
+    const revenueTrend = []
+    const today = new Date()
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today.getTime() - i * 24 * 60 * 60 * 1000)
+      const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+      const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000)
+
+      const dayOrders = orders.filter(o => {
+        const orderDate = new Date(o.created_at || o.order_date || '')
+        return orderDate >= dayStart && orderDate < dayEnd
+      })
+
+      const dayRevenue = dayOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0)
+
+      revenueTrend.push({
+        day: date.toLocaleDateString('id-ID', { weekday: 'short' }),
+        revenue: dayRevenue,
+        isToday: i === 0
+      })
+    }
+
     // Build response
     const response = {
       revenue: {
         today: currentPeriodRevenue,
         total: totalRevenue,
         growth: `${growthPercent}%`,
-        trend
+        trend,
+        revenueTrend
       },
       orders: {
         active: activeOrders,

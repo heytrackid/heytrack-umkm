@@ -4,6 +4,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { createSuccessResponse } from '@/lib/api-core'
 import { apiLogger } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
@@ -29,7 +30,7 @@ async function getHandler(__request: NextRequest): Promise<NextResponse> {
     const alertService = new InventoryAlertService()
     const alerts = await alertService.getActiveAlerts(user.id)
 
-    return NextResponse.json(alerts)
+    return createSuccessResponse(alerts)
 
   } catch (error: unknown) {
     apiLogger.error({ error }, 'Error in GET /api/inventory/alerts')
@@ -57,7 +58,7 @@ async function postHandler(__request: NextRequest): Promise<NextResponse> {
     const alertService = new InventoryAlertService()
     await alertService.checkLowStockAlerts(user.id)
 
-    return NextResponse.json({
+    return createSuccessResponse({
       message: 'Inventory alerts checked successfully'
     })
 

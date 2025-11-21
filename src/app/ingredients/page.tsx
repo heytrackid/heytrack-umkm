@@ -2,26 +2,26 @@
 
 import { AlertTriangle, Plus, ShoppingCart, Upload } from '@/components/icons'
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { generateIngredientsTemplate, parseIngredientsCSV } from '@/components/import/csv-helpers'
 import { ImportDialog } from '@/components/import/ImportDialog'
-import { IngredientsList } from '@/components/ingredients/IngredientsList'
 import { IngredientFormDialog } from '@/components/ingredients/IngredientFormDialog'
+import { IngredientsList } from '@/components/ingredients/IngredientsList'
 import { PageHeader } from '@/components/layout'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatCardPatterns, StatsCards } from '@/components/ui/index'
 import { ListSkeleton, StatsSkeleton, TableSkeleton } from '@/components/ui/skeleton-loader'
-import { useIngredients } from '@/hooks/useIngredients'
+import { errorToast } from '@/lib/toast'
+import { useSettings } from '@/contexts/settings-context'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useCostChangeAlerts } from '@/hooks/useCostAlerts'
-import { useQueryClient } from '@tanstack/react-query'
 import { useIngredientPurchases } from '@/hooks/useIngredientPurchases'
-import { useSettings } from '@/contexts/settings-context'
-import { errorToast } from '@/components/ui/toast'
+import { useIngredients } from '@/hooks/useIngredients'
 import type { Row } from '@/types/database'
+import { useQueryClient } from '@tanstack/react-query'
 
 const IngredientsPage = () => {
   const { data: ingredients, isLoading: loading, error } = useIngredients();
@@ -35,6 +35,10 @@ const IngredientsPage = () => {
   const { data: purchases } = useIngredientPurchases({ limit: 10 })
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
+
+  const handleAddIngredient = useCallback(() => {
+    setShowAddDialog(true);
+  }, []);
 
   // Generate template URL
   const templateUrl = useMemo(() => {
@@ -194,7 +198,7 @@ const IngredientsPage = () => {
             {isMobile ? <ListSkeleton items={5} /> : <TableSkeleton rows={5} columns={5} />}
           </div>
         ) : (
-          <IngredientsList onAdd={() => setShowAddDialog(true)} />
+          <IngredientsList onAdd={handleAddIngredient} />
         )}
 
         {/* Recent Purchases */}

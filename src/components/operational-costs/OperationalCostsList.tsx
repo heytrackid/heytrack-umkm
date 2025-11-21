@@ -42,7 +42,7 @@ import {
 } from '@/components/ui/select'
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { useSettings } from '@/contexts/settings-context'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { useOperationalCosts, useDeleteOperationalCost } from '@/hooks/useOperationalCosts'
 import { usePagination } from '@/hooks/usePagination'
 import { useResponsive } from '@/hooks/useResponsive'

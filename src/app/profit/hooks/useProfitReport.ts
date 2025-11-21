@@ -8,7 +8,7 @@ import type {
 } from '@/app/profit/constants'
 
 import { calculateProfitDateRange, exportProfitReport, prepareProductChartData, validateProfitData } from '@/app/profit/utils'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/lib/toast'
 import { apiLogger } from '@/lib/logger'
 import { buildApiUrl } from '@/lib/query/query-helpers'
 import { cachePresets } from '@/lib/query/query-config'

@@ -17,7 +17,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { uiLogger } from '@/lib/logger'
 import { useCreateRecipeWithIngredients, useUpdateRecipeWithIngredients } from '@/hooks/useRecipes'
 import { PageHeader } from '@/components/layout/PageHeader'

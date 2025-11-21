@@ -1,12 +1,12 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/lib/toast'
 import type { ApiErrorResponse, ApiSuccessResponse } from '@/lib/api-core'
 import { createClientLogger } from '@/lib/client-logger'
-import { getErrorMessage } from '@/lib/type-guards'
-import { fetchApi, buildApiUrl } from '@/lib/query/query-helpers'
 import { cachePresets } from '@/lib/query/query-config'
-import type { Row, Insert, Update } from '@/types/database'
+import { buildApiUrl, fetchApi } from '@/lib/query/query-helpers'
+import { getErrorMessage } from '@/lib/type-guards'
+import type { Insert, Row, Update } from '@/types/database'
 
 const logger = createClientLogger('Hook')
 
@@ -32,7 +32,7 @@ interface UseIngredientsOptions {
 export function useIngredients(options?: UseIngredientsOptions) {
   return useQuery({
     queryKey: ['ingredients', options],
-    queryFn: () => fetchApi<{ ingredients?: Ingredient[], pagination?: unknown }>(buildApiUrl('/ingredients', options as Record<string, string | number | boolean | null | undefined>)),
+    queryFn: () => fetchApi<{ ingredients?: Ingredient[], pagination?: unknown }>(buildApiUrl('/api/ingredients', options as Record<string, string | number | boolean | null | undefined>)),
     ...cachePresets.moderatelyUpdated,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000,

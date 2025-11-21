@@ -8,7 +8,7 @@ import {
 } from '@tanstack/react-query'
 import { useState } from 'react'
 
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/lib/toast'
 import { createClientLogger } from '@/lib/client-logger'
 import { HPP_CONFIG } from '@/lib/constants/hpp-config'
 

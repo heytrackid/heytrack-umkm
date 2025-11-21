@@ -4,6 +4,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { createSuccessResponse } from '@/lib/api-core'
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
@@ -140,7 +141,7 @@ async function getHandler(_request: NextRequest): Promise<NextResponse> {
       recipesWithHpp: result.recipesWithHpp
     }, 'HPP overview retrieved successfully')
 
-    return NextResponse.json(result)
+    return createSuccessResponse(result)
   } catch (error) {
     return handleAPIError(error, 'GET /api/hpp/overview')
   }

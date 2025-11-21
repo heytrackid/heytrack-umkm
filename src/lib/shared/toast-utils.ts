@@ -1,4 +1,4 @@
-import type { useToast } from '@/hooks/use-toast'
+import type { useToast } from '@/lib/toast'
 
 
 /**
@@ -105,27 +105,19 @@ export const API_TOASTS = {
 
 // Toast utility functions
 export function showSuccessToast(
-  toast: ReturnType<typeof useToast>['toast'],
+  toast: ReturnType<typeof useToast>,
   title?: string,
   description?: string
 ) {
-  toast({
-    title: title ?? TOAST_PRESETS.SUCCESS.title,
-    description: description ?? TOAST_PRESETS.SUCCESS.description,
-    variant: TOAST_PRESETS.SUCCESS.variant
-  })
+  toast.successToast(title ?? TOAST_PRESETS.SUCCESS.title, description ?? TOAST_PRESETS.SUCCESS.description)
 }
 
 export function showErrorToast(
-  toast: ReturnType<typeof useToast>['toast'],
+  toast: ReturnType<typeof useToast>,
   title?: string,
   description?: string
 ) {
-  toast({
-    title: title ?? TOAST_PRESETS.ERROR.title,
-    description: description ?? TOAST_PRESETS.ERROR.description,
-    variant: TOAST_PRESETS.ERROR.variant
-  })
+  toast.errorToast(title ?? TOAST_PRESETS.ERROR.title, description ?? TOAST_PRESETS.ERROR.description)
 }
 
 export function showWarningToast(
@@ -202,10 +194,10 @@ export function showFormErrorToast(
 
 // Loading state helpers
 export function showLoadingToast(
-  toast: ReturnType<typeof useToast>['toast'],
+  toast: ReturnType<typeof useToast>,
   message?: string
 ) {
-  return toast({
+  return toast.toast({
     title: API_TOASTS.LOADING.title,
     description: message ?? API_TOASTS.LOADING.description,
   })
@@ -214,7 +206,7 @@ export function showLoadingToast(
 // Async operation wrapper with toast feedback
 export async function withToastFeedback<T>(
   operation: () => Promise<T>,
-  toast: ReturnType<typeof useToast>['toast'],
+  toast: ReturnType<typeof useToast>,
   options: {
     loadingMessage?: string
     successMessage?: string
@@ -232,13 +224,10 @@ export async function withToastFeedback<T>(
   } = options
 
   // Show loading toast
-  const loadingToast = showLoadingToast(toast, loadingMessage)
+  showLoadingToast(toast, loadingMessage)
 
   try {
     const result = await operation()
-
-    // Dismiss loading toast
-    loadingToast.dismiss()
 
     // Show success toast
     showSuccessToast(toast, 'Berhasil', successMessage)
@@ -246,9 +235,6 @@ export async function withToastFeedback<T>(
     onSuccess?.(result)
     return result
   } catch (error) {
-    // Dismiss loading toast
-    loadingToast.dismiss()
-
     // Show error toast
     const errorMsg = error instanceof Error ? error.message : errorMessage
     showErrorToast(toast, 'Error', errorMsg)
@@ -260,27 +246,28 @@ export async function withToastFeedback<T>(
 
 // Batch operation feedback
 export function showBatchResultToast(
-  toast: ReturnType<typeof useToast>['toast'],
+  toast: ReturnType<typeof useToast>,
   successful: number,
   failed: number,
   operation: string
 ) {
   if (failed === 0) {
-    toast({
+    toast.toast({
       title: 'Batch Berhasil',
       description: `${operation} berhasil untuk ${successful} item`,
+      variant: 'success'
     })
   } else if (successful === 0) {
-    toast({
+    toast.toast({
       title: 'Batch Gagal',
       description: `Semua ${failed} ${operation} gagal`,
       variant: 'destructive'
     })
   } else {
-    toast({
+    toast.toast({
       title: 'Batch Selesai dengan Peringatan',
-      description: `${successful} berhasil, ${failed} gagal`,
-      variant: 'destructive'
+      description: `${successful} berhasil, ${failed} gagal dari ${operation}`,
+      variant: 'warning'
     })
   }
 }

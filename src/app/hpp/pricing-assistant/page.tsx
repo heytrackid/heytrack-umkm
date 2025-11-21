@@ -16,7 +16,7 @@ import { Separator } from '@/components/ui/separator'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useRecipes } from '@/hooks/useRecipes'
 import { dbLogger } from '@/lib/logger'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 const pricingBreadcrumbs = [
   { label: 'Dashboard', href: '/' },

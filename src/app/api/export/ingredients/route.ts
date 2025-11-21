@@ -1,6 +1,7 @@
 export const runtime = 'nodejs'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
+import { createSuccessResponse } from '@/lib/api-core/responses'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
@@ -25,7 +26,7 @@ async function getHandler(_request: NextRequest): Promise<NextResponse> {
     if (error) throw error
 
     // Return as JSON for client-side CSV conversion
-    return NextResponse.json({
+    return createSuccessResponse({
       data: ingredients || [],
       meta: {
         total: (ingredients || []).length,

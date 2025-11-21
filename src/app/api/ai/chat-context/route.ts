@@ -8,7 +8,7 @@ export const runtime = 'nodejs'
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 
-
+import { createSuccessResponse } from '@/lib/api-core'
 import { ContextAwareAI } from '@/lib/ai-chatbot-context'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
@@ -233,7 +233,7 @@ async function chatEnhancedPOST(request: NextRequest): Promise<NextResponse> {
 
     apiLogger.info(`Chat message processed - User: ${userId}, Session: ${sessionId}, Response time: ${responseTime}ms, Fallback: ${fallbackUsed}`)
 
-    return NextResponse.json({
+    return createSuccessResponse({
       message: aiResponse,
       session_id: sessionId,
       suggestions: suggestions.map(s => s.text),

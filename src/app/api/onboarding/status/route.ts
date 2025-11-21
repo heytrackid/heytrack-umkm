@@ -1,5 +1,6 @@
 export const runtime = 'nodejs'
 
+import { createSuccessResponse } from '@/lib/api-core'
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
@@ -43,7 +44,7 @@ async function getHandler(_request: NextRequest): Promise<NextResponse> {
 
     const needsOnboarding = progress < 100
 
-    return NextResponse.json({
+    return createSuccessResponse({
       data: {
         needsOnboarding,
         progress,

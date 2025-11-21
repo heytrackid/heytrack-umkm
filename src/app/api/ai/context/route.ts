@@ -2,6 +2,7 @@ export const runtime = 'nodejs'
 
 import { z } from 'zod'
 import { NextResponse } from 'next/server'
+import { createSuccessResponse } from '@/lib/api-core'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { apiLogger } from '@/lib/logger'
 import { BusinessContextService } from '@/lib/services/BusinessContextService'
@@ -54,7 +55,7 @@ async function deleteContextHandler(context: RouteContext): Promise<NextResponse
 
     apiLogger.info({ userId: user.id }, 'DELETE /api/ai/context - Success')
 
-    return NextResponse.json({ success: true })
+    return createSuccessResponse({ success: true })
   } catch (error) {
     apiLogger.error({ error, userId: user.id }, 'DELETE /api/ai/context - Error')
     return NextResponse.json(
