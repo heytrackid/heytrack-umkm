@@ -3,15 +3,11 @@
 import { useRouter } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
 
-
-import { getErrorMessage } from '@/lib/type-guards'
-import { handleError } from '@/lib/error-handling'
-import { useRecipes } from '@/hooks/useRecipes'
+import { useCreateOrder } from '@/hooks/api/useOrders'
 import { useCustomersList } from '@/hooks/useCustomers'
+import { useRecipes } from '@/hooks/useRecipes'
 
 import type { Row } from '@/types/database'
-
-
 
 type Customer = Row<'customers'>
 
@@ -52,8 +48,10 @@ export interface OrderFormData {
 export const useOrderLogic = () => {
   const router = useRouter()
 
+  // React Query mutation for creating orders
+  const createOrderMutation = useCreateOrder()
+
   // Form state
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState('customer')
 
@@ -240,7 +238,6 @@ export const useOrderLogic = () => {
       return
     }
     
-    setIsSubmitting(true)
     setError('')
     
     try {
@@ -279,47 +276,17 @@ export const useOrderLogic = () => {
         }))
       }
       
-      const response = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData),
-        credentials: 'include', // Include cookies for authentication
-      })
-      
-      if (!response.ok) {
-        const responseClone = response.clone()
-        let errorMessage = 'Gagal menyimpan pesanan'
-
-         try {
-           const errorData = await response.json() as unknown
-           const apiMessage = typeof errorData === 'object' && errorData !== null && 'error' in errorData && typeof (errorData as { error?: unknown }).error === 'string' ? (errorData as { error: string }).error.trim() : ''
-           if (apiMessage.length > 0) {
-             errorMessage = apiMessage
-           } else {
-             const fallbackText = (await responseClone.text()).trim()
-             if (fallbackText.length > 0) {
-               errorMessage = fallbackText
-             }
-           }
-        } catch {
-          const fallbackText = (await responseClone.text()).trim()
-          if (fallbackText.length > 0) {
-            errorMessage = fallbackText
-          }
-        }
-
-        throw new Error(errorMessage)
-      }
+      // Use React Query mutation instead of manual fetch
+      await createOrderMutation.mutateAsync(orderData as never)
       
       // Redirect to orders page with success message
       router.push('/orders?success=true')
       
-      } catch (error) {
-        const caughtError = error as Error
-        handleError(caughtError, 'Create order', false, 'Gagal membuat pesanan')
-        const message = getErrorMessage(caughtError)
-        setError(message)
-      }
+    } catch (error) {
+      // Error handling is already done by the mutation's onError
+      // Just set local error state for display
+      setError('Gagal membuat pesanan. Silakan coba lagi.')
+    }
   }
 
   return {
@@ -328,7 +295,7 @@ export const useOrderLogic = () => {
     orderItems,
     availableRecipes,
     customers,
-    isSubmitting,
+    isSubmitting: createOrderMutation.isPending,
     error,
     activeTab,
     

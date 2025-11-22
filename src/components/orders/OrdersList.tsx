@@ -1,5 +1,3 @@
- 
- 
 'use client'
 
 import {
@@ -8,20 +6,21 @@ import {
   Edit,
   Eye,
   Phone,
-  Trash2,
-  Plus
+  Plus,
+  Trash2
 } from '@/components/icons'
 import { memo, useCallback, useMemo, useState } from 'react'
 
 import type { OrderWithRelations } from '@/app/orders/types/orders.types'
-import { OrderStatusBadge, OrderProgress } from '@/components/orders/OrderStatusBadge'
+import { OrderProgress, OrderStatusBadge } from '@/components/orders/OrderStatusBadge'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
-import { SkeletonText } from '@/components/ui/skeleton'
 import { SwipeActions } from '@/components/ui/mobile-gestures'
+import { SkeletonText } from '@/components/ui/skeleton'
 import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
+import { useUpdateOrderStatus } from '@/hooks/api/useOrders'
 import { useCurrency } from '@/hooks/useCurrency'
 
 import { getPaymentInfo, getPriorityInfo } from '@/components/orders/utils'
@@ -54,6 +53,8 @@ export const OrdersList = memo(({
   loading = false
 }: OrdersListProps) => {
   const { formatCurrency } = useCurrency()
+  const updateStatusMutation = useUpdateOrderStatus()
+  
   const pageSizeOptions = useMemo(() => [10, 25, 50], [])
   const [rowsPerPage, setRowsPerPage] = useState<number>(pageSizeOptions[0] ?? 10)
   const [currentPage, setCurrentPage] = useState(1)
@@ -69,8 +70,11 @@ export const OrdersList = memo(({
   )
 
   const handleStatusChange = useCallback((orderId: string, newStatus: OrderStatus) => {
+    // Use React Query mutation for optimistic updates
+    updateStatusMutation.mutate({ orderId, newStatus })
+    // Also call parent callback for backward compatibility
     onUpdateStatus(orderId, newStatus)
-  }, [onUpdateStatus])
+  }, [onUpdateStatus, updateStatusMutation])
 
   if (loading) {
     return (
