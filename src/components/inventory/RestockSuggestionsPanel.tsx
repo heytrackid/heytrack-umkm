@@ -5,8 +5,9 @@ import { AlertCircle, AlertTriangle, Info, ShoppingCart } from '@/components/ico
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import type { RestockSuggestion } from '@/types/database'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useRestockSuggestions } from '@/hooks/useRestockSuggestions'
+import { useRestockSuggestions } from '@/hooks/useInventoryAlerts'
 
 
 
@@ -49,7 +50,7 @@ export const RestockSuggestionsPanel = (): JSX.Element => {
         )
     }
 
-    const { data: suggestions, summary } = data ?? { data: [], summary: {} }
+    const { suggestions, summary } = data ?? { suggestions: [], summary: {} }
 
     const getUrgencyIcon = (urgency: string) => {
         switch (urgency) {
@@ -91,22 +92,22 @@ export const RestockSuggestionsPanel = (): JSX.Element => {
             <CardContent>
                 {suggestions.length > 0 ? (
                     <div className="space-y-4">
-                        {suggestions.map((suggestion) => (
+                        {suggestions.map((suggestion: RestockSuggestion) => (
                             <div
                                 key={suggestion.ingredient_id}
                                 className="flex items-start gap-4 rounded-lg border p-4"
                             >
                                 <div className="mt-1">
-                                    {getUrgencyIcon(suggestion.urgency)}
+                                    {getUrgencyIcon(suggestion.urgency || 'medium')}
                                 </div>
                                 <div className="flex-1 space-y-2">
                                     <div className="flex items-start justify-between">
                                         <div>
                                             <p className="font-medium">{suggestion['ingredient_name']}</p>
-                                            <p className="text-sm text-muted-foreground">{suggestion.reason}</p>
+                                            <p className="text-sm text-muted-foreground">{suggestion.reason || 'Low stock'}</p>
                                         </div>
-                                        <Badge variant={getUrgencyVariant(suggestion.urgency)}>
-                                            {suggestion.urgency}
+                                        <Badge variant={getUrgencyVariant(suggestion.urgency || 'medium')}>
+                                            {suggestion.urgency || 'medium'}
                                         </Badge>
                                     </div>
 
@@ -114,7 +115,7 @@ export const RestockSuggestionsPanel = (): JSX.Element => {
                                         <div>
                                             <p className="text-muted-foreground">Available</p>
                                             <p className="font-medium">
-                                                {suggestion.available_stock} {suggestion['ingredient_name'].split(' ')[0]}
+                                                {suggestion.reserved_stock || 0} reserved
                                             </p>
                                         </div>
                                         <div>

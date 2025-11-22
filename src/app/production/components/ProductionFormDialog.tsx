@@ -1,7 +1,7 @@
 'use client'
 
 import { Loader2 } from '@/components/icons'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -13,25 +13,20 @@ import { Popover } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { uiLogger } from '@/lib/logger'
+import { useRecipes } from '@/hooks/useRecipes'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 
-import type { Row } from '@/types/database'
 
 
-type Recipe = Row<'recipes'>
+
 interface ApiErrorPayload {
     message?: string
 }
 
-const isRecipe = (value: unknown): value is Recipe => {
-    if (typeof value !== 'object' || value === null) {
-        return false
-    }
-    const record = value as Record<string, unknown>
-    return typeof record['id'] === 'string' && typeof record['name'] === 'string'
-}
 
-const isRecipeArray = (value: unknown): value is Recipe[] => Array.isArray(value) && value.every(isRecipe)
+
+
 
 const isApiErrorPayload = (value: unknown): value is ApiErrorPayload => {
     if (typeof value !== 'object' || value === null) {
@@ -48,9 +43,9 @@ interface ProductionFormDialogProps {
 }
 
 export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: ProductionFormDialogProps) => {
-    const [recipes, setRecipes] = useState<Recipe[]>([])
-    const [loading, setLoading] = useState(false)
-    const [loadingRecipes, setLoadingRecipes] = useState(true)
+    const { data: recipes = [], isLoading: loadingRecipes } = useRecipes({ limit: 1000 })
+    const queryClient = useQueryClient()
+
     const [formData, setFormData] = useState({
         recipe_id: '',
         quantity: '',
@@ -58,47 +53,43 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
         notes: ''
     })
 
-    useEffect(() => {
-        if (open) {
-            void fetchRecipes()
-        }
-    }, [open])
 
-    const fetchRecipes = async () => {
-        try {
-            setLoadingRecipes(true)
-            const response = await fetch('/api/recipes', {
-                credentials: 'include', // Include cookies for authentication
+
+    const createProductionBatchMutation = useMutation({
+        mutationFn: async (data: {
+            recipe_id: string
+            quantity: number
+            planned_date: string
+            notes: string | null
+        }) => {
+            const response = await fetch('/api/production-batches', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
             })
-            if (response.ok) {
-                const result: unknown = await response.json()
-                
-                // Handle both formats: direct array or { data: array }
-                let payload: unknown
-                if (Array.isArray(result)) {
-                    payload = result
-                } else if (result && typeof result === 'object' && 'data' in result) {
-                    payload = (result as { data: unknown }).data
-                } else {
-                    payload = []
-                }
-                
-                if (isRecipeArray(payload)) {
-                    setRecipes(payload)
-                } else {
-                    setRecipes([])
-                }
-            } else {
-                setRecipes([])
+
+            if (!response.ok) {
+                const errorPayload: unknown = await response.json()
+                const errorMessage = isApiErrorPayload(errorPayload) ? errorPayload.message : undefined
+                throw new Error(errorMessage ?? 'Gagal membuat batch produksi')
             }
-        } catch (error) {
-            uiLogger.error({ error }, 'Error fetching recipes')
-            toast.error('Gagal memuat daftar resep')
-            setRecipes([])
-        } finally {
-            setLoadingRecipes(false)
-        }
-    }
+
+            return response.json()
+        },
+        onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: ['production-batches'] })
+            toast.success('Batch produksi berhasil dibuat')
+            onSuccess()
+            onOpenChange(false)
+            resetForm()
+        },
+        onError: (error: Error) => {
+            uiLogger.error({ error }, 'Error creating production batch')
+            toast.error(error.message || 'Terjadi kesalahan saat membuat batch produksi')
+        },
+    })
+
+    const loading = createProductionBatchMutation.isPending
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -114,36 +105,12 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
             return
         }
 
-        try {
-            setLoading(true)
-            const response = await fetch('/api/production-batches', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    recipe_id: formData.recipe_id,
-                    quantity,
-                    planned_date: formData.planned_date.toISOString(),
-                    notes: formData.notes || null
-                }),
-                credentials: 'include', // Include cookies for authentication
-            })
-
-            if (!response.ok) {
-                const errorPayload: unknown = await response.json()
-                const errorMessage = isApiErrorPayload(errorPayload) ? errorPayload.message : undefined
-                throw new Error(errorMessage ?? 'Gagal membuat batch produksi')
-            }
-
-            toast.success('Batch produksi berhasil dibuat')
-            onSuccess()
-            onOpenChange(false)
-            resetForm()
-        } catch (error) {
-            uiLogger.error({ error }, 'Error creating production batch')
-            toast.error(error instanceof Error ? error.message : 'Gagal membuat batch produksi')
-        } finally {
-            setLoading(false)
-        }
+        await createProductionBatchMutation.mutateAsync({
+            recipe_id: formData.recipe_id,
+            quantity,
+            planned_date: formData.planned_date.toISOString(),
+            notes: formData.notes || null
+        })
     }
 
     const resetForm = () => {

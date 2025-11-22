@@ -263,17 +263,17 @@ const OptimizedTableComponent = <T extends { id: number | string }>({
           </TableHeader>
           <TableBody>
             {data.map((item) => (
-              <OptimizedTableRow<T>
-                key={item['id']}
-                item={item}
-                columns={columns}
-                isSelected={selectedItems.includes(item['id'].toString())}
-                onSelect={onSelectItem}
-                formatValue={formatValue}
-                {...(onEdit && { onEdit })}
-                {...(onDelete && { onDelete })}
-                {...(onView && { onView })}
-              />
+        <OptimizedTableRow<T>
+          key={item['id']}
+          item={item}
+          columns={columns}
+          isSelected={selectedItems.includes(item['id'].toString())}
+          onSelect={onSelectItem}
+          {...(formatValue && { formatValue })}
+          {...(onEdit && { onEdit })}
+          {...(onDelete && { onDelete })}
+          {...(onView && { onView })}
+        />
             ))}
           </TableBody>
         </Table>

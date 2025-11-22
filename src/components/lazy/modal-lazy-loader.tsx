@@ -1,18 +1,11 @@
 'use client'
 
-import React, { lazy, Suspense, useState, useCallback, type ComponentType, type ReactNode } from 'react'
+import { lazy, Suspense, useState, useCallback, type ComponentType } from 'react'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { logger } from '@/lib/logger'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
-
-// Error fallback for lazy-loaded components
-const LazyErrorFallback = () => (
-  <div className="p-4 text-center text-destructive">
-    <p>Failed to load component</p>
-  </div>
-)
 
 // Modal Loading Skeleton
 const ModalLoadingSkeleton = ({ title }: { title?: string }) => (

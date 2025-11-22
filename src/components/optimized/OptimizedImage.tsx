@@ -33,10 +33,10 @@ export const OptimizedImage = ({
   objectFit = 'cover',
   quality = 75
 }: OptimizedImageProps): JSX.Element => {
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(false)
+  const [isLoading] = useState(true)
+  const [hasError] = useState(false)
 
-  if (error) {
+  if (hasError) {
     return (
       <div
         className={`flex items-center justify-center bg-muted ${className}`}
@@ -47,29 +47,19 @@ export const OptimizedImage = ({
    );
 }
 
-  const resolvedWidth = width ?? 1
-  const resolvedHeight = height ?? 1
-
-  const imageClass = `duration-300 ease-in-out ${isLoading ? 'scale-105 blur-sm' : 'scale-100 blur-0'} ${objectFit === 'cover' ? 'object-cover' : ''} ${objectFit === 'contain' ? 'object-contain' : ''}`
-
   return (
     <div className={`relative overflow-hidden ${className}`}>
       <Image
         src={src}
         alt={alt}
-        width={fill ? undefined : resolvedWidth}
-        height={fill ? undefined : resolvedHeight}
         fill={fill}
         quality={quality}
         priority={priority}
         loading={priority ? 'eager' : 'lazy'}
-        className={imageClass}
+        className={className}
         style={{ objectFit }}
-        onLoad={() => setIsLoading(false)}
-        onError={() => {
-          setIsLoading(false)
-          setError(true)
-        }}
+        {...(width && { width })}
+        {...(height && { height })}
       />
       {isLoading && (
         <div className="absolute inset-0 bg-muted animate-pulse" />

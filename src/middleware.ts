@@ -111,7 +111,7 @@ function addApiHeaders(response: NextResponse, isDev: boolean): void {
  */
 function isProtectedRoute(pathname: string): boolean {
   // Public routes that don't require auth
-  const publicRoutes = ['/handler']
+  const publicRoutes = ['/handler', '/api/']
   
   // Check if pathname starts with any public route
   return !publicRoutes.some(route => pathname.startsWith(route))
@@ -120,7 +120,7 @@ function isProtectedRoute(pathname: string): boolean {
 /**
  * Handle root redirect for authenticated users
  */
-async function handleRootRedirect(request: NextRequest, isDev: boolean): Promise<NextResponse | null> {
+async function handleRootRedirect(request: NextRequest): Promise<NextResponse | null> {
   const { pathname } = request.nextUrl
   if (pathname === '/') {
     // Check if user is authenticated
@@ -167,7 +167,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     }
 
     // Handle root redirect first
-    const rootRedirect = await handleRootRedirect(request, isDev)
+    const rootRedirect = await handleRootRedirect(request)
     if (rootRedirect) {
       return rootRedirect
     }

@@ -1,8 +1,8 @@
 export const runtime = 'nodejs'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
-import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { createSuccessResponse } from '@/lib/api-core/responses'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -25,10 +25,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     const validation = generateRecipeSchema.safeParse(body)
 
     if (!validation.success) {
-      return createErrorResponse({
-        error: 'Invalid input',
-        details: validation.error.issues
-      }, 400)
+      return handleAPIError(new Error('Invalid input'), 'POST /api/recipes/generate')
     }
 
     const { prompt, servings = 4, cuisine, dietary } = validation.data
@@ -36,10 +33,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     // Check if OpenRouter API key is configured
     const apiKey = process.env['OPENROUTER_API_KEY']
     if (!apiKey) {
-      return createErrorResponse({
-        error: 'AI Recipe Generator belum dikonfigurasi',
-        message: 'Silakan tambahkan OPENROUTER_API_KEY di environment variables'
-      }, 503)
+      return handleAPIError(new Error('AI Recipe Generator belum dikonfigurasi. Silakan tambahkan OPENROUTER_API_KEY di environment variables'), 'POST /api/recipes/generate')
     }
 
     // Build the AI prompt
@@ -121,11 +115,7 @@ Please provide the recipe in the following JSON format:
       recipe = JSON.parse(jsonString)
     } catch {
       // If parsing fails, return raw response
-      return createErrorResponse({
-        error: 'Failed to parse AI response',
-        message: 'AI generated a response but it could not be parsed. Please try again.',
-        details: { raw_response: aiResponse }
-      }, 500)
+      return handleAPIError(new Error('Failed to parse AI response. AI generated a response but it could not be parsed. Please try again.'), 'POST /api/recipes/generate')
     }
 
     return createSuccessResponse({

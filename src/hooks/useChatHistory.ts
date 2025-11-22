@@ -1,32 +1,11 @@
-'use client'
-
 import { createClientLogger } from '@/lib/client-logger'
-import type { Json } from '@/types/database'
-import { createClient } from '@/utils/supabase/client'
-import { useCallback, useEffect, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
+import { fetchApi, postApi, deleteApi } from '@/lib/query/query-helpers'
 
 const logger = createClientLogger('useChatHistory')
 
-interface ChatSessionRow {
-  id: string
-  user_id: string
-  title: string
-  context_snapshot: unknown
-  created_at: string
-  updated_at: string
-  deleted_at: string | null
-}
-
-interface ChatMessageRow {
-  id: string
-  session_id: string
-  role: string
-  content: string
-  metadata: unknown
-  created_at: string
-}
-
-interface ExtendedChatMessage {
+interface ChatMessage {
   id: string
   role: 'assistant' | 'system' | 'user'
   content: string
@@ -35,167 +14,77 @@ interface ExtendedChatMessage {
   data?: Record<string, unknown>
 }
 
+/**
+ * Hook for managing chat history with database persistence
+ */
 export function useChatHistory(userId: string) {
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
-  const [messages, setMessages] = useState<ExtendedChatMessage[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const queryClient = useQueryClient()
+  const [messages, setMessages] = useState<ChatMessage[]>([])
 
-  // Load or create session
-  const initializeSession = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      const supabase = createClient()
-
-      // Get most recent active session
-      const { data: sessions, error: sessionError} = await supabase
-        .from('chat_sessions')
-        .select('id, user_id, title, context_snapshot, created_at, updated_at, deleted_at')
-        .eq('user_id', userId)
-        .order('updated_at', { ascending: false })
-        .limit(1)
-
-      if (sessionError) throw sessionError
-
-      let sessionId: string
-
-      if (sessions && sessions.length > 0) {
-        // Use existing session
-        const session = sessions[0] as unknown as ChatSessionRow
-        sessionId = session.id
-        setCurrentSessionId(sessionId)
-
-        // Load messages from this session
-        const { data: messagesData, error: messagesError } = await supabase
-          .from('chat_messages')
-          .select('id, session_id, role, content, metadata, created_at')
-          .eq('session_id', sessionId)
-          .order('created_at', { ascending: true })
-
-        if (messagesError) throw messagesError
-
-        if (messagesData && messagesData.length > 0) {
-          const formattedMessages: ExtendedChatMessage[] = (messagesData as ChatMessageRow[]).map(msg => {
-            const metadata = msg.metadata as Record<string, unknown> | null
-            return {
-              id: msg.id,
-              role: msg.role as 'assistant' | 'system' | 'user',
-              content: msg.content,
-              timestamp: new Date(msg.created_at),
-              actions: metadata?.['actions'] as Array<{ type: string; label: string }> | undefined,
-              data: metadata?.['data'] as Record<string, unknown> | undefined
-            }
-          })
-          setMessages(formattedMessages)
-        }
-      } else {
-        // Create new session
-        const { data: newSession, error: createError } = await supabase
-          .from('chat_sessions')
-          .insert({
-            user_id: userId,
-            title: 'New Conversation',
-            context_snapshot: {}
-          } as never)
-          .select()
-          .single()
-
-        if (createError) throw createError
-        if (newSession) {
-          const session = newSession as ChatSessionRow
-          sessionId = session.id
-          setCurrentSessionId(sessionId)
-        }
+  // Fetch chat history from API
+  const { data: historyData, isLoading } = useQuery<ChatMessage[]>({
+    queryKey: ['chat-history', userId],
+    queryFn: async () => {
+      try {
+        const data = await fetchApi<ChatMessage[]>(`/api/ai/chat-history?user_id=${userId}`)
+        return data.map((msg: ChatMessage) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        }))
+      } catch (error) {
+        logger.warn('Failed to fetch chat history, using empty array')
+        return []
       }
-    } catch (error) {
-      logger.error({ error }, 'Error initializing chat session')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [userId])
+    },
+    staleTime: 60000,
+  })
 
-  // Save message to database
-  const saveMessage = useCallback(async (message: ExtendedChatMessage) => {
-    if (!currentSessionId) return
-
-    try {
-      const supabase = createClient()
-      
-      const { error } = await supabase
-        .from('chat_messages')
-        .insert({
-          session_id: currentSessionId,
-          role: message.role,
-          content: message.content,
-          metadata: {
-            actions: message.actions,
-            data: message.data
-          } as Json
-        } as never)
-
-      if (error) throw error
-
-      // Update session's updated_at
-      await supabase
-        .from('chat_sessions')
-        .update({
-          updated_at: new Date().toISOString()
-        } as never)
-        .eq('id', currentSessionId)
-
-    } catch (error) {
-      logger.error({ error }, 'Error saving message')
-    }
-  }, [currentSessionId])
-
-  // Clear chat history
-  const clearHistory = useCallback(async () => {
-    if (!currentSessionId) return
-
-    try {
-      const supabase = createClient()
-      // Delete all messages in current session
-      await supabase
-        .from('chat_messages')
-        .delete()
-        .eq('session_id', currentSessionId)
-
-      // Create new session
-      const { data: newSession, error: newSessionError } = await supabase
-        .from('chat_sessions')
-        .insert({
-          user_id: userId,
-          title: 'New Conversation',
-          context_snapshot: {}
-        } as never)
-        .select()
-        .single()
-
-      if (newSessionError) {
-        logger.error({ error: newSessionError }, 'Error creating new session')
-        return
-      }
-
-      if (newSession) {
-        const session = newSession as ChatSessionRow
-        setCurrentSessionId(session.id)
-        setMessages([])
-      }
-    } catch (error) {
-      logger.error({ error }, 'Error clearing chat history')
-    }
-  }, [currentSessionId, userId])
-
-  // Initialize on mount
+  // Sync fetched history to local state
   useEffect(() => {
-    void initializeSession()
-  }, [initializeSession])
+    if (historyData) {
+      // Use setTimeout to avoid setState during render cycle
+      setTimeout(() => setMessages(historyData), 0)
+    }
+  }, [historyData])
+
+  // Save message mutation
+  const saveMutation = useMutation({
+    mutationFn: (message: ChatMessage) => postApi('/api/ai/chat-history', {
+      user_id: userId,
+      role: message.role,
+      content: message.content,
+      actions: message.actions,
+      data: message.data,
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chat-history', userId] })
+      logger.info('Message saved to history')
+    },
+    onError: (error: Error) => {
+      logger.error({ error }, 'Failed to save message')
+    },
+  })
+
+  // Clear history mutation
+  const clearMutation = useMutation({
+    mutationFn: () => deleteApi(`/api/ai/chat-history?user_id=${userId}`),
+    onSuccess: () => {
+      setMessages([])
+      queryClient.invalidateQueries({ queryKey: ['chat-history', userId] })
+      logger.info('Chat history cleared')
+    },
+    onError: (error: Error) => {
+      logger.error({ error }, 'Failed to clear history')
+    },
+  })
 
   return {
     messages,
     setMessages,
-    saveMessage,
-    clearHistory,
+    saveMessage: (message: ChatMessage) => saveMutation.mutate(message),
+    clearHistory: () => clearMutation.mutate(),
     isLoading,
-    sessionId: currentSessionId
+    isSaving: saveMutation.isPending,
+    isClearing: clearMutation.isPending,
   }
 }

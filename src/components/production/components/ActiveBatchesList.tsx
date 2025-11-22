@@ -1,7 +1,7 @@
 'use client'
 
-import { format } from 'date-fns'
 import { CheckCircle, ChefHat, Pause, Play, Timer } from '@/components/icons'
+import { format } from 'date-fns'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -10,7 +10,7 @@ import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 
-import type { ProductionBatch } from '@/services/production/BatchSchedulingService'
+import type { ProductionBatch } from '@/types/production'
 
 import type { BatchExecutionState } from '@/components/production/components/types'
 

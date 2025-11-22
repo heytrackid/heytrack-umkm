@@ -3,7 +3,7 @@
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 import { ArrowDownIcon, ArrowUpIcon, DollarSign, Filter, Plus, Search, TrendingDown, TrendingUp } from '@/components/icons'
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -19,18 +19,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useCurrency } from '@/hooks/useCurrency'
 import { useFinancialRecords, useCreateFinancialRecord } from '@/hooks/useFinancialRecords'
 import { toast } from 'sonner'
-import { apiLogger } from '@/lib/logger'
+import type { FinancialRecord } from '@/types/database'
 
-interface FinancialRecord {
-  id: string
-  description: string
-  category: string
-  amount: number
-  date: string
-  type: 'INCOME' | 'EXPENSE'
-  reference: string
-  created_at: string
-}
+
+
 
 interface CashFlowSummary {
   totalIncome: number
@@ -52,12 +44,13 @@ const CashFlowPage = () => {
 
   // Build query parameters for filtering
   const queryParams = {
-    ...(typeFilter !== 'all' && typeFilter === 'income' && { type: 'income' as const }),
-    ...(typeFilter !== 'all' && typeFilter === 'expense' && { type: 'expense' as const }),
+    ...(typeFilter !== 'all' && typeFilter === 'income' && { type: 'INCOME' as const }),
+    ...(typeFilter !== 'all' && typeFilter === 'expense' && { type: 'EXPENSE' as const }),
     ...(searchTerm && { search: searchTerm }),
   }
 
-  const { data: records = [], isLoading: loading, error } = useFinancialRecords(queryParams)
+   const { data, isLoading: loading, error: _error } = useFinancialRecords(queryParams)
+   const records = data ?? []
 
   // Form state for new transaction
   const [newTransaction, setNewTransaction] = useState({
@@ -65,7 +58,7 @@ const CashFlowPage = () => {
     description: '',
     category: '',
     amount: '',
-    date: new Date().toISOString().split('T')[0]
+    date: '',
   })
 
   // Note: Date filtering is not yet implemented in the hook
@@ -76,16 +69,16 @@ const CashFlowPage = () => {
       if (!newTransaction.description || !newTransaction.category || !newTransaction.amount) {
         toast.error('Mohon lengkapi semua field')
         return
-  }
+      }
 
       const transactionData = {
-        type: newTransaction.type.toUpperCase() as 'INCOME' | 'EXPENSE',
+        type: newTransaction.type,
         description: newTransaction.description,
         category: newTransaction.category,
         amount: parseFloat(newTransaction.amount),
         date: newTransaction.date,
-        user_id: 'current-user' // This should be from auth context
-      }
+        user_id: 'temp-user-id', // TODO: get from auth
+      } as const
 
       await createMutation.mutateAsync(transactionData)
 
@@ -95,23 +88,23 @@ const CashFlowPage = () => {
         description: '',
         category: '',
         amount: '',
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0]!
       })
-    } catch (error) {
+      } catch {
       // Error handling is done by the mutation
       toast.error('Gagal menambahkan transaksi')
     }
   }
 
-  const filteredRecords = records.filter((record: FinancialRecord) => {
-    const matchesSearch = record.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         record.category.toLowerCase().includes(searchTerm.toLowerCase())
-    return matchesSearch
+  const filteredRecords = records.filter((record) => {
+    const matchesSearch = record.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          record.category?.toLowerCase().includes(searchTerm.toLowerCase())
+    return matchesSearch && record.date // Only include records with valid dates
   })
 
   const summary: CashFlowSummary = {
-    totalIncome: filteredRecords.filter((r: FinancialRecord) => r.type === 'INCOME').reduce((sum: number, r: FinancialRecord) => sum + r.amount, 0),
-    totalExpenses: filteredRecords.filter((r: FinancialRecord) => r.type === 'EXPENSE').reduce((sum: number, r: FinancialRecord) => sum + r.amount, 0),
+    totalIncome: filteredRecords.filter((r) => r.type === 'INCOME').reduce((sum, r) => sum + r.amount, 0),
+    totalExpenses: filteredRecords.filter((r) => r.type === 'EXPENSE').reduce((sum, r) => sum + r.amount, 0),
     netCashFlow: 0,
     transactionCount: filteredRecords.length
   }
@@ -366,9 +359,9 @@ const CashFlowPage = () => {
                      <TableBody>
                         {filteredRecords.map((record: FinancialRecord) => (
                          <TableRow key={record.id}>
-                           <TableCell>
-                             {format(new Date(record.date), 'dd MMM yyyy', { locale: idLocale })}
-                           </TableCell>
+                            <TableCell>
+                              {record.date ? format(new Date(record.date), 'dd MMM yyyy', { locale: idLocale }) : '-'}
+                            </TableCell>
                            <TableCell>{record.description}</TableCell>
                            <TableCell>{record.category}</TableCell>
                            <TableCell>
@@ -394,9 +387,9 @@ const CashFlowPage = () => {
                        <div className="flex justify-between items-start mb-2">
                          <div>
                            <p className="font-medium">{record.description}</p>
-                           <p className="text-sm text-muted-foreground">
-                             {format(new Date(record.date), 'dd MMM yyyy', { locale: idLocale })}
-                           </p>
+                            <p className="text-sm text-muted-foreground">
+                              {record.date ? format(new Date(record.date), 'dd MMM yyyy', { locale: idLocale }) : '-'}
+                            </p>
                          </div>
                          <Badge variant={record.type === 'INCOME' ? 'default' : 'destructive'}>
                            {record.type === 'INCOME' ? 'Pemasukan' : 'Pengeluaran'}

@@ -5,7 +5,7 @@ import { stackServerApp } from "../stack/server";
 import { Suspense } from 'react';
 
 import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary';
-import { ThemeProvider } from '@/components/providers/theme-provider';
+;
 import { SettingsProvider } from '@/contexts/settings-context';
 import { Toaster } from '@/components/ui/sonner';
 import { headers } from 'next/headers';
@@ -14,7 +14,7 @@ import { headers } from 'next/headers';
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
 import { Providers } from '@/providers';
 import { SupabaseProvider } from '@/providers/SupabaseProvider';
-import { SWRProvider } from '@/providers/SWRProvider';
+import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
 
 import type { Metadata } from 'next';
 import type { ReactElement, ReactNode } from 'react';
@@ -74,26 +74,26 @@ const RootLayout = async ({
         <Suspense fallback={null}>
           <SupabaseProvider>
             <Providers>
-                  <SettingsProvider>
-                    <SWRProvider>
-                      <PreloadingProvider
-                        enableSmartPreloading={false}
-                        enableIdlePreloading={false}
-                        enableNetworkAware={false}
-                        debug={false}
-                        >
-                          <GlobalErrorBoundary>
-                        {/* Header temporarily disabled during development */}
-                        {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
-                        <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm font-medium text-orange-700 dark:text-orange-300">
-                          🚧 Development Mode - Auth Disabled
-                        </div>
-                      </header> */}
-                        {children}
-                          </GlobalErrorBoundary>
-                        </PreloadingProvider>
-                      </SWRProvider>
-                    </SettingsProvider>
+                   <SettingsProvider>
+                     <ReactQueryProvider>
+                       <PreloadingProvider
+                         enableSmartPreloading={false}
+                         enableIdlePreloading={false}
+                         enableNetworkAware={false}
+                         debug={false}
+                         >
+                           <GlobalErrorBoundary>
+                         {/* Header temporarily disabled during development */}
+                         {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
+                         <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm font-medium text-orange-700 dark:text-orange-300">
+                           🚧 Development Mode - Auth Disabled
+                         </div>
+                       </header> */}
+                         {children}
+                           </GlobalErrorBoundary>
+                         </PreloadingProvider>
+                       </ReactQueryProvider>
+                     </SettingsProvider>
             </Providers>
             </SupabaseProvider>
           </Suspense>

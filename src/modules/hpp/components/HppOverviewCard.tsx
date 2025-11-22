@@ -6,8 +6,9 @@ import { useRouter } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { toast } from 'sonner'
+
 import { useCurrency } from '@/hooks/useCurrency'
+import { useCalculateAllHpp } from '@/hooks/api/useHpp'
 
 
 
@@ -24,20 +25,11 @@ interface HppOverviewCardProps {
 export const HppOverviewCard = ({ overview }: HppOverviewCardProps): JSX.Element => {
     const { formatCurrency } = useCurrency()
     const router = useRouter()
+    const calculateAllMutation = useCalculateAllHpp()
 
     const handleCalculateAll = async (): Promise<void> => {
-        try {
-            const response = await fetch('/api/hpp/calculate', {
-                method: 'PUT',
-                credentials: 'include', // Include cookies for authentication
-            })
-            if (response.ok) {
-                toast.success('Semua biaya produksi berhasil dihitung')
-                router.refresh()
-            }
-        } catch {
-            toast.error('Gagal menghitung biaya')
-        }
+        await calculateAllMutation.mutateAsync()
+        router.refresh() // Still need refresh for overview data
     }
 
     const completionPercentage = overview.totalRecipes > 0

@@ -71,12 +71,12 @@ export const CreateModal = <FormData extends FieldValues = Record<string, unknow
     >
       <CrudForm onSubmit={form.handleSubmit(onSubmit)}>
         {children}
-        <FormActions
-          onCancel={modalProps.onClose}
-          submitText={`Simpan ${entityName}`}
-          loading={isLoading}
-          sticky
-        />
+         <FormActions
+           onCancel={modalProps.onClose}
+           submitText="Tambah"
+           loading={isLoading || false}
+           sticky
+         />
       </CrudForm>
     </CrudModal>
   )
@@ -106,12 +106,12 @@ export const EditModal = <FormData extends FieldValues = Record<string, unknown>
     >
       <CrudForm onSubmit={form.handleSubmit(onSubmit)}>
         {children}
-        <FormActions
-          onCancel={modalProps.onClose}
-          submitText="Simpan Perubahan"
-          loading={isLoading}
-          sticky
-        />
+         <FormActions
+           onCancel={modalProps.onClose}
+           submitText="Simpan Perubahan"
+           loading={isLoading || false}
+           sticky
+         />
       </CrudForm>
     </CrudModal>
   )
@@ -136,16 +136,15 @@ export const DeleteModal = ({
   itemName,
   isLoading
 }: DeleteModalProps) => (
-  <ConfirmDialog
-    open={isOpen}
-    onOpenChange={(open) => !open && onClose()}
-    title={`Hapus ${entityName}`}
-    description={`Apakah Anda yakin ingin menghapus "${itemName}"? Tindakan ini tidak dapat dibatalkan.`}
-    onConfirm={onConfirm}
-    confirmText="Ya, Hapus"
-    variant="destructive"
-    loading={isLoading}
-  />
+      <ConfirmDialog
+        open={isOpen}
+        onOpenChange={(open) => !open && onClose()}
+        title={`Hapus ${entityName}`}
+        description={`Apakah Anda yakin ingin menghapus "${itemName}"? Tindakan ini tidak dapat dibatalkan.`}
+        onConfirm={onConfirm}
+        confirmText="Ya, Hapus"
+         loading={isLoading || false}
+      />
 )
 
 interface CrudActionButtonsProps {

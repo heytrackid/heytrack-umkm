@@ -6,14 +6,14 @@
 import { Plus } from '@/components/icons'
 import { useCallback, useMemo, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useCustomers } from '@/hooks/useCustomers'
+import { useCustomers, useDeleteCustomer } from '@/hooks/useCustomers'
 
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { useSettings } from '@/contexts/settings-context'
 import { toast } from 'sonner'
 import { useResponsive } from '@/hooks/useResponsive'
-import { createLogger } from '@/lib/logger'
+
 
 import { CustomerDialog } from './CustomerDialog'
 import { CustomerSearchFilters } from './CustomerSearchFilters'
@@ -22,7 +22,7 @@ import { CustomersTable } from './CustomersTable'
 
 import type { Customer } from './types'
 
-const logger = createLogger('CustomersLayout')
+
 
 export const CustomersLayout = (): JSX.Element => {
   const { isMobile } = useResponsive()
@@ -43,27 +43,8 @@ export const CustomersLayout = (): JSX.Element => {
   // Fetch customers with standardized hook
   const { data: customers = [], isLoading } = useCustomers()
 
-  // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: async (customerId: string) => {
-      const response = await fetch(`/api/customers/${customerId}`, {
-        method: 'DELETE'
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to delete customer')
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['customers'] })
-      toast.success('Pelanggan berhasil dihapus')
-    },
-    onError: () => {
-      toast.error('Gagal menghapus pelanggan')
-    }
-  })
-
-  // Bulk delete mutation
+  // Delete mutations
+  const deleteCustomerMutation = useDeleteCustomer()
   const bulkDeleteMutation = useMutation({
     mutationFn: async (customerIds: string[]) => {
       await Promise.all(
@@ -112,12 +93,12 @@ export const CustomersLayout = (): JSX.Element => {
   const confirmDelete = useCallback(() => {
     if (!deleteConfirm.customer) return
 
-    deleteMutation.mutate(deleteConfirm.customer.id, {
+    deleteCustomerMutation.mutate(deleteConfirm.customer.id, {
       onSuccess: () => {
         setDeleteConfirm({ show: false, customer: null, bulk: false })
       }
     })
-  }, [deleteConfirm.customer, deleteMutation])
+  }, [deleteConfirm.customer, deleteCustomerMutation])
 
   const handleBulkDelete = useCallback(async () => {
     setDeleteConfirm({ show: true, customer: null, bulk: true })

@@ -188,6 +188,70 @@ export type OrderWithDetails = Order & {
   customers: Customer | null
 }
 
+// Type for order list view (simplified)
+export type OrderListItem = Pick<Order,
+  'id' | 'order_no' | 'customer_name' | 'customer_phone' |
+  'delivery_date' | 'order_date' | 'total_amount' | 'status' | 'payment_status' |
+  'priority' | 'created_at'
+>
+
+// Type for order card view
+export type OrderCardItem = Pick<Order,
+  'id' | 'order_no' | 'customer_name' | 'customer_phone' |
+  'delivery_date' | 'total_amount' | 'status' | 'payment_status' |
+  'priority' | 'notes'
+>
+
+// Type for order detail view (with nested items)
+export type OrderDetailItem = Order & {
+  order_items: (OrderItem & {
+    recipe?: Pick<Recipe, 'id' | 'name' | 'image_url'>
+  })[]
+}
+
+// Type for reorder suggestion with additional properties
+export type ReorderSuggestionWithDetails = {
+  ingredient_id: string
+  ingredient_name: string
+  current_stock: number
+  reorder_point: number
+  suggested_quantity: number
+  unit: string
+  last_purchase_price: number | null
+  estimated_cost: number
+  priority: 'high' | 'medium' | 'low'
+  reason?: string
+  available_stock?: number
+  reserved_stock?: number
+  suggested_order_quantity?: number
+  lead_time_days?: number
+  urgency?: string
+}
+
+// Type for restock suggestion from API
+export type RestockSuggestion = {
+  ingredient_id: string
+  ingredient_name: string
+  current_stock: number
+  reserved_stock: number
+  available_stock: number
+  reorder_point: number
+  suggested_order_quantity: number
+  lead_time_days: number | null
+  urgency: 'CRITICAL' | 'HIGH' | 'LOW' | 'MEDIUM'
+  reason: string
+}
+
+// Type for restock suggestions summary
+export type RestockSuggestionsSummary = {
+  total: number
+  critical: number
+  high: number
+  medium: number
+  low: number
+  total_suggested_cost: number
+}
+
 // Type for production with recipe
 export type ProductionWithRecipe = Production & {
   recipes: Recipe

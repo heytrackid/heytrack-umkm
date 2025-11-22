@@ -1,30 +1,22 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
-import { NextResponse } from 'next/server'
-
-import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
-import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
-
-import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core/responses'
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
-import { createClient } from '@/utils/supabase/server'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import type { NextResponse } from 'next/server'
 
 /**
  * Generate default WhatsApp templates for current user
  * POST /api/whatsapp-templates/generate-defaults
  */
-async function postHandler(): Promise<NextResponse> {
-  try {
-    // 1. Authentication
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
+async function postHandler(context: RouteContext): Promise<NextResponse> {
+  const { user, supabase } = context
 
-    const supabase = await createClient()    // 2. Check if user already has templates
+  try {
+    // 2. Check if user already has templates
     const { data: existingTemplates, error: checkError } = await supabase
       .from('whatsapp_templates')
       .select('id')
@@ -37,7 +29,7 @@ async function postHandler(): Promise<NextResponse> {
     }
 
     if (existingTemplates && existingTemplates.length > 0) {
-      return createErrorResponse('Kamu sudah punya template. Hapus dulu kalau mau reset.', 409)
+      return handleAPIError(new Error('Kamu sudah punya template. Hapus dulu kalau mau reset.'), 'API Route')
     }
 
     // 3. Create default templates using database function
@@ -67,8 +59,11 @@ async function postHandler(): Promise<NextResponse> {
     return createSuccessResponse({ templates }, SUCCESS_MESSAGES.WHATSAPP_DEFAULTS_GENERATED)
   } catch (error) {
     apiLogger.error({ error }, 'Error in POST /api/whatsapp-templates/generate-defaults')
-    return createErrorResponse('Internal server error', 500)
+    return handleAPIError(new Error('Internal server error'), 'API Route')
   }
 }
 
-export const POST = createSecureHandler(postHandler, 'POST /api/whatsapp-templates/generate-defaults', SecurityPresets.enhanced())
+export const POST = createApiRoute(
+  { method: 'POST', path: '/api/whatsapp-templates/generate-defaults' },
+  postHandler
+)

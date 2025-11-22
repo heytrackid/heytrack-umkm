@@ -2,6 +2,13 @@
 
 import { RecipeIngredientSelector } from '@/components/recipes/RecipeIngredientSelector'
 import { Button } from '@/components/ui/button'
+
+type RecipeIngredient = {
+  ingredient_id: string
+  quantity: number
+  unit?: string
+  notes?: string | null
+}
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -144,9 +151,9 @@ export function RecipeForm({
           control={control}
           render={({ field }) => (
             <RecipeIngredientSelector
-              ingredients={field.value}
+              ingredients={field.value as RecipeIngredient[]}
               onChange={field.onChange}
-              errors={errors.ingredients?.message}
+              errors={errors.ingredients?.message || ''}
             />
           )}
         />

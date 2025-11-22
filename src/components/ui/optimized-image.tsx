@@ -21,15 +21,7 @@ const OptimizedImage = ({
   const [hasError, setHasError] = useState(false)
 
   // Generate blurDataURL from the image URL if needed
-  const getPlaceholder = () => {
-    if (placeholderType === 'blur' && !src.startsWith('http')) {
-      // In a real app, you would generate actual blur data
-      // This is just a placeholder. In real implementation, you'd use:
-      // https://github.com/joe-bell/plaiceholder or similar
-      return '/placeholder-blur.svg'
-    }
-    return undefined
-  }
+  const blurDataURL = placeholderType === 'blur' && !src.startsWith('http') ? '/placeholder-blur.svg' : undefined
 
   if (hasError) {
     return (
@@ -46,7 +38,7 @@ const OptimizedImage = ({
         alt={alt}
         priority={priority}
         placeholder={placeholderType === 'blur' ? 'blur' : 'empty'}
-        blurDataURL={getPlaceholder()}
+        {...(blurDataURL && { blurDataURL })}
         onLoad={() => setIsLoading(false)}
         onError={() => {
           setIsLoading(false)

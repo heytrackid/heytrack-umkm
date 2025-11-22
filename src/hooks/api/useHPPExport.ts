@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+import { fetchApi } from '@/lib/query/query-helpers'
 
 interface ExportFilters {
   recipeId?: string
@@ -27,14 +28,7 @@ export function useHPPExport() {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch(`/api/hpp/calculations${buildQuery(filters)}`, {
-        cache: 'no-store'
-      })
-      if (!response.ok) {
-        const { error: message } = await response.json().catch(() => ({ error: 'Failed to export HPP data' }))
-        throw new Error(message ?? 'Failed to export HPP data')
-      }
-      return await response.json()
+      return await fetchApi(`/api/hpp/calculations${buildQuery(filters)}`)
     } catch (error) {
       const normalized = error instanceof Error ? error : new Error('Unknown export error')
       setError(normalized)

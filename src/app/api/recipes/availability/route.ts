@@ -1,16 +1,14 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
-import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { apiLogger, logError } from '@/lib/logger'
-import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
-import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
-
-import { createClient } from '@/utils/supabase/server'
-import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import type { NextResponse } from 'next/server'
 
 const CheckMultipleRecipesSchema = z.object({
   recipes: z.array(z.object({
@@ -20,28 +18,22 @@ const CheckMultipleRecipesSchema = z.object({
 }).strict()
 
 // GET /api/recipes/availability?recipe_id=xxx&quantity=10
-async function getHandler(request: NextRequest): Promise<NextResponse> {
+async function getHandler(context: RouteContext): Promise<NextResponse> {
+  const { user, request } = context
+
   try {
     const { searchParams } = new URL(request.url)
     const recipeId = searchParams.get('recipe_id')
     const quantity = parseInt(searchParams.get('quantity') ?? '1', 10)
 
     if (!recipeId) {
-      return createErrorResponse('recipe_id is required', 400)
+      return handleAPIError(new Error('recipe_id is required'), 'API Route')
     }
 
-    // Authenticate with Stack Auth
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const _user = authResult
-
-    const _client = await createClient()
     const result = await RecipeAvailabilityService.checkAvailability(recipeId, quantity)
 
     apiLogger.info({
-      userId: _user.id,
+      userId: user.id,
       recipeId,
       quantity,
       isAvailable: result.is_available
@@ -50,29 +42,25 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     return createSuccessResponse(result)
   } catch (error) {
     logError(apiLogger, error, 'Failed to check recipe availability')
-    return createErrorResponse('Internal server error', 500)
+    return handleAPIError(new Error('Internal server error'), 'API Route')
   }
 }
 
 // POST /api/recipes/availability - Check multiple recipes
-async function postHandler(request: NextRequest): Promise<NextResponse> {
-  try {
-    // Authenticate with Stack Auth
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const _user = authResult
+async function postHandler(context: RouteContext, _query?: never, body?: z.infer<typeof CheckMultipleRecipesSchema>): Promise<NextResponse> {
+  const { user } = context
 
-    const _client = await createClient()
-    const body = await request.json() as Record<string, unknown>
-    const validatedData = CheckMultipleRecipesSchema.parse(body)
-    const { recipes } = validatedData
+  if (!body) {
+    return handleAPIError(new Error('Request body is required'), 'API Route')
+  }
+
+  try {
+    const { recipes } = body
 
     const results = await RecipeAvailabilityService.checkMultipleRecipes(recipes)
 
-    apiLogger.info({ 
-      userId: _user['id'],
+    apiLogger.info({
+      userId: user.id,
       recipeCount: recipes.length,
       availableCount: results.filter(r => r.is_available).length
     }, 'Multiple recipes checked')
@@ -87,9 +75,20 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     })
   } catch (error) {
     logError(apiLogger, error, 'Failed to check multiple recipes')
-    return createErrorResponse('Internal server error', 500)
+    return handleAPIError(new Error('Internal server error'), 'API Route')
   }
 }
 
-export const GET = createSecureHandler(getHandler, 'GET /api/recipes/availability', SecurityPresets.enhanced())
-export const POST = createSecureHandler(postHandler, 'POST /api/recipes/availability', SecurityPresets.enhanced())
+export const GET = createApiRoute(
+  { method: 'GET', path: '/api/recipes/availability' },
+  getHandler
+)
+
+export const POST = createApiRoute(
+  {
+    method: 'POST',
+    path: '/api/recipes/availability',
+    bodySchema: CheckMultipleRecipesSchema
+  },
+  postHandler
+)

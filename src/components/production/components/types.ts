@@ -1,4 +1,4 @@
-import type { ProductionBatchWithDetails } from '@/services/production/BatchSchedulingService'
+import type { ProductionBatchWithDetails } from '@/types/production'
 
 // Production Components Types
 // Type definitions for production batch execution components

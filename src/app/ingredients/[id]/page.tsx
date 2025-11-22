@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, Package, Loader2 } from '@/components/icons'
+import { ArrowLeft, Loader2 } from '@/components/icons'
 import { useRouter, useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
@@ -12,26 +12,26 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { PageBreadcrumb } from '@/components/ui/page-breadcrumb'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { useSupabaseCRUD } from '@/hooks/supabase/index'
+import { useUpdateIngredient } from '@/hooks/useIngredients'
 import { toast } from 'sonner'
 import { apiLogger } from '@/lib/logger'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 import { useIngredient } from '@/hooks/useIngredients'
 
-
-import type { Row, Update } from '@/types/database'
-
+import type { Update } from '@/types/database'
 
 
 
-type Ingredient = Row<'ingredients'>
+
+
+
 type IngredientUpdate = Update<'ingredients'>
 
 const EditIngredientPage = (): JSX.Element | null => {
     const router = useRouter()
     const params = useParams()
     const id = params['id'] as string
-    const { update: updateIngredient } = useSupabaseCRUD('ingredients')
+    const updateIngredientMutation = useUpdateIngredient()
 
     const [loading, setLoading] = useState(false)
 
@@ -86,7 +86,7 @@ const EditIngredientPage = (): JSX.Element | null => {
                 description: data.description ?? null,
             }
 
-            await updateIngredient(id, payload)
+            await updateIngredientMutation.mutateAsync({ id, data: payload })
 
             toast.success(`Bahan baku "${data.name}" berhasil diperbarui`)
 

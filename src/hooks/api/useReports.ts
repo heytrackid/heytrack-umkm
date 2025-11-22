@@ -2,6 +2,9 @@ import { useQuery } from '@tanstack/react-query'
 
 import { buildApiUrl, fetchApi } from '@/lib/query/query-helpers'
 import { queryConfig } from '@/lib/query/query-config'
+import type { Row } from '@/types/database'
+
+type Order = Row<'orders'>
 
 interface SalesReport {
   summary: {
@@ -120,5 +123,42 @@ export function useProfitReport(startDate?: string, endDate?: string) {
       return response.data
     },
     ...queryConfig.queries.analytics,
+  })
+}
+
+// Sales Stats for dashboard
+export interface SalesStats {
+  totalOrders: number
+  totalRevenue: number
+  completedOrders: number
+  pendingOrders: number
+}
+
+export function useSalesStats(options?: { dateRange?: { start?: string; end?: string } }) {
+  return useQuery({
+    queryKey: ['sales-stats', options],
+    queryFn: async (): Promise<SalesStats> => {
+      const params = new URLSearchParams()
+      params.set('limit', '500')
+      params.set('page', '1')
+      params.set('sort_order', 'desc')
+      if (options?.dateRange?.start) params.set('start_date', options.dateRange.start)
+      if (options?.dateRange?.end) params.set('end_date', options.dateRange.end)
+
+      const data = await fetchApi<{ orders: Order[] }>(`/api/orders?${params}`)
+      const orders = data.orders || []
+      const totalOrders = orders.length
+      const totalRevenue = orders.reduce((sum: number, order: Order) => sum + (order.total_amount || 0), 0)
+      const completedOrders = orders.filter((order: Order) => order.status === 'READY').length
+      const pendingOrders = orders.filter((order: Order) => order.status === 'PENDING').length
+
+      return {
+        totalOrders,
+        totalRevenue,
+        completedOrders,
+        pendingOrders
+      }
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
   })
 }

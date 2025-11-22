@@ -81,7 +81,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                     quantity: record.quantity ?? 0,
                     unit: record.unit ?? 'unit',
                     unit_price: record.ingredient?.weighted_average_cost ?? record.ingredient?.price_per_unit ?? 0,
-                    category: record.ingredient?.category ?? undefined
+                    category: record.ingredient?.category || 'Unknown'
                 }
             })
         }

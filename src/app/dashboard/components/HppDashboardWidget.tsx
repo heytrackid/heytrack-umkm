@@ -2,73 +2,33 @@
 
 import { AlertTriangle, Calculator, DollarSign, Target, TrendingDown, TrendingUp } from '@/components/icons'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { GridSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
 import { useCurrency } from '@/hooks/useCurrency'
+import { useHppDashboardSummary } from '@/hooks/api/useDashboard'
 import { uiLogger } from '@/lib/logger'
 import { toast } from 'sonner'
 
-// Using uiLogger for client-side logging
-const logger = uiLogger 
+ 
 
-interface HppDashboardData {
-  totalRecipes: number
-  recipesWithHpp: number
-  averageHpp: number
-  averageMargin: number
-  totalAlerts: number
-  unreadAlerts: number
-  topRecipes: Array<{
-    id: string
-    name: string
-    hpp_value: number
-    margin_percentage: number
-    last_updated: string
-  }>
-  recentChanges: Array<{
-    recipe_id: string
-    recipe_name: string
-    change_percentage: number
-    direction: 'decrease' | 'increase'
-  }>
-}
+
 
 const HppDashboardWidget = (): JSX.Element | null => {
   const { formatCurrency } = useCurrency()
   const router = useRouter()
-  const [data, setData] = useState<HppDashboardData | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { data, isLoading: loading, error } = useHppDashboardSummary()
 
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true)
-
-      // Fetch real data from API
-      const response = await fetch('/api/dashboard/hpp-summary', {
-        credentials: 'include', // Include cookies for authentication
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch HPP dashboard data')
-      }
-
-      const realData = await response.json() as HppDashboardData
-      setData(realData)
-    } catch (error: unknown) {
-      logger.error({ error }, 'Failed to load HPP dashboard data')
-      toast.error('Failed to load HPP data')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
+  // Handle error
   useEffect(() => {
-    void fetchData()
-  }, [fetchData])
+    if (error) {
+      uiLogger.error({ error }, 'Failed to load HPP dashboard data')
+      toast.error('Failed to load HPP data')
+    }
+  }, [error])
 
   if (loading) {
     return (

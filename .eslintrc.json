@@ -1,0 +1,67 @@
+{
+  "extends": ["next/core-web-vitals", "@next/eslint-config-next"],
+  "rules": {
+    // Import organization rules
+    "import/order": [
+      "error",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          "parent",
+          "sibling",
+          "index"
+        ],
+        "newlines-between": "always",
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        }
+      }
+    ],
+
+    // API route specific rules
+    "@next/next/no-server-import-in-page": "off",
+
+    // TypeScript strict rules
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-explicit-any": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["src/app/api/**/*.ts"],
+      "rules": {
+        // API route specific rules
+        "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^(req|res|next|_)" }],
+        "no-console": "error",
+
+        // Enforce import organization for API routes
+        "import/order": [
+          "error",
+          {
+            "groups": [
+              ["builtin", "external"],
+              ["internal"],
+              ["parent", "sibling", "index"],
+              ["object", "type"]
+            ],
+            "pathGroups": [
+              {
+                "pattern": "@/**",
+                "group": "internal",
+                "position": "before"
+              }
+            ],
+            "pathGroupsExcludedImportTypes": ["builtin"],
+            "newlines-between": "always",
+            "alphabetize": {
+              "order": "asc",
+              "caseInsensitive": true
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -47,7 +47,7 @@ export const RecipeFormDialog = ({
 
                 <RecipeFormPage
                     mode={mode}
-                    recipeId={recipe?.id}
+                    {...(recipe?.id ? { recipeId: recipe.id } : {})}
                     onSuccess={handleSuccess}
                     onCancel={handleClose}
                     isDialog

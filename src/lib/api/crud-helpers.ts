@@ -1,7 +1,8 @@
 import type { NextResponse } from 'next/server'
 import { z } from 'zod'
 
-import { PaginationSchema, calculateOffset, createErrorResponse, createPaginationMeta, createSuccessResponse, handleAPIError } from '@/lib/api-core'
+import { PaginationSchema, calculateOffset, createPaginationMeta, createSuccessResponse } from '@/lib/api-core'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase'
 import type { RouteContext } from './route-factory'
@@ -72,8 +73,7 @@ export function createListHandler<TTable extends TableName>(config: CrudConfig<T
 
       if (error) {
         apiLogger.error({ error, table }, 'Failed to fetch resources')
-        const apiError = handleAPIError(error)
-        return createErrorResponse(apiError.message, apiError['statusCode'])
+        return handleAPIError(error, `GET /api/${table}`)
       }
 
       const pagination = createPaginationMeta(count ?? 0, page, limit)
@@ -86,8 +86,7 @@ export function createListHandler<TTable extends TableName>(config: CrudConfig<T
       return response
     } catch (error) {
       apiLogger.error({ error, table }, 'Unhandled error in list handler')
-      const apiError = handleAPIError(error)
-      return createErrorResponse(apiError.message, apiError['statusCode'])
+      return handleAPIError(error, `GET /api/${table}`)
     }
   }
 }
@@ -106,7 +105,7 @@ export function createCreateHandler<TTable extends TableName, TInsert = unknown>
       const { user, supabase } = context
 
       if (!body) {
-        return createErrorResponse('Request body is required', 400)
+        return handleAPIError(new Error('Request body is required'), `POST /api/${table}`)
       }
 
       // Add user context to the data
@@ -125,15 +124,13 @@ export function createCreateHandler<TTable extends TableName, TInsert = unknown>
 
       if (error) {
         apiLogger.error({ error, table }, 'Failed to create resource')
-        const apiError = handleAPIError(error)
-        return createErrorResponse(apiError.message, apiError['statusCode'])
+        return handleAPIError(error, `POST /api/${table}`)
       }
 
       return createSuccessResponse(data, successMessage, undefined, 201)
     } catch (error) {
       apiLogger.error({ error, table }, 'Unhandled error in create handler')
-      const apiError = handleAPIError(error)
-      return createErrorResponse(apiError.message, apiError['statusCode'])
+      return handleAPIError(error, `POST /api/${table}`)
     }
   }
 }
@@ -150,7 +147,7 @@ export function createGetHandler<TTable extends TableName>(config: CrudConfig<TT
       const id = params?.['id']
 
       if (!id) {
-        return createErrorResponse('Resource ID is required', 400)
+        return handleAPIError(new Error('Resource ID is required'), `GET /api/${table}`)
       }
 
       const { data, error } = await supabase
@@ -162,20 +159,18 @@ export function createGetHandler<TTable extends TableName>(config: CrudConfig<TT
 
       if (error) {
         apiLogger.error({ error, table, id }, 'Failed to fetch resource')
-        
+
         if (error.code === 'PGRST116') {
-          return createErrorResponse('Resource not found', 404)
+          return handleAPIError(new Error('Resource not found'), `GET /api/${table}`)
         }
-        
-        const apiError = handleAPIError(error)
-        return createErrorResponse(apiError.message, apiError['statusCode'])
+
+        return handleAPIError(error, `GET /api/${table}`)
       }
 
       return createSuccessResponse(data)
     } catch (error) {
       apiLogger.error({ error, table }, 'Unhandled error in get handler')
-      const apiError = handleAPIError(error)
-      return createErrorResponse(apiError.message, apiError['statusCode'])
+      return handleAPIError(error, `GET /api/${table}`)
     }
   }
 }
@@ -195,11 +190,11 @@ export function createUpdateHandler<TTable extends TableName, TUpdate = unknown>
       const id = params?.['id']
 
       if (!id) {
-        return createErrorResponse('Resource ID is required', 400)
+        return handleAPIError(new Error('Resource ID is required'), `PUT /api/${table}`)
       }
 
       if (!body) {
-        return createErrorResponse('Request body is required', 400)
+        return handleAPIError(new Error('Request body is required'), `PUT /api/${table}`)
       }
 
       // Add updated_by to track changes
@@ -218,20 +213,18 @@ export function createUpdateHandler<TTable extends TableName, TUpdate = unknown>
 
       if (error) {
         apiLogger.error({ error, table, id }, 'Failed to update resource')
-        
+
         if (error.code === 'PGRST116') {
-          return createErrorResponse('Resource not found', 404)
+          return handleAPIError(new Error('Resource not found'), `PUT /api/${table}`)
         }
-        
-        const apiError = handleAPIError(error)
-        return createErrorResponse(apiError.message, apiError['statusCode'])
+
+        return handleAPIError(error, `PUT /api/${table}`)
       }
 
       return createSuccessResponse(data, successMessage)
     } catch (error) {
       apiLogger.error({ error, table }, 'Unhandled error in update handler')
-      const apiError = handleAPIError(error)
-      return createErrorResponse(apiError.message, apiError['statusCode'])
+      return handleAPIError(error, `PUT /api/${table}`)
     }
   }
 }
@@ -251,7 +244,7 @@ export function createDeleteHandler<TTable extends TableName>(
       const id = params?.['id']
 
       if (!id) {
-        return createErrorResponse('Resource ID is required', 400)
+        return handleAPIError(new Error('Resource ID is required'), `DELETE /api/${table}`)
       }
 
       const { error } = await supabase
@@ -262,20 +255,18 @@ export function createDeleteHandler<TTable extends TableName>(
 
       if (error) {
         apiLogger.error({ error, table, id }, 'Failed to delete resource')
-        
+
         if (error.code === 'PGRST116') {
-          return createErrorResponse('Resource not found', 404)
+          return handleAPIError(new Error('Resource not found'), `DELETE /api/${table}`)
         }
-        
-        const apiError = handleAPIError(error)
-        return createErrorResponse(apiError.message, apiError['statusCode'])
+
+        return handleAPIError(error, `DELETE /api/${table}`)
       }
 
       return createSuccessResponse({ id }, successMessage)
     } catch (error) {
       apiLogger.error({ error, table }, 'Unhandled error in delete handler')
-      const apiError = handleAPIError(error)
-      return createErrorResponse(apiError.message, apiError['statusCode'])
+      return handleAPIError(error, `DELETE /api/${table}`)
     }
   }
 }

@@ -13,7 +13,7 @@ export interface StatCardData {
   title: string
   value: number | string
   description?: string
-  icon?: ComponentType<{ className?: string | undefined }>
+   icon?: ComponentType<{ className?: string }>
   trend?: {
     value: number
     isPositive: boolean

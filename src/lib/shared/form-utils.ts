@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { type UseFormProps, type UseFormReturn, type FieldValues, useForm } from 'react-hook-form'
+import { type FieldValues, useForm, type UseFormProps, type UseFormReturn } from 'react-hook-form'
 import { z } from 'zod'
 
 import { useToast } from '@/hooks/use-toast'
@@ -177,11 +177,11 @@ export function useFormSubmission() {
     onSuccess?: (result: T) => void,
     onError?: (error: Error) => void
   ) => {
-    void setState({ isSubmitting: true, isSuccess: false, isError: false, error: undefined })
+    void setState({ isSubmitting: true, isSuccess: false, isError: false })
 
     try {
       const result = await submitFn()
-      void setState({ isSubmitting: false, isSuccess: true, isError: false, error: undefined })
+      void setState({ isSubmitting: false, isSuccess: true, isError: false })
       onSuccess?.(result)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Terjadi kesalahan'
@@ -191,7 +191,7 @@ export function useFormSubmission() {
   }
 
   const reset = () => {
-    void setState({ isSubmitting: false, isSuccess: false, isError: false, error: undefined })
+    void setState({ isSubmitting: false, isSuccess: false, isError: false })
   }
 
   return { ...state, submit, reset }

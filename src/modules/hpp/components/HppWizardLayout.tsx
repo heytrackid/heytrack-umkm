@@ -2,7 +2,7 @@
 
 import { ArrowLeft, ArrowRight, Calculator, CheckCircle, DollarSign, Factory, Percent, Receipt } from '@/components/icons'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -18,7 +18,7 @@ import { toast } from 'sonner'
 import { RecipeSelector } from '@/modules/hpp/components/RecipeSelector'
 import { useUnifiedHpp } from '@/modules/hpp/hooks/useUnifiedHpp'
 
-import type { RecipeWithCosts } from '@/modules/hpp/hooks/useUnifiedHpp'
+
 
 // HPP Wizard Steps
 const wizardSteps = [
@@ -36,7 +36,7 @@ interface OverheadCosts {
 }
 
 export const HppWizardLayout = () => {
-  const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
+  const { isLoading: isAuthLoading } = useAuth()
   const router = useRouter()
 
   // Wizard state
@@ -46,12 +46,10 @@ export const HppWizardLayout = () => {
   // HPP data
   const {
     recipes,
-    overview,
     recipe,
     recipeLoading,
     selectedRecipeId,
     setSelectedRecipeId,
-    calculateHpp,
     updatePrice
   } = useUnifiedHpp()
 
@@ -133,13 +131,16 @@ export const HppWizardLayout = () => {
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     setTouchEnd(null)
-    setTouchStart(e.targetTouches[0].clientX)
+    if (e.targetTouches[0]) {
+      setTouchStart(e.targetTouches[0].clientX)
+    }
     setSwipeDirection(null)
   }, [])
 
   const onTouchMove = useCallback((e: React.TouchEvent) => {
     if (!touchStart) return
 
+    if (!e.targetTouches[0]) return
     const currentTouch = e.targetTouches[0].clientX
     setTouchEnd(currentTouch)
 
@@ -242,7 +243,6 @@ export const HppWizardLayout = () => {
             <div className="md:hidden">
               <div className="flex flex-col space-y-0 mb-4">
                 {wizardSteps.map((step, index) => {
-                const IconComponent = step.icon
                 const isActive = step.id === currentStep
                 const isCompleted = step.id < currentStep
                 
@@ -508,7 +508,7 @@ export const HppWizardLayout = () => {
                           max={200}
                           step={5}
                           value={[marginPercentage]}
-                          onValueChange={(value) => setMarginPercentage(value[0])}
+                          onValueChange={(value) => { if (value.length > 0 && value[0] !== undefined) setMarginPercentage(value[0]) }}
                           className="w-full"
                         />
                         <div className="flex justify-between text-xs text-muted-foreground">

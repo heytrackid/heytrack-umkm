@@ -155,7 +155,10 @@ export function extractSearchParams(request: NextRequest): {
     }
   }
 
-  return { search, filters, sortBy, sortOrder }
+  const result: any = { filters, sortOrder }
+  if (search) result.search = search
+  if (sortBy) result.sortBy = sortBy
+  return result
 }
 
 // Rate limiting helpers

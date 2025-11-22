@@ -1,7 +1,7 @@
 'use client'
 
 import { TrendingUp, AlertCircle, Download, RefreshCw, FileText, Printer, BarChart3 } from '@/components/icons'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
 import { Button } from '@/components/ui/button'
@@ -19,7 +19,7 @@ import { ProfitReportTabs } from '@/app/reports/components/ProfitReportTabs'
 import type { ProfitReportProps, ProfitData, PeriodType, ChartType, SelectedDataPoint } from '@/app/reports/components/ProfitReportTypes'
 
 // Main component
-export const ProfitReport = ({ dateRange }: ProfitReportProps = {}) => {
+export const ProfitReport = ({}: ProfitReportProps = {}) => {
     const { formatCurrency } = useCurrency()
     const { isMobile } = useResponsive()
     const [period, setPeriod] = useState<PeriodType>('monthly')
@@ -54,8 +54,7 @@ export const ProfitReport = ({ dateRange }: ProfitReportProps = {}) => {
 
     // Comparison data query
     const {
-        data: comparisonData,
-        isLoading: comparisonLoading
+        data: comparisonData
     } = useQuery({
         queryKey: ['profit-report-comparison', period, compareMode],
         queryFn: async (): Promise<ProfitData | null> => {

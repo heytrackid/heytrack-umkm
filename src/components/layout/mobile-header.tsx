@@ -22,7 +22,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { useAuth } from '@/hooks/useAuth'
-import { uiLogger } from '@/lib/logger'
+
 import { cn } from '@/lib/utils'
 import { useMobile } from '@/utils/responsive'
 

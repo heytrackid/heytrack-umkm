@@ -1,79 +1,103 @@
-import { useQuery, useMutation } from '@tanstack/react-query'
-
-import { createClientLogger } from '@/lib/client-logger'
-
-const logger = createClientLogger('Hook')
-
-
-
+import { useQuery } from '@tanstack/react-query'
+import { fetchApi, postApi } from '@/lib/query/query-helpers'
 
 interface RecipeAvailabilityResult {
-  recipe_id: string
-  recipe_name: string
-  is_available: boolean
-  max_quantity: number
+  available: boolean
   missing_ingredients: Array<{
     ingredient_id: string
     ingredient_name: string
-    required: number
-    available: number
-    shortfall: number
+    required_quantity: number
+    available_quantity: number
+    shortage: number
     unit: string
-    lead_time_days: number | null
   }>
-  warnings: string[]
+  can_produce_quantity: number
 }
 
-export function useRecipeAvailability(recipeId: string | null, quantity = 1) {
-  return useQuery({
+interface RecipeOption {
+  id: string
+  name: string
+  available: boolean
+  max_quantity: number
+}
+
+interface IngredientUsage {
+  ingredient_id: string
+  ingredient_name: string
+  total_used: number
+  unit: string
+  recipes_using: number
+}
+
+/**
+ * Check recipe availability for production
+ */
+export function useRecipeAvailability(recipeId: string | null, quantity: number = 1) {
+  return useQuery<RecipeAvailabilityResult>({
     queryKey: ['recipe-availability', recipeId, quantity],
-    queryFn: async () => {
-      if (!recipeId) {return null}
-
-      const response = await fetch(
-        `/api/recipes/availability?recipe_id=${recipeId}&quantity=${quantity}`,
-        {
-          credentials: 'include', // Include cookies for authentication
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error('Failed to check recipe availability')
-      }
-
-      return response.json() as Promise<RecipeAvailabilityResult>
+    queryFn: () => {
+      if (!recipeId) throw new Error('Recipe ID is required')
+      return fetchApi<RecipeAvailabilityResult>(`/api/recipes/availability?recipeId=${recipeId}&quantity=${quantity}`)
     },
-    enabled: Boolean(recipeId),
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    refetchOnWindowFocus: true
+    enabled: !!recipeId && quantity > 0,
   })
 }
 
-export function useCheckMultipleRecipes() {
-  return useMutation({
-    mutationFn: async (recipes: Array<{ recipe_id: string; quantity: number }>) => {
-      const response = await fetch('/api/recipes/availability', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipes }),
-        credentials: 'include', // Include cookies for authentication
-      })
+/**
+ * Get all available recipes
+ */
+export function useAvailableRecipes() {
+  return useQuery<RecipeOption[]>({
+    queryKey: ['available-recipes'],
+    queryFn: () => fetchApi<RecipeOption[]>('/api/recipes/availability/all'),
+  })
+}
 
-      if (!response.ok) {
-        throw new Error('Failed to check recipes')
-      }
+/**
+ * Check multiple recipes availability
+ */
+export function useBulkRecipeAvailability(recipeIds: string[]) {
+  return useQuery({
+    queryKey: ['bulk-recipe-availability', recipeIds],
+    queryFn: () => postApi('/api/recipes/availability/bulk', { recipeIds }),
+    enabled: recipeIds.length > 0,
+  })
+}
 
-      return response.json() as Promise<{
-        results: RecipeAvailabilityResult[]
-        summary: {
-          total: number
-          available: number
-          unavailable: number
-        }
-      }>
+/**
+ * Get ingredient usage across recipes
+ */
+export function useIngredientUsage(ingredientId: string | null) {
+  return useQuery<IngredientUsage>({
+    queryKey: ['ingredient-usage', ingredientId],
+    queryFn: () => {
+      if (!ingredientId) throw new Error('Ingredient ID is required')
+      return fetchApi<IngredientUsage>(`/api/ingredients/${ingredientId}/usage`)
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to check multiple recipes:')
-    }
+    enabled: !!ingredientId,
+  })
+}
+
+/**
+ * Get recipes that can be made with current inventory
+ */
+export function useProducibleRecipes() {
+  return useQuery<RecipeOption[]>({
+    queryKey: ['producible-recipes'],
+    queryFn: () => fetchApi<RecipeOption[]>('/api/recipes/producible'),
+  })
+}
+
+/**
+ * Calculate max production quantity for recipe
+ */
+export function useMaxProductionQuantity(recipeId: string | null) {
+  return useQuery<{ max_quantity: number; limiting_ingredient?: string }>({
+    queryKey: ['max-production-quantity', recipeId],
+    queryFn: () => {
+      if (!recipeId) throw new Error('Recipe ID is required')
+      return fetchApi(`/api/recipes/${recipeId}/max-quantity`)
+    },
+    enabled: !!recipeId,
   })
 }

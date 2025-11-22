@@ -6,7 +6,7 @@ import { withSecurity, type SecurityConfig, SecurityPresets } from '@/utils/secu
 
 type Handler<Params extends Record<string, unknown>> = (request: NextRequest, params: Params) => Promise<NextResponse>
 
-type RouteHandler = (request: NextRequest, context: { params: Promise<Record<string, string>> }) => Promise<NextResponse>
+type RouteHandler = (request: NextRequest, context: { params: Promise<Record<string, string | string[]>> }) => Promise<NextResponse>
 
 type SecurityPreset = SecurityConfig | (() => SecurityConfig)
 

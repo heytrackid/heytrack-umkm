@@ -56,7 +56,6 @@ export const DataTable = <TData, TValue>({
   isLoading = false,
   searchPlaceholder = 'Search...',
   searchableColumn,
-  pageSize = 10,
   showPagination = true,
   showSearch = true,
   showColumnToggle = true,

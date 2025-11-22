@@ -1,13 +1,17 @@
  
 'use client'
-import { CheckCircle, Clock, Package, Plus, Search, XCircle } from '@/components/icons'
+import { Package, Plus, Search } from '@/components/icons'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
+import { format } from 'date-fns'
+import { id as idLocale } from 'date-fns/locale'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { useOrders } from '@/hooks/api/useOrders'
+import type { OrderListItem } from '@/types/database'
 import {
     Select,
     SelectContent,
@@ -17,27 +21,10 @@ import {
 } from '@/components/ui/select'
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { useSettings } from '@/contexts/settings-context'
-import { useOrders } from '@/hooks/useOrdersQuery'
-import { toast } from 'sonner'
 import { usePagination } from '@/hooks/usePagination'
-
-
-import type { PaginatedResponse } from '@/lib/validations/pagination'
-import type { Row, OrderStatus } from '@/types/database'
+import type { Order, OrderStatus } from '@/types/database'
 
 import { VirtualizedOrderCards } from '@/components/orders/VirtualizedOrderCards'
-
-type Order = Row<'orders'>
-
-interface OrderWithItems extends Order {
-    items?: Array<{
-        id: string
-        product_name: string | null
-        quantity: number
-        unit_price: number
-        total_price: number
-    }>
-}
 
 export const OrdersListWithPagination = (): JSX.Element => {
     const router = useRouter()
@@ -56,16 +43,19 @@ export const OrdersListWithPagination = (): JSX.Element => {
     })
 
     // React Query hook for orders
-    const { data: ordersData, isLoading: loading } = useOrders({
-        page: pagination.page,
-        pageSize: pagination.pageSize,
-        searchTerm: searchTerm || '',
-        statusFilter: statusFilter,
+    const { data: orders = [], isLoading: loading } = useOrders()
+
+    // Client-side filtering and pagination
+    const filteredOrders = orders.filter((order) => {
+        if (searchTerm) {
+            const term = searchTerm.toLowerCase()
+            return (order as unknown as OrderListItem).order_no?.toLowerCase().includes(term) || 
+                   order.customer_id?.toLowerCase().includes(term)
+        }
+        return true
     })
 
-    // Extract orders and total count
-    const orders = ordersData?.orders || []
-    const totalItems = ordersData?.totalCount || 0
+    const totalItems = filteredOrders.length
 
 
 
@@ -82,26 +72,7 @@ export const OrdersListWithPagination = (): JSX.Element => {
         pagination.setPage(1) // Reset to first page on filter
     }, [pagination])
 
-    const getStatusBadge = (status: OrderStatus) => {
-        const statusConfig: Record<OrderStatus, { label: string; icon: React.ComponentType<{ className?: string }>; className: string }> = {
-            PENDING: { label: 'Pending', icon: Clock as React.ComponentType<{ className?: string }>, className: 'bg-muted text-muted-foreground' },
-            CONFIRMED: { label: 'Dikonfirmasi', icon: CheckCircle as React.ComponentType<{ className?: string }>, className: 'bg-blue-50 text-blue-700' },
-            IN_PROGRESS: { label: 'Sedang Diproses', icon: Package as React.ComponentType<{ className?: string }>, className: 'bg-yellow-50 text-yellow-700' },
-            READY: { label: 'Siap', icon: CheckCircle as React.ComponentType<{ className?: string }>, className: 'bg-green-50 text-green-700' },
-            DELIVERED: { label: 'Terkirim', icon: CheckCircle as React.ComponentType<{ className?: string }>, className: 'bg-green-50 text-green-700' },
-            CANCELLED: { label: 'Dibatalkan', icon: XCircle as React.ComponentType<{ className?: string }>, className: 'bg-destructive/10 text-destructive' },
-        }
 
-        const _config = statusConfig[status] || statusConfig.PENDING
-        const Icon = _config.icon
-
-        return (
-            <Badge className={_config.className}>
-                <Icon className="h-3 w-3 mr-1" />
-                {_config.label}
-            </Badge>
-        )
-    }
 
     return (
         <div className="space-y-6">
@@ -185,43 +156,40 @@ export const OrdersListWithPagination = (): JSX.Element => {
                 </Card>
              ) : orders.length > 20 ? (
                  // Virtual scrolling for large lists (>20 items)
-                 <VirtualizedOrderCards orders={orders} onOrderClick={(orderId) => router.push(`/orders/${orderId}`)} formatCurrency={formatCurrency} />
+                  <VirtualizedOrderCards orders={orders as unknown as Order[]} onOrderClick={(orderId) => router.push(`/orders/${orderId}`)} formatCurrency={formatCurrency} />
              ) : (
                  <div className="space-y-3">
-                      {orders.map((order: OrderWithItems) => (
-                         <Card
-                             key={order['id']}
-                             className="transition-all cursor-pointer"
-                             onClick={() => router.push(`/orders/${order['id']}`)}
-                         >
-                             <CardContent className="p-6">
-                                 <div className="flex flex-col sm:flex-row justify-between gap-4">
-                                     <div className="flex-1 space-y-2">
-                                         <div className="flex items-center gap-3">
-                                             <h3 className="font-semibold text-lg">#{order['order_no']}</h3>
-                                             {getStatusBadge(order['status'] ?? 'PENDING')}
-                                         </div>
-                                         <div className="text-sm text-muted-foreground space-y-1">
-                                             <p>Pelanggan: {order['customer_name']}</p>
-                                             <p>Tanggal: {order.order_date ? new Date(order.order_date).toLocaleDateString('id-ID') : 'No date set'}</p>
-                                             {order.delivery_date && (
-                                                 <p>Pengiriman: {new Date(order.delivery_date).toLocaleDateString('id-ID')}</p>
-                                             )}
-                                         </div>
-                                     </div>
-                                     <div className="text-right">
-                                         <p className="text-2xl font-bold">
-                                             {formatCurrency(order.total_amount ?? 0)}
-                                         </p>
-                                         {order.items && order.items.length > 0 && (
-                                             <p className="text-sm text-muted-foreground mt-1">
-                                                 {order.items.length} item
-                                             </p>
-                                         )}
-                                     </div>
-                                 </div>
-                             </CardContent>
-                         </Card>
+                       {orders.map((order) => (
+                          <Card
+                              key={(order as unknown as OrderListItem).id}
+                              className="transition-all cursor-pointer"
+                              onClick={() => router.push(`/orders/${(order as unknown as OrderListItem).id}`)}
+                          >
+                              <CardContent className="p-6">
+                                  <div className="flex items-start justify-between">
+                                      <div className="space-y-1">
+                                          <p className="font-medium text-sm">#{(order as unknown as OrderListItem).order_no}</p>
+                                          <p className="text-sm text-muted-foreground">{(order as unknown as OrderListItem).customer_name}</p>
+                                      </div>
+                                      <div className="text-right space-y-1">
+                                          <p className="text-sm text-muted-foreground">
+                                              {(order as unknown as OrderListItem).order_date ? format(new Date((order as unknown as OrderListItem).order_date!), 'dd MMM yyyy', { locale: idLocale }) : '-'}
+                                          </p>
+                                          <Badge variant="default">
+                                              {(order as unknown as OrderListItem).status || 'PENDING'}
+                                          </Badge>
+                                      </div>
+                                  </div>
+                                  <div className="mt-4 flex items-center justify-between">
+                                      <div className="text-sm text-muted-foreground">
+                                          0 items
+                                      </div>
+                                      <div className="font-medium">
+                                          {formatCurrency((order as unknown as OrderListItem).total_amount || 0)}
+                                      </div>
+                                  </div>
+                              </CardContent>
+                          </Card>
                      ))}
                  </div>
              )}

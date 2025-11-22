@@ -18,8 +18,9 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
-import { uiLogger } from '@/lib/logger'
-import { useCreateRecipeWithIngredients, useUpdateRecipeWithIngredients } from '@/hooks/useRecipes'
+
+import { useCreateRecipeWithIngredients, useUpdateRecipeWithIngredients, useRecipe } from '@/hooks/useRecipes'
+import { useIngredients } from '@/hooks/useIngredients'
 import { PageHeader } from '@/components/layout/PageHeader'
 
 import type { Row, Database } from '@/types/database'
@@ -48,8 +49,10 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
 
     const createMutation = useCreateRecipeWithIngredients()
     const updateMutation = useUpdateRecipeWithIngredients()
+    const { data: ingredients = [] } = useIngredients()
+    const { data: recipeData } = useRecipe(recipeId || null)
     const loading = createMutation.isPending || updateMutation.isPending
-    const [ingredients, setIngredients] = useState<Ingredient[]>([])
+    const [availableIngredients, setAvailableIngredients] = useState<Ingredient[]>([])
     const [formData, setFormData] = useState<Partial<RecipeInsert>>({
         name: '',
         description: '',
@@ -62,64 +65,39 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
     })
     const [recipeIngredients, setRecipeIngredients] = useState<RecipeIngredientForm[]>([])
 
+    // Sync ingredients from hook to local state
     useEffect(() => {
-        void loadIngredients()
-        if (mode === 'edit' && recipeId) {
-            void loadRecipe()
+        if (ingredients) {
+            // Use setTimeout to avoid setState during render cycle
+            setTimeout(() => setAvailableIngredients(ingredients), 0)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [mode, recipeId])
+    }, [ingredients])
 
-    const loadIngredients = async () => {
-        try {
-            const response = await fetch('/api/ingredients', {
-                credentials: 'include', // Include cookies for authentication
-            })
-            if (response.ok) {
-                const data = await response.json() as { ingredients: Ingredient[] }
-                setIngredients(data.ingredients ?? [])
-            }
-        } catch (error: unknown) {
-            // Silent fail - will show empty ingredients list
-            if (process['env'].NODE_ENV === 'development') {
-                uiLogger.error({ error }, 'Failed to load ingredients')
-            }
+    // Sync recipe data for edit mode
+    useEffect(() => {
+        if (mode === 'edit' && recipeData) {
+            // Use setTimeout to avoid setState during render cycle
+            setTimeout(() => {
+                setFormData(recipeData)
+                // Load recipe ingredients from the response
+                if (recipeData.recipe_ingredients && Array.isArray(recipeData.recipe_ingredients)) {
+                    setRecipeIngredients(
+                        recipeData.recipe_ingredients.map((ri: Database['public']['Tables']['recipe_ingredients']['Row']) => ({
+                            id: ri.id,
+                            ingredient_id: ri.ingredient_id,
+                            quantity: ri.quantity,
+                            unit: ri.unit,
+                            notes: '',
+                        }))
+                    )
+                }
+            }, 0)
         }
-    }
+    }, [mode, recipeData])
 
-    const loadRecipe = async () => {
-        if (!recipeId) { return }
 
-        try {
-            // Fetch recipe with ingredients from API
-            const response = await fetch(`/api/recipes/${recipeId}`, {
-                credentials: 'include', // Include cookies for authentication
-            })
-            if (!response.ok) {
-                throw new Error('Gagal memuat resep')
-            }
 
-            const recipe = await response.json() as RecipeInsert & { recipe_ingredients: Array<Database['public']['Tables']['recipe_ingredients']['Row']> }
-            setFormData(recipe)
 
-            // Load recipe ingredients from the response
-            if (recipe.recipe_ingredients && Array.isArray(recipe.recipe_ingredients)) {
-                setRecipeIngredients(
-                    recipe.recipe_ingredients.map((ri: Database['public']['Tables']['recipe_ingredients']['Row']) => ({
-                        id: ri.id,
-                        ingredient_id: ri.ingredient_id,
-                        quantity: ri.quantity,
-                        unit: ri.unit,
-                        notes: '',
-                    }))
-                )
-            }
-        } catch (error: unknown) {
-              const message = error instanceof Error ? error.message : 'Gagal memuat resep'
-              toast.error(message)
-              router.push('/recipes')
-        }
-    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -144,12 +122,23 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
         }
 
         try {
-            const ingredientData = recipeIngredients.map(ri => ({
-                ingredient_id: ri.ingredient_id,
-                quantity: ri.quantity,
-                unit: ri.unit,
-                notes: ri.notes,
-            }))
+            const ingredientData = recipeIngredients.map(ri => {
+
+                const item: any = {
+
+                    ingredient_id: ri.ingredient_id,
+
+                    quantity: ri.quantity,
+
+                    unit: ri.unit,
+
+                }
+
+                if (ri.notes) item.notes = ri.notes
+
+                return item
+
+            })
 
             if (mode === 'create') {
                 const result = await createMutation.mutateAsync({
@@ -206,7 +195,7 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
         const safeValue = value ?? ''
 
         const updatedIngredient: RecipeIngredientForm = {
-            id: current['id'],
+            ...(current.id ? { id: current.id } : {}),
             ingredient_id: field === 'ingredient_id' ? String(safeValue) : String(current.ingredient_id || ''),
             quantity: field === 'quantity' ? Number(safeValue) : Number(current.quantity || 0),
             unit: field === 'unit' ? String(safeValue) : String(current.unit || 'gram'),
@@ -385,7 +374,7 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
                                                 <SelectValue placeholder="Pilih bahan" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {ingredients.map((ing) => (
+                                                {availableIngredients.map((ing) => (
                                                     <SelectItem key={ing['id']} value={ing['id']}>
                                                         {ing.name}
                                                     </SelectItem>

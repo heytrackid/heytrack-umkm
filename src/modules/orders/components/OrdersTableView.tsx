@@ -227,7 +227,7 @@ export const OrderView = () => {
             </DialogTitle>
           </DialogHeader>
           <OrderForm
-            order={editingOrder}
+            {...(editingOrder && { order: editingOrder })}
             onSubmit={async (data) => {
               // Handle form submission
               logger.info({ orderNo: data.order_no }, 'Order submitted')

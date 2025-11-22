@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, Package } from '@/components/icons'
+import { ArrowLeft } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -12,11 +12,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { BreadcrumbPatterns, PageBreadcrumb } from '@/components/ui/page-breadcrumb'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { useAuth, useSupabaseCRUD } from '@/hooks/index'
+import { useAuth } from '@/hooks/index'
+import { useCreateIngredient } from '@/hooks/useIngredients'
 import { toast } from 'sonner'
 import { apiLogger } from '@/lib/logger'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
-import { useSupabase } from '@/providers/SupabaseProvider'
+
 
 
 import type { Insert } from '@/types/database'
@@ -28,8 +29,8 @@ type IngredientInsert = Insert<'ingredients'>
 
 const NewIngredientPage = (): JSX.Element => {
   const router = useRouter()
-  const { supabase } = useSupabase()
-  const { create: createIngredient } = useSupabaseCRUD('ingredients')
+
+   const createIngredientMutation = useCreateIngredient()
 
   const { user } = useAuth() // Get user from auth hook
 
@@ -68,7 +69,7 @@ const NewIngredientPage = (): JSX.Element => {
         weighted_average_cost: 0
       }
 
-      await createIngredient(payload)
+      await createIngredientMutation.mutateAsync(payload)
 
       toast.success(`Bahan baku "${data.name}" berhasil ditambahkan`)
 

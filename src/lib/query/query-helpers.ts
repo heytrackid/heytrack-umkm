@@ -120,15 +120,14 @@ export async function postApi<T>(
   options?: RequestInit,
   timeout = 30000
 ): Promise<T> {
-  return fetchApi<T>(
-    endpoint,
-    {
-      ...options,
-      method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
-    },
-    timeout
-  )
+  const requestOptions: RequestInit = {
+    ...(options || {}),
+    method: 'POST',
+  }
+  if (data !== undefined) {
+    requestOptions.body = JSON.stringify(data)
+  }
+  return fetchApi<T>(endpoint, requestOptions, timeout)
 }
 
 /**
@@ -141,19 +140,18 @@ export async function postApi<T>(
  */
 export async function putApi<T>(
   endpoint: string,
-  data?: unknown,
+  data: unknown,
   options?: RequestInit,
   timeout = 30000
 ): Promise<T> {
-  return fetchApi<T>(
-    endpoint,
-    {
-      ...options,
-      method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined,
-    },
-    timeout
-  )
+  const requestOptions = {
+    ...(options || {}),
+    method: 'PUT',
+  }
+  if (data != null) {
+    requestOptions.body = JSON.stringify(data)
+  }
+  return fetchApi<T>(endpoint, requestOptions, timeout)
 }
 
 /**
@@ -170,15 +168,15 @@ export async function patchApi<T>(
   options?: RequestInit,
   timeout = 30000
 ): Promise<T> {
-  return fetchApi<T>(
-    endpoint,
-    {
-      ...options,
-      method: 'PATCH',
-      body: data ? JSON.stringify(data) : undefined,
-    },
-    timeout
-  )
+  const requestOptions = {
+    ...options,
+    method: 'PUT',
+    ...(data !== undefined && { body: JSON.stringify(data) })
+  }
+  if (data) {
+    requestOptions.body = JSON.stringify(data)
+  }
+  return fetchApi<T>(endpoint, requestOptions, timeout)
 }
 
 /**

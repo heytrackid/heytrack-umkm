@@ -1,6 +1,7 @@
 export const runtime = 'nodejs'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 
-import { createErrorResponse, createSuccessResponse } from '@/lib/api-core'
+import { createSuccessResponse } from '@/lib/api-core/responses'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { apiLogger } from '@/lib/logger'
 import { SecurityPresets } from '@/utils/security/api-middleware'
@@ -22,7 +23,7 @@ async function getNotificationsHandler(context: RouteContext): Promise<NextRespo
   const { user, supabase } = context
 
   const { data: notifications, error } = await supabase
-    .from('notifications' as never)
+    .from('notifications')
     .select('id, user_id, type, title, message, is_read, created_at')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
@@ -30,7 +31,7 @@ async function getNotificationsHandler(context: RouteContext): Promise<NextRespo
 
   if (error) {
     apiLogger.error({ error, userId: user.id }, 'Failed to fetch notifications')
-    return createErrorResponse('Failed to fetch notifications', 500)
+    return handleAPIError(new Error('Failed to fetch notifications'), 'API Route')
   }
 
   const rows = (notifications || []) as unknown as NotificationRow[]
@@ -67,29 +68,29 @@ async function markReadHandler(
   if (body?.all) {
     // Mark all as read
     const { error } = await supabase
-      .from('notifications' as never)
-      .update({ is_read: true } as never)
+      .from('notifications')
+      .update({ is_read: true })
       .eq('user_id', user.id)
       .eq('is_read', false)
 
     if (error) {
       apiLogger.error({ error, userId: user.id }, 'Failed to mark all notifications as read')
-      return createErrorResponse('Failed to mark notifications as read', 500)
+      return handleAPIError(new Error('Failed to mark notifications as read'), 'API Route')
     }
   } else if (body?.id) {
     // Mark specific one as read
     const { error } = await supabase
-      .from('notifications' as never)
-      .update({ is_read: true } as never)
+      .from('notifications')
+      .update({ is_read: true })
       .eq('user_id', user.id)
       .eq('id', body.id)
 
     if (error) {
       apiLogger.error({ error, userId: user.id }, 'Failed to mark notification as read')
-      return createErrorResponse('Failed to mark notification as read', 500)
+      return handleAPIError(new Error('Failed to mark notification as read'), 'API Route')
     }
   } else {
-    return createErrorResponse('Invalid request parameters', 400)
+    return handleAPIError(new Error('Invalid request parameters'), 'API Route')
   }
 
   return createSuccessResponse({ success: true })

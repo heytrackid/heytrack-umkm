@@ -1,11 +1,10 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { apiLogger } from '@/lib/logger'
 export const runtime = 'nodejs'
 
-import { NextRequest, NextResponse } from 'next/server'
-
- import { handleAPIError } from '@/lib/errors/api-error-handler'
- import { apiLogger } from '@/lib/logger'
- import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
+import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 
 interface EnvVarDiagnostics {
   exists: boolean
@@ -70,10 +69,13 @@ async function checkSupabaseConnectivity(): Promise<DiagnosticsPayload['supabase
 
   try {
     const { createClient } = await import('@supabase/supabase-js')
-    const client = createClient(url, serviceRoleKey ?? anonKey, {
+    const options: unknown = {
       auth: { persistSession: false },
-      global: serviceRoleKey ? { headers: { Authorization: `Bearer ${serviceRoleKey}` } } : undefined,
-    })
+    }
+    if (serviceRoleKey) {
+      (options as any).global = { headers: { Authorization: `Bearer ${serviceRoleKey}` } }
+    }
+    const client = createClient(url, serviceRoleKey ?? anonKey, options as any)
 
     const { error } = await client
       .from('user_profiles')
@@ -101,24 +103,23 @@ function buildDiagnosticsSkeleton(): DiagnosticsPayload {
   }
 }
 
-async function diagnosticsGET(_request: NextRequest): Promise<NextResponse> {
+// GET /api/diagnostics - System diagnostics
+async function getDiagnosticsHandler(context: RouteContext) {
+  const { user } = context
+
   try {
-    apiLogger.info('GET /api/diagnostics - Request received')
+    apiLogger.info({ userId: user.id }, 'GET /api/diagnostics - Request received')
     const diagnostics = buildDiagnosticsSkeleton()
     diagnostics.supabase_connectivity = await checkSupabaseConnectivity()
     diagnostics.deployment_status = 'operational'
 
-    return NextResponse.json(diagnostics, {
-      status: 200,
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET',
-      },
-    })
+    return createSuccessResponse(diagnostics)
   } catch (error) {
     return handleAPIError(error, 'GET /api/diagnostics')
   }
 }
 
-export const GET = createSecureHandler(diagnosticsGET, 'GET /api/diagnostics', SecurityPresets.enhanced())
+export const GET = createApiRoute(
+  { method: 'GET', path: '/api/diagnostics' },
+  getDiagnosticsHandler
+)

@@ -3,7 +3,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from '@/components/icons'
-import { useForm, type DefaultValues, type FieldValues, type Path, type PathValue, type Resolver } from 'react-hook-form'
+import { useForm, type DefaultValues, type FieldValues, type Path, type PathValue, type Resolver, type UseFormProps } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -130,8 +130,6 @@ export const SharedForm = <T extends FieldValues>({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {section.fields.map((field, fieldIndex) => {
                   const fieldPath = field.name as Path<T>
-                  const error = form.formState.errors[fieldPath]?.message
-                  const errorMessage = typeof error === 'string' ? error : undefined
 
                   // Extract watch value to avoid React Hook Form linting warnings
                   // eslint-disable-next-line react-hooks/incompatible-library
@@ -142,22 +140,16 @@ export const SharedForm = <T extends FieldValues>({
                       key={fieldIndex}
                       className={field['type'] === 'textarea' ? 'md:col-span-2' : ''}
                     >
-                      <FormField
-                        label={field.label}
-                        name={field.name}
-                        type={field['type']}
-                        value={watchedValue}
-                        onChange={(_, value) => form.setValue(fieldPath, value as PathValue<T, Path<T>>)}
-                        error={errorMessage}
-                        required={field.required}
-                        placeholder={field.placeholder}
-                        hint={field.hint}
-                        options={field.options}
-                        min={field.min}
-                        max={field.max}
-                        step={field.step}
-                        rows={field.rows}
-                      />
+        <FormField
+          label={field.label}
+          name={field.name}
+          type={field.type}
+          value={watchedValue}
+          onChange={(_, value) => form.setValue(fieldPath, value as PathValue<T, Path<T>>)}
+          placeholder={field.placeholder || ''}
+          required={field.required || false}
+          options={field.options || []}
+        />
                     </div>
                   )
                 })}
@@ -191,12 +183,12 @@ export function useSharedForm<T extends FieldValues>(
   schema: z.ZodSchema<FieldValues>,
   defaultValues?: Partial<T>
 ) {
-  const form = useForm<T>({
-
-     // @ts-ignore - zodResolver type issues with generic schemas
-     resolver: zodResolver(schema) as Resolver<T>,
-     defaultValues: defaultValues as DefaultValues<T> | undefined,
-   })
+  const options: UseFormProps<T> = {
+    // @ts-ignore - zodResolver type issues with generic schemas
+    resolver: zodResolver(schema) as Resolver<T>,
+    ...(defaultValues && { defaultValues: defaultValues as DefaultValues<T> }),
+  }
+  const form = useForm<T>(options)
 
   return {
     form,

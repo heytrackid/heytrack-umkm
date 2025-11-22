@@ -26,16 +26,16 @@
     "strictPropertyInitialization": true,
     "noImplicitThis": true,
     "alwaysStrict": true,
-    "noUnusedLocals": false, // Disabled for faster checking
-    "noUnusedParameters": false, // Disabled for faster checking
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": false, // Disabled for faster checking
+    "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
-    "exactOptionalPropertyTypes": false, // 👈 Dinonaktifkan untuk kompatibilitas
+    "exactOptionalPropertyTypes": true,
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {

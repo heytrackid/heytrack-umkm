@@ -1,4 +1,5 @@
 import { dbLogger } from '@/lib/logger'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 /** 
  * Database Transaction Management
@@ -95,12 +96,13 @@ export async function executeTransaction<T = unknown>(
       completedOperations,
     }
   } catch (error) {
-    return {
+    const result: any = {
       success: false,
       error: error instanceof Error ? error : new Error('Unknown error'),
       completedOperations,
-      failedOperation,
     }
+    if (failedOperation) result.failedOperation = failedOperation
+    return result
   }
 }
 
@@ -151,7 +153,7 @@ export function createOperation<T>(
   execute: () => Promise<T>,
   rollback?: () => Promise<void>
 ): TransactionOperation<T> {
-  return { name, execute, rollback }
+  return { name, execute, ...(rollback && { rollback }) }
 }
 
 /**
@@ -238,4 +240,38 @@ export async function executeParallel<T>(
 
   await Promise.all(executing)
   return results
+}
+
+/**
+ * Execute a database operation within a transaction context
+ *
+ * Note: Supabase doesn't provide native transaction support in the client SDK.
+ * This wrapper ensures proper error handling and logging for multi-step operations.
+ * For true ACID transactions, consider using Supabase Edge Functions.
+ */
+export async function withTransaction<T>(
+  supabase: SupabaseClient,
+  operation: (tx: SupabaseClient) => Promise<T>,
+  operationName = 'database_operation'
+): Promise<T> {
+  try {
+    dbLogger.debug({ operation: operationName }, 'Starting database transaction')
+
+    const result = await operation(supabase)
+
+    dbLogger.debug({ operation: operationName }, 'Database transaction completed successfully')
+
+    return result
+  } catch (error) {
+    dbLogger.error(
+      {
+        error,
+        operation: operationName,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error'
+      },
+      'Database transaction failed'
+    )
+
+    throw error
+  }
 }

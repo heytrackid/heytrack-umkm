@@ -1,11 +1,13 @@
-export const runtime = 'nodejs'
-
+// External libraries
 import { NextResponse } from 'next/server'
 
-import { createErrorResponse } from '@/lib/api-core'
+// Internal modules
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
-import { apiLogger } from '@/lib/logger'
+import { createSuccessResponse } from '@/lib/api-core/responses'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { SecurityPresets } from '@/utils/security/api-middleware'
+
+export const runtime = 'nodejs'
 
 interface AuthResponse {
   userId: string
@@ -17,14 +19,15 @@ async function getAuthStatusHandler(context: RouteContext): Promise<NextResponse
   try {
     const { user } = context
 
-    return NextResponse.json<AuthResponse>({
+    const response: AuthResponse = {
       userId: user.id,
       email: user.email ?? null,
       isAuthenticated: true,
-    })
+    }
+
+    return createSuccessResponse(response)
   } catch (error) {
-    apiLogger.error({ error }, 'Failed to return auth status')
-    return createErrorResponse('Failed to fetch auth status', 500)
+    return handleAPIError(error, 'GET /api/auth/me')
   }
 }
 
@@ -32,7 +35,7 @@ export const GET = createApiRoute(
   {
     method: 'GET',
     path: '/api/auth/me',
-    securityPreset: SecurityPresets.basic(),
+    securityPreset: SecurityPresets.enhanced(),
   },
   getAuthStatusHandler
 )

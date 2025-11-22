@@ -2,7 +2,7 @@ import { Package, PackageCheck, AlertTriangle, ShoppingCart } from '@/components
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { useSupabaseCRUD } from '@/hooks/supabase/index'
+import { useIngredients } from '@/hooks/useIngredients'
 import { useCurrency } from '@/hooks/useCurrency'
 
 // Inventory Report Component
@@ -24,13 +24,13 @@ interface InventoryStats {
 
 export const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps = {}) => {
   const { formatCurrency } = useCurrency()
-  const { data: ingredients } = useSupabaseCRUD<'ingredients'>('ingredients')
+  const { data: ingredients } = useIngredients()
 
   // Calculate inventory report
   const ingredientList = ingredients ?? []
 
-  const inventoryStats = ingredientList.reduce<InventoryStats>(
-    (stats, ingredient) => {
+   const inventoryStats = ingredientList.reduce<InventoryStats>(
+     (stats: InventoryStats, ingredient: any) => {
       const currentStock = ingredient.current_stock ?? 0
       const minimumStock = ingredient.min_stock ?? 0
 

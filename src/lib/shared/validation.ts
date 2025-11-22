@@ -80,7 +80,7 @@ export const validationFunctions = {
   },
 
   // Stock validation (min_stock <= current_stock)
-  validStockLevels: (data: { min_stock?: number; current_stock: number }) => {
+  validStockLevels: (data: { min_stock?: number | undefined; current_stock: number }) => {
     if (!data.min_stock) {return true}
     return data.min_stock <= data.current_stock
   },

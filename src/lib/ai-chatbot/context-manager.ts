@@ -18,7 +18,7 @@ export class ContextManager {
   constructor(userId: string, sessionId?: string) {
     this['context'] = {
       userId,
-      sessionId,
+      ...(sessionId !== undefined && { sessionId }),
       conversationHistory: [],
       businessData: {},
       preferences: {}

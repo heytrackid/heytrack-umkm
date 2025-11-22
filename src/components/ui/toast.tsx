@@ -115,7 +115,7 @@ export function deleteToast({
 export function successToast(title: string, description?: string) {
   return toast({
     title,
-    description,
+    ...(description !== undefined && { description }),
     type: 'success',
     duration: 3000
   })
@@ -125,9 +125,9 @@ export function successToast(title: string, description?: string) {
 export function errorToast(title: string, description?: string) {
   return toast({
     title,
-    description,
+    ...(description !== undefined && { description }),
     type: 'error',
-    duration: 5000
+    duration: 3000
   })
 }
 

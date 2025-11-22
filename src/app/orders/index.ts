@@ -43,17 +43,18 @@ export type {
 } from './config/orders.config'
 
 // Service hooks
-export {
-  useOrders,
-  useOrderItems,
-  useOrderPayments,
-  useOrderTotals,
-  useOrderSummary,
-  useOrderStatus,
-  useOrderCurrency,
-  useInvoiceGeneration,
-  useOrderValidation
-} from './hooks/use-orders'
+// Temporarily disabled due to useSupabaseCRUD removal
+// export {
+//   useOrders,
+//   useOrderItems,
+//   useOrderPayments,
+//   useOrderTotals,
+//   useOrderSummary,
+//   useOrderStatus,
+//   useOrderCurrency,
+//   useInvoiceGeneration,
+//   useOrderValidation
+// } from './hooks/use-orders'
 
 // Module metadata
 export const ORDERS_MODULE_INFO = {

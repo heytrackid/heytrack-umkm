@@ -1,11 +1,11 @@
 'use client'
 
 import { AutoSyncFinancialDashboard } from '@/components/dashboard/AutoSyncFinancialDashboard'
+import { TopProductsWidget } from '@/components/dashboard/TopProductsWidget'
 import { MobileHeader } from '@/components/layout/mobile-header'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
@@ -15,13 +15,13 @@ import { useDashboardStats } from '@/hooks/api/useDashboard'
 
 import { ProductionScheduleWidget } from '@/components/dashboard/ProductionScheduleWidget'
 import {
-    AlertTriangle,
-    DollarSign,
-    Package,
-    Plus,
-    ShoppingCart,
-    TrendingUp,
-    Users,
+  AlertTriangle,
+  DollarSign,
+  Package,
+  Plus,
+  ShoppingCart,
+  TrendingUp,
+  Users,
 } from '@/components/icons'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -46,22 +46,7 @@ export default function DashboardPage(): JSX.Element {
     })
   }
 
-  const _getStatusBadge = (status: string): JSX.Element => {
-    const variants: Record<string, { label: string; className: string }> = {
-      PENDING: { label: 'Pending', className: 'bg-yellow-500/10 text-yellow-600' },
-      PROCESSING: { label: 'Diproses', className: 'bg-blue-500/10 text-blue-600' },
-      COMPLETED: { label: 'Selesai', className: 'bg-green-500/10 text-green-600' },
-      CANCELLED: { label: 'Dibatalkan', className: 'bg-red-500/10 text-red-600' },
-    }
 
-    const variant = variants[status] || variants['PENDING']
-
-    return (
-      <Badge className={variant.className}>
-        {variant.label}
-      </Badge>
-    )
-  }
 
   return (
     <>
@@ -146,6 +131,9 @@ export default function DashboardPage(): JSX.Element {
 
       {/* Production Schedule Widget */}
       <ProductionScheduleWidget />
+
+      {/* Top Products Widget */}
+      <TopProductsWidget />
 
       <Separator className="my-6" />
 

@@ -13,6 +13,9 @@ import {
 import { useIngredients } from '@/hooks/useIngredients'
 import { Plus, Trash2 } from '@/components/icons'
 import { useState } from 'react'
+import type { Row } from '@/types/database'
+
+type Ingredient = Row<'ingredients'>
 
 interface RecipeIngredient {
   ingredient_id: string
@@ -38,7 +41,7 @@ export function RecipeIngredientSelector({
   const handleAdd = () => {
     if (!selectedIngredientId) return
 
-    const ingredient = availableIngredients?.find((i) => i.id === selectedIngredientId)
+    const ingredient = availableIngredients?.find((i: Ingredient) => i.id === selectedIngredientId)
     if (!ingredient) return
 
     onChange([
@@ -59,26 +62,26 @@ export function RecipeIngredientSelector({
 
   const handleQuantityChange = (index: number, quantity: number) => {
     const updated = [...ingredients]
-    updated[index] = { ...updated[index], quantity }
+    updated[index] = { ...updated[index], quantity } as RecipeIngredient
     onChange(updated)
   }
 
   const handleNotesChange = (index: number, notes: string) => {
     const updated = [...ingredients]
-    updated[index] = { ...updated[index], notes }
+    updated[index] = { ...updated[index], notes } as RecipeIngredient
     onChange(updated)
   }
 
   const getIngredientName = (ingredientId: string) => {
-    return availableIngredients?.find((i) => i.id === ingredientId)?.name || 'Unknown'
+    return availableIngredients?.find((i: Ingredient) => i.id === ingredientId)?.name || 'Unknown'
   }
 
   const getIngredientUnit = (ingredientId: string) => {
-    return availableIngredients?.find((i) => i.id === ingredientId)?.unit || ''
+    return availableIngredients?.find((i: Ingredient) => i.id === ingredientId)?.unit || ''
   }
 
   const getIngredientPrice = (ingredientId: string) => {
-    return availableIngredients?.find((i) => i.id === ingredientId)?.price_per_unit || 0
+    return availableIngredients?.find((i: Ingredient) => i.id === ingredientId)?.price_per_unit || 0
   }
 
   const calculateTotalCost = () => {
@@ -112,8 +115,8 @@ export function RecipeIngredientSelector({
                 </SelectItem>
               ) : availableIngredients && availableIngredients.length > 0 ? (
                 availableIngredients
-                  .filter((ing) => !ingredients.some((i) => i.ingredient_id === ing.id))
-                  .map((ingredient) => (
+                  .filter((ing: Ingredient) => !ingredients.some((i: RecipeIngredient) => i.ingredient_id === ing.id))
+                  .map((ingredient: Ingredient) => (
                     <SelectItem key={ingredient.id} value={ingredient.id}>
                       {ingredient.name} ({ingredient.unit})
                     </SelectItem>

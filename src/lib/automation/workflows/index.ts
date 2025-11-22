@@ -97,6 +97,8 @@ export async function triggerWorkflow(
   entityId: string,
   data: Record<string, unknown> = {}
 ): Promise<void> {
+  if (!event) return
+
   const automation = getWorkflowAutomation()
   await automation.triggerEvent({
     event,

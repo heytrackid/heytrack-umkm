@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
-import { Skeleton } from '@/components/ui/skeleton'
+
 import { GridSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
 import { useAuth } from '@/hooks/index'
 import { toast } from 'sonner'

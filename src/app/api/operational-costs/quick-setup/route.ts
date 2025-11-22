@@ -1,33 +1,25 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
-import { NextResponse } from 'next/server'
-
-import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import type { Insert } from '@/types/database'
-import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
-
-import { createClient } from '@/utils/supabase/server'
+import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import type { NextResponse } from 'next/server'
 
 /**
  * POST /api/operational-costs/quick-setup
- * 
+ *
  * Creates template operational costs for new users
  */
-async function postHandler(): Promise<NextResponse> {
-  try {
-    // Authenticate with Stack Auth
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
+async function postHandler(context: RouteContext): Promise<NextResponse> {
+  const { user, supabase } = context
 
-    const supabase = await createClient()    // Template operational costs (common for Indonesian culinary businesses)
+  try {
     const templates: Array<Insert<'operational_costs'>> = [
       {
-        user_id: user['id'],
+        user_id: user.id,
         category: 'utilities',
         description: 'Biaya listrik bulanan',
         amount: 500000,
@@ -37,7 +29,7 @@ async function postHandler(): Promise<NextResponse> {
         notes: 'Template biaya utilitas - sesuaikan dengan kebutuhan'
       },
       {
-        user_id: user['id'],
+        user_id: user.id,
         category: 'utilities',
         description: 'Biaya air bulanan',
         amount: 150000,
@@ -47,7 +39,7 @@ async function postHandler(): Promise<NextResponse> {
         notes: 'Template biaya utilitas'
       },
       {
-        user_id: user['id'],
+        user_id: user.id,
         category: 'utilities',
         description: 'Biaya gas bulanan',
         amount: 200000,
@@ -57,7 +49,7 @@ async function postHandler(): Promise<NextResponse> {
         notes: 'Template biaya utilitas'
       },
       {
-        user_id: user['id'],
+        user_id: user.id,
         category: 'staff',
         description: 'Gaji karyawan bulanan',
         amount: 3000000,
@@ -67,7 +59,7 @@ async function postHandler(): Promise<NextResponse> {
         notes: 'Template gaji - sesuaikan dengan jumlah karyawan'
       },
       {
-        user_id: user['id'],
+        user_id: user.id,
         category: 'rent',
         description: 'Sewa tempat usaha',
         amount: 2000000,
@@ -77,7 +69,7 @@ async function postHandler(): Promise<NextResponse> {
         notes: 'Template sewa tempat'
       },
       {
-        user_id: user['id'],
+        user_id: user.id,
         category: 'communication',
         description: 'Internet & Telepon',
         amount: 300000,
@@ -87,7 +79,7 @@ async function postHandler(): Promise<NextResponse> {
         notes: 'Template komunikasi'
       },
       {
-        user_id: user['id'],
+        user_id: user.id,
         category: 'maintenance',
         description: 'Perawatan peralatan',
         amount: 300000,
@@ -97,7 +89,7 @@ async function postHandler(): Promise<NextResponse> {
         notes: 'Template perawatan'
       },
       {
-        user_id: user['id'],
+        user_id: user.id,
         category: 'transport',
         description: 'BBM & Transport',
         amount: 500000,
@@ -116,26 +108,23 @@ async function postHandler(): Promise<NextResponse> {
 
     if (error) {
       apiLogger.error({ error, userId: user.id }, 'Failed to create template costs')
-      return NextResponse.json(
-        { error: 'Failed to create template costs' },
-        { status: 500 }
-      )
+      return handleAPIError(new Error('Failed to create template costs'), 'API Route')
     }
 
-    apiLogger.info({ userId: user['id'], count: data.length }, 'Template costs created')
+    apiLogger.info({ userId: user.id, count: data.length }, 'Template costs created')
 
-    return NextResponse.json({
+    return createSuccessResponse({
       message: 'Template costs created successfully',
       count: data.length,
       costs: data
-    }, { status: 201 })
+    }, 'Template costs created successfully', undefined, 201)
   } catch (error) {
     apiLogger.error({ error }, 'Error in POST /api/operational-costs/quick-setup')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return handleAPIError(new Error('Internal server error'), 'API Route')
   }
 }
 
-export const POST = createSecureHandler(postHandler, 'POST /api/operational-costs/quick-setup', SecurityPresets.enhanced())
+export const POST = createApiRoute(
+  { method: 'POST', path: '/api/operational-costs/quick-setup' },
+  postHandler
+)

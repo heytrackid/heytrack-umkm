@@ -148,11 +148,16 @@ export const RecipeEditor = ({
             ...recipe,
             steps: [
                 ...recipe.steps,
-                {
-                    step_number: recipe.steps.length + 1,
-                    instruction: newStep.instruction,
-                    duration_minutes: newStep.duration_minutes || undefined
-                }
+                (() => {
+                    const newStepObj: RecipeStep = {
+                        step_number: recipe.steps.length + 1,
+                        instruction: newStep.instruction,
+                    }
+                    if (newStep.duration_minutes) {
+                        newStepObj.duration_minutes = newStep.duration_minutes
+                    }
+                    return newStepObj
+                })()
             ]
         })
 

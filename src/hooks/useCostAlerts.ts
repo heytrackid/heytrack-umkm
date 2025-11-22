@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react'
 
 import { createClientLogger } from '@/lib/client-logger'
 import { useToast } from '@/hooks/use-toast'
+import { fetchApi } from '@/lib/query/query-helpers'
 import type { CostChangeAlert, RecipeCostImpact } from '@/types/recipes/cost'
 
 const logger = createClientLogger('CostAlerts')
@@ -23,16 +24,8 @@ export function useCostChangeAlerts() {
     queryKey: ['cost-change-alerts'],
     queryFn: async (): Promise<CostChangeAlert[]> => {
       try {
-        const response = await fetch('/api/ingredients/cost-alerts', {
-          credentials: 'include',
-        })
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch cost alerts')
-        }
-
-        const data = await response.json()
-        return (data.alerts as CostChangeAlert[]) || []
+        const data = await fetchApi<{ alerts: CostChangeAlert[] }>('/api/ingredients/cost-alerts')
+        return data.alerts || []
       } catch (error) {
         logger.error({ error }, 'Failed to fetch cost change alerts')
         return []
@@ -96,16 +89,7 @@ export function useRecipeCostImpact(recipeId: string | null) {
       if (!recipeId) return null
 
       try {
-        const response = await fetch(`/api/recipes/${recipeId}/cost-impact`, {
-          credentials: 'include',
-        })
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch recipe cost impact')
-        }
-
-        const data = await response.json()
-        return data as RecipeCostImpact
+        return await fetchApi<RecipeCostImpact>(`/api/recipes/${recipeId}/cost-impact`)
       } catch (error) {
         logger.error({ error, recipeId }, 'Failed to fetch recipe cost impact')
         return null

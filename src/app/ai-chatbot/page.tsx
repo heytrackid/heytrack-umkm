@@ -151,6 +151,7 @@ const AIChatbotPage = (): JSX.Element => {
               isLoading={isLoading}
               scrollAreaRef={scrollAreaRef}
               onSuggestionClick={handleSuggestionClick}
+              onFeedbackSubmit={() => {}}
             />
           </Suspense>
         </div>

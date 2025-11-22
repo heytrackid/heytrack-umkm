@@ -1,21 +1,14 @@
 export const runtime = 'nodejs'
-
-import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
-import { createClient } from '@/utils/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
 
-async function getHandler(_request: NextRequest): Promise<NextResponse> {
+import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import type { NextResponse } from 'next/server'
+
+async function getHandler(context: RouteContext): Promise<NextResponse> {
+  const { user, supabase } = context
+
   try {
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
-
-    const supabase = await createClient()
-
     const { data: ingredients, error } = await supabase
       .from('ingredients')
       .select('name, category, unit, price_per_unit, current_stock, reorder_point, supplier')
@@ -25,7 +18,7 @@ async function getHandler(_request: NextRequest): Promise<NextResponse> {
     if (error) throw error
 
     // Return as JSON for client-side CSV conversion
-    return NextResponse.json({
+    return createSuccessResponse({
       data: ingredients || [],
       meta: {
         total: (ingredients || []).length,
@@ -37,4 +30,10 @@ async function getHandler(_request: NextRequest): Promise<NextResponse> {
   }
 }
 
-export const GET = createSecureHandler(getHandler, 'GET /api/export/ingredients', SecurityPresets.enhanced())
+export const GET = createApiRoute(
+  {
+    method: 'GET',
+    path: '/api/export/ingredients',
+  },
+  getHandler
+)

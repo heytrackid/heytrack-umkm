@@ -1,14 +1,15 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
 import { NextResponse, type NextRequest } from 'next/server'
 
 import { z } from 'zod'
 
-import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger, logError } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { APISecurity, InputSanitizer, createSecureHandler, SecurityPresets } from '@/utils/security/index'
+import { createSuccessResponse } from '@/lib/api-core/responses'
 
 
 const OrderItemSchema = z.object({
@@ -81,7 +82,7 @@ async function calculatePricePOST(request: NextRequest): Promise<NextResponse> {
       total: pricing.total_amount
     }, 'Order price calculated')
 
-    return NextResponse.json(pricing)
+    return createSuccessResponse(pricing)
   } catch (error) {
     logError(apiLogger, error, 'Failed to calculate order price')
     return handleAPIError(error, 'POST /api/orders/calculate-price')

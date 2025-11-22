@@ -1,7 +1,7 @@
 'use client'
 
 import { Loader2 } from '@/components/icons'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -23,18 +23,6 @@ import type { Row, Insert } from '@/types/database'
 
 
 type OperationalCost = Row<'operational_costs'>
-
-interface ApiErrorPayload {
-    error?: string
-}
-
-const isApiErrorPayload = (value: unknown): value is ApiErrorPayload => {
-    if (typeof value !== 'object' || value === null) {
-        return false
-    }
-    const { error } = value as { error?: unknown }
-    return error === undefined || typeof error === 'string'
-}
 
 interface OperationalCostFormDialogProps {
     open: boolean
@@ -93,13 +81,10 @@ export const OperationalCostFormDialog = ({
         try {
             if (cost) {
                 // Update existing cost
-                await updateMutation.mutateAsync({
-                    id: cost.id,
-                    data: formData as never
-                })
+                await updateMutation.mutateAsync({ id: cost.id, data: formData })
             } else {
                 // Create new cost
-                await createMutation.mutateAsync(formData as never)
+                await createMutation.mutateAsync(formData as Insert<'operational_costs'>)
             }
 
             toast.success(`${formData.description} berhasil ${cost ? 'diperbarui' : 'ditambahkan'}`)

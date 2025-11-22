@@ -1,17 +1,15 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
-import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { ERROR_MESSAGES } from '@/lib/constants/messages'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger, logError } from '@/lib/logger'
 import { ProductionBatchService } from '@/services/production/ProductionBatchService'
-import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
-
-import { createClient } from '@/utils/supabase/server'
+import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import type { NextResponse } from 'next/server'
 
 const parseISODate = (value: unknown): string | undefined => {
   if (typeof value !== 'string') {return undefined}
@@ -27,27 +25,20 @@ const CreateBatchSchema = z.object({
 }).strict()
 
 // GET /api/production/suggestions - Get suggested production batches
-async function getHandler(request: NextRequest): Promise<NextResponse> {
+async function getHandler(context: RouteContext): Promise<NextResponse> {
+  const { user, request } = context
+
   try {
     apiLogger.info({ url: request.url }, 'GET /api/production/suggestions - Request received')
-    
-    // Authenticate with Stack Auth
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const _user = authResult
 
-    const _client = await createClient()
-
-    const suggestions = await ProductionBatchService.getSuggestedBatches(_user.id)
+    const suggestions = await ProductionBatchService.getSuggestedBatches(user.id)
 
     apiLogger.info({
-      userId: _user.id,
+      userId: user.id,
       suggestionsCount: suggestions.length
     }, 'GET /api/production/suggestions - Success')
 
-    return NextResponse.json({
+    return createSuccessResponse({
       data: suggestions,
       meta: {
         total: suggestions.length,
@@ -65,24 +56,21 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
 }
 
 // POST /api/production/suggestions - Create batch from suggestion
-async function postHandler(request: NextRequest): Promise<NextResponse> {
+async function postHandler(context: RouteContext, _query?: never, body?: z.infer<typeof CreateBatchSchema>): Promise<NextResponse> {
+  const { user, request } = context
+
   try {
     apiLogger.info({ url: request.url }, 'POST /api/production/suggestions - Request received')
-    
-    // Authenticate with Stack Auth
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
+
+    if (!body) {
+      return handleAPIError(new Error('Request body is required'), 'API Route')
     }
-    const _user = authResult
 
-    const _client = await createClient()
-
-    const { order_ids, planned_date } = CreateBatchSchema.parse(await request.json())
+    const { order_ids, planned_date } = body
 
     const result = await ProductionBatchService.createBatchFromOrders(
       order_ids,
-      _user.id,
+      user.id,
       planned_date
     )
 
@@ -93,17 +81,16 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
       })
     }
 
-    apiLogger.info({ 
-      userId: _user['id'],
+    apiLogger.info({
+      userId: user.id,
       batchId: result.batch_id,
       orderCount: order_ids.length
     }, 'POST /api/production/suggestions - Batch created')
 
-    return NextResponse.json({
-      success: true,
+    return createSuccessResponse({
       batch_id: result.batch_id,
       message: result.message
-    }, { status: 201 })
+    }, 'Batch created successfully', undefined, 201)
   } catch (error) {
     logError(apiLogger, error, 'POST /api/production/suggestions - Unexpected error', {
       url: request.url,
@@ -112,5 +99,16 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-export const GET = createSecureHandler(getHandler, 'GET /api/production/suggestions', SecurityPresets.enhanced())
-export const POST = createSecureHandler(postHandler, 'POST /api/production/suggestions', SecurityPresets.enhanced())
+export const GET = createApiRoute(
+  { method: 'GET', path: '/api/production/suggestions' },
+  getHandler
+)
+
+export const POST = createApiRoute(
+  {
+    method: 'POST',
+    path: '/api/production/suggestions',
+    bodySchema: CreateBatchSchema
+  },
+  postHandler
+)

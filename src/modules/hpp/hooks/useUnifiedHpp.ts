@@ -244,7 +244,7 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
               ri.ingredients?.weighted_average_cost ??
               ri.ingredients?.price_per_unit ??
               0,
-            category: ri.ingredients?.category ?? undefined
+            category: ri.ingredients?.category ?? 'Unknown'
           })),
         operational_costs: operationalCost,
         labor_costs: laborCost,

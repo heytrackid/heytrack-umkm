@@ -1,9 +1,9 @@
 'use client'
 
-import { useMemo } from 'react'
-
 import { useDebounce } from '@/hooks/useDebounce'
-import { useSupabaseQuery } from '@/hooks/index'
+import { useQuery } from '@tanstack/react-query'
+import { useMemo } from 'react'
+import { fetchApi } from '@/lib/query/query-helpers'
 
 interface UseHPPAlertsOptions {
   unreadOnly?: boolean
@@ -11,19 +11,23 @@ interface UseHPPAlertsOptions {
 
 export function useHPPAlerts(options: UseHPPAlertsOptions = {}) {
   const { unreadOnly = false } = options
-  const { data, loading, error, refetch } = useSupabaseQuery('hpp_alerts', {
-    orderBy: { column: 'created_at', ascending: false },
-    filter: unreadOnly ? { is_read: false } : undefined,
-    realtime: true
+  
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['hpp-alerts', { unreadOnly }],
+    queryFn: () => {
+      const params = new URLSearchParams()
+      if (unreadOnly) params.append('unread_only', 'true')
+      return fetchApi(`/api/hpp/alerts?${params}`)
+    },
   })
 
   const rawAlerts = useMemo(() => data ?? [], [data])
-  const alerts = useDebounce(rawAlerts, 500) // Debounce updates to prevent too frequent re-renders
+  const alerts = useDebounce(rawAlerts, 500)
 
   return {
     alerts,
     data: alerts,
-    loading,
+    loading: isLoading,
     error,
     refresh: refetch
   }

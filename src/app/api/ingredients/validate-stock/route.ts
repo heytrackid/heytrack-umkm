@@ -1,8 +1,8 @@
 export const runtime = 'nodejs'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { isLowStock, validateStockAvailability } from '@/lib/business-rules/inventory'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { NextRequest, NextResponse } from 'next/server'

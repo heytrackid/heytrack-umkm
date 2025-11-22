@@ -35,7 +35,7 @@ export function createAppError(code: string, message: string, details?: Record<s
   return {
     code,
     message,
-    details,
+    ...(details && { details }),
     timestamp: new Date()
   }
 }
@@ -45,7 +45,7 @@ export function createValidationError(field: string, message: string): Validatio
 }
 
 export function createAPIError(status: number, message: string, details?: Record<string, unknown>): APIError {
-  return { status, message, details }
+  return { status, message, ...(details && { details }) }
 }
 
 // Error handling hooks

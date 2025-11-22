@@ -1,338 +1,137 @@
-'use client'
-
-import { usePathname } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
-
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import { toast } from 'sonner'
 import { createClientLogger } from '@/lib/client-logger'
-import { getErrorMessage } from '@/lib/type-guards';
+import { fetchApi, postApi } from '@/lib/query/query-helpers'
 
-import type { ChatMessage, ChatSuggestion, SessionListItem } from '@/types/features/chat';
+const logger = createClientLogger('useContextAwareChat')
 
-const logger = createClientLogger('Hook');
-
-/**
- * React Hook for Context-Aware AI Chat with Session Persistence
- */
-
-
-interface UseContextAwareChatReturn {
-  messages: ChatMessage[];
-  isLoading: boolean;
-  error: string | null;
-  sessionId: string | null;
-  sessions: SessionListItem[];
-  suggestions: ChatSuggestion[];
-  sendMessage: (message: string) => Promise<void>;
-  loadSession: (sessionId: string) => Promise<void>;
-  createNewSession: () => Promise<void>;
-  deleteSession: (sessionId: string) => Promise<void>;
-  clearError: () => void;
+interface ChatMessage {
+  id: string
+  role: 'assistant' | 'user'
+  content: string
+  timestamp: Date
 }
 
-export function useContextAwareChat(): UseContextAwareChatReturn {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [sessions, setSessions] = useState<SessionListItem[]>([]);
-  const [suggestions, setSuggestions] = useState<ChatSuggestion[]>([]);
-  const pathname = usePathname();
+interface ChatSession {
+  id: string
+  title: string
+  created_at: string
+  updated_at: string
+  message_count: number
+}
 
-  // Load sessions on mount
-  useEffect(() => {
-    const abortController = new AbortController();
-    
-    const fetchSessions = async (): Promise<void> => {
+interface ChatSuggestion {
+  text: string
+  action: string
+}
+
+interface ChatApiResponse {
+  session_id?: string
+  id?: string
+  message?: string
+  role?: string
+  timestamp?: string
+  [key: string]: unknown // For dynamic metadata
+}
+
+/**
+ * Hook for context-aware AI chat with session management
+ */
+export function useContextAwareChat() {
+  const queryClient = useQueryClient()
+  const [sessionId, setSessionId] = useState<string | null>(null)
+
+
+  const [error, setError] = useState<string | null>(null)
+
+  // Fetch chat sessions
+  const { data: sessions = [] } = useQuery<ChatSession[]>({
+    queryKey: ['chat-sessions'],
+    queryFn: async () => {
       try {
-        const response = await fetch('/api/ai/sessions', {
-          credentials: 'include',
-          signal: abortController.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to load sessions');
-        }
-
-        const _data = await response.json() as { sessions?: SessionListItem[] };
-        setSessions(_data.sessions ?? []);
-      } catch (error: unknown) {
-        if (error instanceof Error && error.name === 'AbortError') {
-          return; // Request was aborted, ignore
-        }
-        const message = getErrorMessage(error);
-        logger.error({ error: message }, 'Failed to load sessions');
-      }
-    };
-
-    void fetchSessions();
-
-    return () => {
-      abortController.abort();
-    };
-  }, []);
-
-  // Load suggestions when page changes
-  useEffect(() => {
-    const abortController = new AbortController();
-    
-    const fetchSuggestions = async (): Promise<void> => {
-      try {
-        const response = await fetch(
-          `/api/ai/suggestions?page=${encodeURIComponent(pathname)}`,
-          {
-            credentials: 'include',
-            signal: abortController.signal,
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to load suggestions');
-        }
-
-        const _data = await response.json() as { suggestions?: ChatSuggestion[] };
-        setSuggestions(_data.suggestions ?? []);
-      } catch (error: unknown) {
-        if (error instanceof Error && error.name === 'AbortError') {
-          return; // Request was aborted, ignore
-        }
-        const message = getErrorMessage(error);
-        logger.error({ error: message }, 'Failed to load suggestions');
-      }
-    };
-
-    void fetchSuggestions();
-
-    return () => {
-      abortController.abort();
-    };
-  }, [pathname]);
-
-  const loadSessions = useCallback(async () => {
-    try {
-      const response = await fetch('/api/ai/sessions', {
-        credentials: 'include', // Include cookies for authentication
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to load sessions');
-      }
-
-       const _data = await response.json() as { sessions?: SessionListItem[] };
-       setSessions(_data.sessions ?? []);
-    } catch (error: unknown) {
-      const message = getErrorMessage(error)
-      logger.error({ error: message }, 'Failed to load sessions');
-    }
-  }, []);
-
-  const loadSuggestions = useCallback(async () => {
-    try {
-      const response = await fetch(
-        `/api/ai/suggestions?page=${encodeURIComponent(pathname)}`,
-        {
-          credentials: 'include', // Include cookies for authentication
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to load suggestions');
-      }
-
-       const _data = await response.json() as { suggestions?: ChatSuggestion[] };
-       setSuggestions(_data.suggestions ?? []);
-    } catch (error: unknown) {
-      const message = getErrorMessage(error)
-      logger.error({ error: message }, 'Failed to load suggestions');
-    }
-  }, [pathname]);
-
-  const sendMessage = useCallback(
-    async (message: string) => {
-      if (!message.trim()) {return;}
-
-      setIsLoading(true);
-      setError(null);
-
-      // Add user message optimistically
-      const userMessage: ChatMessage = {
-        id: `temp-${Date.now()}`,
-        session_id: sessionId ?? '',
-        role: 'user',
-        content: message,
-        metadata: {},
-        created_at: new Date().toISOString(),
-      };
-
-      setMessages((prev) => [...prev, userMessage]);
-
-      const abortController = new AbortController();
-      
-      // Store abort controller for potential cancellation
-      const timeoutId = setTimeout(() => {
-        abortController.abort();
-      }, 60000); // 60s timeout for AI responses
-
-      try {
-        const response = await fetch('/api/ai/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            message,
-            session_id: sessionId,
-            currentPage: pathname,
-          }),
-          credentials: 'include', // Include cookies for authentication
-          signal: abortController.signal,
-        });
-
-        clearTimeout(timeoutId);
-
-         if (!response.ok) {
-           const errorData = await response.json() as { message?: string };
-           throw new Error(errorData.message ?? 'Failed to send message');
-         }
-
-        const _data = await response.json() as { session_id?: string; message: string; metadata?: Record<string, unknown>; suggestions?: ChatSuggestion[] };
-
-        // Update session ID if new
-        if (_data.session_id !== null && _data.session_id !== sessionId) {
-          setSessionId(_data.session_id as string);
-        }
-
-        // Add AI response
-        const aiMessage: ChatMessage = {
-          id: `ai-${Date.now()}`,
-          session_id: _data.session_id ?? '',
-          role: 'assistant',
-          content: _data.message,
-          metadata: _data.metadata ?? {},
-          created_at: new Date().toISOString(),
-        };
-
-        setMessages((prev) => [...prev, aiMessage]);
-
-        // Update suggestions
-        if (_data.suggestions) {
-          setSuggestions(_data.suggestions);
-        }
-
-        // Reload sessions to update list (without triggering re-render loop)
-        try {
-          const sessionsResponse = await fetch('/api/ai/sessions', {
-            credentials: 'include', // Include cookies for authentication
-          });
-          if (sessionsResponse.ok) {
-            const sessionsData = await sessionsResponse.json() as { sessions?: SessionListItem[] };
-            setSessions(sessionsData.sessions ?? []);
-          }
-        } catch (error: unknown) {
-          const message = getErrorMessage(error)
-          logger.error({ error: message }, 'Failed to reload sessions');
-        }
-      } catch (error: unknown) {
-        const errorMessage = getErrorMessage(error) || 'Terjadi kesalahan';
-        setError(errorMessage);
-        logger.error({ error: errorMessage }, 'Failed to send message');
-
-        // Remove optimistic user message on error
-        setMessages((prev) => prev.filter((m) => m['id'] !== userMessage['id']));
-      } finally {
-        setIsLoading(false);
+        return await fetchApi<ChatSession[]>('/api/ai/sessions')
+      } catch (error) {
+        logger.warn('Failed to fetch chat sessions')
+        return []
       }
     },
-    [sessionId, pathname]
-  );
+    staleTime: 60000,
+  })
 
-  const loadSession = useCallback(async (newSessionId: string) => {
-    setIsLoading(true);
-    setError(null);
+  // Fetch messages for current session
+  const { data: sessionMessages = [], isLoading: isLoadingMessages } = useQuery<ChatMessage[]>({
+    queryKey: ['chat-messages', sessionId],
+    queryFn: async () => {
+      if (!sessionId) return []
 
-    try {
-      const response = await fetch(`/api/ai/sessions/${newSessionId}`, {
-        credentials: 'include', // Include cookies for authentication
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to load session');
-      }
-
-       const _data = await response.json() as { messages?: ChatMessage[] };
-       setSessionId(newSessionId);
-       setMessages(_data.messages ?? []);
-    } catch (error: unknown) {
-      const errorMessage = getErrorMessage(error) || 'Failed to load session';
-      setError(errorMessage);
-      logger.error({ error: errorMessage }, 'Failed to load session');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const createNewSession = useCallback(() => {
-    setSessionId(null);
-    setMessages([]);
-    setError(null);
-    return Promise.resolve();
-  }, []);
-
-  const deleteSession = useCallback(
-    async (sessionIdToDelete: string) => {
       try {
-        const response = await fetch(`/api/ai/sessions/${sessionIdToDelete}`, {
-          method: 'DELETE',
-          credentials: 'include', // Include cookies for authentication
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to delete session');
-        }
-
-        // If deleted session is current, create new session
-        if (sessionIdToDelete === sessionId) {
-          setSessionId(null);
-          setMessages([]);
-          setError(null);
-        }
-
-        // Reload sessions inline to avoid dependency loop
-        try {
-          const sessionsResponse = await fetch('/api/ai/sessions', {
-            credentials: 'include', // Include cookies for authentication
-          });
-          if (sessionsResponse.ok) {
-            const sessionsData = await sessionsResponse.json() as { sessions?: SessionListItem[] };
-            setSessions(sessionsData.sessions ?? []);
-          }
-        } catch (error: unknown) {
-          const message = getErrorMessage(error)
-          logger.error({ error: message }, 'Failed to reload sessions');
-        }
-      } catch (error: unknown) {
-        const message = getErrorMessage(error)
-        logger.error({ error: message }, 'Failed to delete session');
-        throw error;
+        const data = await fetchApi<ChatMessage[]>(`/api/ai/sessions/${sessionId}/messages`)
+        return data.map((msg: ChatMessage) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        }))
+      } catch (error) {
+        logger.error({ error }, 'Failed to fetch messages')
+        return []
       }
     },
-    [sessionId]
-  );
+    enabled: !!sessionId,
+    staleTime: 30000,
+  })
 
-  const clearError = useCallback(() => {
-    setError(null);
-  }, []);
+  // Send message mutation
+  const sendMutation = useMutation({
+    mutationFn: (data: { message: string; sessionId?: string | null }) => postApi<ChatApiResponse>('/api/ai/chat', {
+      message: data.message,
+      session_id: data.sessionId,
+      currentPage: 'chatbot'
+    }),
+    onSuccess: (result: ChatApiResponse) => {
+      if (result.session_id && result.session_id !== sessionId) {
+        setSessionId(result.session_id)
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['chat-messages', sessionId] })
+      queryClient.invalidateQueries({ queryKey: ['chat-sessions'] })
+
+      logger.info('Message sent successfully')
+    },
+    onError: (error: Error) => {
+      setError(error.message)
+      toast.error(error.message)
+      logger.error({ error }, 'Failed to send message')
+    },
+  })
+
+  // Create new session mutation
+  const createSessionMutation = useMutation({
+    mutationFn: () => postApi<ChatApiResponse>('/api/ai/sessions', { title: 'New Chat' }),
+    onSuccess: (result: ChatApiResponse) => {
+      if (result.id) {
+        setSessionId(result.id)
+        queryClient.invalidateQueries({ queryKey: ['chat-sessions'] })
+        logger.info('New session created')
+      }
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
+      logger.error({ error }, 'Failed to create session')
+    },
+  })
 
   return {
-    messages,
-    isLoading,
+    messages: sessionMessages,
+    isLoading: sendMutation.isPending || isLoadingMessages,
     error,
     sessionId,
     sessions,
-    suggestions,
-    sendMessage,
-    loadSession,
-    createNewSession,
-    deleteSession,
-    clearError,
-  };
+    suggestions: [] as ChatSuggestion[], // TODO: Implement suggestions
+    sendMessage: (message: string) => sendMutation.mutate({ message, sessionId }),
+    loadSession: (id: string) => {
+      setSessionId(id)
+    },
+    createNewSession: () => createSessionMutation.mutate(),
+    clearError: () => setError(null),
+  }
 }

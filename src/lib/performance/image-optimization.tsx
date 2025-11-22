@@ -44,10 +44,10 @@ export const OptimizedImage = ({
             <Image
                 src={src}
                 alt={alt}
-                width={width}
-                height={height}
+                {...(width !== undefined && { width })}
+                {...(height !== undefined && { height })}
                 fill={fill}
-                sizes={sizes}
+                {...(sizes && { sizes })}
                 quality={quality}
                 priority={priority}
                 className={cn(

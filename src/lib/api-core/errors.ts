@@ -13,12 +13,15 @@ import type { APIError } from '@/lib/api-core/types'
  */
 export function handleAPIError(error: unknown): APIError {
   if (error instanceof Error) {
-    return {
+    const result: APIError = {
       message: error.message,
       statusCode: 500,
       code: 'INTERNAL_ERROR',
-      details: error.stack as Record<string, unknown> | undefined
     }
+    if (error.stack) {
+      result.details = { stack: error.stack }
+    }
+    return result
   }
 
   if (typeof error === 'string') {
@@ -44,12 +47,15 @@ export function handleAPIError(error: unknown): APIError {
     }
   }
 
-  return {
+  const result: APIError = {
     message: 'An unexpected error occurred',
     statusCode: 500,
     code: 'UNKNOWN_ERROR',
-    details: error as Record<string, unknown> | undefined
   }
+  if (error) {
+    result.details = error as Record<string, unknown>
+  }
+  return result
 }
 
 /**

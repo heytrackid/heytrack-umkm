@@ -39,6 +39,13 @@ export const MobileSelect = ({
 }: MobileSelectProps) => {
   const { isMobile } = useResponsive()
 
+  const selectProps: any = {}
+  if (value !== undefined) selectProps.value = value
+  if (defaultValue !== undefined) selectProps.defaultValue = defaultValue
+  if (onChange !== undefined) selectProps.onValueChange = onChange
+  if (disabled !== undefined) selectProps.disabled = disabled
+  if (required !== undefined) selectProps.required = required
+
   return (
     <div className={cn("space-y-2", className)}>
       {label && (
@@ -54,13 +61,9 @@ export const MobileSelect = ({
         </Label>
       )}
 
-      <Select
-        value={value}
-        defaultValue={defaultValue}
-        onValueChange={onChange}
-        disabled={disabled}
-        required={required}
-      >
+    <Select
+      {...selectProps}
+    >
         <SelectTrigger
           className={cn(
             "transition-all duration-200",

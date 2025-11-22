@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useRecipes } from '@/hooks/useRecipes'
+import { usePricingAssistant, type PricingRecommendation } from '@/hooks/api/useHpp'
 import { dbLogger } from '@/lib/logger'
 import { toast } from 'sonner'
 
@@ -24,34 +25,15 @@ const pricingBreadcrumbs = [
   { label: 'AI Pricing Assistant' }
 ]
 
-interface PricingRecommendation {
-  recipeId: string
-  currentPrice: number
-  recommendedPrice: number
-  hppValue: number
-  minPrice: number
-  maxPrice: number
-  optimalMargin: number
-  reasoning: string[]
-  confidence: number
-  marketFactors: {
-    competitorPrices: number[]
-    demandLevel: 'high' | 'low' | 'medium'
-    seasonality: 'low' | 'normal' | 'peak'
-    category: string
-  }
-  riskAssessment: {
-    riskLevel: 'high' | 'low' | 'medium'
-    riskFactors: string[]
-  }
-}
+
 
 const PricingAssistantPage = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const { data: recipes = [], isLoading: recipesLoading, error: recipesError, refetch: refetchRecipes } = useRecipes({ limit: 1000 })
   const [selectedRecipe, setSelectedRecipe] = useState<string>('')
   const [recommendation, setRecommendation] = useState<PricingRecommendation | null>(null)
-  const [analyzing, setAnalyzing] = useState(false)
+
+  const pricingAssistantMutation = usePricingAssistant()
 
   // Generate pricing recommendation
   const generateRecommendation = async () => {
@@ -61,29 +43,12 @@ const PricingAssistantPage = (): JSX.Element => {
     }
 
     try {
-      setAnalyzing(true)
-      const response = await fetch('/api/hpp/pricing-assistant', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ recipeId: selectedRecipe }),
-        credentials: 'include', // Include cookies for authentication
-      })
-
-      if (response.ok) {
-        const data = await response.json() as { recommendation?: PricingRecommendation }
-        setRecommendation(data.recommendation ?? null)
-
-        toast.success('Pricing recommendation generated successfully')
-      } else {
-        throw new Error('Failed to generate recommendation')
-      }
+      const result = await pricingAssistantMutation.mutateAsync(selectedRecipe)
+      setRecommendation(result)
+      toast.success('Pricing recommendation generated successfully')
     } catch (_error) {
       dbLogger.error({ _error }, 'Failed to generate pricing recommendation')
       toast.error('Failed to generate pricing recommendation')
-    } finally {
-      setAnalyzing(false)
     }
   }
 
@@ -195,10 +160,10 @@ const PricingAssistantPage = (): JSX.Element => {
 
             <Button
               onClick={generateRecommendation}
-              disabled={analyzing || recipesLoading || !selectedRecipe}
+              disabled={pricingAssistantMutation.isPending || recipesLoading || !selectedRecipe}
               className="w-full md:w-auto"
             >
-              {analyzing ? 'Menganalisis...' : 'Generate Recommendation'}
+              {pricingAssistantMutation.isPending ? 'Menganalisis...' : 'Generate Recommendation'}
             </Button>
           </CardContent>
         </Card>

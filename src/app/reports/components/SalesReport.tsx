@@ -2,9 +2,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
-import { uiLogger } from '@/lib/client-logger'
+
 import { CheckCircle, Clock, DollarSign, ShoppingCart } from '@/components/icons'
-import { useEffect, useState } from 'react'
+import { useSalesStats } from '@/hooks/api/useReports'
 
 interface SalesReportProps {
   dateRange?: {
@@ -13,107 +13,23 @@ interface SalesReportProps {
   }
 }
 
-interface SalesStats {
-  totalOrders: number
-  totalRevenue: number
-  completedOrders: number
-  pendingOrders: number
-}
 
-interface OrderSummary {
-  total_amount?: number | null
-  status?: string | null
-}
 
 export const SalesReport = ({ dateRange }: SalesReportProps = {}) => {
-  const [salesStats, setSalesStats] = useState<SalesStats>({
-    totalOrders: 0,
-    totalRevenue: 0,
-    completedOrders: 0,
-    pendingOrders: 0
-  })
-  const [isLoading, setIsLoading] = useState(true)
-  const [previousStats, setPreviousStats] = useState({
-    totalOrders: 0,
-    totalRevenue: 0
-  })
-
-  useEffect(() => {
-    const fetchSalesData = async () => {
-      setIsLoading(true)
-
-      try {
-        const buildParams = () => {
-          const params = new URLSearchParams()
-          params.set('limit', '500')
-          params.set('page', '1')
-          params.set('sort_order', 'desc')
-          return params
-        }
-
-        const parseOrders = (payload: unknown): OrderSummary[] => {
-          if (!payload || typeof payload !== 'object' || !('data' in payload)) {
-            return []
-          }
-          const data = (payload as { data?: unknown }).data
-          if (!Array.isArray(data)) {
-            return []
-          }
-          return data as OrderSummary[]
-        }
-
-        const toNumber = (value: unknown): number => {
-          if (typeof value === 'number' && Number.isFinite(value)) {
-            return value
-          }
-          const parsed = Number(value)
-          return Number.isFinite(parsed) ? parsed : 0
-        }
-
-        const response = await fetch(`/api/orders?${buildParams().toString()}`)
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch sales data')
-        }
-
-        const currentOrders = parseOrders(await response.json())
-
-        const currentTotals = currentOrders.reduce(
-          (acc, order) => {
-            const status = (order.status ?? '').toString().toUpperCase()
-            acc.totalRevenue += toNumber(order.total_amount)
-            acc.totalOrders += 1
-            if (status === 'DELIVERED') {
-              acc.completedOrders += 1
-            } else if (status !== 'CANCELLED') {
-              acc.pendingOrders += 1
-            }
-            return acc
-          },
-          { totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 }
-        )
-
-        setSalesStats(currentTotals)
-        // Since date filtering is removed, no previous period comparison
-        setPreviousStats({ totalOrders: 0, totalRevenue: 0 })
-      } catch (error) {
-        uiLogger.error({ error }, 'Failed to fetch sales data')
-        setSalesStats({ totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 })
-        setPreviousStats({ totalOrders: 0, totalRevenue: 0 })
-      } finally {
-        setIsLoading(false)
+  const { data: salesStats, isLoading } = useSalesStats(
+    dateRange && (dateRange.start || dateRange.end) ? {
+      dateRange: {
+        ...(dateRange.start && { start: dateRange.start }),
+        ...(dateRange.end && { end: dateRange.end })
       }
-    }
+    } : {}
+  )
 
-    void fetchSalesData()
-  }, [])
+  const safeSalesStats = salesStats ?? { totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 }
 
-  const revenueGrowth = previousStats.totalRevenue > 0
-    ? Math.round(((salesStats.totalRevenue - previousStats.totalRevenue) / previousStats.totalRevenue) * 100)
-    : 0
-  const orderGrowth = previousStats.totalOrders > 0
-    ? Math.round(((salesStats.totalOrders - previousStats.totalOrders) / previousStats.totalOrders) * 100)
-    : 0
+  // Simplified growth calculations (no previous period comparison for now)
+  const revenueGrowth = 0
+  const orderGrowth = 0
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -143,7 +59,7 @@ export const SalesReport = ({ dateRange }: SalesReportProps = {}) => {
     )
   }
 
-  if (salesStats.totalOrders === 0) {
+  if (safeSalesStats.totalOrders === 0) {
     return (
       <EmptyState
         {...EmptyStatePresets.reports}
@@ -170,7 +86,7 @@ export const SalesReport = ({ dateRange }: SalesReportProps = {}) => {
             <ShoppingCart className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{salesStats.totalOrders}</div>
+            <div className="text-2xl font-bold">{safeSalesStats.totalOrders}</div>
             <p className="text-xs text-muted-foreground">+{orderGrowth}% dari periode sebelumnya</p>
           </CardContent>
         </Card>
@@ -182,7 +98,7 @@ export const SalesReport = ({ dateRange }: SalesReportProps = {}) => {
             <DollarSign className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(salesStats.totalRevenue)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(safeSalesStats.totalRevenue)}</div>
             <p className="text-xs text-muted-foreground">+{revenueGrowth}% dari periode sebelumnya</p>
           </CardContent>
         </Card>
@@ -194,7 +110,7 @@ export const SalesReport = ({ dateRange }: SalesReportProps = {}) => {
             <CheckCircle className="h-5 w-5 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{salesStats.completedOrders}</div>
+            <div className="text-2xl font-bold text-green-600">{safeSalesStats.completedOrders}</div>
             <p className="text-xs text-muted-foreground">Diterima pelanggan</p>
           </CardContent>
         </Card>
@@ -206,7 +122,7 @@ export const SalesReport = ({ dateRange }: SalesReportProps = {}) => {
             <Clock className="h-5 w-5 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{salesStats.pendingOrders}</div>
+            <div className="text-2xl font-bold text-orange-600">{safeSalesStats.pendingOrders}</div>
             <p className="text-xs text-muted-foreground">Perlu ditindaklanjuti</p>
           </CardContent>
         </Card>
@@ -218,7 +134,7 @@ export const SalesReport = ({ dateRange }: SalesReportProps = {}) => {
           <CardTitle className="flex items-center gap-2">
             Detail Penjualan
             <span className="text-sm text-muted-foreground">
-              ({salesStats.totalOrders} transaksi dalam periode ini)
+              ({safeSalesStats.totalOrders} transaksi dalam periode ini)
             </span>
           </CardTitle>
         </CardHeader>

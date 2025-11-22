@@ -1,31 +1,20 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
-import { NextResponse } from 'next/server'
-
-import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
-import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
+import type { NextResponse } from 'next/server'
 
-import { createClient } from '@/utils/supabase/server'
-async function postHandler(): Promise<NextResponse> {
+async function postHandler(context: RouteContext): Promise<NextResponse> {
+  const { user, supabase } = context
+
   try {
-    const supabase = await createClient()
-
     apiLogger.info('Marking all HPP alerts as read')
 
-    // Authenticate with Stack Auth
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
-
     // Update all unread alerts for the current user
-
     const { data, error } = await supabase
       .from('hpp_alerts')
       .update({
@@ -34,7 +23,7 @@ async function postHandler(): Promise<NextResponse> {
         updated_at: new Date().toISOString()
       } as never)
       .eq('is_read', false)
-      .eq('user_id', user['id'])
+      .eq('user_id', user.id)
       .select()
 
     if (error) {
@@ -52,4 +41,7 @@ async function postHandler(): Promise<NextResponse> {
   }
 }
 
-export const POST = createSecureHandler(postHandler, 'POST /api/hpp/alerts/bulk-read', SecurityPresets.enhanced())
+export const POST = createApiRoute(
+  { method: 'POST', path: '/api/hpp/alerts/bulk-read' },
+  postHandler
+)

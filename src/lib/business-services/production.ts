@@ -62,9 +62,7 @@ export class ProductionServices {
         notes: batch.notes ?? `Production batch for ${recipe.name}`
       }
 
-      // Save to production_batches table
-      const { createClient: createClientForBatch } = await import('@/utils/supabase/server')
-      const batchSupabase = await createClientForBatch()
+
 
       const batchData = {
         batch_no: batchId,

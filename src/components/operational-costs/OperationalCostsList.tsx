@@ -11,12 +11,12 @@ import {
     Zap,
 } from '@/components/icons'
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState, useCallback } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { postApi } from '@/lib/query/query-helpers'
 
 import { PageHeader } from '@/components/layout/PageHeader'
-import { GridSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
+import { GridSkeleton } from '@/components/ui/skeleton-loader'
 import { DeleteModal } from '@/components/ui/index'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -67,29 +67,7 @@ type CategoryFilter =
     | 'transport'
     | 'utilities'
 
-interface QuickSetupErrorPayload {
-    error?: string
-}
 
-interface QuickSetupResultPayload {
-    count?: number
-}
-
-const isQuickSetupErrorPayload = (value: unknown): value is QuickSetupErrorPayload => {
-    if (typeof value !== 'object' || value === null) {
-        return false
-    }
-    const { error } = value as { error?: unknown }
-    return error === undefined || typeof error === 'string'
-}
-
-const isQuickSetupResultPayload = (value: unknown): value is QuickSetupResultPayload => {
-    if (typeof value !== 'object' || value === null) {
-        return false
-    }
-    const { count } = value as { count?: unknown }
-    return count === undefined || typeof count === 'number'
-}
 
 // Constants
 interface CostCategory { id: string; name: string; icon: string; description: string }
@@ -112,10 +90,9 @@ export const OperationalCostsList = () => {
     const { formatCurrency } = useSettings()
     const queryClient = useQueryClient()
 
-    // Use query hook for fetching data
-    const { data: costs, isLoading: loading, refetch } = useOperationalCosts()
-
-    // Use delete mutation
+    // Use CRUD hook for operational costs
+    const { data: costsData, isLoading: loading, refetch } = useOperationalCosts()
+    const costs = useMemo(() => costsData || [], [costsData])
     const deleteCostMutation = useDeleteOperationalCost()
 
     // ✅ Use React Query mutation for quick setup
@@ -287,7 +264,7 @@ export const OperationalCostsList = () => {
                 title="Biaya Operasional"
                 description="Kelola semua biaya operasional bisnis Anda"
                 action={
-                    <Button onClick={handleAdd} hapticFeedback>
+                     <Button onClick={handleAdd}>
                         <Plus className="h-4 w-4 mr-2" />
                         Tambah Biaya
                     </Button>

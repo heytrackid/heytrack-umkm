@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import useSWR from 'swr'
+import { useQuery } from '@tanstack/react-query'
 
 import type { ExportFormat, ProfitData, ProfitFilters } from '@/app/profit/components/types'
 
@@ -8,7 +8,7 @@ import { apiLogger } from '@/lib/logger'
 
 
 /**
- * Profit Data Hook with SWR Caching
+ * Profit Data Hook with React Query Caching
  * Custom hook for managing profit report data fetching and state with caching
  */
 
@@ -43,16 +43,15 @@ export function useProfitData() {
    }
 
     
-   const { data: profitData, error, mutate, isLoading } = useSWR<ProfitData>(
-     swrKey,
-     fetchProfitData,
-     {
-       revalidateOnFocus: false,
-       revalidateOnReconnect: true,
-       errorRetryCount: 3,
-       refreshInterval: 5 * 60 * 1000, // Refresh every 5 minutes
-     }
-   )
+    const { data: profitData, error, refetch, isLoading } = useQuery<ProfitData>({
+      queryKey: ['profit', selectedPeriod],
+      queryFn: () => fetchProfitData(swrKey),
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      refetchOnWindowFocus: false,
+      retry: 3,
+      refetchInterval: 5 * 60 * 1000, // Refresh every 5 minutes
+    })
 
   const updateFilters = (newFilters: Partial<ProfitFilters>) => {
     const sanitizedEntries = Object.entries(newFilters).filter(([, value]) => value !== undefined)
@@ -94,7 +93,7 @@ export function useProfitData() {
     profitData: profitData ?? null,
     filters,
     updateFilters,
-    refetch: () => { void mutate() },
+    refetch: () => { void refetch() },
     exportReport
   }
 }

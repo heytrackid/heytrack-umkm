@@ -38,22 +38,22 @@ export class SmartNotificationSystem {
   addNotification(notification: Omit<SmartNotification, 'id' | 'isRead' | 'timestamp' | 'type'>): void {
     const id = `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const fullNotification: SmartNotification = {
-      ...notification,
       id,
       type: 'info', // Default to info for notifications
       timestamp: new Date().toISOString(),
       isRead: false,
-      status: 'sent', // Notifications are immediately sent
-      expiresAt: this.config.defaultExpiryHours ?
-        new Date(Date.now() + this.config.defaultExpiryHours * 60 * 60 * 1000).toISOString() : undefined
-    };
-
-    this.notifications.unshift(fullNotification);
-
-    // Keep only max notifications
-    if (this.notifications.length > this.config.maxNotifications) {
-      this.notifications = this.notifications.slice(0, this.config.maxNotifications);
+      title: notification.title,
+      message: notification.message,
+      priority: notification.priority,
+      category: notification.category,
+      ...(notification.expiresAt && { expiresAt: notification.expiresAt }),
+      ...(notification.data && { data: notification.data }),
+      ...(notification.actionUrl && { actionUrl: notification.actionUrl }),
+      ...(notification.actionLabel && { actionLabel: notification.actionLabel }),
+      ...(notification.status && { status: notification.status }),
     }
+
+    this.notifications.push(fullNotification)
 
     // Notify subscribers
     this.notifySubscribers();
@@ -139,16 +139,17 @@ export class SmartNotificationSystem {
       }
 
       if (shouldTrigger) {
-        this.addNotification({
+        const notification: any = {
           category: rule.category,
           priority: rule.notification.priority,
           title: rule.notification.title,
           message: rule.notification.message,
-          actionUrl: rule.notification.actionUrl,
-          actionLabel: rule.notification.actionLabel,
           data,
           status: 'sent'
-        });
+        }
+        if (rule.notification.actionUrl) notification.actionUrl = rule.notification.actionUrl
+        if (rule.notification.actionLabel) notification.actionLabel = rule.notification.actionLabel
+        this.addNotification(notification);
       }
     }
   }

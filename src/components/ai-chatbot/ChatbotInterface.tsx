@@ -11,8 +11,8 @@ import type { ChatAction, ChatContext } from '@/lib/ai-chatbot/types';
 import { createClientLogger } from '@/lib/client-logger';
 
 import { useChatHistory } from '@/hooks/useChatHistory';
-import { useMutation } from '@tanstack/react-query';
 import { postApi } from '@/lib/query/query-helpers';
+import { useMutation } from '@tanstack/react-query';
 
 
 const logger = createClientLogger('ChatbotInterface')
@@ -114,7 +114,7 @@ export const ChatbotInterface = ({
   const chatMutation = useMutation({
     mutationFn: (data: { message: string; session_id?: string; currentPage: string }) =>
       postApi<{ message: string; suggestions?: Array<{ text: string; action: string }>; session_id?: string }>('/ai/chat', data),
-    onSuccess: (result, variables) => {
+    onSuccess: (result) => {
       if (result.message) {
         const assistantMessage: ExtendedChatMessage = {
           id: `assistant_${Date.now()}`,
@@ -129,7 +129,7 @@ export const ChatbotInterface = ({
           })
         };
 
-        setMessages(prev => [...prev, assistantMessage]);
+        setMessages((prev: ExtendedChatMessage[]) => [...prev, assistantMessage]);
         void saveMessage(assistantMessage);
 
         // Update session context
@@ -156,7 +156,7 @@ export const ChatbotInterface = ({
         content: 'Maaf, terjadi kesalahan saat menghubungi AI. Silakan coba lagi.',
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev: ExtendedChatMessage[]) => [...prev, errorMessage]);
     }
   });
 
@@ -172,7 +172,7 @@ export const ChatbotInterface = ({
           content: result.message,
           timestamp: new Date()
         };
-        setMessages(prev => [...prev, assistantMessage]);
+        setMessages((prev: ExtendedChatMessage[]) => [...prev, assistantMessage]);
         void saveMessage(assistantMessage);
       }
     },
@@ -184,7 +184,7 @@ export const ChatbotInterface = ({
         content: 'Maaf, terjadi kesalahan saat mengeksekusi aksi. Silakan coba lagi.',
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev: ExtendedChatMessage[]) => [...prev, errorMessage]);
     }
   });
 
@@ -260,16 +260,17 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
         content: messageToSend,
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, userMessage]);
+      setMessages((prev: ExtendedChatMessage[]) => [...prev, userMessage]);
       void saveMessage(userMessage);
     }
 
     // Call AI chat API with React Query mutation
-    chatMutation.mutate({
+    const params: any = {
       message: messageToSend,
-      session_id: context?.sessionId,
       currentPage: 'chatbot'
-    });
+    }
+    if (context?.sessionId) params.session_id = context.sessionId
+    chatMutation.mutate(params);
   };
 
   // Handle action button clicks via API
@@ -465,7 +466,7 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
       <CardContent className="flex-1 flex flex-col p-0 overflow-hidden min-h-0">
         <div className="flex-1 overflow-y-auto p-4 min-h-0" style={{ maxHeight: 'calc(100% - 200px)' }}>
           <div className="space-y-4">
-            {messages.map((message) => (
+            {messages.map((message: ExtendedChatMessage) => (
               <MessageBubble key={message['id']} message={message} />
             ))}
 

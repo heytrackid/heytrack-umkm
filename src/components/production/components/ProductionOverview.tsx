@@ -2,7 +2,7 @@ import { CheckCircle, Clock, Play } from '@/components/icons'
 
 import { Card, CardContent } from '@/components/ui/card'
 
-import type { ProductionBatch } from '@/services/production/BatchSchedulingService'
+import type { ProductionBatch } from '@/types/production'
 
 // Production Overview Component - Lazy Loaded
 // Displays production statistics and overview cards

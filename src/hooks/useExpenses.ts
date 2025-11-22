@@ -1,141 +1,126 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-
 import { createClientLogger } from '@/lib/client-logger'
-const logger = createClientLogger('Hook')
-import { getErrorMessage } from '@/lib/type-guards'
+import type { Insert, Row, Update } from '@/types/database'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { fetchApi, postApi, putApi, deleteApi } from '@/lib/query/query-helpers'
+import { toast } from 'sonner'
 
+const logger = createClientLogger('useExpenses')
 
-export interface Expense {
-  id: string
-  date: string
-  category: string
-  description: string
-  amount: number
-  payment_method: string
-  vendor: string
-  receipt_number: string
-  notes?: string
-  status: 'overdue' | 'paid' | 'pending'
-  recurring: boolean
-  recurring_period?: 'monthly' | 'quarterly' | 'weekly' | 'yearly'
-  created_at?: string
-  updated_at?: string
+// Note: expenses table doesn't exist in DB yet, using financial_records instead
+type Expense = Row<'financial_records'>
+type ExpenseInsert = Insert<'financial_records'>
+type ExpenseUpdate = Update<'financial_records'>
+
+interface ExpenseStats {
+  total: number
+  by_category: Record<string, number>
+  monthly_trend: Array<{
+    month: string
+    total: number
+  }>
 }
 
- 
-export function useExpenses() {
-  const [expenses, setExpenses] = useState<Expense[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+/**
+ * Get all expenses
+ */
+export function useExpenses(params?: {
+  category?: string
+  startDate?: string
+  endDate?: string
+}) {
+  const searchParams = new URLSearchParams()
+  if (params?.category) searchParams.append('category', params.category)
+  if (params?.startDate) searchParams.append('start_date', params.startDate)
+  if (params?.endDate) searchParams.append('end_date', params.endDate)
 
-  const fetchExpenses = async () => {
-    try {
-      setLoading(true)
-      const response = await fetch('/api/expenses', {
-        credentials: 'include', // Include cookies for authentication
-      })
+  return useQuery<Expense[]>({
+    queryKey: ['expenses', params],
+    queryFn: () => fetchApi<Expense[]>(`/api/expenses?${searchParams}`),
+  })
+}
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch expenses')
-      }
+/**
+ * Get single expense by ID
+ */
+export function useExpense(id: string | null) {
+  return useQuery<Expense>({
+    queryKey: ['expense', id],
+    queryFn: () => fetchApi<Expense>(`/api/expenses/${id}`),
+    enabled: !!id,
+  })
+}
 
-       const data = await response.json() as Expense[]
-       setExpenses(data)
-    } catch (error) {
-      const errorMessage = getErrorMessage(error)
-      setError(errorMessage)
-      logger.error({ error: errorMessage }, 'Error fetching expenses:')
-    } finally {
-      setLoading(false)
-    }
-  }
+/**
+ * Create new expense
+ */
+export function useCreateExpense() {
+  const queryClient = useQueryClient()
 
-  const addExpense = async (expenseData: Omit<Expense, 'created_at' | 'id' | 'updated_at'>) => {
-    try {
-      const response = await fetch('/api/expenses', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(expenseData),
-        credentials: 'include', // Include cookies for authentication
-      })
+  return useMutation({
+    mutationFn: (data: Omit<ExpenseInsert, 'user_id'>) => postApi('/api/expenses', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] })
+      queryClient.invalidateQueries({ queryKey: ['expense-stats'] })
+      toast.success('Pengeluaran berhasil dicatat')
+    },
+    onError: (error) => {
+      logger.error({ error }, 'Failed to create expense')
+      toast.error('Gagal mencatat pengeluaran')
+    },
+  })
+}
 
-      if (!response.ok) {
-        throw new Error('Failed to add expense')
-      }
+/**
+ * Update expense
+ */
+export function useUpdateExpense() {
+  const queryClient = useQueryClient()
 
-       const newExpense = await response.json() as Expense
-       setExpenses(prev => [newExpense, ...prev])
-       return newExpense
-    } catch (error) {
-      const errorMessage = getErrorMessage(error)
-      setError(errorMessage)
-      throw error
-    }
-  }
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<ExpenseUpdate> }) => putApi(`/api/expenses/${id}`, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] })
+      queryClient.invalidateQueries({ queryKey: ['expense', id] })
+      queryClient.invalidateQueries({ queryKey: ['expense-stats'] })
+      toast.success('Pengeluaran berhasil diperbarui')
+    },
+    onError: (error) => {
+      logger.error({ error }, 'Failed to update expense')
+      toast.error('Gagal memperbarui pengeluaran')
+    },
+  })
+}
 
-  const updateExpense = async (id: string, expenseData: Partial<Expense>) => {
-    try {
-      const response = await fetch(`/api/expenses/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(expenseData),
-        credentials: 'include', // Include cookies for authentication
-      })
+/**
+ * Delete expense
+ */
+export function useDeleteExpense() {
+  const queryClient = useQueryClient()
 
-      if (!response.ok) {
-        throw new Error('Failed to update expense')
-      }
+  return useMutation({
+    mutationFn: (id: string) => deleteApi(`/api/expenses/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] })
+      queryClient.invalidateQueries({ queryKey: ['expense-stats'] })
+      toast.success('Pengeluaran berhasil dihapus')
+    },
+    onError: (error) => {
+      logger.error({ error }, 'Failed to delete expense')
+      toast.error('Gagal menghapus pengeluaran')
+    },
+  })
+}
 
-       const updatedExpense = await response.json() as Expense
-       setExpenses(prev =>
-         prev.map(expense =>
-           expense['id'] === id ? updatedExpense : expense
-         )
-       )
-       return updatedExpense
-    } catch (error) {
-      const errorMessage = getErrorMessage(error)
-      setError(errorMessage)
-      throw error
-    }
-  }
+/**
+ * Get expense statistics
+ */
+export function useExpenseStats(params?: { startDate?: string; endDate?: string }) {
+  const searchParams = new URLSearchParams()
+  if (params?.startDate) searchParams.append('start_date', params.startDate)
+  if (params?.endDate) searchParams.append('end_date', params.endDate)
 
-  const deleteExpense = async (id: string) => {
-    try {
-      const response = await fetch(`/api/expenses/${id}`, {
-        method: 'DELETE',
-        credentials: 'include', // Include cookies for authentication
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to delete expense')
-      }
-
-      setExpenses(prev => prev.filter(expense => expense['id'] !== id))
-    } catch (error) {
-      const errorMessage = getErrorMessage(error)
-      setError(errorMessage)
-      throw error
-    }
-  }
-
-  useEffect(() => {
-    void fetchExpenses()
-  }, [])
-
-  return {
-    expenses,
-    loading,
-    error,
-    addExpense,
-    updateExpense,
-    deleteExpense,
-    refetch: fetchExpenses
-  }
+  return useQuery<ExpenseStats>({
+    queryKey: ['expense-stats', params],
+    queryFn: () => fetchApi<ExpenseStats>(`/api/expenses/stats?${searchParams}`),
+  })
 }

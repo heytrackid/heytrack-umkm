@@ -76,12 +76,14 @@ export function OrderItemsSelector({
 
   const handleFieldChange = (index: number, field: keyof OrderItem, value: unknown) => {
     const updated = [...items]
-    updated[index] = { ...updated[index], [field]: value }
+    updated[index] = { ...updated[index], [field]: value } as OrderItem
     onChange(updated)
   }
 
+
+
   const calculateSubtotal = (item: OrderItem) => {
-    return item.quantity * item.unit_price
+    return (item.quantity || 0) * (item.unit_price || 0)
   }
 
   const calculateTotal = () => {

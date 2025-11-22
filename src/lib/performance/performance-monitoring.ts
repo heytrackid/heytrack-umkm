@@ -39,7 +39,7 @@ class ClientPerformanceMonitor {
       ...operation,
       endTime,
       duration,
-      context
+      ...(context && { context })
     })
 
     return duration

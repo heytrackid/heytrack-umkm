@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import type { PeriodType, ProfitFilters, ProfitFiltersProps } from '@/app/profit/components/types'
+import type { PeriodType, ProfitFiltersProps } from '@/app/profit/components/types'
 
 
 

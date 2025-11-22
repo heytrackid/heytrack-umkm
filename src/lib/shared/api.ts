@@ -28,7 +28,7 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
 export interface ApiErrorInterface {
   readonly _code: string
   readonly message: string
-  readonly details?: Record<string, unknown>
+  readonly details: Record<string, unknown>
   readonly statusCode: number
 }
 
@@ -68,7 +68,7 @@ export class ApiErrorClass extends Error implements ApiErrorInterface {
     message: string,
     public readonly _code: string = API_ERROR_CODES.UNKNOWN_ERROR,
     public readonly statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR,
-    public readonly details?: Record<string, unknown>
+    public readonly details: Record<string, unknown> = {}
   ) {
     super(message)
     this.name = 'ApiError'
@@ -85,7 +85,7 @@ export const createApiResponse = {
   success: <T>(data: T, message?: string): ApiResponse<T> => ({
     success: true,
     data,
-    message,
+    ...(message && { message }),
     timestamp: new Date().toISOString(),
   }),
 
@@ -110,7 +110,7 @@ export const createApiResponse = {
     success: true,
     data,
     pagination,
-    message,
+    ...(message && { message }),
     timestamp: new Date().toISOString(),
   }),
 }
@@ -349,19 +349,19 @@ export const apiMethods = {
   post: <T, D = unknown>(url: string, data?: D, config?: Partial<ApiRequestConfig>) =>
     apiRequest<T>(url, {
       method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
+      body: data ? JSON.stringify(data) : null,
     }, config),
 
   put: <T, D = unknown>(url: string, data?: D, config?: Partial<ApiRequestConfig>) =>
     apiRequest<T>(url, {
       method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined,
+      body: data ? JSON.stringify(data) : null,
     }, config),
 
   patch: <T, D = unknown>(url: string, data?: D, config?: Partial<ApiRequestConfig>) =>
     apiRequest<T>(url, {
       method: 'PATCH',
-      body: data ? JSON.stringify(data) : undefined,
+      body: data ? JSON.stringify(data) : null,
     }, config),
 
   delete: <T>(url: string, config?: Partial<ApiRequestConfig>) =>

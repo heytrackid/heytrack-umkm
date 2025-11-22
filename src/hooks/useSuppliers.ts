@@ -1,16 +1,23 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { createClientLogger } from '@/lib/client-logger'
+import { queryConfig } from '@/lib/query/query-config'
+import { buildApiUrl, fetchApi, postApi, putApi, deleteApi } from '@/lib/query/query-helpers'
 import { getErrorMessage } from '@/lib/type-guards'
-import { fetchApi, buildApiUrl } from '@/lib/query/query-helpers'
-import { cachePresets } from '@/lib/query/query-config'
-import type { Insert, Update } from '@/types/database'
+import type { Insert, Row, Update } from '@/types/database'
 
 /**
  * React Query hooks for Suppliers
  * Provides caching and optimistic updates for supplier data
  */
 
+interface UseSuppliersOptions {
+  limit?: number
+  offset?: number
+  search?: string
+}
+
+type Supplier = Row<'suppliers'>
 type SupplierInsert = Insert<'suppliers'>
 type SupplierUpdate = Update<'suppliers'>
 
@@ -27,8 +34,8 @@ interface UseSuppliersOptions {
 export function useSuppliers(options?: UseSuppliersOptions) {
   return useQuery({
     queryKey: ['suppliers', options],
-    queryFn: () => fetchApi<unknown[]>(buildApiUrl('/suppliers', options as Record<string, string | number | boolean | null | undefined>)),
-    ...cachePresets.moderatelyUpdated,
+    queryFn: () => fetchApi<unknown[]>(buildApiUrl('/api/suppliers', options as Record<string, string | number | boolean | null | undefined>)),
+    ...queryConfig.queries.moderate,
   })
 }
 
@@ -53,28 +60,9 @@ export function useCreateSupplier() {
   const logger = createClientLogger('useCreateSupplier')
 
   return useMutation({
-    mutationFn: async (data: SupplierInsert) => {
-      const response = await fetch('/api/suppliers', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-        credentials: 'include', // Include cookies for authentication
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message ?? 'Failed to create supplier')
-      }
-
-      const result = await response.json()
-      if (!result.success) {
-        throw new Error(result.error ?? 'Failed to create supplier')
-      }
-      return result.data
-    },
+    mutationFn: (data: Omit<SupplierInsert, 'user_id'>) => postApi<Supplier>('/api/suppliers', data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['suppliers'] })
-
       logger.info({}, 'Supplier created successfully')
     },
     onError: (error: unknown) => {
@@ -92,25 +80,7 @@ export function useUpdateSupplier() {
   const logger = createClientLogger('useUpdateSupplier')
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: SupplierUpdate }) => {
-      const response = await fetch(`/api/suppliers/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-        credentials: 'include', // Include cookies for authentication
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message ?? 'Failed to update supplier')
-      }
-
-      const result = await response.json()
-      if (!result.success) {
-        throw new Error(result.error ?? 'Failed to update supplier')
-      }
-      return result.data
-    },
+    mutationFn: ({ id, data }: { id: string; data: SupplierUpdate }) => putApi<Supplier>(`/api/suppliers/${id}`, data),
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({ queryKey: ['supplier', variables.id] })
       void queryClient.invalidateQueries({ queryKey: ['suppliers'] })
@@ -132,23 +102,7 @@ export function useDeleteSupplier() {
   const logger = createClientLogger('useDeleteSupplier')
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      const response = await fetch(`/api/suppliers/${id}`, {
-        method: 'DELETE',
-        credentials: 'include', // Include cookies for authentication
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message ?? 'Failed to delete supplier')
-      }
-
-      const result = await response.json()
-      if (!result.success) {
-        throw new Error(result.error ?? 'Failed to delete supplier')
-      }
-      return result.data
-    },
+    mutationFn: (id: string) => deleteApi(`/api/suppliers/${id}`),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['suppliers'] })
 
@@ -157,6 +111,27 @@ export function useDeleteSupplier() {
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
       logger.error({ error: message }, 'Failed to delete supplier')
+    },
+  })
+}
+
+/**
+ * Import suppliers from CSV
+ */
+export function useImportSuppliers() {
+  const queryClient = useQueryClient()
+  const logger = createClientLogger('useImportSuppliers')
+
+  return useMutation({
+    mutationFn: (suppliers: unknown[]) => postApi('/api/suppliers/import', { suppliers }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['suppliers'] })
+
+      logger.info({}, 'Suppliers imported successfully')
+    },
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error)
+      logger.error({ error: message }, 'Failed to import suppliers')
     },
   })
 }

@@ -1,6 +1,7 @@
 'use client'
 
-import useSWR from 'swr'
+import { useQuery } from '@tanstack/react-query'
+import { fetchApi } from '@/lib/query/query-helpers'
 
 interface ComparisonParams {
   category?: string
@@ -25,12 +26,7 @@ interface HppComparisonResponse {
 }
 
 const fetcher = async (url: string) => {
-  const response = await fetch(url, { cache: 'no-store' })
-  if (!response.ok) {
-    const { error } = await response.json().catch(() => ({ error: 'Failed to fetch HPP comparison data' }))
-    throw new Error(error ?? 'Failed to fetch HPP comparison data')
-  }
-  return response.json() as Promise<HppComparisonResponse>
+  return fetchApi<HppComparisonResponse>(url)
 }
 
 export function useHPPComparison(params: ComparisonParams = {}) {
@@ -40,9 +36,13 @@ export function useHPPComparison(params: ComparisonParams = {}) {
   }
 
   const endpoint = `/api/hpp/comparison${searchParams.toString() ? `?${searchParams}` : ''}`
-  const { data, error, isLoading, mutate } = useSWR(endpoint, fetcher, {
-    revalidateOnFocus: false,
-    shouldRetryOnError: false
+  const { data, error, isLoading, refetch } = useQuery({
+    queryKey: ['hpp-comparison', params],
+    queryFn: () => fetcher(endpoint),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false,
+    retry: false
   })
 
   return {
@@ -51,6 +51,6 @@ export function useHPPComparison(params: ComparisonParams = {}) {
     total: data?.total ?? 0,
     loading: isLoading,
     error,
-    refresh: () => mutate()
+    refresh: () => { void refetch() }
   }
 }

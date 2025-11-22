@@ -1,15 +1,11 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
-
-import { NextRequest, NextResponse } from 'next/server'
-
+import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { apiLogger, logError } from '@/lib/logger'
-import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
-import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
-import { createClient } from '@/utils/supabase/server'
-import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 
 
 interface RestockSuggestion {
@@ -26,23 +22,14 @@ interface RestockSuggestion {
 }
 
 // GET /api/inventory/restock-suggestions
-async function getHandler(request: NextRequest): Promise<NextResponse> {
+async function getRestockSuggestionsHandler(context: RouteContext) {
+  const { user } = context
+
   try {
-    apiLogger.info({ url: request.url }, 'GET /api/inventory/restock-suggestions')
-
-    // Authenticate with Stack Auth
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const _user = authResult
-
-    const _client = await createClient()
-
-    const suggestions = await RecipeAvailabilityService.getRestockSuggestions(_user.id)
+    const suggestions = await RecipeAvailabilityService.getRestockSuggestions(user.id)
 
     apiLogger.info({
-      userId: _user.id,
+      userId: user.id,
       suggestionsCount: suggestions.length,
       criticalCount: suggestions.filter((s: RestockSuggestion) => s.urgency === 'CRITICAL').length
     }, 'Restock suggestions fetched')
@@ -63,8 +50,11 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     })
   } catch (error) {
     logError(apiLogger, error, 'Failed to get restock suggestions')
-    return createErrorResponse('Internal server error', 500)
+    return handleAPIError(new Error('Internal server error'), 'API Route')
   }
 }
 
-export const GET = createSecureHandler(getHandler, 'GET /api/inventory/restock-suggestions', SecurityPresets.enhanced())
+export const GET = createApiRoute(
+  { method: 'GET', path: '/api/inventory/restock-suggestions' },
+  getRestockSuggestionsHandler
+)

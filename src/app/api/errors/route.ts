@@ -1,17 +1,16 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
-
 
 import { NextRequest, NextResponse } from 'next/server'
 
-// import { checkAdminPrivileges } from '@/lib/admin-check' // Removed - not implemented
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 import type { ErrorLogInsert } from '@/types/database'
-import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core/responses'
 
 interface ErrorBody {
   message?: string
@@ -101,7 +100,6 @@ async function logErrorToDatabase(
       }
     }
 
-     
     const { error } = await supabase.from('error_logs').insert(payload as ErrorLogInsert)
     if (error) {
       throw error
@@ -120,11 +118,11 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
       errorBody = await parseErrorBody(request)
     } catch (error: unknown) {
       apiLogger.error({ error: getErrorMessage(error) }, 'Failed to parse error report body')
-      return createErrorResponse('Invalid request body', 400)
+      return handleAPIError(new Error('Invalid request body'), 'POST /api/errors')
     }
 
     if (!errorBody.message && !errorBody.msg) {
-      return createErrorResponse('Message is required', 400)
+      return handleAPIError(new Error('Message is required'), 'POST /api/errors')
     }
 
     const sanitized = sanitizeErrorBody(errorBody)
@@ -139,8 +137,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
     return createSuccessResponse(null, 'Error reported successfully')
   } catch (error) {
-    apiLogger.error({ error: getErrorMessage(error) }, 'Error in POST /api/errors')
-    return createErrorResponse('Internal server error', 500)
+    return handleAPIError(error, 'POST /api/errors')
   }
 }
 
@@ -173,7 +170,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
         userId: user.id,
         email: user.email
       }, 'Unauthorized access attempt to error logs')
-      
+
       return NextResponse.json(
         { error: 'Forbidden - Admin access required' },
         { status: 403 }
@@ -201,8 +198,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
 
     return createSuccessResponse({ errors })
   } catch (error) {
-    apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/errors')
-    return createErrorResponse('Internal server error', 500)
+    return handleAPIError(error, 'GET /api/errors')
   }
 }
 

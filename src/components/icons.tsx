@@ -1,6 +1,5 @@
 'use client';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { cn } from '@/lib/utils';
 import { Icon } from '@iconify/react';
 import React from 'react';
@@ -10,24 +9,25 @@ export type LucideIcon = React.FC<{
   className?: string;
   color?: string;
   strokeWidth?: number | string;
-  [key: string]: any;
+  [key: string]: unknown;
 }>;
 
-interface IconProps extends React.ComponentProps<typeof Icon> {
-  size?: number | string;
-  className?: string;
-}
+
 
 const createIcon = (iconName: string): LucideIcon => {
-  const IconWrapper = ({ size = 24, className, ...props }: any) => (
-    <Icon
-      icon={iconName}
-      width={size}
-      height={size}
-      className={cn("", className)}
-      {...props}
-    />
-  );
+  const IconWrapper: LucideIcon = ({ size = 24, className, ...props }) => {
+    // Avoid 'icon' prop duplication by destructuring it out
+    const { icon: _icon, ...iconProps } = props as { icon?: string; [key: string]: unknown };
+    return (
+      <Icon
+        icon={iconName}
+        width={size}
+        height={size}
+        className={cn("", className)}
+        {...iconProps}
+      />
+    );
+  };
   IconWrapper.displayName = `Icon(${iconName})`;
   return IconWrapper;
 };

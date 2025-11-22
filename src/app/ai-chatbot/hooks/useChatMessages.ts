@@ -2,10 +2,7 @@ import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
 
 import { SUGGESTIONS, type Message } from '@/app/ai-chatbot/types/index'
 import { createLogger } from '@/lib/logger'
-import type { MessageMetadata, SessionListItem } from '@/types/features/chat'
-
-interface OrderRow { id: string; status: string; total_amount: number; created_at: string }
-interface InventoryRow { id: string; current_stock: number; min_stock: number }
+import type { SessionListItem } from '@/types/features/chat'
 interface BusinessStats { totalOrders: number; pendingOrders: number; totalRevenue: number; criticalItems: number }
 
 interface UseChatMessagesResult {

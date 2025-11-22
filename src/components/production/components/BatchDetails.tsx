@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 
 
-import type { ProductionBatchWithDetails as ProductionBatch } from '@/services/production/BatchSchedulingService'
+import type { ProductionBatchWithDetails as ProductionBatch } from '@/types/production'
 
 import type { BatchExecutionState } from '@/components/production/components/types'
 

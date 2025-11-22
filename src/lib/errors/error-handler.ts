@@ -203,7 +203,7 @@ export function convertToAppError(error: unknown, context?: string): AppError {
       {
         code: 'INTERNAL_ERROR',
         status: 500,
-        details: context ? { context } : undefined,
+        ...(context && { details: { context } }),
       }
     );
   }
@@ -213,7 +213,7 @@ export function convertToAppError(error: unknown, context?: string): AppError {
     {
       code: 'INTERNAL_ERROR',
       status: 500,
-      details: context ? { context, originalError: error } : undefined,
+      ...(context && { details: { context, originalError: error } }),
     }
   );
 }

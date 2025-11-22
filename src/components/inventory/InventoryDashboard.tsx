@@ -10,29 +10,46 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { useSettings } from '@/contexts/settings-context'
-import { useInventoryAlerts, InventoryAlertsList } from '@/hooks/useInventoryAlerts'
-import { useReorderManagement, type ReorderSuggestion } from '@/hooks/useReorderManagement'
-
-
+import { useInventoryAlerts } from '@/hooks/useInventoryAlerts'
+import { useReorderSuggestions } from '@/hooks/useReorderManagement'
+import type { ReorderSuggestionWithDetails } from '@/types/database'
 
 export const InventoryDashboard = (): JSX.Element => {
   const { formatCurrency } = useSettings()
-  const { inventoryStatus, loading: alertsLoading, refetch: refetchAlerts } = useInventoryAlerts()
-  const { reorderData, loading: reorderLoading, refetch: refetchReorder } = useReorderManagement()
+  const { data: alertsData, isLoading: alertsLoading, refetch: refetchAlerts } = useInventoryAlerts()
+  const { data: reorderData = [], isLoading: reorderLoading, refetch: refetchReorder } = useReorderSuggestions()
+
+  // Calculate summary from reorder data
+  const reorderSummary = {
+    total_suggestions: reorderData.length,
+    total_estimated_cost: reorderData.reduce((sum, item) => sum + (item.estimated_cost || 0), 0),
+    urgent_count: reorderData.filter(item => item.priority === 'high').length,
+    high_count: reorderData.filter(item => item.priority === 'high').length,
+    medium_count: reorderData.filter(item => item.priority === 'medium').length,
+    low_count: reorderData.filter(item => item.priority === 'low').length,
+  }
   const [searchTerm, setSearchTerm] = useState('')
+
+  // Mock inventory status from alerts data
+  const inventoryStatus = {
+    total_ingredients: (alertsData || []).length,
+    healthy_stock_count: 0,
+    low_stock_count: (alertsData || []).filter((a) => a.alert_type === 'low_stock').length,
+    out_of_stock_count: (alertsData || []).filter((a) => a.alert_type === 'out_of_stock').length,
+    total_value: 0,
+  }
 
   const handleRefresh = () => {
     refetchAlerts()
     refetchReorder()
   }
 
-  const filteredAlerts = inventoryStatus.alerts.filter(alert =>
-    alert.ingredient_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    alert.message.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredAlerts = (alertsData || []).filter((alert) =>
+    alert.ingredient_name?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const filteredSuggestions = reorderData.suggestions.filter(suggestion =>
-    suggestion.ingredient_name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredSuggestions = (reorderData || []).filter((suggestion: ReorderSuggestionWithDetails) =>
+    suggestion.ingredient_name?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   if (alertsLoading || reorderLoading) {
@@ -124,9 +141,9 @@ export const InventoryDashboard = (): JSX.Element => {
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{reorderData.total_suggestions}</div>
+            <div className="text-2xl font-bold">{reorderData.length}</div>
             <p className="text-xs text-muted-foreground">
-              {formatCurrency(reorderData.total_estimated_cost)}
+              {formatCurrency(reorderData.reduce((sum, item) => sum + (item.estimated_cost || 0), 0))}
             </p>
           </CardContent>
         </Card>
@@ -158,7 +175,24 @@ export const InventoryDashboard = (): JSX.Element => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <InventoryAlertsList alerts={filteredAlerts} maxItems={5} />
+            <div className="space-y-2">
+              {filteredAlerts.slice(0, 5).map((alert) => (
+                <div key={alert.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{alert.ingredient_name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Stock: {alert.current_stock} • {alert.alert_type}
+                    </p>
+                  </div>
+                  <Badge variant={alert.alert_type === 'out_of_stock' ? 'destructive' : 'secondary'}>
+                    {alert.alert_type === 'out_of_stock' ? 'Out of Stock' : 'Low Stock'}
+                  </Badge>
+                </div>
+              ))}
+              {filteredAlerts.length === 0 && (
+                <p className="text-center text-muted-foreground py-4">No alerts</p>
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -182,20 +216,19 @@ export const InventoryDashboard = (): JSX.Element => {
               </div>
             ) : (
                <div className="space-y-3">
-                 {filteredSuggestions.slice(0, 5).map((suggestion: ReorderSuggestion) => (
-                  <div key={suggestion.ingredient_id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-sm">{suggestion['ingredient_name']}</p>
+                   {filteredSuggestions.slice(0, 5).map((suggestion: ReorderSuggestionWithDetails) => (
+                   <div key={suggestion.ingredient_id} className="flex items-center justify-between p-3 border rounded-lg">
+                     <div className="flex-1">
+                       <div className="flex items-center gap-2">
+                         <p className="font-medium text-sm">{suggestion.ingredient_name}</p>
                         <Badge
                           variant={
-                            suggestion.priority === 'urgent' ? 'destructive' :
-                              suggestion.priority === 'high' ? 'destructive' :
-                                suggestion.priority === 'medium' ? 'secondary' : 'outline'
+                            suggestion.priority === 'high' ? 'destructive' :
+                              suggestion.priority === 'medium' ? 'secondary' : 'outline'
                           }
                           className="text-xs"
                         >
-                          {suggestion.priority.toUpperCase()}
+                          {(suggestion.priority || 'low').toUpperCase()}
                         </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
@@ -204,9 +237,9 @@ export const InventoryDashboard = (): JSX.Element => {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-sm">{formatCurrency(suggestion.total_cost)}</p>
+                      <p className="font-medium text-sm">{formatCurrency(suggestion.estimated_cost)}</p>
                       <p className="text-xs text-muted-foreground">
-                        @ {formatCurrency(suggestion.unit_cost)}/{suggestion.unit}
+                        @ {formatCurrency(suggestion.last_purchase_price || 0)}/{suggestion.unit}
                       </p>
                     </div>
                   </div>
@@ -225,7 +258,7 @@ export const InventoryDashboard = (): JSX.Element => {
       </div>
 
       {/* Priority Breakdown */}
-      {reorderData.total_suggestions > 0 && (
+      {reorderSummary.total_suggestions > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Reorder Priority Breakdown</CardTitle>
@@ -236,24 +269,24 @@ export const InventoryDashboard = (): JSX.Element => {
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">{reorderData.urgent_count}</div>
+                <div className="text-2xl font-bold text-red-600">{reorderSummary.urgent_count}</div>
                 <p className="text-sm text-muted-foreground">Urgent</p>
-                <Progress value={(reorderData.urgent_count / reorderData.total_suggestions) * 100} className="mt-2" />
+                <Progress value={(reorderSummary.urgent_count / reorderSummary.total_suggestions) * 100} className="mt-2" />
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600">{reorderData.high_count}</div>
+                <div className="text-2xl font-bold text-orange-600">{reorderSummary.high_count}</div>
                 <p className="text-sm text-muted-foreground">High</p>
-                <Progress value={(reorderData.high_count / reorderData.total_suggestions) * 100} className="mt-2" />
+                <Progress value={(reorderSummary.high_count / reorderSummary.total_suggestions) * 100} className="mt-2" />
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-yellow-600">{reorderData.medium_count}</div>
+                <div className="text-2xl font-bold text-yellow-600">{reorderSummary.medium_count}</div>
                 <p className="text-sm text-muted-foreground">Medium</p>
-                <Progress value={(reorderData.medium_count / reorderData.total_suggestions) * 100} className="mt-2" />
+                <Progress value={(reorderSummary.medium_count / reorderSummary.total_suggestions) * 100} className="mt-2" />
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-muted-foreground">{reorderData.low_count}</div>
+                <div className="text-2xl font-bold text-muted-foreground">{reorderSummary.low_count}</div>
                 <p className="text-sm text-muted-foreground">Low</p>
-                <Progress value={(reorderData.low_count / reorderData.total_suggestions) * 100} className="mt-2" />
+                <Progress value={(reorderSummary.low_count / reorderSummary.total_suggestions) * 100} className="mt-2" />
               </div>
             </div>
           </CardContent>

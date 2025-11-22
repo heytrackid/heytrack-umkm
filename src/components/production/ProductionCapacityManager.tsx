@@ -12,12 +12,10 @@ import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { Slider } from '@/components/ui/slider'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import { toast } from 'sonner'
 import { createClientLogger } from '@/lib/client-logger'
-import {
-    batchSchedulingService,
-    type ProductionConstraints
-} from '@/services/production/BatchSchedulingService'
+import type { ProductionConstraints } from '@/types/production'
+import { toast } from 'sonner'
+import { useProductionCapacity, useUpdateProductionConstraints } from '../../hooks'
 
 const logger = createClientLogger('ProductionCapacityManager')
 
@@ -41,6 +39,10 @@ interface EfficiencyMetrics {
 }
 
 const DEFAULT_CONSTRAINTS: ProductionConstraints = {
+  max_daily_batches: 10,
+  max_batch_size: 100,
+  min_batch_size: 1,
+  production_hours_per_day: 8,
   oven_capacity: 4,
   mixing_stations: 2,
   decorating_stations: 1,
@@ -50,8 +52,8 @@ const DEFAULT_CONSTRAINTS: ProductionConstraints = {
   shift_start: "06:00",
   shift_end: "18:00",
   break_times: [
-    { start: "10:00", end: "10:15" },
-    { start: "14:00", end: "14:30" }
+    { start: "10:00", end: "10:15", duration: 15 },
+    { start: "14:00", end: "14:30", duration: 30 }
   ],
   setup_time_minutes: 15,
   cleanup_time_minutes: 10
@@ -76,6 +78,8 @@ export const ProductionCapacityManager = ({
   }, [constraints, originalConstraints])
 
   const calculateShiftHours = useCallback((currentConstraints: ProductionConstraints): number => {
+    if (!currentConstraints.shift_start || !currentConstraints.shift_end) return 8
+    
     const [startHour = 0, startMin = 0] = currentConstraints.shift_start.split(':').map(Number)
     const [endHour = 0, endMin = 0] = currentConstraints.shift_end.split(':').map(Number)
 
@@ -83,7 +87,7 @@ export const ProductionCapacityManager = ({
     const endMinutes = endHour * 60 + endMin
 
     const totalMinutes = endMinutes - startMinutes
-    const breakMinutes = currentConstraints.break_times.reduce((sum, br) => {
+    const breakMinutes = (currentConstraints.break_times || []).reduce((sum, br) => {
       const [brStartHour = 0, brStartMin = 0] = br.start.split(':').map(Number)
       const [brEndHour = 0, brEndMin = 0] = br.end.split(':').map(Number)
       return sum + ((brEndHour * 60 + brEndMin) - (brStartHour * 60 + brStartMin))
@@ -95,15 +99,15 @@ export const ProductionCapacityManager = ({
   const calculateEfficiencyMetrics = useCallback((currentConstraints: ProductionConstraints) => {
     // Calculate theoretical maximum daily production
     const shiftHours = calculateShiftHours(currentConstraints)
-    const ovenHourCapacity = currentConstraints.oven_capacity * shiftHours
-    const laborHourCapacity = currentConstraints.bakers_available * shiftHours
+    const ovenHourCapacity = (currentConstraints.oven_capacity || 0) * shiftHours
+    const laborHourCapacity = (currentConstraints.bakers_available || 0) * shiftHours
 
     // Find bottleneck
     const resourceCapacities = {
       'oven': ovenHourCapacity,
       'labor': laborHourCapacity,
-      'mixing': currentConstraints.mixing_stations * shiftHours,
-      'decorating': currentConstraints.decorators_available * shiftHours
+      'mixing': (currentConstraints.mixing_stations || 0) * shiftHours,
+      'decorating': (currentConstraints.decorators_available || 0) * shiftHours
     }
 
     const bottleneck = Object.entries(resourceCapacities)
@@ -120,7 +124,7 @@ export const ProductionCapacityManager = ({
     if (bottleneck.resource === 'labor') {
       recommendations.push('Add more bakers or extend shifts')
     }
-    if (currentConstraints.setup_time_minutes > 10) {
+    if ((currentConstraints.setup_time_minutes || 0) > 10) {
       recommendations.push('Optimize setup processes to reduce changeover time')
     }
 
@@ -133,33 +137,34 @@ export const ProductionCapacityManager = ({
     })
   }, [calculateShiftHours])
 
-  const fetchCapacityData = useCallback(async () => {
-    try {
-      setLoading(true)
-      const currentConstraints = await batchSchedulingService.getProductionCapacity()
-      setConstraints(currentConstraints)
-      setOriginalConstraints(currentConstraints)
-      calculateEfficiencyMetrics(currentConstraints)
-    } catch (error: unknown) {
-      logger.error({ error }, 'Error loading constraints:')
-      toast.error('Failed to load production capacity settings')
-    } finally {
-      setLoading(false)
-    }
-  }, [calculateEfficiencyMetrics])
+  const { data: capacityData } = useProductionCapacity()
+  const { mutate: updateCapacity } = useUpdateProductionConstraints()
 
   useEffect(() => {
-    void fetchCapacityData()
-  }, [fetchCapacityData])
+    if (capacityData) {
+      setConstraints(capacityData)
+      setOriginalConstraints(capacityData)
+      calculateEfficiencyMetrics(capacityData)
+    }
+  }, [capacityData, calculateEfficiencyMetrics])
 
   const handleSave = async () => {
     try {
       setLoading(true)
-      await batchSchedulingService.updateProductionConstraints(constraints)
-      setOriginalConstraints(constraints)
-      calculateEfficiencyMetrics(constraints)
-      onCapacityUpdate?.(constraints)
-      toast.success('Production capacity updated successfully')
+      updateCapacity(constraints, {
+        onSuccess: () => {
+          setOriginalConstraints(constraints)
+          calculateEfficiencyMetrics(constraints)
+          onCapacityUpdate?.(constraints)
+          toast.success('Production capacity updated successfully')
+          setLoading(false)
+        },
+        onError: (error: unknown) => {
+          logger.error({ error }, 'Error updating constraints:')
+          toast.error('Failed to update production capacity')
+          setLoading(false)
+        }
+      })
     } catch (error: unknown) {
       logger.error({ error }, 'Error saving constraints:')
       toast.error('Failed to save production capacity settings')
@@ -184,7 +189,7 @@ export const ProductionCapacityManager = ({
     if (newBreakStart && newBreakEnd) {
       setConstraints(prev => ({
         ...prev,
-        break_times: [...prev.break_times, { start: newBreakStart, end: newBreakEnd }]
+        break_times: [...(prev.break_times || []), { start: newBreakStart, end: newBreakEnd, duration: 30 }]
       }))
       setNewBreakStart('')
       setNewBreakEnd('')
@@ -194,7 +199,7 @@ export const ProductionCapacityManager = ({
   const removeBreakTime = (index: number) => {
     setConstraints(prev => ({
       ...prev,
-      break_times: prev.break_times.filter((_, i) => i !== index)
+      break_times: (prev.break_times || []).filter((_, i) => i !== index)
     }))
   }
 
@@ -281,7 +286,7 @@ export const ProductionCapacityManager = ({
                     <Label>Oven Capacity (simultaneous batches)</Label>
                     <div className="flex items-center space-x-4">
                       <Slider
-                        value={[constraints.oven_capacity]}
+                        value={[constraints.oven_capacity || 0]}
                         onValueChange={([value = 1]) => updateConstraint('oven_capacity', value)}
                         max={10}
                         min={1}
@@ -298,7 +303,7 @@ export const ProductionCapacityManager = ({
                     <Label>Mixing Stations</Label>
                     <div className="flex items-center space-x-4">
                       <Slider
-                        value={[constraints.mixing_stations]}
+                        value={[constraints.mixing_stations || 0]}
                         onValueChange={([value = 1]) => updateConstraint('mixing_stations', value)}
                         max={6}
                         min={1}
@@ -317,7 +322,7 @@ export const ProductionCapacityManager = ({
                     <Label>Decorating Stations</Label>
                     <div className="flex items-center space-x-4">
                       <Slider
-                        value={[constraints.decorating_stations]}
+                        value={[constraints.decorating_stations || 0]}
                         onValueChange={([value = 1]) => updateConstraint('decorating_stations', value)}
                         max={4}
                         min={1}
@@ -334,7 +339,7 @@ export const ProductionCapacityManager = ({
                     <Label>Packaging Capacity (items/hour)</Label>
                     <div className="flex items-center space-x-4">
                       <Slider
-                        value={[constraints.packaging_capacity]}
+                        value={[constraints.packaging_capacity || 0]}
                         onValueChange={([value = 1]) => updateConstraint('packaging_capacity', value)}
                         max={200}
                         min={10}
@@ -356,7 +361,7 @@ export const ProductionCapacityManager = ({
                       <Label>Setup Time (minutes)</Label>
                       <Input
                         type="number"
-                        value={constraints.setup_time_minutes}
+                        value={constraints.setup_time_minutes || 0}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateConstraint('setup_time_minutes', parseInt(e.target.value) || 0)}
                         min={0}
                         max={60}
@@ -366,7 +371,7 @@ export const ProductionCapacityManager = ({
                       <Label>Cleanup Time (minutes)</Label>
                       <Input
                         type="number"
-                        value={constraints.cleanup_time_minutes}
+                        value={constraints.cleanup_time_minutes || 0}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateConstraint('cleanup_time_minutes', parseInt(e.target.value) || 0)}
                         min={0}
                         max={30}
@@ -393,7 +398,7 @@ export const ProductionCapacityManager = ({
                     <Label>Bakers Available</Label>
                     <div className="flex items-center space-x-4">
                       <Slider
-                        value={[constraints.bakers_available]}
+                        value={[constraints.bakers_available || 0]}
                         onValueChange={([value = 1]) => updateConstraint('bakers_available', value)}
                         max={8}
                         min={1}
@@ -410,7 +415,7 @@ export const ProductionCapacityManager = ({
                     <Label>Decorators Available</Label>
                     <div className="flex items-center space-x-4">
                       <Slider
-                        value={[constraints.decorators_available]}
+                        value={[constraints.decorators_available || 0]}
                         onValueChange={([value = 1]) => updateConstraint('decorators_available', value)}
                         max={4}
                         min={0}
@@ -451,7 +456,7 @@ export const ProductionCapacityManager = ({
                     <Label>Shift Start Time</Label>
                     <Input
                       type="time"
-                      value={constraints.shift_start}
+                      value={constraints.shift_start || ''}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateConstraint('shift_start', e.target.value)}
                     />
                   </div>
@@ -459,7 +464,7 @@ export const ProductionCapacityManager = ({
                     <Label>Shift End Time</Label>
                     <Input
                       type="time"
-                      value={constraints.shift_end}
+                      value={constraints.shift_end || ''}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateConstraint('shift_end', e.target.value)}
                     />
                   </div>
@@ -475,7 +480,7 @@ export const ProductionCapacityManager = ({
                 <div className="space-y-4">
                   <h4 className="font-semibold">Break Times</h4>
 
-                  {constraints.break_times.map((breakTime, index: number) => (
+                  {(constraints.break_times || []).map((breakTime, index: number) => (
                     <div key={index} className="flex items-center gap-2 p-2 border rounded">
                       <span className="text-sm">
                         {breakTime.start} - {breakTime.end}

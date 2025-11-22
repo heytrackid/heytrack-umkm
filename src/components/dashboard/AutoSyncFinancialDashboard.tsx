@@ -1,7 +1,6 @@
 import dynamic from 'next/dynamic'
 import { createLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
-const logger = createLogger('AutoSyncFinancialDashboard')
 
 interface SyncStatus {
   isEnabled: boolean

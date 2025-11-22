@@ -253,7 +253,6 @@ interface PullToRefreshInfiniteScrollProps {
   onLoadMore: () => void
   hasMore: boolean
   loading: boolean
-  refreshing?: boolean
   className?: string
   disabled?: boolean
 }
@@ -264,15 +263,14 @@ export const PullToRefreshInfiniteScroll = ({
   onLoadMore,
   hasMore,
   loading,
-  refreshing = false,
   className,
   disabled = false
 }: PullToRefreshInfiniteScrollProps) => (
-  <PullToRefresh
-    onRefresh={onRefresh}
-    className={className}
-    disabled={disabled || refreshing}
-  >
+    <PullToRefresh
+      onRefresh={onRefresh}
+      className={className || ''}
+      disabled={disabled}
+    >
     <InfiniteScroll
       hasMore={hasMore}
       loading={loading}

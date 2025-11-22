@@ -2,6 +2,7 @@ import 'server-only'
 
 import { dbLogger } from '@/lib/logger'
 import type { Database, Insert } from '@/types/database'
+import type { Json } from '@/types/supabase-generated'
 import { createClient } from '@/utils/supabase/server'
 
 
@@ -152,8 +153,9 @@ export class InventoryAlertService {
               .insert({
                 ...alert,
                 user_id: userId,
-                is_active: true
-              })
+                is_active: true,
+                ...(alert.metadata && { metadata: alert.metadata as Json })
+              } as any)
           }
         })
       )
@@ -244,9 +246,13 @@ export class InventoryAlertService {
         await supabase
           .from('inventory_alerts')
           .insert({
-            ...alertPayload,
+            alert_type: alertPayload.alert_type,
+            severity: alertPayload.severity,
+            message: alertPayload.message,
+            ingredient_id: alertPayload.ingredient_id,
             user_id: userId,
-            is_active: true
+            is_active: true,
+            ...(alertPayload.metadata && { metadata: alertPayload.metadata as Json })
           })
 
         this.logger.info({

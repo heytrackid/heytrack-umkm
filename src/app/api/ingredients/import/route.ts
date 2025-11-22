@@ -1,4 +1,5 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -132,11 +133,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     return createSuccessResponse({ count: data.length, data }, SUCCESS_MESSAGES.INGREDIENT_IMPORTED, undefined, 201)
 
   } catch (error) {
-    apiLogger.error({ error }, 'Error in POST /api/ingredients/import')
-    return NextResponse.json(
-      { error: ERROR_MESSAGES.IMPORT_ERROR },
-      { status: 500 }
-    )
+    return handleAPIError(error, 'POST /api/ingredients/import')
   }
 }
 

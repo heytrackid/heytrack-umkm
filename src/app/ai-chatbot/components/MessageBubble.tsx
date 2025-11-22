@@ -20,7 +20,7 @@ import { FeedbackWidget } from '@/app/ai-chatbot/components/FeedbackWidget'
 interface MessageBubbleProps {
   message: Message
   onSuggestionClick?: (suggestion: string) => void
-  onFeedbackSubmit?: (messageId: string, rating: number, comment?: string) => void
+  onFeedbackSubmit: ((messageId: string, rating: number, comment?: string | undefined) => void) | undefined
 }
 
 const validateData = (data: unknown): Record<string, unknown> | null => {

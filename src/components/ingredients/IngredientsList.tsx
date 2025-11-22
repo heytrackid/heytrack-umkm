@@ -76,7 +76,7 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
     // Get unique suppliers
     const suppliers = useMemo(() => {
         if (!ingredients) return ['all']
-        const unique = Array.from(new Set(ingredients.map(i => i.supplier).filter(s => s && s.trim()))) as string[]
+        const unique = Array.from(new Set(ingredients.map((i: Ingredient) => i.supplier).filter((s: string | null) => s && s.trim()))) as string[]
         return ['all', ...unique]
     }, [ingredients])
 
@@ -84,7 +84,7 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
     const filteredData = useMemo(() => {
         if (!ingredients) { return [] }
 
-        return ingredients.filter(item => {
+        return ingredients.filter((item: Ingredient) => {
             // Search filter
             const matchesSearch = !searchTerm || item.name.toLowerCase().includes(searchTerm.toLowerCase())
 
@@ -110,7 +110,7 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                 (item.supplier ?? '') === supplierFilter
 
             return matchesSearch && matchesStock && matchesCategory && matchesSupplier
-        }).sort((a, b) => a.name.localeCompare(b.name))
+        }).sort((a: Ingredient, b: Ingredient) => a.name.localeCompare(b.name))
     }, [ingredients, searchTerm, stockFilter, categoryFilter, supplierFilter])
 
     // Pagination
@@ -362,7 +362,7 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {paginatedData.map((item) => {
+                                    {paginatedData.map((item: Ingredient) => {
                                         const currentStock = item.current_stock ?? 0
                                         const minStock = item.min_stock ?? 0
                                         const resolvedUnitPrice = item.price_per_unit ?? item.weighted_average_cost

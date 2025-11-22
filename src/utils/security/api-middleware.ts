@@ -498,5 +498,50 @@ export const SecurityPresets = {
     rateLimit: { maxRequests: 20, windowMs: 15 * 60 * 1000 }, // 20 requests per 15 minutes
     checkForSQLInjection: true,
     checkForXSS: true
+  }),
+
+  // Endpoint-specific rate limiting presets
+  listEndpoint: (): SecurityConfig => ({
+    sanitizeInputs: true,
+    sanitizeQueryParams: true,
+    validateContentType: true,
+    allowedContentTypes: ['application/json'],
+    enableCSRFProtection: true,
+    rateLimit: { maxRequests: 100, windowMs: 15 * 60 * 1000 }, // Higher limit for list operations
+    checkForSQLInjection: false,
+    checkForXSS: false
+  }),
+
+  createEndpoint: (): SecurityConfig => ({
+    sanitizeInputs: true,
+    sanitizeQueryParams: true,
+    validateContentType: true,
+    allowedContentTypes: ['application/json'],
+    enableCSRFProtection: true,
+    allowedOrigins: [
+      process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+      'http://localhost:3001',
+      'http://127.0.0.1:3001',
+      'http://localhost:3002',
+      'http://127.0.0.1:3002',
+      'https://ndelok.heytrack.id',
+      'https://app.heytrack.id'
+    ],
+    rateLimit: { maxRequests: 20, windowMs: 15 * 60 * 1000 }, // Lower limit for create operations
+    checkForSQLInjection: true,
+    checkForXSS: true
+  }),
+
+  sensitiveEndpoint: (): SecurityConfig => ({
+    sanitizeInputs: true,
+    sanitizeQueryParams: true,
+    validateContentType: true,
+    allowedContentTypes: ['application/json'],
+    enableCSRFProtection: true,
+    rateLimit: { maxRequests: 5, windowMs: 15 * 60 * 1000 }, // Very low limit for sensitive operations
+    checkForSQLInjection: true,
+    checkForXSS: true
   })
 }

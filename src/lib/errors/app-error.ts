@@ -23,9 +23,13 @@ export class AppError extends Error {
   ) {
     super(message);
     this.name = this.constructor.name;
-    this.code = options?.code;
+    if (options?.code) {
+      this.code = options.code;
+    }
     this.status = options?.status ?? 500;
-    this.details = options?.details;
+    if (options?.details) {
+      this.details = options.details;
+    }
     this.timestamp = new Date().toISOString();
     
     // Maintains proper stack trace for where our error was thrown (only available on V8)
@@ -40,10 +44,10 @@ export class ValidationError extends AppError {
     message: string,
     details?: Record<string, unknown>
   ) {
-    super(message, { 
-      code: 'VALIDATION_ERROR', 
+    super(message, {
+      code: 'VALIDATION_ERROR',
       status: 400,
-      details 
+      ...(details && { details })
     });
   }
 }
@@ -80,10 +84,10 @@ export class DatabaseError extends AppError {
     message: string,
     details?: Record<string, unknown>
   ) {
-    super(message, { 
-      code: 'DATABASE_ERROR', 
+    super(message, {
+      code: 'DATABASE_ERROR',
       status: 500,
-      details 
+      ...(details && { details })
     });
   }
 }
@@ -94,10 +98,10 @@ export class ExternalServiceError extends AppError {
     service: string,
     details?: Record<string, unknown>
   ) {
-    super(message, { 
-      code: `EXTERNAL_SERVICE_ERROR_${service.toUpperCase()}`, 
+    super(message, {
+      code: `EXTERNAL_SERVICE_ERROR_${service.toUpperCase()}`,
       status: 502,
-      details 
+      ...(details && { details })
     });
   }
 }

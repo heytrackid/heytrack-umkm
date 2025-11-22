@@ -44,7 +44,7 @@ export function parseRecipeResponse(response: string): GeneratedRecipe {
           step: index + 1,
           title: `Langkah ${index + 1}`,
           description: instruction.trim(),
-        }
+        } as RecipeInstruction
       } else if (typeof instruction === 'object' && instruction !== null) {
         const instObj = instruction as Record<string, unknown>
         if (!instObj['description'] || typeof instObj['description'] !== 'string' || !(instObj['description'] as string).trim()) {
@@ -56,7 +56,7 @@ export function parseRecipeResponse(response: string): GeneratedRecipe {
           description: instObj['description'] as string,
           duration_minutes: typeof instObj['duration_minutes'] === 'number' ? instObj['duration_minutes'] as number : undefined,
           temperature: typeof instObj['temperature'] === 'string' ? instObj['temperature'] as string : undefined,
-        }
+        } as RecipeInstruction
       } else {
         throw new Error(`Invalid instruction at index ${index}: must be a string or object`)
       }

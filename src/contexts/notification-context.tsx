@@ -1,11 +1,8 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
-import { toast } from 'sonner'
+import { createContext, useContext, type ReactNode } from 'react'
 
-import { useAuth } from '@/hooks/useAuth'
-import { logger } from '@/lib/logger'
-import { useSupabase } from '@/providers/SupabaseProvider'
+import { useNotifications as useNotificationsQuery, useMarkNotificationAsRead, useMarkAllNotificationsAsRead } from '@/hooks/api/useNotifications'
 
 export interface Notification {
   id: string
@@ -28,114 +25,32 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined)
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth()
-  const { supabase } = useSupabase()
-  const [notifications, setNotifications] = useState<Notification[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  // const { user } = useAuth() // Not needed for notifications
+  const { data: notifications = [], isLoading } = useNotificationsQuery()
+  const markAsReadMutation = useMarkNotificationAsRead()
+  const markAllAsReadMutation = useMarkAllNotificationsAsRead()
 
-  const userId = user?.id
+
   const unreadCount = notifications.filter((n) => !n.read).length
 
-  const fetchNotifications = useCallback(async () => {
-    if (!userId) {
-      setNotifications([])
-      setIsLoading(false)
-      return
-    }
-    try {
-      const res = await fetch('/api/notifications')
-      if (res.ok) {
-        const response = await res.json()
-        setNotifications(response.data || [])
-      }
-    } catch (error) {
-      logger.error(error, 'Failed to fetch notifications')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [userId])
-
   const markAsRead = async (id: string) => {
-    // Optimistic update
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    )
-
-    try {
-      if (!userId) {
-        return
-      }
-      await fetch('/api/notifications', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
-      })
-    } catch (error) {
-      logger.error(error, 'Failed to mark notification as read')
-      // Revert on error
-      fetchNotifications()
-    }
+    await markAsReadMutation.mutateAsync(id)
   }
 
   const markAllAsRead = async () => {
-    // Optimistic update
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-
-    try {
-      if (!userId) {
-        return
-      }
-      await fetch('/api/notifications', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ all: true }),
-      })
-      toast.success('Semua notifikasi ditandai sudah dibaca')
-    } catch (error) {
-      logger.error(error, 'Failed to mark all notifications as read')
-      fetchNotifications()
-    }
+    await markAllAsReadMutation.mutateAsync()
   }
 
-  useEffect(() => {
-    if (!userId) {
-      setNotifications([])
-      setIsLoading(false)
-      return
-    }
-
-    void fetchNotifications()
-
-    // Real-time subscription
-    const channel = supabase
-      .channel(`notifications-${userId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          const newNotification = payload.new as Notification
-          setNotifications((prev) => [newNotification, ...prev])
-          toast(newNotification.title, {
-            description: newNotification.message,
-          })
-        }
-      )
-      .subscribe()
-
-    return () => {
-      void supabase.removeChannel(channel)
-    }
-  }, [userId, supabase, fetchNotifications])
+  const value: NotificationContextType = {
+    notifications,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    isLoading,
+  }
 
   return (
-    <NotificationContext.Provider
-      value={{ notifications, unreadCount, markAsRead, markAllAsRead, isLoading }}
-    >
+    <NotificationContext.Provider value={value}>
       {children}
     </NotificationContext.Provider>
   )

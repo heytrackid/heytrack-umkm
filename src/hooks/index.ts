@@ -1,39 +1,64 @@
 /**
- * Central export file for all custom hooks
- * 
- * This file provides a single import point for all hooks used throughout the application.
- * 
- * Usage:
- *   import { useResponsive, useSupabase } from '@/hooks/index'
+ * Central export for all React Query hooks
+ * All hooks use React Query for data fetching, caching, and state management
  */
 
-// Auth Hook (No Auth Mode)
-export { useAuth } from './useAuth'
+// Core entities
+export * from './useCustomers'
+export * from './useIngredients'
+export * from './useRecipes'
+export * from './useSuppliers'
 
-// Database Hooks - ALL API-based versions
-export { useCustomers } from './useCustomers'
-export { useIngredientPurchases } from './useIngredientPurchases'
-export { useIngredients } from './useIngredients'
-export { useOperationalCosts } from './useOperationalCosts'
-export { useOrder, useOrders, useOrderStats } from './useOrdersQuery'
-export { useRecipes } from './useRecipes'
-export { useSuppliers } from './useSuppliers'
+// Production & Inventory
+export * from './useIngredientPurchases'
+export * from './useInventoryAlerts'
+export * from './useProductionBatches'
+export * from './useRecipeAvailability'
+export * from './useReorderManagement'
 
-// Utility Hooks
-export { useChatHistory } from './useChatHistory'
-export { useCurrency } from './useCurrency'
-export { useDebounce } from './useDebounce'
-export { useInstantNavigation } from './useInstantNavigation'
+// Financial
+export * from './useCostAlerts'
+export * from './useExpenses'
+export * from './useFinancialRecords'
+export * from './useFinancialTrends'
+export * from './useOperationalCosts'
 
+// HPP & Pricing
+export * from './useHppData'
+export * from './useOrderPricing'
+export * from './useRecipeCostPreview'
 
-// Dashboard Hooks
-export { useDashboardStats, useTopProducts, useWeeklySales } from './api/useDashboard'
-export type { DashboardStats, TopProductsData, WeeklySalesData } from './api/useDashboard'
+// Orders & Recommendations
+export * from './useOrderValidation'
+export * from './useProductionTime'
+export * from './useRecipeRecommendations'
 
-// Supabase Hooks
-export { useSupabaseQuery } from './supabase/core'
-export { useSupabaseCRUD } from './supabase/useSupabaseCRUD'
+// Communications
+export * from './useWhatsAppTemplates'
 
-// Re-export from shadcn/ui
-export { useToast } from './use-toast'
+// Reports & Analytics
+export * from './useProfitAnalysis'
+export * from './useReports'
+
+// Settings
+export * from './useSettings'
+
+// AI & Chatbot
+export * from './useAIChat'
+export * from './useChatHistory'
+export * from './useContextAwareChat'
+export * from './useDashboardSchedule'
+
+// Financial Sync & Export
+export * from './useFinancialSync'
+export * from './useGlobalExport'
+
+// Shared utilities
+export * from './use-toast'
+export * from './usePreloading'
+
+// Re-export from other locations for backward compatibility
+export * from './api/useDashboard'
+export * from './api/useNotifications'
+export * from './useAuth'
 

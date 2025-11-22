@@ -4,14 +4,8 @@ import { AlertCircle, Clock, Package, TrendingUp } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
 import { ListSkeleton } from '@/components/ui/skeleton-loader'
 import { useDashboardSchedule } from '@/hooks/useDashboardSchedule'
-
-
-
-
-
 
 export const ProductionScheduleWidget = (): JSX.Element => {
     const { data, isLoading, error } = useDashboardSchedule()
@@ -97,7 +91,7 @@ export const ProductionScheduleWidget = (): JSX.Element => {
                 <CardContent>
                     <div className="text-2xl font-bold">
                         {summary?.total_batches_today
-                            ? Math.round((summary.completed_batches / summary.total_batches_today) * 100)
+                            ? Math.round(((summary.completed_batches || 0) / (summary.total_batches_today || 1)) * 100)
                             : 0}%
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -124,7 +118,7 @@ export const ProductionScheduleWidget = (): JSX.Element => {
                                 return (
                                 <div key={batch['id']} className="flex items-center justify-between border-b pb-3 last:border-0">
                                     <div className="flex-1">
-                                        <p className="font-medium">{batch.recipe.name}</p>
+                                        <p className="font-medium">{batch.recipe?.name || 'Unknown Recipe'}</p>
                                         <p className="text-sm text-muted-foreground">
                                             {batch.quantity} units • {batch.total_orders} orders
                                         </p>

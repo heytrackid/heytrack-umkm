@@ -1,4 +1,5 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
 /**
@@ -6,27 +7,17 @@ export const runtime = 'nodejs'
  * Example of using caching and performance optimizations
  */
 
-import { createCachedResponse, cachePresets } from '@/lib/api-cache'
+import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { apiLogger, dbLogger } from '@/lib/logger'
-import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { safeNumber, getErrorMessage } from '@/lib/type-guards'
-import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
-import { createClient } from '@/utils/supabase/server'
+import type { NextResponse } from 'next/server'
 
-import type { NextRequest, NextResponse } from 'next/server'
+async function getHandler(context: RouteContext): Promise<NextResponse> {
+  const { user, supabase, request } = context
 
-async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'GET /api/recipes/optimized - Request received')
-
-    // Authenticate with Stack Auth
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
-
-    const supabase = await createClient()
 
     // Parse query params
     const {searchParams} = request.nextUrl
@@ -58,7 +49,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
       `,
         { count: 'exact' }
       )
-      .eq('user_id', user['id'])
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(limit)
 
@@ -70,33 +61,22 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     const { data: recipes, error, count } = await query
 
     if (error) {
-      dbLogger.error({ error, userId: user['id'], msg: 'Failed to fetch recipes' })
-      return createCachedResponse(
-        { error: 'Failed to fetch recipes' },
-        cachePresets.realtime
-      )
+      dbLogger.error({ error, userId: user.id, msg: 'Failed to fetch recipes' })
+      return handleAPIError(new Error('Failed to fetch recipes'), 'API Route')
     }
 
-    // Use appropriate cache strategy based on data
-    const cacheConfig = isActive === 'true' 
-      ? cachePresets.dynamic // Active recipes change more often
-      : cachePresets.static // All recipes are more stable
-
-    return createCachedResponse(
-      {
-        recipes: recipes ?? [],
-        total: count ?? 0,
-        limit
-      },
-      cacheConfig
-    )
+    return createSuccessResponse({
+      recipes: recipes ?? [],
+      total: count ?? 0,
+      limit
+    })
   } catch (error) {
     dbLogger.error({ error: getErrorMessage(error), msg: 'Recipes API error' })
-    return createCachedResponse(
-      { error: 'Internal server error' },
-      cachePresets.realtime
-    )
+    return handleAPIError(new Error('Internal server error'), 'API Route')
   }
 }
 
-export const GET = createSecureHandler(getHandler, 'GET /api/recipes/optimized', SecurityPresets.enhanced())
+export const GET = createApiRoute(
+  { method: 'GET', path: '/api/recipes/optimized' },
+  getHandler
+)

@@ -3,48 +3,22 @@
  * Standardized cache configurations for different data types
  */
 
-/**
- * Legacy export for backward compatibility
- * @deprecated Use queryConfig.queries instead
- */
-export const cachePresets = {
-  dynamic: {
-    staleTime: 10000,
-    gcTime: 300000,
-    refetchInterval: false as const,
-  },
-  frequentlyUpdated: {
-    staleTime: 30000,
-    gcTime: 600000,
-    refetchInterval: false as const,
-  },
-  moderatelyUpdated: {
-    staleTime: 120000,
-    gcTime: 900000,
-    refetchInterval: false as const,
-  },
-  static: {
-    staleTime: 300000,
-    gcTime: 1800000,
-    refetchInterval: false as const,
-  },
-  dashboard: {
-    staleTime: 60000,
-    gcTime: 300000,
-    refetchInterval: false as const,
-  },
-  analytics: {
-    staleTime: 300000,
-    gcTime: 1200000,
-    refetchInterval: false as const,
-  },
-}
 
 export const queryConfig = {
   /**
    * Query configurations based on data update frequency
    */
   queries: {
+    /**
+     * For real-time data that needs immediate updates
+     * Example: chat messages, notifications, live updates
+     */
+    realtime: {
+      staleTime: 0, // Always stale
+      gcTime: 60000, // 1 minute
+      refetchInterval: 5000 as const, // Refetch every 5 seconds
+    },
+
     /**
      * For frequently changing data that needs to be fresh
      * Example: real-time dashboards, live inventory

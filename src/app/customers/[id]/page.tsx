@@ -10,19 +10,21 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import {
   Breadcrumb,
-  BreadcrumbList,
   BreadcrumbItem,
   BreadcrumbLink,
-  BreadcrumbSeparator,
-  BreadcrumbPage
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks/supabase/index'
 import { useCurrency } from '@/hooks/useCurrency'
+import { useCustomer, useDeleteCustomer } from '@/hooks/useCustomers'
+import { useOrders } from '@/hooks/api/useOrders'
+import type { OrderListItem } from '@/types/database'
 
 // Helper function to get status variant
 const getStatusVariant = (status: string): "default" | "destructive" | "secondary" => {
@@ -36,7 +38,9 @@ const getStatusVariant = (status: string): "default" | "destructive" | "secondar
   }
 }
 
-import type { Order } from '@/types/index'
+import type { Row } from '@/types/database'
+
+type Customer = Row<'customers'>
 
 const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }): JSX.Element => {
   const { id } = use(params)
@@ -45,23 +49,19 @@ const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }): JS
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   // Fetch customer data
-  const { data: customers, loading: customerLoading } = useSupabaseQuery('customers', {
-    filter: { id }
-  })
-  const customer = customers?.[0]
+  const { data: customerData, isLoading: customerLoading } = useCustomer(id)
+  const customer = customerData as Customer | undefined
 
   // CRUD operations
-  const { remove: deleteCustomer } = useSupabaseCRUD('customers')
+  const deleteCustomerMutation = useDeleteCustomer()
 
   // Fetch customer orders
-  const { data: orders, loading: ordersLoading } = useSupabaseQuery('orders', {
-    filter: { customer_id: id },
-    orderBy: { column: 'created_at', ascending: false }
-  })
+  const { data: allOrders = [], isLoading: ordersLoading } = useOrders()
+  const orders = allOrders.filter(order => order.customer_id === id)
 
   const handleDelete = async (): Promise<void> => {
     try {
-      await deleteCustomer(id)
+      await deleteCustomerMutation.mutateAsync(id)
       toast.success('Pelanggan berhasil dihapus')
       router.push('/customers')
     } catch (error) {
@@ -249,7 +249,7 @@ const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }): JS
               if (orders?.length) {
                 return (
                   <div className="space-y-3">
-                    {orders.map((order: Order) => (
+                    {(orders as unknown as OrderListItem[]).map((order: OrderListItem) => (
                        <div
                          key={order['id']}
                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"

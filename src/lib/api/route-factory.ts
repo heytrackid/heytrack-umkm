@@ -1,19 +1,21 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 import type { ZodSchema } from 'zod'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { createErrorResponse, handleAPIError, withQueryValidation } from '@/lib/api-core'
 import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase'
-import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
+
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
+import { SecurityPresets } from '@/utils/security/index'
 
 export interface RouteContext {
   user: { id: string; email: string | null }
   supabase: SupabaseClient<Database>
   request: NextRequest
-  params?: Record<string, string>
+  params?: Record<string, string | string[]>
 }
 
 export interface RouteConfig<TQuery = unknown, TBody = unknown> {
@@ -50,10 +52,13 @@ export function createApiRoute<TQuery = unknown, TBody = unknown>(
     querySchema,
     bodySchema,
     requireAuth: requireAuthFlag = true,
-    securityPreset = SecurityPresets.enhanced(),
   } = config
 
-  const wrappedHandler = async (request: NextRequest, params: Record<string, string>): Promise<NextResponse> => {
+  const wrappedHandler = async (request: NextRequest, routeParams: { params: Promise<Record<string, string | string[]>> }): Promise<NextResponse> => {
+    const params = await routeParams.params
+    const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const startTime = Date.now()
+
     try {
       // 1. Authentication
       let user: { id: string; email: string | null } | undefined
@@ -108,17 +113,35 @@ export function createApiRoute<TQuery = unknown, TBody = unknown>(
 
       // 5. Execute handler
       const response = await handler(routeContext, validatedQuery, validatedBody)
-      
+
+      // Add response metadata
+      const responseTime = Date.now() - startTime
+      if (response && typeof response.headers?.set === 'function') {
+        response.headers.set('X-Request-ID', requestId)
+        response.headers.set('X-Response-Time', responseTime.toString())
+      }
+
       return response
     } catch (error) {
       apiLogger.error({ error, path, method }, 'Unhandled error in route')
       const apiError = handleAPIError(error)
-      return createErrorResponse(apiError.message, apiError['statusCode'])
+      const errorResponse = createErrorResponse(apiError.message, apiError['statusCode'])
+
+      // Add response metadata to error response
+      const responseTime = Date.now() - startTime
+      errorResponse.headers.set('X-Request-ID', requestId)
+      errorResponse.headers.set('X-Response-Time', responseTime.toString())
+
+      return errorResponse
     }
   }
 
-  // Wrap with security middleware
-  return createSecureHandler(wrappedHandler as never, `${method} ${path}`, securityPreset)
+  // Wrap with security middleware for App Router
+  const appRouterHandler = async (request: NextRequest, routeParams: { params: Promise<Record<string, string | string[]>> }): Promise<NextResponse> => {
+    return wrappedHandler(request, routeParams)
+  }
+
+  return appRouterHandler
 }
 
 /**
@@ -145,7 +168,7 @@ export function createResourceRoutes<TQuery = unknown, TBody = unknown>(
       {
         method: 'GET',
         path: basePath,
-        querySchema: schemas?.querySchema,
+        ...(schemas?.querySchema && { querySchema: schemas.querySchema as any }),
       },
       handlers.GET
     )
@@ -156,7 +179,7 @@ export function createResourceRoutes<TQuery = unknown, TBody = unknown>(
       {
         method: 'POST',
         path: basePath,
-        bodySchema: schemas?.bodySchema,
+        ...(schemas?.bodySchema && { bodySchema: schemas.bodySchema as any }),
       },
       handlers.POST
     )
@@ -167,7 +190,7 @@ export function createResourceRoutes<TQuery = unknown, TBody = unknown>(
       {
         method: 'PUT',
         path: basePath,
-        bodySchema: schemas?.bodySchema,
+        ...(schemas?.bodySchema && { bodySchema: schemas.bodySchema as any }),
       },
       handlers.PUT
     )

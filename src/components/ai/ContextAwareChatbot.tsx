@@ -1,6 +1,6 @@
 'use client'
-import { MessageCircle, Send, Loader2, Plus, History, Sparkles, AlertCircle, Bot, User, X, Minimize2, Maximize2 } from '@/components/icons'
-import { useState, useRef, useEffect, type FormEvent } from 'react'
+import { AlertCircle, Bot, History, Loader2, Maximize2, MessageCircle, Minimize2, Plus, Send, Sparkles, User, X } from '@/components/icons'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -140,7 +140,7 @@ export const ContextAwareChatbot = (): JSX.Element => {
                     <p className="text-sm text-muted-foreground">Belum ada percakapan</p>
                   </div>
                 ) : (
-                  sessions.map((session) => (
+                  sessions.map((session: { id: string; title: string; created_at: string; updated_at: string; message_count: number }) => (
                     <Button
                       key={session['id']}
                       variant={sessionId === session['id'] ? 'secondary' : 'ghost'}
@@ -233,7 +233,7 @@ export const ContextAwareChatbot = (): JSX.Element => {
             </div>
           ) : (
             <div className="space-y-4">
-              {messages.map((message) => (
+              {messages.map((message: { id: string; role: 'assistant' | 'user'; content: string; timestamp: Date }) => (
                 <div
                   key={message['id']}
                   className={`flex gap-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -261,7 +261,7 @@ export const ContextAwareChatbot = (): JSX.Element => {
                             💡 Pertanyaan lanjutan:
                           </p>
                           <div className="flex flex-wrap gap-2">
-                            {suggestions.slice(0, 3).map((suggestion, idx: number) => (
+                            {suggestions.slice(0, 3).map((suggestion: { text: string; action: string }, idx: number) => (
                               <Button
                                 key={idx}
                                 variant="secondary"

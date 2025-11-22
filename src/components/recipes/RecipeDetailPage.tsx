@@ -1,7 +1,6 @@
 'use client'
 
 import {
-    ArrowLeft,
     Calculator,
     ChefHat,
     Clock,
@@ -28,10 +27,10 @@ import { ProductionScaler } from '@/components/recipes/ProductionScaler'
 import { useAuth } from '@/hooks/index'
 import { useRecipe } from '@/hooks/useRecipes'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { toast, errorToast, successToast } from '@/components/ui/toast'
+import { errorToast, successToast } from '@/components/ui/toast'
 
 import type { RecipeInstruction } from '@/app/recipes/ai-generator/components/types'
-import type { Ingredient, Recipe, RecipeIngredient } from '@/types/database'
+import type { Ingredient } from '@/types/database'
 import { isNonNull } from '@/types/shared/guards'
 import type { RecipeIngredientWithDetails } from '@/types/query-results'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -39,15 +38,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 // Type for ingredient with only required fields for display
 type IngredientDisplay = Pick<Ingredient, 'id' | 'name' | 'price_per_unit' | 'unit' | 'weighted_average_cost'>
 
-// Use the imported type for recipe ingredient with details
-type RecipeIngredientWithIngredient = RecipeIngredientWithDetails
 
-// Type for recipe with all related data
-type RecipeWithIngredients = Recipe & {
-    recipe_ingredients: RecipeIngredientWithDetails[]
-    instructions: RecipeInstruction[] | null
-    image_url?: string | null
-}
 
 interface RecipeDetailPageProps {
     recipeId: string
@@ -64,6 +55,14 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
 
     // React Query hook for recipe
     const { data: recipe, isLoading: loading, error } = useRecipe(recipeId)
+
+    const breadcrumbs = [{ label: 'Recipes', href: '/recipes' }, { label: recipe?.name || 'Recipe' }]
+    const action = (
+      <Button variant="outline" onClick={() => router.push(`/recipes/${recipeId}/edit`)}>
+        <Edit className="w-4 h-4 mr-2" />
+        Edit
+      </Button>
+    )
 
     // Handle error state
     useEffect(() => {
@@ -183,20 +182,12 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
 
     return (
         <div className="space-y-6 sm:space-y-8">
-            <PageHeader
-                title={recipe.name}
-                description={recipe.description || undefined}
-                breadcrumbs={[
-                    { label: 'Resep', href: '/recipes' },
-                    { label: recipe.name }
-                ]}
-                action={
-                    <Button variant="ghost" onClick={() => router.push('/recipes')}>
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Kembali
-                    </Button>
-                }
-            />
+      <PageHeader
+        title={recipe.name}
+        description={recipe.description || ''}
+        breadcrumbs={breadcrumbs}
+        action={action}
+      />
 
             <div className="space-y-6">
                 {recipe.image_url && (

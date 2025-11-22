@@ -1,10 +1,10 @@
-import { format } from 'date-fns'
 import { CheckCircle } from '@/components/icons'
+import { format } from 'date-fns'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-import type { ProductionBatchWithDetails as ProductionBatch } from '@/services/production/BatchSchedulingService'
+import type { ProductionBatchWithDetails as ProductionBatch } from '@/types/production'
 
 // Completed Batches Component - Lazy Loaded
 // Displays recently completed production batches

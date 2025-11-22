@@ -1,28 +1,27 @@
  
  
 // Using Pino logger for all logging
-'use client'
-
-import { useQueryClient } from '@tanstack/react-query'
-import { useAllOrders } from '@/hooks/useOrdersQuery'
 import { BarChart3, Calendar, Clock, DollarSign, Edit, Eye, Filter, MessageCircle, Plus, Search, ShoppingCart, TrendingUp, XCircle } from '@/components/icons'
+import { useOrders, useUpdateOrderStatus } from '@/hooks/api/useOrders'
+import { useQueryClient } from '@tanstack/react-query'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'
 
-import type { Order, OrderStatus } from '@/app/orders/types/orders.types'
 import { PageHeader } from '@/components/layout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import type { OrderListItem, OrderStatus } from '@/types/database'
+import type { OrderWithItems } from '@/app/orders/types/orders-db.types'
+import type { OrderItemWithRecipe } from '@/app/orders/types/orders-db.types'
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useCurrency } from '@/hooks/useCurrency'
 import { uiLogger } from '@/lib/logger'
-import { arrayCalculations } from '@/lib/performance/index'
 import { getErrorMessage } from '@/lib/type-guards'
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@/modules/orders/types'
@@ -33,7 +32,16 @@ import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@/modules/orders/typ
 // Using uiLogger for client-side logging
 const logger = uiLogger
 
+const arrayCalculations = {
+  sum: (arr: Record<string, unknown>[], key: string): number => arr.reduce((sum: number, item) => sum + Number(item[key] ?? 0), 0),
+  average: (arr: Record<string, unknown>[], key: string): number => {
+    if (arr.length === 0) return 0;
+    const sum = arr.reduce((s: number, item) => s + Number(item[key] ?? 0), 0);
+    return sum / arr.length;
+  }
+} as const;
 
+ 
 
 // ✅ Code Splitting - Lazy load heavy components
 // ✅ Correct pattern for named exports (per Next.js docs)
@@ -111,7 +119,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
    const hasFiltersApplied = filters.status.length > 0 || Boolean(filters.customer_search?.trim())
 
   // ✅ Use standardized hook for automatic caching
-  const { data: ordersData, isLoading: loading, error: queryError, refetch } = useAllOrders()
+  const { data: ordersData, isLoading: loading, error: queryError, refetch } = useOrders()
 
   const orders = useMemo(() => ordersData ?? [], [ordersData])
 
@@ -119,20 +127,20 @@ const OrdersPage = (_props: OrdersPageProps) => {
 
   // Filter orders based on search and status
   const filteredOrders = useMemo(() => {
-    let result = orders
+    let result: OrderListItem[] = orders as unknown as OrderListItem[]
 
     // Apply search filter
     if (filters.customer_search?.trim()) {
       const term = filters.customer_search.toLowerCase()
-      result = result.filter(order =>
-        order.order_no?.toLowerCase().includes(term) ||
-        order.customer_name?.toLowerCase().includes(term)
-      )
+        result = result.filter((order: OrderListItem) =>
+          order.order_no?.toLowerCase().includes(term) ||
+          order.customer_name?.toLowerCase().includes(term)
+        )
     }
 
     // Apply status filter
     if (filters.status.length > 0) {
-      result = result.filter(order => 
+      result = result.filter((order: OrderListItem) =>
         order.status && filters.status.includes(order.status)
       )
     }
@@ -142,20 +150,23 @@ const OrdersPage = (_props: OrdersPageProps) => {
 
   // ✅ Calculate stats with useMemo for performance (use all orders, not filtered)
   const stats = useMemo<OrderStats>(() => ({
-    total_orders: orders.length,
-    pending_orders: orders.filter(o => o['status'] === 'PENDING').length,
-    confirmed_orders: orders.filter(o => o['status'] === 'CONFIRMED').length,
-    in_production_orders: orders.filter(o => o['status'] === 'IN_PROGRESS').length,
-    completed_orders: orders.filter(o => o['status'] === 'DELIVERED').length,
-    cancelled_orders: orders.filter(o => o['status'] === 'CANCELLED').length,
-    total_revenue: arrayCalculations.sum(orders, 'total_amount'),
+    total_orders: (orders as unknown as OrderListItem[]).length,
+    pending_orders: (orders as unknown as OrderListItem[]).filter((o: OrderListItem) => o.status === 'PENDING').length,
+    confirmed_orders: (orders as unknown as OrderListItem[]).filter((o: OrderListItem) => o.status === 'CONFIRMED').length,
+    in_production_orders: (orders as unknown as OrderListItem[]).filter((o: OrderListItem) => o.status === 'IN_PROGRESS').length,
+    completed_orders: (orders as unknown as OrderListItem[]).filter((o: OrderListItem) => o.status === 'DELIVERED').length,
+    cancelled_orders: (orders as unknown as OrderListItem[]).filter((o: OrderListItem) => o.status === 'CANCELLED').length,
+    total_revenue: orders.reduce((sum, o) => sum + Number(o.total_amount ?? 0), 0),
     pending_revenue: arrayCalculations.sum(
-      orders.filter(o => o.payment_status === 'UNPAID'),
+      (orders as unknown as OrderListItem[]).filter((o: OrderListItem) => o.payment_status === 'UNPAID'),
       'total_amount'
     ),
-    paid_revenue: orders.reduce((sum, o) => sum + (o.paid_amount ?? 0), 0),
-    average_order_value: arrayCalculations.average(orders, 'total_amount'),
-    total_customers: new Set(orders.filter(o => o.customer_id).map(o => o.customer_id)).size,
+    paid_revenue: arrayCalculations.sum(
+      (orders as unknown as OrderListItem[]).filter((o: OrderListItem) => o.payment_status !== 'UNPAID'),
+      'total_amount'
+    ),
+    average_order_value: arrayCalculations.average(orders as unknown as OrderListItem[], 'total_amount'),
+    total_customers: new Set((orders as unknown as OrderListItem[]).filter((o: OrderListItem) => o.customer_name).map((o: OrderListItem) => o.customer_name)).size,
     repeat_customers: 0,
     period_growth: 0,
     revenue_growth: 0,
@@ -184,39 +195,28 @@ const OrdersPage = (_props: OrdersPageProps) => {
   // Dialog states
   const [showOrderForm, setShowOrderForm] = useState(false)
   const [showOrderDetail, setShowOrderDetail] = useState(false)
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [selectedOrder, setSelectedOrder] = useState<OrderWithItems | null>(null)
 
   const handleCreateOrder = useCallback(() => {
     setSelectedOrder(null)
     setShowOrderForm(true)
   }, [])
 
-  const handleEditOrder = useCallback((order: Order) => {
+  const handleEditOrder = useCallback((order: OrderWithItems) => {
     setSelectedOrder(order)
     setShowOrderForm(true)
   }, [])
 
-  const handleViewOrder = useCallback((order: Order) => {
+  const handleViewOrder = useCallback((order: OrderWithItems) => {
     setSelectedOrder(order)
     setShowOrderDetail(true)
   }, [])
 
+  const updateOrderStatusMutation = useUpdateOrderStatus()
+
   const handleUpdateStatus = useCallback(async (orderId: string, newStatus: OrderStatus) => {
-    try {
-      // Update status via API
-      await fetch(`/api/orders/${orderId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-        credentials: 'include', // Include cookies for authentication
-      })
-      // Invalidate and refetch orders after update
-      await queryClient.invalidateQueries({ queryKey: ['orders'] })
-    } catch (error: unknown) {
-      const message = getErrorMessage(error)
-      logger.error({ error: message }, 'Failed to update status')
-    }
-  }, [queryClient])
+    await updateOrderStatusMutation.mutateAsync({ orderId, newStatus })
+  }, [updateOrderStatusMutation])
 
   // Only show loading skeleton on initial load (when no data yet)
   if (loading && orders.length === 0) {
@@ -415,7 +415,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                     {orders.slice(0, 5).map((order) => (
+                      {(orders as unknown as OrderListItem[]).slice(0, 5).map((order: OrderListItem) => (
                        <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
                          <div className="flex-1">
                            <div className="font-medium">{order.order_no}</div>
@@ -425,7 +425,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
                          <div className="text-right">
                            <div className="font-medium">{formatCurrency(order.total_amount ?? 0)}</div>
                            <Badge className={`text-xs ${getStatusColor(order.status)}`}>
-                             {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status] : 'N/A'}
+                             {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status as OrderStatus] : 'N/A'}
                            </Badge>
                          </div>
                        </div>
@@ -446,7 +446,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
               <CardContent>
                 <div className="space-y-3">
                   {Object.entries(ORDER_STATUS_CONFIG).map(([status, config]) => {
-                    const count = orders.filter(o => o['status'] === status).length
+                    const count = (orders as unknown as OrderListItem[]).filter((o: OrderListItem) => o.status === status).length
                     const percentage = orders.length > 0 ? (count / orders.length) * 100 : 0
 
                     return (
@@ -578,7 +578,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
               </Card>
             ) : (
               <>
-                {filteredOrders.map((order) => (
+                {filteredOrders.map((order: OrderListItem) => (
                   <Card key={order.id} className="hover: ">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between mb-4">
@@ -590,7 +590,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge className={getStatusColor(order.status)}>
-                            {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status] : 'N/A'}
+                            {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status as OrderStatus] : 'N/A'}
                           </Badge>
                           <Badge className={getPaymentStatusColor(order.payment_status ?? null)}>
                             {order.payment_status ? PAYMENT_STATUS_LABELS[order.payment_status.toUpperCase() as keyof typeof PAYMENT_STATUS_LABELS] || 'N/A' : 'N/A'}
@@ -616,15 +616,15 @@ const OrdersPage = (_props: OrdersPageProps) => {
                       </div>
 
                       <div className="flex gap-2 flex-wrap">
-                        <Button variant="outline" size="sm" onClick={() => handleViewOrder(order)}>
+                        <Button variant="outline" size="sm" onClick={() => handleViewOrder(order as unknown as OrderWithItems)}>
                           <Eye className="h-3 w-3 mr-1" />
                           Detail
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleEditOrder(order)}>
+                        <Button variant="outline" size="sm" onClick={() => handleEditOrder(order as unknown as OrderWithItems)}>
                           <Edit className="h-3 w-3 mr-1" />
                           Edit
                         </Button>
-                        {order.status && order.status in ORDER_STATUS_CONFIG && ORDER_STATUS_CONFIG[order.status]?.nextStatuses && ORDER_STATUS_CONFIG[order.status].nextStatuses.length > 0 && (
+                        {order.status && order.status in ORDER_STATUS_CONFIG && ORDER_STATUS_CONFIG[order.status as OrderStatus]?.nextStatuses && ORDER_STATUS_CONFIG[order.status as OrderStatus].nextStatuses.length > 0 && (
                           <Select
                             value={order.status}
                             onValueChange={(newStatus) => handleUpdateStatus(order.id, newStatus as OrderStatus)}
@@ -634,9 +634,9 @@ const OrdersPage = (_props: OrdersPageProps) => {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value={order.status ?? 'PENDING'} disabled>
-                                {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status] : 'Status Tidak Diketahui'}
+                                {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status as OrderStatus] : 'Status Tidak Diketahui'}
                               </SelectItem>
-                              {ORDER_STATUS_CONFIG[order.status]?.nextStatuses?.map((status) => (
+                              {ORDER_STATUS_CONFIG[order.status as OrderStatus]?.nextStatuses?.map((status: OrderStatus) => (
                                 <SelectItem key={status} value={status}>
                                   {status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[status] : status}
                                 </SelectItem>
@@ -691,7 +691,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
             </DialogTitle>
           </DialogHeader>
           <OrderForm
-            order={selectedOrder ? { ...selectedOrder, items: [] } : undefined}
+            {...(selectedOrder && { order: { ...selectedOrder, items: [] as OrderItemWithRecipe[] } as OrderWithItems })}
             onSubmit={async () => {
               await queryClient.invalidateQueries({ queryKey: ['orders'] })
               setShowOrderForm(false)

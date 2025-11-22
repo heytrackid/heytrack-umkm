@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useMemo, useState } from 'react'
 
 import type {
     ChartDataPoint,
@@ -10,8 +10,8 @@ import type {
 import { calculateProfitDateRange, exportProfitReport, prepareProductChartData, validateProfitData } from '@/app/profit/utils'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
+import { queryConfig } from '@/lib/query/query-config'
 import { buildApiUrl } from '@/lib/query/query-helpers'
-import { cachePresets } from '@/lib/query/query-config'
 
 
 interface UseProfitReportReturn {
@@ -61,7 +61,7 @@ export function useProfitReport(): UseProfitReportReturn {
   const { data: profitData, isLoading: loading, error: queryError, refetch } = useQuery({
     queryKey: ['reports', 'profit', { selectedPeriod, startDate: calculatedStartDate, endDate: calculatedEndDate }],
     queryFn: async () => {
-      const url = buildApiUrl('/reports/profit', {
+      const url = buildApiUrl('/api/reports/profit', {
         start_date: calculatedStartDate,
         end_date: calculatedEndDate
       })
@@ -80,7 +80,7 @@ export function useProfitReport(): UseProfitReportReturn {
 
       return data
     },
-    ...cachePresets.analytics, // 5min stale, 20min gc
+    ...queryConfig.queries.analytics, // 5min stale, 20min gc
     enabled: !!(calculatedStartDate && calculatedEndDate)
   })
 

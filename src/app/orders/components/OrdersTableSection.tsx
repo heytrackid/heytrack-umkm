@@ -1,16 +1,17 @@
 'use client'
 
-import { ChevronLeft, ChevronRight, Eye, Edit, Trash2, MoreVertical } from '@/components/icons'
+import { ChevronLeft, ChevronRight, Edit, Eye, MoreVertical, Trash2 } from '@/components/icons'
 import { useRouter } from 'next/navigation'
-import { memo, useMemo, useState, useEffect } from 'react'
+import { memo, useEffect, useMemo, useRef, useState } from 'react'
 
 import { DeleteConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { TableSkeleton } from '@/components/ui/skeleton-loader'
-import { toast } from 'sonner'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+
+import { useDeleteOrder } from '@/hooks/api/useOrders'
 
 import type { Row } from '@/types/database'
 
@@ -36,7 +37,7 @@ const OrderSection = ({
   // Delete confirmation state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [orderToDelete, setOrderToDelete] = useState<OrderForTable | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const deleteOrderMutation = useDeleteOrder()
 
   const router = useRouter()
 
@@ -65,9 +66,15 @@ const OrderSection = ({
     return orders.slice(startIndex, endIndex)
   }, [orders, currentPage, pageSize])
 
-  // Reset to page 1 when orders change
+  // Reset to page 1 when orders change (using ref to avoid cascading renders)
+  const prevOrdersLengthRef = useRef(orders.length)
+  // Reset to first page when orders length changes
   useEffect(() => {
-    setCurrentPage(1)
+    if (prevOrdersLengthRef.current !== orders.length) {
+      prevOrdersLengthRef.current = orders.length
+      // Use setTimeout to avoid setState during render cycle
+      setTimeout(() => setCurrentPage(1), 0)
+    }
   }, [orders.length])
 
   // Delete handler
@@ -75,24 +82,12 @@ const OrderSection = ({
     if (!orderToDelete) {return}
 
     try {
-      setIsDeleting(true)
-      const response = await fetch(`/api/orders/${orderToDelete['id']}`, {
-        method: 'DELETE'
-      })
-
-      if (!response.ok) {
-        const { error: message } = await response.json().catch(() => ({ error: 'Gagal menghapus pesanan' }))
-        throw new Error(message ?? 'Gagal menghapus pesanan')
-      }
-
-      toast.success(`Pesanan ${orderToDelete.order_no} berhasil dihapus.`)
-      router.refresh()
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Terjadi kesalahan saat menghapus pesanan.')
-    } finally {
-      setIsDeleting(false)
+      await deleteOrderMutation.mutateAsync(orderToDelete.id)
       setDeleteDialogOpen(false)
       setOrderToDelete(null)
+      router.refresh()
+    } catch (error) {
+      // Error handling is done in mutation
     }
   }
 
@@ -250,7 +245,7 @@ const OrderSection = ({
         onOpenChange={setDeleteDialogOpen}
         itemName={`Order ${orderToDelete?.id ?? ''}`}
         onConfirm={handleDeleteOrder}
-        loading={isDeleting}
+        loading={deleteOrderMutation.isPending}
       />
     </div>
   )

@@ -6,22 +6,22 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { generateIngredientsTemplate, parseIngredientsCSV } from '@/components/import/csv-helpers'
 import { ImportDialog } from '@/components/import/ImportDialog'
-import { IngredientsList } from '@/components/ingredients/IngredientsList'
 import { IngredientFormDialog } from '@/components/ingredients/IngredientFormDialog'
+import { IngredientsList } from '@/components/ingredients/IngredientsList'
 import { PageHeader } from '@/components/layout'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatCardPatterns, StatsCards } from '@/components/ui/index'
 import { ListSkeleton, StatsSkeleton, TableSkeleton } from '@/components/ui/skeleton-loader'
-import { useIngredients } from '@/hooks/useIngredients'
+import { errorToast } from '@/components/ui/toast'
+import { useSettings } from '@/contexts/settings-context'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useCostChangeAlerts } from '@/hooks/useCostAlerts'
-import { useQueryClient } from '@tanstack/react-query'
 import { useIngredientPurchases } from '@/hooks/useIngredientPurchases'
-import { useSettings } from '@/contexts/settings-context'
-import { errorToast } from '@/components/ui/toast'
+import { useImportIngredients, useIngredients } from '@/hooks/useIngredients'
 import type { Row } from '@/types/database'
+import { useQueryClient } from '@tanstack/react-query'
 
 const IngredientsPage = () => {
   const { data: ingredients, isLoading: loading, error } = useIngredients();
@@ -32,9 +32,11 @@ const IngredientsPage = () => {
   const isMobile = useIsMobile();
 
   // Fetch recent purchases
-  const { data: purchases } = useIngredientPurchases({ limit: 10 })
+  const { data: allPurchases } = useIngredientPurchases()
+  const purchases = allPurchases?.slice(0, 10)
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const importIngredientsMutation = useImportIngredients();
 
   // Generate template URL
   const templateUrl = useMemo(() => {
@@ -113,29 +115,26 @@ const IngredientsPage = () => {
           description="Kelola stok dan harga bahan baku"
           actions={
             <div className="flex flex-col sm:flex-row gap-2 w-full">
-               <Button
-                 variant="outline"
-                 onClick={() => setImportDialogOpen(true)}
-                 className="w-full sm:w-auto"
-                 hapticFeedback
-               >
+                <Button
+                  variant="outline"
+                  onClick={() => setImportDialogOpen(true)}
+                  className="w-full sm:w-auto"
+                >
                 <Upload className="h-4 w-4 mr-2" />
                 Import
               </Button>
-               <Button
-                 variant="outline"
-                 onClick={() => router.push('/ingredients/purchases')}
-                 className="w-full sm:w-auto"
-                 hapticFeedback
-               >
+                <Button
+                  variant="outline"
+                  onClick={() => router.push('/ingredients/purchases')}
+                  className="w-full sm:w-auto"
+                >
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 Pembelian
               </Button>
-               <Button
-                 onClick={() => setShowAddDialog(true)}
-                 className="w-full sm:w-auto"
-                 hapticFeedback
-               >
+                <Button
+                  onClick={() => setShowAddDialog(true)}
+                  className="w-full sm:w-auto"
+                >
                 <Plus className="h-4 w-4 mr-2" />
                 Tambah
               </Button>
@@ -149,7 +148,7 @@ const IngredientsPage = () => {
           lowStock: lowStockCount,
           outOfStock: outOfStockCount,
           totalValue
-        })} />
+        }) as any} />
 
         {/* Alert for Low Stock */}
         {(lowStockCount > 0 || outOfStockCount > 0) && (
@@ -210,10 +209,14 @@ const IngredientsPage = () => {
             </CardHeader>
             <CardContent>
                <div className="space-y-3">
-                 {purchases.slice(0, 5).map((purchase: Row<'ingredient_purchases'>) => (
+                 {(purchases || []).slice(0, 5).map((purchase) => (
                   <div key={purchase.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
-                      <p className="font-medium">{purchase.supplier || 'Supplier'}</p>
+                      <p className="font-medium">
+                        {typeof purchase.supplier === 'string' 
+                          ? purchase.supplier 
+                          : purchase.supplier?.name || 'Supplier'}
+                      </p>
                       <p className="text-sm text-muted-foreground">
                         {purchase.purchase_date ? new Date(purchase.purchase_date).toLocaleDateString('id-ID') : 'N/A'}
                       </p>
@@ -240,33 +243,15 @@ const IngredientsPage = () => {
           parseCSV={parseIngredientsCSV}
           onImport={async (data: unknown) => {
             try {
-              const response = await fetch('/api/ingredients/import', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ingredients: data })
-              })
-
-              const result = await response.json() as { error?: string; details?: unknown[]; count?: number }
-
-              if (!response.ok) {
-                return {
-                  success: false,
-                  error: result.error ?? 'Import gagal',
-                  details: result.details || []
-                }
-              }
-
-               // Refresh data
-               queryClient.invalidateQueries({ queryKey: ['ingredients'] })
-
+              await importIngredientsMutation.mutateAsync(data as unknown[])
               return {
                 success: true,
-                ...(result.count !== undefined && { count: result.count })
+                count: Array.isArray(data) ? data.length : 0
               }
-             } catch {
+            } catch (error: unknown) {
               return {
                 success: false,
-                error: 'Terjadi kesalahan saat import'
+                error: error instanceof Error ? error.message : 'Terjadi kesalahan saat import'
               }
             }
           }}

@@ -233,7 +233,7 @@ export function createAuthError(code: string, message: string, action?: AuthErro
   return {
     code,
     message,
-    action
+    ...(action && { action })
   }
 }
 

@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { Skeleton } from '@/components/ui/skeleton'
-import { CardSkeleton, GridSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
+import { GridSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
 import { logger } from '@/lib/logger'
 
 // Dynamically import the production page to optimize initial load

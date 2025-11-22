@@ -27,7 +27,7 @@ export const RecipeSelector = ({ recipes, selectedRecipeId, onRecipeSelect, isLo
             </CardTitle>
         </CardHeader>
         <CardContent>
-            <Select value={selectedRecipeId} onValueChange={onRecipeSelect} disabled={isLoading}>
+            <Select value={selectedRecipeId} onValueChange={onRecipeSelect} {...(isLoading && { disabled: isLoading })}>
                 <SelectTrigger>
                     <SelectValue placeholder="Pilih produk yang ingin dihitung..." />
                 </SelectTrigger>

@@ -2,11 +2,12 @@
 
 import { MessageCircle, Package } from '@/components/icons'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+
 
 import { Card, CardContent } from '@/components/ui/card'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { toast } from 'sonner'
+import { useExportOrders } from '@/hooks/api/useOrders'
 
 
 
@@ -16,7 +17,7 @@ interface OrdersQuickActionsProps {
 
 const OrdersQuickActions = ({ _t: _ }: OrdersQuickActionsProps) => {
   const router = useRouter()
-  const [isExporting, setIsExporting] = useState(false)
+  const exportOrdersMutation = useExportOrders()
 
   const handleNavigateToTemplates = (): void => {
     router.push('/orders/whatsapp-templates')
@@ -24,18 +25,10 @@ const OrdersQuickActions = ({ _t: _ }: OrdersQuickActionsProps) => {
 
   const handleExportOrders = async (): Promise<void> => {
     try {
-      setIsExporting(true)
-      const response = await fetch('/api/export/global', { method: 'GET' })
-      if (!response.ok) {
-        const { error } = await response.json().catch(() => ({ error: 'Failed to export orders' }))
-        throw new Error(error ?? 'Failed to export orders')
-      }
+      const blob = await exportOrdersMutation.mutateAsync()
 
-      const blob = await response.blob()
       const url = URL.createObjectURL(blob)
-      const disposition = response.headers.get('Content-Disposition') ?? ''
-      const matchedFilename = disposition.match(/filename="?([^";]+)"?/)
-      const filename = matchedFilename?.[1] ?? `HeyTrack_Orders_${new Date().toISOString().split('T')[0]}.xlsx`
+      const filename = `HeyTrack_Orders_${new Date().toISOString().split('T')[0]}.xlsx`
 
       const anchor = document.createElement('a')
       anchor.href = url
@@ -48,8 +41,6 @@ const OrdersQuickActions = ({ _t: _ }: OrdersQuickActionsProps) => {
       toast.success('File orders berhasil diunduh.')
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Terjadi kesalahan saat mengekspor orders.')
-    } finally {
-      setIsExporting(false)
     }
   }
 
@@ -75,7 +66,7 @@ const OrdersQuickActions = ({ _t: _ }: OrdersQuickActionsProps) => {
             className="flex items-center gap-2"
             hapticFeedback
             hapticType="light"
-            loading={isExporting}
+            loading={exportOrdersMutation.isPending}
             loadingText="Mengunduh..."
           >
             <Package className="h-4 w-4" />

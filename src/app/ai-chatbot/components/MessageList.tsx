@@ -16,7 +16,7 @@ interface MessageListProps {
   isLoading: boolean
   scrollAreaRef: RefObject<HTMLDivElement>
   onSuggestionClick: (suggestion: string) => void
-  onFeedbackSubmit?: (messageId: string, rating: number, comment?: string) => void
+  onFeedbackSubmit: ((messageId: string, rating: number, comment?: string | undefined) => void) | undefined
 }
 
 export const MessageList = ({

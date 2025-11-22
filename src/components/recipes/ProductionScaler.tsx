@@ -59,9 +59,13 @@ export const ProductionScaler = memo(({
 
   const handleBatchSizeChange = (value: number[]) => {
     const newBatchSize = value[0]
-    setBatchSize(newBatchSize)
-    setCustomBatchSize(newBatchSize.toString())
-    onBatchSizeChange?.(newBatchSize, scaledData.scaledIngredients, scaledData.totalCost)
+    if (newBatchSize !== undefined) {
+      setBatchSize(newBatchSize)
+      setCustomBatchSize(newBatchSize.toString())
+      if (onBatchSizeChange) {
+        onBatchSizeChange(newBatchSize, scaledData.scaledIngredients, scaledData.totalCost)
+      }
+    }
   }
 
   const handleCustomBatchSizeChange = (value: string) => {

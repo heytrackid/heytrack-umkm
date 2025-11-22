@@ -87,7 +87,7 @@ export class CustomerValidationHelpers {
   static validateUpdate(data: unknown): { success: boolean; data?: Update<'customers'>; errors?: string[] } {
     try {
       const validatedData = EnhancedCustomerUpdateSchema.parse(data)
-      return { success: true, data: validatedData }
+      return { success: true, data: validatedData as any }
     } catch (error) {
       if (error instanceof z.ZodError) {
         const errors = error.issues.map(error => `${error.path.join('.')}: ${error.message}`)

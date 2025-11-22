@@ -397,14 +397,13 @@ export class InventoryWorkflowHandlers {
         category: notificationData.category,
         title: notificationData.title,
         message: notificationData.message,
-        priority: notificationData.priority,
-        entity_id: notificationData.entity_id,
-        entity_type: notificationData.entity_type,
-        action_url: notificationData.action_url,
-        metadata,
+        ...(notificationData.priority && { priority: notificationData.priority }),
+        ...(notificationData.entity_id && { entity_id: notificationData.entity_id }),
+        ...(notificationData.entity_type && { entity_type: notificationData.entity_type }),
+        ...(notificationData.action_url && { action_url: notificationData.action_url }),
+        ...(metadata && { metadata }),
         is_read: false,
         is_dismissed: false,
-        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days from now
       }
 
       const { error } = await supabase.from('notifications').insert(notification)

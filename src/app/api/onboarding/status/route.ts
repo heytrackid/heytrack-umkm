@@ -1,20 +1,14 @@
 export const runtime = 'nodejs'
-
-import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
-import { createClient } from '@/utils/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
 
-async function getHandler(_request: NextRequest): Promise<NextResponse> {
+import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+
+// GET /api/onboarding/status - Get onboarding status
+async function getOnboardingStatusHandler(context: RouteContext) {
+  const { user, supabase } = context
+
   try {
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
-
-    const supabase = await createClient()
 
     // Check if user has data
     const [ingredients, recipes, orders, customers] = await Promise.all([
@@ -43,19 +37,20 @@ async function getHandler(_request: NextRequest): Promise<NextResponse> {
 
     const needsOnboarding = progress < 100
 
-    return NextResponse.json({
-      data: {
-        needsOnboarding,
-        progress,
-        completedSteps,
-        currentStep: needsOnboarding
-          ? Object.entries(completedSteps).find(([_, done]) => !done)?.[0] || 'welcome'
-          : 'complete',
-      },
+    return createSuccessResponse({
+      needsOnboarding,
+      progress,
+      completedSteps,
+      currentStep: needsOnboarding
+        ? Object.entries(completedSteps).find(([_, done]) => !done)?.[0] || 'welcome'
+        : 'complete',
     })
   } catch (error) {
     return handleAPIError(error, 'GET /api/onboarding/status')
   }
 }
 
-export const GET = createSecureHandler(getHandler, 'GET /api/onboarding/status', SecurityPresets.enhanced())
+export const GET = createApiRoute(
+  { method: 'GET', path: '/api/onboarding/status' },
+  getOnboardingStatusHandler
+)

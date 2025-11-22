@@ -1,77 +1,53 @@
 import { useQuery } from '@tanstack/react-query'
+import { fetchApi } from '@/lib/query/query-helpers'
 
-
-
-
-interface ProductionBatch {
-  id: string
-  quantity: number
-  batch_status: string
-  planned_start_time: string
-  actual_start_time: string | null
-  total_orders: number
-  recipe: {
+interface DashboardSchedule {
+  production_schedule: Array<{
     id: string
-    name: string
-    image_url: string | null
-    cost_per_unit: number
+    batch_name?: string
+    status?: string
+    scheduled_date?: string
+    quantity: number
+    recipe?: { name: string }
+    total_orders?: number
+    batch_status?: string
+    priority?: string
+  }>
+  pending_orders: Array<{
+    id: string
+    order_no: string
+    customer_name: string | null
+    delivery_date: string | null
+    status?: string
+    production_priority?: string
+  }>
+  low_stock_alerts: Array<{
+    ingredient_id: string
+    ingredient_name: string
+    current_stock: number
+    reorder_point: number
+  }>
+  summary: {
+    total_batches: number
+    total_orders: number
+    total_alerts: number
+    total_batches_today?: number
+    planned_batches?: number
+    in_progress_batches?: number
+    pending_orders_count?: number
+    urgent_orders?: number
+    critical_stock_items?: number
+    completed_batches?: number
   }
 }
 
-interface PendingOrder {
-  id: string
-  order_no: string
-  customer_name: string | null
-  delivery_date: string | null
-  production_priority: string | null
-  status: string
-  order_items: Array<{
-    recipe: {
-      name: string
-    }
-  }>
-}
-
-interface LowStockAlert {
-  id: string
-  name: string
-  current_stock: number
-  reserved_stock: number
-  available_stock: number
-  unit: string
-  availability_status: string
-}
-
+/**
+ * Get dashboard schedule data (upcoming production batches and orders)
+ */
 export function useDashboardSchedule() {
-  return useQuery({
+  return useQuery<DashboardSchedule>({
     queryKey: ['dashboard-schedule'],
-    queryFn: async () => {
-      const response = await fetch('/api/dashboard/production-schedule', {
-        credentials: 'include', // Include cookies for authentication
-      })
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch dashboard schedule')
-      }
-
-      const data = await response.json()
-      return data as {
-        production_schedule: ProductionBatch[]
-        pending_orders: PendingOrder[]
-        low_stock_alerts: LowStockAlert[]
-        summary: {
-          total_batches_today: number
-          planned_batches: number
-          in_progress_batches: number
-          completed_batches: number
-          pending_orders_count: number
-          urgent_orders: number
-          critical_stock_items: number
-        }
-      }
-    },
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
-    refetchOnWindowFocus: true
+    queryFn: () => fetchApi<DashboardSchedule>('/api/dashboard/schedule'),
+    staleTime: 5 * 60 * 1000, // 5 minutes
   })
 }

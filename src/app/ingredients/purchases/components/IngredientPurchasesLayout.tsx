@@ -6,9 +6,9 @@ import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { BreadcrumbPatterns, PageBreadcrumb } from '@/components/ui/index'
 import { useAuth } from '@/hooks/index'
-import { toast } from 'sonner'
 import { useCreateIngredientPurchase, useIngredientPurchases } from '@/hooks/useIngredientPurchases'
 import { useIngredients } from '@/hooks/useIngredients'
+import { toast } from 'sonner'
 
 import type { Insert } from '@/types/database'
 
@@ -19,7 +19,7 @@ import { PurchaseStats } from '@/app/ingredients/purchases/components/PurchaseSt
 
 
 const IngredientPurchasesLayout = (): JSX.Element => {
-  const { data: purchases = [], isLoading: _purchasesLoading } = useIngredientPurchases()
+  const { data: purchases = [], isLoading: _purchasesLoading, error: purchasesError } = useIngredientPurchases()
   const { data: ingredients = [], isLoading: _ingredientsLoading } = useIngredients()
   const createPurchase = useCreateIngredientPurchase()
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
@@ -30,6 +30,14 @@ const IngredientPurchasesLayout = (): JSX.Element => {
       toast.error('Sesi Anda telah berakhir. Silakan login kembali.')
     }
   }, [isAuthLoading, isAuthenticated])
+
+  // Handle data fetch errors
+  useEffect(() => {
+    if (purchasesError) {
+      const errorMessage = purchasesError instanceof Error ? purchasesError.message : 'Gagal memuat data pembelian'
+      toast.error(errorMessage)
+    }
+  }, [purchasesError])
 
   const handlePurchaseSubmit = async (formData: {
     ingredient_id: string;

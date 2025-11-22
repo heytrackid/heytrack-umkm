@@ -2,98 +2,12 @@
 
 import { useCallback, useState } from 'react'
 
-import { useSupabaseCRUD } from '@/hooks/supabase/index'
-import { useToast } from '@/hooks/use-toast'
-
-import type { Database } from '@/types/database'
 
 
 
-/**
- * Generic CRUD hook for common operations
- */
-type TablesMap = Database['public']['Tables']
 
-type TableInsert<TTable extends keyof TablesMap> = TablesMap[TTable]['Insert']
-type TableUpdate<TTable extends keyof TablesMap> = TablesMap[TTable]['Update']
 
- 
-export function useGenericCRUD<TTable extends keyof TablesMap>(tableName: TTable) {
-  const { create: createRecord, update: updateRecord, remove: deleteRecord } = useSupabaseCRUD(tableName)
-  const { toast } = useToast()
 
-  const [loading, setLoading] = useState(false)
-
-  const create = useCallback(async (data: TableInsert<TTable>) => {
-    setLoading(true)
-    try {
-      const result = await createRecord(data as never) // Type assertion for Supabase
-      toast({
-        title: "Berhasil",
-        description: "Data berhasil ditambahkan",
-      })
-      return result
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Gagal menambahkan data",
-        variant: "destructive",
-      })
-      throw error
-    } finally {
-      setLoading(false)
-    }
-  }, [createRecord, toast])
-
-  const update = useCallback(async (id: string, data: TableUpdate<TTable>) => {
-    setLoading(true)
-    try {
-      const result = await updateRecord(id, data as never) // Type assertion for Supabase
-      toast({
-        title: "Berhasil",
-        description: "Data berhasil diperbarui",
-      })
-      return result
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Gagal memperbarui data",
-        variant: "destructive",
-      })
-      throw error
-    } finally {
-      setLoading(false)
-    }
-  }, [updateRecord, toast])
-
-  const remove = useCallback(async (id: string) => {
-    setLoading(true)
-    try {
-      const result = await deleteRecord(id)
-      toast({
-        title: "Berhasil",
-        description: "Data berhasil dihapus",
-      })
-      return result
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Gagal menghapus data",
-        variant: "destructive",
-      })
-      throw error
-    } finally {
-      setLoading(false)
-    }
-  }, [deleteRecord, toast])
-
-  return {
-    create,
-    update,
-    remove,
-    loading,
-  }
-}
 
 /**
  * Hook for confirmation dialogs

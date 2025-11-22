@@ -1,22 +1,22 @@
 export const runtime = 'nodejs'
-
-import { isErrorResponse, requireAuth } from '@/lib/api-auth'
-import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
-import { createClient } from '@/utils/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
+
+import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { z } from 'zod'
+
+const UpdateOnboardingSchema = z.object({
+  current_step: z.number().optional(),
+  steps_completed: z.array(z.string()).optional(),
+  completed: z.boolean().optional(),
+  skipped: z.boolean().optional(),
+})
 
 // GET /api/onboarding - Get onboarding status
-async function getHandler(_request: NextRequest): Promise<NextResponse> {
-  try {
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
+async function getOnboardingHandler(context: RouteContext) {
+  const { user, supabase } = context
 
-    const supabase = await createClient()
+  try {
 
     // Get or create onboarding record
     const { data: onboarding, error } = await supabase
@@ -60,27 +60,23 @@ async function getHandler(_request: NextRequest): Promise<NextResponse> {
 }
 
 // PATCH /api/onboarding - Update onboarding progress
-async function patchHandler(request: NextRequest): Promise<NextResponse> {
+async function updateOnboardingHandler(context: RouteContext, _query?: never, body?: z.infer<typeof UpdateOnboardingSchema>) {
+  const { user, supabase } = context
+
+  if (!body) {
+    return handleAPIError(new Error('Request body is required'), 'API Route')
+  }
+
   try {
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
-
-    const body = await request.json()
-    const { current_step, steps_completed, completed, skipped } = body
-
-    const supabase = await createClient()
 
     const updateData: Record<string, unknown> = {}
-    if (typeof current_step === 'number') updateData['current_step'] = current_step
-    if (Array.isArray(steps_completed)) updateData['steps_completed'] = steps_completed
-    if (typeof completed === 'boolean') {
-      updateData['completed'] = completed
-      if (completed) updateData['completed_at'] = new Date().toISOString()
+    if (typeof body.current_step === 'number') updateData['current_step'] = body.current_step
+    if (Array.isArray(body.steps_completed)) updateData['steps_completed'] = body.steps_completed
+    if (typeof body.completed === 'boolean') {
+      updateData['completed'] = body.completed
+      if (body.completed) updateData['completed_at'] = new Date().toISOString()
     }
-    if (typeof skipped === 'boolean') updateData['skipped'] = skipped
+    if (typeof body.skipped === 'boolean') updateData['skipped'] = body.skipped
 
     const { data, error } = await supabase
       .from('user_onboarding')
@@ -107,5 +103,12 @@ async function patchHandler(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-export const GET = createSecureHandler(getHandler, 'GET /api/onboarding', SecurityPresets.enhanced())
-export const PATCH = createSecureHandler(patchHandler, 'PATCH /api/onboarding', SecurityPresets.enhanced())
+export const GET = createApiRoute(
+  { method: 'GET', path: '/api/onboarding' },
+  getOnboardingHandler
+)
+
+export const PATCH = createApiRoute(
+  { method: 'PATCH', path: '/api/onboarding', bodySchema: UpdateOnboardingSchema },
+  updateOnboardingHandler
+)

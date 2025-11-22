@@ -8,8 +8,12 @@ type IngredientPurchaseBase = Row<'ingredient_purchases'>
 type Ingredient = Row<'ingredients'>
 
 // Re-export base type with relations
-export interface IngredientPurchase extends IngredientPurchaseBase {
+export interface IngredientPurchase extends Omit<IngredientPurchaseBase, 'supplier'> {
   ingredient?: Pick<Ingredient, 'id' | 'name' | 'unit'>
+  supplier?: {
+    id: string
+    name: string
+  } | string | null
 }
 
 export interface PurchaseFormData {

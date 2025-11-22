@@ -1,11 +1,19 @@
-import { NextResponse } from 'next/server'
+// External libraries
 import { z } from 'zod'
 
+// Internal modules
 import { createApiRoute } from '@/lib/api/route-factory'
 import { buildRecipeCostPreview } from '@/lib/costs/cost-calculations'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import { createSuccessResponse } from '@/lib/api-core/responses'
+
+// Types and schemas
 import { isRecipeCostRecord } from '@/types/recipes/cost'
 import type { RecipeCostPreview, RecipeCostRecord } from '@/types/recipes/cost'
+
+// Constants and config
+export const runtime = 'nodejs'
 
 const CostPreviewsRequestSchema = z.object({
   recipeIds: z.array(z.string()),
@@ -28,7 +36,7 @@ export const POST = createApiRoute(
     const { recipeIds } = body as CostPreviewsRequest
 
     if (!recipeIds || recipeIds.length === 0) {
-      return NextResponse.json({})
+      return createSuccessResponse({})
     }
 
     try {
@@ -68,13 +76,10 @@ export const POST = createApiRoute(
         result[recipe.id] = buildRecipeCostPreview(recipe)
       }
 
-      return NextResponse.json(result)
+      return createSuccessResponse(result)
     } catch (error) {
       apiLogger.error({ error }, 'Failed to build recipe cost previews')
-      return NextResponse.json(
-        { error: 'Internal server error' },
-        { status: 500 }
-      )
+      return handleAPIError(new Error('Internal server error'), 'API Route')
     }
   }
 )

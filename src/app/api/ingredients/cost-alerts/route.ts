@@ -1,8 +1,15 @@
+// External libraries
 import { NextResponse } from 'next/server'
 
+// Internal modules
 import { createApiRoute } from '@/lib/api/route-factory'
-import { apiLogger } from '@/lib/logger'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
+
+// Types and schemas
 import type { CostChangeAlert } from '@/types/recipes/cost'
+
+// Constants and config
+export const runtime = 'nodejs'
 
 type IngredientWithPricingRelations = {
   id: string
@@ -149,11 +156,7 @@ export const GET = createApiRoute(
 
       return NextResponse.json({ alerts })
     } catch (error) {
-      apiLogger.error({ error }, 'Error fetching ingredient cost alerts')
-      return NextResponse.json(
-        { error: 'Internal server error' },
-        { status: 500 }
-      )
+      return handleAPIError(error, 'GET /api/ingredients/cost-alerts')
     }
   }
 )

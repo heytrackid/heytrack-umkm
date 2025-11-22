@@ -100,17 +100,17 @@ class ErrorMonitoringService {
 
     const errorEvent: ErrorEvent = {
       message: error.message,
-      stack: error.stack,
+      ...(error.stack && { stack: error.stack }),
       name: error.name,
       timestamp: new Date().toISOString(),
-      _context: context.extra,
-      _user: context._user,
+      ...((context.extra && { _context: context.extra }) || {}),
+      ...(context._user && { _user: context._user }),
       tags,
       level: context.level ?? 'error',
-      url: typeof window !== 'undefined' ? window.location.href : undefined,
-      userAgent: typeof window !== 'undefined' 
-        ? window.navigator.userAgent 
-        : undefined,
+      ...(typeof window !== 'undefined' && {
+        url: window.location.href,
+        userAgent: window.navigator.userAgent,
+      }),
     }
 
     // Apply beforeSend hook if provided
@@ -156,14 +156,14 @@ class ErrorMonitoringService {
     const errorEvent: ErrorEvent = {
       message,
       timestamp: new Date().toISOString(),
-      _context: _context.extra,
-      _user: _context._user,
+      ...(_context.extra && { _context: _context.extra }),
+      ...(_context._user && { _user: _context._user }),
       tags,
       level,
-      url: typeof window !== 'undefined' ? window.location.href : undefined,
-      userAgent: typeof window !== 'undefined' 
-        ? window.navigator.userAgent 
-        : undefined,
+      ...(typeof window !== 'undefined' && {
+        url: window.location.href,
+        userAgent: window.navigator.userAgent,
+      }),
     }
 
     const processedEvent = this.config.beforeSend?.(errorEvent) ?? errorEvent

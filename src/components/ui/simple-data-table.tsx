@@ -268,7 +268,7 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
     header: col.header,
     accessor: col.key,
     cell: createCellRenderer(col)
-  }))
+  })).filter((col): col is { header: string; accessor: keyof T; cell: (item: T) => ReactNode } => col.cell !== undefined)
 
   // Add actions column if needed
   const actionsCell = createActionsCell(onView, onEdit, onDelete)

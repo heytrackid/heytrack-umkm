@@ -45,22 +45,22 @@ export type {
   PriorityLevel
 } from './config/production.config'
 
-// Service hooks
-export {
-  useProductionBatches,
-  useQualityChecks,
-  useProductionEquipment,
-  useProductionStaff,
-  useIngredientAllocations,
-  useBatchScheduling,
-  useProductionCapacity,
-  useBatchStatus,
-  useProductionAnalytics,
-  useProductionNotifications,
-  useTemperatureMonitoring,
-  useProductionCurrency,
-  useBatchValidation
-} from './hooks/use-production'
+// Service hooks - temporarily disabled due to useSupabaseCRUD removal
+// export {
+//   useProductionBatches,
+//   useQualityChecks,
+//   useProductionEquipment,
+//   useProductionStaff,
+//   useIngredientAllocations,
+//   useBatchScheduling,
+//   useProductionCapacity,
+//   useBatchStatus,
+//   useProductionAnalytics,
+//   useProductionNotifications,
+//   useTemperatureMonitoring,
+//   useProductionCurrency,
+//   useBatchValidation
+// } from './hooks/use-production'
 
 // Module metadata
 export const PRODUCTION_MODULE_INFO = {

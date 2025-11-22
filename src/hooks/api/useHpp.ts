@@ -1,5 +1,6 @@
 import type { HppCalculationInput, HppRecommendationInput, HppRecommendationUpdate } from '@/lib/validations/domains/hpp'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 import { buildApiUrl, deleteApi, fetchApi, patchApi, postApi } from '@/lib/query/query-helpers'
 import { queryConfig } from '@/lib/query/query-config'
@@ -156,3 +157,121 @@ export function useDeleteHppRecommendation() {
     },
   })
 }
+
+// Pricing Assistant
+export interface PricingRecommendation {
+  recipeId: string
+  currentPrice: number
+  recommendedPrice: number
+  hppValue: number
+  minPrice: number
+  maxPrice: number
+  optimalMargin: number
+  reasoning: string[]
+  confidence: number
+  marketFactors: {
+    competitorPrices: number[]
+    demandLevel: 'high' | 'low' | 'medium'
+    seasonality: 'low' | 'normal' | 'peak'
+    category: string
+  }
+  riskAssessment: {
+    riskLevel: 'high' | 'low' | 'medium'
+    riskFactors: string[]
+  }
+}
+
+export function usePricingAssistant() {
+  return useMutation({
+    mutationFn: (recipeId: string): Promise<PricingRecommendation> => postApi('/api/hpp/pricing-assistant', { recipeId }),
+    onSuccess: () => {
+      // Optional: could invalidate related queries if needed
+    },
+  })
+}
+
+export function useCalculateAllHpp() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (): Promise<void> => patchApi('/api/hpp/calculate'),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['hpp'] })
+      toast.success('Semua biaya produksi berhasil dihitung')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Gagal menghitung biaya')
+    },
+  })
+}
+
+// HPP Comparison
+export interface HppComparisonItem {
+  recipe_id: string
+  recipe_name: string
+  current_hpp: number
+  previous_hpp: number
+  change_percentage: number
+  change_type: 'increase' | 'decrease' | 'stable'
+  last_updated: string
+}
+
+export function useHppComparison(options?: { days?: number }) {
+  return useQuery({
+    queryKey: ['hpp', 'comparison', options],
+    queryFn: (): Promise<HppComparisonItem[]> => {
+      const params = new URLSearchParams()
+      if (options?.days) params.set('days', options.days.toString())
+
+      return fetchApi(`/api/hpp/comparison?${params}`)
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+}
+
+// Recipe Comparison for analytics page
+export interface RecipeComparison {
+  id: string
+  name: string
+  category: string
+  hppValue: number
+  sellingPrice: number
+  margin: number
+  marginPercentage: number
+  timesMade: number
+  lastMade: string | null
+  profitability: 'high' | 'low' | 'medium'
+  efficiency: 'high' | 'low' | 'medium'
+}
+
+export interface BenchmarkData {
+  averageHpp: number
+  averageMargin: number
+  averagePrice: number
+  topPerformer: RecipeComparison | null
+  worstPerformer: RecipeComparison | null
+  totalRevenue: number
+  totalProduction: number
+}
+
+export interface RecipeComparisonData {
+  recipes: RecipeComparison[]
+  benchmark: BenchmarkData
+}
+
+export function useRecipeComparison(options?: { category?: string }) {
+  return useQuery({
+    queryKey: ['recipe-comparison', options],
+    queryFn: (): Promise<RecipeComparisonData> => {
+      const params = new URLSearchParams()
+      if (options?.category && options.category !== 'all') {
+        params.append('category', options.category)
+      }
+
+      return fetchApi(`/api/hpp/comparison?${params}`)
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+}
+
+

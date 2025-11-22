@@ -47,7 +47,7 @@ export class ChatSessionService {
       .from('chat_sessions')
       .insert({
         user_id: userId,
-        title,
+        ...(title && { title }),
         context_snapshot: serializedSnapshot,
       })
       .select()
@@ -134,7 +134,6 @@ export class ChatSessionService {
         created_at: session.created_at ?? new Date().toISOString(),
         updated_at: session.updated_at ?? new Date().toISOString(),
         message_count: 0,
-        last_message: undefined,
       });
     });
 
@@ -219,10 +218,13 @@ export class ChatSessionService {
       : 0
 
     // Calculate user satisfaction based on conversation patterns
-    const mappedMessages = (messages ?? []).map(m => ({
-      role: m.role || 'unknown',
-      content: m.content || undefined
-    }))
+    const mappedMessages = (messages ?? []).map(m => {
+      const msg: { role: string; content?: string } = {
+        role: m.role || 'unknown',
+      }
+      if (m.content) msg.content = m.content
+      return msg
+    })
     const userSatisfaction = this.calculateUserSatisfaction(mappedMessages)
 
     return {

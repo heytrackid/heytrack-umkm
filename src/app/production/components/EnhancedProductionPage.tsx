@@ -1,7 +1,7 @@
 'use client'
 
 import { BarChart3, Calendar, CheckCircle, Clock, Download, Factory, Filter, Package, Play, Plus, Search, TrendingUp, XCircle } from '@/components/icons'
-import { useProductionBatches } from '@/hooks/useProduction'
+import { useProductionBatches, useUpdateProductionBatch } from '@/hooks/useProductionBatches'
 import { useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
@@ -18,7 +18,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useResponsive } from '@/hooks/useResponsive'
-import { apiLogger } from '@/lib/logger'
 
 
 // Lazy load the ProductionFormDialog component as it's heavy
@@ -159,42 +158,26 @@ const EnhancedProductionPage = () => {
         )
     }
 
-    const handleStartProduction = async (id: string) => {
-        try {
-            const response = await fetch(`/api/production-batches/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    status: 'IN_PROGRESS',
-                    started_at: new Date().toISOString()
-                })
-            })
+    const updateProductionBatchMutation = useUpdateProductionBatch()
 
-            if (response.ok) {
-                queryClient.invalidateQueries({ queryKey: ['production-batches'] })
+    const handleStartProduction = async (id: string) => {
+        await updateProductionBatchMutation.mutateAsync({
+            id,
+            data: {
+                status: 'IN_PROGRESS',
+                started_at: new Date().toISOString()
             }
-        } catch (error) {
-            apiLogger.error({ error }, 'Error starting production')
-        }
+        })
     }
 
     const handleCompleteProduction = async (id: string) => {
-        try {
-            const response = await fetch(`/api/production-batches/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    status: 'COMPLETED',
-                    completed_at: new Date().toISOString()
-                })
-            })
-
-            if (response.ok) {
-                queryClient.invalidateQueries({ queryKey: ['production-batches'] })
+        await updateProductionBatchMutation.mutateAsync({
+            id,
+            data: {
+                status: 'COMPLETED',
+                completed_at: new Date().toISOString()
             }
-        } catch (error) {
-            apiLogger.error({ error }, 'Error completing production')
-        }
+        })
     }
 
     if (loading) {

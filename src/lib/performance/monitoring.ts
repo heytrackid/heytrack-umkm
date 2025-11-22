@@ -346,14 +346,17 @@ export function useNetworkMonitor() {
       const nav = navigator as NavigatorWithConnection
       const connection = nav.connection ?? nav.mozConnection ?? nav.webkitConnection
 
-      setNetworkInfo({
+      const networkInfo: any = {
         isOnline: navigator.onLine,
-        connection: connection ? {
+      }
+      if (connection) {
+        networkInfo.connection = {
           effectiveType: connection.effectiveType,
           downlink: connection.downlink,
           rtt: connection.rtt
-        } : undefined
-      })
+        }
+      }
+      setNetworkInfo(networkInfo)
     }
 
     updateNetworkInfo()

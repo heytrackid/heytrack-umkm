@@ -37,9 +37,10 @@ export class EnhancedErrorLogger {
     context?: ErrorContext,
     additionalData?: Record<string, unknown>
   ): void {
+    const stack = this.getErrorStack(error);
     const log: ErrorLog = {
       message: this.getErrorMessage(error),
-      stack: this.getErrorStack(error),
+      ...(stack && { stack }),
       context: context ?? {},
       timestamp: new Date().toISOString(),
       level: 'error',
@@ -58,9 +59,10 @@ export class EnhancedErrorLogger {
     context?: ErrorContext,
     additionalData?: Record<string, unknown>
   ): void {
+    const stack = this.getErrorStack(error);
     const log: ErrorLog = {
       message: this.getErrorMessage(error),
-      stack: this.getErrorStack(error),
+      ...(stack && { stack }),
       context: context ?? {},
       timestamp: new Date().toISOString(),
       level: 'error',
@@ -79,9 +81,10 @@ export class EnhancedErrorLogger {
     context?: ErrorContext,
     additionalData?: Record<string, unknown>
   ): void {
+    const stack = this.getErrorStack(error);
     const log: ErrorLog = {
       message: this.getErrorMessage(error),
-      stack: this.getErrorStack(error),
+      ...(stack && { stack }),
       context: context ?? {},
       timestamp: new Date().toISOString(),
       level: 'error',
@@ -133,12 +136,13 @@ export class EnhancedErrorLogger {
    */
   static createContextFromRequest(request: Request): ErrorContext {
     const url = new URL(request.url);
+    const userAgent = request['headers'].get('user-agent');
+    const ipAddress = request['headers'].get('x-forwarded-for')?.split(',')[0] ??
+                      request['headers'].get('x-real-ip');
     return {
       url: url.toString(),
-      userAgent: request['headers'].get('user-agent') ?? undefined,
-      ipAddress: request['headers'].get('x-forwarded-for')?.split(',')[0] ?? 
-                 request['headers'].get('x-real-ip') ?? 
-                 undefined,
+      ...(userAgent && { userAgent }),
+      ...(ipAddress && { ipAddress }),
     };
   }
 

@@ -10,7 +10,7 @@ import { Loader2, Sparkles } from '@/components/icons'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
-import { useCreateRecipe } from '@/hooks/useRecipes'
+
 import { useMutation } from '@tanstack/react-query'
 import { postApi } from '@/lib/query/query-helpers'
 
@@ -73,7 +73,7 @@ export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps)
     generateRecipeMutation.mutate({
       prompt,
       servings: parseInt(servings),
-      cuisine: cuisine || undefined,
+      ...(cuisine ? { cuisine } : {}),
     })
   }
 

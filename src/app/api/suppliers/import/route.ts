@@ -1,16 +1,14 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
-import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
-import { isErrorResponse, requireAuth } from '@/lib/api-auth'
-import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core/responses'
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
-import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
-import { createClient } from '@/utils/supabase/server'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import type { NextResponse } from 'next/server'
 
 const SupplierImportSchema = z.object({
   name: z.string().min(1),
@@ -28,26 +26,17 @@ const SuppliersImportSchema = z.object({
 })
 
 // POST /api/suppliers/import - Import suppliers from CSV
-async function postHandler(request: NextRequest): Promise<NextResponse> {
+async function postHandler(context: RouteContext, _query?: never, body?: z.infer<typeof SuppliersImportSchema>): Promise<NextResponse> {
+  const { user, supabase, request } = context
+
   try {
     apiLogger.info({ url: request.url }, 'POST /api/suppliers/import - Request received')
 
-    // Authenticate with Stack Auth
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
-
-    const supabase = await createClient()
-    const body = await request.json()
-    const validation = SuppliersImportSchema.safeParse(body)
-
-    if (!validation.success) {
-      return createErrorResponse('Invalid request data', 400, validation.error.issues.map(i => i.message))
+    if (!body) {
+      return handleAPIError(new Error('Request body is required'), 'API Route')
     }
 
-    const { suppliers } = validation.data
+    const { suppliers } = body
 
     const errors: Array<{ row: number; error: string }> = []
     const validSuppliers: Array<{
@@ -85,7 +74,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
           company_type: typeof supplierObj['company_type'] === 'string' ? supplierObj['company_type'].trim() : '',
           payment_terms: typeof supplierObj['payment_terms'] === 'string' ? supplierObj['payment_terms'].trim() : '',
           notes: typeof supplierObj['notes'] === 'string' ? supplierObj['notes'].trim() : '',
-          user_id: user['id']
+          user_id: user.id
         }
 
         validSuppliers.push(supplierData)
@@ -96,11 +85,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
     // If there are validation errors, return them
     if (errors.length > 0) {
-      return NextResponse.json({
-        success: false,
-        error: `Found ${errors.length} validation errors`,
-        details: errors
-      }, { status: 400 })
+      return handleAPIError(new Error(`Found ${errors.length} validation errors`), 'POST /api/suppliers/import')
     }
 
     // Insert suppliers
@@ -111,11 +96,11 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
     if (insertError) {
       apiLogger.error({ error: insertError }, 'POST /api/suppliers/import - Database error')
-      return createErrorResponse('Failed to import suppliers', 500)
+      return handleAPIError(new Error('Failed to import suppliers'), 'API Route')
     }
 
     apiLogger.info({
-      userId: user['id'],
+      userId: user.id,
       count: validSuppliers.length
     }, 'POST /api/suppliers/import - Success')
 
@@ -129,5 +114,12 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-// Apply security middleware
-export const POST = createSecureHandler(postHandler, 'POST /api/suppliers/import', SecurityPresets.enhanced())
+// Apply API route factory
+export const POST = createApiRoute(
+  {
+    method: 'POST',
+    path: '/api/suppliers/import',
+    bodySchema: SuppliersImportSchema
+  },
+  postHandler
+)

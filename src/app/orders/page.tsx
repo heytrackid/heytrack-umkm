@@ -8,7 +8,7 @@ import { TableSkeleton } from '@/components/ui/skeleton-loader'
 
 // Lazy load the heavy orders page component
 const OrdersContent = dynamic(
-  () => import('@/modules/orders/components/OrdersPage')
+  () => import('@/modules/orders/components/OrdersPage/index')
     .then(m => ({ default: m.OrdersPage }))
     .catch(() => {
       return { default: () => <div className="p-4 text-center text-red-600">Failed to load orders page</div> }

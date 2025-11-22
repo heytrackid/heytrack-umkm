@@ -1,7 +1,7 @@
 'use client'
 
 import { BarChart3, Package, Target, TrendingDown, TrendingUp, Users } from '@/components/icons'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { SharedStatsCards } from '@/components/shared/index'
@@ -12,80 +12,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { toast } from 'sonner'
+
 import { useCurrency } from '@/hooks/useCurrency'
-import { dbLogger } from '@/lib/logger'
+import { useRecipeComparison } from '@/hooks/api/useHpp'
+
 // No imports needed for now
 
-interface RecipeComparison {
-  id: string
-  name: string
-  category: string
-  hppValue: number
-  sellingPrice: number
-  margin: number
-  marginPercentage: number
-  timesMade: number
-  lastMade: string | null
-  profitability: 'high' | 'low' | 'medium'
-  efficiency: 'high' | 'low' | 'medium'
-}
 
-interface BenchmarkData {
-  averageHpp: number
-  averageMargin: number
-  averagePrice: number
-  topPerformer: RecipeComparison | null
-  worstPerformer: RecipeComparison | null
-  totalRevenue: number
-  totalProduction: number
-}
+
+
 
 const ComparisonAnalyticsPage = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
-  const [recipes, setRecipes] = useState<RecipeComparison[]>([])
-  const [benchmark, setBenchmark] = useState<BenchmarkData | null>(null)
-  const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [sortBy, setSortBy] = useState<string>('margin')
 
-  // Load comparison data
-  useEffect(() => {
-    void loadComparisonData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCategory])
+  const { data, isLoading: loading } = useRecipeComparison({ category: selectedCategory })
+  const recipes = data?.recipes || []
+  const benchmark = data?.benchmark || null
 
-  const loadComparisonData = async (): Promise<void> => {
-    try {
-      setLoading(true)
 
-      // Get recipes with HPP data
-     const params = new URLSearchParams()
-     if (selectedCategory !== 'all') {
-       params.append('category', selectedCategory)
-     }
-     // Forward date range params if present
-     const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
-     const from = urlParams?.get('from')
-     const to = urlParams?.get('to')
-     if (from) params.set('from', from)
-     if (to) params.set('to', to)
-
-     const response = await fetch(`/api/hpp/comparison?${params.toString()}`, {
-        credentials: 'include', // Include cookies for authentication
-      })
-      if (response.ok) {
-        const data = await response.json() as { recipes?: RecipeComparison[]; benchmark?: BenchmarkData }
-        setRecipes(data.recipes ?? [])
-        setBenchmark(data.benchmark ?? null)
-      }
-    } catch (_error) {
-      dbLogger.error({ _error }, 'Failed to load comparison data')
-      toast.error('Failed to load comparison data')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const getProfitabilityColor = (profitability: string) => {
     switch (profitability) {

@@ -1,79 +1,88 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchApi, buildApiUrl } from '@/lib/query/query-helpers'
-
-import { useToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
-import { getErrorMessage } from '@/lib/type-guards'
+import type { Insert, Row, Update } from '@/types/database'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { fetchApi, postApi, putApi, deleteApi } from '@/lib/query/query-helpers'
+import { toast } from 'sonner'
 
-import type { Row, Insert, Update } from '@/types/database'
-
-const logger = createClientLogger('IngredientPurchases')
+const logger = createClientLogger('useIngredientPurchases')
 
 type IngredientPurchase = Row<'ingredient_purchases'>
 type IngredientPurchaseInsert = Insert<'ingredient_purchases'>
 type IngredientPurchaseUpdate = Update<'ingredient_purchases'>
 
-interface UseIngredientPurchasesOptions {
-  limit?: number
-  offset?: number
-  ingredientId?: string
+interface IngredientPurchaseWithDetails extends Omit<IngredientPurchase, 'supplier'> {
+  ingredient?: {
+    id: string
+    name: string
+    unit: string
+  }
+  supplier?: {
+    id: string
+    name: string
+  } | string | null
+}
+
+interface PurchaseStats {
+  total_purchases: number
+  total_amount: number
+  average_price: number
+  top_suppliers: Array<{
+    supplier_id: string
+    supplier_name: string
+    total_purchases: number
+    total_amount: number
+  }>
 }
 
 /**
- * Fetch ingredient purchases with caching
+ * Get all ingredient purchases
  */
-export function useIngredientPurchases(options?: UseIngredientPurchasesOptions) {
-  return useQuery({
-    queryKey: ['ingredient-purchases', options],
-    queryFn: async () => {
-      const result = await fetchApi<{ ingredient_purchases?: IngredientPurchase[] }>(buildApiUrl('/ingredient-purchases', options as Record<string, string | number | boolean | null | undefined>))
-      return result?.ingredient_purchases ?? []
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+export function useIngredientPurchases(params?: {
+  ingredientId?: string
+  supplierId?: string
+  startDate?: string
+  endDate?: string
+}) {
+  const searchParams = new URLSearchParams()
+  if (params?.ingredientId) searchParams.append('ingredient_id', params.ingredientId)
+  if (params?.supplierId) searchParams.append('supplier_id', params.supplierId)
+  if (params?.startDate) searchParams.append('start_date', params.startDate)
+  if (params?.endDate) searchParams.append('end_date', params.endDate)
+
+  return useQuery<IngredientPurchaseWithDetails[]>({
+    queryKey: ['ingredient-purchases', params],
+    queryFn: () => fetchApi<IngredientPurchaseWithDetails[]>(`/api/ingredient-purchases?${searchParams}`),
   })
 }
 
 /**
- * Create ingredient purchase
+ * Get single ingredient purchase by ID
+ */
+export function useIngredientPurchase(id: string | null) {
+  return useQuery<IngredientPurchaseWithDetails>({
+    queryKey: ['ingredient-purchase', id],
+    queryFn: () => fetchApi<IngredientPurchaseWithDetails>(`/api/ingredient-purchases/${id}`),
+    enabled: !!id,
+  })
+}
+
+/**
+ * Create new ingredient purchase
  */
 export function useCreateIngredientPurchase() {
   const queryClient = useQueryClient()
-  const { toast } = useToast()
 
   return useMutation({
-    mutationFn: async (data: IngredientPurchaseInsert) => {
-      const response = await fetch('/api/ingredient-purchases', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-        credentials: 'include',
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message ?? 'Gagal menambahkan pembelian bahan')
-      }
-
-      return response.json()
-    },
+    mutationFn: (data: Omit<IngredientPurchaseInsert, 'user_id'>) => postApi<IngredientPurchase>('/api/ingredient-purchases', data),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['ingredient-purchases'] })
-
-      toast({
-        title: 'Berhasil ✓',
-        description: 'Pembelian bahan berhasil ditambahkan',
-      })
+      queryClient.invalidateQueries({ queryKey: ['ingredient-purchases'] })
+      queryClient.invalidateQueries({ queryKey: ['ingredients'] })
+      queryClient.invalidateQueries({ queryKey: ['purchase-stats'] })
+      toast.success('Pembelian bahan berhasil dicatat')
     },
-    onError: (error: unknown) => {
-      const message = getErrorMessage(error)
-      logger.error({ error: message }, 'Gagal menambahkan pembelian bahan')
-
-      toast({
-        title: 'Error',
-        description: message || 'Gagal menambahkan pembelian bahan',
-        variant: 'destructive',
-      })
+    onError: (error) => {
+      logger.error({ error }, 'Failed to create ingredient purchase')
+      toast.error('Gagal mencatat pembelian bahan')
     },
   })
 }
@@ -83,42 +92,18 @@ export function useCreateIngredientPurchase() {
  */
 export function useUpdateIngredientPurchase() {
   const queryClient = useQueryClient()
-  const { toast } = useToast()
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: IngredientPurchaseUpdate }) => {
-      const response = await fetch(`/api/ingredient-purchases/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-        credentials: 'include',
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message ?? 'Gagal memperbarui pembelian bahan')
-      }
-
-      return response.json()
+    mutationFn: ({ id, data }: { id: string; data: Partial<IngredientPurchaseUpdate> }) => putApi<IngredientPurchase>(`/api/ingredient-purchases/${id}`, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['ingredient-purchases'] })
+      queryClient.invalidateQueries({ queryKey: ['ingredient-purchase', id] })
+      queryClient.invalidateQueries({ queryKey: ['purchase-stats'] })
+      toast.success('Pembelian bahan berhasil diperbarui')
     },
-    onSuccess: (_, variables) => {
-      void queryClient.invalidateQueries({ queryKey: ['ingredient-purchase', variables['id']] })
-      void queryClient.invalidateQueries({ queryKey: ['ingredient-purchases'] })
-
-      toast({
-        title: 'Berhasil ✓',
-        description: 'Pembelian bahan berhasil diperbarui',
-      })
-    },
-    onError: (error: unknown) => {
-      const message = getErrorMessage(error)
-      logger.error({ error: message }, 'Gagal memperbarui pembelian bahan')
-
-      toast({
-        title: 'Error',
-        description: message || 'Gagal memperbarui pembelian bahan',
-        variant: 'destructive',
-      })
+    onError: (error) => {
+      logger.error({ error }, 'Failed to update ingredient purchase')
+      toast.error('Gagal memperbarui pembelian bahan')
     },
   })
 }
@@ -128,39 +113,42 @@ export function useUpdateIngredientPurchase() {
  */
 export function useDeleteIngredientPurchase() {
   const queryClient = useQueryClient()
-  const { toast } = useToast()
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      const response = await fetch(`/api/ingredient-purchases/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message ?? 'Gagal menghapus pembelian bahan')
-      }
-
-      return response.json()
-    },
+    mutationFn: (id: string) => deleteApi(`/api/ingredient-purchases/${id}`),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['ingredient-purchases'] })
-
-      toast({
-        title: 'Berhasil ✓',
-        description: 'Pembelian bahan berhasil dihapus',
-      })
+      queryClient.invalidateQueries({ queryKey: ['ingredient-purchases'] })
+      queryClient.invalidateQueries({ queryKey: ['purchase-stats'] })
+      toast.success('Pembelian bahan berhasil dihapus')
     },
-    onError: (error: unknown) => {
-      const message = getErrorMessage(error)
-      logger.error({ error: message }, 'Gagal menghapus pembelian bahan')
-
-      toast({
-        title: 'Error',
-        description: message || 'Gagal menghapus pembelian bahan',
-        variant: 'destructive',
-      })
+    onError: (error) => {
+      logger.error({ error }, 'Failed to delete ingredient purchase')
+      toast.error('Gagal menghapus pembelian bahan')
     },
+  })
+}
+
+/**
+ * Get purchase statistics
+ */
+export function usePurchaseStats(params?: { startDate?: string; endDate?: string }) {
+  const searchParams = new URLSearchParams()
+  if (params?.startDate) searchParams.append('start_date', params.startDate)
+  if (params?.endDate) searchParams.append('end_date', params.endDate)
+
+  return useQuery<PurchaseStats>({
+    queryKey: ['purchase-stats', params],
+    queryFn: () => fetchApi<PurchaseStats>(`/api/ingredient-purchases/stats?${searchParams}`),
+  })
+}
+
+/**
+ * Get purchase history for ingredient
+ */
+export function useIngredientPurchaseHistory(ingredientId: string | null) {
+  return useQuery<IngredientPurchaseWithDetails[]>({
+    queryKey: ['ingredient-purchase-history', ingredientId],
+    queryFn: () => fetchApi<IngredientPurchaseWithDetails[]>(`/api/ingredients/${ingredientId}/purchase-history`),
+    enabled: !!ingredientId,
   })
 }

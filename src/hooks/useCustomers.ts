@@ -1,10 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { createClientLogger } from '@/lib/client-logger'
+import { queryConfig } from '@/lib/query/query-config'
+import { buildApiUrl, fetchApi, postApi, putApi, deleteApi } from '@/lib/query/query-helpers'
 import { getErrorMessage } from '@/lib/type-guards'
-import { fetchApi, buildApiUrl } from '@/lib/query/query-helpers'
-import { cachePresets } from '@/lib/query/query-config'
-import type { Insert, Update, Row } from '@/types/database'
+import type { Insert, Row, Update } from '@/types/database'
 
 /**
  * React Query hooks for Customers
@@ -27,8 +27,8 @@ type CustomerUpdate = Update<'customers'>
 export function useCustomers(options?: UseCustomersOptions) {
   return useQuery({
     queryKey: ['customers', options],
-    queryFn: () => fetchApi<Customer[]>(buildApiUrl('/customers', options as Record<string, string | number | boolean | null | undefined>)),
-    ...cachePresets.moderatelyUpdated,
+    queryFn: () => fetchApi<Customer[]>(buildApiUrl('/api/customers', options as Record<string, string | number | boolean | null | undefined>)),
+    ...queryConfig.queries.moderate,
   })
 }
 
@@ -55,39 +55,7 @@ export function useCreateCustomer() {
   const logger = createClientLogger('useCreateCustomer')
 
   return useMutation({
-    mutationFn: async (data: CustomerInsert) => {
-      const abortController = new AbortController()
-      const timeoutId = setTimeout(() => abortController.abort(), 30000)
-
-      try {
-        const response = await fetch('/api/customers', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-          credentials: 'include',
-          signal: abortController.signal,
-        })
-
-        clearTimeout(timeoutId)
-
-        if (!response.ok) {
-          const error = await response.json()
-          throw new Error(error.message ?? 'Failed to create customer')
-        }
-
-        const result = await response.json()
-        if (!result.success) {
-          throw new Error(result.error ?? 'Failed to create customer')
-        }
-        return result.data
-      } catch (error) {
-        clearTimeout(timeoutId)
-        if (error instanceof Error && error.name === 'AbortError') {
-          throw new Error('Request timeout - please try again')
-        }
-        throw error
-      }
-    },
+    mutationFn: (data: Omit<CustomerInsert, 'user_id'>) => postApi<Customer>('/api/customers', data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['customers'] })
 
@@ -108,39 +76,7 @@ export function useUpdateCustomer() {
   const logger = createClientLogger('useUpdateCustomer')
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: CustomerUpdate }) => {
-      const abortController = new AbortController()
-      const timeoutId = setTimeout(() => abortController.abort(), 30000)
-
-      try {
-        const response = await fetch(`/api/customers/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-          credentials: 'include',
-          signal: abortController.signal,
-        })
-
-        clearTimeout(timeoutId)
-
-        if (!response.ok) {
-          const error = await response.json()
-          throw new Error(error.message ?? 'Failed to update customer')
-        }
-
-        const result = await response.json()
-        if (!result.success) {
-          throw new Error(result.error ?? 'Failed to update customer')
-        }
-        return result.data
-      } catch (error) {
-        clearTimeout(timeoutId)
-        if (error instanceof Error && error.name === 'AbortError') {
-          throw new Error('Request timeout - please try again')
-        }
-        throw error
-      }
-    },
+    mutationFn: ({ id, data }: { id: string; data: CustomerUpdate }) => putApi<Customer>(`/api/customers/${id}`, data),
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({ queryKey: ['customer', variables.id] })
       void queryClient.invalidateQueries({ queryKey: ['customers'] })
@@ -162,37 +98,7 @@ export function useDeleteCustomer() {
   const logger = createClientLogger('useDeleteCustomer')
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      const abortController = new AbortController()
-      const timeoutId = setTimeout(() => abortController.abort(), 30000)
-
-      try {
-        const response = await fetch(`/api/customers/${id}`, {
-          method: 'DELETE',
-          credentials: 'include',
-          signal: abortController.signal,
-        })
-
-        clearTimeout(timeoutId)
-
-        if (!response.ok) {
-          const error = await response.json()
-          throw new Error(error.message ?? 'Failed to delete customer')
-        }
-
-        const result = await response.json()
-        if (!result.success) {
-          throw new Error(result.error ?? 'Failed to delete customer')
-        }
-        return result.data
-      } catch (error) {
-        clearTimeout(timeoutId)
-        if (error instanceof Error && error.name === 'AbortError') {
-          throw new Error('Request timeout - please try again')
-        }
-        throw error
-      }
-    },
+    mutationFn: (id: string) => deleteApi(`/api/customers/${id}`),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['customers'] })
 

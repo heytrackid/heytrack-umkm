@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { TableSkeleton } from '@/components/ui/table-skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 
 import type { IngredientPurchase } from '@/app/ingredients/purchases/components/types'
 
@@ -66,7 +66,11 @@ const PurchasesTable = ({ purchases, isLoading = false }: PurchasesTableProps): 
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>{purchase.supplier ?? '-'}</TableCell>
+                    <TableCell>
+                      {typeof purchase.supplier === 'string' 
+                        ? purchase.supplier 
+                        : purchase.supplier?.name ?? '-'}
+                    </TableCell>
                     <TableCell className="text-right">
                       {purchase.quantity} {purchase.ingredient?.unit}
                     </TableCell>

@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { fetchApi } from '@/lib/query/query-helpers'
 
 interface HppOverview {
   totalRecipes: number
@@ -18,16 +19,6 @@ interface HppOverview {
     new_value: number | null
     created_at: string | null
   }>
-}
-
-interface HppAnalytics {
-  totalRecipes: number
-  totalCalculations: number
-  averageHpp: number
-  hppRange: {
-    min: number
-    max: number
-  }
   marginAnalysis: {
     high: number
     medium: number
@@ -48,20 +39,14 @@ interface HppAnalytics {
 export function useHppOverview() {
   return useQuery<HppOverview>({
     queryKey: ['hpp-overview'],
-    queryFn: async () => {
-      const response = await fetch('/api/hpp/overview')
-      if (!response.ok) {
-        throw new Error('Failed to fetch HPP overview')
-      }
-      return response.json()
-    },
+    queryFn: () => fetchApi<HppOverview>('/api/hpp/overview'),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   })
 }
 
 // HPP analytics functionality has been removed
-export function useHppAnalytics(startDate?: string, endDate?: string) {
+export function useHppAnalytics() {
   // Return a mock query that always succeeds with empty data to prevent errors
   return {
     data: null,

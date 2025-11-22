@@ -12,6 +12,7 @@ const logger = createClientLogger('Hook')
 
 import type { Insert, Row, Update } from '@/types/database'
 import type { RecipeWithIngredients } from '@/types/database'
+import type { SmartPricingAnalysis } from '@/types/features/analytics'
 
 /**
  * React Query hooks for Recipes
@@ -153,7 +154,6 @@ export function useUpdateRecipe() {
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
       logger.error({ error: message }, 'Failed to update recipe')
-      
       toast({
         title: 'Error',
         description: message || 'Gagal memperbarui resep',
@@ -162,6 +162,16 @@ export function useUpdateRecipe() {
     },
   })
 }
+
+/**
+ * Hook for recipe pricing analysis
+ */
+export function useRecipePricing() {
+  return useMutation({
+    mutationFn: ({ recipeId, recipe }: { recipeId: string; recipe: Row<'recipes'> }) => postApi<SmartPricingAnalysis>(`/api/recipes/${recipeId}/pricing`, { recipe }),
+  })
+}
+
 
 /**
  * Delete recipe

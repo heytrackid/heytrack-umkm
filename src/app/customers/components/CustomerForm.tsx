@@ -3,9 +3,9 @@
 
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
 import { FileText, Loader2, Mail, MapPin, Percent, Phone, Save, Tag, User, X } from '@/components/icons'
-import { useState } from 'react'
+import { zodResolver } from '@hookform/resolvers/zod'
+
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -16,7 +16,8 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
-import { toast } from 'sonner'
+
+import { useCreateCustomer, useUpdateCustomer } from '@/hooks/useCustomers'
 import { apiLogger } from '@/lib/logger'
 
 import type { Row } from '@/types/database'
@@ -69,7 +70,7 @@ interface CustomerFormProps {
 }
 
 const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps): JSX.Element => {
-    const [isSubmitting, setIsSubmitting] = useState(false)
+
     const isEditMode = Boolean(customer)
 
     const form = useForm<CustomerFormData>({
@@ -87,12 +88,15 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps): JSX
     })
 
     const { register, handleSubmit, formState: { errors }, setValue, watch } = form
+    // eslint-disable-next-line react-hooks/incompatible-library
     const customerType = watch('customer_type')
+     
     const isActive = watch('is_active')
 
-    const onSubmit = handleSubmit(async (data: CustomerFormData) => {
-        setIsSubmitting(true)
+    const createCustomerMutation = useCreateCustomer()
+    const updateCustomerMutation = useUpdateCustomer()
 
+    const onSubmit = handleSubmit(async (data: CustomerFormData) => {
         try {
             // Prepare payload
             const payload = {
@@ -106,35 +110,16 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps): JSX
                 is_active: data.is_active,
             }
 
-            const customerId = customer?.id
-            if (isEditMode && !customerId) {
-              throw new Error('Customer ID required for edit')
+            if (isEditMode && customer?.id) {
+                await updateCustomerMutation.mutateAsync({ id: customer.id, data: payload })
+            } else {
+                await createCustomerMutation.mutateAsync(payload)
             }
-            const url = isEditMode ? `/api/customers/${customerId}` : '/api/customers'
-            const method = isEditMode ? 'PUT' : 'POST'
-
-            const response = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-                credentials: 'include', // Include cookies for authentication
-            })
-
-            if (!response.ok) {
-                const errorData = await response.json() as { error?: string }
-                throw new Error(errorData.error ?? 'Gagal menyimpan data pelanggan')
-            }
-
-            toast.success(isEditMode
-                ? 'Data pelanggan berhasil diperbarui'
-                : 'Pelanggan baru berhasil ditambahkan')
 
             onSuccess()
-        } catch (error: unknown) {
+        } catch (error) {
+            // Error handling is done in mutations
             apiLogger.error({ error }, 'Error saving customer')
-            toast.error(error instanceof Error ? error.message : 'Terjadi kesalahan saat menyimpan data')
-        } finally {
-            setIsSubmitting(false)
         }
     })
 
@@ -328,7 +313,7 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps): JSX
                             type="button"
                             variant="outline"
                             onClick={onCancel}
-                            disabled={isSubmitting}
+                            disabled={createCustomerMutation.isPending || updateCustomerMutation.isPending}
                             className="flex-1"
                         >
                             <X className="h-4 w-4 mr-2" />
@@ -336,10 +321,10 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps): JSX
                         </Button>
                         <Button
                             type="submit"
-                            disabled={isSubmitting}
+                            disabled={createCustomerMutation.isPending || updateCustomerMutation.isPending}
                             className="flex-1"
                         >
-                            {isSubmitting ? (
+                            {(createCustomerMutation.isPending || updateCustomerMutation.isPending) ? (
                                 <>
                                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                                     Menyimpan...

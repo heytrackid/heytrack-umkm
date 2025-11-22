@@ -58,16 +58,17 @@ export class ApiClient {
   async post<T>(endpoint: string, data?: unknown, options?: ApiRequestOptions): Promise<ApiResponse<T>> {
     try {
       const url = this.buildUrl(endpoint, options?.params)
-      const response = await fetch(url, {
+      const requestOptions: RequestInit = {
         ...options,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...options?.headers
         },
-        body: data ? JSON.stringify(data) : undefined,
         credentials: 'include', // Include cookies for authentication
-      })
+        ...(data !== undefined && { body: JSON.stringify(data) })
+      }
+      const response = await fetch(url, requestOptions)
 
       return this.handleResponse<T>(response)
     } catch (error) {
@@ -81,16 +82,17 @@ export class ApiClient {
   async put<T>(endpoint: string, data?: unknown, options?: ApiRequestOptions): Promise<ApiResponse<T>> {
     try {
       const url = this.buildUrl(endpoint, options?.params)
-      const response = await fetch(url, {
+      const requestOptions: RequestInit = {
         ...options,
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           ...options?.headers
         },
-        body: data ? JSON.stringify(data) : undefined,
         credentials: 'include', // Include cookies for authentication
-      })
+        ...(data !== undefined && { body: JSON.stringify(data) })
+      }
+      const response = await fetch(url, requestOptions)
 
       return this.handleResponse<T>(response)
     } catch (error) {
@@ -104,16 +106,17 @@ export class ApiClient {
   async patch<T>(endpoint: string, data?: unknown, options?: ApiRequestOptions): Promise<ApiResponse<T>> {
     try {
       const url = this.buildUrl(endpoint, options?.params)
-      const response = await fetch(url, {
+      const requestOptions: RequestInit = {
         ...options,
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           ...options?.headers
         },
-        body: data ? JSON.stringify(data) : undefined,
         credentials: 'include', // Include cookies for authentication
-      })
+        ...(data !== undefined && { body: JSON.stringify(data) })
+      }
+      const response = await fetch(url, requestOptions)
 
       return this.handleResponse<T>(response)
     } catch (error) {

@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense, type ReactNode } from 'react'
 import Image from 'next/image'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { LoadingSpinner } from '@/components/ui/loading-state'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TableSkeleton } from '@/components/ui/skeleton-loader'

@@ -419,7 +419,7 @@ export class OrderWorkflowHandlers {
 
       if (order.customer_id) {
         const customerUpdate: CustomerUpdate = {
-          last_order_date: new Date().toISOString().split('T')[0]
+          last_order_date: new Date().toISOString().split('T')[0] as string | null
         }
 
         const { error: customerUpdateError } = await supabase
@@ -685,15 +685,14 @@ export class OrderWorkflowHandlers {
     if (customer) {
       const newTotalOrders = (Number((customer).total_orders) || 0) + 1
       const newTotalSpent = (Number((customer).total_spent) || 0) + Number(order.total_amount)
-      const newAverageOrderValue = newTotalSpent / newTotalOrders
+
 
       await supabase
         .from('customers')
         .update({
           total_orders: newTotalOrders,
           total_spent: newTotalSpent,
-          average_order_value: newAverageOrderValue,
-          last_order_date: new Date().toISOString().split('T')[0],
+          last_order_date: new Date().toISOString().split('T')[0] as string | null,
           updated_at: new Date().toISOString()
         })
         .eq('id', order.customer_id)

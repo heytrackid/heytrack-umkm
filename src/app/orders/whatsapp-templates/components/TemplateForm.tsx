@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { uiLogger } from '@/lib/client-logger'
+import { useCreateWhatsAppTemplate, useUpdateWhatsAppTemplate } from '@/hooks/api/useWhatsAppTemplates'
 
 interface TemplateFormProps {
   showDialog: boolean
@@ -182,6 +183,9 @@ const TemplateForm = ({
         })
     }
 
+    const createTemplateMutation = useCreateWhatsAppTemplate()
+    const updateTemplateMutation = useUpdateWhatsAppTemplate()
+
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault()
 
@@ -192,24 +196,19 @@ const TemplateForm = ({
                 variables
             }
 
-            const url = editingTemplate
-                ? `/api/whatsapp-templates/${editingTemplate['id']}`
-                : '/api/whatsapp-templates'
+            if (editingTemplate) {
+                await updateTemplateMutation.mutateAsync({
+                    id: editingTemplate.id,
+                    template: templateData
+                })
+            } else {
+                await createTemplateMutation.mutateAsync(templateData)
+            }
 
-            const method = editingTemplate ? 'PUT' : 'POST'
-
-            const response = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(templateData)
-            })
-
-            if (response.ok) {
-                onSuccess()
-                onOpenChange(false)
-                if (!editingTemplate) {
-                    resetForm()
-                }
+            onSuccess()
+            onOpenChange(false)
+            if (!editingTemplate) {
+                resetForm()
             }
         } catch (error: unknown) {
             uiLogger.error({ error: String(error) }, 'Error saving template')

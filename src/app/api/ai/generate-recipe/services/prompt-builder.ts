@@ -3,7 +3,7 @@ import type { PromptParams } from '../types'
 import { sanitizeInput, validateNoInjection } from '../utils/security'
 
 function getFlourGuidelines(type: string, servings: number): number {
-  const baseFlour = BASE_FLOUR_PER_UNIT[type as keyof typeof BASE_FLOUR_PER_UNIT] || BASE_FLOUR_PER_UNIT['other']
+  const baseFlour = BASE_FLOUR_PER_UNIT[type as keyof typeof BASE_FLOUR_PER_UNIT] || 200
   return Math.round(baseFlour * servings)
 }
 

@@ -1,12 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-
 import { useToast } from '@/hooks/use-toast'
-import type { ApiErrorResponse, ApiSuccessResponse } from '@/lib/api-core'
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { createClientLogger } from '@/lib/client-logger'
+import { queryConfig } from '@/lib/query/query-config'
+import { buildApiUrl, fetchApi, postApi, putApi, deleteApi } from '@/lib/query/query-helpers'
 import { getErrorMessage } from '@/lib/type-guards'
-import { fetchApi, buildApiUrl } from '@/lib/query/query-helpers'
-import { cachePresets } from '@/lib/query/query-config'
-import type { Row, Insert, Update } from '@/types/database'
+import type { Insert, Row, Update } from '@/types/database'
+
 
 const logger = createClientLogger('Hook')
 
@@ -32,12 +31,11 @@ interface UseIngredientsOptions {
 export function useIngredients(options?: UseIngredientsOptions) {
   return useQuery({
     queryKey: ['ingredients', options],
-    queryFn: () => fetchApi<{ ingredients?: Ingredient[], pagination?: unknown }>(buildApiUrl('/ingredients', options as Record<string, string | number | boolean | null | undefined>)),
-    ...cachePresets.moderatelyUpdated,
+    queryFn: () => fetchApi<Ingredient[]>(buildApiUrl('/api/ingredients', options as Record<string, string | number | boolean | null | undefined>)),
+    ...queryConfig.queries.moderate,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
-    select: (result: { ingredients?: Ingredient[] }) => result.ingredients ?? [],
   })
 }
 
@@ -62,39 +60,7 @@ export function useCreateIngredient() {
   const { toast } = useToast()
   
   return useMutation({
-    mutationFn: async (data: IngredientInsert) => {
-      const abortController = new AbortController()
-      const timeoutId = setTimeout(() => abortController.abort(), 30000)
-
-      try {
-        const response = await fetch('/api/ingredients', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-          credentials: 'include',
-          signal: abortController.signal,
-        })
-        
-        clearTimeout(timeoutId)
-        
-        if (!response.ok) {
-          const error = await response.json()
-          throw new Error(error.message ?? 'Failed to create ingredient')
-        }
-        
-        const payload = await response.json() as ApiSuccessResponse<Ingredient> | ApiErrorResponse
-        if (!('success' in payload) || !payload.success) {
-          throw new Error(payload?.error ?? 'Failed to create ingredient')
-        }
-        return payload.data
-      } catch (error) {
-        clearTimeout(timeoutId)
-        if (error instanceof Error && error.name === 'AbortError') {
-          throw new Error('Request timeout - please try again')
-        }
-        throw error
-      }
-    },
+    mutationFn: (data: IngredientInsert) => postApi('/api/ingredients', data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
       
@@ -124,40 +90,8 @@ export function useUpdateIngredient() {
   const { toast } = useToast()
   
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: IngredientUpdate }) => {
-      const abortController = new AbortController()
-      const timeoutId = setTimeout(() => abortController.abort(), 30000)
-
-      try {
-        const response = await fetch(`/api/ingredients/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-          credentials: 'include',
-          signal: abortController.signal,
-        })
-        
-        clearTimeout(timeoutId)
-        
-        if (!response.ok) {
-          const error = await response.json()
-          throw new Error(error.message ?? 'Failed to update ingredient')
-        }
-        
-        const payload = await response.json() as ApiSuccessResponse<Ingredient> | ApiErrorResponse
-        if (!('success' in payload) || !payload.success) {
-          throw new Error(payload?.error ?? 'Failed to update ingredient')
-        }
-        return payload.data
-      } catch (error) {
-        clearTimeout(timeoutId)
-        if (error instanceof Error && error.name === 'AbortError') {
-          throw new Error('Request timeout - please try again')
-        }
-        throw error
-      }
-    },
-    onSuccess: (_, variables) => {
+    mutationFn: ({ id, data }: { id: string; data: IngredientUpdate }) => putApi(`/api/ingredients/${id}`, data),
+    onSuccess: (_: unknown, variables: { id: string; data: IngredientUpdate }) => {
       void queryClient.invalidateQueries({ queryKey: ['ingredient', variables['id']] })
       void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
       
@@ -187,37 +121,7 @@ export function useDeleteIngredient() {
   const { toast } = useToast()
   
   return useMutation({
-    mutationFn: async (id: string) => {
-      const abortController = new AbortController()
-      const timeoutId = setTimeout(() => abortController.abort(), 30000)
-
-      try {
-        const response = await fetch(`/api/ingredients/${id}`, {
-          method: 'DELETE',
-          credentials: 'include',
-          signal: abortController.signal,
-        })
-        
-        clearTimeout(timeoutId)
-        
-        if (!response.ok) {
-          const error = await response.json()
-          throw new Error(error.message ?? 'Failed to delete ingredient')
-        }
-        
-        const payload = await response.json() as ApiSuccessResponse<null> | ApiErrorResponse
-        if (!('success' in payload) || !payload.success) {
-          throw new Error(payload?.error ?? 'Failed to delete ingredient')
-        }
-        return payload.data
-      } catch (error) {
-        clearTimeout(timeoutId)
-        if (error instanceof Error && error.name === 'AbortError') {
-          throw new Error('Request timeout - please try again')
-        }
-        throw error
-      }
-    },
+    mutationFn: (id: string) => deleteApi(`/api/ingredients/${id}`),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
       
@@ -229,10 +133,43 @@ export function useDeleteIngredient() {
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
       logger.error({ error: message }, 'Failed to delete ingredient')
-      
+
       toast({
         title: 'Error',
         description: message || 'Gagal menghapus bahan',
+        variant: 'destructive',
+      })
+    },
+  })
+}
+
+/**
+ * Import ingredients from CSV
+ */
+export function useImportIngredients() {
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+  const logger = createClientLogger('useImportIngredients')
+
+  return useMutation({
+    mutationFn: (ingredients: unknown[]) => postApi('/api/ingredients/import', { ingredients }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
+
+      toast({
+        title: 'Berhasil ✓',
+        description: 'Bahan berhasil diimpor',
+      })
+
+      logger.info({}, 'Ingredients imported successfully')
+    },
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error)
+      logger.error({ error: message }, 'Failed to import ingredients')
+
+      toast({
+        title: 'Error',
+        description: message || 'Gagal mengimpor bahan',
         variant: 'destructive',
       })
     },

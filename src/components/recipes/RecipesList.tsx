@@ -47,10 +47,9 @@ import {
 } from '@/components/ui/select'
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { undoableToast } from '@/components/ui/toast'
-import { useSupabaseCRUD } from '@/hooks/supabase/index'
 import { usePagination } from '@/hooks/usePagination'
 import { useRecipesCostPreviews } from '@/hooks/useRecipeCostPreview'
-import { useRecipes } from '@/hooks/useRecipes'
+import { useDeleteRecipe, useRecipes } from '@/hooks/useRecipes'
 import { useResponsive } from '@/hooks/useResponsive'
 import { createClientLogger } from '@/lib/client-logger'
 
@@ -68,7 +67,7 @@ export const RecipesList = () => {
     const logger = createClientLogger('RecipesList')
     const router = useRouter()
     const { data: recipesData = [], isLoading: loading, error, refetch, isFetching } = useRecipes()
-    const { remove: deleteRecipe } = useSupabaseCRUD('recipes')
+    const deleteRecipeMutation = useDeleteRecipe()
 
     const { isMobile } = useResponsive()
 
@@ -251,7 +250,7 @@ export const RecipesList = () => {
                 return
             }
 
-            await deleteRecipe(recipeId)
+            await deleteRecipeMutation.mutateAsync(recipeId)
 
             // Enhanced toast with undo
             undoableToast({
@@ -271,7 +270,7 @@ export const RecipesList = () => {
             logger.error({ error, recipeId: selectedRecipe?.id }, 'Failed to delete recipe')
             toast.error(message)
         }
-    }, [selectedRecipe, deleteRecipe, logger])
+    }, [selectedRecipe, deleteRecipeMutation, logger])
 
     const clearFilters = (): void => {
         setSearchTerm('')

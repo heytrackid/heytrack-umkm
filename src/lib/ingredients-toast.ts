@@ -46,14 +46,17 @@ export const ingredientUpdatedToast = (name: string, changes?: string[]): ToastO
 /**
  * Success toast for ingredient deletion
  */
-export const ingredientDeletedToast = (name: string, onUndo?: () => void): ToastOptions => ({
-  title: '🗑️ Bahan Baku Dihapus',
-  description: `"${name}" telah dihapus dari daftar`,
-  variant: 'default',
-  action: onUndo
-    ? createElement('button', { onClick: onUndo }, 'Batalkan') as unknown as ToastActionElement
-    : undefined
-})
+export const ingredientDeletedToast = (name: string, onUndo?: () => void): ToastOptions => {
+  const toast: ToastOptions = {
+    title: '🗑️ Bahan Baku Dihapus',
+    description: `"${name}" telah dihapus dari daftar`,
+    variant: 'default',
+  }
+  if (onUndo) {
+    toast.action = createElement('button', { onClick: onUndo }, 'Batalkan') as unknown as ToastActionElement
+  }
+  return toast
+}
 
 /**
  * Error toast for duplicate name

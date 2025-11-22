@@ -1,56 +1,22 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 
 
-import { apiLogger } from '@/lib/logger'
-import { getErrorMessage, isArrayOf, isRecipe, isCustomer } from '@/lib/type-guards'
+import { getErrorMessage } from '@/lib/type-guards'
+import { useRecipes } from '@/hooks/useRecipes'
+import { useCustomers } from '@/hooks/useCustomers'
 
 import type { Row } from '@/types/database'
 
 
 
-type Recipe = Row<'recipes'>
 type Customer = Row<'customers'>
 
-const isRecipeArray = (value: unknown): value is Recipe[] =>
-  Array.isArray(value) && isArrayOf(value, isRecipe)
 
-const isCustomerArray = (value: unknown): value is Customer[] =>
-  Array.isArray(value) && isArrayOf(value, isCustomer)
 
-const extractRecipes = (payload: unknown): Recipe[] | null => {
-  if (isRecipeArray(payload)) {
-    return payload
-  }
-  if (typeof payload === 'object' && payload !== null) {
-    const record = payload as Record<string, unknown>
-    if (isRecipeArray(record['recipes'])) {
-      return record['recipes']
-    }
-    if (isRecipeArray(record['data'])) {
-      return record['data']
-    }
-  }
-  return null
-}
 
-const extractCustomers = (payload: unknown): Customer[] | null => {
-  if (isCustomerArray(payload)) {
-    return payload
-  }
-  if (typeof payload === 'object' && payload !== null) {
-    const record = payload as Record<string, unknown>
-    if (isCustomerArray(record['customers'])) {
-      return record['customers']
-    }
-    if (isCustomerArray(record['data'])) {
-      return record['data']
-    }
-  }
-  return null
-}
 
 export interface OrderItem {
   id?: string
@@ -84,12 +50,12 @@ export interface OrderFormData {
 
 export const useOrderLogic = () => {
   const router = useRouter()
-  
+
   // Form state
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState('customer')
-  
+
   const [formData, setFormData] = useState<OrderFormData>({
     customer_name: '',
     customer_phone: '',
@@ -110,66 +76,13 @@ export const useOrderLogic = () => {
   })
 
   const [orderItems, setOrderItems] = useState<OrderItem[]>([])
-  const [availableRecipes, setAvailableRecipes] = useState<Recipe[]>([])
-  const [customers, setCustomers] = useState<Customer[]>([])
 
-  // Load initial data
-  useEffect(() => {
-    void fetchRecipes()
-    void fetchCustomers()
-  }, [])
+  // Use React Query hooks
+  const { data: availableRecipes = [] } = useRecipes({ limit: 100 })
+  const { data: customersData } = useCustomers({ limit: 100 })
+  const customers = customersData || []
 
-  const fetchRecipes = async () => {
-    try {
-      const response = await fetch('/api/recipes', {
-        credentials: 'include', // Include cookies for authentication
-      })
-      if (response.ok) {
-        const payload: unknown = await response.json()
-        const recipesData = extractRecipes(payload)
-        if (recipesData) {
-          setAvailableRecipes(recipesData)
-        } else {
-          apiLogger.warn({ payload }, 'API returned unexpected format for recipes')
-          setAvailableRecipes([])
-        }
-      } else {
-        const errorText = await response.text()
-        apiLogger.error({ error: errorText }, 'Failed to fetch recipes')
-        setAvailableRecipes([])
-      }
-     } catch (error) {
-       const message = getErrorMessage(error)
-       apiLogger.error({ error: message }, 'Failed to fetch recipes:')
-       setAvailableRecipes([])
-     }
-  }
 
-  const fetchCustomers = async () => {
-    try {
-      const response = await fetch('/api/customers', {
-        credentials: 'include', // Include cookies for authentication
-      })
-      if (response.ok) {
-        const payload: unknown = await response.json()
-        const customersData = extractCustomers(payload)
-        if (customersData) {
-          setCustomers(customersData)
-        } else {
-          apiLogger.warn({ payload }, 'API returned unexpected format for customers')
-          setCustomers([])
-        }
-      } else {
-        const errorText = await response.text()
-        apiLogger.error({ error: errorText }, 'Failed to fetch customers')
-        setCustomers([])
-      }
-     } catch (error) {
-       const message = getErrorMessage(error)
-       apiLogger.error({ error: message }, 'Failed to fetch customers:')
-       setCustomers([])
-     }
-  }
 
   // Calculations
   const subtotal = orderItems.reduce((sum, item) => sum + item.total_price, 0)

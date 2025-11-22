@@ -32,7 +32,7 @@ export class BusinessContextService {
       const cached = await this.getCachedContext(userId);
       if (cached) {
         logger.info({ userId }, 'Using cached business context');
-        return { ...cached, currentPage };
+        return { ...cached, ...(currentPage && { currentPage }) };
       }
 
       // Load fresh context
@@ -48,7 +48,9 @@ export class BusinessContextService {
     } catch (error) {
       logger.error({ error, userId }, 'Failed to load business context');
       // Return minimal context on error
-      return { currentPage, timestamp: new Date().toISOString() };
+      const result: any = { timestamp: new Date().toISOString() };
+      if (currentPage) result.currentPage = currentPage;
+      return result;
     }
   }
 
@@ -81,8 +83,8 @@ export class BusinessContextService {
       financial,
       businessInsights: insights,
       quickStats,
-      currentPage,
-      timestamp: new Date().toISOString(),
+      ...(currentPage && { currentPage }),
+      timestamp: new Date().toISOString()
     }
   }
 

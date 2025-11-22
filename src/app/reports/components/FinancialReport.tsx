@@ -1,35 +1,28 @@
-import { TrendingUp, TrendingDown, DollarSign, PiggyBank } from '@/components/icons'
+import { DollarSign, PiggyBank, TrendingDown, TrendingUp } from '@/components/icons'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useSupabaseCRUD } from '@/hooks/supabase/index'
 import { useCurrency } from '@/hooks/useCurrency'
+import { useFinancialRecords } from '@/hooks/useFinancialRecords'
 
-import type { Row } from '@/types/database'
+
 
 // Financial Report Component
 // Handles financial data filtering, calculations, and display
 
 
-type FinancialRecord = Row<'financial_records'>
 
-interface FinancialReportProps {
-  dateRange?: {
-    start: string | undefined
-    end: string | undefined
-  }
-}
 
-export const FinancialReport = ({ dateRange }: FinancialReportProps = {}) => {
+interface FinancialReportProps {}
+
+export const FinancialReport = ({}: FinancialReportProps = {}) => {
   const { formatCurrency } = useCurrency()
-  const { data: financialRecords } = useSupabaseCRUD<'financial_records'>('financial_records')
+  const { data: financialRecords } = useFinancialRecords()
 
   // Calculate financial report
-  const financialData = (financialRecords ?? []).filter((record): record is FinancialRecord & { date: string } => {
-    return !!record.date
-  })
+  const financialData = (financialRecords ?? []).filter((record) => !!record.date)
 
-  const financialStats = financialData.reduce<{ totalIncome: number; totalExpense: number }>(
-    (stats, record) => {
+  const financialStats = financialData.reduce(
+    (stats: { totalIncome: number; totalExpense: number }, record) => {
       if (record['type'] === 'INCOME') {
         stats.totalIncome += record.amount
       }

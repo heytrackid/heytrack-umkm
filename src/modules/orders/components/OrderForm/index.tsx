@@ -16,7 +16,7 @@ import { uiLogger } from '@/lib/logger'
 import { ORDER_CONFIG } from '@/modules/orders/constants'
 import { calculateOrderTotals, generateOrderNo } from '@/modules/orders/utils/helpers'
 
-import type { Row } from '@/types/database'
+
 
 
 
@@ -80,8 +80,6 @@ const PaymentSection = dynamic(
     ssr: false
   }
 )
-
-type Customer = Row<'customers'>
 
 interface FormState {
     customer_name: string
@@ -155,16 +153,16 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
             profit_margin: unitPrice > 0 ? (((unitPrice - cost) / unitPrice) * 100) : 0,
             updated_at: null,
             user_id: order?.user_id ?? '',
-            recipe: firstRecipe
-                ? {
+            ...(firstRecipe && {
+                recipe: {
                     id: firstRecipe['id'],
                     name: firstRecipe.name,
                     price: unitPrice,
                     category: firstRecipe.category ?? 'Uncategorized',
                     servings: firstRecipe.servings ?? 0,
-                    description: firstRecipe.description ?? undefined
+                    ...(firstRecipe.description && { description: firstRecipe.description })
                 }
-                : undefined
+            })
         }
     }, [order?.id, order?.user_id, recipesData])
 
@@ -192,14 +190,14 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                     price: unitPrice,
                     category: recipe.category ?? 'Uncategorized',
                     servings: recipe.servings ?? 0,
-                    description: recipe.description ?? undefined
+                    ...(recipe.description && { description: recipe.description })
                 },
                 unit_price: unitPrice,
                 total_price: unitPrice * currentItem.quantity,
                 hpp_at_order: cost,
                 profit_amount: unitPrice - cost,
                 profit_margin: unitPrice > 0 ? (((unitPrice - cost) / unitPrice) * 100) : 0
-            }
+            } as OrderItemWithRecipe
         },
         deriveItemTotals: (item) => {
             const quantity = Number(item.quantity) || 0

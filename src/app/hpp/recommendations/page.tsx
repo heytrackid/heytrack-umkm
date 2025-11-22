@@ -1,7 +1,7 @@
 'use client'
 
 import { AlertTriangle, CheckCircle, Lightbulb, Sparkles, TrendingUp } from '@/components/icons'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { useCurrency } from '@/hooks/useCurrency'
+import { useHppRecommendations } from '@/hooks/api/useHpp'
 import { dbLogger } from '@/lib/logger'
 
 const recommendationsBreadcrumbs = [
@@ -19,61 +20,17 @@ const recommendationsBreadcrumbs = [
   { label: 'Cost Optimization' }
 ]
 
-interface Recommendation {
-  id: string
-  recipe_id: string
-  recommendation_type: string
-  title: string
-  description: string
-  potential_savings: number
-  priority: string
-  is_implemented: boolean
-  created_at: string
-  recipes: {
-    id: string
-    name: string
-    category: string
-  } | null
-}
+
 
 const HppRecommendationsPage = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([])
-  const [loading, setLoading] = useState(true)
   type RecommendationFilter = 'all' | 'implemented' | 'pending'
 
   const [filter, setFilter] = useState<RecommendationFilter>('pending')
 
-  // Load recommendations
-  useEffect(() => {
-    void loadRecommendations()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter])
+  const { data: recommendations = [], isLoading: loading } = useHppRecommendations()
 
-  const loadRecommendations = async () => {
-    try {
-      setLoading(true)
-      const params = new URLSearchParams()
-      if (filter === 'pending') {
-        params.append('is_implemented', 'false')
-      } else if (filter === 'implemented') {
-        params.append('is_implemented', 'true')
-      }
 
-      const response = await fetch(`/api/hpp/recommendations?${params.toString()}`, {
-        credentials: 'include', // Include cookies for authentication
-      })
-      if (response.ok) {
-        const data = await response.json() as { recommendations?: Recommendation[] }
-        setRecommendations(data.recommendations ?? [])
-      }
-    } catch (_error) {
-      dbLogger.error({ _error }, 'Failed to load recommendations')
-      toast.error('Failed to load recommendations')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const markAsImplemented = (recommendationId: string) => {
     try {
@@ -269,12 +226,7 @@ const HppRecommendationsPage = (): JSX.Element => {
 
                         <p className="text-muted-foreground">{rec.description}</p>
 
-                        {rec.recipes && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className="font-medium">Recipe:</span>
-                            <Badge variant="outline">{rec.recipes.name}</Badge>
-                          </div>
-                        )}
+
 
                         {rec.potential_savings > 0 && (
                           <div className="flex items-center gap-2 text-sm">

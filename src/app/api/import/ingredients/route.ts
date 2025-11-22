@@ -1,8 +1,9 @@
 export const runtime = 'nodejs'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 
 import { z } from 'zod'
 
-import { createErrorResponse, createSuccessResponse } from '@/lib/api-core'
+import { createSuccessResponse } from '@/lib/api-core/responses'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
@@ -35,7 +36,7 @@ async function importIngredientsHandler(
   const { user, supabase } = context
 
   if (!body) {
-    return createErrorResponse('Request body is required', 400)
+    return handleAPIError(new Error('Request body is required'), 'API Route')
   }
 
   const { ingredients } = body

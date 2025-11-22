@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useCurrency } from '@/hooks/useCurrency'
+import { useRecipePricing } from '@/hooks/useRecipes'
 import { uiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 
@@ -43,30 +44,14 @@ export const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, 
   const [analysis, setAnalysis] = useState<SmartPricingAnalysis | null>(null)
   const [selectedTier, setSelectedTier] = useState<PricingTierKey>('standard')
   const [customPrice, setCustomPrice] = useState<number>(0)
-  const [loading, setLoading] = useState(false)
+  const recipePricingMutation = useRecipePricing()
 
   const analyzePricing = useCallback(async () => {
-    setLoading(true)
     try {
-      const response = await fetch(`/api/recipes/${recipe['id']}/pricing`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ recipe }),
-        credentials: 'include', // Include cookies for authentication
+      const pricingAnalysis = await recipePricingMutation.mutateAsync({
+        recipeId: recipe.id,
+        recipe
       })
-
-      if (!response.ok) {
-        throw new Error(`API call failed: ${response['status']}`)
-      }
-
-      const pricingData = await response.json()
-      if (!pricingData.success) {
-        throw new Error(pricingData.error || 'Gagal menghitung harga')
-      }
-
-      const pricingAnalysis: SmartPricingAnalysis = pricingData.data
       setAnalysis(pricingAnalysis)
       setCustomPrice(pricingAnalysis.pricing.standard.price || 0)
     } catch (error: unknown) {
@@ -132,14 +117,15 @@ export const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, 
         setAnalysis(fallbackAnalysis)
         setCustomPrice(fallbackAnalysis.pricing.standard.price)
       }
-    } finally {
-      setLoading(false)
     }
-  }, [recipe])
+  }, [recipe, recipePricingMutation])
 
   useEffect(() => {
     if (recipe?.recipe_ingredients?.length) {
-      void analyzePricing()
+      // Use setTimeout to avoid setState during render cycle
+      setTimeout(() => {
+        void analyzePricing()
+      }, 0)
     }
   }, [analyzePricing, recipe])
 
@@ -157,7 +143,7 @@ export const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, 
     onPriceUpdate(tierPrice, tierMargin)
   }
 
-  if (loading) {
+  if (recipePricingMutation.isPending) {
     return (
       <Card>
         <CardContent className="pt-6">
@@ -212,9 +198,9 @@ export const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, 
               variant="outline"
               size="sm"
               onClick={analyzePricing}
-              disabled={loading}
+              disabled={recipePricingMutation.isPending}
             >
-              {loading ? 'Menganalisis...' : '🔄 Segarkan'}
+              {recipePricingMutation.isPending ? 'Menganalisis...' : '🔄 Segarkan'}
             </Button>
           </div>
         </CardHeader>

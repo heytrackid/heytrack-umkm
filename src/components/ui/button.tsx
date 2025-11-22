@@ -4,33 +4,6 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-// Haptic feedback utility for mobile devices
-const triggerHapticFeedback = (type: 'heavy' | 'light' | 'medium' = 'light') => {
-  if (typeof window !== 'undefined' && 'navigator' in window) {
-    try {
-      if ('vibrate' in navigator) {
-        const patterns: Record<string, number[]> = {
-          light: [10],
-          medium: [20],
-          heavy: [30]
-        }
-        const pattern = patterns[type] ?? [10]
-        navigator.vibrate(pattern)
-      }
-      else if ('hapticFeedback' in (window as Window & { hapticFeedback?: { impact: (type: string) => void } })) {
-        const hapticTypes: Record<string, string> = {
-          light: 'impactLight',
-          medium: 'impactMedium',
-          heavy: 'impactHeavy'
-        }
-        ;(window as Window & { hapticFeedback?: { impact: (type: string) => void } }).hapticFeedback?.impact(hapticTypes[type] ?? 'impactLight')
-      }
-    } catch {
-      // Silently fail if haptic feedback is not supported
-    }
-  }
-}
-
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
   {
@@ -63,37 +36,21 @@ const buttonVariants = cva(
   }
 )
 
-function Button({
-  className,
-  variant,
-  size,
-  asChild = false,
-  hapticFeedback = false,
-  hapticType = 'light',
-  ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean
-    hapticFeedback?: boolean
-    hapticType?: 'heavy' | 'light' | 'medium'
-  }) {
+const Button = React.forwardRef<
+  HTMLButtonElement,
+  React.ComponentProps<"button"> & VariantProps<typeof buttonVariants> & { asChild?: boolean }
+>(({ className, variant, size, asChild = false, ...props }, ref) => {
   const Comp = asChild ? Slot : "button"
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (hapticFeedback) {
-      triggerHapticFeedback(hapticType)
-    }
-    props.onClick?.(event)
-  }
 
   return (
     <Comp
-      data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      ref={ref}
       {...props}
-      onClick={handleClick}
     />
   )
-}
+})
+
+Button.displayName = "Button"
 
 export { Button, buttonVariants }

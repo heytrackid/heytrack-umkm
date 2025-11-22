@@ -77,7 +77,7 @@ class ClientLogger {
  * Create a client logger instance
  */
 export const createClientLogger = (context?: string): ClientLogger => {
-  return new ClientLogger({ context })
+  return new ClientLogger({ ...(context && { context }) })
 }
 
 /**

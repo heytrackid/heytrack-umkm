@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo } from 'react'
 
 import { createClientLogger } from '@/lib/client-logger'
+import { fetchApi } from '@/lib/query/query-helpers'
 
 const logger = createClientLogger('Hook')
 
@@ -29,72 +30,37 @@ export function useInstantNavigation() {
     {
       path: '/dashboard',
       queryKeys: [['dashboard', 'all-data']],
-      prefetchFn: async () => {
-        const response = await fetch('/api/dashboard/stats', {
-          credentials: 'include', // Include cookies for authentication
-        })
-        return response.json()
-      }
+      prefetchFn: () => fetchApi('/api/dashboard/stats')
     },
     {
       path: '/orders',
       queryKeys: [['orders', 'list']],
-      prefetchFn: async () => {
-        const response = await fetch('/api/orders?page=1&limit=10', {
-          credentials: 'include', // Include cookies for authentication
-        })
-        return response.json()
-      }
+      prefetchFn: () => fetchApi('/api/orders?page=1&limit=10')
     },
     {
       path: '/recipes',
       queryKeys: [['recipes', 'list']],
-      prefetchFn: async () => {
-        const response = await fetch('/api/recipes', {
-          credentials: 'include', // Include cookies for authentication
-        })
-        return response.json()
-      }
+      prefetchFn: () => fetchApi('/api/recipes')
     },
     {
       path: '/ingredients',
       queryKeys: [['ingredients', 'list']],
-      prefetchFn: async () => {
-        const response = await fetch('/api/ingredients?page=1&limit=10', {
-          credentials: 'include', // Include cookies for authentication
-        })
-        return response.json()
-      }
+      prefetchFn: () => fetchApi('/api/ingredients?page=1&limit=10')
     },
     {
       path: '/customers',
       queryKeys: [['customers']],
-      prefetchFn: async () => {
-        const response = await fetch('/api/customers', {
-          credentials: 'include', // Include cookies for authentication
-        })
-        return response.json()
-      }
+      prefetchFn: () => fetchApi('/api/customers')
     },
     {
       path: '/hpp',
       queryKeys: [['hpp', 'overview']],
-      prefetchFn: async () => {
-        const response = await fetch('/api/hpp/overview', {
-          credentials: 'include', // Include cookies for authentication
-        })
-        return response.json()
-      }
+      prefetchFn: () => fetchApi('/api/hpp/overview')
     },
     {
       path: '/profit',
       queryKeys: [['profit', 'report']],
-      prefetchFn: async () => {
-        const response = await fetch('/api/reports/profit', {
-          credentials: 'include', // Include cookies for authentication
-        })
-        return response.json()
-      }
+      prefetchFn: () => fetchApi('/api/reports/profit')
     }
   ], [])
 

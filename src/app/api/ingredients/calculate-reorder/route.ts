@@ -1,12 +1,12 @@
 export const runtime = 'nodejs'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { calculateAverageDailyUsage, calculateReorderPoint } from '@/lib/business-rules/inventory'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { NextRequest, NextResponse } from 'next/server'
-import { createSuccessResponse, createErrorResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core/responses'
 
 async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
@@ -31,7 +31,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
     if (ingredientError) {
       if (ingredientError.code === 'PGRST116') {
-        return createErrorResponse('Ingredient not found', 404)
+        return handleAPIError(new Error('Ingredient not found'), 'API Route')
       }
       throw ingredientError
     }

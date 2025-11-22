@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo } from 'react'
-import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
+import { useEffect, useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
 import { DEFAULT_APP_SETTINGS, normalizeSettings, type AppSettingsState, type SettingsUpdateHandler } from '@/app/settings/types'
 import { useSettings } from '@/contexts/settings-context'
+import { useBusinessSettings, usePreferencesSettings, useProfileSettings, useUpdateBusinessSettings, useUpdatePreferencesSettings, useUpdateProfileSettings, type BusinessSettings, type PreferencesSettings, type ProfileSettings } from '@/hooks/useSettings'
 
 export function useSettingsManager() {
   const { settings: contextSettings } = useSettings()
@@ -17,48 +18,35 @@ export function useSettingsManager() {
   const [settings, setSettings] = useState<AppSettingsState>(mergedDefaults)
   const [isUnsavedChanges, setIsUnsavedChanges] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
 
-  // Fetch all settings on mount
+  // Use React Query hooks for settings
+  const { data: businessData, isLoading: businessLoading } = useBusinessSettings()
+  const { data: profileData, isLoading: profileLoading } = useProfileSettings()
+  const { data: preferencesData, isLoading: preferencesLoading } = usePreferencesSettings()
+
+  const updateBusinessMutation = useUpdateBusinessSettings()
+  const updateProfileMutation = useUpdateProfileSettings()
+  const updatePreferencesMutation = useUpdatePreferencesSettings()
+
+  const isLoading = businessLoading || profileLoading || preferencesLoading
+
+  // Combine settings when data changes
   useEffect(() => {
-    const fetchSettings = async () => {
-      setIsLoading(true)
-      try {
-        // Fetch data in parallel
-        const [businessRes, profileRes, preferencesRes] = await Promise.all([
-            fetch('/api/settings/business'),
-            fetch('/api/settings/profile'),
-            fetch('/api/settings/preferences')
-        ])
+    if (businessData || profileData || preferencesData) {
+      // Cast to unknown then proper type to access properties safely
+      const prefData = preferencesData as { system?: unknown, ui?: unknown }
 
-        const [businessData, profileData, preferencesData] = await Promise.all([
-            businessRes.ok ? businessRes.json().then(r => r.data) : {},
-            profileRes.ok ? profileRes.json().then(r => r.data) : {},
-            preferencesRes.ok ? preferencesRes.json().then(r => r.data) : {}
-        ])
+      // Combine all data
+      const combinedSettings = {
+          general: { ...mergedDefaults.general, ...(businessData || {}) },
+          user: { ...mergedDefaults.user, ...(profileData || {}) },
+          system: { ...mergedDefaults.system, ...(prefData?.system as object || {}) },
+          ui: { ...mergedDefaults.ui, ...(prefData?.ui as object || {}) }
+      } as AppSettingsState
 
-        // Cast to unknown then proper type to access properties safely
-        const prefData = preferencesData as { system?: unknown, ui?: unknown }
-        
-        // Combine all data
-        const combinedSettings = {
-            general: { ...mergedDefaults.general, ...(businessData || {}) },
-            user: { ...mergedDefaults.user, ...(profileData || {}) },
-            system: { ...mergedDefaults.system, ...(prefData?.system as object || {}) },
-            ui: { ...mergedDefaults.ui, ...(prefData?.ui as object || {}) }
-        } as AppSettingsState
-
-        setSettings(combinedSettings)
-      } catch (error) {
-        logger.error(error, 'Failed to fetch settings')
-        toast.error('Gagal memuat pengaturan. Menggunakan nilai default.')
-      } finally {
-        setIsLoading(false)
-      }
+      setSettings(combinedSettings)
     }
-
-    fetchSettings()
-  }, [mergedDefaults]) // Re-fetch if defaults change (e.g. context currency changes), though mostly runs once on mount effectively
+  }, [businessData, profileData, preferencesData, mergedDefaults])
 
   const handleSettingChange: SettingsUpdateHandler = (category, key, value) => {
     setSettings(prev => {
@@ -81,53 +69,19 @@ export function useSettingsManager() {
     setIsSaving(true)
 
     try {
-        // Save in parallel based on category logic
-        // Business -> /api/settings/business
-        // Profile -> /api/settings/profile
-        // System & UI -> /api/settings/preferences
-        
-        const savePromises = []
-        
-        // Always save all modified sections? Or we could track dirty sections.
-        // For simplicity, save all. API handles merging.
-        
-        savePromises.push(
-            fetch('/api/settings/business', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(settings.general)
-            })
-        )
-
-        savePromises.push(
-            fetch('/api/settings/profile', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(settings.user)
-            })
-        )
-
-        savePromises.push(
-            fetch('/api/settings/preferences', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    system: settings.system,
-                    ui: settings.ui
-                })
-            })
-        )
-
-        const results = await Promise.all(savePromises)
-        
-        // Check if any failed
-        const failed = results.filter(r => !r.ok)
-        if (failed.length > 0) {
-            throw new Error('Some settings failed to save')
-        }
+        // Save in parallel using mutations
+        // Map the settings to match API expectations
+        await Promise.all([
+            updateBusinessMutation.mutateAsync(settings.general as unknown as BusinessSettings),
+            updateProfileMutation.mutateAsync(settings.user as unknown as ProfileSettings),
+            updatePreferencesMutation.mutateAsync({
+                system: settings.system,
+                ui: settings.ui
+            } as unknown as PreferencesSettings)
+        ])
 
         setIsUnsavedChanges(false)
-        toast.success('Pengaturan berhasil disimpan')
+        // Don't show success toast here as mutations already do it
 
     } catch (error) {
       logger.error(error, 'Failed to save settings')

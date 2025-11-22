@@ -12,8 +12,9 @@ import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { useAuth } from '@/hooks/index'
+import { useWhatsAppTemplates, useUpdateWhatsAppTemplate, useDeleteWhatsAppTemplate, useGenerateDefaultTemplates } from '@/hooks/api/useWhatsAppTemplates'
 import { toast } from 'sonner'
-import { uiLogger } from '@/lib/client-logger'
+
 
 // Lazy load heavy components
 const TemplatesTable = lazy(() => import('./TemplatesTable'))
@@ -22,13 +23,16 @@ const TemplatePreview = lazy(() => import('./TemplatePreview'))
 
 
 const WhatsAppTemplatesLayout = () => {
-    const [templates, setTemplates] = useState<WhatsAppTemplate[]>([])
-    const [loading, setLoading] = useState(true)
+    const { data: templates = [], isLoading: loading } = useWhatsAppTemplates()
+  
+    const updateMutation = useUpdateWhatsAppTemplate()
+    const deleteMutation = useDeleteWhatsAppTemplate()
+    const generateDefaultsMutation = useGenerateDefaultTemplates()
+
     const [showDialog, setShowDialog] = useState(false)
     const [editingTemplate, setEditingTemplate] = useState<WhatsAppTemplate | null>(null)
     const [previewTemplate, setPreviewTemplate] = useState<WhatsAppTemplate | null>(null)
     const [showPreview, setShowPreview] = useState(false)
-    const [generatingDefaults, setGeneratingDefaults] = useState(false)
     const [templateToDelete, setTemplateToDelete] = useState<WhatsAppTemplate | null>(null)
     const [isConfirmOpen, setIsConfirmOpen] = useState(false)
 
@@ -43,41 +47,7 @@ const WhatsAppTemplatesLayout = () => {
         }
     }, [isAuthLoading, isAuthenticated, router])
 
-    const fetchTemplates = useCallback(async () => {
-        try {
-            setLoading(true)
-            const response = await fetch('/api/whatsapp-templates', {
-                credentials: 'include', // Include cookies for authentication
-            })
-            if (response.ok) {
-                const result = await response.json() as unknown
-                
-                // Handle both formats: direct array or { data: array }
-                let data: WhatsAppTemplate[]
-                if (Array.isArray(result)) {
-                    data = result as WhatsAppTemplate[]
-                } else if (result && typeof result === 'object' && 'data' in result) {
-                    const extracted = (result as { data: unknown }).data
-                    data = Array.isArray(extracted) ? (extracted as WhatsAppTemplate[]) : []
-                } else {
-                    data = []
-                }
-                
-                setTemplates(data)
-            } else {
-                toast.error('Gagal memuat template')
-            }
-        } catch (error: unknown) {
-            uiLogger.error({ error: String(error) }, 'Error fetching WhatsApp templates')
-            toast.error('Terjadi kesalahan saat memuat template')
-        } finally {
-            setLoading(false)
-        }
-    }, [])
 
-    useEffect(() => {
-        void fetchTemplates()
-    }, [fetchTemplates])
 
     const handleEdit = useCallback((template: WhatsAppTemplate) => {
         setEditingTemplate(template)
@@ -95,49 +65,23 @@ const WhatsAppTemplatesLayout = () => {
         }
 
         try {
-            const response = await fetch(`/api/whatsapp-templates/${templateToDelete['id']}`, {
-                method: 'DELETE',
-                credentials: 'include', // Include cookies for authentication
-            })
-
-            if (response.ok) {
-                toast.success('Template berhasil dihapus')
-                await fetchTemplates()
-            } else {
-                toast.error('Gagal menghapus template')
-            }
-        } catch (error: unknown) {
-            uiLogger.error({ error: String(error), template: templateToDelete }, 'Error deleting WhatsApp template')
-            toast.error('Terjadi kesalahan saat menghapus template')
-        } finally {
+            await deleteMutation.mutateAsync(templateToDelete.id)
             setTemplateToDelete(null)
             setIsConfirmOpen(false)
+        } catch (error) {
+            // Error handling is done in the mutation
         }
-    }, [fetchTemplates, templateToDelete])
+    }, [deleteMutation, templateToDelete])
 
     const handleToggleDefault = useCallback(async (template: WhatsAppTemplate) => {
-        try {
-            const response = await fetch(`/api/whatsapp-templates/${template['id']}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...template,
-                    is_default: !template.is_default
-                }),
-                credentials: 'include', // Include cookies for authentication
-            })
-
-            if (response.ok) {
-                toast.success(template.is_default ? 'Template bukan lagi default' : 'Template diset sebagai default')
-                await fetchTemplates()
-            } else {
-                toast.error('Gagal mengupdate template')
+        await updateMutation.mutateAsync({
+            id: template.id,
+            template: {
+                ...template,
+                is_default: !template.is_default
             }
-        } catch (error: unknown) {
-            uiLogger.error({ error: String(error), template }, 'Error updating WhatsApp template')
-            toast.error('Terjadi kesalahan saat mengupdate template')
-        }
-    }, [fetchTemplates])
+        })
+    }, [updateMutation])
 
     const handlePreview = useCallback((template: WhatsAppTemplate) => {
         setPreviewTemplate(template)
@@ -156,37 +100,12 @@ const WhatsAppTemplatesLayout = () => {
 
     const handleSuccess = useCallback(async () => {
         toast.success(editingTemplate?.id ? 'Template berhasil diupdate' : 'Template berhasil dibuat')
-        await fetchTemplates()
         setEditingTemplate(null)
-    }, [fetchTemplates, editingTemplate])
+    }, [editingTemplate])
 
     const handleGenerateDefaults = useCallback(async () => {
-        try {
-            setGeneratingDefaults(true)
-            const response = await fetch('/api/whatsapp-templates/generate-defaults', {
-                method: 'POST',
-                credentials: 'include', // Include cookies for authentication
-            })
-
-            if (response.ok) {
-                const _data = await response.json() as { templates?: unknown[] }
-                toast.success(`🎉 Template Siap Digunakan!`, {
-                    description: `${_data.templates?.length ?? 8} template WhatsApp sudah dibuat dan siap kamu edit!`
-                })
-                await fetchTemplates()
-            } else {
-                const errorBody = await response.json() as { message?: string }
-                toast.error('Gagal membuat template', {
-                    description: errorBody.message ?? 'Terjadi kesalahan'
-                })
-            }
-        } catch (error: unknown) {
-            uiLogger.error({ error: String(error) }, 'Error generating default templates')
-            toast.error('Terjadi kesalahan saat membuat template default')
-        } finally {
-            setGeneratingDefaults(false)
-        }
-    }, [fetchTemplates])
+        await generateDefaultsMutation.mutateAsync()
+    }, [generateDefaultsMutation])
 
     // Show loading state while auth is initializing
     if (isAuthLoading) {
@@ -270,10 +189,10 @@ const WhatsAppTemplatesLayout = () => {
                                 <div className="flex flex-wrap gap-3">
                                     <Button
                                         onClick={handleGenerateDefaults}
-                                        disabled={generatingDefaults}
+                                        disabled={generateDefaultsMutation.isPending}
                                         className="bg-green-600 hover:bg-green-700"
                                     >
-                                        {generatingDefaults ? (
+                                        {generateDefaultsMutation.isPending ? (
                                             <>
                                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-background mr-2" />
                                                 Membuat Template...

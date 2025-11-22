@@ -74,11 +74,10 @@ export function createRouteHandler<T>(
       }
 
       // Execute handler
-      const response = await handler({
-        request,
-        validatedData,
-        pagination
-      })
+      const context: any = { request }
+      if (validatedData !== undefined) context.validatedData = validatedData
+      if (pagination !== undefined) context.pagination = pagination
+      const response = await handler(context)
 
       // Cache response if configured
       if (config.caching && request.method === 'GET') {

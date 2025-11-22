@@ -1,7 +1,9 @@
 'use client'
 
 import { useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useUser } from '@stackframe/stack'
+import { fetchApi } from '@/lib/query/query-helpers'
 
 export interface User {
   id: string
@@ -43,4 +45,16 @@ export function useAuth(): UseAuthReturn {
   }, [stackUserId, stackUserEmail])
 
   return authState
+}
+
+/**
+ * Fetch user authentication data from custom API endpoint
+ */
+export function useAuthMe() {
+  return useQuery({
+    queryKey: ['auth', 'me'],
+    queryFn: () => fetchApi('/api/auth/me'),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: false,
+  })
 }

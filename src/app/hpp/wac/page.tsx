@@ -13,7 +13,9 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { useIngredients } from '@/hooks/useIngredients'
 import { dbLogger } from '@/lib/logger'
 
-import type { Row as _Row } from '@/types/database'
+import type { Row } from '@/types/database'
+
+type Ingredient = Row<'ingredients'>
 
 
 
@@ -109,12 +111,12 @@ const WacEnginePage = (): JSX.Element => {
                   <SelectTrigger id="ingredient-select">
                     <SelectValue placeholder="Pilih bahan baku..." />
                   </SelectTrigger>
-                  <SelectContent>
-                    {ingredients.map((ingredient) => (
-                      <SelectItem key={ingredient['id']} value={ingredient['id']}>
-                        {ingredient.name}
-                      </SelectItem>
-                    ))}
+                   <SelectContent>
+                     {ingredients.map((ingredient: Ingredient) => (
+                       <SelectItem key={ingredient['id']} value={ingredient['id']}>
+                         {ingredient.name}
+                       </SelectItem>
+                     ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -176,9 +178,9 @@ const WacEnginePage = (): JSX.Element => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-muted-foreground">
-                {ingredients.filter(i => i.weighted_average_cost && i.weighted_average_cost > 0).length}
-              </div>
+               <div className="text-3xl font-bold text-muted-foreground">
+                 {ingredients.filter((i: Ingredient) => i.weighted_average_cost && i.weighted_average_cost > 0).length}
+               </div>
               <p className="text-sm text-muted-foreground mt-1">
                 dari {ingredients.length} total
               </p>
@@ -196,10 +198,10 @@ const WacEnginePage = (): JSX.Element => {
               <div className="text-3xl font-bold text-muted-foreground">
                 {ingredients.length > 0
                   ? formatCurrency(
-                    ingredients
-                      .filter(i => i.weighted_average_cost && i.weighted_average_cost > 0)
-                      .reduce((sum, i) => sum + (i.weighted_average_cost || 0), 0) /
-                    Math.max(1, ingredients.filter(i => i.weighted_average_cost && i.weighted_average_cost > 0).length)
+                     ingredients
+                       .filter((i: Ingredient) => i.weighted_average_cost && i.weighted_average_cost > 0)
+                       .reduce((sum: number, i: Ingredient) => sum + (i.weighted_average_cost || 0), 0) /
+                     Math.max(1, ingredients.filter((i: Ingredient) => i.weighted_average_cost && i.weighted_average_cost > 0).length)
                   )
                   : formatCurrency(0)
                 }
@@ -219,13 +221,13 @@ const WacEnginePage = (): JSX.Element => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-muted-foreground">
-                {formatCurrency(
-                  ingredients.reduce((sum, i) => {
-                    const wac = (i.weighted_average_cost || i.price_per_unit) || 0
-                    const stock = i.current_stock ?? 0
-                    return sum + (wac * stock)
-                  }, 0)
-                )}
+                 {formatCurrency(
+                   ingredients.reduce((sum: number, i: Ingredient) => {
+                     const wac = (i.weighted_average_cost || i.price_per_unit) || 0
+                     const stock = i.current_stock ?? 0
+                     return sum + (wac * stock)
+                   }, 0)
+                 )}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
                 berdasarkan WAC
@@ -240,9 +242,9 @@ const WacEnginePage = (): JSX.Element => {
             <CardTitle>WAC per Bahan Baku</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {ingredients.slice(0, 10).map((ingredient) => (
-                <div key={ingredient['id']} className="flex justify-between items-center p-3 border rounded-lg">
+             <div className="space-y-2">
+               {ingredients.slice(0, 10).map((ingredient: Ingredient) => (
+                 <div key={ingredient['id']} className="flex justify-between items-center p-3 border rounded-lg">
                   <div>
                     <div className="font-medium">{ingredient.name}</div>
                     <div className="text-sm text-muted-foreground">

@@ -3,30 +3,37 @@
 import { DollarSign, Package, TrendingUp, Upload, Users } from '@/components/icons'
 import { useState } from 'react'
 
-import { SuppliersCRUD } from '@/components/crud/suppliers-crud'
 import { generateSuppliersTemplate, parseSuppliersCSV } from '@/components/import/csv-helpers'
 import { ImportDialog } from '@/components/import/ImportDialog'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
-import { BreadcrumbPatterns, PageBreadcrumb, StatsCards } from '@/components/ui/index'
+import { SupplierForm } from '@/app/suppliers/components/SupplierForm'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { useSupabaseCRUD } from '@/hooks/supabase/index'
+import { BreadcrumbPatterns, PageBreadcrumb, StatsCards } from '@/components/ui/index'
+import { useCreateSupplier, useImportSuppliers, useSuppliers } from '@/hooks/useSuppliers'
 
 import type { Row } from '@/types/database'
 
+type Supplier = Row<'suppliers'>
+
 const SuppliersPage = (): JSX.Element => {
-    const { data: suppliers } = useSupabaseCRUD('suppliers')
+    const { data: suppliersData } = useSuppliers()
+    const suppliers = suppliersData as Supplier[] | undefined
     const [importDialogOpen, setImportDialogOpen] = useState(false)
+    const importSuppliersMutation = useImportSuppliers()
+    const createSupplierMutation = useCreateSupplier()
 
     // Calculate stats
     const totalSuppliers = suppliers?.length ?? 0
-    const activeSuppliers = suppliers?.filter((s: Row<'suppliers'>) => s.is_active).length ?? 0
-    const totalSpent = suppliers?.reduce((sum: number, s: Row<'suppliers'>) =>
+    const activeSuppliers = suppliers?.filter((s) => s.is_active).length ?? 0
+    const totalSpent = suppliers?.reduce((sum: number, s) =>
         sum + (Number(s.total_spent) || 0), 0
     ) ?? 0
     const avgRating = suppliers && suppliers.length > 0
-        ? suppliers.reduce((sum: number, s: Row<'suppliers'>) =>
+        ? suppliers.reduce((sum: number, s) =>
             sum + (Number(s.rating) || 0), 0
         ) / suppliers.length
         : 0
@@ -42,7 +49,7 @@ const SuppliersPage = (): JSX.Element => {
                     description="Kelola data supplier dan vendor bahan baku"
                     actions={
                         <div className="flex items-center gap-2">
-                             <Button
+                            <Button
                                 variant="outline"
                                 onClick={() => setImportDialogOpen(true)}
                                 className="flex-1 sm:flex-none"
@@ -50,6 +57,18 @@ const SuppliersPage = (): JSX.Element => {
                                 <Upload className="h-4 w-4 mr-2" />
                                 Import CSV
                             </Button>
+                             <SupplierForm
+                                 onSubmit={async (data) => {
+                                     await createSupplierMutation.mutateAsync({
+                                         ...data,
+                                         contact_person: data.contact_person || null,
+                                         phone: data.phone || null,
+                                         email: data.email || null,
+                                         address: data.address || null,
+                                         notes: data.notes || null,
+                                     })
+                                 }}
+                             />
                         </div>
                     }
                 />
@@ -61,14 +80,14 @@ const SuppliersPage = (): JSX.Element => {
                         value: totalSuppliers.toString(),
                         icon: Users,
                         description: `${activeSuppliers} aktif`,
-                        trend: { value: activeSuppliers, isPositive: activeSuppliers > 0 }
+                        trend: { value: activeSuppliers, isPositive: true }
                     },
                     {
                         title: 'Total Pembelian',
                         value: `Rp ${totalSpent.toLocaleString('id-ID')}`,
                         icon: DollarSign,
                         description: 'Total nilai pembelian',
-                        trend: { value: totalSpent, isPositive: totalSpent > 0 }
+                        trend: { value: totalSpent, isPositive: true }
                     },
                     {
                         title: 'Rating Rata-rata',
@@ -87,7 +106,55 @@ const SuppliersPage = (): JSX.Element => {
                 ]} />
 
                 {/* Main Content */}
-                <SuppliersCRUD />
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Daftar Supplier</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="rounded-md border">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Nama</TableHead>
+                                        <TableHead>Kontak</TableHead>
+                                        <TableHead>Email</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead className="text-right">Rating</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {!suppliers || suppliers.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                                                Belum ada data supplier
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : (
+                                        suppliers.map((supplier) => (
+                                            <TableRow key={supplier.id}>
+                                                <TableCell className="font-medium">{supplier.name}</TableCell>
+                                                <TableCell>{supplier.contact_person ?? '-'}</TableCell>
+                                                <TableCell>{supplier.email ?? '-'}</TableCell>
+                                                <TableCell>
+                                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                                        supplier.is_active 
+                                                            ? 'bg-green-100 text-green-800' 
+                                                            : 'bg-gray-100 text-gray-800'
+                                                    }`}>
+                                                        {supplier.is_active ? 'Aktif' : 'Tidak Aktif'}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    {supplier.rating ? `${supplier.rating}/5` : '-'}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </CardContent>
+                </Card>
 
                 {/* Import Dialog */}
                 <ImportDialog
@@ -100,31 +167,15 @@ const SuppliersPage = (): JSX.Element => {
                     parseCSV={parseSuppliersCSV}
                     onImport={async (data) => {
                         try {
-                            const response = await fetch('/api/suppliers/import', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ suppliers: data }),
-                                credentials: 'include', // Include cookies for authentication
-                            })
-
-                            const result = await response.json() as { error?: string; details?: unknown[]; count?: number }
-
-                            if (!response.ok) {
-                                return {
-                                    success: false,
-                                    error: result.error ?? 'Import gagal',
-                                    details: result.details || []
-                                }
-                            }
-
+                            await importSuppliersMutation.mutateAsync(data)
                             return {
                                 success: true,
-                                ...(result.count !== undefined && { count: result.count })
+                                count: data.length
                             }
-                        } catch {
+                        } catch (error: unknown) {
                             return {
                                 success: false,
-                                error: 'Terjadi kesalahan saat import'
+                                error: error instanceof Error ? error.message : 'Terjadi kesalahan saat import'
                             }
                         }
                     }}
