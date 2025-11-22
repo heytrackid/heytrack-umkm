@@ -346,7 +346,14 @@ export function useNetworkMonitor() {
       const nav = navigator as NavigatorWithConnection
       const connection = nav.connection ?? nav.mozConnection ?? nav.webkitConnection
 
-      const networkInfo: any = {
+      const networkInfo: {
+        isOnline: boolean
+        connection?: {
+          effectiveType: string
+          downlink: number
+          rtt: number
+        }
+      } = {
         isOnline: navigator.onLine,
       }
       if (connection) {

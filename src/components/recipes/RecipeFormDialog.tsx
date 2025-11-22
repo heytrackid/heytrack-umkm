@@ -22,13 +22,9 @@ export const RecipeFormDialog = ({
     const mode = recipe ? 'edit' : 'create'
 
     const handleSuccess = async () => {
-        try {
-            onOpenChange(false)
-            if (onSuccess) {
-                await onSuccess()
-            }
-        } catch {
-            // Error handling is done in the form component
+        onOpenChange(false)
+        if (onSuccess) {
+            await onSuccess()
         }
     }
 

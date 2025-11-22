@@ -1,9 +1,10 @@
-import { createClientLogger } from '@/lib/client-logger'
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 
-const logger = createClientLogger('useSettings')
+
 
 interface UserProfile {
   id: string
@@ -59,10 +60,7 @@ export function useUpdateUserProfile() {
       queryClient.invalidateQueries({ queryKey: ['user-profile'] })
       toast.success('Profil berhasil diperbarui')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to update user profile')
-      toast.error('Gagal memperbarui profil')
-    },
+    onError: (error) => handleError(error, 'Update user profile', true, 'Gagal memperbarui profil'),
   })
 }
 
@@ -88,10 +86,7 @@ export function useUpdateBusinessSettings() {
       queryClient.invalidateQueries({ queryKey: ['business-settings'] })
       toast.success('Pengaturan bisnis berhasil diperbarui')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to update business settings')
-      toast.error('Gagal memperbarui pengaturan bisnis')
-    },
+    onError: (error) => handleError(error, 'Update business settings', true, 'Gagal memperbarui pengaturan bisnis'),
   })
 }
 
@@ -117,10 +112,7 @@ export function useUpdateNotificationPreferences() {
       queryClient.invalidateQueries({ queryKey: ['notification-preferences'] })
       toast.success('Preferensi notifikasi berhasil diperbarui')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to update notification preferences')
-      toast.error('Gagal memperbarui preferensi notifikasi')
-    },
+    onError: (error) => handleError(error, 'Update notification preferences', true, 'Gagal memperbarui preferensi notifikasi'),
   })
 }
 
@@ -133,10 +125,7 @@ export function useChangePassword() {
     onSuccess: () => {
       toast.success('Password berhasil diubah')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to change password')
-      toast.error('Gagal mengubah password')
-    },
+    onError: (error) => handleError(error, 'Change password', true, 'Gagal mengubah password'),
   })
 }
 
@@ -163,10 +152,7 @@ export function useUploadBusinessLogo() {
       queryClient.invalidateQueries({ queryKey: ['business-settings'] })
       toast.success('Logo berhasil diupload')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to upload logo')
-      toast.error('Gagal mengupload logo')
-    },
+    onError: (error) => handleError(error, 'Upload business logo', true, 'Gagal mengupload logo'),
   })
 }
 

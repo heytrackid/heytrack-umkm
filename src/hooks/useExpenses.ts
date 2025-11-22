@@ -1,10 +1,11 @@
-import { createClientLogger } from '@/lib/client-logger'
+
 import type { Insert, Row, Update } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchApi, postApi, putApi, deleteApi } from '@/lib/query/query-helpers'
 import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 
-const logger = createClientLogger('useExpenses')
+
 
 // Note: expenses table doesn't exist in DB yet, using financial_records instead
 type Expense = Row<'financial_records'>
@@ -63,10 +64,7 @@ export function useCreateExpense() {
       queryClient.invalidateQueries({ queryKey: ['expense-stats'] })
       toast.success('Pengeluaran berhasil dicatat')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to create expense')
-      toast.error('Gagal mencatat pengeluaran')
-    },
+    onError: (error) => handleError(error, 'Create expense', true, 'Gagal mencatat pengeluaran'),
   })
 }
 
@@ -84,10 +82,7 @@ export function useUpdateExpense() {
       queryClient.invalidateQueries({ queryKey: ['expense-stats'] })
       toast.success('Pengeluaran berhasil diperbarui')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to update expense')
-      toast.error('Gagal memperbarui pengeluaran')
-    },
+    onError: (error) => handleError(error, 'Update expense', true, 'Gagal memperbarui pengeluaran'),
   })
 }
 
@@ -104,10 +99,7 @@ export function useDeleteExpense() {
       queryClient.invalidateQueries({ queryKey: ['expense-stats'] })
       toast.success('Pengeluaran berhasil dihapus')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to delete expense')
-      toast.error('Gagal menghapus pengeluaran')
-    },
+    onError: (error) => handleError(error, 'Delete expense', true, 'Gagal menghapus pengeluaran'),
   })
 }
 

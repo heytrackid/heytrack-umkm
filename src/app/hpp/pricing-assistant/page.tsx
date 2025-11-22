@@ -16,7 +16,7 @@ import { Separator } from '@/components/ui/separator'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useRecipes } from '@/hooks/useRecipes'
 import { usePricingAssistant, type PricingRecommendation } from '@/hooks/api/useHpp'
-import { dbLogger } from '@/lib/logger'
+import { handleError } from '@/lib/error-handling'
 import { toast } from 'sonner'
 
 const pricingBreadcrumbs = [
@@ -38,7 +38,7 @@ const PricingAssistantPage = (): JSX.Element => {
   // Generate pricing recommendation
   const generateRecommendation = async () => {
     if (!selectedRecipe) {
-      toast.error('Please select a recipe')
+      handleError(new Error('Validation: Please select a recipe'), 'HPP Pricing Assistant: validation', true, 'Silakan pilih resep')
       return
     }
 
@@ -47,8 +47,7 @@ const PricingAssistantPage = (): JSX.Element => {
       setRecommendation(result)
       toast.success('Pricing recommendation generated successfully')
     } catch (_error) {
-      dbLogger.error({ _error }, 'Failed to generate pricing recommendation')
-      toast.error('Failed to generate pricing recommendation')
+      handleError(_error as Error, 'HPP Pricing Assistant: generate recommendation', true, 'Gagal membuat rekomendasi harga')
     }
   }
 

@@ -2,6 +2,7 @@ import { createClientLogger } from '@/lib/client-logger'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchApi, postApi, patchApi, deleteApi } from '@/lib/query/query-helpers'
 import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 import type { FinancialRecord } from '@/types/database'
 
 const logger = createClientLogger('useFinancialRecords')
@@ -44,10 +45,7 @@ export function useCreateFinancialRecord() {
       toast.success('Financial record created successfully')
       logger.info('Financial record created')
     },
-    onError: (error: Error) => {
-      toast.error(error.message)
-      logger.error({ error }, 'Failed to create financial record')
-    },
+    onError: (error) => handleError(error, 'Create financial record', true, 'Gagal membuat catatan keuangan'),
   })
 }
 
@@ -64,10 +62,7 @@ export function useUpdateFinancialRecord() {
       toast.success('Financial record updated successfully')
       logger.info('Financial record updated')
     },
-    onError: (error: Error) => {
-      toast.error(error.message)
-      logger.error({ error }, 'Failed to update financial record')
-    },
+    onError: (error) => handleError(error, 'Update financial record', true, 'Gagal memperbarui catatan keuangan'),
   })
 }
 
@@ -84,9 +79,6 @@ export function useDeleteFinancialRecord() {
       toast.success('Financial record deleted successfully')
       logger.info('Financial record deleted')
     },
-    onError: (error: Error) => {
-      toast.error(error.message)
-      logger.error({ error }, 'Failed to delete financial record')
-    },
+    onError: (error) => handleError(error, 'Delete financial record', true, 'Gagal menghapus catatan keuangan'),
   })
 }

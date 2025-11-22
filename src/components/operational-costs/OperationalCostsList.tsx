@@ -43,6 +43,7 @@ import {
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { useSettings } from '@/contexts/settings-context'
 import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 import { useOperationalCosts, useDeleteOperationalCost } from '@/hooks/useOperationalCosts'
 import { usePagination } from '@/hooks/usePagination'
 import { useResponsive } from '@/hooks/useResponsive'
@@ -106,10 +107,7 @@ export const OperationalCostsList = () => {
             void queryClient.invalidateQueries({ queryKey: ['operational-costs'] })
             _router.refresh()
         },
-        onError: (error) => {
-            const message = error instanceof Error ? error.message : 'Gagal menambahkan template'
-            toast.error(message)
-        }
+        onError: (error) => handleError(error, 'Add operational cost template', true, 'Gagal menambahkan template'),
     })
 
     const { isMobile } = useResponsive()

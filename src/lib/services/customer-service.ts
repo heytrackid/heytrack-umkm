@@ -3,6 +3,7 @@
 
 import { SanitizationPresets, sanitizeObject } from '@/lib/sanitization'
 import { BaseService, ServiceResult } from './base-service'
+import type { Customer, CustomerInsert, CustomerUpdate } from '@/types/database'
 
 export interface CreateCustomerData {
   name: string
@@ -47,7 +48,7 @@ export class CustomerService extends BaseService {
         const { data: customer, error } = await this.context.supabase
           .from('customers')
           .insert({
-            ...(sanitizedData as any),
+            ...(sanitizedData as CustomerInsert),
             user_id: this.context.userId,
           })
           .select()
@@ -87,7 +88,7 @@ export class CustomerService extends BaseService {
         // Update customer
         const { data: customer, error } = await this.context.supabase
           .from('customers')
-          .update(sanitizedData as any)
+          .update(sanitizedData as CustomerUpdate)
           .eq('id', id)
           .eq('user_id', this.context.userId)
           .select()
@@ -176,7 +177,7 @@ export class CustomerService extends BaseService {
     search?: string
     sortBy?: string
     sortOrder?: 'asc' | 'desc'
-  } = {}): Promise<ServiceResult<any>> {
+  } = {}): Promise<ServiceResult<{ customers: Customer[], total: number }>> {
     const {
       page = 1,
       limit = 50,

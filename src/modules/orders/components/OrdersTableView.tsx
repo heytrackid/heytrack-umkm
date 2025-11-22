@@ -6,8 +6,9 @@ import { useCallback, useState } from 'react'
 import type { OrderWithItems } from '@/app/orders/types/orders-db.types'
 import { OrderComponent } from '@/components/orders/orders-table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { handleError } from '@/lib/error-handling'
 import { createClientLogger } from '@/lib/client-logger'
-import { getErrorMessage, isArrayOf, isOrder } from '@/lib/type-guards'
+import { isArrayOf, isOrder } from '@/lib/type-guards'
 import { OrderDetailView } from '@/modules/orders/components/OrderDetailView'
 import { OrderForm } from '@/modules/orders/components/OrderForm'
 
@@ -100,10 +101,7 @@ export const OrderView = () => {
       void queryClient.invalidateQueries({ queryKey: ['orders'] })
       logger.info('Order deleted successfully')
     },
-    onError: (error) => {
-      const message = getErrorMessage(error)
-      logger.error({ error: message }, 'Error deleting order')
-    }
+    onError: (error) => handleError(error, 'Delete order', true, 'Gagal menghapus pesanan')
   })
 
   const handleDeleteOrder = useCallback(async (order: Order) => {
@@ -140,10 +138,7 @@ export const OrderView = () => {
       void queryClient.invalidateQueries({ queryKey: ['orders'] })
       logger.info('Order status updated')
     },
-    onError: (error) => {
-      const message = getErrorMessage(error)
-      logger.error({ error: message }, 'Error updating status')
-    }
+    onError: (error) => handleError(error, 'Update order status', true, 'Gagal memperbarui status pesanan')
   })
 
   const handleUpdateStatus = useCallback(async (orderId: string, newStatus: string) => {

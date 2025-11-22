@@ -1,5 +1,5 @@
- 
- 
+'use client'
+
 // Using Pino logger for all logging
 import { BarChart3, Calendar, Clock, DollarSign, Edit, Eye, Filter, MessageCircle, Plus, Search, ShoppingCart, TrendingUp, XCircle } from '@/components/icons'
 import { useOrders, useUpdateOrderStatus } from '@/hooks/api/useOrders'

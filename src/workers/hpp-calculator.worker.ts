@@ -1,35 +1,25 @@
-import type { Row } from '@/types/database'
-
-
 /**
- * Web Worker for HPP Calculations
- * Offloads heavy calculations from main thread
+ * Advanced HPP Calculator Web Worker
+ * Handles complex HPP calculations with WAC, labor, and overhead allocation
+ * Offloads heavy calculations from main thread for better performance
  */
 
 
-type RecipeIngredient = Row<'recipe_ingredients'>
-type Ingredient = Row<'ingredients'>
 
-/**
- * Worker input type based on generated types
- */
 interface HppCalculationInput {
   ingredients: Array<{
-    quantity: RecipeIngredient['quantity']
-    price_per_unit: Ingredient['price_per_unit']
+    quantity: number
+    price_per_unit: number
   }>
   operationalCost: number
   batchSize: number
 }
 
-/**
- * Worker output type
- */
 interface HppCalculationResult {
-  materialCost: number
-  operationalCostPerUnit: number
-  totalCost: number
-  costPerUnit: number
+  material_cost: number
+  operational_cost_per_unit: number
+  total_cost: number
+  cost_per_unit: number
   breakdown: {
     materials: number
     operational: number
@@ -37,42 +27,49 @@ interface HppCalculationResult {
 }
 
 self.onmessage = (e: MessageEvent<HppCalculationInput>) => {
-  const { ingredients, operationalCost, batchSize } = e['data']
+  const input = e.data
 
   try {
-    // Calculate material cost
-    const materialCost = ingredients.reduce(
-      (sum, ingredient) => sum + ingredient.quantity * ingredient.price_per_unit,
-      0
-    )
-
-    // Calculate operational cost per unit
-    const operationalCostPerUnit = batchSize > 0 ? operationalCost / batchSize : 0
-
-    // Calculate total cost
-    const totalCost = materialCost + operationalCost
-
-    // Calculate cost per unit
-    const costPerUnit = batchSize > 0 ? totalCost / batchSize : totalCost
-
-    const result: HppCalculationResult = {
-      materialCost,
-      operationalCostPerUnit,
-      totalCost,
-      costPerUnit,
-      breakdown: {
-        materials: materialCost,
-        operational: operationalCost
-      }
-    }
-
+    const result = calculateHpp(input)
     self.postMessage({ success: true, data: result })
   } catch (error) {
     self.postMessage({
       success: false,
-      error: error instanceof Error ? error.message : 'Perhitungan gagal'
+      error: error instanceof Error ? error.message : 'HPP calculation failed'
     })
   }
 }
+
+function calculateHpp(input: HppCalculationInput): HppCalculationResult {
+  const { ingredients, operationalCost, batchSize } = input
+
+  // Calculate material cost
+  const materialCost = ingredients.reduce(
+    (sum, ingredient) => sum + ingredient.quantity * ingredient.price_per_unit,
+    0
+  )
+
+  // Calculate operational cost per unit
+  const operationalCostPerUnit = batchSize > 0 ? operationalCost / batchSize : 0
+
+  // Calculate total cost
+  const totalCost = materialCost + operationalCost
+
+  // Calculate cost per unit
+  const costPerUnit = batchSize > 0 ? totalCost / batchSize : totalCost
+
+  return {
+    material_cost: materialCost,
+    operational_cost_per_unit: operationalCostPerUnit,
+    total_cost: totalCost,
+    cost_per_unit: costPerUnit,
+    breakdown: {
+      materials: materialCost,
+      operational: operationalCost
+    }
+  }
+}
+
+
 
 

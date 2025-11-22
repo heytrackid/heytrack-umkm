@@ -16,9 +16,9 @@ interface RecipeStatsCardsProps {
 
 const getDifficultyLabel = (difficulty: string): string => {
     const labels: Record<string, string> = {
-        'EASY': 'Mudah',
-        'MEDIUM': 'Sedang',
-        'HARD': 'Sulit'
+        'easy': 'Mudah',
+        'medium': 'Sedang',
+        'hard': 'Sulit'
     }
     return labels[difficulty] ?? difficulty
 }
@@ -29,21 +29,21 @@ export const RecipeStatsCards = ({ recipes }: RecipeStatsCardsProps) => {
     const activeRecipes = recipes.filter((r) => r.is_active).length
 
     // Calculate average difficulty (for display purposes)
-    const difficultyMap = { EASY: 1, MEDIUM: 2, HARD: 3 }
+    const difficultyMap = { easy: 1, medium: 2, hard: 3 }
     const avgDifficultyNum =
         recipes.length > 0
-            ? recipes.reduce((sum, r) => sum + (difficultyMap[(r.difficulty ?? 'MEDIUM') as keyof typeof difficultyMap] ?? 2), 0) /
+            ? recipes.reduce((sum, r) => sum + (difficultyMap[(r.difficulty ?? 'medium') as keyof typeof difficultyMap] ?? 2), 0) /
             recipes.length
             : 0
 
     // Convert average to difficulty label
     let avgDifficulty: string
     if (avgDifficultyNum <= 1.5) {
-      avgDifficulty = 'EASY'
+      avgDifficulty = 'easy'
     } else if (avgDifficultyNum <= 2.5) {
-      avgDifficulty = 'MEDIUM'
+      avgDifficulty = 'medium'
     } else {
-      avgDifficulty = 'HARD'
+      avgDifficulty = 'hard'
     }
 
     // Find most common category

@@ -61,7 +61,12 @@ async function getProfitReportHandler(context: RouteContext, request: Request): 
   const { searchParams } = new URL(request.url)
 
   try {
-    const filters: any = {
+    const filters: {
+      aggregation: 'daily' | 'weekly' | 'monthly'
+      includeBreakdown: boolean
+      startDate?: string
+      endDate?: string
+    } = {
       aggregation: (searchParams.get('aggregation') as 'daily' | 'weekly' | 'monthly') || 'monthly',
       includeBreakdown: searchParams.get('include_breakdown') === 'true'
     }

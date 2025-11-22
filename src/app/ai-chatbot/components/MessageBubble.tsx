@@ -8,7 +8,7 @@ import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/pris
 import type { Message } from '@/app/ai-chatbot/types/index'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { createLogger } from '@/lib/logger'
+import { handleError } from '@/lib/error-handling'
 import { cn } from '@/lib/utils'
 import { useTheme } from 'next-themes'
 
@@ -91,17 +91,16 @@ const formatMessageContent = (
       const language = firstLineBreak > 0 ? codeBlock.slice(0, firstLineBreak).trim().toLowerCase() : 'text'
       const codeContent = firstLineBreak > 0 ? codeBlock.slice(firstLineBreak + 1) : codeBlock
 
-       const handleCopy = async () => {
-          const logger = createLogger('MessageBubble')
-         try {
+        const handleCopy = async () => {
+          try {
            await navigator.clipboard.writeText(codeContent)
            setCopiedStates(prev => ({ ...prev, [index]: true }))
            setTimeout(() => {
              setCopiedStates(prev => ({ ...prev, [index]: false }))
            }, 2000)
-         } catch (err) {
-            logger.error({ error: err }, 'Failed to copy code')
-         }
+          } catch (err) {
+             handleError(err, 'MessageBubble: Copy code', true, 'Gagal menyalin kode')
+          }
        }
 
       return (

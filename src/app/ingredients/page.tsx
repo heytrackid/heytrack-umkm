@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatCardPatterns, StatsCards } from '@/components/ui/index'
 import { ListSkeleton, StatsSkeleton, TableSkeleton } from '@/components/ui/skeleton-loader'
-import { errorToast } from '@/components/ui/toast'
+import { handleError } from '@/lib/error-handling'
 import { useSettings } from '@/contexts/settings-context'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useCostChangeAlerts } from '@/hooks/useCostAlerts'
@@ -47,11 +47,11 @@ const IngredientsPage = () => {
 
   // Handle auth errors
   useEffect(() => {
-    if (error && typeof error === 'object' && (error).message?.includes('401')) {
-      errorToast(typeof error === 'string' ? error : (error).message || 'Terjadi kesalahan autentikasi');
-      router.push('/auth/login');
-    } else if (error) {
-      errorToast('Gagal memuat data bahan baku', 'Silakan coba lagi.');
+    if (error) {
+      handleError(error, 'Load ingredients', true, 'Gagal memuat data bahan baku')
+      if (typeof error === 'object' && error && 'message' in error && typeof error.message === 'string' && error.message.includes('401')) {
+        router.push('/auth/login')
+      }
     }
   }, [error, router]);
 
@@ -147,8 +147,8 @@ const IngredientsPage = () => {
           total: totalIngredients,
           lowStock: lowStockCount,
           outOfStock: outOfStockCount,
-          totalValue
-        }) as any} />
+          totalValue: totalValue as number
+        })} />
 
         {/* Alert for Low Stock */}
         {(lowStockCount > 0 || outOfStockCount > 0) && (

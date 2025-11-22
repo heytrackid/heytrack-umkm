@@ -52,6 +52,7 @@ const nextConfig: NextConfig = {
     },
     optimizeCss: true,
     optimisticClientCache: false,
+    reactCompiler: false,
   },
 
   images: {

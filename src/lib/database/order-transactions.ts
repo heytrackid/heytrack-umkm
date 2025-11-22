@@ -162,7 +162,11 @@ export async function createOrderWithTransaction(
     throw new Error('Order ID not set after transaction')
   }
 
-  const orderResult: any = {
+  const orderResult: {
+    orderId: string
+    orderItemIds: string[]
+    financialRecordId?: string
+  } = {
     orderId,
     orderItemIds,
   }

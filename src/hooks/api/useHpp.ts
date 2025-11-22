@@ -1,6 +1,7 @@
 import type { HppCalculationInput, HppRecommendationInput, HppRecommendationUpdate } from '@/lib/validations/domains/hpp'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 
 import { buildApiUrl, deleteApi, fetchApi, patchApi, postApi } from '@/lib/query/query-helpers'
 import { queryConfig } from '@/lib/query/query-config'
@@ -92,6 +93,7 @@ export function useCalculateHpp() {
       const response = await postApi<HppCalculationApiResponse>('/api/hpp/calculate', input)
       return response.data
     },
+    onError: (error) => handleError(error, 'Calculate HPP', true, 'Gagal menghitung biaya produksi'),
   })
 }
 
@@ -127,7 +129,9 @@ export function useCreateHppRecommendation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hpp', 'recommendations'] })
+      toast.success('Rekomendasi berhasil dibuat')
     },
+    onError: (error) => handleError(error, 'Create HPP recommendation', true, 'Gagal membuat rekomendasi'),
   })
 }
 
@@ -141,7 +145,9 @@ export function useUpdateHppRecommendation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hpp', 'recommendations'] })
+      toast.success('Rekomendasi berhasil diperbarui')
     },
+    onError: (error) => handleError(error, 'Update HPP recommendation', true, 'Gagal memperbarui rekomendasi'),
   })
 }
 
@@ -154,7 +160,9 @@ export function useDeleteHppRecommendation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hpp', 'recommendations'] })
+      toast.success('Rekomendasi berhasil dihapus')
     },
+    onError: (error) => handleError(error, 'Delete HPP recommendation', true, 'Gagal menghapus rekomendasi'),
   })
 }
 
@@ -185,8 +193,9 @@ export function usePricingAssistant() {
   return useMutation({
     mutationFn: (recipeId: string): Promise<PricingRecommendation> => postApi('/api/hpp/pricing-assistant', { recipeId }),
     onSuccess: () => {
-      // Optional: could invalidate related queries if needed
+      toast.success('Rekomendasi harga berhasil dibuat')
     },
+    onError: (error) => handleError(error, 'Pricing assistant', true, 'Gagal membuat rekomendasi harga'),
   })
 }
 
@@ -199,9 +208,7 @@ export function useCalculateAllHpp() {
       void queryClient.invalidateQueries({ queryKey: ['hpp'] })
       toast.success('Semua biaya produksi berhasil dihitung')
     },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Gagal menghitung biaya')
-    },
+    onError: (error) => handleError(error, 'Calculate HPP', true, 'Gagal menghitung biaya'),
   })
 }
 

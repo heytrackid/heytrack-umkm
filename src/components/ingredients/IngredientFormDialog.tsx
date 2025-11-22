@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { LoadingButton } from '@/components/ui/loading-button'
+import { handleError } from '@/lib/error-handling'
 import { toast } from 'sonner'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 import { useCreateIngredient, useUpdateIngredient } from '@/hooks/useIngredients'
@@ -77,7 +78,7 @@ export const IngredientFormDialog = ({
             void onSuccess?.()
         } catch (error: unknown) {
             // Error handling is done by the mutations
-            toast.error(error instanceof Error ? error.message : 'Terjadi kesalahan')
+            handleError(error, 'Ingredient form submission', true, 'Terjadi kesalahan')
         }
     }
 

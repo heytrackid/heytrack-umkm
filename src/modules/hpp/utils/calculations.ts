@@ -4,6 +4,21 @@
  * HPP Calculation Utilities
  */
 
+export interface HppConfig {
+  operationalCostPercentage: number
+  operationalCostMinimum: number
+  defaultMarginPercentage: number
+}
+
+/**
+ * Default HPP configuration
+ */
+export const DEFAULT_HPP_CONFIG: HppConfig = {
+  operationalCostPercentage: 0.15, // 15%
+  operationalCostMinimum: 2500, // 2500 IDR
+  defaultMarginPercentage: 30 // 30%
+}
+
 /**
  * Calculate margin percentage
  */
@@ -27,9 +42,25 @@ export function calculateSuggestedPrice(hpp: number, marginPercentage: number): 
 }
 
 /**
- * Calculate operational cost (default 15% of material cost)
+ * Calculate operational cost based on configuration
  */
-export function calculateOperationalCost(materialCost: number, percentage = 0.15): number {
+export function calculateOperationalCost(
+  materialCost: number,
+  config: Partial<HppConfig> = {}
+): number {
+  const {
+    operationalCostPercentage = DEFAULT_HPP_CONFIG.operationalCostPercentage,
+    operationalCostMinimum = DEFAULT_HPP_CONFIG.operationalCostMinimum
+  } = config
+
+  return Math.max(materialCost * operationalCostPercentage, operationalCostMinimum)
+}
+
+/**
+ * Legacy function for backward compatibility
+ * @deprecated Use calculateOperationalCost with config instead
+ */
+export function calculateOperationalCostLegacy(materialCost: number, percentage = 0.15): number {
   return Math.max(materialCost * percentage, 2500) // Minimum 2500 IDR
 }
 

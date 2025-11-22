@@ -14,6 +14,7 @@ import { HppEmptyState } from '@/modules/hpp/components/HppEmptyState'
 import { HppOverviewCard } from '@/modules/hpp/components/HppOverviewCard'
 import { HppQuickSummary } from '@/modules/hpp/components/HppQuickSummary'
 import { HppScenarioPlanner } from '@/modules/hpp/components/HppScenarioPlanner'
+import { HppTrendVisualization } from '@/modules/hpp/components/HppTrendVisualization'
 import { PricingCalculatorCard } from '@/modules/hpp/components/PricingCalculatorCard'
 import { ProductComparisonCard } from '@/modules/hpp/components/ProductComparisonCard'
 import { RecipeSelector } from '@/modules/hpp/components/RecipeSelector'
@@ -156,34 +157,54 @@ export const UnifiedHppPage = memo(() => {
                          <Calculator className="h-4 w-4" />
                          <span className="hidden sm:inline">Simulasi</span> Skenario
                        </SwipeableTabsTrigger>
-                       <SwipeableTabsTrigger value="alerts" className="gap-2">
-                         <Bell className="h-4 w-4" />
-                         <span className="hidden sm:inline">Peringatan</span> Alerts
-                       </SwipeableTabsTrigger>
+                        <SwipeableTabsTrigger value="alerts" className="gap-2">
+                          <Bell className="h-4 w-4" />
+                          <span className="hidden sm:inline">Peringatan</span> Alerts
+                        </SwipeableTabsTrigger>
+                        <SwipeableTabsTrigger value="trends" className="gap-2">
+                          <TrendingUp className="h-4 w-4" />
+                          <span className="hidden sm:inline">Tren</span> Trends
+                        </SwipeableTabsTrigger>
                      </SwipeableTabsList>
 
                     <SwipeableTabsContent value="breakdown" className="mt-0">
                       <HppBreakdownVisual recipe={recipe} />
                     </SwipeableTabsContent>
 
-                    <SwipeableTabsContent value="comparison" className="mt-0">
-                      {comparison && comparison.length > 0 ? (
-                        <ProductComparisonCard comparison={comparison} />
-                      ) : (
-                        <div className="text-center py-8 text-muted-foreground">
-                          <p>Belum ada produk lain untuk dibandingkan</p>
-                          <p className="text-sm mt-2">Tambahkan lebih banyak resep untuk melihat perbandingan</p>
-                        </div>
-                      )}
-                    </SwipeableTabsContent>
+                     <SwipeableTabsContent value="comparison" className="mt-0">
+                       {comparison && comparison.length > 0 ? (
+                          <ProductComparisonCard comparison={comparison.map((recipe: unknown) => {
+                           const r = recipe as { id: string; name: string; cost_per_unit: number; selling_price: number; margin_percentage: number }
+                           return {
+                             id: r.id,
+                             name: r.name,
+                             hppValue: r.cost_per_unit,
+                             sellingPrice: r.selling_price,
+                             marginPercentage: r.margin_percentage
+                           }
+                         })} />
+                       ) : (
+                         <div className="text-center py-8 text-muted-foreground">
+                           <p>Belum ada produk lain untuk dibandingkan</p>
+                           <p className="text-sm mt-2">Tambahkan lebih banyak resep untuk melihat perbandingan</p>
+                         </div>
+                       )}
+                     </SwipeableTabsContent>
 
                      <SwipeableTabsContent value="scenario" className="mt-0">
                        <HppScenarioPlanner recipe={recipe} />
                      </SwipeableTabsContent>
 
-                     <SwipeableTabsContent value="alerts" className="mt-0">
-                       <HppAlertsTab />
-                     </SwipeableTabsContent>
+                      <SwipeableTabsContent value="alerts" className="mt-0">
+                        <HppAlertsTab />
+                      </SwipeableTabsContent>
+
+                      <SwipeableTabsContent value="trends" className="mt-0">
+                        <HppTrendVisualization
+                          trendData={[]} // TODO: Fetch actual trend data from API
+                          recipeName={recipe.name}
+                        />
+                      </SwipeableTabsContent>
                    </SwipeableTabs>
                 </CardContent>
               </Card>

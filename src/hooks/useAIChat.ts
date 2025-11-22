@@ -1,9 +1,10 @@
-import { createClientLogger } from '@/lib/client-logger'
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchApi, postApi, deleteApi } from '@/lib/query/query-helpers'
 import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 
-const logger = createClientLogger('useAIChat')
+
 
 interface ChatMessage {
   id: string
@@ -77,10 +78,7 @@ export function useSendChatMessage() {
       }
       queryClient.invalidateQueries({ queryKey: ['chat-sessions'] })
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to send chat message')
-      toast.error('Gagal mengirim pesan')
-    },
+    onError: (error) => handleError(error, 'Send chat message', true, 'Gagal mengirim pesan'),
   })
 }
 
@@ -95,10 +93,7 @@ export function useCreateChatSession() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chat-sessions'] })
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to create chat session')
-      toast.error('Gagal membuat sesi chat')
-    },
+    onError: (error) => handleError(error, 'Create chat session', true, 'Gagal membuat sesi chat'),
   })
 }
 
@@ -114,10 +109,7 @@ export function useDeleteChatSession() {
       queryClient.invalidateQueries({ queryKey: ['chat-sessions'] })
       toast.success('Sesi chat berhasil dihapus')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to delete chat session')
-      toast.error('Gagal menghapus sesi chat')
-    },
+    onError: (error) => handleError(error, 'Delete chat session', true, 'Gagal menghapus sesi chat'),
   })
 }
 

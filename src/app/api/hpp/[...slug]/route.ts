@@ -102,7 +102,7 @@ const getCalculationsRoute = createApiRoute(
 
     try {
       const hppService = new HppService(context.supabase)
-      const params: any = { page, limit }
+      const params = { page, limit, ...(recipeId && { recipe_id: recipeId }) }
       if (recipeId) params.recipe_id = recipeId
       const result = await hppService.getCalculations(user.id, params)
 
@@ -155,13 +155,132 @@ export const GET = createApiRoute(
 
         apiLogger.info({
           userId: context.user.id,
-          recipeCount: result.recipes.length,
-          calculatedCount: result.summary.calculated_recipes
+          recipeCount: result.length,
+          calculatedCount: result.filter(r => r.cost_per_unit !== null).length
         }, 'Recipe comparison retrieved')
 
         return createSuccessResponse(result)
       } catch (error) {
         return handleAPIError(error, 'GET /api/hpp/comparison')
+      }
+    } else if (slug.length === 2 && slug[0] === 'recipe') {
+      // GET /api/hpp/recipe/[id] - Get recipe with HPP data
+      const recipeId = slug[1]
+
+      if (!recipeId) {
+        return handleAPIError(new Error('Recipe ID is required'), 'GET /api/hpp/recipe/[id]')
+      }
+
+      try {
+        // Fetch recipe details
+        const { data: recipe, error: recipeError } = await context.supabase
+          .from('recipes')
+          .select(`
+            *,
+            recipe_ingredients (
+              *,
+              ingredients (
+                id,
+                name,
+                price_per_unit,
+                weighted_average_cost,
+                unit,
+                category
+              )
+            )
+          `)
+          .eq('id', recipeId)
+          .eq('user_id', context.user.id)
+          .single()
+
+        if (recipeError || !recipe) {
+          return handleAPIError(new Error('Recipe not found'), 'GET /api/hpp/recipe/[id]')
+        }
+
+        // Try to get latest HPP calculation
+        const hppService = new HppService(context.supabase)
+        let hppCalculation = null
+
+        try {
+          const calculations = await hppService.getCalculations(context.user.id, {
+            recipe_id: recipeId,
+            limit: 1
+          })
+
+          if (calculations.data.length > 0) {
+            hppCalculation = calculations.data[0]
+          }
+        } catch (error) {
+          apiLogger.warn({ error, recipeId }, 'Failed to fetch HPP calculation, using fallback')
+        }
+
+        // Calculate costs if no HPP calculation exists
+        let totalCost = 0
+        let operationalCost = 0
+        let laborCost = 0
+        let overheadCost = 0
+
+        if (hppCalculation) {
+          // Use existing calculation
+          const servings = Number(recipe.servings) || 1
+          totalCost = hppCalculation.cost_per_unit
+          operationalCost = (hppCalculation.overhead_cost || 0) / servings
+          laborCost = (hppCalculation.labor_cost || 0) / servings
+          overheadCost = (hppCalculation.overhead_cost || 0) / servings
+        } else {
+          // Fallback calculation
+          const ingredients = Array.isArray(recipe.recipe_ingredients)
+            ? recipe.recipe_ingredients.filter(ri => ri.ingredients)
+            : []
+
+          const ingredientCost = ingredients.reduce((sum: number, ri) => {
+            const quantity = ri.quantity ?? 0
+            const unitPrice = ri.ingredients?.weighted_average_cost ??
+                             ri.ingredients?.price_per_unit ?? 0
+            return sum + quantity * unitPrice
+          }, 0)
+
+          operationalCost = Math.max(
+            ingredientCost * 0.15, // 15%
+            2500 // Minimum 2500 IDR
+          )
+          totalCost = ingredientCost + operationalCost
+        }
+
+        // Transform ingredients for frontend
+        const transformedIngredients = Array.isArray(recipe.recipe_ingredients)
+          ? recipe.recipe_ingredients
+              .filter(ri => ri.ingredients)
+              .map((ri) => ({
+                id: ri.ingredient_id,
+                name: ri.ingredients?.name ?? 'Unknown',
+                quantity: ri.quantity ?? 0,
+                unit: ri.unit ?? 'unit',
+                unit_price: ri.ingredients?.weighted_average_cost ??
+                           ri.ingredients?.price_per_unit ?? 0,
+                category: ri.ingredients?.category ?? 'Unknown'
+              }))
+          : []
+
+        const result = {
+          recipe,
+          ingredients: transformedIngredients,
+          operational_costs: operationalCost,
+          labor_costs: laborCost,
+          overhead_costs: overheadCost,
+          total_cost: totalCost
+        }
+
+        apiLogger.info({
+          userId: context.user.id,
+          recipeId,
+          hasHppCalculation: !!hppCalculation,
+          totalCost
+        }, 'Recipe with HPP data retrieved')
+
+        return createSuccessResponse(result)
+      } catch (error) {
+        return handleAPIError(error, 'GET /api/hpp/recipe/[id]')
       }
     } else {
       return handleAPIError(new Error('Invalid path'), 'GET /api/hpp')

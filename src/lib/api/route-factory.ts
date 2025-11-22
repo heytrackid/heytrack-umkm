@@ -168,7 +168,7 @@ export function createResourceRoutes<TQuery = unknown, TBody = unknown>(
       {
         method: 'GET',
         path: basePath,
-        ...(schemas?.querySchema && { querySchema: schemas.querySchema as any }),
+        ...(schemas?.querySchema && { querySchema: schemas.querySchema }),
       },
       handlers.GET
     )
@@ -179,7 +179,7 @@ export function createResourceRoutes<TQuery = unknown, TBody = unknown>(
       {
         method: 'POST',
         path: basePath,
-        ...(schemas?.bodySchema && { bodySchema: schemas.bodySchema as any }),
+        ...(schemas?.bodySchema && { bodySchema: schemas.bodySchema }),
       },
       handlers.POST
     )
@@ -190,7 +190,7 @@ export function createResourceRoutes<TQuery = unknown, TBody = unknown>(
       {
         method: 'PUT',
         path: basePath,
-        ...(schemas?.bodySchema && { bodySchema: schemas.bodySchema as any }),
+        ...(schemas?.bodySchema && { bodySchema: schemas.bodySchema }),
       },
       handlers.PUT
     )

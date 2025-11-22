@@ -14,28 +14,7 @@ import { createLogger } from '@/lib/logger'
 
 const perfLogger = createLogger('Performance')
 
-/**
- * Debounce function
- * Delays execution until after wait milliseconds have elapsed since last call
- */
-export function debounce<T extends (...args: Parameters<T>) => void>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null
-
-  return function executedFunction(...args: Parameters<T>) {
-    const later = () => {
-      timeout = null
-      func(...args)
-    }
-
-    if (timeout) {
-      clearTimeout(timeout)
-    }
-    timeout = setTimeout(later, wait)
-  }
-}
+// Debounce function imported from @/lib/debounce
 
 /**
  * Throttle function

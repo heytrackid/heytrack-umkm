@@ -3,6 +3,9 @@ import { apiLogger } from '@/lib/logger'
 import { PromptBuilder } from '@/lib/ai/prompt-builder'
 import { AIService } from '@/lib/ai/service'
 
+// Business Rules
+import { calculateHPP, validateMinimumMarkup } from '@/lib/business-rules/pricing'
+
 /**
  * Business AI Module
  * AI services for business intelligence and insights
@@ -92,8 +95,24 @@ export class BusinessAI {
   }
 
   /**
-   * Build business data string from context
-   */
+    * Build business rules context
+    */
+  private static buildBusinessRulesContext(): string {
+    return `
+ATURAN BISNIS HEYTRACK:
+• HPP Formula: (Biaya Bahan + Overhead) / (1 - Margin Keuntungan)
+• Margin Minimum: 30-50% untuk produk makanan
+• Reorder Point: (Penggunaan Harian Rata-rata × Lead Time) + Safety Stock
+• Status Pesanan: Draft → Confirmed → Processing → Ready → Delivered
+• Validasi Stok: Pesanan harus dicek ketersediaan bahan sebelum konfirmasi
+• FIFO Inventory: First In, First Out untuk rotasi stok
+• Break-even Analysis: Fixed Costs / (Selling Price - Variable Cost per Unit)
+• Supplier Lead Time: Pertimbangkan waktu pengiriman dalam perencanaan produksi`
+  }
+
+  /**
+    * Build business data string from context
+    */
   private static buildBusinessData(context: {
     orders?: {
       total: number
@@ -137,8 +156,34 @@ ${context.orders.recent.slice(0, 3).map(order =>
   }
 
   /**
-   * Build contextual prompt based on intent
-   */
+    * Generate HPP calculation example
+    */
+  private static generateHPPCalculationExample(): string {
+    try {
+      // Example calculation: Brownies with 30% margin
+      const ingredientCost = 15000 // Rp 15,000 for ingredients
+      const overheadCost = 3000   // Rp 3,000 overhead
+      const profitMargin = 30     // 30%
+
+      const hpp = calculateHPP(ingredientCost, overheadCost, profitMargin)
+      const markupValidation = validateMinimumMarkup(profitMargin)
+
+      return `
+Contoh Kalkulasi HPP:
+• Biaya Bahan: Rp ${ingredientCost.toLocaleString('id-ID')}
+• Biaya Overhead: Rp ${overheadCost.toLocaleString('id-ID')}
+• Total Biaya: Rp ${hpp.totalCost.toLocaleString('id-ID')}
+• Margin: ${profitMargin}% (${markupValidation.valid ? '✅' : '❌'} ${markupValidation.message})
+• Harga Jual: Rp ${Math.round(hpp.sellingPrice).toLocaleString('id-ID')}
+• Profit per Unit: Rp ${Math.round(hpp.profit).toLocaleString('id-ID')}`
+    } catch (error) {
+      return 'Contoh kalkulasi HPP tidak tersedia saat ini.'
+    }
+  }
+
+  /**
+    * Build contextual prompt based on intent
+    */
   private static buildContextualPrompt(intent: string, query: string, businessData: string): string {
     let contextualPrompt = ''
 
@@ -186,14 +231,19 @@ Berdasarkan data resep dan inventory saat ini, berikan saran:
 - Tips produksi yang sesuai dengan kapasitas saat ini`
         break
       case 'pricing_strategy':
+        const hppExample = this.generateHPPCalculationExample()
         contextualPrompt = `User bertanya tentang strategi harga: "${query}".
 
 ${businessData}
 
-Berdasarkan data revenue dan biaya aktual, berikan saran:
-- Penetapan harga yang kompetitif berdasarkan data real
-- Analisis margin berdasarkan kondisi bisnis saat ini
-- Strategi pricing untuk UMKM kuliner yang realistis`
+Berdasarkan aturan bisnis HeyTrack (HPP Formula, Margin Minimum 30-50%), berikan saran pricing:
+- Penetapan harga menggunakan formula HPP yang benar
+- Analisis margin dengan minimum 30% untuk sustainability
+- Strategi pricing kompetitif berdasarkan data real
+
+${hppExample}
+
+Berikan rekomendasi pricing yang sesuai dengan aturan bisnis di atas.`
         break
       case 'marketing_strategy':
         contextualPrompt = `User bertanya tentang marketing: "${query}".
@@ -255,28 +305,33 @@ Berikan jawaban yang membantu terkait bisnis kuliner UMKM di Indonesia, mengguna
 
       // Build contextual information
       const businessData = this.buildBusinessData(context)
+      const businessRules = this.buildBusinessRulesContext()
 
       // Build contextual prompt based on intent
       const contextualPrompt = this.buildContextualPrompt(intent as string, query as string, businessData)
 
-      const systemPrompt = `Anda adalah asisten AI HeyTrack yang ahli dalam bisnis kuliner UMKM Indonesia. 
+      const systemPrompt = `Anda adalah asisten AI HeyTrack yang ahli dalam bisnis kuliner UMKM Indonesia.
 
 KONTEKS:
 - HeyTrack adalah sistem manajemen bisnis untuk UMKM kuliner
 - User menggunakan sistem untuk tracking HPP, inventory, resep, dan profit
 - Fokus pada solusi praktis dan actionable untuk bisnis kuliner
 
+${businessRules}
+
 GAYA KOMUNIKASI:
 - Gunakan bahasa Indonesia yang ramah dan profesional
-- Berikan jawaban yang spesifik dan actionable
+- Berikan jawaban yang spesifik dan actionable berdasarkan aturan bisnis HeyTrack
 - Sertakan contoh praktis jika relevan
 - Gunakan format yang mudah dibaca (bullet points, numbering)
 - Fokus pada solusi bisnis yang realistis untuk UMKM
+- Referensikan aturan bisnis yang relevan dalam jawaban
 
 BATASAN:
 - Hanya jawab pertanyaan terkait bisnis kuliner dan manajemen
-- Jangan berikan informasi yang tidak akurat
-- Jika tidak yakin, arahkan user ke fitur yang relevan di HeyTrack`
+- Jangan berikan informasi yang bertentangan dengan aturan bisnis HeyTrack
+- Jika tidak yakin, arahkan user ke fitur yang relevan di HeyTrack
+- Selalu pertimbangkan konteks bisnis real-time dalam rekomendasi`
 
       const response = await AIService.callOpenRouter(contextualPrompt, systemPrompt)
       return response

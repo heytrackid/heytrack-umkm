@@ -187,7 +187,23 @@ HeyTrack is a comprehensive culinary business management system designed to help
 - Automated VIP status based on purchase thresholds
 - Integration with order management for seamless data flow
 
-### 10. Settings & Configuration
+### 10. Supplier Management (Pemasok)
+**Purpose**: Supplier relationship management for procurement optimization.
+
+**Key Features**:
+- **Supplier Profiles**: Complete supplier information and performance history
+- **Supplier Classification**: Preferred/standard/trial/blacklisted categorization
+- **Performance Tracking**: Delivery time, quality ratings, and cost analysis
+- **Procurement Analytics**: Supplier comparison and optimization metrics
+- **Contract Management**: Payment terms, credit limits, and lead time tracking
+
+**Logic**:
+- Supplier classification algorithms based on performance metrics
+- Automated supplier scoring (quality, timeliness, cost)
+- Preferred supplier prioritization for procurement
+- Integration with inventory management for seamless supply chain
+
+### 11. Settings & Configuration
 **Purpose**: System configuration and user preferences.
 
 **Key Features**:

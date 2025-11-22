@@ -199,7 +199,7 @@ export function validateIngredientRow(row: IngredientCSVRow, rowNumber: number):
 export interface RecipeCSVRow {
   name: string
   category: string
-  serving_size: string
+  servings: string
   selling_price: string
   description?: string
 }
@@ -211,9 +211,9 @@ export function validateRecipeRow(row: RecipeCSVRow, rowNumber: number): string[
     errors.push(`Row ${rowNumber}: Name is required`)
   }
 
-  const servingSize = parseInt(row.serving_size)
-  if (isNaN(servingSize) || servingSize <= 0) {
-    errors.push(`Row ${rowNumber}: Serving size must be a positive number`)
+  const servings = parseInt(row.servings)
+  if (isNaN(servings) || servings <= 0) {
+    errors.push(`Row ${rowNumber}: Servings must be a positive number`)
   }
 
   const price = parseFloat(row.selling_price)

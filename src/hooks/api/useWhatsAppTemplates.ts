@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchApi, postApi, putApi, deleteApi } from '@/lib/query/query-helpers'
 import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 import type { WhatsAppTemplate } from '@/app/orders/whatsapp-templates/components/types'
 
 export function useWhatsAppTemplates() {
@@ -20,9 +21,7 @@ export function useCreateWhatsAppTemplate() {
       void queryClient.invalidateQueries({ queryKey: ['whatsapp-templates'] })
       toast.success('Template berhasil dibuat')
     },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Gagal membuat template')
-    },
+    onError: (error) => handleError(error, 'Create WhatsApp template', true, 'Gagal membuat template'),
   })
 }
 
@@ -35,9 +34,7 @@ export function useUpdateWhatsAppTemplate() {
       void queryClient.invalidateQueries({ queryKey: ['whatsapp-templates'] })
       toast.success('Template berhasil diperbarui')
     },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Gagal memperbarui template')
-    },
+    onError: (error) => handleError(error, 'Update WhatsApp template', true, 'Gagal memperbarui template'),
   })
 }
 
@@ -50,9 +47,7 @@ export function useDeleteWhatsAppTemplate() {
       void queryClient.invalidateQueries({ queryKey: ['whatsapp-templates'] })
       toast.success('Template berhasil dihapus')
     },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Gagal menghapus template')
-    },
+    onError: (error) => handleError(error, 'Delete WhatsApp template', true, 'Gagal menghapus template'),
   })
 }
 
@@ -65,8 +60,6 @@ export function useGenerateDefaultTemplates() {
       void queryClient.invalidateQueries({ queryKey: ['whatsapp-templates'] })
       toast.success('Template default berhasil dibuat')
     },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Gagal membuat template default')
-    },
+    onError: (error) => handleError(error, 'Generate default WhatsApp templates', true, 'Gagal membuat template default'),
   })
 }

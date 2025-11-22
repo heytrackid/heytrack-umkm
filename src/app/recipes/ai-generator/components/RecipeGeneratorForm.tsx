@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react'
 import { AlertCircle, ChefHat, Loader2, Sparkles, CheckCircle, XCircle } from '@/components/icons'
 

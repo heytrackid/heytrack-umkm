@@ -15,7 +15,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { useAuth } from '@/hooks/index'
 import { useCreateIngredient } from '@/hooks/useIngredients'
 import { toast } from 'sonner'
-import { apiLogger } from '@/lib/logger'
+import { handleError } from '@/lib/error-handling'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 
 
@@ -75,8 +75,7 @@ const NewIngredientPage = (): JSX.Element => {
 
       router.push('/ingredients')
     } catch (error) {
-      apiLogger.error({ error }, 'Failed to create ingredient:')
-      toast.error('Gagal menambahkan bahan baku. Silakan coba lagi.')
+      handleError(error as Error, 'Create ingredient page', true, 'Gagal menambahkan bahan baku. Silakan coba lagi.')
     } finally {
       setLoading(false)
     }

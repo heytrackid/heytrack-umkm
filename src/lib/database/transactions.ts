@@ -96,7 +96,12 @@ export async function executeTransaction<T = unknown>(
       completedOperations,
     }
   } catch (error) {
-    const result: any = {
+    const result: {
+      success: false
+      error: Error
+      completedOperations: string[]
+      failedOperation?: string
+    } = {
       success: false,
       error: error instanceof Error ? error : new Error('Unknown error'),
       completedOperations,

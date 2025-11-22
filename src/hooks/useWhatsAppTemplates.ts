@@ -1,10 +1,11 @@
-import { createClientLogger } from '@/lib/client-logger'
+
 import type { Insert, Row, Update } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchApi, postApi, putApi, deleteApi } from '@/lib/query/query-helpers'
 import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 
-const logger = createClientLogger('useWhatsAppTemplates')
+
 
 type WhatsAppTemplate = Row<'whatsapp_templates'>
 type WhatsAppTemplateInsert = Insert<'whatsapp_templates'>
@@ -47,10 +48,7 @@ export function useCreateWhatsAppTemplate() {
       queryClient.invalidateQueries({ queryKey: ['whatsapp-templates'] })
       toast.success('Template WhatsApp berhasil dibuat')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to create WhatsApp template')
-      toast.error('Gagal membuat template WhatsApp')
-    },
+    onError: (error) => handleError(error, 'Create WhatsApp template', true, 'Gagal membuat template WhatsApp'),
   })
 }
 
@@ -67,10 +65,7 @@ export function useUpdateWhatsAppTemplate() {
       queryClient.invalidateQueries({ queryKey: ['whatsapp-template', id] })
       toast.success('Template WhatsApp berhasil diperbarui')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to update WhatsApp template')
-      toast.error('Gagal memperbarui template WhatsApp')
-    },
+    onError: (error) => handleError(error, 'Update WhatsApp template', true, 'Gagal memperbarui template WhatsApp'),
   })
 }
 
@@ -86,10 +81,7 @@ export function useDeleteWhatsAppTemplate() {
       queryClient.invalidateQueries({ queryKey: ['whatsapp-templates'] })
       toast.success('Template WhatsApp berhasil dihapus')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to delete WhatsApp template')
-      toast.error('Gagal menghapus template WhatsApp')
-    },
+    onError: (error) => handleError(error, 'Delete WhatsApp template', true, 'Gagal menghapus template WhatsApp'),
   })
 }
 
@@ -116,9 +108,6 @@ export function useGenerateDefaultTemplates() {
       queryClient.invalidateQueries({ queryKey: ['whatsapp-templates'] })
       toast.success('Template default berhasil dibuat')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to generate default templates')
-      toast.error('Gagal membuat template default')
-    },
+    onError: (error) => handleError(error, 'Generate default templates', true, 'Gagal membuat template default'),
   })
 }

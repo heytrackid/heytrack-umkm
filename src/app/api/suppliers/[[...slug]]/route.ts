@@ -31,19 +31,19 @@ export const GET = createApiRoute(
 
     if (!slug || slug.length === 0) {
       // GET /api/suppliers - List all suppliers
-      return createListHandler({
-        table: 'suppliers',
-        selectFields: 'id, name, contact_person, email, phone, address, notes, is_active, created_at, updated_at',
-        defaultSort: 'name',
-        defaultOrder: 'asc',
-        searchFields: ['name', 'contact_person', 'email'],
-      })(context, validatedQuery)
+       return createListHandler({
+         table: 'suppliers',
+         selectFields: 'id, name, contact_person, email, phone, address, supplier_type, company_type, payment_terms, credit_limit, lead_time_days, quality_rating, notes, is_active, total_spent, rating, created_at, updated_at',
+         defaultSort: 'name',
+         defaultOrder: 'asc',
+         searchFields: ['name', 'contact_person', 'email'],
+       })(context, validatedQuery)
     } else if (slug && slug.length === 1) {
       // GET /api/suppliers/[id] - Get single supplier
-      return createGetHandler({
-        table: 'suppliers',
-        selectFields: 'id, name, contact_person, email, phone, address, notes, is_active, created_at, updated_at',
-      })(context)
+       return createGetHandler({
+         table: 'suppliers',
+         selectFields: 'id, name, contact_person, email, phone, address, supplier_type, company_type, payment_terms, credit_limit, lead_time_days, quality_rating, notes, is_active, total_spent, rating, created_at, updated_at',
+       })(context)
     } else {
       return handleAPIError(new Error('Invalid path'), 'API Route')
     }
@@ -63,13 +63,13 @@ export const POST = createApiRoute(
     if (slug && slug.length > 0) {
       return handleAPIError(new Error('Method not allowed'), 'API Route')
     }
-    return createCreateHandler(
-      {
-        table: 'suppliers',
-        selectFields: 'id, name, contact_person, email, phone, address, notes, is_active, created_at, updated_at',
-      },
-      SUCCESS_MESSAGES.SUPPLIER_CREATED
-    )(context, undefined, body)
+     return createCreateHandler(
+       {
+         table: 'suppliers',
+         selectFields: 'id, name, contact_person, email, phone, address, supplier_type, company_type, payment_terms, credit_limit, lead_time_days, quality_rating, notes, is_active, created_at, updated_at',
+       },
+       SUCCESS_MESSAGES.SUPPLIER_CREATED
+     )(context, undefined, body)
   }
 )
 
@@ -86,13 +86,13 @@ export const PUT = createApiRoute(
     if (!slug || slug.length !== 1) {
       return handleAPIError(new Error('Invalid path'), 'API Route')
     }
-    return createUpdateHandler(
-      {
-        table: 'suppliers',
-        selectFields: 'id, name, contact_person, email, phone, address, notes, is_active, updated_at',
-      },
-      SUCCESS_MESSAGES.SUPPLIER_UPDATED
-    )(context, undefined, body)
+     return createUpdateHandler(
+       {
+         table: 'suppliers',
+         selectFields: 'id, name, contact_person, email, phone, address, supplier_type, company_type, payment_terms, credit_limit, lead_time_days, quality_rating, notes, is_active, updated_at',
+       },
+       SUCCESS_MESSAGES.SUPPLIER_UPDATED
+     )(context, undefined, body)
   }
 )
 

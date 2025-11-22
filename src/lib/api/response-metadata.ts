@@ -153,7 +153,7 @@ export function withResponseMetadata(
     includeApiVersion?: boolean
   } = {}
 ) {
-  return async (request: NextRequest, context?: any): Promise<NextResponse> => {
+  return async (request: NextRequest, context?: unknown): Promise<NextResponse> => {
     const startTime = Date.now()
 
     try {

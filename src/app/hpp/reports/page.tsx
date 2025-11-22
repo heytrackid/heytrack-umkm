@@ -20,7 +20,7 @@ import { toast } from 'sonner'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useHppOverview } from '@/hooks/useHppData'
 import { useResponsive } from '@/hooks/useResponsive'
-import { dbLogger } from '@/lib/logger'
+import { handleError } from '@/lib/error-handling'
 
 type HppExportFormat = 'csv' | 'excel' | 'json' | 'pdf'
 type HppExportMetric = 'alerts' | 'cost_breakdown' | 'hpp' | 'margin' | 'recommendations' | 'trends'
@@ -127,8 +127,7 @@ const HppReportsPage = (): JSX.Element => {
       toast.success(`Report generated successfully in ${config.format.toUpperCase()} format`)
 
     } catch (error) {
-      dbLogger.error({ error }, 'Failed to generate report')
-      toast.error('Failed to generate report')
+      handleError(error, 'Generate HPP report', true, 'Failed to generate report')
     } finally {
       setGenerating(false)
     }
@@ -137,11 +136,10 @@ const HppReportsPage = (): JSX.Element => {
   const exportData = (format: ExportFormat) => {
     try {
       setGenerating(true)
-      toast.error('Export feature has been removed')
+      handleError(new Error('Feature removed'), 'HPP Reports: export', true, 'Fitur ekspor telah dihapus')
 
     } catch (error) {
-      dbLogger.error({ error }, `Failed to export ${format}`)
-      toast.error(`Failed to export ${format.toUpperCase()} file`)
+      handleError(error, `Export HPP ${format}`, true, `Failed to export ${format.toUpperCase()} file`)
     } finally {
       setGenerating(false)
     }

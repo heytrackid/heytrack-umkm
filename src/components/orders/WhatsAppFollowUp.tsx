@@ -15,12 +15,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useSettings } from '@/contexts/settings-context';
-import { createClientLogger } from '@/lib/client-logger'
+import { handleError } from '@/lib/error-handling'
 import type { OrderData } from '@/lib/communications/types';
 import { WhatsAppService } from '@/lib/communications/whatsapp';
-
-
-const logger = createClientLogger('WhatsAppFollowUp');
 
 
 
@@ -128,8 +125,7 @@ export const WhatsAppFollowUp = ({
 
       setGeneratedMessage(message);
     } catch (error: unknown) {
-      logger.error({ error }, 'Error generating message:');
-      toast.error('Gagal generate pesan. Coba template lain.');
+      handleError(error, 'WhatsApp message generation', true, 'Gagal generate pesan. Coba template lain.');
     }
   };
 
@@ -154,7 +150,7 @@ export const WhatsAppFollowUp = ({
       toast.success('Berhasil disalin!');
       setTimeout(() => setCopied(null), 2000);
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'Gagal menyalin text');
+      handleError(error as Error, 'WhatsApp FollowUp: copy text', true, 'Gagal menyalin text');
     }
   };
 

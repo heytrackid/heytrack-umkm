@@ -2,6 +2,7 @@ import { createClientLogger } from '@/lib/client-logger'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { postApi } from '@/lib/query/query-helpers'
 import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 
 const logger = createClientLogger('useFinancialSync')
 
@@ -32,10 +33,7 @@ export function useAutoSyncFinancial() {
       toast.success(`${data.total} transaksi berhasil disinkronkan`)
       logger.info({ data }, 'Financial data synced')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to auto-sync financial data')
-      toast.error('Gagal sinkronisasi data keuangan')
-    },
+    onError: (error) => handleError(error, 'Auto-sync financial data', true, 'Gagal sinkronisasi data keuangan'),
   })
 }
 
@@ -54,9 +52,6 @@ export function useSyncFinancialRecord() {
       queryClient.invalidateQueries({ queryKey: ['financial-records'] })
       toast.success('Record berhasil disinkronkan')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to sync financial record')
-      toast.error('Gagal sinkronisasi record')
-    },
+    onError: (error) => handleError(error, 'Sync financial record', true, 'Gagal sinkronisasi record'),
   })
 }

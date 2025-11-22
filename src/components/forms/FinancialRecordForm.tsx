@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { handleError } from '@/lib/error-handling'
 import { toast } from 'sonner'
 import {
   FinancialRecordSchema,
@@ -56,7 +57,7 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
         form.reset()
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Gagal menyimpan catatan keuangan')
+      handleError(error as Error, 'Financial Record Form: submit', true, 'Gagal menyimpan catatan keuangan')
     }
   }
 

@@ -139,13 +139,13 @@ export class SmartNotificationSystem {
       }
 
       if (shouldTrigger) {
-        const notification: any = {
-          category: rule.category,
+        const notification: Omit<SmartNotification, 'id' | 'isRead' | 'timestamp' | 'type'> = {
           priority: rule.notification.priority,
+          status: 'sent',
+          category: rule.category,
           title: rule.notification.title,
           message: rule.notification.message,
-          data,
-          status: 'sent'
+          data
         }
         if (rule.notification.actionUrl) notification.actionUrl = rule.notification.actionUrl
         if (rule.notification.actionLabel) notification.actionLabel = rule.notification.actionLabel

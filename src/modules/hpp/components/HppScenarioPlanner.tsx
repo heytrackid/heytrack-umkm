@@ -62,24 +62,26 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Ele
         const ingredient = recipe.ingredients.find((item) => item['id'] === ingredientId)
         if (!ingredient) { return null }
 
-        const originalCost = ingredient.unit_price * ingredient.quantity
+        const originalIngredientCost = ingredient.unit_price * ingredient.quantity
         const multiplier = 1 + (changePercent / 100)
 
-        let newIngredientCost = originalCost
+        let newIngredientCost = originalIngredientCost
         if (type === 'price') {
-            newIngredientCost = ingredient.unit_price * multiplier * ingredient.quantity
+            // Price change affects unit_price
+            newIngredientCost = (ingredient.unit_price * multiplier) * ingredient.quantity
         } else {
-            newIngredientCost = ingredient.unit_price * ingredient.quantity * multiplier
+            // Quantity change affects quantity used
+            newIngredientCost = ingredient.unit_price * (ingredient.quantity * multiplier)
         }
 
-        const costDiff = newIngredientCost - originalCost
-        const newTotalCost = currentCost + costDiff
+        const ingredientCostDiff = newIngredientCost - originalIngredientCost
+        const newTotalCost = currentCost + ingredientCostDiff
         const newMargin = sellingPrice > 0 ? ((sellingPrice - newTotalCost) / sellingPrice) * 100 : 0
 
         return {
             newCost: newTotalCost,
-            costDiff,
-            costDiffPercent: (costDiff / currentCost) * 100,
+            costDiff: ingredientCostDiff,
+            costDiffPercent: (ingredientCostDiff / currentCost) * 100,
             newMargin,
             marginDiff: newMargin - currentMargin
         }
@@ -123,18 +125,19 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Ele
         // Apply to all ingredients
         const allIngredients = recipe.ingredients
 
-        let totalNewCost = currentCost
+        let totalCostDiff = 0
         allIngredients.forEach((ri) => {
             const impact = calculateScenario(ri['id'], type, change)
             if (impact) {
-                totalNewCost = impact.newCost
+                totalCostDiff += impact.costDiff
             }
         })
 
-        const newMargin = sellingPrice > 0 ? ((sellingPrice - totalNewCost) / sellingPrice) * 100 : 0
+        const newTotalCost = currentCost + totalCostDiff
+        const newMargin = sellingPrice > 0 ? ((sellingPrice - newTotalCost) / sellingPrice) * 100 : 0
 
         const newScenario: Scenario = {
-            id: `scenario_${++scenarioIdCounter.current}`, // Using only counter ref for unique IDs
+            id: `scenario_${++scenarioIdCounter.current}`,
             name: `Semua bahan ${type === 'price' ? 'harga' : 'qty'} ${change > 0 ? '+' : ''}${change}%`,
             changes: allIngredients.map(ri => ({
                 ingredient: ri.name,
@@ -142,9 +145,9 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Ele
                 change
             })),
             impact: {
-                newCost: totalNewCost,
-                costDiff: totalNewCost - currentCost,
-                costDiffPercent: ((totalNewCost - currentCost) / currentCost) * 100,
+                newCost: newTotalCost,
+                costDiff: totalCostDiff,
+                costDiffPercent: (totalCostDiff / currentCost) * 100,
                 newMargin,
                 marginDiff: newMargin - currentMargin
             }

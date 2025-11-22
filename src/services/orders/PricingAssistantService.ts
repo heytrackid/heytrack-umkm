@@ -13,6 +13,28 @@ type RecipeWithIngredients = RecipeRow & {
   }>
 }
 
+type InventoryValidationResult = {
+  valid: boolean
+  items: Array<{
+    recipeId: string
+    recipeName: string
+    ingredientId: string
+    ingredientName: string
+    requiredQuantity: number
+    availableQuantity: number
+    shortfall: number
+    unit: string
+  }>
+  lowStockWarnings: Array<{
+    ingredientId: string
+    ingredientName: string
+    currentStock: number
+    reorderPoint: number
+  }>
+}
+
+
+
 const normalizeError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error))
 
@@ -378,8 +400,8 @@ export class PricingAssistantService {
   }
 
   /**
-   * Get pricing insights and analytics
-   */
+    * Get pricing insights and analytics
+    */
   static async getPricingInsights(userId: string): Promise<{
     totalRecipes: number
     recipesWithPricing: number
@@ -446,6 +468,105 @@ export class PricingAssistantService {
     } catch (error) {
       const normalizedError = normalizeError(error)
       dbLogger.error({ error: normalizedError }, 'Failed to get pricing insights')
+      throw normalizedError
+    }
+  }
+
+  /**
+   * Validate inventory availability for order items
+   */
+  static async validateOrderInventory(
+    orderItems: Array<{ recipe_id: string; quantity: number }>,
+    userId: string
+  ): Promise<InventoryValidationResult> {
+    try {
+      const supabase = createClient()
+
+      // Get all recipes with their ingredients
+      const recipeIds = orderItems.map(item => item.recipe_id)
+      const { data: recipes, error: recipesError } = await supabase
+        .from('recipes')
+        .select(`
+          id,
+          name,
+          recipe_ingredients (
+            quantity_needed,
+            ingredient:ingredients (
+              id,
+              name,
+              current_stock,
+              reorder_point,
+              unit
+            )
+          )
+        `)
+        .in('id', recipeIds)
+        .eq('user_id', userId)
+
+      if (recipesError) {
+        throw new Error(`Failed to fetch recipes: ${recipesError.message}`)
+      }
+
+      const validationItems: InventoryValidationResult['items'] = []
+      const lowStockWarnings: InventoryValidationResult['lowStockWarnings'] = []
+      let allValid = true
+
+      // Process each order item
+      for (const orderItem of orderItems) {
+        const recipe = recipes?.find(r => r.id === orderItem.recipe_id)
+        if (!recipe) {
+          dbLogger.warn({ recipeId: orderItem.recipe_id }, 'Recipe not found for inventory validation')
+          continue
+        }
+
+        const recipeIngredients = (recipe as { recipe_ingredients?: unknown[] }).recipe_ingredients || []
+
+        // Calculate required quantities for each ingredient
+        for (const ri of recipeIngredients) {
+          const riTyped = ri as { ingredient?: { id: string; name?: string; current_stock?: number; unit?: string; reorder_point?: number }; quantity_needed?: number }
+          if (!riTyped.ingredient) continue
+
+          const requiredQuantity = (riTyped.quantity_needed || 0) * orderItem.quantity
+          const availableQuantity = riTyped.ingredient.current_stock || 0
+          const shortfall = Math.max(0, requiredQuantity - availableQuantity)
+
+          validationItems.push({
+            recipeId: orderItem.recipe_id,
+            recipeName: recipe.name || 'Unknown Recipe',
+            ingredientId: riTyped.ingredient.id,
+            ingredientName: riTyped.ingredient.name || 'Unknown Ingredient',
+            requiredQuantity,
+            availableQuantity,
+            shortfall,
+            unit: riTyped.ingredient.unit || 'unit'
+          })
+
+          if (shortfall > 0) {
+            allValid = false
+          }
+
+          // Check for low stock warning
+          const reorderPoint = riTyped.ingredient.reorder_point || 0
+          if (availableQuantity <= reorderPoint && !lowStockWarnings.some(w => w.ingredientId === riTyped.ingredient!.id)) {
+            lowStockWarnings.push({
+              ingredientId: riTyped.ingredient.id,
+              ingredientName: riTyped.ingredient.name || 'Unknown Ingredient',
+              currentStock: availableQuantity,
+              reorderPoint
+            })
+          }
+        }
+      }
+
+      return {
+        valid: allValid,
+        items: validationItems,
+        lowStockWarnings
+      }
+
+    } catch (error) {
+      const normalizedError = normalizeError(error)
+      dbLogger.error({ error: normalizedError }, 'Failed to validate order inventory')
       throw normalizedError
     }
   }

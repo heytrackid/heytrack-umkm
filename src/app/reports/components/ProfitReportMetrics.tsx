@@ -10,14 +10,12 @@ import { useCurrency } from '@/hooks/useCurrency'
 
 interface ProfitMetricsProps {
     summary: {
-        total_revenue: number
-        total_cogs: number
-        gross_profit: number
-        gross_profit_margin: number
-        total_operating_expenses: number
-        net_profit: number
-        net_profit_margin: number
-        orders_count: number
+        totalRevenue: number
+        totalCOGS: number
+        grossProfit: number
+        profitMargin: number
+        totalOperatingExpenses: number
+        netProfit: number
     }
     isMobile?: boolean
 }
@@ -72,12 +70,13 @@ export const ProfitMetrics: React.FC<ProfitMetricsProps> = ({ summary, isMobile 
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold">
-                        {formatCurrency(summary.total_revenue)}
+                        {formatCurrency(summary.totalRevenue)}
                     </div>
                     <div className="flex items-center gap-1 text-sm">
-                        {getTrendIcon(summary.total_revenue)}
-                        <span className={getTrendColor(summary.total_revenue)}>
-                            {summary.orders_count} pesanan
+                        {getTrendIcon(summary.totalRevenue)}
+                        <span className={getTrendColor(summary.totalRevenue)}>
+                            {/* Orders count not available in new summary */}
+                            Data tersedia
                         </span>
                     </div>
                 </CardContent>
@@ -93,12 +92,12 @@ export const ProfitMetrics: React.FC<ProfitMetricsProps> = ({ summary, isMobile 
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold text-orange-600">
-                        {formatCurrency(summary.total_cogs)}
+                        {formatCurrency(summary.totalCOGS)}
                     </div>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <span>
-                            {summary.total_revenue > 0
-                                ? ((summary.total_cogs / summary.total_revenue) * 100).toFixed(1)
+                            {summary.totalRevenue > 0
+                                ? ((summary.totalCOGS / summary.totalRevenue) * 100).toFixed(1)
                                 : 0}% dari revenue
                         </span>
                     </div>
@@ -114,12 +113,12 @@ export const ProfitMetrics: React.FC<ProfitMetricsProps> = ({ summary, isMobile 
                     <TrendingUp className="h-5 w-5 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                    <div className={`text-2xl font-bold ${summary.gross_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatCurrency(summary.gross_profit)}
+                    <div className={`text-2xl font-bold ${summary.grossProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {formatCurrency(summary.grossProfit)}
                     </div>
                     <div className="flex items-center gap-1">
-                        <Badge variant={summary.gross_profit_margin >= 30 ? 'default' : 'secondary'}>
-                            Margin: {summary.gross_profit_margin.toFixed(1)}%
+                        <Badge variant={((summary.grossProfit / summary.totalRevenue) * 100) >= 30 ? 'default' : 'secondary'}>
+                            Margin: {((summary.grossProfit / summary.totalRevenue) * 100).toFixed(1)}%
                         </Badge>
                     </div>
                 </CardContent>
@@ -134,12 +133,12 @@ export const ProfitMetrics: React.FC<ProfitMetricsProps> = ({ summary, isMobile 
                     <ShoppingCart className="h-5 w-5 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                    <div className={`text-2xl font-bold ${summary.net_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatCurrency(summary.net_profit)}
+                    <div className={`text-2xl font-bold ${summary.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {formatCurrency(summary.netProfit)}
                     </div>
                     <div className="flex items-center gap-1">
-                        <Badge variant={summary.net_profit >= 0 ? 'default' : 'destructive'}>
-                            Margin: {summary.net_profit_margin.toFixed(1)}%
+                        <Badge variant={summary.netProfit >= 0 ? 'default' : 'destructive'}>
+                            Margin: {summary.profitMargin.toFixed(1)}%
                         </Badge>
                     </div>
                 </CardContent>
@@ -151,11 +150,11 @@ export const ProfitMetrics: React.FC<ProfitMetricsProps> = ({ summary, isMobile 
 // Profit breakdown component
 interface ProfitBreakdownProps {
     summary: {
-        total_revenue: number
-        total_cogs: number
-        gross_profit: number
-        total_operating_expenses: number
-        net_profit: number
+        totalRevenue: number
+        totalCOGS: number
+        grossProfit: number
+        totalOperatingExpenses: number
+        netProfit: number
     }
     formatCurrency: (amount: number) => string
 }
@@ -191,30 +190,30 @@ export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProp
                 <div className="space-y-4">
                     <div className="flex justify-between items-center p-4 bg-green-50 dark:bg-green-950 rounded-lg border">
                         <span className="font-medium">Total Pendapatan</span>
-                        <span className="text-lg font-bold">{formatCurrency(summary.total_revenue)}</span>
+                        <span className="text-lg font-bold">{formatCurrency(summary.totalRevenue)}</span>
                     </div>
                     <div className="flex justify-between items-center p-4 bg-orange-50 dark:bg-orange-950 rounded-lg border">
                         <span className="font-medium">- HPP (Harga Pokok Penjualan)</span>
                         <span className="text-lg font-bold text-orange-600">
-                            ({formatCurrency(summary.total_cogs)})
+                            ({formatCurrency(summary.totalCOGS)})
                         </span>
                     </div>
                     <div className="flex justify-between items-center p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border-2 border-blue-200">
                         <span className="font-medium">= Laba Kotor</span>
                         <span className="text-lg font-bold text-blue-600">
-                            {formatCurrency(summary.gross_profit)}
+                            {formatCurrency(summary.grossProfit)}
                         </span>
                     </div>
                     <div className="flex justify-between items-center p-4 bg-red-50 dark:bg-red-950 rounded-lg border">
                         <span className="font-medium">- Biaya Operasional</span>
                         <span className="text-lg font-bold text-red-600">
-                            ({formatCurrency(summary.total_operating_expenses)})
+                            ({formatCurrency(summary.totalOperatingExpenses)})
                         </span>
                     </div>
                     <div className="flex justify-between items-center p-4 bg-muted rounded-lg border-2 border-border/20">
                         <span className="font-bold text-lg">= Laba Bersih</span>
-                        <span className={`text-xl font-bold ${summary.net_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {formatCurrency(summary.net_profit)}
+                        <span className={`text-xl font-bold ${summary.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {formatCurrency(summary.netProfit)}
                         </span>
                     </div>
                 </div>

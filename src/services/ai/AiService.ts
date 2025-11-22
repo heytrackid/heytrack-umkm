@@ -22,6 +22,7 @@ export interface ContextInfo {
   business_data: {
     recipes_count: number
     ingredients_count: number
+    calculated_recipes_count: number
     current_page: string
   }
   recent_activities: Array<{
@@ -205,9 +206,20 @@ export class AiService {
         .eq('user_id', userId)
         .eq('is_active', true)
 
+      // Get count of recipes with HPP calculations
+      const { data: hppData } = await this.supabase
+        .from('hpp_calculations')
+        .select('recipe_id')
+        .eq('user_id', userId)
+        .not('recipe_id', 'is', null)
+
+      const uniqueRecipeIds = new Set(hppData?.map(d => d.recipe_id) || [])
+      const calculatedRecipesCount = uniqueRecipeIds.size
+
       const businessData = {
         recipes_count: recipes?.length || 0,
         ingredients_count: ingredients?.length || 0,
+        calculated_recipes_count: calculatedRecipesCount || 0,
         current_page: page || 'dashboard'
       }
 
@@ -316,7 +328,7 @@ export class AiService {
     // Check for price-related queries
     if (lowerMessage.includes('harga') || lowerMessage.includes('price') || lowerMessage.includes('hpp')) {
       const recipeCount = businessContext.business_data.recipes_count || 0
-      const calculatedRecipes = 0 // TODO: implement calculated recipes count
+      const calculatedRecipes = businessContext.business_data.calculated_recipes_count || 0
 
       if (calculatedRecipes === 0) {
         return 'Anda belum memiliki perhitungan HPP. Silakan buat resep dan hitung HPP terlebih dahulu di menu Resep.'

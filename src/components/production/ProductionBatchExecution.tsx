@@ -3,6 +3,7 @@
 import { differenceInMinutes, format } from 'date-fns'
 import { useEffect, useState } from 'react'
 
+import { handleError } from '@/lib/error-handling'
 import { createClientLogger } from '@/lib/client-logger'
 import { toast } from 'sonner'
 
@@ -14,10 +15,9 @@ import { CompletedBatches } from '@/components/production/components/CompletedBa
 import { ProductionOverview } from '@/components/production/components/ProductionOverview'
 import { PRODUCTION_STEPS, QUALITY_CHECKS, type BatchExecutionState } from '@/components/production/components/types'
 
+// Import constants that are still needed
 
 const logger = createClientLogger('ProductionBatchExecution')
-
-// Import constants that are still needed
 
 interface ProductionBatchExecutionProps {
   batches: ProductionBatch[]
@@ -150,7 +150,7 @@ export const ProductionBatchExecution = ({
     const allQualityChecksPassed = state.qualityChecks.every(check => check.completed && check.passed !== false)
 
     if (!allQualityChecksPassed) {
-      toast.error('Please complete all quality checks before finishing the batch')
+      handleError(new Error('Validation: Please complete all quality checks before finishing the batch'), 'Production Batch Execution: validation', true, 'Harap lengkapi semua pemeriksaan kualitas sebelum menyelesaikan batch')
       return
     }
 
@@ -175,14 +175,13 @@ export const ProductionBatchExecution = ({
 
       // Update production progress in the system
       // Note: UpdateProductionProgress is not defined in the service, so we'll just log for now
-      logger.info({ batchId, status: 'COMPLETED' }, 'Production completed, updating system')
+      logger.info({ batchId }, 'Production completed')
 
       onBatchUpdate?.(batchId, { status: 'COMPLETED', completed_at: completedAt.toISOString() })
       toast.success(`Completed production of ${state.batch.recipe_id ?? 'Batch'}`)
      } catch (error) {
-      logger.error({ error }, 'Error completing batch:')
-      toast.error('Failed to complete batch')
-    }
+       handleError(error as Error, 'Production Batch Execution: complete batch', true, 'Gagal menyelesaikan batch')
+     }
   }
 
   const handleQualityCheck = (batchId: string, checkId: string, passed: boolean, notes?: string) => {

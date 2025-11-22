@@ -6,7 +6,7 @@ import { useEffect } from 'react'
 
 import { GridSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
 import { useAuth } from '@/hooks/index'
-import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 
 import { ReportsLayout } from '@/app/reports/components/ReportsLayout'
 
@@ -38,7 +38,7 @@ const ReportsPage = () => {
   // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
-      toast.error('Sesi Anda telah berakhir. Silakan login kembali.')
+      handleError(new Error('Authentication required'), 'Auth check', false)
       router.push('/auth/login?redirectTo=/reports')
     }
   }, [isAuthLoading, isAuthenticated, router])

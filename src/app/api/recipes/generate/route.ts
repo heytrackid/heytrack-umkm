@@ -109,10 +109,28 @@ Please provide the recipe in the following JSON format:
     let recipe
     try {
       // Extract JSON from markdown code blocks if present
-      const jsonMatch = aiResponse.match(/```json\n([\s\S]*?)\n```/) || 
+      const jsonMatch = aiResponse.match(/```json\n([\s\S]*?)\n```/) ||
                        aiResponse.match(/```\n([\s\S]*?)\n```/)
       const jsonString = jsonMatch ? jsonMatch[1] : aiResponse
       recipe = JSON.parse(jsonString)
+
+      // Convert difficulty to lowercase to match database format
+      if (recipe.difficulty) {
+        recipe.difficulty = recipe.difficulty.toLowerCase()
+      }
+
+      // Convert string times to numbers
+      if (typeof recipe.prep_time === 'string') {
+        recipe.prep_time = parseInt(recipe.prep_time) || 0
+      }
+      if (typeof recipe.cook_time === 'string') {
+        recipe.cook_time = parseInt(recipe.cook_time) || 0
+      }
+
+      // Convert instructions array to string
+      if (Array.isArray(recipe.instructions)) {
+        recipe.instructions = recipe.instructions.join('\n')
+      }
     } catch {
       // If parsing fails, return raw response
       return handleAPIError(new Error('Failed to parse AI response. AI generated a response but it could not be parsed. Please try again.'), 'POST /api/recipes/generate')

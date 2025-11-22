@@ -8,7 +8,7 @@ import { BreadcrumbPatterns, PageBreadcrumb } from '@/components/ui/index'
 import { useAuth } from '@/hooks/index'
 import { useCreateIngredientPurchase, useIngredientPurchases } from '@/hooks/useIngredientPurchases'
 import { useIngredients } from '@/hooks/useIngredients'
-import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 
 import type { Insert } from '@/types/database'
 
@@ -27,15 +27,14 @@ const IngredientPurchasesLayout = (): JSX.Element => {
   // Handle auth errors
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
-      toast.error('Sesi Anda telah berakhir. Silakan login kembali.')
+      handleError(new Error('Authentication required'), 'Auth check', false)
     }
   }, [isAuthLoading, isAuthenticated])
 
   // Handle data fetch errors
   useEffect(() => {
     if (purchasesError) {
-      const errorMessage = purchasesError instanceof Error ? purchasesError.message : 'Gagal memuat data pembelian'
-      toast.error(errorMessage)
+      handleError(purchasesError, 'Load ingredient purchases', true, 'Gagal memuat data pembelian')
     }
   }, [purchasesError])
 

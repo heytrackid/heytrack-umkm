@@ -8,6 +8,7 @@ export interface IngredientCostSnapshot {
 }
 
 export interface RecipeIngredientSnapshot {
+  ingredient_id: string
   quantity: number | null
   ingredients: IngredientCostSnapshot | null
 }

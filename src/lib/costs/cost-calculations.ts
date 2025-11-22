@@ -34,22 +34,35 @@ export const extractIngredientContributions = (
 ): IngredientCostContribution[] => {
   const entries: RecipeIngredientSnapshot[] = recipe.recipe_ingredients ?? []
 
-  return entries
-    .filter((entry): entry is RecipeIngredientSnapshot & { ingredients: IngredientCostSnapshot } => Boolean(entry?.ingredients))
-    .map((entry) => {
-      const ingredient = entry.ingredients
-      const quantity = normalizeQuantity(entry.quantity)
-      const unitPrice = getIngredientUnitPrice(ingredient)
+  return entries.map((entry) => {
+    const quantity = normalizeQuantity(entry.quantity)
 
+    // Handle missing ingredients gracefully
+    if (!entry.ingredients) {
       return {
-        ingredientId: ingredient.id,
-        ingredientName: ingredient.name,
+        ingredientId: entry.ingredient_id,
+        ingredientName: `Unknown Ingredient (${entry.ingredient_id})`,
         quantity,
-        unitPrice,
-        costContribution: quantity * unitPrice,
-        lastUpdated: ingredient.updated_at ?? null
+        unitPrice: 0,
+        costContribution: 0,
+        lastUpdated: null
       }
-    })
+    }
+
+    const ingredient = entry.ingredients
+    const unitPrice = getIngredientUnitPrice(ingredient)
+
+    // Note: ingredient has no pricing data if unitPrice === 0
+
+    return {
+      ingredientId: ingredient.id,
+      ingredientName: ingredient.name,
+      quantity,
+      unitPrice,
+      costContribution: quantity * unitPrice,
+      lastUpdated: ingredient.updated_at ?? null
+    }
+  })
 }
 
 export const calculateMaterialCost = (recipe: RecipeCostRecord): {

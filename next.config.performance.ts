@@ -84,15 +84,15 @@ function applyProdOptimizations(config: Record<string, unknown>): void {
 
   // Enable bundle analyzer if requested
   if (process.env['ANALYZE'] === 'true') {
-     
-    (config as any).plugins = [
-      ...(config.plugins as unknown[] || []),
+
+    ;(config as { plugins?: unknown[] }).plugins = [
+      ...((config as { plugins?: unknown[] }).plugins || []),
       // Bundle analyzer plugin would go here
     ]
   }
 
   // Split chunks for better caching
-  ;(config.optimization).splitChunks = {
+  ;(config.optimization as { splitChunks?: unknown }).splitChunks = {
     chunks: 'all',
     cacheGroups: {
       default: false,

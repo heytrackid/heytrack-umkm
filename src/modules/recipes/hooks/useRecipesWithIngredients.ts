@@ -2,7 +2,7 @@
 
 import type { Row } from '@/types/database'
 import { createClientLogger } from '@/lib/client-logger'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, type UseQueryOptions } from '@tanstack/react-query'
 
 const logger = createClientLogger('useRecipesWithIngredients')
 
@@ -20,7 +20,7 @@ interface UseRecipesWithIngredientsOptions {
 }
 
 export function useRecipesWithIngredients(options: UseRecipesWithIngredientsOptions = {}) {
-  const queryOptions: any = {
+  const queryOptions: UseQueryOptions<RecipeWithIngredients[]> = {
     queryKey: ['recipes-with-ingredients'],
     queryFn: async () => {
       const response = await fetch('/api/recipes?include=ingredients')

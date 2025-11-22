@@ -1,9 +1,10 @@
-import { createClientLogger } from '@/lib/client-logger'
+
 import { useMutation } from '@tanstack/react-query'
 
 import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 
-const logger = createClientLogger('useGlobalExport')
+
 
 /**
  * Export all data globally
@@ -35,10 +36,7 @@ export function useGlobalExport() {
     onSuccess: () => {
       toast.success('Data berhasil diexport')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to export data')
-      toast.error('Gagal export data')
-    },
+    onError: (error) => handleError(error, 'Global export', true, 'Gagal export data'),
   })
 }
 
@@ -80,9 +78,6 @@ export function useEntityExport() {
     onSuccess: () => {
       toast.success('Data berhasil diexport')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to export entity data')
-      toast.error('Gagal export data')
-    },
+    onError: (error) => handleError(error, 'Entity export', true, 'Gagal export data'),
   })
 }

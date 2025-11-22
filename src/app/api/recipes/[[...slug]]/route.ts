@@ -40,7 +40,7 @@ const RecipeUpdateSchema = z.object({
   image_url: z.string().url().optional(),
   prep_time: z.number().int().positive().optional(),
   cook_time: z.number().int().positive().optional(),
-  serving_size: z.number().int().positive().optional(),
+  servings: z.number().int().positive().optional(),
   selling_price: z.number().positive().optional(),
   is_active: z.boolean().optional(),
 })
@@ -53,14 +53,14 @@ export const GET = createApiRoute(
     querySchema: RecipeListQuerySchema,
     securityPreset: SecurityPresets.basic(),
   },
-  async (context: RouteContext, validatedQuery?: z.infer<typeof RecipeListQuerySchema>) => {
+  async (context, validatedQuery) => {
     const { params } = context
     const { slug } = parseRouteParams(params)
 
     if (!slug || slug.length === 0) {
       // GET /api/recipes - List recipes
       const { user, supabase } = context
-      const query = (validatedQuery || {}) as any
+      const query = (validatedQuery as z.infer<typeof RecipeListQuerySchema>) ?? {}
       const { page = 1, limit = 999999, search, sort_by = 'name', sort_order = 'asc', status } = query
       const typedSupabase = supabase as TypedSupabaseClient
 

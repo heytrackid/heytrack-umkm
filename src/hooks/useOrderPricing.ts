@@ -1,7 +1,7 @@
 import { createClientLogger } from '@/lib/client-logger'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { fetchApi, postApi } from '@/lib/query/query-helpers'
-import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 
 const logger = createClientLogger('useOrderPricing')
 
@@ -49,10 +49,7 @@ export function useCalculateOrderPrice() {
     delivery_fee?: number
   }>({
     mutationFn: (data) => postApi('/api/orders/calculate-price', data),
-    onError: (error) => {
-      logger.error({ error }, 'Failed to calculate order price')
-      toast.error('Gagal menghitung harga pesanan')
-    },
+    onError: (error) => handleError(error, 'Calculate order price', true, 'Gagal menghitung harga pesanan'),
   })
 }
 

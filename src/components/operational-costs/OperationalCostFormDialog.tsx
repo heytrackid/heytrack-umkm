@@ -16,6 +16,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { handleError } from '@/lib/error-handling'
 import { toast } from 'sonner'
 import { useCreateOperationalCost, useUpdateOperationalCost } from '@/hooks/useOperationalCosts'
 
@@ -69,12 +70,12 @@ export const OperationalCostFormDialog = ({
         e.preventDefault()
 
         if (!formData.description) {
-            toast.error('Nama biaya harus diisi')
+            handleError(new Error('Validation: Nama biaya harus diisi'), 'Operational Cost Form: validation', true, 'Nama biaya harus diisi')
             return
         }
 
         if (!formData.amount || formData.amount <= 0) {
-            toast.error('Jumlah biaya harus lebih dari 0')
+            handleError(new Error('Validation: Jumlah biaya harus lebih dari 0'), 'Operational Cost Form: validation', true, 'Jumlah biaya harus lebih dari 0')
             return
         }
 
@@ -92,7 +93,7 @@ export const OperationalCostFormDialog = ({
             onOpenChange(false)
             onSuccess?.()
         } catch (error: unknown) {
-            toast.error(error instanceof Error ? error.message : 'Terjadi kesalahan')
+            handleError(error as Error, 'Operational Cost Form: submit', true, 'Terjadi kesalahan')
         }
     }
 

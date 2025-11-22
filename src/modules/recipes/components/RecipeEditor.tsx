@@ -16,7 +16,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 import { useCurrency } from '@/hooks/useCurrency'
 
 interface RecipeIngredient {
@@ -198,12 +198,12 @@ export const RecipeEditor = ({
 
     const handleSave = async () => {
         if (!recipe.name.trim()) {
-            toast.error('Nama resep harus diisi!')
+            handleError(new Error('Validation: Nama resep harus diisi'), 'RecipeEditor: validation', true, 'Nama resep harus diisi!')
             return
         }
 
         if (recipe.ingredients.length === 0) {
-            toast.error('Minimal harus ada 1 bahan!')
+            handleError(new Error('Validation: Minimal harus ada 1 bahan'), 'RecipeEditor: validation', true, 'Minimal harus ada 1 bahan!')
             return
         }
 

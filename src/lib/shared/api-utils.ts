@@ -155,7 +155,12 @@ export function extractSearchParams(request: NextRequest): {
     }
   }
 
-  const result: any = { filters, sortOrder }
+  const result: {
+    search?: string
+    filters: Record<string, unknown>
+    sortBy?: string
+    sortOrder?: 'asc' | 'desc'
+  } = { filters, sortOrder }
   if (search) result.search = search
   if (sortBy) result.sortBy = sortBy
   return result

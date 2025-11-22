@@ -1,4 +1,5 @@
 // External libraries
+import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
@@ -16,6 +17,10 @@ import { apiLogger } from '@/lib/logger'
 // Types and schemas
 import type { Database, FinancialRecordInsert, FinancialRecordUpdate, OrderInsert, OrderStatus } from '@/types/database'
 import { OrderInsertSchema, OrderUpdateSchema } from '@/lib/validations/domains/order'
+
+// Services
+import { PricingAssistantService } from '@/services/orders/PricingAssistantService'
+import { CustomerPreferencesService } from '@/services/orders/CustomerPreferencesService'
 
 // Constants and config
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
@@ -166,6 +171,40 @@ export const POST = createApiRoute(
       return handleAPIError(new Error('Request body is required'), 'POST /api/orders')
     }
 
+    // Validate inventory availability for order items
+    if (body.items && body.items.length > 0) {
+      try {
+        const inventoryValidation = await PricingAssistantService.validateOrderInventory(
+          body.items.map((item) => ({ recipe_id: item.recipe_id, quantity: item.quantity })),
+          user.id
+        )
+
+        if (!inventoryValidation.valid) {
+          // Return detailed inventory validation error
+          return NextResponse.json({
+            error: 'Insufficient inventory for order',
+            code: 'INSUFFICIENT_INVENTORY',
+            details: {
+              validation: inventoryValidation,
+              message: 'Some ingredients do not have sufficient stock for this order'
+            }
+          }, { status: 400 })
+        }
+
+        // Log low stock warnings
+        if (inventoryValidation.lowStockWarnings.length > 0) {
+          apiLogger.warn({
+            orderItems: body.items.length,
+            lowStockWarnings: inventoryValidation.lowStockWarnings.length,
+            warnings: inventoryValidation.lowStockWarnings
+          }, 'Order created with low stock warnings')
+        }
+      } catch (validationError) {
+        apiLogger.error({ error: validationError }, 'Inventory validation failed')
+        return handleAPIError(validationError as Error, 'POST /api/orders')
+      }
+    }
+
     const orderStatus = body.status || 'PENDING'
     let incomeRecordId: string | null = null
 
@@ -251,6 +290,20 @@ export const POST = createApiRoute(
         await typedSupabase.from('financial_records').delete().eq('id', incomeRecordId).eq('user_id', user.id)
         }
         return handleAPIError(itemsError, 'POST /api/orders')
+      }
+    }
+
+    // Update customer preferences for demand forecasting
+    if (body.customer_id && body.items && body.items.length > 0) {
+      try {
+        await CustomerPreferencesService.updateCustomerPreferences(
+          body.customer_id,
+          body.items.map((item) => ({ recipe_id: item.recipe_id, quantity: item.quantity })),
+          user.id
+        )
+      } catch (prefError) {
+        // Don't fail the order creation for preference update failure
+        apiLogger.warn({ error: prefError, customerId: body.customer_id }, 'Failed to update customer preferences')
       }
     }
 

@@ -48,7 +48,8 @@ async function postHandler(context: RouteContext, _query?: never, body?: z.infer
     const recipeMap = await orderImportService.fetchRecipes(user.id)
 
     // Process orders
-    const { errors, customersToCreate, ordersToCreate } = orderImportService.processOrders(orders as any, recipeMap, user.id)
+    const result = orderImportService.processOrders(orders, recipeMap, user.id)
+    const { errors, customersToCreate, ordersToCreate } = result
 
     // Return validation errors if any
     if (errors.length > 0) {

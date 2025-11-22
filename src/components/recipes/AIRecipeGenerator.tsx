@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Loader2, Sparkles } from '@/components/icons'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { logger } from '@/lib/logger'
+import { handleError, handleApiError } from '@/lib/error-handling'
 
 import { useMutation } from '@tanstack/react-query'
 import { postApi } from '@/lib/query/query-helpers'
@@ -20,7 +20,7 @@ interface GeneratedRecipe {
   servings: number
   prep_time: number
   cook_time: number
-  difficulty: 'EASY' | 'MEDIUM' | 'HARD'
+  difficulty: 'easy' | 'medium' | 'hard'
   category: string
   ingredients: Array<{
     name: string
@@ -53,19 +53,12 @@ export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps)
         description: 'AI telah membuat resep untuk Anda',
       })
     },
-    onError: (error) => {
-      logger.error({ error }, 'AI Generation Error')
-      toast.error('Gagal membuat resep', {
-        description: error instanceof Error ? error.message : 'Terjadi kesalahan saat membuat resep',
-      })
-    }
+    onError: (error) => handleApiError(error, 'AI Recipe Generator', 'Gagal membuat resep')
   })
 
   const handleGenerate = (): void => {
     if (!prompt.trim()) {
-      toast.error('Prompt diperlukan', {
-        description: 'Silakan masukkan deskripsi resep yang ingin dibuat',
-      })
+      handleError(new Error('Validation: Prompt diperlukan'), 'AI Recipe Generator: validation', true, 'Prompt diperlukan')
       return
     }
 

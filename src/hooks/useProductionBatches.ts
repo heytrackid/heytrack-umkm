@@ -1,10 +1,11 @@
-import { createClientLogger } from '@/lib/client-logger'
+
 import type { Insert, Update } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchApi, postApi, putApi, deleteApi } from '@/lib/query/query-helpers'
 import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 
-const logger = createClientLogger('useProductionBatches')
+
 
 type ProductionBatch = {
   id: string
@@ -71,10 +72,7 @@ export function useCreateProductionBatch() {
       queryClient.invalidateQueries({ queryKey: ['production-batches'] })
       toast.success('Batch produksi berhasil dibuat')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to create production batch')
-      toast.error('Gagal membuat batch produksi')
-    },
+    onError: (error) => handleError(error, 'Create production batch', true, 'Gagal membuat batch produksi'),
   })
 }
 
@@ -91,10 +89,7 @@ export function useUpdateProductionBatch() {
       queryClient.invalidateQueries({ queryKey: ['production-batch', id] })
       toast.success('Batch produksi berhasil diperbarui')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to update production batch')
-      toast.error('Gagal memperbarui batch produksi')
-    },
+    onError: (error) => handleError(error, 'Update production batch', true, 'Gagal memperbarui batch produksi'),
   })
 }
 
@@ -110,10 +105,7 @@ export function useDeleteProductionBatch() {
       queryClient.invalidateQueries({ queryKey: ['production-batches'] })
       toast.success('Batch produksi berhasil dihapus')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to delete production batch')
-      toast.error('Gagal menghapus batch produksi')
-    },
+    onError: (error) => handleError(error, 'Delete production batch', true, 'Gagal menghapus batch produksi'),
   })
 }
 
@@ -144,10 +136,7 @@ export function useSyncBatchWithInventory() {
       queryClient.invalidateQueries({ queryKey: ['ingredients'] })
       toast.success('Inventori berhasil disinkronkan')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to sync with inventory')
-      toast.error('Gagal sinkronisasi inventori')
-    },
+    onError: (error) => handleError(error, 'Sync batch with inventory', true, 'Gagal sinkronisasi inventori'),
   })
 }
 
@@ -163,10 +152,7 @@ export function useLinkBatchToOrder() {
       queryClient.invalidateQueries({ queryKey: ['production-batch', batchId] })
       toast.success('Batch berhasil dihubungkan dengan pesanan')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to link to order')
-      toast.error('Gagal menghubungkan dengan pesanan')
-    },
+    onError: (error) => handleError(error, 'Link batch to order', true, 'Gagal menghubungkan dengan pesanan'),
   })
 }
 
@@ -192,9 +178,6 @@ export function useUpdateProductionConstraints() {
       queryClient.invalidateQueries({ queryKey: ['production-capacity'] })
       toast.success('Kapasitas produksi berhasil diperbarui')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to update production constraints')
-      toast.error('Gagal memperbarui kapasitas produksi')
-    },
+    onError: (error) => handleError(error, 'Update production constraints', true, 'Gagal memperbarui kapasitas produksi'),
   })
 }

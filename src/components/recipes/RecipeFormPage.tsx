@@ -4,6 +4,7 @@
 import { ArrowLeft, Plus, Save, Trash2 } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { handleError } from '@/lib/error-handling'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,7 +18,6 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { toast } from 'sonner'
 
 import { useCreateRecipeWithIngredients, useUpdateRecipeWithIngredients, useRecipe } from '@/hooks/useRecipes'
 import { useIngredients } from '@/hooks/useIngredients'
@@ -102,21 +102,48 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        if (!formData.name) {
-            toast.error('Nama resep harus diisi')
+        // Validate basic recipe data
+        if (!formData.name?.trim()) {
+            handleError(new Error('Validation: Nama resep harus diisi'), 'RecipeFormPage: validation', true, 'Nama resep harus diisi')
+            return
+        }
+
+        if (!formData.servings || formData.servings < 1) {
+            handleError(new Error('Validation: Porsi harus minimal 1'), 'RecipeFormPage: validation', true, 'Porsi harus minimal 1')
+            return
+        }
+
+        if (formData.prep_time !== undefined && formData.prep_time !== null && formData.prep_time < 0) {
+            handleError(new Error('Validation: Waktu persiapan tidak boleh negatif'), 'RecipeFormPage: validation', true, 'Waktu persiapan tidak boleh negatif')
+            return
+        }
+
+        if (formData.cook_time !== undefined && formData.cook_time !== null && formData.cook_time < 0) {
+            handleError(new Error('Validation: Waktu memasak tidak boleh negatif'), 'RecipeFormPage: validation', true, 'Waktu memasak tidak boleh negatif')
             return
         }
 
         // Validate ingredients
         if (recipeIngredients.length === 0) {
-            toast.error('Resep harus memiliki minimal 1 bahan')
+            handleError(new Error('Validation: Resep harus memiliki minimal 1 bahan'), 'RecipeFormPage: validation', true, 'Resep harus memiliki minimal 1 bahan')
             return
         }
 
         // Validate each ingredient
-        for (const ri of recipeIngredients) {
-            if (!ri.ingredient_id || ri.quantity <= 0) {
-                toast.error('Semua bahan harus dipilih dan memiliki jumlah yang valid')
+        for (let i = 0; i < recipeIngredients.length; i++) {
+            const ri = recipeIngredients[i]
+            if (!ri) continue
+
+            if (!ri.ingredient_id?.trim()) {
+                handleError(new Error(`Validation: Bahan ${i + 1} harus dipilih`), 'RecipeFormPage: validation', true, `Bahan ${i + 1} harus dipilih`)
+                return
+            }
+            if (!ri.quantity || ri.quantity <= 0) {
+                handleError(new Error(`Validation: Bahan ${i + 1} harus memiliki jumlah yang valid`), 'RecipeFormPage: validation', true, `Bahan ${i + 1} harus memiliki jumlah yang valid`)
+                return
+            }
+            if (!ri.unit?.trim()) {
+                handleError(new Error(`Validation: Bahan ${i + 1} harus memiliki satuan`), 'RecipeFormPage: validation', true, `Bahan ${i + 1} harus memiliki satuan`)
                 return
             }
         }
@@ -124,14 +151,15 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
         try {
             const ingredientData = recipeIngredients.map(ri => {
 
-                const item: any = {
-
+                const item: {
+                    ingredient_id: string
+                    quantity: number
+                    unit: string
+                    notes?: string
+                } = {
                     ingredient_id: ri.ingredient_id,
-
                     quantity: ri.quantity,
-
                     unit: ri.unit,
-
                 }
 
                 if (ri.notes) item.notes = ri.notes
@@ -165,9 +193,7 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
                 }
             }
         } catch (error: unknown) {
-            // Error handling is done by the mutations
-            const message = error instanceof Error ? error.message : 'Gagal menyimpan resep'
-            toast.error(message)
+            handleError(error, 'Save recipe', true, 'Gagal menyimpan resep')
         }
     }
 

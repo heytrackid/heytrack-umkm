@@ -16,6 +16,7 @@ export const SupplierInsertSchema = z.object({
   email: EmailSchema.optional().nullable(),
   phone: PhoneSchema.optional().nullable(),
   address: z.string().max(500, 'Alamat maksimal 500 karakter').optional().nullable(),
+  supplier_type: z.enum(['preferred', 'standard', 'trial', 'blacklisted']).default('standard').optional().nullable(),
   company_type: z.string().max(100, 'Tipe perusahaan maksimal 100 karakter').optional().nullable(),
   payment_terms: z.string().max(100, 'Syarat pembayaran maksimal 100 karakter').optional().nullable(),
   credit_limit: NonNegativeNumberSchema.optional().nullable(),
@@ -25,8 +26,8 @@ export const SupplierInsertSchema = z.object({
   notes: z.string().max(1000, 'Catatan maksimal 1000 karakter').optional().nullable(),
   bank_details: z.object({
     bank_name: z.string().max(100, 'Nama bank maksimal 100 karakter').optional(),
-    account_number: z.string().max(50, 'Nomor rekening maksimal 50 karakter').optional(),
     account_holder: z.string().max(255, 'Nama pemegang rekening maksimal 255 karakter').optional(),
+    account_number: z.string().max(50, 'Nomor rekening maksimal 50 karakter').optional(),
   }).optional().nullable(),
 })
 
@@ -39,6 +40,7 @@ export const SupplierBasicFormSchema = z.object({
   email: z.string().email('Format email tidak valid').optional().or(z.literal('')),
   phone: z.string().regex(/^(\+62|62|0)[8-9][0-9]{7,11}$/, 'Format nomor telepon Indonesia tidak valid').optional().or(z.literal('')),
   address: z.string().max(500, 'Alamat maksimal 500 karakter').optional().or(z.literal('')),
+  supplier_type: z.enum(['preferred', 'standard', 'trial', 'blacklisted']).optional(),
   notes: z.string().max(1000, 'Catatan maksimal 1000 karakter').optional().or(z.literal('')),
 })
 
@@ -62,3 +64,42 @@ export type SupplierInsert = z.infer<typeof SupplierInsertSchema>
 export type SupplierUpdate = z.infer<typeof SupplierUpdateSchema>
 export type SupplierQuery = z.infer<typeof SupplierQuerySchema>
 export type SupplierRatingUpdate = z.infer<typeof SupplierRatingUpdateSchema>
+
+/**
+ * Calculate supplier performance score
+ * Score ranges from 0-100 based on multiple factors
+ */
+export function calculateSupplierScore(supplier: {
+  rating?: number | null
+  total_spent?: number | null
+  lead_time_days?: number | null
+  supplier_type?: string
+}): number {
+  let score = 0
+
+  // Rating score (0-40 points)
+  if (supplier.rating) {
+    score += (supplier.rating / 5) * 40
+  }
+
+  // Spending volume score (0-30 points)
+  if (supplier.total_spent) {
+    const spentScore = Math.min(supplier.total_spent / 10000000, 1) * 30 // Cap at 10M
+    score += spentScore
+  }
+
+  // Lead time efficiency score (0-20 points)
+  if (supplier.lead_time_days) {
+    const leadTimeScore = Math.max(0, (14 - supplier.lead_time_days) / 14) * 20 // Better if < 14 days
+    score += leadTimeScore
+  }
+
+  // Supplier type bonus (0-10 points)
+  if (supplier.supplier_type === 'preferred') {
+    score += 10
+  } else if (supplier.supplier_type === 'standard') {
+    score += 5
+  }
+
+  return Math.round(Math.min(score, 100))
+}

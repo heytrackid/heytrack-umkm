@@ -39,12 +39,12 @@ export const MobileSelect = ({
 }: MobileSelectProps) => {
   const { isMobile } = useResponsive()
 
-  const selectProps: any = {}
-  if (value !== undefined) selectProps.value = value
-  if (defaultValue !== undefined) selectProps.defaultValue = defaultValue
-  if (onChange !== undefined) selectProps.onValueChange = onChange
-  if (disabled !== undefined) selectProps.disabled = disabled
-  if (required !== undefined) selectProps.required = required
+  const selectProps: Record<string, unknown> = {}
+  if (value !== undefined) selectProps['value'] = value
+  if (defaultValue !== undefined) selectProps['defaultValue'] = defaultValue
+  if (onChange !== undefined) selectProps['onValueChange'] = onChange
+  if (disabled !== undefined) selectProps['disabled'] = disabled
+  if (required !== undefined) selectProps['required'] = required
 
   return (
     <div className={cn("space-y-2", className)}>

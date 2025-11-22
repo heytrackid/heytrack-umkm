@@ -3,16 +3,19 @@
 
 'use client'
 
-import { Plus } from '@/components/icons'
+import { Plus, Upload } from '@/components/icons'
 import { useCallback, useMemo, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useCustomers, useDeleteCustomer } from '@/hooks/useCustomers'
+import { useCustomers, useDeleteCustomer, useImportCustomers } from '@/hooks/useCustomers'
 
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { ImportDialog } from '@/components/import/ImportDialog'
+import { generateCustomersTemplate, parseCustomersCSV } from '@/components/import/csv-helpers'
 import { useSettings } from '@/contexts/settings-context'
 import { toast } from 'sonner'
 import { useResponsive } from '@/hooks/useResponsive'
+import { handleError } from '@/lib/error-handling'
 
 
 import { CustomerDialog } from './CustomerDialog'
@@ -34,6 +37,7 @@ export const CustomersLayout = (): JSX.Element => {
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
+  const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; customer: Customer | null; bulk: boolean }>({
     show: false,
     customer: null,
@@ -43,8 +47,9 @@ export const CustomersLayout = (): JSX.Element => {
   // Fetch customers with standardized hook
   const { data: customers = [], isLoading } = useCustomers()
 
-  // Delete mutations
+  // Mutations
   const deleteCustomerMutation = useDeleteCustomer()
+  const importCustomersMutation = useImportCustomers()
   const bulkDeleteMutation = useMutation({
     mutationFn: async (customerIds: string[]) => {
       await Promise.all(
@@ -58,9 +63,7 @@ export const CustomersLayout = (): JSX.Element => {
       toast.success(`${customerIds.length} pelanggan berhasil dihapus`)
       setSelectedItems([])
     },
-    onError: () => {
-      toast.error('Gagal menghapus pelanggan')
-    }
+    onError: (error) => handleError(error, 'Delete customers', true, 'Gagal menghapus pelanggan')
   })
 
   // Filter customers
@@ -139,11 +142,21 @@ export const CustomersLayout = (): JSX.Element => {
       <PageHeader
         title="Pelanggan"
         description="Kelola data pelanggan Anda"
-        action={
-          <Button onClick={handleAddNew}>
-            <Plus className="h-4 w-4 mr-2" />
-            Tambah Pelanggan
-          </Button>
+        actions={
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setImportDialogOpen(true)}
+              className="flex-1 sm:flex-none"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Import CSV
+            </Button>
+            <Button onClick={handleAddNew}>
+              <Plus className="h-4 w-4 mr-2" />
+              Tambah Pelanggan
+            </Button>
+          </div>
         }
       />
 
@@ -195,7 +208,7 @@ export const CustomersLayout = (): JSX.Element => {
               {deleteConfirm.bulk ? 'Hapus Pelanggan?' : `Hapus ${deleteConfirm.customer?.name}?`}
             </h3>
             <p className="text-sm text-muted-foreground mb-4">
-              {deleteConfirm.bulk 
+              {deleteConfirm.bulk
                 ? `Yakin ingin menghapus ${selectedItems.length} pelanggan? Tindakan ini tidak dapat dibatalkan.`
                 : 'Yakin ingin menghapus pelanggan ini? Tindakan ini tidak dapat dibatalkan.'
               }
@@ -217,6 +230,31 @@ export const CustomersLayout = (): JSX.Element => {
           </div>
         </div>
       )}
+
+      {/* Import Dialog */}
+      <ImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        title="Import Pelanggan"
+        description="Upload file CSV untuk import data pelanggan secara massal"
+        templateUrl={`data:text/csv;charset=utf-8,${encodeURIComponent(generateCustomersTemplate())}`}
+        templateFilename="template-pelanggan.csv"
+        parseCSV={parseCustomersCSV}
+        onImport={async (data) => {
+          try {
+            await importCustomersMutation.mutateAsync(data)
+            return {
+              success: true,
+              count: data.length
+            }
+          } catch (error: unknown) {
+            return {
+              success: false,
+              error: error instanceof Error ? error.message : 'Terjadi kesalahan saat import'
+            }
+          }
+        }}
+      />
     </div>
   )
 }

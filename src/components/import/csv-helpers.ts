@@ -119,38 +119,20 @@ export function generateIngredientsTemplate(): string {
 /**
  * Generate CSV template for suppliers
  */
-export function generateSuppliersTemplate(): string {
-  const headers = [
-    'name',
-    'contact_person',
-    'phone',
-    'email',
-    'address',
-    'company_type',
-    'payment_terms',
-    'notes'
-  ]
+export function generateSuppliersTemplate() {
+  return `name,contact_person,phone,email,address,company_type,payment_terms,notes
+PT. Supplier Jaya,John Doe,08123456789,supplier@email.com,Jl. Supplier No. 123,CV,30 hari,Supplier bahan baku terpercaya
+CV. Maju Mundur,Jane Smith,08198765432,jane@supplier.com,Jl. Maju No. 456,PT,14 hari,Supplier baru`
+}
 
-  const examples = [
-    ['PT. Bahan Kue Indonesia', 'Ahmad Rahman', '+6281234567890', 'ahmad@bahan-kue.com', 'Jl. Industri No. 123, Jakarta', 'PT', '30 hari', 'Supplier bahan baku terpercaya'],
-    ['CV. Sembako Makmur', 'Siti Nurhaliza', '+6289876543210', 'siti@sembako-makmur.com', 'Jl. Perdagangan No. 45, Bandung', 'CV', '14 hari', 'Spesialis gula dan tepung'],
-    ['Toko Bahan Kue Lokal', 'Budi Santoso', '+6281122334455', 'budi@tokobahan.com', 'Jl. Raya No. 67, Surabaya', 'Toko', 'Cash', 'Supplier lokal dengan harga kompetitif']
-  ]
-
-  // Wrap fields with commas or quotes in double quotes
-  const escapeCSV = (field: string) => {
-    if (field.includes(',') || field.includes('"') || field.includes('\n')) {
-      return `"${field.replace(/"/g, '""')}"`
-    }
-    return field
-  }
-
-  const rows = [
-    headers.join(','),
-    ...examples.map(row => row.map(escapeCSV).join(','))
-  ]
-
-  return rows.join('\n')
+/**
+ * Generate CSV template for customers
+ */
+export function generateCustomersTemplate() {
+  return `name,email,phone,address,customer_type,discount_percentage,notes
+PT. Maju Jaya,customer1@email.com,08123456789,Jl. Sudirman No. 123,vip,10,Pelanggan VIP dengan diskon 10%
+CV. Retail Indonesia,customer2@email.com,08198765432,Jl. Thamrin No. 456,retail,,Pelanggan retail biasa
+John Doe,john@email.com,08155566677,Jl. Malioboro No. 789,regular,,Pelanggan individual`
 }
 
 /**
@@ -225,6 +207,23 @@ export function parseSuppliersCSV(text: string) {
     address: (row['address'] ?? row['Address'] ?? row['ALAMAT']) ?? '',
     company_type: (row['company_type'] ?? row['Company Type'] ?? row['TIPE_PERUSAHAAN']) ?? '',
     payment_terms: (row['payment_terms'] ?? row['Payment Terms'] ?? row['SYARAT_PEMBAYARAN']) ?? '',
+    notes: (row['notes'] ?? row['Notes'] ?? row['CATATAN']) ?? ''
+  }))
+}
+
+/**
+ * Parse customers from CSV data
+ */
+export function parseCustomersCSV(text: string) {
+  const data = parseCSV(text)
+
+  return data.map(row => ({
+    name: (row['name'] ?? row['Name'] ?? row['NAMA']) ?? '',
+    email: (row['email'] ?? row['Email'] ?? row['EMAIL']) ?? '',
+    phone: (row['phone'] ?? row['Phone'] ?? row['TELEPON']) ?? '',
+    address: (row['address'] ?? row['Address'] ?? row['ALAMAT']) ?? '',
+    customer_type: (row['customer_type'] ?? row['Customer Type'] ?? row['TIPE']) ?? 'regular',
+    discount_percentage: (row['discount_percentage'] ?? row['Discount Percentage'] ?? row['DISKON']) ?? '',
     notes: (row['notes'] ?? row['Notes'] ?? row['CATATAN']) ?? ''
   }))
 }

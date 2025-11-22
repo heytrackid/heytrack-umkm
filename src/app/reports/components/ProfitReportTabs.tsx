@@ -11,12 +11,13 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { COLORS, type ProfitData, type SelectedDataPoint } from '@/app/reports/components/ProfitReportTypes'
 
 type PartialProfitData = Pick<ProfitData,
+    'period' |
     'summary' |
     'profit_by_period' |
-    'product_profitability' |
+    'productProfitability' |
     'top_profitable_products' |
     'least_profitable_products' |
-    'operating_expenses_breakdown'
+    'operatingExpensesBreakdown'
 >
 
 interface ProfitReportTabsProps {
@@ -58,7 +59,7 @@ const TrendTab: React.FC<{
                     <div className="text-sm text-muted-foreground bg-blue-50 dark:bg-blue-950 p-3 rounded-md mt-2">
                         <strong>{selectedDataPoint.period}:</strong> Pendapatan {formatCurrency(selectedDataPoint.revenue)},
                         HPP {formatCurrency(selectedDataPoint.cogs)},
-                        Laba Kotor {formatCurrency(selectedDataPoint.gross_profit)}
+                        Laba Kotor {formatCurrency(selectedDataPoint.grossProfit)}
                     </div>
                 )}
             </CardHeader>
@@ -87,7 +88,7 @@ const TrendTab: React.FC<{
                                     <div className="text-right">
                                         <p className="font-bold">{formatCurrency(period.revenue)}</p>
                                         <p className="text-sm text-muted-foreground">
-                                            Laba: {formatCurrency(period.gross_profit)}
+                                            Laba: {formatCurrency(period.grossProfit)}
                                         </p>
                                     </div>
                                 </div>
@@ -125,13 +126,13 @@ const ProductsTab: React.FC<{
                             {topProducts.map((product, index) => (
                                 <div key={index} className="flex justify-between items-center p-3 bg-muted dark:bg-green-950 rounded-lg">
                                     <div>
-                                        <p className="font-medium">{product.product_name}</p>
+                                        <p className="font-medium">{product.productName}</p>
                                         <p className="text-sm text-muted-foreground">
-                                            Margin: {product.gross_margin.toFixed(1)}%
+                                            Margin: {product.grossMargin.toFixed(1)}%
                                         </p>
                                     </div>
                                     <p className="font-bold text-muted-foreground">
-                                        {formatCurrency(product.gross_profit)}
+                                        {formatCurrency(product.grossProfit)}
                                     </p>
                                 </div>
                             ))}
@@ -155,13 +156,13 @@ const ProductsTab: React.FC<{
                             {leastProducts.map((product, index) => (
                                 <div key={index} className="flex justify-between items-center p-3 bg-red-50 dark:bg-red-950 rounded-lg">
                                     <div>
-                                        <p className="font-medium">{product.product_name}</p>
+                                        <p className="font-medium">{product.productName}</p>
                                         <p className="text-sm text-muted-foreground">
-                                            Margin: {product.gross_margin.toFixed(1)}%
+                                            Margin: {product.grossMargin.toFixed(1)}%
                                         </p>
                                     </div>
                                     <p className="font-bold text-red-600">
-                                        {formatCurrency(product.gross_profit)}
+                                        {formatCurrency(product.grossProfit)}
                                     </p>
                                 </div>
                             ))}
@@ -178,7 +179,7 @@ const ExpensesTab: React.FC<{
     profitData: ProfitData
 }> = ({ profitData }) => {
     const { formatCurrency } = useCurrency()
-    const breakdown = profitData.operating_expenses_breakdown ?? []
+    const breakdown = profitData.operatingExpensesBreakdown ?? []
 
     return (
         <Card>
@@ -240,16 +241,16 @@ const ComparisonTab: React.FC<{
 
     if (compareMode && comparisonData && profitData.summary && comparisonData.summary) {
         const revenueGrowth = calculateGrowth(
-            profitData.summary.total_revenue ?? 0,
-            comparisonData.summary.total_revenue ?? 0
+            profitData.summary.totalRevenue ?? 0,
+            comparisonData.summary.totalRevenue ?? 0
         )
         const grossGrowth = calculateGrowth(
-            profitData.summary.gross_profit ?? 0,
-            comparisonData.summary.gross_profit ?? 0
+            profitData.summary.grossProfit ?? 0,
+            comparisonData.summary.grossProfit ?? 0
         )
         const netGrowth = calculateGrowth(
-            profitData.summary.net_profit ?? 0,
-            comparisonData.summary.net_profit ?? 0
+            profitData.summary.netProfit ?? 0,
+            comparisonData.summary.netProfit ?? 0
         )
         return (
             <div className="space-y-6">
@@ -259,21 +260,21 @@ const ComparisonTab: React.FC<{
                         <CardHeader>
                             <CardTitle className="text-lg">Periode Saat Ini</CardTitle>
                             <p className="text-sm text-muted-foreground">
-                                {formatPeriodRange(profitData.summary.period)}
+                                {formatPeriodRange(profitData.period)}
                             </p>
                         </CardHeader>
                          <CardContent className="space-y-2">
                             <div className="flex justify-between">
                                 <span>Pendapatan:</span>
-                                <span className="font-semibold">{formatCurrency(Number(profitData.summary.total_revenue ?? 0))}</span>
+                                <span className="font-semibold">{formatCurrency(Number(profitData.summary.totalRevenue ?? 0))}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span>Laba Kotor:</span>
-                                <span className="font-semibold text-green-600">{formatCurrency(profitData.summary.gross_profit ?? 0)}</span>
+                                <span className="font-semibold text-green-600">{formatCurrency(profitData.summary.grossProfit ?? 0)}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span>Laba Bersih:</span>
-                                <span className="font-semibold text-green-600">{formatCurrency(profitData.summary.net_profit ?? 0)}</span>
+                                <span className="font-semibold text-green-600">{formatCurrency(profitData.summary.netProfit ?? 0)}</span>
                             </div>
                         </CardContent>
                     </Card>
@@ -282,21 +283,21 @@ const ComparisonTab: React.FC<{
                         <CardHeader>
                             <CardTitle className="text-lg">Periode Sebelumnya</CardTitle>
                             <p className="text-sm text-muted-foreground">
-                                {formatPeriodRange(comparisonData.summary.period)}
+                                {formatPeriodRange(comparisonData.period)}
                             </p>
                         </CardHeader>
                         <CardContent className="space-y-2">
                             <div className="flex justify-between">
                                 <span>Pendapatan:</span>
-                                <span className="font-semibold">{formatCurrency(comparisonData.summary.total_revenue ?? 0)}</span>
+                                <span className="font-semibold">{formatCurrency(comparisonData.summary.totalRevenue ?? 0)}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span>Laba Kotor:</span>
-                                <span className="font-semibold text-green-600">{formatCurrency(comparisonData.summary.gross_profit ?? 0)}</span>
+                                <span className="font-semibold text-green-600">{formatCurrency(comparisonData.summary.grossProfit ?? 0)}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span>Laba Bersih:</span>
-                                <span className="font-semibold text-green-600">{formatCurrency(comparisonData.summary.net_profit ?? 0)}</span>
+                                <span className="font-semibold text-green-600">{formatCurrency(comparisonData.summary.netProfit ?? 0)}</span>
                             </div>
                         </CardContent>
                     </Card>

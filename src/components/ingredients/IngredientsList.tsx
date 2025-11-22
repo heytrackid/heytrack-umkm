@@ -34,6 +34,7 @@ import { SimplePagination } from '@/components/ui/simple-pagination'
 import { useSettings } from '@/contexts/settings-context'
 import { useIngredients, useDeleteIngredient } from '@/hooks/useIngredients'
 import { useResponsive } from '@/hooks/useResponsive'
+import { handleError } from '@/lib/error-handling'
 import { toast } from 'sonner'
 import { usePagination } from '@/hooks/usePagination'
 import type { Row } from '@/types/database'
@@ -209,8 +210,7 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
             setIsDeleteDialogOpen(false)
             setSelectedIngredient(null)
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Gagal menghapus bahan baku'
-            toast.error(message || 'Gagal menghapus bahan baku')
+            handleError(error as Error, 'Ingredients List: delete ingredient', true, 'Gagal menghapus bahan baku')
         }
     }, [selectedIngredient, deleteIngredient])
 

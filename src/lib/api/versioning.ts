@@ -137,7 +137,7 @@ export function withVersioning(handler: (request: NextRequest, params?: Record<s
     const version = extractAPIVersion(request, params)
 
     // Add version to request for use in handlers
-    ;(request as any).apiVersion = version
+    ;(request as { apiVersion?: string }).apiVersion = version
 
     const response = await handler(request, params)
 

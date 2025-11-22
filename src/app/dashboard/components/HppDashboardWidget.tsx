@@ -10,8 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { GridSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useHppDashboardSummary } from '@/hooks/api/useDashboard'
-import { uiLogger } from '@/lib/logger'
-import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 
  
 
@@ -25,8 +24,7 @@ const HppDashboardWidget = (): JSX.Element | null => {
   // Handle error
   useEffect(() => {
     if (error) {
-      uiLogger.error({ error }, 'Failed to load HPP dashboard data')
-      toast.error('Failed to load HPP data')
+      handleError(error as Error, 'HPP Dashboard Widget: load data', true, 'Gagal memuat data HPP')
     }
   }, [error])
 

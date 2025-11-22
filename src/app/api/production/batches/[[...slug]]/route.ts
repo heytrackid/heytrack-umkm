@@ -6,7 +6,7 @@ import { createSuccessResponse } from '@/lib/api-core/responses'
 import { createApiRoute } from '@/lib/api/route-factory'
 import { ProductionBatchCreateSchema, ProductionBatchUpdateSchema } from '@/lib/validations/domains/production'
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
-import { ProductionService } from '@/services/production/ProductionService'
+import { ProductionService, type ProductionBatchCreateData, type ProductionBatchUpdateData } from '@/services/production/ProductionService'
 import type { NextResponse } from 'next/server'
 
 // GET /api/production/batches or /api/production/batches/[id]
@@ -28,8 +28,7 @@ export const GET = createApiRoute(
 
       try {
         const productionService = new ProductionService(context.supabase)
-        const params: any = { limit }
-        if (status) params.status = status
+        const params = { limit, ...(status && { status }) }
         const result = await productionService.getProductionBatches(user.id, params)
 
         return createSuccessResponse(result)
@@ -76,10 +75,10 @@ export const POST = createApiRoute(
 
     try {
       const productionService = new ProductionService(context.supabase)
-      const createData = { ...body }
+      const createData = body as ProductionBatchCreateData
       if (createData.notes === undefined) delete createData.notes
 
-      const batch = await productionService.createProductionBatch(user.id, createData as any)
+      const batch = await productionService.createProductionBatch(user.id, createData)
 
       return createSuccessResponse(batch, SUCCESS_MESSAGES.PRODUCTION_BATCH_CREATED, undefined, 201)
     } catch (error) {
@@ -110,10 +109,10 @@ export const PUT = createApiRoute(
 
     try {
       const productionService = new ProductionService(context.supabase)
-      const updateData = { ...body }
+      const updateData = body as ProductionBatchUpdateData
       if (updateData.notes === undefined) delete updateData.notes
 
-      const updatedBatch = await productionService.updateProductionBatch(user.id, id, updateData as any)
+      const updatedBatch = await productionService.updateProductionBatch(user.id, id, updateData)
 
       return createSuccessResponse(updatedBatch, SUCCESS_MESSAGES.PRODUCTION_BATCH_UPDATED)
     } catch (error) {

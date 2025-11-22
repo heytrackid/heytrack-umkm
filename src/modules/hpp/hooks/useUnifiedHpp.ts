@@ -10,7 +10,6 @@ import { useState } from 'react'
 
 import { useToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
-import { HPP_CONFIG } from '@/lib/constants/hpp-config'
 
 import type {
     HppComparison,
@@ -70,12 +69,7 @@ export interface UseUnifiedHppReturn {
   updatePrice: UseMutationResult<unknown, unknown, { recipeId: string; price: number; margin: number }, unknown>
 }
 
-// Type guard for recipe ingredient structure
-function isValidRecipeIngredient(ri: unknown): ri is RecipeIngredientRecord {
-  if (!ri || typeof ri !== 'object') {return false}
-  const ingredient = ri as { ingredient_id?: unknown }
-  return typeof ingredient.ingredient_id === 'string'
-}
+
 
 function isRecipesListResponse(payload: unknown): payload is RecipesListResponse {
   return typeof payload === 'object' && payload !== null && Array.isArray((payload as RecipesListResponse).recipes)
@@ -145,114 +139,32 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
     refetchOnWindowFocus: false
   })
 
-  // Fetch selected recipe details
+  // Fetch selected recipe details with HPP data
   const { data: recipeData, isLoading: recipeLoading } = useQuery<RecipeWithCosts | null>({
     queryKey: ['recipe-detail', selectedRecipeId],
     queryFn: async (): Promise<RecipeWithCosts | null> => {
       if (!selectedRecipeId) {return null}
 
-      // Fetch complete HPP calculation from the backend service first
-      let totalCost = 0;
-      let operationalCost = 0;
-      let laborCost = 0;
-      let overheadCost = 0;
-      let recipeDetail: RecipeDetailResponse | null = null;
-      
-      try {
-        const hppResponse = await fetch(`/api/hpp/calculations?recipeId=${selectedRecipeId}`, {
-          credentials: 'include', // Include cookies for authentication
-        });
-        
-        if (hppResponse.ok) {
-          const hppData = await hppResponse.json();
-          if (Array.isArray(hppData.calculations) && hppData.calculations.length > 0) {
-            // Get the most recent HPP calculation
-            const latestCalculation = hppData.calculations[0];
-            totalCost = latestCalculation.cost_per_unit || 0;
-            
-            // Calculate per-unit costs based on servings from recipe info
-            const recipeResponse = await fetch(`/api/recipes/${selectedRecipeId}`, {
-              credentials: 'include', // Include cookies for authentication
-            });
-            if (recipeResponse.ok) {
-              recipeDetail = await recipeResponse.json();
-            } else {
-              throw new Error('Failed to fetch recipe details');
-            }
-            
-            const servings = Number(recipeDetail!.servings) || 1;
-            operationalCost = (latestCalculation.overhead_cost || 0) / servings;
-            laborCost = (latestCalculation.labor_cost || 0) / servings;
-            overheadCost = (latestCalculation.overhead_cost || 0) / servings;
-          }
-        }
-      } catch (error) {
-        logger.warn({ error, recipeId: selectedRecipeId }, 'Failed to fetch complete HPP calculation, will use fallback calculation');
+      // Fetch recipe with HPP calculation from API
+      const response = await fetch(`/api/hpp/recipe/${selectedRecipeId}`, {
+        credentials: 'include', // Include cookies for authentication
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch recipe with HPP data')
       }
 
-      // If no complete HPP calculation is available, fall back to basic calculation
-      if (totalCost === 0) {
-        const response = await fetch(`/api/recipes/${selectedRecipeId}`, {
-          credentials: 'include', // Include cookies for authentication
-        });
-        if (!response.ok) {throw new Error('Failed to fetch recipe')}
-        recipeDetail = await response.json();
+      const data = await response.json()
 
-        // Calculate ingredient costs for fallback
-        let ingredientCost = 0;
-        const recipeIngredients = Array.isArray(recipeDetail!.recipe_ingredients)
-          ? recipeDetail!.recipe_ingredients.filter(isValidRecipeIngredient)
-          : [];
-
-         ingredientCost = recipeIngredients.reduce((sum: number, ri) => {
-           const quantity = ri.quantity ?? 0;
-           // Use WAC if available, otherwise use current price
-           const unitPrice =
-             ri.ingredients?.weighted_average_cost ??
-             ri.ingredients?.price_per_unit ??
-             0;
-
-           // Log warning if ingredient has no price
-           if (unitPrice === 0 && ri.ingredients?.name) {
-             logger.warn({
-               ingredientId: ri.ingredient_id,
-               ingredientName: ri.ingredients.name
-             }, 'Ingredient has no price data for HPP calculation');
-           }
-
-           return sum + quantity * unitPrice;
-         }, 0);
-
-        // Fallback operational costs calculation
-        operationalCost = Math.max(
-          ingredientCost * HPP_CONFIG.MIN_OPERATIONAL_COST_PERCENTAGE,
-          HPP_CONFIG.DEFAULT_OVERHEAD_PER_SERVING
-        );
-        totalCost = ingredientCost + operationalCost;
-      }
-
-        const result = {
-          ...recipeDetail!,
-        ingredients: (recipeDetail!.recipe_ingredients || [])
-          .filter(isValidRecipeIngredient)
-          .map((ri): RecipeIngredientWithPrice => ({
-            id: ri.ingredient_id,
-            name: ri.ingredients?.name ?? 'Unknown',
-            quantity: ri.quantity ?? 0,
-            unit: ri.unit ?? 'unit',
-            unit_price:
-              ri.ingredients?.weighted_average_cost ??
-              ri.ingredients?.price_per_unit ??
-              0,
-            category: ri.ingredients?.category ?? 'Unknown'
-          })),
-        operational_costs: operationalCost,
-        labor_costs: laborCost,
-        overhead_costs: overheadCost,
-        total_cost: totalCost
-      } as RecipeWithCosts;
-
-      return result;
+      // Transform API response to match RecipeWithCosts interface
+      return {
+        ...data.recipe,
+        ingredients: data.ingredients || [],
+        operational_costs: data.operational_costs || 0,
+        labor_costs: data.labor_costs || 0,
+        overhead_costs: data.overhead_costs || 0,
+        total_cost: data.total_cost || 0
+      } as RecipeWithCosts
     },
     enabled: Boolean(selectedRecipeId),
     staleTime: 5 * 60 * 1000, // 5 minutes

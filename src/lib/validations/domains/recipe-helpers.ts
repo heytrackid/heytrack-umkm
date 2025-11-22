@@ -17,8 +17,8 @@ export const EnhancedRecipeInsertSchema = RecipeInsertSchema
   .extend({
     // Enhanced validation for recipe components
     servings: z.number().positive().max(1000), // Max 1000 servings
-    preparation_time: z.number().min(0).max(1440).optional(), // Max 24 hours in minutes
-    cooking_time: z.number().min(0).max(1440).optional(), // Max 24 hours in minutes
+    prep_time: z.number().min(0).max(1440).optional(), // Max 24 hours in minutes
+    cook_time: z.number().min(0).max(1440).optional(), // Max 24 hours in minutes
 
     // Cost validation
     cost_per_serving: z.number().min(0).max(10000000).optional(), // Max 10M per serving
@@ -141,12 +141,12 @@ export class RecipeValidationHelpers {
   static getRecipeComplexity(recipe: {
     ingredients: Array<Record<string, unknown>>
     instructions?: Array<Record<string, unknown>>
-    preparation_time?: number
-    cooking_time?: number
+    prep_time?: number
+    cook_time?: number
   }): 'complex' | 'moderate' | 'simple' {
     const ingredientCount = recipe.ingredients.length
     const instructionCount = recipe.instructions?.length ?? 0
-    const totalTime = (recipe.preparation_time ?? 0) + (recipe.cooking_time ?? 0)
+    const totalTime = (recipe.prep_time ?? 0) + (recipe.cook_time ?? 0)
 
     if (ingredientCount <= 5 && instructionCount <= 5 && totalTime <= 30) {
       return 'simple'

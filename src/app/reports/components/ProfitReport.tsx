@@ -1,31 +1,24 @@
 'use client'
 
-import { TrendingUp, AlertCircle, Download, RefreshCw, FileText, Printer, BarChart3 } from '@/components/icons'
-import { useState, useCallback } from 'react'
+import { TrendingUp, AlertCircle, RefreshCw } from '@/components/icons'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useCurrency } from '@/hooks/useCurrency'
-import { useResponsive } from '@/hooks/useResponsive'
-import { apiLogger } from '@/lib/logger'
 
 // Import our separated components
-import { useExportUtilities } from '@/app/reports/components/ProfitReportExport'
 import { ProfitMetrics, ProfitBreakdown } from '@/app/reports/components/ProfitReportMetrics'
 import { ProfitReportTabs } from '@/app/reports/components/ProfitReportTabs'
 
-import type { ProfitReportProps, ProfitData, PeriodType, ChartType, SelectedDataPoint } from '@/app/reports/components/ProfitReportTypes'
+import type { ProfitReportProps, ProfitData, SelectedDataPoint } from '@/app/reports/components/ProfitReportTypes'
 
 // Main component
 export const ProfitReport = ({}: ProfitReportProps = {}) => {
     const { formatCurrency } = useCurrency()
-    const { isMobile } = useResponsive()
-    const [period, setPeriod] = useState<PeriodType>('monthly')
-    const [chartType, setChartType] = useState<ChartType>('line')
     const [selectedDataPoint, setSelectedDataPoint] = useState<SelectedDataPoint | null>(null)
-    const [compareMode, setCompareMode] = useState(false)
+    const [compareMode] = useState(false)
 
     // Data fetching with React Query
     const {
@@ -34,10 +27,9 @@ export const ProfitReport = ({}: ProfitReportProps = {}) => {
         error,
         refetch
     } = useQuery({
-        queryKey: ['profit-report', period],
+        queryKey: ['profit-report'],
         queryFn: async (): Promise<ProfitData> => {
             const params = new URLSearchParams()
-            params.set('period', period)
             params.set('include_breakdown', 'true')
 
             const response = await fetch(`/api/reports/profit?${params.toString()}`)
@@ -52,44 +44,41 @@ export const ProfitReport = ({}: ProfitReportProps = {}) => {
         refetchOnWindowFocus: false
     })
 
-    // Comparison data query
+    // Comparison data query - compare with previous period
     const {
         data: comparisonData
     } = useQuery({
-        queryKey: ['profit-report-comparison', period, compareMode],
+        queryKey: ['profit-report-comparison', compareMode],
         queryFn: async (): Promise<ProfitData | null> => {
-            // Since date filtering is removed, comparison is disabled
-            return null
+            if (!compareMode) return null
+
+            // Calculate previous period date range
+            const now = new Date()
+            const currentPeriodStart = new Date(now.getFullYear(), now.getMonth(), 1) // Start of current month
+            const currentPeriodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0) // End of current month
+
+            const previousPeriodStart = new Date(currentPeriodStart)
+            previousPeriodStart.setMonth(previousPeriodStart.getMonth() - 1)
+            const previousPeriodEnd = new Date(currentPeriodEnd)
+            previousPeriodEnd.setMonth(previousPeriodEnd.getMonth() - 1)
+
+            const params = new URLSearchParams()
+            params.set('start_date', previousPeriodStart.toISOString().split('T')[0] || previousPeriodStart.toISOString().substring(0, 10))
+            params.set('end_date', previousPeriodEnd.toISOString().split('T')[0] || previousPeriodEnd.toISOString().substring(0, 10))
+            params.set('include_breakdown', 'true')
+
+            const response = await fetch(`/api/reports/profit?${params.toString()}`)
+            if (!response.ok) {
+                throw new Error('Failed to fetch comparison data')
+            }
+
+            return (await response.json()) as unknown as ProfitData
         },
         enabled: compareMode,
         refetchInterval: 5 * 60 * 1000,
         staleTime: 2 * 60 * 1000,
         refetchOnWindowFocus: false
     })
-
-    const { handleExportCSV, handlePrint, exporting, printing } = useExportUtilities({
-        profitData: profitData ?? null,
-        dateRange: { start: '', end: '' }
-    })
-
-    // Safe export handlers with error boundaries
-    const safeHandleExportCSV = useCallback(async () => {
-        try {
-            await handleExportCSV()
-        } catch (error) {
-            apiLogger.error({ error }, 'Export CSV failed')
-            // Could show a toast notification here if needed
-        }
-    }, [handleExportCSV])
-
-    const safeHandlePrint = useCallback(() => {
-        try {
-            handlePrint()
-        } catch (error) {
-            apiLogger.error({ error }, 'Print failed')
-            // Could show a toast notification here if needed
-        }
-    }, [handlePrint])
 
     // Loading state
     if (loading) {
@@ -132,9 +121,9 @@ export const ProfitReport = ({}: ProfitReportProps = {}) => {
         )
     }
 
-    const { summary } = profitData!
-    const resolvedPeriodStart = summary?.period?.start ?? ''
-    const resolvedPeriodEnd = summary?.period?.end ?? ''
+    const { summary, period } = profitData!
+    const resolvedPeriodStart = period?.start ?? ''
+    const resolvedPeriodEnd = period?.end ?? ''
     const safeFormatDate = (value: string | undefined) => {
         if (!value) { return null }
         const parsed = new Date(value)
@@ -145,111 +134,23 @@ export const ProfitReport = ({}: ProfitReportProps = {}) => {
 
     return (
         <div className="space-y-6">
-            {/* Header Actions */}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-                <div>
-                    <h2 className="text-2xl font-bold flex items-center gap-2">
-                        <TrendingUp className="h-6 w-6 text-blue-600" />
-                        Laporan Laba Rugi
-                    </h2>
-                    <p className="text-sm text-muted-foreground mt-1">
-                        {displayPeriodStart && displayPeriodEnd
-                            ? `${displayPeriodStart} - ${displayPeriodEnd}`
-                            : displayPeriodStart || displayPeriodEnd || 'Periode tidak tersedia'}
-                    </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                    <Button
-                        variant={compareMode ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setCompareMode(!compareMode)}
-                    >
-                        <BarChart3 className="h-4 w-4 mr-2" />
-                        Bandingkan
-                    </Button>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm">
-                                <Download className="h-4 w-4 mr-2" />
-                                Ekspor
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                             <DropdownMenuItem
-                                  disabled={exporting || !profitData}
-                                 onClick={() => { void safeHandleExportCSV() }}
-                             >
-                                <FileText className="h-4 w-4 mr-2" />
-                                Ekspor CSV
-                            </DropdownMenuItem>
-
-                             <DropdownMenuItem
-                                 disabled={printing}
-                                 onClick={() => { safeHandlePrint() }}
-                             >
-                                <Printer className="h-4 w-4 mr-2" />
-                                Cetak
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
+            {/* Header */}
+            <div>
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                    <TrendingUp className="h-6 w-6 text-blue-600" />
+                    Laporan Laba Rugi
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                    {displayPeriodStart && displayPeriodEnd
+                        ? `${displayPeriodStart} - ${displayPeriodEnd}`
+                        : displayPeriodStart || displayPeriodEnd || 'Periode tidak tersedia'}
+                </p>
             </div>
 
-            {/* Period and Chart Type Selectors */}
-            <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex gap-2">
-                    <span className="text-sm font-medium self-center mr-2">Periode:</span>
-                    <Button
-                        variant={period === 'daily' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setPeriod('daily')}
-                    >
-                        Harian
-                    </Button>
-                    <Button
-                        variant={period === 'weekly' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setPeriod('weekly')}
-                    >
-                        Mingguan
-                    </Button>
-                    <Button
-                        variant={period === 'monthly' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setPeriod('monthly')}
-                    >
-                        Bulanan
-                    </Button>
-                </div>
 
-                <div className="flex gap-2">
-                    <span className="text-sm font-medium self-center mr-2">Tipe Chart:</span>
-                    <Button
-                        variant={chartType === 'line' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setChartType('line')}
-                    >
-                        Line
-                    </Button>
-                    <Button
-                        variant={chartType === 'bar' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setChartType('bar')}
-                    >
-                        Bar
-                    </Button>
-                    <Button
-                        variant={chartType === 'area' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setChartType('area')}
-                    >
-                        Area
-                    </Button>
-                </div>
-            </div>
 
             {/* Key Metrics Cards */}
-            <ProfitMetrics summary={summary!} isMobile={isMobile} />
+            <ProfitMetrics summary={summary!} isMobile={false} />
 
             {/* Profit Breakdown */}
             <ProfitBreakdown summary={summary!} formatCurrency={formatCurrency} />

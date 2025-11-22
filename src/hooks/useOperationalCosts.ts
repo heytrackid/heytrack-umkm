@@ -1,10 +1,11 @@
-import { createClientLogger } from '@/lib/client-logger'
+
 import type { Insert, Row, Update } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchApi, postApi, putApi, deleteApi } from '@/lib/query/query-helpers'
 import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 
-const logger = createClientLogger('useOperationalCosts')
+
 
 type OperationalCost = Row<'operational_costs'>
 type OperationalCostInsert = Insert<'operational_costs'>
@@ -55,10 +56,7 @@ export function useCreateOperationalCost() {
       queryClient.invalidateQueries({ queryKey: ['operational-cost-stats'] })
       toast.success('Biaya operasional berhasil ditambahkan')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to create operational cost')
-      toast.error('Gagal menambahkan biaya operasional')
-    },
+    onError: (error) => handleError(error, 'Create operational cost', true, 'Gagal menambahkan biaya operasional'),
   })
 }
 
@@ -76,10 +74,7 @@ export function useUpdateOperationalCost() {
       queryClient.invalidateQueries({ queryKey: ['operational-cost-stats'] })
       toast.success('Biaya operasional berhasil diperbarui')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to update operational cost')
-      toast.error('Gagal memperbarui biaya operasional')
-    },
+    onError: (error) => handleError(error, 'Update operational cost', true, 'Gagal memperbarui biaya operasional'),
   })
 }
 
@@ -96,10 +91,7 @@ export function useDeleteOperationalCost() {
       queryClient.invalidateQueries({ queryKey: ['operational-cost-stats'] })
       toast.success('Biaya operasional berhasil dihapus')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to delete operational cost')
-      toast.error('Gagal menghapus biaya operasional')
-    },
+    onError: (error) => handleError(error, 'Delete operational cost', true, 'Gagal menghapus biaya operasional'),
   })
 }
 
@@ -125,9 +117,6 @@ export function useQuickSetupOperationalCosts() {
       queryClient.invalidateQueries({ queryKey: ['operational-costs'] })
       toast.success('Biaya operasional default berhasil dibuat')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to setup operational costs')
-      toast.error('Gagal membuat biaya operasional default')
-    },
+    onError: (error) => handleError(error, 'Quick setup operational costs', true, 'Gagal membuat biaya operasional default'),
   })
 }

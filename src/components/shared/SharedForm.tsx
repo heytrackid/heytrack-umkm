@@ -8,7 +8,7 @@ import { useForm, type DefaultValues, type FieldValues, type Path, type PathValu
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FormField } from '@/components/ui/crud-form'
-import { uiLogger } from '@/lib/logger'
+import { handleError } from '@/lib/error-handling'
 
 import type { z } from 'zod'
 
@@ -94,9 +94,9 @@ export const SharedForm = <T extends FieldValues>({
   const handleSubmit = async (data: T) => {
     try {
       await onSubmit(data)
-     } catch (error) {
-       uiLogger.error({ error }, 'Form submission error:')
-     }
+      } catch (error) {
+        handleError(error, 'Form submission', false) // Don't show toast for form errors, let the form handle it
+      }
   }
 
   const onFormSubmit = form.handleSubmit(handleSubmit)

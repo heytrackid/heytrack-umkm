@@ -69,11 +69,24 @@ export const POST = createApiRoute(
       const result: Record<string, RecipeCostPreview> = {}
 
       for (const recipe of recipes) {
-        if (!isRecipeCostRecord(recipe)) {
-          continue
-        }
+        try {
+          if (!isRecipeCostRecord(recipe)) {
+            apiLogger.warn({ recipeId: (recipe as RecipeCostRecord).id }, 'Invalid recipe cost record structure')
+            continue
+          }
 
-        result[recipe.id] = buildRecipeCostPreview(recipe)
+          result[recipe.id] = buildRecipeCostPreview(recipe)
+        } catch (error) {
+          apiLogger.error({ error, recipeId: recipe.id }, 'Failed to calculate cost preview for recipe')
+          // Include recipe with zero cost as fallback
+          result[recipe.id] = {
+            recipeId: recipe.id,
+            materialCost: 0,
+            costPerServing: 0,
+            lastUpdated: recipe.updated_at,
+            ingredientsCount: 0
+          }
+        }
       }
 
       return createSuccessResponse(result)

@@ -91,18 +91,18 @@ export class GlobalErrorBoundary extends Component<Props, State> {
                 <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
               </div>
               <CardTitle className="text-xl text-foreground">
-                Oops! Something went wrong
+                Ups! Terjadi Kesalahan
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground text-center">
-                We encountered an unexpected error. Our team has been notified and is working to fix this issue.
+                Kami mengalami kesalahan yang tidak terduga. Tim kami telah diberitahu dan sedang berusaha memperbaiki masalah ini.
               </p>
 
               {this.state.error && (
                 <details className="bg-secondary p-3 rounded text-xs font-mono">
                   <summary className="cursor-pointer text-foreground mb-2">
-                    Error Details (Development Only)
+                    Detail Kesalahan (Hanya untuk Development)
                   </summary>
                   <div className="space-y-2 text-red-600 dark:text-red-400">
                     <div>
@@ -128,11 +128,11 @@ export class GlobalErrorBoundary extends Component<Props, State> {
               <div className="flex gap-3 justify-center">
                 <Button onClick={this.handleRetry} variant="outline">
                   <RefreshCw className="w-4 h-4 mr-2" />
-                  Try Again
+                  Coba Lagi
                 </Button>
                 <Button onClick={this.handleGoHome}>
                   <Home className="w-4 h-4 mr-2" />
-                  Go Home
+                  Kembali ke Beranda
                 </Button>
               </div>
 

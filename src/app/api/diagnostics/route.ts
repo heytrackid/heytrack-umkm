@@ -69,13 +69,16 @@ async function checkSupabaseConnectivity(): Promise<DiagnosticsPayload['supabase
 
   try {
     const { createClient } = await import('@supabase/supabase-js')
-    const options: unknown = {
+    const options: {
+      auth: { persistSession: boolean }
+      global?: { headers: { Authorization: string } }
+    } = {
       auth: { persistSession: false },
     }
     if (serviceRoleKey) {
-      (options as any).global = { headers: { Authorization: `Bearer ${serviceRoleKey}` } }
+      options.global = { headers: { Authorization: `Bearer ${serviceRoleKey}` } }
     }
-    const client = createClient(url, serviceRoleKey ?? anonKey, options as any)
+    const client = createClient(url, serviceRoleKey ?? anonKey, options)
 
     const { error } = await client
       .from('user_profiles')

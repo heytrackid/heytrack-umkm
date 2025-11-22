@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 import { validateBusinessInfoSettings } from '@/lib/settings-validation'
 
 
@@ -62,9 +62,7 @@ const BusinessInfoSettingsComponent = ({ settings, onSettingChange }: BusinessIn
       validateBusinessInfoSettings(localSettings)
       setErrors({})
     } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message)
-      }
+      handleError(error, 'Business info validation', true)
     }
   }
 

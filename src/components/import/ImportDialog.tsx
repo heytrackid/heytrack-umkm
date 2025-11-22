@@ -11,6 +11,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
+import { handleError } from '@/lib/error-handling'
 import { toast } from 'sonner'
 import { uiLogger } from '@/lib/logger'
 
@@ -50,7 +51,7 @@ export const ImportDialog = ({
         const selectedFile = e.target.files?.[0]
         if (selectedFile) {
             if (!selectedFile.name.endsWith('.csv')) {
-                toast.error('File tidak valid - Hanya file CSV yang diperbolehkan')
+                handleError(new Error('Validation: File tidak valid - Hanya file CSV yang diperbolehkan'), 'Import Dialog: validation', true, 'File tidak valid - Hanya file CSV yang diperbolehkan')
                 return
             }
             setFile(selectedFile)

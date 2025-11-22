@@ -250,20 +250,7 @@ export function sortBy<T>(
   })
 }
 
-/**
- * Debounce utility for search inputs
- */
-export function debounce<T extends (...args: Parameters<T>) => ReturnType<T>>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null
-
-  return (...args: Parameters<T>) => {
-    if (timeout) {clearTimeout(timeout)}
-    timeout = setTimeout(() => func(...args), wait)
-  }
-}
+// Debounce utility imported from lib/debounce.ts
 
 /**
  * Local storage utilities with error handling

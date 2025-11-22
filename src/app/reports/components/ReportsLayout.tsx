@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowDownIcon, ArrowUpIcon, CheckCircle, DollarSign, Filter, Package, ShoppingCart, TrendingUp } from '@/components/icons'
+import { ArrowDownIcon, ArrowUpIcon, CheckCircle, DollarSign, Package, ShoppingCart, TrendingUp } from '@/components/icons'
 import dynamic from 'next/dynamic'
 import { type ReactNode } from 'react'
 
@@ -80,10 +80,8 @@ const FinancialReport = dynamic(
   }
 )
 
-// ProfitReport removed - use dedicated /profit menu instead for comprehensive profit analysis
-
 // Reports Layout - Main structure and navigation
-// Contains breadcrumbs, header, and date range picker
+// Contains breadcrumbs, header, and report tabs
 
 interface ReportsLayoutProps {
   children?: ReactNode
@@ -247,24 +245,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
           </Card>
         </div>
 
-        {/* Enhanced Date Range Picker */}
-        <Card className="border-0 ">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Filter className="h-5 w-5" />
-                Filter Laporan
-              </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
 
-
-
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Reports Tabs */}
         <div className="w-full overflow-hidden">

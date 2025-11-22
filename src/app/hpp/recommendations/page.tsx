@@ -10,9 +10,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useHppRecommendations } from '@/hooks/api/useHpp'
-import { dbLogger } from '@/lib/logger'
 
 const recommendationsBreadcrumbs = [
   { label: 'Dashboard', href: '/' },
@@ -37,8 +37,7 @@ const HppRecommendationsPage = (): JSX.Element => {
       // In a real implementation, this would call an API to update the recommendation
       toast(`Implementation tracking for recommendation ${recommendationId} will be available in the API`)
     } catch (error) {
-      dbLogger.error({ error }, 'Failed to mark recommendation as implemented')
-      toast.error('Failed to update recommendation')
+      handleError(error as Error, 'HPP Recommendations: update', true, 'Gagal memperbarui rekomendasi')
     }
   }
 

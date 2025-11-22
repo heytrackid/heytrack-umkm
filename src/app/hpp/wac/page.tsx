@@ -9,9 +9,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useIngredients } from '@/hooks/useIngredients'
-import { dbLogger } from '@/lib/logger'
 
 import type { Row } from '@/types/database'
 
@@ -41,7 +41,7 @@ const WacEnginePage = (): JSX.Element => {
   // Calculate WAC for selected ingredient
   const calculateWac = () => {
     if (!selectedIngredient) {
-      toast.error('Please select an ingredient')
+      handleError(new Error('Validation: Please select an ingredient'), 'HPP WAC: validation', true, 'Silakan pilih bahan baku')
       return
     }
 
@@ -51,8 +51,7 @@ const WacEnginePage = (): JSX.Element => {
       // For now, we'll simulate the calculation
       toast('WAC calculation endpoint not yet implemented')
     } catch (error) {
-      dbLogger.error({ error }, 'Failed to calculate WAC')
-      toast.error('Failed to calculate WAC')
+      handleError(error as Error, 'HPP WAC: calculate', true, 'Gagal menghitung WAC')
     } finally {
       setCalculating(false)
     }
@@ -70,8 +69,7 @@ const WacEnginePage = (): JSX.Element => {
         toast.success('WAC recalculation completed')
       }, 2000)
     } catch (error) {
-      dbLogger.error({ error }, 'Failed to recalculate WAC')
-      toast.error('Failed to recalculate WAC')
+      handleError(error as Error, 'HPP WAC: recalculate all', true, 'Gagal menghitung ulang WAC')
       setRecalculating(false)
     }
   }

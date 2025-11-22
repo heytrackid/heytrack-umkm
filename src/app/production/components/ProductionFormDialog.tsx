@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Popover } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { uiLogger } from '@/lib/logger'
+import { handleError } from '@/lib/error-handling'
 import { useRecipes } from '@/hooks/useRecipes'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
@@ -83,10 +83,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
             onOpenChange(false)
             resetForm()
         },
-        onError: (error: Error) => {
-            uiLogger.error({ error }, 'Error creating production batch')
-            toast.error(error.message || 'Terjadi kesalahan saat membuat batch produksi')
-        },
+        onError: (error) => handleError(error, 'Create production batch', true, 'Terjadi kesalahan saat membuat batch produksi'),
     })
 
     const loading = createProductionBatchMutation.isPending
@@ -95,13 +92,13 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
         e.preventDefault()
 
         if (!formData.recipe_id || !formData.quantity) {
-            toast.error('Mohon lengkapi semua field yang wajib diisi')
+            handleError(new Error('Validation failed'), 'Production form validation', true, 'Mohon lengkapi semua field yang wajib diisi')
             return
         }
 
         const quantity = parseFloat(formData.quantity)
         if (isNaN(quantity) || quantity <= 0) {
-            toast.error('Quantity harus berupa angka positif')
+            handleError(new Error('Validation failed'), 'Production form validation', true, 'Quantity harus berupa angka positif')
             return
         }
 

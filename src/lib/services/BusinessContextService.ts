@@ -48,7 +48,7 @@ export class BusinessContextService {
     } catch (error) {
       logger.error({ error, userId }, 'Failed to load business context');
       // Return minimal context on error
-      const result: any = { timestamp: new Date().toISOString() };
+      const result: BusinessContext = { timestamp: new Date().toISOString() };
       if (currentPage) result.currentPage = currentPage;
       return result;
     }

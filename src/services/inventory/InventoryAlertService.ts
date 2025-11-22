@@ -1,7 +1,7 @@
 import 'server-only'
 
 import { dbLogger } from '@/lib/logger'
-import type { Database, Insert } from '@/types/database'
+import type { Database, Insert, InventoryAlertInsert } from '@/types/database'
 import type { Json } from '@/types/supabase-generated'
 import { createClient } from '@/utils/supabase/server'
 
@@ -155,7 +155,7 @@ export class InventoryAlertService {
                 user_id: userId,
                 is_active: true,
                 ...(alert.metadata && { metadata: alert.metadata as Json })
-              } as any)
+              } as InventoryAlertInsert)
           }
         })
       )

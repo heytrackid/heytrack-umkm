@@ -25,9 +25,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ListSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
 import { ProductionScaler } from '@/components/recipes/ProductionScaler'
 import { useAuth } from '@/hooks/index'
-import { useRecipe } from '@/hooks/useRecipes'
-import { useSupabase } from '@/providers/SupabaseProvider'
-import { errorToast, successToast } from '@/components/ui/toast'
+import { useDeleteRecipe, useRecipe } from '@/hooks/useRecipes'
+import { successToast } from '@/components/ui/toast'
+import { handleError } from '@/lib/error-handling'
 
 import type { RecipeInstruction } from '@/app/recipes/ai-generator/components/types'
 import type { Ingredient } from '@/types/database'
@@ -46,15 +46,15 @@ interface RecipeDetailPageProps {
 
 export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
     const router = useRouter()
-    const { user, isLoading: authLoading } = useAuth()
-    const { supabase } = useSupabase()
+    const { isLoading: authLoading } = useAuth()
 
 
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const [showCostBreakdown, setShowCostBreakdown] = useState(false)
 
-    // React Query hook for recipe
+    // React Query hooks
     const { data: recipe, isLoading: loading, error } = useRecipe(recipeId)
+    const deleteRecipeMutation = useDeleteRecipe()
 
     const breadcrumbs = [{ label: 'Recipes', href: '/recipes' }, { label: recipe?.name || 'Recipe' }]
     const action = (
@@ -67,8 +67,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
     // Handle error state
     useEffect(() => {
         if (error) {
-            const message = error instanceof Error ? error.message : 'Gagal memuat resep'
-            errorToast(message)
+            handleError(error, 'Load recipe', true, 'Gagal memuat resep')
             router.push('/recipes')
         }
     }, [error, router])
@@ -76,28 +75,18 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
 
 
     const handleDelete = useCallback(async (): Promise<void> => {
-        if (!recipe || !user?.id) { 
-            return 
+        if (!recipe?.id) {
+            return
         }
 
         try {
-            const { error } = await supabase
-                .from('recipes')
-                .delete()
-                .eq('id', recipeId)
-                .eq('user_id', user.id)
-
-            if (error) {
-                throw error
-            }
-
-            successToast(`${recipe.name} berhasil dihapus`)
+            await deleteRecipeMutation.mutateAsync(recipe.id)
             router.push('/recipes')
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Gagal menghapus resep'
-            errorToast(message)
+            // Error handling is done in the mutation hook
+            handleError(error, 'Delete recipe', true, 'Gagal menghapus resep')
         }
-    }, [recipe, user?.id, supabase, recipeId, router])
+    }, [recipe, deleteRecipeMutation, router])
 
 
 
@@ -246,7 +235,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                                 } catch (error) {
                                     // User cancelled share or clipboard access denied
                                     if (error instanceof Error && error.name !== 'AbortError') {
-                                        errorToast('Gagal membagikan resep')
+                                        handleError(error, 'Share recipe', true, 'Gagal membagikan resep')
                                     }
                                 }
                             }} 

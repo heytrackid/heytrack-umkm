@@ -60,10 +60,30 @@ export interface ProfitReport {
     grossProfit: number
     netProfit: number
     profitMargin: number
+    has_loss_making_products?: boolean
+    loss_making_products_count?: number
+    has_unrealistic_margins?: boolean
   }
   trends: ProfitTrends
   productProfitability: ProductProfitabilityEntry[]
-  operatingExpenses: OperatingExpenseBreakdownEntry[]
+  top_profitable_products: ProductProfitabilityEntry[]
+  least_profitable_products: ProductProfitabilityEntry[]
+  operating_expenses_breakdown: OperatingExpenseBreakdownEntry[]
+  profit_by_period: Array<{
+    period: string
+    revenue: number
+    cogs: number
+    gross_profit: number
+    gross_margin: number
+    orders_count: number
+  }>
+  insights: Array<{
+    type: 'warning' | 'success' | 'info' | 'danger'
+    title: string
+    description: string
+    recommendation?: string
+    impact?: 'high' | 'medium' | 'low'
+  }>
 }
 
 export interface SalesReport {
@@ -304,6 +324,10 @@ export class ReportService {
       const netProfit = grossProfit - totalOperatingExpenses
       const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0
 
+      // Business validation
+      const lossMakingProductsCount = productProfitability.filter(p => p.is_loss_making).length
+      const unrealisticMargin = profitMargin > 80 || profitMargin < -50 // Flag unrealistic margins
+
       // Calculate actual trends from historical data
       const previousPeriodStart = new Date(start)
       previousPeriodStart.setMonth(previousPeriodStart.getMonth() - 1)
@@ -312,18 +336,41 @@ export class ReportService {
 
       const { data: previousOrders } = await this.supabase
         .from('orders')
-        .select('total_amount')
+        .select(`
+          total_amount,
+          order_items (
+            quantity,
+            recipes (cost_per_unit)
+          )
+        `)
         .eq('user_id', userId)
         .gte('created_at', previousPeriodStart.toISOString())
         .lte('created_at', previousPeriodEnd.toISOString())
         .eq('status', 'DELIVERED')
 
-      const previousRevenue = previousOrders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
+      let previousRevenue = 0
+      let previousCOGS = 0
+      if (previousOrders) {
+        for (const order of previousOrders) {
+          previousRevenue += order.total_amount || 0
+          for (const item of (order.order_items || [])) {
+            const recipe = item.recipes
+            if (recipe) {
+              previousCOGS += (item.quantity || 0) * (recipe.cost_per_unit || 0)
+            }
+          }
+        }
+      }
+
+      const previousProfit = previousRevenue - previousCOGS
+      const currentProfit = grossProfit
+
       const revenueChange = previousRevenue > 0 ? ((totalRevenue - previousRevenue) / previousRevenue) * 100 : 0
+      const profitChange = previousProfit !== 0 ? ((currentProfit - previousProfit) / Math.abs(previousProfit)) * 100 : 0
 
       const trends: ProfitTrends = {
         revenue_trend: revenueChange,
-        profit_trend: revenueChange * 0.7 // Estimate profit trend based on revenue
+        profit_trend: profitChange
       }
 
       // Operating expenses breakdown
@@ -342,6 +389,21 @@ export class ReportService {
         })
       }
 
+      // Generate automated insights
+      const insights = this.generateProfitInsights({
+        totalRevenue,
+        totalCOGS,
+        totalOperatingExpenses,
+        grossProfit,
+        netProfit,
+        profitMargin,
+        lossMakingProductsCount,
+        unrealisticMargin,
+        revenueChange,
+        profitChange,
+        operatingExpenses
+      })
+
       return {
         period: {
           start: start.toISOString(),
@@ -354,16 +416,143 @@ export class ReportService {
           totalOperatingExpenses,
           grossProfit,
           netProfit,
-          profitMargin
+          profitMargin,
+          has_loss_making_products: lossMakingProductsCount > 0,
+          loss_making_products_count: lossMakingProductsCount,
+          has_unrealistic_margins: unrealisticMargin
         },
         trends,
         productProfitability,
-        operatingExpenses
+        top_profitable_products: [],
+        least_profitable_products: [],
+        operating_expenses_breakdown: operatingExpenses,
+        profit_by_period: [],
+        insights
       }
     } catch (error) {
       apiLogger.error({ error, userId, filters }, 'Failed to generate profit report')
       throw error
     }
+  }
+
+  /**
+   * Generate automated insights from profit report data
+   */
+  private generateProfitInsights(data: {
+    totalRevenue: number
+    totalCOGS: number
+    totalOperatingExpenses: number
+    grossProfit: number
+    netProfit: number
+    profitMargin: number
+    lossMakingProductsCount: number
+    unrealisticMargin: boolean
+    revenueChange: number
+    profitChange: number
+    operatingExpenses: OperatingExpenseBreakdownEntry[]
+  }): Array<{
+    type: 'warning' | 'success' | 'info' | 'danger'
+    title: string
+    description: string
+    recommendation?: string
+    impact?: 'high' | 'medium' | 'low'
+  }> {
+    const insights: Array<{
+      type: 'warning' | 'success' | 'info' | 'danger'
+      title: string
+      description: string
+      recommendation?: string
+      impact?: 'high' | 'medium' | 'low'
+    }> = []
+
+    // Profit margin analysis
+    if (data.profitMargin < 10) {
+      insights.push({
+        type: 'danger',
+        title: 'Margin Keuntungan Rendah',
+        description: `Margin keuntungan Anda sebesar ${data.profitMargin.toFixed(1)}% berada di bawah standar industri (minimal 15-25%).`,
+        recommendation: 'Tinjau ulang harga jual atau optimalkan biaya bahan baku dan operasional.',
+        impact: 'high'
+      })
+    } else if (data.profitMargin > 40) {
+      insights.push({
+        type: 'warning',
+        title: 'Margin Keuntungan Tinggi',
+        description: `Margin keuntungan ${data.profitMargin.toFixed(1)}% cukup tinggi. Pastikan tidak mempengaruhi volume penjualan.`,
+        recommendation: 'Evaluasi apakah harga masih kompetitif di pasar.',
+        impact: 'medium'
+      })
+    } else {
+      insights.push({
+        type: 'success',
+        title: 'Margin Keuntungan Optimal',
+        description: `Margin keuntungan ${data.profitMargin.toFixed(1)}% dalam kisaran yang sehat.`,
+        impact: 'low'
+      })
+    }
+
+    // Loss-making products
+    if (data.lossMakingProductsCount > 0) {
+      insights.push({
+        type: 'danger',
+        title: 'Produk Rugi',
+        description: `Terdapat ${data.lossMakingProductsCount} produk yang menimbulkan kerugian.`,
+        recommendation: 'Evaluasi harga pokok produksi dan pertimbangkan penghentian produk yang tidak menguntungkan.',
+        impact: 'high'
+      })
+    }
+
+    // Revenue trend analysis
+    if (Math.abs(data.revenueChange) > 20) {
+      const trend = data.revenueChange > 0 ? 'peningkatan' : 'penurunan'
+      const type = data.revenueChange > 0 ? 'success' : 'warning'
+      insights.push({
+        type: type as 'success' | 'warning',
+        title: `Tren Revenue ${trend.charAt(0).toUpperCase() + trend.slice(1)}`,
+        description: `Revenue ${trend} sebesar ${Math.abs(data.revenueChange).toFixed(1)}% dibandingkan periode sebelumnya.`,
+        recommendation: data.revenueChange > 0
+          ? 'Pertahankan strategi yang berhasil dan identifikasi faktor pendorong pertumbuhan.'
+          : 'Analisis penyebab penurunan dan implementasikan strategi perbaikan.',
+        impact: 'high'
+      })
+    }
+
+    // Operating expenses analysis
+    const topExpense = data.operatingExpenses.sort((a, b) => b.total - a.total)[0]
+    if (topExpense && topExpense.percentage > 30) {
+      insights.push({
+        type: 'warning',
+        title: 'Biaya Operasional Dominan',
+        description: `Kategori ${topExpense.category} menyumbang ${topExpense.percentage.toFixed(1)}% dari total biaya operasional.`,
+        recommendation: 'Evaluasi efisiensi dalam kategori biaya ini dan cari alternatif yang lebih hemat.',
+        impact: 'medium'
+      })
+    }
+
+    // COGS ratio analysis
+    const cogsRatio = (data.totalCOGS / data.totalRevenue) * 100
+    if (cogsRatio > 70) {
+      insights.push({
+        type: 'warning',
+        title: 'Biaya Bahan Baku Tinggi',
+        description: `Biaya bahan baku mencapai ${cogsRatio.toFixed(1)}% dari total revenue.`,
+        recommendation: 'Optimalkan penggunaan bahan baku atau negosiasikan harga dengan supplier.',
+        impact: 'high'
+      })
+    }
+
+    // Net profit analysis
+    if (data.netProfit < 0) {
+      insights.push({
+        type: 'danger',
+        title: 'Kerugian Bersih',
+        description: 'Bisnis mengalami kerugian bersih dalam periode ini.',
+        recommendation: 'Segera tinjau struktur biaya dan strategi pricing untuk kembali ke zona profit.',
+        impact: 'high'
+      })
+    }
+
+    return insights
   }
 
   async getSalesReport(

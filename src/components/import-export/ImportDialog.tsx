@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { generateTemplate, parseCSV, type CSVParseResult } from '@/lib/import-export/csv-handler'
+import { handleError } from '@/lib/error-handling'
 import { AlertCircle, CheckCircle2, Download, FileText, Upload } from '@/components/icons'
 import { useRef, useState } from 'react'
-import { logger } from '@/lib/logger'
 
 interface ImportDialogProps {
   open: boolean
@@ -52,7 +52,7 @@ export function ImportDialog({
       const result = await parseCSV<unknown>(file, templateHeaders)
       setParseResult(result)
     } catch (error) {
-      logger.error({ error }, 'Parse error')
+      handleError(error, 'Import Dialog: Parse CSV', true, 'Gagal memproses file CSV. Pastikan format file sudah benar.')
     } finally {
       setParsing(false)
     }

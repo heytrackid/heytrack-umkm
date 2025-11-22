@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { handleClientError } from '@/lib/error-handling'
 
 // Create a client
 function makeQueryClient() {
@@ -11,7 +12,21 @@ function makeQueryClient() {
         staleTime: 5 * 60 * 1000, // 5 minutes
         gcTime: 10 * 60 * 1000, // 10 minutes
         refetchOnWindowFocus: false,
-        retry: 1,
+        retry: (failureCount, error) => {
+          // Don't retry on auth errors
+          if (error && typeof error === 'object' && 'message' in error) {
+            const message = String(error.message).toLowerCase()
+            if (message.includes('authentication') || message.includes('401') || message.includes('unauthorized')) {
+              return false
+            }
+          }
+          // Retry up to 3 times for other errors
+          return failureCount < 3
+        },
+      },
+      mutations: {
+        retry: false, // Don't retry mutations by default
+        onError: (error: unknown) => handleClientError(error, 'React Query Mutation'),
       },
     },
   })

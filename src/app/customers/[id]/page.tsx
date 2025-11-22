@@ -3,7 +3,8 @@
 import { ArrowLeft, Edit, Mail, MapPin, Phone, ShoppingCart, Trash2, TrendingUp, User } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { use, useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { handleError } from '@/lib/error-handling'
+import { toast } from 'sonner'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -65,8 +66,7 @@ const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }): JS
       toast.success('Pelanggan berhasil dihapus')
       router.push('/customers')
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Gagal menghapus pelanggan'
-      toast.error(errorMessage)
+      handleError(error, 'Delete customer', true, 'Gagal menghapus pelanggan')
     }
   }
 

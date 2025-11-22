@@ -59,19 +59,19 @@ export function RecipeForm({
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="serving_size">Porsi</Label>
-            <Input
-              id="serving_size"
-              type="number"
-              {...register('serving_size', { valueAsNumber: true })}
-              placeholder="1"
-              aria-describedby={errors.serving_size ? 'serving_size-error' : undefined}
-            />
-            {errors.serving_size && (
-              <p id="serving_size-error" className="text-sm text-destructive">{errors.serving_size.message}</p>
-            )}
-          </div>
+           <div className="space-y-2">
+             <Label htmlFor="servings">Porsi</Label>
+             <Input
+               id="servings"
+               type="number"
+               {...register('servings', { valueAsNumber: true })}
+               placeholder="1"
+               aria-describedby={errors.servings ? 'servings-error' : undefined}
+             />
+             {errors.servings && (
+               <p id="servings-error" className="text-sm text-destructive">{errors.servings.message}</p>
+             )}
+           </div>
         </div>
 
         <div className="space-y-2">
@@ -88,33 +88,33 @@ export function RecipeForm({
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="preparation_time">Waktu Persiapan (menit)</Label>
-            <Input
-              id="preparation_time"
-              type="number"
-              {...register('preparation_time', { valueAsNumber: true })}
-              placeholder="0"
-            />
-            {errors.preparation_time && (
-              <p className="text-sm text-destructive">{errors.preparation_time.message}</p>
-            )}
-          </div>
+         <div className="grid grid-cols-2 gap-4">
+           <div className="space-y-2">
+             <Label htmlFor="prep_time">Waktu Persiapan (menit)</Label>
+             <Input
+               id="prep_time"
+               type="number"
+               {...register('prep_time', { valueAsNumber: true })}
+               placeholder="0"
+             />
+             {errors.prep_time && (
+               <p className="text-sm text-destructive">{errors.prep_time.message}</p>
+             )}
+           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="cooking_time">Waktu Memasak (menit)</Label>
-            <Input
-              id="cooking_time"
-              type="number"
-              {...register('cooking_time', { valueAsNumber: true })}
-              placeholder="0"
-            />
-            {errors.cooking_time && (
-              <p className="text-sm text-destructive">{errors.cooking_time.message}</p>
-            )}
-          </div>
-        </div>
+           <div className="space-y-2">
+             <Label htmlFor="cook_time">Waktu Memasak (menit)</Label>
+             <Input
+               id="cook_time"
+               type="number"
+               {...register('cook_time', { valueAsNumber: true })}
+               placeholder="0"
+             />
+             {errors.cook_time && (
+               <p className="text-sm text-destructive">{errors.cook_time.message}</p>
+             )}
+           </div>
+         </div>
 
         <div className="space-y-2">
           <Label htmlFor="instructions">Instruksi Pembuatan</Label>

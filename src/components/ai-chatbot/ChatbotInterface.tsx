@@ -8,14 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import type { ChatAction, ChatContext } from '@/lib/ai-chatbot/types';
-import { createClientLogger } from '@/lib/client-logger';
 
 import { useChatHistory } from '@/hooks/useChatHistory';
+import { handleError } from '@/lib/error-handling';
 import { postApi } from '@/lib/query/query-helpers';
 import { useMutation } from '@tanstack/react-query';
 
-
-const logger = createClientLogger('ChatbotInterface')
 
 // QuickActions component moved outside to avoid render-time creation
 interface QuickActionsProps {
@@ -149,7 +147,7 @@ export const ChatbotInterface = ({
       }
     },
     onError: (error) => {
-      logger.error({ error }, 'Error sending message:');
+      handleError(error, 'Chatbot: Send message', false) // Don't show toast, show inline error
       const errorMessage: ExtendedChatMessage = {
         id: `error_${Date.now()}`,
         role: 'assistant' as const,
@@ -177,7 +175,7 @@ export const ChatbotInterface = ({
       }
     },
     onError: (error) => {
-      logger.error({ error }, 'Error executing action:');
+      handleError(error, 'Chatbot: Execute action', false) // Don't show toast, show inline error
       const errorMessage: ExtendedChatMessage = {
         id: `error_${Date.now()}`,
         role: 'assistant' as const,
@@ -265,11 +263,11 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
     }
 
     // Call AI chat API with React Query mutation
-    const params: any = {
+    const params = {
       message: messageToSend,
-      currentPage: 'chatbot'
+      currentPage: 'chatbot',
+      ...(context?.sessionId && { session_id: context.sessionId })
     }
-    if (context?.sessionId) params.session_id = context.sessionId
     chatMutation.mutate(params);
   };
 

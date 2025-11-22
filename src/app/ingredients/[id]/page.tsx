@@ -14,7 +14,7 @@ import { PageBreadcrumb } from '@/components/ui/page-breadcrumb'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { useUpdateIngredient } from '@/hooks/useIngredients'
 import { toast } from 'sonner'
-import { apiLogger } from '@/lib/logger'
+import { handleError } from '@/lib/error-handling'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 import { useIngredient } from '@/hooks/useIngredients'
 
@@ -67,8 +67,7 @@ const EditIngredientPage = (): JSX.Element | null => {
     // Handle fetch error
     useEffect(() => {
         if (fetchError) {
-            apiLogger.error({ error: fetchError }, 'Failed to fetch ingredient:')
-            toast.error('Gagal memuat data bahan baku')
+            handleError(fetchError, 'Fetch ingredient', true, 'Gagal memuat data bahan baku')
             router.push('/ingredients')
         }
     }, [fetchError, router])
@@ -92,8 +91,7 @@ const EditIngredientPage = (): JSX.Element | null => {
 
             router.push('/ingredients')
         } catch (error) {
-            apiLogger.error({ error }, 'Failed to update ingredient:')
-            toast.error('Gagal memperbarui bahan baku. Silakan coba lagi.')
+            handleError(error, 'Update ingredient', true, 'Gagal memperbarui bahan baku')
         } finally {
             setLoading(false)
         }

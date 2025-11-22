@@ -18,7 +18,7 @@ import { useGenerateRecipe } from '@/hooks/api/useAIRecipe'
 import { useAuth, useAuthMe } from '@/hooks/index'
 import { useIngredients } from '@/hooks/useIngredients'
 import { useCreateRecipeWithIngredients } from '@/hooks/useRecipes'
-import { apiLogger } from '@/lib/logger'
+import { handleError } from '@/lib/error-handling'
 import { toast } from 'sonner'
 
 import type { Insert } from '@/types/database'
@@ -86,7 +86,7 @@ const AIRecipeGeneratorPage = () => {
   // Handle auth errors
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
-      toast.error('Sesi Anda telah berakhir. Silakan login kembali.')
+      handleError(new Error('Authentication required'), 'AI Recipe Generator: auth check', true, 'Sesi Anda telah berakhir. Silakan login kembali.')
       router.push('/auth/login')
     }
   }, [isAuthLoading, isAuthenticated, router])
@@ -96,22 +96,22 @@ const AIRecipeGeneratorPage = () => {
   const handleGenerate = useCallback(async () => {
     // More comprehensive validation before submission
     if (!isProductNameValid) {
-      toast.error('Nama produk harus minimal 3 karakter')
+      handleError(new Error('Validation: Nama produk harus minimal 3 karakter'), 'AI Recipe Generator: validation', true, 'Nama produk harus minimal 3 karakter')
       return
     }
 
     if (!isIngredientsValid) {
-      toast.error('Minimal 3 bahan diperlukan untuk generate resep')
+      handleError(new Error('Validation: Minimal 3 bahan diperlukan untuk generate resep'), 'AI Recipe Generator: validation', true, 'Minimal 3 bahan diperlukan untuk generate resep')
       return
     }
 
     if (!isServingsValid) {
-      toast.error('Jumlah porsi harus lebih dari 0')
+      handleError(new Error('Validation: Jumlah porsi harus lebih dari 0'), 'AI Recipe Generator: validation', true, 'Jumlah porsi harus lebih dari 0')
       return
     }
 
     if (targetPrice && !isTargetPriceValid) {
-      toast.error('Target harga harus berupa angka positif')
+      handleError(new Error('Validation: Target harga harus berupa angka positif'), 'AI Recipe Generator: validation', true, 'Target harga harus berupa angka positif')
       return
     }
 
@@ -189,15 +189,14 @@ const AIRecipeGeneratorPage = () => {
       setActiveTab('input')
 
     } catch (error: unknown) {
-      apiLogger.error({ error }, 'Error saving recipe:')
       const errorMessage = error as Error
 
       if (errorMessage.message.includes('authentication')) {
-        toast.error('Sesi Anda telah habis. Silakan login kembali.')
+        handleError(errorMessage, 'AI Recipe Generator: save recipe', true, 'Sesi Anda telah habis. Silakan login kembali.')
       } else if (errorMessage.message.includes('database') || errorMessage.message.includes('insert')) {
-        toast.error('Gagal menyimpan resep ke database. Silakan coba lagi.')
+        handleError(errorMessage, 'AI Recipe Generator: save recipe', true, 'Gagal menyimpan resep ke database. Silakan coba lagi.')
       } else {
-        toast.error(errorMessage.message || 'Terjadi kesalahan saat menyimpan resep.')
+        handleError(errorMessage, 'AI Recipe Generator: save recipe', true, 'Terjadi kesalahan saat menyimpan resep.')
       }
     }
   }, [generatedRecipe, availableIngredients, createRecipeWithIngredients, authData])

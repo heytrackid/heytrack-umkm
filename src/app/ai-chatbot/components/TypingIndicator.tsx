@@ -1,3 +1,5 @@
+'use client'
+
 import { Bot, Sparkles } from '@/components/icons'
 import React, { useState, useEffect } from 'react'
 

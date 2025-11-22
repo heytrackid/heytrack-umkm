@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react'
 import { Package, AlertCircle } from '@/components/icons'
 import { useEffect, useState } from 'react'

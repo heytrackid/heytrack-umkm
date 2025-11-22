@@ -17,7 +17,6 @@ import {
 } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'
-import { toast } from 'sonner'
 
 import { PageHeader } from '@/components/layout/PageHeader'
 import { MobileRecipeCard } from '@/components/recipes/MobileRecipeCard'
@@ -46,12 +45,12 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { SimplePagination } from '@/components/ui/simple-pagination'
-import { undoableToast } from '@/components/ui/toast'
+import { toast } from '@/components/ui/toast'
 import { usePagination } from '@/hooks/usePagination'
 import { useRecipesCostPreviews } from '@/hooks/useRecipeCostPreview'
 import { useDeleteRecipe, useRecipes } from '@/hooks/useRecipes'
 import { useResponsive } from '@/hooks/useResponsive'
-import { createClientLogger } from '@/lib/client-logger'
+import { handleError } from '@/lib/error-handling'
 
 import type { Recipe } from '@/types/database'
 import { isNonNull, isRecipe } from '@/types/shared/guards'
@@ -63,8 +62,7 @@ const isRecipeArray = (data: unknown): data is Recipe[] => {
     return Array.isArray(data) && data.every(isRecipe)
 }
 
-export const RecipesList = () => {
-    const logger = createClientLogger('RecipesList')
+const RecipesList = () => {
     const router = useRouter()
     const { data: recipesData = [], isLoading: loading, error, refetch, isFetching } = useRecipes()
     const deleteRecipeMutation = useDeleteRecipe()
@@ -246,35 +244,31 @@ export const RecipesList = () => {
             const recipeName = deletedRecipe.name ?? 'Resep'
 
             if (!recipeId) {
-                toast.error('ID resep tidak valid')
+                handleError(new Error('Validation: ID resep tidak valid'), 'Recipes List: delete validation', true, 'ID resep tidak valid')
                 return
             }
 
             await deleteRecipeMutation.mutateAsync(recipeId)
 
-            // Enhanced toast with undo
-            undoableToast({
+            // Success toast without undo
+            toast({
                 title: `${recipeName} dihapus`,
                 description: 'Resep telah dihapus dari sistem',
-                onUndo: (): void => {
-                    // Note: Would need an undelete API endpoint
-                    toast('Fitur undo sedang dikembangkan - Anda bisa membuat ulang resep ini')
-                },
-                duration: 6000
+                type: 'success'
             })
 
             setIsDeleteDialogOpen(false)
             setSelectedRecipe(null)
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Gagal menghapus resep'
-            logger.error({ error, recipeId: selectedRecipe?.id }, 'Failed to delete recipe')
-            toast.error(message)
+            handleError(error as Error, 'Recipes List: delete recipe', true, 'Gagal menghapus resep')
         }
-    }, [selectedRecipe, deleteRecipeMutation, logger])
+    }, [selectedRecipe, deleteRecipeMutation])
 
     const clearFilters = (): void => {
         setSearchTerm('')
         setDifficultyFilter('all')
+        setPrepTimeMin('')
+        setPrepTimeMax('')
     }
 
     const hasActiveFilters =
@@ -310,8 +304,6 @@ export const RecipesList = () => {
                 return validDifficulty
         }
     }
-
-    const errorMessage = error instanceof Error ? error.message : 'Terjadi kesalahan saat memuat data resep'
 
     return (
         <div className="space-y-6">
@@ -351,7 +343,7 @@ export const RecipesList = () => {
                                 <AlertCircle className="h-5 w-5 text-destructive" />
                                 <div>
                                     <p className="font-semibold">Gagal memuat data resep</p>
-                                    <p className="text-sm text-muted-foreground">{errorMessage}</p>
+                                    <p className="text-sm text-muted-foreground">Silakan coba lagi atau periksa koneksi internet Anda.</p>
                                 </div>
                             </div>
                             <Button

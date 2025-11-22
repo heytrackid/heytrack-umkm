@@ -29,8 +29,8 @@ export const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps 
   // Calculate inventory report
   const ingredientList = ingredients ?? []
 
-   const inventoryStats = ingredientList.reduce<InventoryStats>(
-     (stats: InventoryStats, ingredient: any) => {
+    const inventoryStats = ingredientList.reduce<InventoryStats>(
+      (stats, ingredient) => {
       const currentStock = ingredient.current_stock ?? 0
       const minimumStock = ingredient.min_stock ?? 0
 

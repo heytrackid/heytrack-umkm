@@ -1,12 +1,9 @@
 'use client'
 
-import { createClientLogger } from '@/lib/client-logger'
 import { queryConfig } from '@/lib/query/query-config'
-import { getErrorMessage } from '@/lib/type-guards'
+import { handleError } from '@/lib/error-handling'
 import { fetchApi, postApi } from '@/lib/query/query-helpers'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-
-const logger = createClientLogger('useChatSessions')
 
 interface ChatMessage {
   id: string
@@ -70,10 +67,7 @@ export function useCreateChatMessage() {
       void queryClient.invalidateQueries({ queryKey: ['chat-messages', variables.sessionId] })
       void queryClient.invalidateQueries({ queryKey: ['chat-session'] })
     },
-    onError: (error: unknown) => {
-      const message = getErrorMessage(error)
-      logger.error({ error: message }, 'Failed to create chat message')
-    },
+    onError: (error) => handleError(error, 'Create chat message', false),
   })
 }
 
@@ -89,9 +83,6 @@ export function useClearChatHistory() {
       void queryClient.invalidateQueries({ queryKey: ['chat-session', variables.userId] })
       void queryClient.invalidateQueries({ queryKey: ['chat-messages'] })
     },
-    onError: (error: unknown) => {
-      const message = getErrorMessage(error)
-      logger.error({ error: message }, 'Failed to clear chat history')
-    },
+    onError: (error) => handleError(error, 'Clear chat history', false),
   })
 }

@@ -1,8 +1,10 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { apiLogger } from '@/lib/logger'
+import { AIService } from '@/lib/ai/service'
 import { HppCalculatorService } from './HppCalculatorService'
 import { typed } from '@/types/type-utilities'
 import type { Database } from '@/types/database'
+import type { HppOverview, HppComparison } from '@/modules/hpp/types'
 
 
 
@@ -28,36 +30,7 @@ export interface HppCalculationResult {
   created_at: string
 }
 
-export interface HppOverview {
-  totalRecipes: number
-  calculatedRecipes: number
-  totalHppValue: number
-  averageMargin: number
-  alerts: Array<{
-    recipe_id: string
-    recipe_name: string
-    issue: string
-    severity: 'low' | 'medium' | 'high'
-  }>
-}
 
-export interface HppComparison {
-  recipes: Array<{
-    id: string
-    name: string
-    cost_per_unit: number
-    selling_price: number
-    margin_percentage: number
-    last_calculated: string | null
-  }>
-  summary: {
-    total_recipes: number
-    calculated_recipes: number
-    average_margin: number
-    high_margin_count: number
-    low_margin_count: number
-  }
-}
 
 export class HppService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -139,10 +112,10 @@ export class HppService {
       try {
         const calculation = await this.calculateRecipeHpp(recipe.id, userId)
         results.push(calculation)
-      } catch (error) {
-        apiLogger.error({ error, recipeId: recipe.id, userId }, 'Failed to calculate HPP for recipe in batch')
-        // Continue with other recipes
-      }
+    } catch (error) {
+      apiLogger.error({ error, userId }, 'Failed to fetch recipe for pricing recommendation')
+      throw error
+    }
     }
 
     return results
@@ -251,33 +224,23 @@ export class HppService {
       throw error
     }
 
-    const recipes = (data || []).map((recipe: Record<string, unknown>) => ({
-      id: recipe['id'] as string,
-      name: recipe['name'] as string,
-      cost_per_unit: recipe['cost_per_unit'] as number,
-      selling_price: recipe['selling_price'] as number,
-      margin_percentage: recipe['margin_percentage'] as number,
-      last_calculated: recipe['last_calculated'] as string | null
-    }))
+    const recipes = (data || []).map((recipe: Record<string, unknown>) => {
+      const hppCalculations = recipe['hpp_calculations'] as Array<Record<string, unknown>> | null
+      const lastCalculated = hppCalculations && hppCalculations.length > 0
+        ? hppCalculations[0]?.['created_at'] as string
+        : null
 
-    const calculatedRecipes = recipes.filter(r => r.cost_per_unit !== null)
-    const averageMargin = calculatedRecipes.length > 0
-      ? calculatedRecipes.reduce((sum, r) => sum + (r.margin_percentage || 0), 0) / calculatedRecipes.length
-      : 0
-
-    const highMarginCount = calculatedRecipes.filter(r => (r.margin_percentage || 0) >= 30).length
-    const lowMarginCount = calculatedRecipes.filter(r => (r.margin_percentage || 0) < 20).length
-
-    return {
-      recipes,
-      summary: {
-        total_recipes: recipes.length,
-        calculated_recipes: calculatedRecipes.length,
-        average_margin: averageMargin,
-        high_margin_count: highMarginCount,
-        low_margin_count: lowMarginCount
+      return {
+        id: recipe['id'] as string,
+        name: recipe['name'] as string,
+        cost_per_unit: recipe['cost_per_unit'] as number,
+        selling_price: recipe['selling_price'] as number,
+        margin_percentage: recipe['margin_percentage'] as number,
+        last_calculated: lastCalculated
       }
-    }
+    })
+
+    return recipes
   }
 
   async getOverview(userId: string): Promise<HppOverview> {
@@ -357,14 +320,31 @@ export class HppService {
     hpp_cost: number
     suggested_margin: number
     reasoning: string[]
+    ai_insights?: {
+      confidence: number
+      alternatives: Array<{
+        price: number
+        margin: number
+        rationale: string
+      }>
+    } | undefined
   }> {
-    // Get recipe and latest HPP calculation
+    // Get recipe with ingredients and latest HPP calculation
     const { data, error } = await this.supabase
       .from('recipes')
       .select(`
         id,
         name,
+        category,
         selling_price,
+        recipe_ingredients (
+          quantity,
+          ingredients (
+            name,
+            category,
+            price_per_unit
+          )
+        ),
         hpp_calculations (
           cost_per_unit,
           created_at
@@ -387,8 +367,42 @@ export class HppService {
     }
 
     const currentPrice = recipe['selling_price'] as number || 0
-    const suggestedMargin = 35 // 35% margin
-    const recommendedPrice = latestHpp * (1 + suggestedMargin / 100)
+    const recipeName = recipe['name'] as string
+    const category = recipe['category'] as string || 'General'
+
+    // Prepare ingredient data for AI
+    const ingredients = ((recipe['recipe_ingredients'] as Record<string, unknown>[]) || []).map((ri: Record<string, unknown>) => {
+      const ingredient = ri['ingredients'] as Record<string, unknown>
+      const quantity = ri['quantity'] as number || 0
+      const unitPrice = ingredient?.['price_per_unit'] as number || 0
+
+      return {
+        name: ingredient?.['name'] as string || 'Unknown',
+        cost: quantity * unitPrice,
+        category: ingredient?.['category'] as string || 'Unknown'
+      }
+    })
+
+    // Get AI-powered recommendation
+    let aiRecommendation = null
+    try {
+      aiRecommendation = await AIService.generatePricingRecommendation({
+        recipeName,
+        currentHpp: latestHpp,
+        currentPrice,
+        currentMargin: currentPrice > 0 ? ((currentPrice - latestHpp) / latestHpp) * 100 : 0,
+        category,
+        ingredients
+      })
+    } catch (aiError) {
+      apiLogger.warn({ aiError, recipeId }, 'AI pricing recommendation failed, using fallback')
+    }
+
+    // Use AI recommendation or fallback to simple calculation
+    const recommendedPrice = aiRecommendation?.recommendedPrice || (latestHpp * 1.35) // 35% margin fallback
+    const suggestedMargin = aiRecommendation ?
+      ((recommendedPrice - latestHpp) / latestHpp) * 100 :
+      35
 
     const reasoning: string[] = []
 
@@ -406,15 +420,25 @@ export class HppService {
     }
 
     reasoning.push(`HPP terbaru: ${latestHpp.toLocaleString('id-ID')} per porsi`)
-    reasoning.push(`Rekomendasi margin: ${suggestedMargin}%`)
-    reasoning.push(`Harga rekomendasi: ${recommendedPrice.toLocaleString('id-ID')}`)
+
+    if (aiRecommendation) {
+      reasoning.push(`AI Confidence: ${aiRecommendation.confidence}%`)
+      reasoning.push(...aiRecommendation.reasoning)
+    } else {
+      reasoning.push(`Rekomendasi margin: ${suggestedMargin.toFixed(1)}%`)
+      reasoning.push(`Harga rekomendasi: ${recommendedPrice.toLocaleString('id-ID')}`)
+    }
 
     return {
       current_price: currentPrice,
       recommended_price: recommendedPrice,
       hpp_cost: latestHpp,
       suggested_margin: suggestedMargin,
-      reasoning
+      reasoning,
+      ai_insights: aiRecommendation ? {
+        confidence: aiRecommendation.confidence,
+        alternatives: aiRecommendation.alternatives
+      } : undefined
     }
   }
 }

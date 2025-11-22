@@ -5,6 +5,7 @@ import { useState, type FormEvent } from 'react'
 
 
 import { getErrorMessage } from '@/lib/type-guards'
+import { handleError } from '@/lib/error-handling'
 import { useRecipes } from '@/hooks/useRecipes'
 import { useCustomers } from '@/hooks/useCustomers'
 
@@ -314,11 +315,12 @@ export const useOrderLogic = () => {
       // Redirect to orders page with success message
       router.push('/orders?success=true')
       
-     } catch (error) {
-       const caughtError = error as Error
-       const message = getErrorMessage(caughtError)
-       setError(message)
-     }
+      } catch (error) {
+        const caughtError = error as Error
+        handleError(caughtError, 'Create order', false, 'Gagal membuat pesanan')
+        const message = getErrorMessage(caughtError)
+        setError(message)
+      }
   }
 
   return {

@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { toast } from 'sonner'
-import { createClientLogger } from '@/lib/client-logger'
-import { fetchApi, postApi } from '@/lib/query/query-helpers'
 
-const logger = createClientLogger('useContextAwareChat')
+import { fetchApi, postApi } from '@/lib/query/query-helpers'
+import { handleError } from '@/lib/error-handling'
+
+
 
 interface ChatMessage {
   id: string
@@ -52,7 +52,7 @@ export function useContextAwareChat() {
       try {
         return await fetchApi<ChatSession[]>('/api/ai/sessions')
       } catch (error) {
-        logger.warn('Failed to fetch chat sessions')
+
         return []
       }
     },
@@ -72,7 +72,7 @@ export function useContextAwareChat() {
           timestamp: new Date(msg.timestamp)
         }))
       } catch (error) {
-        logger.error({ error }, 'Failed to fetch messages')
+
         return []
       }
     },
@@ -95,12 +95,11 @@ export function useContextAwareChat() {
       queryClient.invalidateQueries({ queryKey: ['chat-messages', sessionId] })
       queryClient.invalidateQueries({ queryKey: ['chat-sessions'] })
 
-      logger.info('Message sent successfully')
+
     },
     onError: (error: Error) => {
       setError(error.message)
-      toast.error(error.message)
-      logger.error({ error }, 'Failed to send message')
+      handleError(error, 'Send chat message', true, 'Gagal mengirim pesan')
     },
   })
 
@@ -111,12 +110,11 @@ export function useContextAwareChat() {
       if (result.id) {
         setSessionId(result.id)
         queryClient.invalidateQueries({ queryKey: ['chat-sessions'] })
-        logger.info('New session created')
+
       }
     },
     onError: (error: Error) => {
-      toast.error(error.message)
-      logger.error({ error }, 'Failed to create session')
+      handleError(error, 'Create chat session', true, 'Gagal membuat sesi chat')
     },
   })
 

@@ -110,3 +110,24 @@ export function useDeleteCustomer() {
     },
   })
 }
+
+/**
+ * Import customers from CSV
+ */
+export function useImportCustomers() {
+  const queryClient = useQueryClient()
+  const logger = createClientLogger('useImportCustomers')
+
+  return useMutation({
+    mutationFn: (customers: unknown[]) => postApi('/api/customers/import', { customers }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['customers'] })
+
+      logger.info({}, 'Customers imported successfully')
+    },
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error)
+      logger.error({ error: message }, 'Failed to import customers')
+    },
+  })
+}

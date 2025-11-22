@@ -74,7 +74,7 @@ export function createRouteHandler<T>(
       }
 
       // Execute handler
-      const context: any = { request }
+      const context: RouteHandlerContext<T> = { request }
       if (validatedData !== undefined) context.validatedData = validatedData
       if (pagination !== undefined) context.pagination = pagination
       const response = await handler(context)

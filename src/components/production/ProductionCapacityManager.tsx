@@ -12,12 +12,10 @@ import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { Slider } from '@/components/ui/slider'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import { createClientLogger } from '@/lib/client-logger'
+import { handleError } from '@/lib/error-handling'
 import type { ProductionConstraints } from '@/types/production'
 import { toast } from 'sonner'
 import { useProductionCapacity, useUpdateProductionConstraints } from '../../hooks'
-
-const logger = createClientLogger('ProductionCapacityManager')
 
 /**
  * ProductionCapacityManager
@@ -160,14 +158,12 @@ export const ProductionCapacityManager = ({
           setLoading(false)
         },
         onError: (error: unknown) => {
-          logger.error({ error }, 'Error updating constraints:')
-          toast.error('Failed to update production capacity')
+          handleError(error as Error, 'Production Capacity Manager: update constraints', true, 'Gagal memperbarui kapasitas produksi')
           setLoading(false)
         }
       })
     } catch (error: unknown) {
-      logger.error({ error }, 'Error saving constraints:')
-      toast.error('Failed to save production capacity settings')
+      handleError(error as Error, 'Production Capacity Manager: save constraints', true, 'Gagal menyimpan pengaturan kapasitas produksi')
     } finally {
       setLoading(false)
     }

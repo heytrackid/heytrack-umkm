@@ -2,6 +2,7 @@ import { createClientLogger } from '@/lib/client-logger'
 import { deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 import type { RestockSuggestion, RestockSuggestionsSummary } from '@/types/database'
 
 const logger = createClientLogger('useInventoryAlerts')
@@ -56,10 +57,7 @@ export function useAcknowledgeAlert() {
       queryClient.invalidateQueries({ queryKey: ['inventory-alerts'] })
       toast.success('Alert berhasil ditandai')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to acknowledge alert')
-      toast.error('Gagal menandai alert')
-    },
+    onError: (error) => handleError(error, 'Acknowledge alert', true, 'Gagal menandai alert'),
   })
 }
 
@@ -75,10 +73,7 @@ export function useDismissAlert() {
       queryClient.invalidateQueries({ queryKey: ['inventory-alerts'] })
       toast.success('Alert berhasil dihapus')
     },
-    onError: (error) => {
-      logger.error({ error }, 'Failed to dismiss alert')
-      toast.error('Gagal menghapus alert')
-    },
+    onError: (error) => handleError(error, 'Dismiss alert', true, 'Gagal menghapus alert'),
   })
 }
 

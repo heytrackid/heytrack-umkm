@@ -41,23 +41,27 @@ export interface MaterialBreakdown {
 
 export interface HppOverview {
   totalRecipes: number
-  recipesWithHpp: number
-  averageHpp: number
-  unreadAlerts: number
-  totalAlerts: number
-  lastCalculated?: string
+  calculatedRecipes: number
+  totalHppValue: number
+  averageMargin: number
+  alerts: Array<{
+    recipe_id: string
+    recipe_name: string
+    issue: string
+    severity: 'low' | 'medium' | 'high'
+  }>
 }
 
-export interface HppComparison {
+export interface HppComparisonItem {
   id: string
   name: string
-  category: string
-  hppValue: number
-  sellingPrice: number
-  marginPercentage: number
-  marginAmount: number
-  lastCalculated: string
+  cost_per_unit: number
+  selling_price: number
+  margin_percentage: number
+  last_calculated: string | null
 }
+
+export type HppComparison = HppComparisonItem[]
 
 export interface RecipeWithHpp {
   id: string

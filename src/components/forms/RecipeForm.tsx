@@ -12,8 +12,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { handleError } from '@/lib/error-handling'
 import { toast } from 'sonner'
-import { getErrorMessage } from '@/lib/type-guards'
 import {
   RecipeFormSchema,
   type RecipeForm as RecipeFormData
@@ -42,10 +42,10 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
       name: initialData?.name ?? '',
       description: initialData?.description ?? '',
       servings: initialData?.servings ?? 1,
-      preparation_time: initialData?.preparation_time ?? initialData?.prep_time ?? 30,
-      cooking_time: initialData?.cooking_time ?? initialData?.cook_time ?? 0,
+      prep_time: initialData?.prep_time ?? 30,
+      cook_time: initialData?.cook_time ?? 0,
       instructions: typeof initialData?.instructions === 'string' ? [] : initialData?.instructions ?? [],
-      difficulty: (initialData?.difficulty as 'EASY' | 'HARD' | 'MEDIUM') || 'MEDIUM',
+      difficulty: (initialData?.difficulty as 'easy' | 'hard' | 'medium') || 'medium',
 
       is_active: initialData?.is_active ?? true,
       is_available: initialData?.is_available ?? true,
@@ -62,8 +62,7 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
         form.reset()
       }
     } catch (error: unknown) {
-      const message = getErrorMessage(error)
-      toast.error(message || 'Gagal menyimpan resep')
+      handleError(error as Error, 'Recipe Form: submit', true, 'Gagal menyimpan resep')
     }
   }
 
@@ -107,24 +106,25 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
             <FormField
               label="Waktu Persiapan (menit)"
               required
-              error={form.formState.errors.preparation_time?.message}
+              error={form.formState.errors.prep_time?.message}
             >
               <Input
+                {...form.register('prep_time', { valueAsNumber: true })}
                 type="number"
-                min="1"
-                max="1440"
-                {...form.register('preparation_time', { valueAsNumber: true })}
+                min="0"
+                placeholder="30"
               />
             </FormField>
 
             <FormField
               label="Waktu Memasak (menit)"
-              error={form.formState.errors.cooking_time?.message}
+              error={form.formState.errors.cook_time?.message}
             >
               <Input
+                {...form.register('cook_time', { valueAsNumber: true })}
                 type="number"
                 min="0"
-                {...form.register('cooking_time', { valueAsNumber: true })}
+                placeholder="0"
               />
             </FormField>
 
@@ -134,7 +134,7 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
             >
               <Select
                 onValueChange={(value) => {
-                  form.setValue('difficulty', value as 'EASY' | 'HARD' | 'MEDIUM')
+                  form.setValue('difficulty', value as 'easy' | 'hard' | 'medium')
                 }}
                 {...(watchedDifficulty ? { value: watchedDifficulty as string } : {})}
               
@@ -143,9 +143,9 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="EASY">Mudah</SelectItem>
-                  <SelectItem value="MEDIUM">Sedang</SelectItem>
-                  <SelectItem value="HARD">Sulit</SelectItem>
+                  <SelectItem value="easy">Mudah</SelectItem>
+                  <SelectItem value="medium">Sedang</SelectItem>
+                  <SelectItem value="hard">Sulit</SelectItem>
                 </SelectContent>
               </Select>
             </FormField>

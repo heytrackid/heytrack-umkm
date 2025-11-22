@@ -2,6 +2,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+export { debounce } from '@/lib/debounce'
 
 export type Breakpoint = '2xl' | 'lg' | 'md' | 'sm' | 'xl' | 'xs';
 
@@ -250,25 +251,7 @@ export function getSafeAreaInsets(): {
   };
 }
 
-/**
- * Debounce function for resize handlers
- */
-export function debounce<T extends (..._args: unknown[]) => void>(
-  func: T,
-  wait: number
-): (..._args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
-  
-  return function executedFunction(..._args: Parameters<T>) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(..._args);
-    };
-    
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
+// Debounce function imported from @/lib/debounce
 
 /**
  * Throttle function for scroll/resize handlers

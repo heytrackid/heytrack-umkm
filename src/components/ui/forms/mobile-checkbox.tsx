@@ -35,12 +35,12 @@ export const MobileCheckbox = ({
 }: MobileCheckboxProps) => {
   const { isMobile } = useResponsive()
 
-  const checkboxProps: any = {}
-  if (checked !== undefined) checkboxProps.checked = checked
-  if (defaultChecked !== undefined) checkboxProps.defaultChecked = defaultChecked
-  if (onChange !== undefined) checkboxProps.onCheckedChange = onChange
-  if (disabled !== undefined) checkboxProps.disabled = disabled
-  if (required !== undefined) checkboxProps.required = required
+  const checkboxProps: Record<string, unknown> = {}
+  if (checked !== undefined) checkboxProps['checked'] = checked
+  if (defaultChecked !== undefined) checkboxProps['defaultChecked'] = defaultChecked
+  if (onChange !== undefined) checkboxProps['onCheckedChange'] = onChange
+  if (disabled !== undefined) checkboxProps['disabled'] = disabled
+  if (required !== undefined) checkboxProps['required'] = required
 
   return (
     <div className={cn("space-y-2", className)}>

@@ -13,13 +13,10 @@ import { useCalculateAllHpp } from '@/hooks/api/useHpp'
 
 
 
+import type { HppOverview } from '@/modules/hpp/types'
+
 interface HppOverviewCardProps {
-    overview: {
-        totalRecipes: number
-        recipesWithHpp: number
-        averageHpp: number
-        unreadAlerts: number
-    }
+    overview: HppOverview
 }
 
 export const HppOverviewCard = ({ overview }: HppOverviewCardProps): JSX.Element => {
@@ -33,7 +30,7 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps): JSX.Element
     }
 
     const completionPercentage = overview.totalRecipes > 0
-        ? Math.round((overview.recipesWithHpp / overview.totalRecipes) * 100)
+        ? Math.round((overview.calculatedRecipes / overview.totalRecipes) * 100)
         : 0
 
     return (
@@ -65,7 +62,7 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps): JSX.Element
                     {/* Produk Dihitung */}
                     <div className="p-4 bg-muted/20 rounded-lg border border-border/20 ">
                         <div className="text-2xl font-bold text-foreground mb-1">
-                            {overview.recipesWithHpp}/{overview.totalRecipes}
+                            {overview.calculatedRecipes}/{overview.totalRecipes}
                         </div>
                         <div className="text-xs text-muted-foreground mb-2">Produk Dihitung</div>
                         <div className="w-full bg-muted dark:bg-muted rounded-full h-1.5">
@@ -79,7 +76,7 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps): JSX.Element
                     {/* Biaya Rata-rata */}
                     <div className="p-4 bg-muted/20 rounded-lg border border-border/20 ">
                         <div className="text-2xl font-bold text-foreground mb-1">
-                            {formatCurrency(overview.averageHpp)}
+                            {formatCurrency(overview.calculatedRecipes > 0 ? overview.totalHppValue / overview.calculatedRecipes : 0)}
                         </div>
                         <div className="text-xs text-muted-foreground">Biaya Rata-rata</div>
                         <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
@@ -89,16 +86,16 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps): JSX.Element
                     </div>
 
                     {/* Peringatan */}
-                    <div className={`p-4 rounded-lg border ${overview.unreadAlerts > 0
-                        ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
-                        : 'bg-muted/20 border-border/20 '
+                    <div className={`p-4 rounded-lg border ${overview.alerts.length > 0
+                        ? 'border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/10'
+                        : 'border-border/20 bg-muted/20'
                         }`}>
                         <div className="text-2xl font-bold mb-1 text-muted-foreground">
-                            {overview.unreadAlerts}
+                            {overview.alerts.length}
                         </div>
                         <div className="text-xs text-muted-foreground">Peringatan Baru</div>
                         <div className="flex items-center gap-1 mt-1 text-xs">
-                            {overview.unreadAlerts > 0 ? (
+                            {overview.alerts.length > 0 ? (
                                 <>
                                     <Bell className="h-3 w-3 text-muted-foreground" />
                                     <span className="text-muted-foreground">Perlu tindakan</span>

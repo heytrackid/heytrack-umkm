@@ -1,3 +1,5 @@
+'use client'
+
 import { Scale } from '@/components/icons'
 import { memo, useMemo, useState } from 'react'
 

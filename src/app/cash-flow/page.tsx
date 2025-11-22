@@ -1,24 +1,25 @@
 'use client'
 
+import { ArrowDownIcon, ArrowUpIcon, DollarSign, Filter, Plus, Search, TrendingDown, TrendingUp } from '@/components/icons'
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
-import { ArrowDownIcon, ArrowUpIcon, DollarSign, Filter, Plus, Search, TrendingDown, TrendingUp } from '@/components/icons'
 import { useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useCurrency } from '@/hooks/useCurrency'
-import { useFinancialRecords, useCreateFinancialRecord } from '@/hooks/useFinancialRecords'
-import { toast } from 'sonner'
+import { useCreateFinancialRecord, useFinancialRecords } from '@/hooks/useFinancialRecords'
+import { useAuth } from '@/hooks/useAuth'
+import { handleError } from '@/lib/error-handling'
 import type { FinancialRecord } from '@/types/database'
 
 
@@ -33,6 +34,7 @@ interface CashFlowSummary {
 
 const CashFlowPage = () => {
   const { formatCurrency } = useCurrency()
+  const { user } = useAuth()
 
   const [searchTerm, setSearchTerm] = useState('')
   const [typeFilter, setTypeFilter] = useState<string>('all')
@@ -61,13 +63,10 @@ const CashFlowPage = () => {
     date: '',
   })
 
-  // Note: Date filtering is not yet implemented in the hook
-  // TODO: Add date range filtering to useFinancialRecords hook
-
   const handleAddTransaction = async () => {
     try {
       if (!newTransaction.description || !newTransaction.category || !newTransaction.amount) {
-        toast.error('Mohon lengkapi semua field')
+        handleError(new Error('Validation failed'), 'Add transaction validation', true, 'Mohon lengkapi semua field')
         return
       }
 
@@ -77,7 +76,7 @@ const CashFlowPage = () => {
         category: newTransaction.category,
         amount: parseFloat(newTransaction.amount),
         date: newTransaction.date,
-        user_id: 'temp-user-id', // TODO: get from auth
+        user_id: user?.id || '',
       } as const
 
       await createMutation.mutateAsync(transactionData)
@@ -90,9 +89,9 @@ const CashFlowPage = () => {
         amount: '',
         date: new Date().toISOString().split('T')[0]!
       })
-      } catch {
-      // Error handling is done by the mutation
-      toast.error('Gagal menambahkan transaksi')
+      } catch (error) {
+      // Error handling is done by the mutation, but provide fallback
+      handleError(error, 'Add transaction', true, 'Gagal menambahkan transaksi')
     }
   }
 

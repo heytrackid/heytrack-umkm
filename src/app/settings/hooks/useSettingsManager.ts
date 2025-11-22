@@ -1,6 +1,5 @@
-import { logger } from '@/lib/logger'
 import { useEffect, useMemo, useState } from 'react'
-import { toast } from 'sonner'
+import { handleError } from '@/lib/error-handling'
 
 import { DEFAULT_APP_SETTINGS, normalizeSettings, type AppSettingsState, type SettingsUpdateHandler } from '@/app/settings/types'
 import { useSettings } from '@/contexts/settings-context'
@@ -84,8 +83,7 @@ export function useSettingsManager() {
         // Don't show success toast here as mutations already do it
 
     } catch (error) {
-      logger.error(error, 'Failed to save settings')
-      toast.error('Gagal menyimpan pengaturan. Silakan coba lagi.')
+      handleError(error, 'Save settings', true, 'Gagal menyimpan pengaturan. Silakan coba lagi.')
     } finally {
       setIsSaving(false)
     }

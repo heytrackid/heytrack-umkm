@@ -15,12 +15,12 @@ export interface ImportedOrder {
   recipe_name: string
   quantity: number
   unit_price: number
-  customer_phone?: string
-  customer_email?: string
-  customer_address?: string
+  customer_phone?: string | undefined
+  customer_email?: string | undefined
+  customer_address?: string | undefined
   status: string
-  delivery_date?: string
-  notes?: string
+  delivery_date?: string | undefined
+  notes?: string | undefined
 }
 
 export interface OrderProcessingResult {

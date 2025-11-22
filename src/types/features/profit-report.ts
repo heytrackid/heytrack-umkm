@@ -14,6 +14,10 @@ export interface ProfitSummary {
   net_profit: number
   net_profit_margin: number
   orders_count: number
+  // Business validation flags
+  has_loss_making_products?: boolean
+  loss_making_products_count?: number
+  has_unrealistic_margins?: boolean
 }
 
 export interface ProductProfit {
@@ -58,6 +62,8 @@ export interface ProductProfitabilityEntry {
   gross_profit: number
   gross_margin: number
   total_quantity: number
+  is_loss_making?: boolean
+  is_low_margin?: boolean
 }
 
 export interface OperatingExpenseBreakdownEntry {

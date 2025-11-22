@@ -10,8 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { toast } from 'sonner'
-import { uiLogger } from '@/lib/logger'
+import { handleError } from '@/lib/error-handling'
 import { IngredientPurchaseInsertSchema, type IngredientPurchaseInsert } from '@/lib/validations/database-validations'
 
 import type { AvailableIngredient } from '@/app/ingredients/purchases/components/types'
@@ -69,9 +68,7 @@ const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps): 
       setIsDialogOpen(false)
       onSuccess()
     } catch (error) {
-      const normalizedError = error instanceof Error ? error : new Error(String(error))
-      uiLogger.error({ error: normalizedError }, 'Error creating purchase')
-      toast.error(normalizedError.message || 'Gagal menambahkan pembelian')
+      handleError(error, 'Create ingredient purchase', true, 'Gagal menambahkan pembelian')
     }
   }
 

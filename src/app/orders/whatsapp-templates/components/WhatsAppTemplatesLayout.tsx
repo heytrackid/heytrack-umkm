@@ -13,6 +13,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { useAuth } from '@/hooks/index'
 import { useWhatsAppTemplates, useUpdateWhatsAppTemplate, useDeleteWhatsAppTemplate, useGenerateDefaultTemplates } from '@/hooks/api/useWhatsAppTemplates'
+import { handleError } from '@/lib/error-handling'
 import { toast } from 'sonner'
 
 
@@ -42,7 +43,7 @@ const WhatsAppTemplatesLayout = () => {
     // Handle auth errors
     useEffect(() => {
         if (!isAuthLoading && !isAuthenticated) {
-            toast.error('Sesi Anda telah berakhir. Silakan login kembali.')
+            handleError(new Error('Authentication required'), 'Auth check', false)
             router.push('/auth/login')
         }
     }, [isAuthLoading, isAuthenticated, router])

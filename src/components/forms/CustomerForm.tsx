@@ -12,8 +12,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { handleError } from '@/lib/error-handling'
 import { toast } from 'sonner'
-import { getErrorMessage } from '@/lib/type-guards'
 
 import type { Row } from '@/types/database'
 
@@ -75,8 +75,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
         form.reset()
       }
     } catch (error: unknown) {
-      const message = getErrorMessage(error)
-      toast.error(message || 'Gagal menyimpan data customer')
+      handleError(error as Error, 'Customer Form: submit', true, 'Gagal menyimpan data customer')
     }
   }
 

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { apiLogger } from '@/lib/logger'
+import { handleError } from '@/lib/error-handling'
 import { fetchApi, postApi, patchApi } from '@/lib/query/query-helpers'
 
 export interface Notification {
@@ -31,10 +31,7 @@ export function useMarkNotificationAsRead() {
       // Invalidate and refetch notifications
       void queryClient.invalidateQueries({ queryKey: ['notifications'] })
     },
-    onError: (error: Error) => {
-      toast.error('Failed to mark notification as read')
-      apiLogger.error({ error }, 'Mark notification as read error')
-    },
+    onError: (error) => handleError(error, 'Mark notification as read', true, 'Gagal menandai notifikasi sebagai sudah dibaca'),
   })
 }
 
@@ -48,9 +45,6 @@ export function useMarkAllNotificationsAsRead() {
       void queryClient.invalidateQueries({ queryKey: ['notifications'] })
       toast.success('All notifications marked as read')
     },
-    onError: (error: Error) => {
-      toast.error('Failed to mark all notifications as read')
-      apiLogger.error({ error }, 'Mark all notifications as read error')
-    },
+    onError: (error) => handleError(error, 'Mark all notifications as read', true, 'Gagal menandai semua notifikasi sebagai sudah dibaca'),
   })
 }
