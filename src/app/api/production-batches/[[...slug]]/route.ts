@@ -1,8 +1,9 @@
 // External libraries
-import { z } from 'zod'
+
 
 // Internal modules
 import { createApiRoute } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { ListQuerySchema, createCreateHandler, createListHandler, createGetHandler, createUpdateHandler, createDeleteHandler } from '@/lib/api/crud-helpers'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 
@@ -12,34 +13,12 @@ import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 
 export const runtime = 'nodejs'
 
-const CreateProductionSchema = z.object({
-  recipe_id: z.string().uuid(),
-  quantity: z.number().positive(),
-  cost_per_unit: z.number().min(0),
-  labor_cost: z.number().min(0).optional().default(0),
-  total_cost: z.number().min(0),
-  status: z.enum(['PLANNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional().default('PLANNED'),
-  planned_start_time: z.string().optional(),
-  notes: z.string().max(500).optional(),
-}).strict()
-
-const UpdateProductionSchema = z.object({
-  quantity: z.number().positive().optional(),
-  cost_per_unit: z.number().min(0).optional(),
-  labor_cost: z.number().min(0).optional(),
-  total_cost: z.number().min(0).optional(),
-  status: z.enum(['PLANNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional(),
-  planned_start_time: z.string().optional(),
-  actual_start_time: z.string().optional(),
-  actual_end_time: z.string().optional(),
-  notes: z.string().max(500).optional(),
-})
-
 // GET /api/production-batches or /api/production-batches/[id]
 export const GET = createApiRoute(
   {
     method: 'GET',
     path: '/api/production-batches',
+    securityPreset: SecurityPresets.basic(),
   },
   async (context) => {
     const { request, params } = context
@@ -71,7 +50,7 @@ export const POST = createApiRoute(
   {
     method: 'POST',
     path: '/api/production-batches',
-    bodySchema: CreateProductionSchema,
+    securityPreset: SecurityPresets.basic(),
   },
   async (context, _query, body) => {
     const slug = context.params?.['slug'] as string[] | undefined
@@ -90,7 +69,7 @@ export const PUT = createApiRoute(
   {
     method: 'PUT',
     path: '/api/production-batches/[id]',
-    bodySchema: UpdateProductionSchema,
+    securityPreset: SecurityPresets.basic(),
   },
   async (context, _query, body) => {
     const slug = context.params?.['slug'] as string[] | undefined
@@ -109,6 +88,7 @@ export const DELETE = createApiRoute(
   {
     method: 'DELETE',
     path: '/api/production-batches/[id]',
+    securityPreset: SecurityPresets.basic(),
   },
   async (context) => {
     const slug = context.params?.['slug'] as string[] | undefined

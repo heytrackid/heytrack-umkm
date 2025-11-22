@@ -1,4 +1,5 @@
 import { inventoryLogger } from '@/lib/logger'
+import { createClient } from '@/utils/supabase/server'
 
 import type { Row } from '@/types/database'
 
@@ -42,8 +43,6 @@ export class InventoryServices {
 
   async checkReorderNeeds(): Promise<ReorderSummary> {
     try {
-      // Import Supabase client dynamically to avoid circular dependencies
-      const { createClient } = await import('@/utils/supabase/server')
       const supabase = await createClient()
 
       // Get all ingredients with stock information
@@ -106,7 +105,6 @@ export class InventoryServices {
 
   async getLowStockItems(): Promise<Ingredient[]> {
     try {
-      const { createClient } = await import('@/utils/supabase/server')
       const supabase = await createClient()
 
       const { data: allIngredients, error } = await supabase
@@ -145,7 +143,6 @@ export class InventoryServices {
 
   async updateStockLevels(updates: Array<{ id: string; quantity: number }>): Promise<void> {
     try {
-      const { createClient } = await import('@/utils/supabase/server')
       const supabase = await createClient()
 
       // Update each ingredient's stock level
@@ -180,7 +177,6 @@ export class InventoryServices {
     message: string
   }>> {
     try {
-      const { createClient } = await import('@/utils/supabase/server')
       const supabase = await createClient()
 
       const { data: ingredients, error } = await supabase

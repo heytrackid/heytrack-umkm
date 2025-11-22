@@ -1,10 +1,10 @@
 // External libraries
-import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 // Internal modules
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { parseRouteParams } from '@/lib/api/route-helpers'
 import { createDeleteHandler, createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
 import { createPaginationMeta, createSuccessResponse } from '@/lib/api-core'
@@ -16,7 +16,7 @@ import { apiLogger } from '@/lib/logger'
 
 // Types and schemas
 import type { Database, FinancialRecordInsert, FinancialRecordUpdate, OrderInsert, OrderStatus } from '@/types/database'
-import { OrderInsertSchema, OrderUpdateSchema } from '@/lib/validations/domains/order'
+import { OrderInsertSchema } from '@/lib/validations/domains/order'
 
 // Services
 import { PricingAssistantService } from '@/services/orders/PricingAssistantService'
@@ -100,6 +100,7 @@ export const GET = createApiRoute(
     method: 'GET',
     path: '/api/orders',
     querySchema: OrderListQuerySchema,
+    securityPreset: SecurityPresets.basic(),
   },
   async (context: RouteContext, validatedQuery?: z.infer<typeof OrderListQuerySchema>) => {
     const { params } = context
@@ -181,14 +182,7 @@ export const POST = createApiRoute(
 
         if (!inventoryValidation.valid) {
           // Return detailed inventory validation error
-          return NextResponse.json({
-            error: 'Insufficient inventory for order',
-            code: 'INSUFFICIENT_INVENTORY',
-            details: {
-              validation: inventoryValidation,
-              message: 'Some ingredients do not have sufficient stock for this order'
-            }
-          }, { status: 400 })
+          return handleAPIError(new Error('Insufficient inventory for order'), 'API Route')
         }
 
         // Log low stock warnings
@@ -319,7 +313,8 @@ export const PUT = createApiRoute(
   {
     method: 'PUT',
     path: '/api/orders/[id]',
-    bodySchema: OrderUpdateSchema,
+    bodySchema: OrderInsertSchema, // Using insert schema for updates (partial)
+    securityPreset: SecurityPresets.basic(),
   },
   async (context: RouteContext, _query, body) => {
     const slug = context.params?.['slug'] as string[] | undefined
@@ -348,6 +343,7 @@ export const DELETE = createApiRoute(
   {
     method: 'DELETE',
     path: '/api/orders/[id]',
+    securityPreset: SecurityPresets.basic(),
   },
   async (context: RouteContext) => {
     const slug = context.params?.['slug'] as string[] | undefined

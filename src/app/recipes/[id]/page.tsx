@@ -1,12 +1,9 @@
 'use client'
 
-import { Suspense, use } from 'react'
+import { use } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { RecipeDetailPage } from '@/components/recipes/RecipeDetailPage'
-import { CardSkeleton, ListSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
-
-
 
 interface RecipePageProps {
     params: Promise<{
@@ -19,17 +16,7 @@ const RecipePage = ({ params }: RecipePageProps) => {
     return (
         <AppLayout pageTitle="Detail Resep">
             <div className="p-6">
-                <Suspense
-                    fallback={(
-                        <div className="space-y-6">
-                            <StatsSkeleton count={4} />
-                            <CardSkeleton rows={6} />
-                            <ListSkeleton items={5} />
-                        </div>
-                    )}
-                >
-                    <RecipeDetailPage recipeId={id} />
-                </Suspense>
+                <RecipeDetailPage recipeId={id} />
             </div>
         </AppLayout>
     )

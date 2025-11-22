@@ -57,6 +57,9 @@ const RootLayout = async ({
         <link rel="preconnect" href="https://api.openrouter.ai" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://api.openrouter.ai" />
 
+        {/* Preload critical dashboard stats API */}
+        <link rel="preload" href="/api/dashboard/stats" as="fetch" crossOrigin="anonymous" />
+
 
         
         {/* CSP nonce for inline scripts (server-safe) */}

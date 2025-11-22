@@ -1,6 +1,6 @@
-import dynamic from 'next/dynamic'
 import { createLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
+import { AutoSyncFinancialDashboardClient } from './AutoSyncFinancialDashboardClient'
 
 interface SyncStatus {
   isEnabled: boolean
@@ -56,7 +56,7 @@ async function fetchAutoSyncData(): Promise<{ success: boolean; data?: AutoSyncD
     // Ambil data financial records terbaru
     const { data: financialRecords, error: financialError } = await supabase
       .from('financial_records')
-      .select('*')
+      .select('id, type, amount, created_at, reference, category, date, description')
       .order('created_at', { ascending: false })
       .limit(50)
 
@@ -161,19 +161,6 @@ async function fetchAutoSyncData(): Promise<{ success: boolean; data?: AutoSyncD
 }
 
 // Client component for interactive features
-const AutoSyncClient = dynamic(
-  () => import('./AutoSyncFinancialDashboardClient')
-    .then(m => ({ default: m.AutoSyncFinancialDashboardClient }))
-    .catch((error) => {
-      const logger = createLogger('AutoSyncFinancialDashboard')
-      logger.error({ error }, 'Failed to load AutoSyncFinancialDashboardClient')
-      return { default: () => <div className="p-4 text-center text-red-600">Failed to load auto-sync dashboard</div> }
-    }),
-  {
-    loading: () => <div>Loading auto-sync dashboard...</div>,
-    ssr: false
-  }
-)
 
 export const AutoSyncFinancialDashboard = async () => {
   const autoSyncData = await fetchAutoSyncData()
@@ -182,5 +169,5 @@ export const AutoSyncFinancialDashboard = async () => {
     return <div>Failed to load auto-sync data</div>
   }
 
-  return <AutoSyncClient initialData={autoSyncData.data} />
+  return <AutoSyncFinancialDashboardClient initialData={autoSyncData.data} />
 }

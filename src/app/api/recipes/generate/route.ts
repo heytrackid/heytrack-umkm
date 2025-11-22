@@ -1,10 +1,9 @@
 export const runtime = 'nodejs'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 
-import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { createSuccessResponse } from '@/lib/api-core/responses'
-import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
-import { NextRequest, NextResponse } from 'next/server'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { z } from 'zod'
 
 const generateRecipeSchema = z.object({
@@ -14,21 +13,15 @@ const generateRecipeSchema = z.object({
   dietary: z.array(z.string()).optional(),
 })
 
-async function postHandler(request: NextRequest): Promise<NextResponse> {
-  try {
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-
-    const body = await request.json()
-    const validation = generateRecipeSchema.safeParse(body)
-
-    if (!validation.success) {
-      return handleAPIError(new Error('Invalid input'), 'POST /api/recipes/generate')
-    }
-
-    const { prompt, servings = 4, cuisine, dietary } = validation.data
+export const POST = createApiRoute(
+  {
+    method: 'POST',
+    path: '/api/recipes/generate',
+    bodySchema: generateRecipeSchema,
+    securityPreset: SecurityPresets.enhanced(),
+  },
+  async (_context: RouteContext, _query, body) => {
+    const { prompt, servings = 4, cuisine, dietary } = body!
 
     // Check if OpenRouter API key is configured
     const apiKey = process.env['OPENROUTER_API_KEY']
@@ -38,11 +31,11 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
     // Build the AI prompt
     let systemPrompt = `You are a professional chef and recipe creator. Generate a detailed recipe in Indonesian language.`
-    
+
     if (cuisine) {
       systemPrompt += ` The recipe should be ${cuisine} cuisine.`
     }
-    
+
     if (dietary && dietary.length > 0) {
       systemPrompt += ` The recipe must be ${dietary.join(', ')}.`
     }
@@ -141,9 +134,5 @@ Please provide the recipe in the following JSON format:
       usage: data.usage,
       message: 'Recipe generated successfully'
     })
-  } catch (error) {
-    return handleAPIError(error, 'POST /api/recipes/generate')
   }
-}
-
-export const POST = createSecureHandler(postHandler, 'POST /api/recipes/generate', SecurityPresets.enhanced())
+)

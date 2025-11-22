@@ -120,9 +120,9 @@ export function generateIngredientsTemplate(): string {
  * Generate CSV template for suppliers
  */
 export function generateSuppliersTemplate() {
-  return `name,contact_person,phone,email,address,company_type,payment_terms,notes
-PT. Supplier Jaya,John Doe,08123456789,supplier@email.com,Jl. Supplier No. 123,CV,30 hari,Supplier bahan baku terpercaya
-CV. Maju Mundur,Jane Smith,08198765432,jane@supplier.com,Jl. Maju No. 456,PT,14 hari,Supplier baru`
+  return `name,contact_person,phone,email,address,supplier_type,payment_terms,notes
+PT. Supplier Jaya,John Doe,08123456789,supplier@email.com,Jl. Supplier No. 123,preferred,30 hari,Supplier bahan baku terpercaya
+CV. Maju Mundur,Jane Smith,08198765432,jane@supplier.com,Jl. Maju No. 456,standard,14 hari,Supplier baru`
 }
 
 /**
@@ -205,7 +205,7 @@ export function parseSuppliersCSV(text: string) {
     phone: (row['phone'] ?? row['Phone'] ?? row['TELEPON']) ?? '',
     email: (row['email'] ?? row['Email'] ?? row['EMAIL']) ?? '',
     address: (row['address'] ?? row['Address'] ?? row['ALAMAT']) ?? '',
-    company_type: (row['company_type'] ?? row['Company Type'] ?? row['TIPE_PERUSAHAAN']) ?? '',
+    supplier_type: (row['supplier_type'] ?? row['Supplier Type'] ?? row['TIPE_SUPPLIER']) ?? '',
     payment_terms: (row['payment_terms'] ?? row['Payment Terms'] ?? row['SYARAT_PEMBAYARAN']) ?? '',
     notes: (row['notes'] ?? row['Notes'] ?? row['CATATAN']) ?? ''
   }))

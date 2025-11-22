@@ -2,7 +2,6 @@
 
 import { BarChart3, Calendar, Download, FileImage, FileSpreadsheet, FileText, LineChart, Table, TrendingUp, type LucideIcon } from '@/components/icons'
 import { useState } from 'react'
-import { type DateRange } from 'react-day-picker'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { SharedStatsCards } from '@/components/shared/index'
@@ -29,7 +28,7 @@ type ExportFormat = HppExportFormat
 type ExportMetric = HppExportMetric
 
 interface ReportConfig {
-  dateRange: DateRange | undefined
+  dateRange: { from?: Date; to?: Date } | undefined
   recipeIds: string[]
   metrics: ExportMetric[]
   format: ExportFormat

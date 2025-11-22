@@ -1,4 +1,5 @@
 import { dbLogger } from '@/lib/logger'
+import { revalidateTag } from 'next/cache'
 
 
 /**
@@ -123,8 +124,6 @@ export class CacheInvalidator {
 
     // For Next.js revalidation (tag-based invalidation)
     try {
-      const { revalidateTag } = await import('next/cache')
-
       keys.forEach(key => revalidateTag(key, 'page'))
 
       dbLogger.info({ keys }, 'Cache invalidation completed successfully')

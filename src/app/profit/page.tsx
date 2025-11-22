@@ -1,7 +1,6 @@
 'use client'
 
 import { AlertCircle, Download, Loader2 } from '@/components/icons'
-import { Suspense } from 'react'
 
 import { PageHeader } from '@/components/layout'
 import { AppLayout } from '@/components/layout/app-layout'
@@ -48,31 +47,6 @@ const ProfitReportPage = () => {
   } = useProfitData()
 
   // Chart data removed - no longer using charts
-
-  // Loading skeleton helper functions to avoid unstable nested components
-  const renderProfitInfoSkeleton = () => (
-    Array.from({ length: 5 }, (_, i) => (
-      <div key={`profit-info-${i}`} className="h-12 bg-muted rounded" />
-    ))
-  )
-
-  const renderIngredientCostSkeleton = () => (
-    Array.from({ length: 3 }, (_, i) => (
-      <div key={`ingredient-cost-${i}`} className="h-12 bg-muted rounded" />
-    ))
-  )
-
-  const renderOperatingExpenseSkeleton = () => (
-    Array.from({ length: 4 }, (_, i) => (
-      <div key={`operating-expense-${i}`} className="h-10 bg-muted rounded" />
-    ))
-  )
-
-  const renderProfitBreakdownSkeleton = () => (
-    Array.from({ length: 6 }, (_, i) => (
-      <div key={`profit-breakdown-${i}`} className="h-6 bg-muted rounded" />
-    ))
-  )
 
   // Error state
   if (error) {
@@ -225,88 +199,7 @@ const ProfitReportPage = () => {
             ))}
           </div>
         ) : (
-          <Suspense fallback={
-            <div className="space-y-6">
-              {/* Filters Loading */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="animate-pulse space-y-4">
-                    <div className="h-4 bg-muted rounded w-1/4" />
-                    <div className="grid gap-4 md:grid-cols-4">
-                      <div className="h-10 bg-muted rounded" />
-                      <div className="h-10 bg-muted rounded" />
-                      <div className="h-10 bg-muted rounded" />
-                      <div className="h-10 bg-muted rounded" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Summary Cards Loading */}
-              <StatsSkeleton count={4} />
-
-                {/* Product Profitability Table Loading */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="animate-pulse space-y-4">
-                    <div className="h-4 bg-muted rounded w-1/3" />
-                    <div className="space-y-2">
-                      {renderProfitInfoSkeleton()}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Ingredient Costs Loading */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="animate-pulse space-y-4">
-                    <div className="h-4 bg-muted rounded w-1/4" />
-                    <div className="space-y-2">
-                      {renderIngredientCostSkeleton()}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Operating Expenses Loading */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="animate-pulse space-y-4">
-                    <div className="h-4 bg-muted rounded w-1/3" />
-                    <div className="space-y-2">
-                      {renderOperatingExpenseSkeleton()}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Profit Breakdown Loading */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="animate-pulse space-y-4">
-                    <div className="h-4 bg-muted rounded w-1/4" />
-                    <div className="space-y-2">
-                      {renderProfitBreakdownSkeleton()}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Info Card Loading */}
-              <Card className="border-border/20 bg-muted ">
-                <CardContent className="pt-6">
-                  <div className="animate-pulse space-y-4">
-                    <div className="h-4 bg-muted rounded w-1/2" />
-                    <div className="space-y-2">
-                      <div className="h-3 bg-muted rounded" />
-                      <div className="h-3 bg-muted rounded w-3/4" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          }>
+          <>
             {/* Filters */}
             <ProfitFilters
               filters={filters}
@@ -352,7 +245,7 @@ const ProfitReportPage = () => {
 
             {/* Info Card */}
             <ProfitInfoCard />
-          </Suspense>
+          </>
         )}
       </div>
     </AppLayout>

@@ -3,6 +3,7 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
 import { createSuccessResponse } from '@/lib/api-core/responses'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { apiLogger, logError } from '@/lib/logger'
 import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
@@ -55,6 +56,10 @@ async function getRestockSuggestionsHandler(context: RouteContext) {
 }
 
 export const GET = createApiRoute(
-  { method: 'GET', path: '/api/inventory/restock-suggestions' },
+  {
+    method: 'GET',
+    path: '/api/inventory/restock-suggestions',
+    securityPreset: SecurityPresets.basic(),
+  },
   getRestockSuggestionsHandler
 )

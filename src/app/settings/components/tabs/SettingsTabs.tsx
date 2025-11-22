@@ -1,21 +1,14 @@
-import { Suspense, lazy } from 'react'
-
 import { BusinessSettings } from '@/app/settings/components/BusinessSettings'
+import { BusinessInfoSettings } from '@/app/settings/components/BusinessInfoSettings'
 import { DangerZone } from '@/app/settings/components/DangerZone'
 import { DateTimeSettings } from '@/app/settings/components/DateTimeSettings'
-
 import { NumberCurrencySettings } from '@/app/settings/components/NumberCurrencySettings'
 import { ProfileSettings } from '@/app/settings/components/ProfileSettings'
+import { RegionalSettings } from '@/app/settings/components/RegionalSettings'
 import { SecuritySettings } from '@/app/settings/components/SecuritySettings'
-import { SettingsLoadingSkeleton } from '@/app/settings/components/SettingsLoadingSkeleton'
 import { UIThemeSettings } from '@/app/settings/components/UIThemeSettings'
 import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-
-// Lazy load settings components only when tabs are accessed (smart code splitting)
-// ✅ Correct pattern for named exports with React.lazy
-const BusinessInfoSettings = lazy(() => import('@/app/settings/components/BusinessInfoSettings').then(mod => ({ default: mod.BusinessInfoSettings })))
-const RegionalSettings = lazy(() => import('@/app/settings/components/RegionalSettings').then(mod => ({ default: mod.RegionalSettings })))
 
 
 // Import existing components
@@ -39,47 +32,29 @@ export const SettingsTabs = ({ activeTab, onTabChange, settings, onSettingChange
 
     {/* General Settings */}
     <SwipeableTabsContent value="general" className="space-y-6">
-      <Suspense fallback={<SettingsLoadingSkeleton />}>
-        <BusinessInfoSettings settings={settings} onSettingChange={onSettingChange} />
-      </Suspense>
-      <Suspense fallback={<SettingsLoadingSkeleton />}>
-        <RegionalSettings settings={settings} onSettingChange={onSettingChange} />
-      </Suspense>
+      <BusinessInfoSettings settings={settings} onSettingChange={onSettingChange} />
+      <RegionalSettings settings={settings} onSettingChange={onSettingChange} />
     </SwipeableTabsContent>
 
     {/* Profile Settings */}
     <SwipeableTabsContent value="profile" className="space-y-6">
-      <Suspense fallback={<SettingsLoadingSkeleton />}>
-        <ProfileSettings settings={settings} onSettingChange={onSettingChange} />
-      </Suspense>
-      <Suspense fallback={<SettingsLoadingSkeleton />}>
-        <SecuritySettings />
-      </Suspense>
+      <ProfileSettings settings={settings} onSettingChange={onSettingChange} />
+      <SecuritySettings />
     </SwipeableTabsContent>
 
 
 
     {/* System Settings */}
     <SwipeableTabsContent value="system" className="space-y-6">
-      <Suspense fallback={<SettingsLoadingSkeleton />}>
-        <BusinessSettings settings={settings} onSettingChange={onSettingChange} />
-      </Suspense>
-      <Suspense fallback={<SettingsLoadingSkeleton />}>
-        <DangerZone />
-      </Suspense>
+      <BusinessSettings settings={settings} onSettingChange={onSettingChange} />
+      <DangerZone />
     </SwipeableTabsContent>
 
     {/* UI Settings */}
     <SwipeableTabsContent value="ui" className="space-y-6">
-      <Suspense fallback={<SettingsLoadingSkeleton />}>
-        <UIThemeSettings settings={settings} onSettingChange={onSettingChange} />
-      </Suspense>
-      <Suspense fallback={<SettingsLoadingSkeleton />}>
-        <DateTimeSettings settings={settings} onSettingChange={onSettingChange} />
-      </Suspense>
-      <Suspense fallback={<SettingsLoadingSkeleton />}>
-        <NumberCurrencySettings settings={settings} onSettingChange={onSettingChange} />
-      </Suspense>
+      <UIThemeSettings settings={settings} onSettingChange={onSettingChange} />
+      <DateTimeSettings settings={settings} onSettingChange={onSettingChange} />
+      <NumberCurrencySettings settings={settings} onSettingChange={onSettingChange} />
     </SwipeableTabsContent>
   </SwipeableTabs>
 )

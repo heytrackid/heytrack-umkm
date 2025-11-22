@@ -1,23 +1,21 @@
-import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
+import { type ComponentType } from 'react'
 
-import { serializeError, uiLogger } from '@/lib/logger'
+import { uiLogger } from '@/lib/logger'
+
+// Static imports for pages (converted from dynamic imports)
+import DashboardPage from '@/app/dashboard/page'
+import OrdersPage from '@/app/orders/page'
+import ReportsPage from '@/app/reports/page'
+import SettingsPage from '@/app/settings/page'
 
 /**
  * Bundle Splitting Utilities
  * Advanced code splitting and preloading strategies
  */
 
-// Lazy load with error boundary
- 
-export function lazyLoad<T extends ComponentType<Record<string, unknown>>>(
-  importFunc: () => Promise<{ default: T }>
-): LazyExoticComponent<T> {
-  return lazy(() =>
-     importFunc().catch((error) => {
-       uiLogger.error('Failed to load component:', error)
-       throw error
-     })
-  )
+// Static load function (converted from lazy loading)
+export function staticLoad<T extends ComponentType<Record<string, unknown>>>(component: T): T {
+  return component
 }
 
 
@@ -31,31 +29,8 @@ export class RoutePreloader {
       return
     }
 
-    switch (route) {
-      case '/dashboard':
-        import('@/app/dashboard/page').catch((error) => {
-          uiLogger.warn({ route, error: serializeError(error) }, 'Failed to preload dashboard route')
-        })
-        break
-      case '/orders':
-        import('@/app/orders/page').catch((error) => {
-          uiLogger.warn({ route, error: serializeError(error) }, 'Failed to preload orders route')
-        })
-        break
-      case '/reports':
-        import('@/app/reports/page').catch((error) => {
-          uiLogger.warn({ route, error: serializeError(error) }, 'Failed to preload reports route')
-        })
-        break
-      case '/settings':
-        import('@/app/settings/page').catch((error) => {
-          uiLogger.warn({ route, error: serializeError(error) }, 'Failed to preload settings route')
-        })
-        break
-      default:
-        break
-    }
-
+    // Static preloading - components are already imported
+    uiLogger.info({ route }, 'Route marked as preloaded (static import)')
     this.preloadedRoutes.add(route)
   }
 
@@ -153,8 +128,8 @@ export class BundleMonitor {
 // Charts removed - no longer using chart visualizations
 
 export const LazyPages = {
-  Dashboard: lazyLoad(() => import('@/app/dashboard/page')),
-  Orders: lazyLoad(() => import('@/app/orders/page')),
-  Reports: lazyLoad(() => import('@/app/reports/page')),
-  Settings: lazyLoad(() => import('@/app/settings/page')),
+  Dashboard: staticLoad(DashboardPage),
+  Orders: staticLoad(OrdersPage),
+  Reports: staticLoad(ReportsPage),
+  Settings: staticLoad(SettingsPage),
 }

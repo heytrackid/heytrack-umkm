@@ -22,30 +22,43 @@ import { CustomerDialog } from './CustomerDialog'
 import { CustomerSearchFilters } from './CustomerSearchFilters'
 import { CustomerStats } from './CustomerStats'
 import { CustomersTable } from './CustomersTable'
+import { ServerPagination } from '@/components/ui/server-pagination'
 
 import type { Customer } from './types'
 
 
 
 export const CustomersLayout = (): JSX.Element => {
-  const { isMobile } = useResponsive()
-  const { formatCurrency } = useSettings()
-  const queryClient = useQueryClient()
+   const { isMobile } = useResponsive()
+   const { formatCurrency } = useSettings()
+   const queryClient = useQueryClient()
 
-  // State
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedItems, setSelectedItems] = useState<string[]>([])
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
-  const [importDialogOpen, setImportDialogOpen] = useState(false)
-  const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; customer: Customer | null; bulk: boolean }>({
-    show: false,
-    customer: null,
-    bulk: false
-  })
+   // State
+   const [searchTerm, setSearchTerm] = useState('')
+   const [selectedItems, setSelectedItems] = useState<string[]>([])
+   const [dialogOpen, setDialogOpen] = useState(false)
+   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
+   const [importDialogOpen, setImportDialogOpen] = useState(false)
+   const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; customer: Customer | null; bulk: boolean }>({
+     show: false,
+     customer: null,
+     bulk: false
+   })
 
-  // Fetch customers with standardized hook
-  const { data: customers = [], isLoading } = useCustomers()
+   // Pagination state
+   const [page, setPage] = useState(1)
+   const [limit, setLimit] = useState(20)
+
+   // Fetch customers with pagination
+   const { data: customersResponse, isLoading } = useCustomers({
+     page,
+     limit,
+     search: searchTerm.trim() || undefined
+   })
+
+    // Extract data and pagination from response
+    const customers = useMemo(() => customersResponse?.data || [], [customersResponse?.data])
+    const pagination = customersResponse?.pagination
 
   // Mutations
   const deleteCustomerMutation = useDeleteCustomer()
@@ -66,17 +79,21 @@ export const CustomersLayout = (): JSX.Element => {
     onError: (error) => handleError(error, 'Delete customers', true, 'Gagal menghapus pelanggan')
   })
 
-  // Filter customers
-  const filteredCustomers = useMemo(() => {
-    if (!searchTerm) return customers
+   // Handle pagination changes
+   const handlePageChange = useCallback((newPage: number) => {
+     setPage(newPage)
+   }, [])
 
-    const term = searchTerm.toLowerCase()
-    return customers.filter(customer =>
-      customer.name.toLowerCase().includes(term) ||
-      customer.email?.toLowerCase().includes(term) ||
-      customer.phone?.toLowerCase().includes(term)
-    )
-  }, [customers, searchTerm])
+   const handlePageSizeChange = useCallback((newLimit: number) => {
+     setLimit(newLimit)
+     setPage(1) // Reset to first page when changing page size
+   }, [])
+
+   // Handle search with debouncing
+   const handleSearchChange = useCallback((newSearch: string) => {
+     setSearchTerm(newSearch)
+     setPage(1) // Reset to first page when searching
+   }, [])
 
   // Handlers
   const handleAddNew = useCallback(() => {
@@ -167,30 +184,40 @@ export const CustomersLayout = (): JSX.Element => {
         isMobile={isMobile}
       />
 
-      {/* Search & Filters */}
-      <CustomerSearchFilters
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        filteredCustomers={filteredCustomers}
-        selectedItems={selectedItems}
-        onClearSelection={() => setSelectedItems([])}
-        onBulkDelete={handleBulkDelete}
-        isLoading={isLoading}
-      />
+       {/* Search & Filters */}
+       <CustomerSearchFilters
+         searchTerm={searchTerm}
+         onSearchChange={handleSearchChange}
+         filteredCustomers={customers}
+         selectedItems={selectedItems}
+         onClearSelection={() => setSelectedItems([])}
+         onBulkDelete={handleBulkDelete}
+         isLoading={isLoading}
+       />
 
-      {/* Table */}
-      <CustomersTable
-        customers={filteredCustomers}
-        selectedItems={selectedItems}
-        onSelectItem={handleSelectItem}
-        onSelectAll={handleSelectAll}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onAddNew={handleAddNew}
-        formatCurrency={formatCurrency}
-        isMobile={isMobile}
-        isLoading={isLoading}
-      />
+       {/* Table */}
+        <CustomersTable
+          customers={customers}
+          selectedItems={selectedItems}
+          onSelectItem={handleSelectItem}
+          onSelectAll={handleSelectAll}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onAddNew={handleAddNew}
+          formatCurrency={formatCurrency}
+          isMobile={isMobile}
+          isLoading={isLoading}
+        />
+
+       {/* Pagination */}
+       {pagination && (
+         <ServerPagination
+           pagination={pagination}
+           onPageChange={handlePageChange}
+           onPageSizeChange={handlePageSizeChange}
+           pageSizeOptions={[10, 20, 50, 100]}
+         />
+       )}
 
       {/* Dialog */}
       <CustomerDialog

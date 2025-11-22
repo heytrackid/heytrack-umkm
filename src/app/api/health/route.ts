@@ -1,4 +1,5 @@
 // External libraries
+import { createClient } from '@supabase/supabase-js'
 // Internal modules
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { createSuccessResponse } from '@/lib/api-core/responses'
@@ -28,7 +29,6 @@ async function getHealthCheckHandler(context: RouteContext) {
     try {
       if (process.env['NEXT_PUBLIC_SUPABASE_URL'] && process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY']) {
         // Try to create a client (this will fail if env vars are invalid)
-        const { createClient } = await import('@supabase/supabase-js')
         createClient(
           process.env['NEXT_PUBLIC_SUPABASE_URL'],
           process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY']
@@ -49,7 +49,7 @@ async function getHealthCheckHandler(context: RouteContext) {
         supabase: supabaseStatus
       },
       version: '1.0.0',
-      userId: user.id
+      userId: user?.id || null // Handle case when auth is disabled
     })
   } catch (error) {
     return handleAPIError(error, 'GET /api/health')
@@ -60,6 +60,7 @@ export const GET = createApiRoute(
   {
     method: 'GET',
     path: '/api/health',
+    requireAuth: false,
   },
   getHealthCheckHandler
 )

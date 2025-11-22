@@ -8,13 +8,44 @@ type Order = Row<'orders'>
 type OrderInsert = Insert<'orders'>
 type OrderUpdate = Update<'orders'>
 
-export function useOrders(options?: { limit?: number; offset?: number }) {
+export function useOrders(options?: { page?: number; limit?: number; offset?: number; search?: string | undefined }) {
+  const { page = 1, limit = 20, search } = options || {}
+
+  // Convert page to offset for API
+  const offset = (page - 1) * limit
+
+  const apiOptions = {
+    page,
+    limit,
+    offset,
+    search: search || undefined
+  }
+
   return useQuery({
-    queryKey: ['orders', options],
+    queryKey: ['orders', apiOptions],
+    queryFn: (): Promise<{ data: Order[]; pagination: any }> => { // eslint-disable-line @typescript-eslint/no-explicit-any
+      const params = new URLSearchParams()
+      params.set('page', page.toString())
+      params.set('limit', limit.toString())
+      if (search) params.set('search', search)
+
+      return fetchApi<{ data: Order[]; pagination: any }>(`/api/orders?${params}`) // eslint-disable-line @typescript-eslint/no-explicit-any
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+}
+
+/**
+ * Fetch all orders as array (for backward compatibility)
+ * @deprecated Use useOrders for new implementations with pagination
+ */
+export function useOrdersList(search?: string) {
+  return useQuery({
+    queryKey: ['orders-list', search],
     queryFn: (): Promise<Order[]> => {
       const params = new URLSearchParams()
-      if (options?.limit) params.set('limit', options.limit.toString())
-      if (options?.offset) params.set('offset', options.offset.toString())
+      params.set('limit', '1000')
+      if (search) params.set('search', search)
 
       return fetchApi<Order[]>(`/api/orders?${params}`)
     },

@@ -3,6 +3,7 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 
 import { createSuccessResponse } from '@/lib/api-core/responses'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { z } from 'zod'
 
 const UpdateOnboardingSchema = z.object({
@@ -104,11 +105,20 @@ async function updateOnboardingHandler(context: RouteContext, _query?: never, bo
 }
 
 export const GET = createApiRoute(
-  { method: 'GET', path: '/api/onboarding' },
+  {
+    method: 'GET',
+    path: '/api/onboarding',
+    securityPreset: SecurityPresets.basic(),
+  },
   getOnboardingHandler
 )
 
 export const PATCH = createApiRoute(
-  { method: 'PATCH', path: '/api/onboarding', bodySchema: UpdateOnboardingSchema },
+  {
+    method: 'PATCH',
+    path: '/api/onboarding',
+    bodySchema: UpdateOnboardingSchema,
+    securityPreset: SecurityPresets.basic(),
+  },
   updateOnboardingHandler
 )

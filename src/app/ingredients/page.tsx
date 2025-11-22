@@ -19,12 +19,12 @@ import { useSettings } from '@/contexts/settings-context'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useCostChangeAlerts } from '@/hooks/useCostAlerts'
 import { useIngredientPurchases } from '@/hooks/useIngredientPurchases'
-import { useImportIngredients, useIngredients } from '@/hooks/useIngredients'
+import { useImportIngredients, useIngredientsList } from '@/hooks/useIngredients'
 import type { Row } from '@/types/database'
 import { useQueryClient } from '@tanstack/react-query'
 
 const IngredientsPage = () => {
-  const { data: ingredients, isLoading: loading, error } = useIngredients();
+  const { data: ingredients, isLoading: loading, error } = useIngredientsList();
   const { formatCurrency } = useSettings();
   const router = useRouter();
   const queryClient = useQueryClient();

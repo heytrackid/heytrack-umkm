@@ -258,7 +258,7 @@ worker.onmessage = (e) => handleResult(e.data)
 // Indexed queries for performance
 const { data } = await supabase
   .from('hpp_calculations')
-  .select('*')
+  .select('id, user_id, recipe_id, total_cost, created_at')
   .eq('user_id', userId)
   .order('created_at', { ascending: false })
   .limit(50)

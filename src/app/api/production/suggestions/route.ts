@@ -2,6 +2,7 @@
 export const runtime = 'nodejs'
 
 import { z } from 'zod'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
 import { ERROR_MESSAGES } from '@/lib/constants/messages'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
@@ -100,7 +101,11 @@ async function postHandler(context: RouteContext, _query?: never, body?: z.infer
 }
 
 export const GET = createApiRoute(
-  { method: 'GET', path: '/api/production/suggestions' },
+  {
+    method: 'GET',
+    path: '/api/production/suggestions',
+    securityPreset: SecurityPresets.basic(),
+  },
   getHandler
 )
 
@@ -108,7 +113,8 @@ export const POST = createApiRoute(
   {
     method: 'POST',
     path: '/api/production/suggestions',
-    bodySchema: CreateBatchSchema
+    bodySchema: CreateBatchSchema,
+    securityPreset: SecurityPresets.basic(),
   },
   postHandler
 )

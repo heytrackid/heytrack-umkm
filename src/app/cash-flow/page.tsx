@@ -6,6 +6,7 @@ import { id as idLocale } from 'date-fns/locale'
 import { useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
+import { CashFlowLoading } from '@/components/loading'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -14,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Skeleton } from '@/components/ui/skeleton'
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useCreateFinancialRecord, useFinancialRecords } from '@/hooks/useFinancialRecords'
@@ -115,6 +116,15 @@ const CashFlowPage = () => {
       acc[r.category] = (acc[r.category] || 0) + r.amount
       return acc
     }, {} as Record<string, number>)
+
+  // Show loading state for entire page
+  if (loading) {
+    return (
+      <AppLayout pageTitle="Arus Kas">
+        <CashFlowLoading />
+      </AppLayout>
+    )
+  }
 
   return (
     <AppLayout pageTitle="Arus Kas">
@@ -324,89 +334,83 @@ const CashFlowPage = () => {
             <CardTitle>Riwayat Transaksi</CardTitle>
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <div className="space-y-4">
-                {Array.from({ length: 5 }, (_, i) => (
-                  <Skeleton key={i} className="h-12 rounded" />
-                ))}
-              </div>
-             ) : filteredRecords.length === 0 ? (
-               <EmptyState
-                 {...EmptyStatePresets.financial}
-                 actions={[
-                   {
-                     label: 'Tambah Transaksi',
-                     onClick: () => setIsAddDialogOpen(true),
-                     icon: Plus
-                   }
-                 ]}
-               />
-              ) : (
-               <>
-                 {/* Desktop Table */}
-                 <div className="hidden md:block">
-                   <Table>
-                     <TableHeader>
-                       <TableRow>
-                         <TableHead>Tanggal</TableHead>
-                         <TableHead>Deskripsi</TableHead>
-                         <TableHead>Kategori</TableHead>
-                         <TableHead>Tipe</TableHead>
-                         <TableHead className="text-right">Jumlah</TableHead>
-                       </TableRow>
-                     </TableHeader>
-                     <TableBody>
-                        {filteredRecords.map((record: FinancialRecord) => (
-                         <TableRow key={record.id}>
-                            <TableCell>
-                              {record.date ? format(new Date(record.date), 'dd MMM yyyy', { locale: idLocale }) : '-'}
-                            </TableCell>
-                           <TableCell>{record.description}</TableCell>
-                           <TableCell>{record.category}</TableCell>
+            {filteredRecords.length === 0 ? (
+              <EmptyState
+                {...EmptyStatePresets.financial}
+                actions={[
+                  {
+                    label: 'Tambah Transaksi',
+                    onClick: () => setIsAddDialogOpen(true),
+                    icon: Plus
+                  }
+                ]}
+              />
+            ) : (
+              <>
+                {/* Desktop Table */}
+                <div className="hidden md:block">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Tanggal</TableHead>
+                        <TableHead>Deskripsi</TableHead>
+                        <TableHead>Kategori</TableHead>
+                        <TableHead>Tipe</TableHead>
+                        <TableHead className="text-right">Jumlah</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                       {filteredRecords.map((record: FinancialRecord) => (
+                        <TableRow key={record.id}>
                            <TableCell>
-                             <Badge variant={record.type === 'INCOME' ? 'default' : 'destructive'}>
-                               {record.type === 'INCOME' ? 'Pemasukan' : 'Pengeluaran'}
-                             </Badge>
+                             {record.date ? format(new Date(record.date), 'dd MMM yyyy', { locale: idLocale }) : '-'}
                            </TableCell>
-                           <TableCell className={`text-right font-medium ${
-                             record.type === 'INCOME' ? 'text-green-600' : 'text-red-600'
-                           }`}>
-                             {record.type === 'INCOME' ? '+' : '-'}{formatCurrency(record.amount)}
-                           </TableCell>
-                         </TableRow>
-                       ))}
-                     </TableBody>
-                   </Table>
-                 </div>
+                          <TableCell>{record.description}</TableCell>
+                          <TableCell>{record.category}</TableCell>
+                          <TableCell>
+                            <Badge variant={record.type === 'INCOME' ? 'default' : 'destructive'}>
+                              {record.type === 'INCOME' ? 'Pemasukan' : 'Pengeluaran'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className={`text-right font-medium ${
+                            record.type === 'INCOME' ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {record.type === 'INCOME' ? '+' : '-'}{formatCurrency(record.amount)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
 
-                 {/* Mobile Cards */}
-                 <div className="md:hidden space-y-3">
-                    {filteredRecords.map((record: FinancialRecord) => (
-                     <Card key={record.id} className="p-4">
-                       <div className="flex justify-between items-start mb-2">
-                         <div>
-                           <p className="font-medium">{record.description}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {record.date ? format(new Date(record.date), 'dd MMM yyyy', { locale: idLocale }) : '-'}
-                            </p>
-                         </div>
-                         <Badge variant={record.type === 'INCOME' ? 'default' : 'destructive'}>
-                           {record.type === 'INCOME' ? 'Pemasukan' : 'Pengeluaran'}
-                         </Badge>
-                       </div>
-                       <div className="flex justify-between items-center">
-                         <span className="text-sm text-muted-foreground">{record.category}</span>
-                         <span className={`font-medium ${
-                           record.type === 'INCOME' ? 'text-green-600' : 'text-red-600'
-                         }`}>
-                           {record.type === 'INCOME' ? '+' : '-'}{formatCurrency(record.amount)}
-                         </span>
-                       </div>
-                     </Card>
-                   ))}
-                 </div>
-               </>
-             )}
+                {/* Mobile Cards */}
+                <div className="md:hidden space-y-3">
+                   {filteredRecords.map((record: FinancialRecord) => (
+                    <Card key={record.id} className="p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <p className="font-medium">{record.description}</p>
+                           <p className="text-sm text-muted-foreground">
+                             {record.date ? format(new Date(record.date), 'dd MMM yyyy', { locale: idLocale }) : '-'}
+                           </p>
+                        </div>
+                        <Badge variant={record.type === 'INCOME' ? 'default' : 'destructive'}>
+                          {record.type === 'INCOME' ? 'Pemasukan' : 'Pengeluaran'}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">{record.category}</span>
+                        <span className={`font-medium ${
+                          record.type === 'INCOME' ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          {record.type === 'INCOME' ? '+' : '-'}{formatCurrency(record.amount)}
+                        </span>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

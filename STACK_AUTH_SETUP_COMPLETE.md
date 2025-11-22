@@ -115,7 +115,7 @@ const user = await requireAuth()
 console.log('User ID:', user.id)
 
 // Test Supabase query
-const { data } = await supabase.from('orders').select('*')
+const { data } = await supabase.from('orders').select('id, order_no, status, total_amount, created_at')
 console.log('Orders:', data) // Should only show user's orders
 ```
 
@@ -160,8 +160,8 @@ export async function GET() {
   
   // Query with automatic RLS filtering
   const supabase = await createClient()
-  const { data } = await supabase.from('orders').select('*')
-  
+  const { data } = await supabase.from('orders').select('id, order_no, status, total_amount, created_at')
+
   return Response.json({ orders: data })
 }
 ```

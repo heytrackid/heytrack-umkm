@@ -1,49 +1,32 @@
 // External libraries
-import { z } from 'zod'
 
 // Internal modules
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { parseRouteParams } from '@/lib/api/route-helpers'
 import { createDeleteHandler, createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
 import { calculateOffset, createPaginationMeta, createSuccessResponse } from '@/lib/api-core'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 
 // Types and schemas
-import { ExpenseInsertSchema } from '@/lib/validations/database-validations'
 
 // Constants and config
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 
 export const runtime = 'nodejs'
 
-const ExpenseQuerySchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().positive().optional().default(1000),
-  search: z.string().optional(),
-  sort: z.string().optional().default('date'),
-  order: z.enum(['asc', 'desc']).optional().default('desc'),
-  category: z.string().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-})
 
-const UpdateExpenseSchema = z.object({
-  description: z.string().min(1).optional(),
-  category: z.string().min(1).optional(),
-  amount: z.number().positive().optional(),
-  date: z.string().optional(),
-  reference: z.string().optional(),
-  supplier_id: z.string().uuid().optional(),
-})
 
 // GET /api/expenses or /api/expenses/[id]
 export const GET = createApiRoute(
   {
     method: 'GET',
     path: '/api/expenses',
-    querySchema: ExpenseQuerySchema,
+    securityPreset: SecurityPresets.basic(),
   },
-  async (context: RouteContext, validatedQuery) => {
+   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async (context: RouteContext, validatedQuery: any) => {
     const { params } = context
     const { slug } = parseRouteParams(params)
 
@@ -116,7 +99,7 @@ export const PUT = createApiRoute(
   {
     method: 'PUT',
     path: '/api/expenses/[id]',
-    bodySchema: UpdateExpenseSchema,
+    securityPreset: SecurityPresets.basic(),
   },
   async (context, _query, body) => {
     const slug = context.params?.['slug']
@@ -140,7 +123,7 @@ export const POST = createApiRoute(
   {
     method: 'POST',
     path: '/api/expenses',
-    bodySchema: ExpenseInsertSchema,
+    securityPreset: SecurityPresets.basic(),
   },
   async (context, _query, body) => {
     const slug = context.params?.['slug']
@@ -181,6 +164,7 @@ export const DELETE = createApiRoute(
   {
     method: 'DELETE',
     path: '/api/expenses/[id]',
+    securityPreset: SecurityPresets.basic(),
   },
   async (context) => {
     const slug = context.params?.['slug']

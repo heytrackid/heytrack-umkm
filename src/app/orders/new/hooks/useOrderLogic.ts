@@ -7,7 +7,7 @@ import { useState, type FormEvent } from 'react'
 import { getErrorMessage } from '@/lib/type-guards'
 import { handleError } from '@/lib/error-handling'
 import { useRecipes } from '@/hooks/useRecipes'
-import { useCustomers } from '@/hooks/useCustomers'
+import { useCustomersList } from '@/hooks/useCustomers'
 
 import type { Row } from '@/types/database'
 
@@ -80,8 +80,7 @@ export const useOrderLogic = () => {
 
   // Use React Query hooks
   const { data: availableRecipes = [] } = useRecipes({ limit: 100 })
-  const { data: customersData } = useCustomers({ limit: 100 })
-  const customers = customersData || []
+  const { data: customers = [] } = useCustomersList()
 
 
 

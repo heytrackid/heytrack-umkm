@@ -2068,6 +2068,7 @@ export type Database = {
           payment_terms: string | null
           phone: string | null
           rating: number | null
+          supplier_type: Database["public"]["Enums"]["supplier_type"]
           total_orders: number | null
           total_spent: number | null
           updated_at: string | null
@@ -2090,6 +2091,7 @@ export type Database = {
           payment_terms?: string | null
           phone?: string | null
           rating?: number | null
+          supplier_type?: Database["public"]["Enums"]["supplier_type"]
           total_orders?: number | null
           total_spent?: number | null
           updated_at?: string | null
@@ -2112,6 +2114,7 @@ export type Database = {
           payment_terms?: string | null
           phone?: string | null
           rating?: number | null
+          supplier_type?: Database["public"]["Enums"]["supplier_type"]
           total_orders?: number | null
           total_spent?: number | null
           updated_at?: string | null
@@ -2658,6 +2661,7 @@ export type Database = {
         | "OTHER"
       production_status: "PLANNED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
       record_type: "INCOME" | "EXPENSE" | "INVESTMENT" | "WITHDRAWAL"
+      supplier_type: "preferred" | "standard" | "trial" | "blacklisted"
       transaction_type: "PURCHASE" | "USAGE" | "ADJUSTMENT" | "WASTE"
       user_role: "super_admin" | "admin" | "manager" | "staff" | "viewer"
     }
@@ -2805,6 +2809,7 @@ export const Constants = {
       ],
       production_status: ["PLANNED", "IN_PROGRESS", "COMPLETED", "CANCELLED"],
       record_type: ["INCOME", "EXPENSE", "INVESTMENT", "WITHDRAWAL"],
+      supplier_type: ["preferred", "standard", "trial", "blacklisted"],
       transaction_type: ["PURCHASE", "USAGE", "ADJUSTMENT", "WASTE"],
       user_role: ["super_admin", "admin", "manager", "staff", "viewer"],
     },

@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner'
 import { handleError } from '@/lib/error-handling'
 import { useCurrency } from '@/hooks/useCurrency'
-import { useIngredients } from '@/hooks/useIngredients'
+import { useIngredientsList } from '@/hooks/useIngredients'
 
 import type { Row } from '@/types/database'
 
@@ -24,7 +24,7 @@ const WacEnginePage = (): JSX.Element => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
    // Use ingredients hook with caching
-   const { data: ingredients = [], isLoading: loading } = useIngredients({ limit: 1000 })
+    const { data: ingredients = [], isLoading: loading } = useIngredientsList()
    const [selectedIngredient, setSelectedIngredient] = useState<string>('')
    const [calculating, setCalculating] = useState(false)
    const [recalculating, setRecalculating] = useState(false)

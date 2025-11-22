@@ -1,25 +1,28 @@
 export const runtime = 'nodejs'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 
-import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { calculateAverageDailyUsage, calculateReorderPoint } from '@/lib/business-rules/inventory'
-import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
-import { createServiceRoleClient } from '@/utils/supabase/service-role'
-import { NextRequest, NextResponse } from 'next/server'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { createSuccessResponse } from '@/lib/api-core/responses'
+import { z } from 'zod'
 
-async function postHandler(request: NextRequest): Promise<NextResponse> {
-  try {
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
+const CalculateReorderSchema = z.object({
+  ingredientId: z.string().uuid(),
+  leadTimeDays: z.number().min(1).max(365).optional().default(7),
+  safetyStockDays: z.number().min(0).max(365).optional().default(3),
+})
 
-    const body = await request.json()
-    const { ingredientId, leadTimeDays = 7, safetyStockDays = 3 } = body
-
-    const supabase = createServiceRoleClient()
+export const POST = createApiRoute(
+  {
+    method: 'POST',
+    path: '/api/ingredients/calculate-reorder',
+    bodySchema: CalculateReorderSchema,
+    securityPreset: SecurityPresets.enhanced(),
+  },
+  async (context: RouteContext, _query, body) => {
+    const { user, supabase } = context
+    const { ingredientId, leadTimeDays, safetyStockDays } = body!
 
     // Get ingredient
     const { data: _ingredient, error: ingredientError } = await supabase
@@ -81,9 +84,5 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
       calculatedReorderPoint: reorderPoint,
       ingredient: updated,
     }, 'Reorder point calculated successfully')
-  } catch (error) {
-    return handleAPIError(error, 'POST /api/ingredients/calculate-reorder')
   }
-}
-
-export const POST = createSecureHandler(postHandler, 'POST /api/ingredients/calculate-reorder', SecurityPresets.enhanced())
+)

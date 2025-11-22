@@ -12,9 +12,10 @@ import type { Insert, Row, Update } from '@/types/database'
  */
 
 interface UseCustomersOptions {
+  page?: number
   limit?: number
   offset?: number
-  search?: string
+  search?: string | undefined
 }
 
 type Customer = Row<'customers'>
@@ -22,12 +23,36 @@ type CustomerInsert = Insert<'customers'>
 type CustomerUpdate = Update<'customers'>
 
 /**
- * Fetch all customers with caching
- */
+  * Fetch all customers with caching and pagination support
+  */
 export function useCustomers(options?: UseCustomersOptions) {
+  const { page = 1, limit = 20, search } = options || {}
+
+  // Convert page to offset for API
+  const offset = (page - 1) * limit
+
+  const apiOptions = {
+    page,
+    limit,
+    offset,
+    search: search || undefined
+  }
+
   return useQuery({
-    queryKey: ['customers', options],
-    queryFn: () => fetchApi<Customer[]>(buildApiUrl('/api/customers', options as Record<string, string | number | boolean | null | undefined>)),
+    queryKey: ['customers', apiOptions],
+    queryFn: () => fetchApi<{ data: Customer[]; pagination: any }>(buildApiUrl('/api/customers', apiOptions as Record<string, string | number | boolean | null | undefined>)), // eslint-disable-line @typescript-eslint/no-explicit-any
+    ...queryConfig.queries.moderate,
+  })
+}
+
+/**
+  * Fetch all customers as array (for backward compatibility)
+  * @deprecated Use useCustomers for new implementations with pagination
+  */
+export function useCustomersList(search?: string) {
+  return useQuery({
+    queryKey: ['customers-list', search],
+    queryFn: () => fetchApi<Customer[]>(buildApiUrl('/api/customers', { search: search || undefined } as Record<string, string | number | boolean | null | undefined>)),
     ...queryConfig.queries.moderate,
   })
 }

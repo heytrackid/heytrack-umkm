@@ -1,7 +1,7 @@
 'use client'
 
 
-import { Search, Calendar } from '@/components/icons'
+import { Search } from '@/components/icons'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -14,10 +14,6 @@ interface OrdersFiltersProps {
   setSearchTerm: (value: string) => void
   statusFilter: string
   setStatusFilter: (value: string) => void
-  dateFrom: string
-  setDateFrom: (value: string) => void
-  dateTo: string
-  setDateTo: (value: string) => void
   statusConfig: Record<string, { label: string; color: string }>
 }
 
@@ -26,10 +22,6 @@ const OrdersFilters = ({
   setSearchTerm,
   statusFilter,
   setStatusFilter,
-  dateFrom,
-  setDateFrom,
-  dateTo,
-  setDateTo,
   statusConfig,
   // _t not used
 }: OrdersFiltersProps): JSX.Element => (
@@ -62,24 +54,7 @@ const OrdersFilters = ({
           </SelectContent>
         </Select>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-          <Input
-            type="date"
-            placeholder=""
-            value={dateFrom}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDateFrom(e.target.value)}
-            className="flex-1 sm:w-[140px]"
-          />
-          <span className="text-muted-foreground flex-shrink-0">-</span>
-          <Input
-            type="date"
-            placeholder=""
-            value={dateTo}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDateTo(e.target.value)}
-            className="flex-1 sm:w-[140px]"
-          />
-        </div>
+
       </div>
     </CardContent>
   </Card>

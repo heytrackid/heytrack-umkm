@@ -8,6 +8,7 @@ import { createSuccessResponse } from '@/lib/api-core/responses'
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { apiLogger } from '@/lib/logger'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import type { NextResponse } from 'next/server'
 
 const SupplierImportSchema = z.object({
@@ -16,7 +17,7 @@ const SupplierImportSchema = z.object({
   phone: z.string().optional(),
   email: z.string().email().optional(),
   address: z.string().optional(),
-  company_type: z.string().optional(),
+  supplier_type: z.enum(['preferred', 'standard', 'trial', 'blacklisted']).optional(),
   payment_terms: z.string().optional(),
   notes: z.string().optional(),
 })
@@ -45,7 +46,7 @@ async function postHandler(context: RouteContext, _query?: never, body?: z.infer
       phone?: string
       email?: string
       address?: string
-      company_type?: string
+      supplier_type?: string
       payment_terms?: string
       notes?: string
       user_id: string
@@ -65,13 +66,17 @@ async function postHandler(context: RouteContext, _query?: never, body?: z.infer
         }
 
         // Prepare supplier data
+        const supplierTypeValue = typeof supplierObj['supplier_type'] === 'string' ? supplierObj['supplier_type'].trim() : ''
+        const validSupplierTypes = ['preferred', 'standard', 'trial', 'blacklisted']
+        const supplierType = validSupplierTypes.includes(supplierTypeValue) ? supplierTypeValue : 'standard'
+
         const supplierData = {
           name: supplierObj['name'].trim(),
           contact_person: typeof supplierObj['contact_person'] === 'string' ? supplierObj['contact_person'].trim() : '',
           phone: typeof supplierObj['phone'] === 'string' ? supplierObj['phone'].trim() : '',
           email: typeof supplierObj['email'] === 'string' ? supplierObj['email'].trim() : '',
           address: typeof supplierObj['address'] === 'string' ? supplierObj['address'].trim() : '',
-          company_type: typeof supplierObj['company_type'] === 'string' ? supplierObj['company_type'].trim() : '',
+          supplier_type: supplierType,
           payment_terms: typeof supplierObj['payment_terms'] === 'string' ? supplierObj['payment_terms'].trim() : '',
           notes: typeof supplierObj['notes'] === 'string' ? supplierObj['notes'].trim() : '',
           user_id: user.id
@@ -119,7 +124,7 @@ export const POST = createApiRoute(
   {
     method: 'POST',
     path: '/api/suppliers/import',
-    bodySchema: SuppliersImportSchema
+    securityPreset: SecurityPresets.basic(),
   },
   postHandler
 )

@@ -20,7 +20,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 
 import { useCreateRecipeWithIngredients, useUpdateRecipeWithIngredients, useRecipe } from '@/hooks/useRecipes'
-import { useIngredients } from '@/hooks/useIngredients'
+import { useIngredientsList } from '@/hooks/useIngredients'
 import { PageHeader } from '@/components/layout/PageHeader'
 
 import type { Row, Database } from '@/types/database'
@@ -49,7 +49,7 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
 
     const createMutation = useCreateRecipeWithIngredients()
     const updateMutation = useUpdateRecipeWithIngredients()
-    const { data: ingredients = [] } = useIngredients()
+    const { data: ingredients = [] } = useIngredientsList()
     const { data: recipeData } = useRecipe(recipeId || null)
     const loading = createMutation.isPending || updateMutation.isPending
     const [availableIngredients, setAvailableIngredients] = useState<Ingredient[]>([])

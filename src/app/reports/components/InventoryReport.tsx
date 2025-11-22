@@ -2,7 +2,7 @@ import { Package, PackageCheck, AlertTriangle, ShoppingCart } from '@/components
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { useIngredients } from '@/hooks/useIngredients'
+import { useIngredientsList } from '@/hooks/useIngredients'
 import { useCurrency } from '@/hooks/useCurrency'
 
 // Inventory Report Component
@@ -24,7 +24,7 @@ interface InventoryStats {
 
 export const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps = {}) => {
   const { formatCurrency } = useCurrency()
-  const { data: ingredients } = useIngredients()
+  const { data: ingredients } = useIngredientsList()
 
   // Calculate inventory report
   const ingredientList = ingredients ?? []

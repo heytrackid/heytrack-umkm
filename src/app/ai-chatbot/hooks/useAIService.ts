@@ -1,4 +1,5 @@
 import { apiLogger } from '@/lib/logger'
+import { useAuth } from '@/hooks/useAuth'
 
 export function useAIService(sessionId?: string | null): {
   processAIQuery: (query: string) => Promise<{
@@ -7,6 +8,8 @@ export function useAIService(sessionId?: string | null): {
     data?: Record<string, unknown>
   }>
 } {
+  const { user, isAuthenticated } = useAuth()
+
   const processAIQuery = async (
     query: string
   ): Promise<{
@@ -14,19 +17,10 @@ export function useAIService(sessionId?: string | null): {
     suggestions: string[]
     data?: Record<string, unknown>
   }> => {
-    // Get current user ID from Stack Auth
-    let userId: string | undefined
-    try {
-      const response = await fetch('/api/auth/me')
-      if (response.ok) {
-        const data = await response.json()
-        userId = data.userId
-      }
-    } catch (error) {
-      apiLogger.error({ error }, 'Failed to get user from Stack Auth')
-    }
+    // Get current user ID from useAuth hook
+    const userId = user?.id
 
-    if (!userId) {
+    if (!isAuthenticated || !userId) {
       apiLogger.warn('AI Chatbot accessed without authentication')
       return {
         message: '❌ **Error:** Anda perlu login untuk menggunakan AI Chatbot',

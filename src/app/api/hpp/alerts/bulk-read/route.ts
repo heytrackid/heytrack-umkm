@@ -3,6 +3,7 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
 import { createSuccessResponse } from '@/lib/api-core/responses'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { apiLogger } from '@/lib/logger'
@@ -42,6 +43,10 @@ async function postHandler(context: RouteContext): Promise<NextResponse> {
 }
 
 export const POST = createApiRoute(
-  { method: 'POST', path: '/api/hpp/alerts/bulk-read' },
+  {
+    method: 'POST',
+    path: '/api/hpp/alerts/bulk-read',
+    securityPreset: SecurityPresets.basic(),
+  },
   postHandler
 )

@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 // Internal modules
 import { createApiRoute, type RouteContext, type RouteHandler } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { ListQuerySchema, createListHandler, createCreateHandler, createGetHandler, createDeleteHandler } from '@/lib/api/crud-helpers'
 import { withQueryValidation } from '@/lib/api-core'
 import { triggerWorkflow } from '@/lib/automation/workflows/index'
@@ -14,16 +15,6 @@ import type { IngredientPurchaseUpdate } from '@/types/database'
 
 // Constants and config
 export const runtime = 'nodejs'
-
-const IngredientPurchaseSchema = z.object({
-  ingredient_id: z.string().uuid(),
-  quantity: z.number().positive(),
-  price_per_unit: z.number().positive(),
-  total_cost: z.number().positive(),
-  supplier: z.string().min(1),
-  purchase_date: z.string(),
-  notes: z.string().optional(),
-})
 
 const UpdatePurchaseSchema = z.object({
   quantity: z.number().positive().optional(),
@@ -40,6 +31,7 @@ export const GET = createApiRoute(
   {
     method: 'GET',
     path: '/api/ingredient-purchases',
+    securityPreset: SecurityPresets.basic(),
   },
   async (context) => {
     const { request, params } = context
@@ -76,7 +68,7 @@ export const POST = createApiRoute(
   {
     method: 'POST',
     path: '/api/ingredient-purchases',
-    bodySchema: IngredientPurchaseSchema,
+    securityPreset: SecurityPresets.basic(),
   },
   async (context, _query, body) => {
     const slug = context.params?.['slug'] as string[] | undefined
@@ -141,7 +133,7 @@ export const PUT = createApiRoute(
   {
     method: 'PUT',
     path: '/api/ingredient-purchases/[id]',
-    bodySchema: UpdatePurchaseSchema,
+    securityPreset: SecurityPresets.basic(),
   },
   updatePurchaseHandler as RouteHandler<never, z.infer<typeof UpdatePurchaseSchema>>
 )
@@ -151,6 +143,7 @@ export const DELETE = createApiRoute(
   {
     method: 'DELETE',
     path: '/api/ingredient-purchases/[id]',
+    securityPreset: SecurityPresets.basic(),
   },
   async (context) => {
     const slug = context.params?.['slug'] as string[] | undefined

@@ -1,13 +1,12 @@
 // External libraries
-import { z } from 'zod'
-import type { NextResponse } from 'next/server'
-
 // Internal modules
+import { NextResponse } from 'next/server'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { createSuccessResponse } from '@/lib/api-core'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
-import { SecurityPresets } from '@/utils/security/api-middleware'
+import { z } from 'zod'
 
 // Types and schemas
 // Constants and config

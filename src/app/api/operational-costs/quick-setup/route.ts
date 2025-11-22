@@ -3,6 +3,7 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
 import { apiLogger } from '@/lib/logger'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import type { Insert } from '@/types/database'
 import { createSuccessResponse } from '@/lib/api-core/responses'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
@@ -125,6 +126,10 @@ async function postHandler(context: RouteContext): Promise<NextResponse> {
 }
 
 export const POST = createApiRoute(
-  { method: 'POST', path: '/api/operational-costs/quick-setup' },
+  {
+    method: 'POST',
+    path: '/api/operational-costs/quick-setup',
+    securityPreset: SecurityPresets.basic(),
+  },
   postHandler
 )

@@ -20,8 +20,9 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true, // Ignore Supabase type issues in build
   },
   typedRoutes: true,
+  reactCompiler: true,
   compiler: {
-    removeConsole: isProd ? { exclude: ['error'] } : false
+    removeConsole: isProd ? { exclude: ['error'] } : false,
   },
 
 
@@ -52,7 +53,6 @@ const nextConfig: NextConfig = {
     },
     optimizeCss: true,
     optimisticClientCache: false,
-    reactCompiler: false,
   },
 
   images: {

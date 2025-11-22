@@ -1,6 +1,7 @@
 // External libraries
 // Internal modules
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { parseRouteParams } from '@/lib/api/route-helpers'
 import { ListQuerySchema, createListHandler, createGetHandler, createDeleteHandler } from '@/lib/api/crud-helpers'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
@@ -13,6 +14,7 @@ export const GET = createApiRoute(
     method: 'GET',
     path: '/api/sales',
     querySchema: ListQuerySchema,
+    securityPreset: SecurityPresets.basic(),
   },
   async (context: RouteContext, validatedQuery) => {
     const { params } = context
@@ -44,6 +46,7 @@ export const DELETE = createApiRoute(
   {
     method: 'DELETE',
     path: '/api/sales/[id]',
+    securityPreset: SecurityPresets.basic(),
   },
   async (context) => {
     const slug = context.params?.['slug'] as string[] | undefined

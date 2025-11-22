@@ -10,7 +10,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { useIngredients } from '@/hooks/useIngredients'
+import { useIngredientsList } from '@/hooks/useIngredients'
 import { Plus, Trash2 } from '@/components/icons'
 import { useState } from 'react'
 import type { Row } from '@/types/database'
@@ -35,7 +35,7 @@ export function RecipeIngredientSelector({
   onChange,
   errors,
 }: RecipeIngredientSelectorProps): JSX.Element {
-  const { data: availableIngredients, isLoading } = useIngredients()
+  const { data: availableIngredients, isLoading } = useIngredientsList()
   const [selectedIngredientId, setSelectedIngredientId] = useState<string>('')
 
   const handleAdd = () => {

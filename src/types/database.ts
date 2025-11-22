@@ -168,6 +168,7 @@ export type RecordType = Enums<'record_type'>
 export type TransactionType = Enums<'transaction_type'>
 export type UserRole = Enums<'user_role'>
 export type BusinessUnit = Enums<'business_unit'>
+export type SupplierType = Enums<'supplier_type'>
 
 // ============================================================================
 // HELPER TYPES

@@ -2,6 +2,7 @@ export const runtime = 'nodejs'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { apiLogger } from '@/lib/logger'
 
 import { typed } from '@/types/type-utilities'
@@ -155,6 +156,7 @@ export const GET = createApiRoute(
   {
     method: 'GET',
     path: '/api/ai/sessions',
+    securityPreset: SecurityPresets.enhanced(),
   },
   getHandler
 )
@@ -164,6 +166,7 @@ export const DELETE = createApiRoute(
   {
     method: 'DELETE',
     path: '/api/ai/sessions',
+    securityPreset: SecurityPresets.enhanced(),
   },
   deleteHandler
 )

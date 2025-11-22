@@ -3,9 +3,10 @@ import { z } from 'zod'
 import type { NextResponse } from 'next/server'
 
 // Internal modules
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { parseRouteParams } from '@/lib/api/route-helpers'
-import { createListHandler, createGetHandler, createUpdateHandler, createDeleteHandler, ListQuerySchema } from '@/lib/api/crud-helpers'
+import { createListHandler, createGetHandler, createUpdateHandler, createDeleteHandler } from '@/lib/api/crud-helpers'
 import { createSuccessResponse } from '@/lib/api-core'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
@@ -26,24 +27,17 @@ const TemplateInsertSchema = z.object({
   is_default: z.boolean().optional(),
 })
 
-const TemplateUpdateSchema = z.object({
-  name: z.string().optional(),
-  template_content: z.string().optional(),
-  category: z.string().optional(),
-  description: z.string().optional(),
-  variables: z.array(z.string()).optional(),
-  is_active: z.boolean().optional(),
-  is_default: z.boolean().optional(),
-})
+
 
 // GET /api/whatsapp-templates or /api/whatsapp-templates/[id]
 export const GET = createApiRoute(
   {
     method: 'GET',
     path: '/api/whatsapp-templates',
-    querySchema: ListQuerySchema,
+    securityPreset: SecurityPresets.basic(),
   },
-  async (context, validatedQuery) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async (context, validatedQuery: any) => {
     const { params } = context
     const { slug } = parseRouteParams(params)
 
@@ -125,7 +119,7 @@ export const POST = createApiRoute(
   {
     method: 'POST',
     path: '/api/whatsapp-templates',
-    bodySchema: TemplateInsertSchema,
+    securityPreset: SecurityPresets.basic(),
   },
   createTemplateHandler
 )
@@ -135,7 +129,7 @@ export const PUT = createApiRoute(
   {
     method: 'PUT',
     path: '/api/whatsapp-templates/[id]',
-    bodySchema: TemplateUpdateSchema,
+    securityPreset: SecurityPresets.basic(),
   },
   async (context, _query, body) => {
     const slug = context.params?.['slug'] as string[] | undefined
@@ -157,6 +151,7 @@ export const DELETE = createApiRoute(
   {
     method: 'DELETE',
     path: '/api/whatsapp-templates/[id]',
+    securityPreset: SecurityPresets.basic(),
   },
   async (context) => {
     const slug = context.params?.['slug'] as string[] | undefined

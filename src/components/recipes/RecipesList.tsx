@@ -22,6 +22,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { MobileRecipeCard } from '@/components/recipes/MobileRecipeCard'
 import { RecipeFormDialog } from '@/components/recipes/RecipeFormDialog'
 import { RecipeStatsCards } from '@/components/recipes/RecipeStatsCards'
+import { RecipesLoading } from '@/components/loading'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -451,22 +452,7 @@ const RecipesList = () => {
 
             {/* Recipe List */}
             {loading ? (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {Array.from({length: 6}).map((_, i) => (
-                        <Card key={i}>
-                            <CardContent className="p-6">
-                                <div className="space-y-3">
-                                    <div className="h-6 bg-muted rounded animate-pulse" />
-                                    <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
-                                    <div className="flex gap-2">
-                                        <div className="h-6 bg-muted rounded animate-pulse w-16" />
-                                        <div className="h-6 bg-muted rounded animate-pulse w-16" />
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
+                <RecipesLoading />
             ) : filteredData.length === 0 ? (
                 <>
                     {/* Empty state - no data at all */}

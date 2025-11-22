@@ -1,5 +1,6 @@
 import { BaseWorkflowAutomation } from '@/lib/automation/base-workflow'
 import { automationLogger } from '@/lib/logger'
+import { createClient } from '@/utils/supabase/server'
 
 import type { AutomationConfig, WorkflowEventData, WorkflowResult } from '@/types/features/automation'
 
@@ -40,7 +41,6 @@ export class WorkflowAutomation extends BaseWorkflowAutomation {
     const context = this.createContext(event)
 
     // Set up Supabase client in context
-    const { createClient } = await import('@/utils/supabase/server')
     context.supabase = await createClient()
 
     switch (event.event) {

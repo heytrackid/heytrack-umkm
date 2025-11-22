@@ -153,7 +153,7 @@ export class CustomerService extends BaseService {
   async getCustomerById(id: string): Promise<unknown | null> {
     const { data, error } = await this.context.supabase
       .from('customers')
-      .select('*')
+      .select('id, address, created_at, created_by, customer_type, discount_percentage, email, favorite_items, is_active, last_order_date, loyalty_points, name, notes, phone, total_orders, total_spent, updated_at, updated_by, user_id')
       .eq('id', id)
       .eq('user_id', this.context.userId)
       .single()

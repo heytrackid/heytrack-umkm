@@ -155,7 +155,7 @@ import { typed } from '@/types/database'
 
 const result = await typed(supabase)
   .from('orders')
-  .select('*')
+  .select('id, order_no, status, total_amount, created_at')
 // ✅ Fully typed
 ```
 

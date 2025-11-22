@@ -5,7 +5,6 @@ import { useProductionBatches, useUpdateProductionBatch } from '@/hooks/useProdu
 import { useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
-import dynamic from 'next/dynamic'
 import { useState } from 'react'
 
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -20,31 +19,7 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { useResponsive } from '@/hooks/useResponsive'
 
 
-// Lazy load the ProductionFormDialog component as it's heavy
-const LazyProductionFormDialog = dynamic(
-  () => import('./ProductionFormDialog')
-    .then(mod => mod.ProductionFormDialog)
-    .catch(() => {
-      return { default: () => <div className="p-4 text-center text-red-600">Failed to load production form</div> }
-    }),
-  {
-    loading: () => (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-card rounded-lg p-8 max-w-md w-full mx-4">
-          <div className="animate-pulse space-y-4">
-            <div className="h-6 bg-muted rounded w-1/2 mx-auto" />
-            <div className="space-y-2">
-              <div className="h-4 bg-muted rounded" />
-              <div className="h-4 bg-muted rounded" />
-              <div className="h-10 bg-muted rounded mt-4" />
-            </div>
-          </div>
-        </div>
-      </div>
-    ),
-    ssr: false
-  }
-)
+import { ProductionFormDialog } from './ProductionFormDialog'
 
 import type { ProductionStatus, Row } from '@/types/database'
 
@@ -499,7 +474,7 @@ const EnhancedProductionPage = () => {
                     </CardContent>
                 </Card>
             )}
-            <LazyProductionFormDialog
+            <ProductionFormDialog
                 open={isFormOpen}
                 onOpenChange={(open) => setIsFormOpen(open)}
                 onSuccess={() => queryClient.invalidateQueries({ queryKey: ['production-batches'] })}

@@ -50,7 +50,7 @@ export const ImportDialog = ({
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         const selectedFile = e.target.files?.[0]
         if (selectedFile) {
-            if (!selectedFile.name.endsWith('.csv')) {
+            if (!selectedFile.name || !selectedFile.name.endsWith('.csv')) {
                 handleError(new Error('Validation: File tidak valid - Hanya file CSV yang diperbolehkan'), 'Import Dialog: validation', true, 'File tidak valid - Hanya file CSV yang diperbolehkan')
                 return
             }

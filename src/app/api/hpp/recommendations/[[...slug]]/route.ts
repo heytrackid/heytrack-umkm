@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { cacheInvalidation } from '@/lib/cache'
 import { apiLogger } from '@/lib/logger'
 
@@ -226,21 +227,37 @@ async function deleteHandler(context: RouteContext): Promise<NextResponse> {
 }
 
 export const GET = createApiRoute(
-  { method: 'GET', path: '/api/hpp/recommendations' },
+  {
+    method: 'GET',
+    path: '/api/hpp/recommendations',
+    securityPreset: SecurityPresets.basic(),
+  },
   getHandler
 )
 
 export const POST = createApiRoute(
-  { method: 'POST', path: '/api/hpp/recommendations' },
+  {
+    method: 'POST',
+    path: '/api/hpp/recommendations',
+    securityPreset: SecurityPresets.basic(),
+  },
   postHandler
 )
 
 export const PATCH = createApiRoute(
-  { method: 'PATCH', path: '/api/hpp/recommendations/[id]' },
+  {
+    method: 'PATCH',
+    path: '/api/hpp/recommendations/[id]',
+    securityPreset: SecurityPresets.basic(),
+  },
   patchHandler
 )
 
 export const DELETE = createApiRoute(
-  { method: 'DELETE', path: '/api/hpp/recommendations/[id]' },
+  {
+    method: 'DELETE',
+    path: '/api/hpp/recommendations/[id]',
+    securityPreset: SecurityPresets.basic(),
+  },
   deleteHandler
 )

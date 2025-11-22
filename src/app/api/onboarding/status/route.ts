@@ -3,6 +3,7 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 
 import { createSuccessResponse } from '@/lib/api-core/responses'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
 // GET /api/onboarding/status - Get onboarding status
 async function getOnboardingStatusHandler(context: RouteContext) {
@@ -51,6 +52,10 @@ async function getOnboardingStatusHandler(context: RouteContext) {
 }
 
 export const GET = createApiRoute(
-  { method: 'GET', path: '/api/onboarding/status' },
+  {
+    method: 'GET',
+    path: '/api/onboarding/status',
+    securityPreset: SecurityPresets.basic(),
+  },
   getOnboardingStatusHandler
 )

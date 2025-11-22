@@ -2,7 +2,7 @@
 'use client'
 
 import { useRecipes } from '@/hooks/useRecipes'
-import { useCustomers } from '@/hooks/useCustomers'
+import { useCustomersList } from '@/hooks/useCustomers'
 import { AlertCircle, Package, Plus, Trash2 } from '@/components/icons'
 import { memo, useCallback, useMemo, useState, type FormEvent } from 'react'
 
@@ -83,7 +83,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
   const { data: recipesData = [] } = useRecipes()
 
   // ✅ Use standardized customers hook
-  const { data: customersData = [] } = useCustomers()
+  const { data: customersData = [] } = useCustomersList()
 
   // Use data directly from query (no need for local state)
   const availableRecipes = useMemo(() => recipesData || [], [recipesData])

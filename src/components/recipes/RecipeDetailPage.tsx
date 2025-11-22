@@ -13,7 +13,7 @@ import {
     ChevronDown,
     ChevronUp,
 } from '@/components/icons'
-import Image from 'next/image'
+import { OptimizedImage } from '@/components/ui/optimized-image'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -181,7 +181,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
             <div className="space-y-6">
                 {recipe.image_url && (
                     <div className="w-full max-w-md mx-auto">
-                        <Image
+                        <OptimizedImage
                             src={recipe.image_url}
                             alt={recipe.name}
                             width={400}

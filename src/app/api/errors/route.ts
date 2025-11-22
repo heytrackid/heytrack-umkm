@@ -1,39 +1,38 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
-import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { createClient } from '@/utils/supabase/server'
-import type { ErrorLogInsert } from '@/types/database'
 import { createSuccessResponse } from '@/lib/api-core/responses'
+import { z } from 'zod'
 
-interface ErrorBody {
-  message?: string
-  msg?: string
-  stack?: string
-  url?: string
-  userAgent?: string
-  componentStack?: string
-  timestamp?: number | string
-  errorType?: string
-  browser?: string
-  os?: string
-  device?: string
-}
+const ErrorReportSchema = z.object({
+  message: z.string().optional(),
+  msg: z.string().optional(),
+  stack: z.string().optional(),
+  url: z.string().optional(),
+  userAgent: z.string().optional(),
+  componentStack: z.string().optional(),
+  timestamp: z.union([z.number(), z.string()]).optional(),
+  errorType: z.string().optional(),
+  browser: z.string().optional(),
+  os: z.string().optional(),
+  device: z.string().optional(),
+}).refine((data) => data.message || data.msg, {
+  message: 'Either message or msg is required',
+  path: ['message']
+})
 
-interface SanitizedError {
-  message: string
-  stack: string | null
-  url: string | null
-  userAgent: string | null
-  timestamp: string
-  componentStack: string | null
-}
+const ErrorQuerySchema = z.object({
+  limit: z.string().transform(val => parseInt(val, 10)).optional().default(1000),
+  offset: z.string().transform(val => parseInt(val, 10)).optional().default(0),
+})
 
 async function getOptionalUserId(): Promise<string | null> {
   try {
@@ -48,22 +47,7 @@ async function getOptionalUserId(): Promise<string | null> {
   }
 }
 
-async function parseErrorBody(request: NextRequest): Promise<ErrorBody> {
-  const contentType = request.headers.get('content-type') ?? ''
-
-  if (contentType.includes('application/json')) {
-    return request.json() as Promise<ErrorBody>
-  }
-
-  if (contentType.includes('text/plain')) {
-    const text = await request.text()
-    return JSON.parse(text) as ErrorBody
-  }
-
-  return request.json() as Promise<ErrorBody>
-}
-
-function sanitizeErrorBody(body: ErrorBody): SanitizedError {
+function sanitizeErrorBody(body: z.infer<typeof ErrorReportSchema>) {
   const timestamp = body.timestamp ? String(body.timestamp) : new Date().toISOString()
 
   return {
@@ -78,8 +62,8 @@ function sanitizeErrorBody(body: ErrorBody): SanitizedError {
 
 async function logErrorToDatabase(
   userId: string,
-  sanitized: SanitizedError,
-  original: ErrorBody
+  sanitized: ReturnType<typeof sanitizeErrorBody>,
+  original: z.infer<typeof ErrorReportSchema>
 ): Promise<void> {
   try {
     const supabase = await createClient()
@@ -100,7 +84,7 @@ async function logErrorToDatabase(
       }
     }
 
-    const { error } = await supabase.from('error_logs').insert(payload as ErrorLogInsert)
+    const { error } = await supabase.from('error_logs').insert(payload)
     if (error) {
       throw error
     }
@@ -109,47 +93,16 @@ async function logErrorToDatabase(
   }
 }
 
-async function postHandler(request: NextRequest): Promise<NextResponse> {
-  try {
-    const userId = await getOptionalUserId()
-
-    let errorBody: ErrorBody
-    try {
-      errorBody = await parseErrorBody(request)
-    } catch (error: unknown) {
-      apiLogger.error({ error: getErrorMessage(error) }, 'Failed to parse error report body')
-      return handleAPIError(new Error('Invalid request body'), 'POST /api/errors')
-    }
-
-    if (!errorBody.message && !errorBody.msg) {
-      return handleAPIError(new Error('Message is required'), 'POST /api/errors')
-    }
-
-    const sanitized = sanitizeErrorBody(errorBody)
-
-    if (userId) {
-      await logErrorToDatabase(userId, sanitized, errorBody)
-    }
-
-    if (process['env'].NODE_ENV === 'development') {
-      apiLogger.info({ ...sanitized, userId }, 'Client-side error reported')
-    }
-
-    return createSuccessResponse(null, 'Error reported successfully')
-  } catch (error) {
-    return handleAPIError(error, 'POST /api/errors')
-  }
-}
-
-// GET /api/errors - Get recent errors (admin only)
-async function getHandler(request: NextRequest): Promise<NextResponse> {
-  try {
-    // Authenticate with Stack Auth
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
+export const GET = createApiRoute(
+  {
+    method: 'GET',
+    path: '/api/errors',
+    querySchema: ErrorQuerySchema,
+    securityPreset: SecurityPresets.enhanced(),
+  },
+  async (context: RouteContext, query) => {
+    const { user } = context
+    const { limit, offset } = query!
 
     const supabase = await createClient()
 
@@ -177,10 +130,6 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
       )
     }
 
-    const { searchParams } = new URL(request.url)
-    const limit = parseInt(searchParams.get('limit') ?? '1000', 10)
-    const offset = parseInt(searchParams.get('offset') ?? '0', 10)
-
     // Fetch recent errors from database
     const { data: errors, error: queryError } = await supabase
       .from('error_logs')
@@ -197,22 +146,40 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     }
 
     return createSuccessResponse({ errors })
-  } catch (error) {
-    return handleAPIError(error, 'GET /api/errors')
   }
-}
+)
 
-// Custom config for error reporting - selective validation to prevent false positives
-const errorReportingConfig = {
-  sanitizeInputs: true,
-  sanitizeQueryParams: true,
-  validateContentType: true,
-  allowedContentTypes: ['application/json', 'text/plain'], // Allow both JSON and text/plain for sendBeacon
-  enableCSRFProtection: false, // Allow error reports from various sources
-  rateLimit: { maxRequests: 200, windowMs: 15 * 60 * 1000 }, // Higher limit for error reporting
-  checkForSQLInjection: false, // Disable SQL injection checks for error messages
-  checkForXSS: false, // Use custom validation instead
-}
+export const POST = createApiRoute(
+  {
+    method: 'POST',
+    path: '/api/errors',
+    bodySchema: ErrorReportSchema,
+    requireAuth: false, // Allow anonymous error reports
+    securityPreset: {
+      sanitizeInputs: true,
+      sanitizeQueryParams: true,
+      validateContentType: true,
+      allowedContentTypes: ['application/json', 'text/plain'],
+      enableCSRFProtection: false,
+      rateLimit: { maxRequests: 200, windowMs: 15 * 60 * 1000 },
+      checkForSQLInjection: false,
+      checkForXSS: false,
+    },
+  },
+  async (_context: RouteContext, _query, body) => {
+    const errorBody = body!
 
-export const GET = createSecureHandler(getHandler, 'GET /api/errors', SecurityPresets.enhanced())
-export const POST = createSecureHandler(postHandler, 'POST /api/errors', errorReportingConfig)
+    const userId = await getOptionalUserId()
+    const sanitized = sanitizeErrorBody(errorBody)
+
+    if (userId) {
+      await logErrorToDatabase(userId, sanitized, errorBody)
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      apiLogger.info({ ...sanitized, userId }, 'Client-side error reported')
+    }
+
+    return createSuccessResponse(null, 'Error reported successfully')
+  }
+)

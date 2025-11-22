@@ -3,6 +3,7 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
 import { z } from 'zod'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
 import { apiLogger, logError } from '@/lib/logger'
 import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
@@ -80,7 +81,11 @@ async function postHandler(context: RouteContext, _query?: never, body?: z.infer
 }
 
 export const GET = createApiRoute(
-  { method: 'GET', path: '/api/recipes/availability' },
+  {
+    method: 'GET',
+    path: '/api/recipes/availability',
+    securityPreset: SecurityPresets.basic(),
+  },
   getHandler
 )
 
@@ -88,7 +93,8 @@ export const POST = createApiRoute(
   {
     method: 'POST',
     path: '/api/recipes/availability',
-    bodySchema: CheckMultipleRecipesSchema
+    bodySchema: CheckMultipleRecipesSchema,
+    securityPreset: SecurityPresets.basic(),
   },
   postHandler
 )

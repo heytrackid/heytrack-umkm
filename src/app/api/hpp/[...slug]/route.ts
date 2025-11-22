@@ -2,30 +2,26 @@
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
-import { z } from 'zod'
+
 
 import { createSuccessResponse } from '@/lib/api-core/responses'
 import { createApiRoute } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { cacheInvalidation } from '@/lib/cache'
 import { apiLogger } from '@/lib/logger'
 import { HppService } from '@/services/hpp/HppService'
 
-const CalculateHppSchema = z.object({
-  recipeId: z.string().min(1, 'Recipe ID is required')
-})
 
-const GeneratePricingRecommendationSchema = z.object({
-  recipeId: z.string().uuid('Recipe ID harus valid'),
-}).strict()
 
 // POST /api/hpp/calculate - Calculate HPP for a recipe
 export const POST = createApiRoute(
   {
     method: 'POST',
-    path: '/api/hpp/calculate',
-    bodySchema: CalculateHppSchema
+    path: '/api/hpp',
+    securityPreset: SecurityPresets.basic(),
   },
-  async (context, _query, body) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async (context, _query, body: any) => {
     const { user } = context
 
     if (!body) {
@@ -58,7 +54,8 @@ export const POST = createApiRoute(
 export const PUT = createApiRoute(
   {
     method: 'PUT',
-    path: '/api/hpp/calculate'
+    path: '/api/hpp',
+    securityPreset: SecurityPresets.basic(),
   },
   async (context) => {
     const { user } = context
@@ -90,7 +87,8 @@ export const PUT = createApiRoute(
 const getCalculationsRoute = createApiRoute(
   {
     method: 'GET',
-    path: '/api/hpp/calculations'
+    path: '/api/hpp/calculations',
+    securityPreset: SecurityPresets.basic(),
   },
   async (context) => {
     const { user, request } = context
@@ -124,14 +122,32 @@ const getCalculationsRoute = createApiRoute(
 export const GET = createApiRoute(
   {
     method: 'GET',
-    path: '/api/hpp'
+    path: '/api/hpp',
+    securityPreset: SecurityPresets.basic(),
   },
   async (context) => {
     const { params } = context
     const slug = params?.['slug']
 
     if (!slug || slug.length === 0) {
-      // GET /api/hpp - Get overview
+      // GET /api/hpp - Get overview (redirect to overview for backward compatibility)
+      try {
+        const hppService = new HppService(context.supabase)
+        const result = await hppService.getOverview(context.user.id)
+
+        apiLogger.info({
+          userId: context.user.id,
+          totalRecipes: result.totalRecipes,
+          calculatedRecipes: result.calculatedRecipes,
+          alertCount: result.alerts.length
+        }, 'HPP overview retrieved')
+
+        return createSuccessResponse(result)
+      } catch (error) {
+        return handleAPIError(error, 'GET /api/hpp/overview')
+      }
+    } else if (slug.length === 1 && slug[0] === 'overview') {
+      // GET /api/hpp/overview - Get overview
       try {
         const hppService = new HppService(context.supabase)
         const result = await hppService.getOverview(context.user.id)
@@ -291,11 +307,12 @@ export const GET = createApiRoute(
 // POST /api/hpp/pricing - Generate pricing recommendation
 const pricingRoute = createApiRoute(
   {
-    method: 'POST',
+    method: 'GET',
     path: '/api/hpp/pricing',
-    bodySchema: GeneratePricingRecommendationSchema
+    securityPreset: SecurityPresets.basic(),
   },
-  async (context, _query, body) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async (context, _query, body: any) => {
     const { user } = context
 
     if (!body) {

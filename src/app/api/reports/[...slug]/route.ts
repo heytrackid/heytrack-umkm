@@ -4,6 +4,7 @@ export const runtime = 'nodejs'
 
 import { createSuccessResponse } from '@/lib/api-core/responses'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { apiLogger } from '@/lib/logger'
 import { ReportService } from '@/services/reports/ReportService'
 import type { NextResponse } from 'next/server'
@@ -15,6 +16,7 @@ export const GET = createApiRoute(
   {
     method: 'GET',
     path: '/api/reports',
+    securityPreset: SecurityPresets.basic(),
   },
   async (context) => {
     const { params, request } = context

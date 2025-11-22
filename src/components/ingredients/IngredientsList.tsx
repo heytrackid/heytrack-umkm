@@ -33,10 +33,11 @@ import {
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { useSettings } from '@/contexts/settings-context'
 import { useIngredients, useDeleteIngredient } from '@/hooks/useIngredients'
+import { ServerPagination } from '@/components/ui/server-pagination'
 import { useResponsive } from '@/hooks/useResponsive'
 import { handleError } from '@/lib/error-handling'
 import { toast } from 'sonner'
-import { usePagination } from '@/hooks/usePagination'
+
 import type { Row } from '@/types/database'
 
 import { IngredientFormDialog } from '@/components/ingredients/IngredientFormDialog'
@@ -56,7 +57,6 @@ interface IngredientsListProps {
 const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
     const router = useRouter()
     const { formatCurrency } = useSettings()
-    const { data: ingredients, isLoading } = useIngredients()
     const deleteIngredient = useDeleteIngredient()
 
     const { isMobile } = useResponsive()
@@ -67,12 +67,24 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
     const [showFormDialog, setShowFormDialog] = useState(false)
     const [editingIngredient, setEditingIngredient] = useState<Ingredient | undefined>(undefined)
 
-    // Filter states
+    // Filter and pagination states
     const [searchTerm, setSearchTerm] = useState('')
     const [stockFilter, setStockFilter] = useState<StockFilter>('all')
     const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
     const [supplierFilter, setSupplierFilter] = useState('all')
-    const [pageSize, setPageSize] = useState(12)
+    const [page, setPage] = useState(1)
+    const [limit, setLimit] = useState(12)
+
+    // Fetch ingredients with pagination
+    const { data: ingredientsResponse, isLoading } = useIngredients({
+      page,
+      limit,
+      search: searchTerm.trim() || undefined
+    })
+
+    // Extract data and pagination from response
+    const ingredients = useMemo(() => ingredientsResponse?.data || [], [ingredientsResponse?.data])
+    const pagination = ingredientsResponse?.pagination
 
     // Get unique suppliers
     const suppliers = useMemo(() => {
@@ -114,20 +126,15 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
         }).sort((a: Ingredient, b: Ingredient) => a.name.localeCompare(b.name))
     }, [ingredients, searchTerm, stockFilter, categoryFilter, supplierFilter])
 
-    // Pagination
-    const pagination = usePagination({
-        initialPageSize: pageSize,
-        totalItems: filteredData.length,
-    })
+    // Handle pagination changes
+    const handlePageChange = useCallback((newPage: number) => {
+        setPage(newPage)
+    }, [])
 
-    // Get paginated data
-    const paginatedData = useMemo(() => filteredData.slice(pagination.startIndex, pagination.endIndex), [filteredData, pagination.startIndex, pagination.endIndex])
-
-    // Update page size
-    const handlePageSizeChange = useCallback((newSize: number) => {
-        setPageSize(newSize)
-        pagination.setPageSize(newSize)
-    }, [pagination])
+    const handlePageSizeChange = useCallback((newLimit: number) => {
+        setLimit(newLimit)
+        setPage(1) // Reset to first page when changing page size
+    }, [])
 
     // Create filter badges
     const activeFilters = createFilterBadges(
@@ -341,7 +348,7 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
             {/* Data Display */}
             {isMobile ? (
                 <MobileIngredientList
-                    ingredients={paginatedData}
+                    ingredients={ingredients}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onQuickBuy={handleQuickBuy}
@@ -362,7 +369,7 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {paginatedData.map((item: Ingredient) => {
+                                    {ingredients.map((item: Ingredient) => {
                                         const currentStock = item.current_stock ?? 0
                                         const minStock = item.min_stock ?? 0
                                         const resolvedUnitPrice = item.price_per_unit ?? item.weighted_average_cost
@@ -505,6 +512,16 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                     onPageSizeChange={handlePageSizeChange}
                     canNextPage={pagination.canNextPage}
                     canPrevPage={pagination.canPrevPage}
+                    pageSizeOptions={[12, 24, 48, 96]}
+                />
+            )}
+
+            {/* Pagination */}
+            {pagination && ingredients.length > 0 && (
+                <ServerPagination
+                    pagination={pagination}
+                    onPageChange={handlePageChange}
+                    onPageSizeChange={handlePageSizeChange}
                     pageSizeOptions={[12, 24, 48, 96]}
                 />
             )}

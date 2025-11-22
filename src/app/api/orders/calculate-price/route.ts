@@ -1,16 +1,12 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
-import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
-
-import { NextResponse, type NextRequest } from 'next/server'
 
 import { z } from 'zod'
 
-import { apiLogger, logError } from '@/lib/logger'
-import { requireAuth, isErrorResponse } from '@/lib/api-auth'
-import { APISecurity, InputSanitizer, createSecureHandler, SecurityPresets } from '@/utils/security/index'
+import { apiLogger } from '@/lib/logger'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { createSuccessResponse } from '@/lib/api-core/responses'
-
 
 const OrderItemSchema = z.object({
   unit_price: z.number().finite().min(0, { message: 'unit_price must be >= 0' }),
@@ -25,29 +21,22 @@ const CalculatePriceSchema = z.object({
   use_loyalty_points: z.number().int().min(0).optional()
 }).strict()
 
-// POST /api/orders/calculate-price - Calculate order price with discounts
-async function calculatePricePOST(request: NextRequest): Promise<NextResponse> {
-  try {
-    apiLogger.info({ url: request.url }, 'POST /api/orders/calculate-price')
-
-    // Authenticate with Stack Auth
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
-
-    const sanitizedBody = APISecurity.sanitizeRequestBody(await request.json())
-    const parsedBody = CalculatePriceSchema.parse(sanitizedBody)
+export const POST = createApiRoute(
+  {
+    method: 'POST',
+    path: '/api/orders/calculate-price',
+    bodySchema: CalculatePriceSchema,
+    securityPreset: SecurityPresets.enhanced(),
+  },
+  async (context: RouteContext, _query, body) => {
+    const { user } = context
     const {
       customer_id,
       items,
       delivery_fee,
       tax_rate,
       use_loyalty_points,
-    } = parsedBody
-
-    const safeCustomerId = customer_id ? InputSanitizer.sanitizeSQLInput(customer_id) : undefined
+    } = body!
 
     // Calculate subtotal
     const subtotal = items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0)
@@ -70,23 +59,18 @@ async function calculatePricePOST(request: NextRequest): Promise<NextResponse> {
       total_amount,
       loyalty_points_earned: Math.floor(total_amount / 10), // Simple calculation
       loyalty_points_used: use_loyalty_points ?? 0,
-      customer_info: safeCustomerId
-        ? { id: safeCustomerId, name: '', discount_percentage: 0, loyalty_points: 0 }
+      customer_info: customer_id
+        ? { id: customer_id, name: '', discount_percentage: 0, loyalty_points: 0 }
         : undefined
     }
 
     apiLogger.info({
-      userId: user['id'],
-      customerId: safeCustomerId,
+      userId: user.id,
+      customerId: customer_id,
       subtotal: pricing.subtotal,
       total: pricing.total_amount
     }, 'Order price calculated')
 
     return createSuccessResponse(pricing)
-  } catch (error) {
-    logError(apiLogger, error, 'Failed to calculate order price')
-    return handleAPIError(error, 'POST /api/orders/calculate-price')
   }
-}
-
-export const POST = createSecureHandler(calculatePricePOST, 'POST /api/orders/calculate-price', SecurityPresets.enhanced())
+)

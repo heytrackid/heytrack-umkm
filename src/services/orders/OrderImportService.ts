@@ -179,7 +179,7 @@ export class OrderImportService {
           ...orderData.order,
           customer_id: customerId ?? null
         } as never)
-        .select('*')
+        .select('id, created_at, created_by, customer_address, customer_id, customer_name, customer_phone, delivery_date, delivery_fee, delivery_time, discount, estimated_production_time, financial_record_id, notes, order_date, order_no, paid_amount, payment_method, payment_status, priority, production_batch_id, production_priority, special_instructions, status, tax_amount, total_amount, updated_at, updated_by, user_id')
         .single()
 
       if (orderError) {

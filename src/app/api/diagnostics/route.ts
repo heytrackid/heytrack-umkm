@@ -5,6 +5,8 @@ export const runtime = 'nodejs'
 
 import { createSuccessResponse } from '@/lib/api-core/responses'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
+import { createClient } from '@supabase/supabase-js'
 
 interface EnvVarDiagnostics {
   exists: boolean
@@ -68,7 +70,6 @@ async function checkSupabaseConnectivity(): Promise<DiagnosticsPayload['supabase
   }
 
   try {
-    const { createClient } = await import('@supabase/supabase-js')
     const options: {
       auth: { persistSession: boolean }
       global?: { headers: { Authorization: string } }
@@ -123,6 +124,10 @@ async function getDiagnosticsHandler(context: RouteContext) {
 }
 
 export const GET = createApiRoute(
-  { method: 'GET', path: '/api/diagnostics' },
+  {
+    method: 'GET',
+    path: '/api/diagnostics',
+    securityPreset: SecurityPresets.enhanced(),
+  },
   getDiagnosticsHandler
 )

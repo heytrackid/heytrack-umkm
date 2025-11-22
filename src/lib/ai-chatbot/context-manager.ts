@@ -1,4 +1,5 @@
 import { createClientLogger } from '@/lib/client-logger'
+import { createClient } from '@/utils/supabase/client'
 
 const logger = createClientLogger('ClientFile')
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
@@ -37,7 +38,6 @@ export class ContextManager {
         try {
           // Note: This needs supabase client - should be passed from caller
           // For now, assuming it's called from client with browser client
-          const { createClient } = await import('@/utils/supabase/client')
           const supabase = createClient()
           const messages = await ChatSessionService.getMessages(
             supabase as unknown as SupabaseClient<Database>,

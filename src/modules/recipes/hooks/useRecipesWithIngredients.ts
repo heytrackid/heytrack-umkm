@@ -2,6 +2,7 @@
 
 import type { Row } from '@/types/database'
 import { createClientLogger } from '@/lib/client-logger'
+import { fetchApi } from '@/lib/query/query-helpers'
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query'
 
 const logger = createClientLogger('useRecipesWithIngredients')
@@ -22,15 +23,8 @@ interface UseRecipesWithIngredientsOptions {
 export function useRecipesWithIngredients(options: UseRecipesWithIngredientsOptions = {}) {
   const queryOptions: UseQueryOptions<RecipeWithIngredients[]> = {
     queryKey: ['recipes-with-ingredients'],
-    queryFn: async () => {
-      const response = await fetch('/api/recipes?include=ingredients')
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to fetch recipes with ingredients')
-      }
-
-      const data = await response.json()
+    queryFn: async (): Promise<RecipeWithIngredients[]> => {
+      const data = await fetchApi('/api/recipes?include=ingredients') as RecipeWithIngredients[]
       logger.info('Recipes with ingredients fetched')
       return data
     },

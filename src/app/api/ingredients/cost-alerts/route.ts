@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 
 // Internal modules
 import { createApiRoute } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 
 // Types and schemas
@@ -37,7 +38,7 @@ export const GET = createApiRoute(
   {
     method: 'GET',
     path: '/api/ingredients/cost-alerts',
-    requireAuth: true,
+    securityPreset: SecurityPresets.enhanced(),
   },
   async ({ supabase }) => {
     try {

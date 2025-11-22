@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
 
 import { SUGGESTIONS, type Message } from '@/app/ai-chatbot/types/index'
 import { createLogger } from '@/lib/logger'
+import { fetchApi } from '@/lib/query/query-helpers'
 import type { SessionListItem } from '@/types/features/chat'
 interface BusinessStats { totalOrders: number; pendingOrders: number; totalRevenue: number; criticalItems: number }
 
@@ -24,19 +25,14 @@ export function useChatMessages(): UseChatMessagesResult {
 
   const fetchBusinessStats = useCallback(async (): Promise<BusinessStats> => {
     try {
-      const response = await fetch('/api/dashboard/stats')
-      if (!response.ok) {
-        return { totalOrders: 0, pendingOrders: 0, totalRevenue: 0, criticalItems: 0 }
-      }
-
-      const data = await response.json() as {
+      const data = await fetchApi<{
         stats?: {
           total_orders?: number
           pending_orders?: number
           total_revenue?: number
           critical_items?: number
         }
-      }
+      }>('/api/dashboard/stats')
 
       const stats = data.stats || {}
       return {
@@ -54,13 +50,7 @@ export function useChatMessages(): UseChatMessagesResult {
   const initializeSession = useCallback(async (): Promise<void> => {
     try {
       // Fetch sessions from API
-      const response = await fetch('/api/ai/sessions?limit=1')
-      if (!response.ok) {
-        logger.error({ status: response.status }, 'Failed to fetch sessions')
-        return
-      }
-
-      const data = await response.json() as { data?: SessionListItem[] }
+      const data = await fetchApi<{ data?: SessionListItem[] }>('/api/ai/sessions?limit=1')
       const sessions = data.data || []
 
       if (sessions.length > 0 && sessions[0]) {

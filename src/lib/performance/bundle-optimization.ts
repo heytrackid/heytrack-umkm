@@ -1,29 +1,26 @@
 import { performanceLogger } from '@/lib/client-logger'
 
+// Static imports for libraries (converted from dynamic imports)
+import * as ExcelJS from 'exceljs'
+import { saveAs } from 'file-saver'
 
 /**
  * Bundle Optimization Utilities
- * 
- * Tips untuk mengurangi bundle size:
- * 1. Use dynamic imports untuk heavy components
- * 2. Tree-shake unused code
- * 3. Use lighter alternatives
- * 4. Defer non-critical code
+ *
+ * Note: All imports are now static for full static import requirement
  */
-
 
 /**
- * Dynamically import heavy libraries only when needed
+ * Static library exports (converted from dynamic imports)
  */
 export const lazyImports = {
-  // Excel export - Load only when exporting
-  exceljs: (): Promise<unknown> => import('exceljs'),
+  // Excel export - Now static import
+  exceljs: (): Promise<unknown> => Promise.resolve(ExcelJS),
 
-  // File saver - Load only when downloading
-  fileSaver: (): Promise<unknown> => import('file-saver'),
+  // File saver - Now static import
+  fileSaver: (): Promise<unknown> => Promise.resolve({ saveAs }),
 
-  // Date picker - Load only when date input is shown
-  datePicker: (): Promise<unknown> => import('react-day-picker'),
+
 
   // Rich text editor - Load only when editing
   // editor: () => import('@tiptap/react'),

@@ -1,8 +1,6 @@
 'use client'
 
 import { ArrowLeft, User, CreditCard, Truck, Package, AlertCircle } from '@/components/icons'
-import dynamic from 'next/dynamic'
-import { Suspense } from 'react'
 
 import { useOrderLogic } from '@/app/orders/new/hooks/useOrderLogic'
 import { AppLayout } from '@/components/layout/app-layout'
@@ -14,146 +12,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { OrderFormSkeleton } from '@/components/ui/skeletons/form-skeletons'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-
-
-// Lazy load wizard step components
-const OrderCustomerStep = dynamic(
-  () => import('./_components/OrderCustomerStep')
-    .then(m => ({ default: m.OrderCustomerStep }))
-    .catch(() => {
-      return { default: () => <div className="p-4 text-center text-red-600">Failed to load customer step</div> }
-    }),
-  {
-    loading: () => (
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {Array.from({ length: 4 }, (_, i) => (
-            <div key={i} className="h-10 bg-muted animate-pulse rounded" />
-          ))}
-        </div>
-        <div className="h-32 bg-muted animate-pulse rounded" />
-      </div>
-    )
-  }
-)
-
-const OrderItemsStep = dynamic(
-  () => import('./_components/OrderItemsStep')
-    .then(m => ({ default: m.OrderItemsStep }))
-    .catch(() => {
-      return { default: () => <div className="p-4 text-center text-red-600">Failed to load items step</div> }
-    }),
-  {
-    loading: () => (
-      <div className="space-y-4">
-        <div className="h-12 bg-muted animate-pulse rounded" />
-        <div className="space-y-3">
-          {Array.from({ length: 3 }, (_, i) => (
-            <div key={i} className="h-16 bg-muted animate-pulse rounded" />
-          ))}
-        </div>
-      </div>
-    )
-  }
-)
-
-const OrderDeliveryStep = dynamic(
-  () => import('./_components/OrderDeliveryStep')
-    .then(m => ({ default: m.OrderDeliveryStep }))
-    .catch(() => {
-      return { default: () => <div className="p-4 text-center text-red-600">Failed to load delivery step</div> }
-    }),
-  {
-    loading: () => (
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {Array.from({ length: 4 }, (_, i) => (
-            <div key={i} className="h-10 bg-muted animate-pulse rounded" />
-          ))}
-        </div>
-      </div>
-    )
-  }
-)
-
-const OrderPaymentStep = dynamic(
-  () => import('./_components/OrderPaymentStep')
-    .then(m => ({ default: m.OrderPaymentStep }))
-    .catch(() => {
-      return { default: () => <div className="p-4 text-center text-red-600">Failed to load payment step</div> }
-    }),
-  {
-    loading: () => (
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {Array.from({ length: 4 }, (_, i) => (
-            <div key={i} className="h-10 bg-muted animate-pulse rounded" />
-          ))}
-        </div>
-      </div>
-    )
-  }
-)
-
-const OrderSummary = dynamic(
-  () => import('./_components/OrderSummary')
-    .then(m => ({ default: m.OrderSummary }))
-    .catch(() => {
-      return { default: () => <div className="p-4 text-center text-red-600">Failed to load order summary</div> }
-    }),
-  {
-    loading: () => (
-      <div className="space-y-4">
-        <div className="h-32 bg-muted animate-pulse rounded" />
-        <div className="flex gap-2">
-          <div className="h-10 bg-muted animate-pulse rounded flex-1" />
-          <div className="h-10 bg-muted animate-pulse rounded w-20" />
-        </div>
-    </div>
-  )
-})
-
-const CustomerStepSkeleton = () => (
-  <div className="space-y-4">
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="h-10 bg-muted animate-pulse rounded" />
-      ))}
-    </div>
-    <div className="h-32 bg-muted animate-pulse rounded" />
-  </div>
-)
-
-const ItemsStepSkeleton = () => (
-  <div className="space-y-4">
-    <div className="h-12 bg-muted animate-pulse rounded" />
-    <div className="space-y-3">
-      {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className="h-16 bg-muted animate-pulse rounded" />
-      ))}
-    </div>
-  </div>
-)
-
-const DeliveryStepSkeleton = () => (
-  <div className="space-y-4">
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="h-10 bg-muted animate-pulse rounded" />
-      ))}
-    </div>
-  </div>
-)
-
-const PaymentStepSkeleton = () => (
-  <div className="space-y-4">
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="h-10 bg-muted animate-pulse rounded" />
-      ))}
-    </div>
-  </div>
-) 
+import { OrderCustomerStep } from './_components/OrderCustomerStep'
+import { OrderItemsStep } from './_components/OrderItemsStep'
+import { OrderDeliveryStep } from './_components/OrderDeliveryStep'
+import { OrderPaymentStep } from './_components/OrderPaymentStep'
+import { OrderSummary } from './_components/OrderSummary'
 
 const NewOrderPage = () => {
   const {
@@ -281,46 +144,38 @@ const NewOrderPage = () => {
                   )}
 
                     <SwipeableTabsContent value="customer" className="mt-6">
-                      <Suspense fallback={<CustomerStepSkeleton />}>
-                       <OrderCustomerStep
-                         formData={formData}
-                         customers={customers}
-                         onInputChange={handleInputChange}
-                         onSelectCustomer={selectCustomer}
-                       />
-                     </Suspense>
+                      <OrderCustomerStep
+                        formData={formData}
+                        customers={customers}
+                        onInputChange={handleInputChange}
+                        onSelectCustomer={selectCustomer}
+                      />
                    </SwipeableTabsContent>
 
                     <SwipeableTabsContent value="items" className="mt-6">
-                      <Suspense fallback={<ItemsStepSkeleton />}>
-                       <OrderItemsStep
-                         orderItems={orderItems}
-                         availableRecipes={availableRecipes}
-                         subtotal={subtotal}
-                         onAddItem={addOrderItem}
-                         onUpdateItem={updateOrderItem}
-                         onRemoveItem={removeOrderItem}
-                         onReorderItems={reorderOrderItems}
-                       />
-                     </Suspense>
+                      <OrderItemsStep
+                        orderItems={orderItems}
+                        availableRecipes={availableRecipes}
+                        subtotal={subtotal}
+                        onAddItem={addOrderItem}
+                        onUpdateItem={updateOrderItem}
+                        onRemoveItem={removeOrderItem}
+                        onReorderItems={reorderOrderItems}
+                      />
                    </SwipeableTabsContent>
 
                     <SwipeableTabsContent value="delivery" className="mt-6">
-                       <Suspense fallback={<DeliveryStepSkeleton />}>
-                       <OrderDeliveryStep
-                         formData={formData}
-                         onInputChange={handleInputChange}
-                       />
-                     </Suspense>
+                      <OrderDeliveryStep
+                        formData={formData}
+                        onInputChange={handleInputChange}
+                      />
                    </SwipeableTabsContent>
 
                      <SwipeableTabsContent value="payment" className="mt-6">
-                       <Suspense fallback={<PaymentStepSkeleton />}>
-                       <OrderPaymentStep
-                         formData={formData}
-                         onInputChange={handleInputChange}
-                       />
-                     </Suspense>
+                      <OrderPaymentStep
+                        formData={formData}
+                        onInputChange={handleInputChange}
+                      />
                    </SwipeableTabsContent>
                 </SwipeableTabs>
               </CardContent>
@@ -329,26 +184,16 @@ const NewOrderPage = () => {
             {/* Order Summary */}
             <Card>
               <CardContent className="p-6">
-                <Suspense fallback={
-                  <div className="space-y-4">
-                    <div className="h-32 bg-muted animate-pulse rounded" />
-                    <div className="flex gap-2">
-                      <div className="h-10 bg-muted animate-pulse rounded flex-1" />
-                      <div className="h-10 bg-muted animate-pulse rounded w-20" />
-                    </div>
-                  </div>
-                }>
-                  <OrderSummary
-                    formData={formData}
-                    orderItems={orderItems}
-                    subtotal={subtotal}
-                    taxAmount={taxAmount}
-                    totalAmount={totalAmount}
-                    isSubmitting={isSubmitting}
-                    onSubmit={handleSubmit}
-                    onCancel={() => router.back()}
-                  />
-                </Suspense>
+                <OrderSummary
+                  formData={formData}
+                  orderItems={orderItems}
+                  subtotal={subtotal}
+                  taxAmount={taxAmount}
+                  totalAmount={totalAmount}
+                  isSubmitting={isSubmitting}
+                  onSubmit={handleSubmit}
+                  onCancel={() => router.back()}
+                />
               </CardContent>
             </Card>
           </div>

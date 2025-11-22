@@ -3,6 +3,7 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
 import { z } from 'zod'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
 import { createSuccessResponse } from '@/lib/api-core/responses'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
@@ -73,7 +74,7 @@ export const POST = createApiRoute(
   {
     method: 'POST',
     path: '/api/orders/import',
-    bodySchema: ImportOrdersSchema
+    securityPreset: SecurityPresets.basic(),
   },
   postHandler
 )

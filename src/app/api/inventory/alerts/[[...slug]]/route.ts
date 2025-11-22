@@ -3,6 +3,7 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
 import { createSuccessResponse } from '@/lib/api-core/responses'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { createApiRoute } from '@/lib/api/route-factory'
 import { apiLogger } from '@/lib/logger'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
@@ -12,6 +13,7 @@ export const GET = createApiRoute(
   {
     method: 'GET',
     path: '/api/inventory/alerts',
+    securityPreset: SecurityPresets.basic(),
   },
   async (context) => {
     const slug = context.params?.['slug'] as string[] | undefined
@@ -41,6 +43,7 @@ export const POST = createApiRoute(
   {
     method: 'POST',
     path: '/api/inventory/alerts',
+    securityPreset: SecurityPresets.basic(),
   },
   async (context) => {
     const slug = context.params?.['slug'] as string[] | undefined
@@ -68,6 +71,7 @@ export const PUT = createApiRoute(
   {
     method: 'PUT',
     path: '/api/inventory/alerts/[id]',
+    securityPreset: SecurityPresets.basic(),
   },
   async (context) => {
     const slug = context.params?.['slug'] as string[] | undefined

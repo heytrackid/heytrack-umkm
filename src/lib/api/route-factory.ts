@@ -9,7 +9,7 @@ import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase'
 
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
-import { SecurityPresets } from '@/utils/security/index'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
 export interface RouteContext {
   user: { id: string; email: string | null }

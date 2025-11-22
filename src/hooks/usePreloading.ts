@@ -3,8 +3,6 @@
 import { useRouter } from 'next/navigation'
 import { useCallback } from 'react'
 
-import { preloadModalComponent } from '@/components/lazy/index'
-
 /**
  * Consolidated Preloading Hooks
  * All preloading utilities in one place for single source of truth
@@ -57,10 +55,8 @@ export function useSimplePreload() {
  * Provides functions to preload modals and charts on button interactions
  */
 export const useAdvancedButtonPreloading = () => {
-  const preloadModalOnHover = useCallback((modalType: string) => {
-    if (modalType.includes('form') || modalType.includes('detail')) {
-      preloadModalComponent(modalType as Parameters<typeof preloadModalComponent>[0]).catch(() => {})
-    }
+  const preloadModalOnHover = useCallback(() => {
+    // Components are now statically imported, preloading not needed
   }, [])
 
   const preloadChartOnHover = useCallback(() => {

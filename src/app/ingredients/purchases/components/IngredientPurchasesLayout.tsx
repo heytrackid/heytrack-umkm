@@ -7,7 +7,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { BreadcrumbPatterns, PageBreadcrumb } from '@/components/ui/index'
 import { useAuth } from '@/hooks/index'
 import { useCreateIngredientPurchase, useIngredientPurchases } from '@/hooks/useIngredientPurchases'
-import { useIngredients } from '@/hooks/useIngredients'
+import { useIngredientsList } from '@/hooks/useIngredients'
 import { handleError } from '@/lib/error-handling'
 
 import type { Insert } from '@/types/database'
@@ -20,7 +20,7 @@ import { PurchaseStats } from '@/app/ingredients/purchases/components/PurchaseSt
 
 const IngredientPurchasesLayout = (): JSX.Element => {
   const { data: purchases = [], isLoading: _purchasesLoading, error: purchasesError } = useIngredientPurchases()
-  const { data: ingredients = [], isLoading: _ingredientsLoading } = useIngredients()
+  const { data: ingredients = [], isLoading: _ingredientsLoading } = useIngredientsList()
   const createPurchase = useCreateIngredientPurchase()
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
 

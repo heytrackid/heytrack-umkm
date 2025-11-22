@@ -145,7 +145,7 @@ export const SmartButton = ({
 
   const handleMouseEnter = () => {
     if (preloadOnHover && modalType) {
-      preloadModalOnHover(modalType)
+      preloadModalOnHover()
     }
   }
 

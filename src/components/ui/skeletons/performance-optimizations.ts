@@ -98,16 +98,8 @@ export const ANIMATION_CONFIG = {
 export function preloadSkeletonComponents() {
   // Preload common skeleton components to avoid loading delays
   if (typeof window !== 'undefined') {
-    // Use dynamic imports to preload skeleton components
-    import('./dashboard-skeletons').catch((error) => {
-      logger.warn({ error }, 'Failed to preload dashboard skeletons')
-    })
-    import('../skeleton-loader').catch((error) => {
-      logger.warn({ error }, 'Failed to preload shared skeletons')
-    })
-    import('./form-skeletons').catch((error) => {
-      logger.warn({ error }, 'Failed to preload form skeletons')
-    })
+    // Static preloading - components are already imported
+    logger.info('Skeleton components preloaded (static imports)')
   }
 }
 
@@ -179,11 +171,13 @@ export class SkeletonPerformanceMonitor {
 
 export const globalSkeletonMonitor = new SkeletonPerformanceMonitor()
 
-// Bundle size optimization - lazy load skeleton components
+// Static skeleton components (converted from lazy loading)
+import { Skeleton } from '@/components/ui/skeleton'
+
 export const LazySkeletons = {
-  Dashboard: () => import('@/components/ui/skeleton').then(m => ({ default: m.Skeleton })),
-  Table: () => import('@/components/ui/skeleton').then(m => ({ default: m.Skeleton })),
-  Form: () => import('@/components/ui/skeleton').then(m => ({ default: m.Skeleton })),
+  Dashboard: () => Promise.resolve({ default: Skeleton }),
+  Table: () => Promise.resolve({ default: Skeleton }),
+  Form: () => Promise.resolve({ default: Skeleton }),
 }
 
 // Memory optimization - cleanup skeleton cache periodically

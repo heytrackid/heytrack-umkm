@@ -1,34 +1,33 @@
 export const runtime = 'nodejs'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
 
-import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { isLowStock, validateStockAvailability } from '@/lib/business-rules/inventory'
-import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
-import { createServiceRoleClient } from '@/utils/supabase/service-role'
-import { NextRequest, NextResponse } from 'next/server'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
+import { NextResponse } from 'next/server'
+import { z } from 'zod'
 
-async function postHandler(request: NextRequest): Promise<NextResponse> {
-  try {
-    const authResult = await requireAuth()
-    if (isErrorResponse(authResult)) {
-      return authResult
-    }
-    const user = authResult
+const ValidateStockItemSchema = z.object({
+  ingredientId: z.string().uuid(),
+  requiredQuantity: z.number().min(0),
+})
 
-    const body = await request.json()
-    const { items } = body // Array of { ingredientId, requiredQuantity }
+const ValidateStockSchema = z.object({
+  items: z.array(ValidateStockItemSchema).min(1, 'At least one item is required'),
+})
 
-    if (!Array.isArray(items) || items.length === 0) {
-      return NextResponse.json(
-        { error: 'Items array is required' },
-        { status: 400 }
-      )
-    }
-
-    const supabase = createServiceRoleClient()
+export const POST = createApiRoute(
+  {
+    method: 'POST',
+    path: '/api/ingredients/validate-stock',
+    bodySchema: ValidateStockSchema,
+    securityPreset: SecurityPresets.enhanced(),
+  },
+  async (context: RouteContext, _query, body) => {
+    const { user, supabase } = context
+    const { items } = body!
 
     // Get all ingredients
-    const ingredientIds = items.map((item: { ingredientId: string }) => item.ingredientId)
+    const ingredientIds = items.map((item) => item.ingredientId)
     const { data: ingredients, error: ingredientsError } = await supabase
       .from('ingredients')
       .select('id, name, current_stock, reorder_point, unit')
@@ -43,7 +42,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     )
 
     // Validate each item
-    const validationResults = items.map((item: { ingredientId: string; requiredQuantity: number }) => {
+    const validationResults = items.map((item) => {
       const ingredient = ingredientMap.get(item.ingredientId)
 
       if (!ingredient) {
@@ -87,9 +86,5 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
         lowStockItems,
       },
     })
-  } catch (error) {
-    return handleAPIError(error, 'POST /api/ingredients/validate-stock')
   }
-}
-
-export const POST = createSecureHandler(postHandler, 'POST /api/ingredients/validate-stock', SecurityPresets.enhanced())
+)

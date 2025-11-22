@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { EmailSchema, PhoneSchema, NonNegativeNumberSchema } from '@/lib/validations/base-validations'
+import { EmailSchema, PhoneSchema } from '@/lib/validations/base-validations'
 
 
 /**
@@ -17,11 +17,8 @@ export const SupplierInsertSchema = z.object({
   phone: PhoneSchema.optional().nullable(),
   address: z.string().max(500, 'Alamat maksimal 500 karakter').optional().nullable(),
   supplier_type: z.enum(['preferred', 'standard', 'trial', 'blacklisted']).default('standard').optional().nullable(),
-  company_type: z.string().max(100, 'Tipe perusahaan maksimal 100 karakter').optional().nullable(),
   payment_terms: z.string().max(100, 'Syarat pembayaran maksimal 100 karakter').optional().nullable(),
-  credit_limit: NonNegativeNumberSchema.optional().nullable(),
   lead_time_days: z.number().int().positive('Lead time harus positif').optional().nullable(),
-  quality_rating: z.number().min(1, 'Rating minimal 1').max(5, 'Rating maksimal 5').optional().nullable(),
   is_active: z.boolean().default(true).optional().nullable(),
   notes: z.string().max(1000, 'Catatan maksimal 1000 karakter').optional().nullable(),
   bank_details: z.object({
@@ -49,21 +46,13 @@ export type SupplierBasicForm = z.infer<typeof SupplierBasicFormSchema>
 // Supplier API schemas
 export const SupplierQuerySchema = z.object({
   search: z.string().optional(),
-  company_type: z.string().optional(),
   is_active: z.boolean().optional(),
-  quality_rating_min: z.number().min(1).max(5).optional(),
   lead_time_max: z.number().int().positive().optional(),
-})
-
-export const SupplierRatingUpdateSchema = z.object({
-  quality_rating: z.number().min(1).max(5),
-  rating_notes: z.string().max(500).optional(),
 })
 
 export type SupplierInsert = z.infer<typeof SupplierInsertSchema>
 export type SupplierUpdate = z.infer<typeof SupplierUpdateSchema>
 export type SupplierQuery = z.infer<typeof SupplierQuerySchema>
-export type SupplierRatingUpdate = z.infer<typeof SupplierRatingUpdateSchema>
 
 /**
  * Calculate supplier performance score

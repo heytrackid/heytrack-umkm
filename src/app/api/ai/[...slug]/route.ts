@@ -2,6 +2,7 @@
 export const runtime = 'nodejs'
 
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { AiService } from '@/services/ai/AiService'
 import type { ChatRequest, RecipeGenerationRequest } from '@/services/ai/AiService'
 import { createSuccessResponse } from '@/lib/api-core/responses'
@@ -13,6 +14,7 @@ export const GET = createApiRoute(
   {
     method: 'GET',
     path: '/api/ai',
+    securityPreset: SecurityPresets.enhanced(),
   },
   async (context) => {
     const { params } = context
@@ -40,6 +42,7 @@ export const POST = createApiRoute(
   {
     method: 'POST',
     path: '/api/ai',
+    securityPreset: SecurityPresets.enhanced(),
   },
   async (context) => {
     const { params } = context
@@ -67,6 +70,7 @@ export const DELETE = createApiRoute(
   {
     method: 'DELETE',
     path: '/api/ai',
+    securityPreset: SecurityPresets.enhanced(),
   },
   async (context) => {
     const { params } = context

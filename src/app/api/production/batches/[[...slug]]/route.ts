@@ -3,17 +3,18 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
 import { createSuccessResponse } from '@/lib/api-core/responses'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { createApiRoute } from '@/lib/api/route-factory'
-import { ProductionBatchCreateSchema, ProductionBatchUpdateSchema } from '@/lib/validations/domains/production'
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
+import { NextResponse } from 'next/server'
 import { ProductionService, type ProductionBatchCreateData, type ProductionBatchUpdateData } from '@/services/production/ProductionService'
-import type { NextResponse } from 'next/server'
 
 // GET /api/production/batches or /api/production/batches/[id]
 export const GET = createApiRoute(
   {
     method: 'GET',
     path: '/api/production/batches',
+    securityPreset: SecurityPresets.basic(),
   },
   async (context): Promise<NextResponse> => {
     const { params } = context
@@ -59,7 +60,7 @@ export const POST = createApiRoute(
   {
     method: 'POST',
     path: '/api/production/batches',
-    bodySchema: ProductionBatchCreateSchema,
+    securityPreset: SecurityPresets.basic(),
   },
   async (context, _query, body): Promise<NextResponse> => {
     const slug = context.params?.['slug'] as string[] | undefined
@@ -92,7 +93,7 @@ export const PUT = createApiRoute(
   {
     method: 'PUT',
     path: '/api/production/batches/[id]',
-    bodySchema: ProductionBatchUpdateSchema,
+    securityPreset: SecurityPresets.basic(),
   },
   async (context, _query, body): Promise<NextResponse> => {
     const slug = context.params?.['slug'] as string[] | undefined
@@ -126,6 +127,7 @@ export const DELETE = createApiRoute(
   {
     method: 'DELETE',
     path: '/api/production/batches/[id]',
+    securityPreset: SecurityPresets.basic(),
   },
   async (context): Promise<NextResponse> => {
     const slug = context.params?.['slug'] as string[] | undefined

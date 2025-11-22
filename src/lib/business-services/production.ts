@@ -3,6 +3,7 @@ import { productionLogger } from '@/lib/logger'
 import { isIngredient } from '@/lib/type-guards'
 
 import type { ProductionBatch } from '@/lib/business-services/types'
+import { createClient } from '@/utils/supabase/server'
 
 
 
@@ -30,7 +31,6 @@ export class ProductionServices {
 
   async scheduleProductionBatch(batch: Omit<ProductionBatch, 'id' | 'status'>): Promise<ProductionBatch> {
     try {
-      const { createClient } = await import('@/utils/supabase/server')
       const supabase = await createClient()
 
       // Validate recipe exists and is active
@@ -107,7 +107,6 @@ export class ProductionServices {
     }>
   }> {
     try {
-      const { createClient } = await import('@/utils/supabase/server')
       const supabase = await createClient()
 
       // Get recipe with ingredients
@@ -192,7 +191,6 @@ export class ProductionServices {
 
   private async reserveIngredientsForProduction(recipeId: string, quantity: number): Promise<void> {
     try {
-      const { createClient } = await import('@/utils/supabase/server')
       const supabase = await createClient()
 
       // Get recipe ingredients
@@ -237,7 +235,6 @@ export class ProductionServices {
 
   async updateBatchStatus(batchId: string, status: ProductionBatch['status']): Promise<void> {
     try {
-      const { createClient } = await import('@/utils/supabase/server')
       const supabase = await createClient()
       const normalizedStatus = status === 'pending' ? 'planned' : status
 
@@ -263,7 +260,6 @@ export class ProductionServices {
 
   async getActiveBatches(): Promise<ProductionBatch[]> {
     try {
-      const { createClient } = await import('@/utils/supabase/server')
       const supabase = await createClient()
       const { data, error } = await supabase
         .from('production_batches')
@@ -284,7 +280,6 @@ export class ProductionServices {
 
   async cancelProductionBatch(batchId: string): Promise<void> {
     try {
-      const { createClient } = await import('@/utils/supabase/server')
       const supabase = await createClient()
       const { data: batch, error } = await supabase
         .from('production_batches')

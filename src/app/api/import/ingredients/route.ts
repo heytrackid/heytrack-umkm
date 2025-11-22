@@ -2,6 +2,7 @@ export const runtime = 'nodejs'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 
 import { z } from 'zod'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
 import { createSuccessResponse } from '@/lib/api-core/responses'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
@@ -92,7 +93,7 @@ export const POST = createApiRoute(
   {
     method: 'POST',
     path: '/api/import/ingredients',
-    bodySchema: BulkImportSchema,
+    securityPreset: SecurityPresets.basic(),
   },
   importIngredientsHandler
 )

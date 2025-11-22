@@ -20,18 +20,46 @@ type IngredientInsert = Insert<'ingredients'>
 type IngredientUpdate = Update<'ingredients'>
 
 interface UseIngredientsOptions {
+  page?: number
   limit?: number
   offset?: number
-  search?: string
+  search?: string | undefined
 }
 
 /**
- * Fetch all ingredients with caching
- */
+  * Fetch all ingredients with caching and pagination support
+  */
 export function useIngredients(options?: UseIngredientsOptions) {
+  const { page = 1, limit = 20, search } = options || {}
+
+  // Convert page to offset for API
+  const offset = (page - 1) * limit
+
+  const apiOptions = {
+    page,
+    limit,
+    offset,
+    search: search || undefined
+  }
+
   return useQuery({
-    queryKey: ['ingredients', options],
-    queryFn: () => fetchApi<Ingredient[]>(buildApiUrl('/api/ingredients', options as Record<string, string | number | boolean | null | undefined>)),
+    queryKey: ['ingredients', apiOptions],
+    queryFn: () => fetchApi<{ data: Ingredient[]; pagination: any }>(buildApiUrl('/api/ingredients', apiOptions as Record<string, string | number | boolean | null | undefined>)), // eslint-disable-line @typescript-eslint/no-explicit-any
+    ...queryConfig.queries.moderate,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  })
+}
+
+/**
+  * Fetch all ingredients as array (for backward compatibility)
+  * @deprecated Use useIngredients for new implementations with pagination
+  */
+export function useIngredientsList(search?: string) {
+  return useQuery({
+    queryKey: ['ingredients-list', search],
+    queryFn: () => fetchApi<Ingredient[]>(buildApiUrl('/api/ingredients', { search: search || undefined, limit: 1000 } as Record<string, string | number | boolean | null | undefined>)),
     ...queryConfig.queries.moderate,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000,

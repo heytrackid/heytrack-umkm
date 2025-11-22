@@ -3,6 +3,7 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 
 import { createSuccessResponse } from '@/lib/api-core/responses'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import type { NextResponse } from 'next/server'
 
 async function getHandler(context: RouteContext): Promise<NextResponse> {
@@ -34,6 +35,7 @@ export const GET = createApiRoute(
   {
     method: 'GET',
     path: '/api/export/ingredients',
+    securityPreset: SecurityPresets.basic(),
   },
   getHandler
 )

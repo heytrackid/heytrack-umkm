@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Popover } from '@/components/ui/popover'
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { handleError } from '@/lib/error-handling'
@@ -187,14 +187,12 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
                         <Label>
                             Tanggal Rencana Produksi <span className="text-muted-foreground">*</span>
                         </Label>
-                        <Popover>
-                            <Input
-                              type="date"
-                              value={formData.planned_date.toISOString().slice(0, 10)}
-                              onChange={(e) => setFormData({ ...formData, planned_date: new Date(e.target.value) })}
-                              placeholder="Pilih tanggal"
-                            />
-                        </Popover>
+                        <Input
+                          type="date"
+                          value={formData.planned_date.toISOString().slice(0, 10)}
+                          onChange={(e) => setFormData({ ...formData, planned_date: new Date(e.target.value) })}
+                          placeholder="Pilih tanggal"
+                        />
                     </div>
 
                     {/* Notes */}

@@ -24,7 +24,7 @@ import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useCustomer, useDeleteCustomer } from '@/hooks/useCustomers'
-import { useOrders } from '@/hooks/api/useOrders'
+import { useOrdersList } from '@/hooks/api/useOrders'
 import type { OrderListItem } from '@/types/database'
 
 // Helper function to get status variant
@@ -57,7 +57,7 @@ const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }): JS
   const deleteCustomerMutation = useDeleteCustomer()
 
   // Fetch customer orders
-  const { data: allOrders = [], isLoading: ordersLoading } = useOrders()
+  const { data: allOrders = [], isLoading: ordersLoading } = useOrdersList()
   const orders = allOrders.filter(order => order.customer_id === id)
 
   const handleDelete = async (): Promise<void> => {

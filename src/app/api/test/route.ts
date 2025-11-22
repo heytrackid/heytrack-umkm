@@ -12,6 +12,7 @@ export const GET = createApiRoute(
   {
     method: 'GET',
     path: '/api/test',
+    requireAuth: false,
   },
   async () => {
     return createSuccessResponse({ message: 'Test route working' })

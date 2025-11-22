@@ -1,7 +1,6 @@
 'use client'
 
 import { ArrowDownIcon, ArrowUpIcon, CheckCircle, DollarSign, Package, ShoppingCart, TrendingUp } from '@/components/icons'
-import dynamic from 'next/dynamic'
 import { type ReactNode } from 'react'
 
 import { PageHeader } from '@/components/layout'
@@ -19,66 +18,9 @@ import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useDashboardStats } from '@/hooks/api/useDashboard'
-import { createClientLogger } from '@/lib/client-logger'
 import { SalesReport } from './SalesReport'
-
-const logger = createClientLogger('ReportsLayout')
-
-const logDynamicImportError = (label: string, error: unknown) => {
-  if (process.env.NODE_ENV !== 'production') {
-    logger.error({ label, error: error instanceof Error ? error.message : String(error) }, 'Component load failure')
-  }
-}
-
-const InventoryReport = dynamic(
-  () => import('./InventoryReport')
-    .then(m => ({ default: m.InventoryReport }))
-    .catch((error) => {
-      logDynamicImportError('Inventory report', error)
-      return { default: () => <div className="p-4 text-center text-red-600">Failed to load inventory report</div> }
-    }),
-  {
-    loading: () => (
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }, (_, i) => (
-            <Skeleton key={i} className="h-24 rounded" />
-          ))}
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Skeleton className="h-64 rounded" />
-          <Skeleton className="h-64 rounded" />
-        </div>
-      </div>
-    ),
-    ssr: false
-  }
-)
-
-const FinancialReport = dynamic(
-  () => import('./FinancialReport')
-    .then(m => ({ default: m.FinancialReport }))
-    .catch((error) => {
-      logDynamicImportError('Financial report', error)
-      return { default: () => <div className="p-4 text-center text-red-600">Failed to load financial report</div> }
-    }),
-  {
-    loading: () => (
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }, (_, i) => (
-            <Skeleton key={i} className="h-24 rounded" />
-          ))}
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Skeleton className="h-48 rounded" />
-          <Skeleton className="h-48 rounded" />
-        </div>
-      </div>
-    ),
-    ssr: false
-  }
-)
+import { InventoryReport } from './InventoryReport'
+import { FinancialReport } from './FinancialReport'
 
 // Reports Layout - Main structure and navigation
 // Contains breadcrumbs, header, and report tabs

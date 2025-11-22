@@ -2,9 +2,8 @@
 
 // Using Pino logger for all logging
 import { BarChart3, Calendar, Clock, DollarSign, Edit, Eye, Filter, MessageCircle, Plus, Search, ShoppingCart, TrendingUp, XCircle } from '@/components/icons'
-import { useOrders, useUpdateOrderStatus } from '@/hooks/api/useOrders'
+import { useOrdersList, useUpdateOrderStatus } from '@/hooks/api/useOrders'
 import { useQueryClient } from '@tanstack/react-query'
-import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'
 
@@ -21,16 +20,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useCurrency } from '@/hooks/useCurrency'
-import { uiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@/modules/orders/types'
+import { OrderForm } from './OrderForm'
+import { OrderDetailView } from './OrderDetailView'
 
 
 
-
-// Using uiLogger for client-side logging
-const logger = uiLogger
 
 const arrayCalculations = {
   sum: (arr: Record<string, unknown>[], key: string): number => arr.reduce((sum: number, item) => sum + Number(item[key] ?? 0), 0),
@@ -40,36 +37,6 @@ const arrayCalculations = {
     return sum / arr.length;
   }
 } as const;
-
- 
-
-// ✅ Code Splitting - Lazy load heavy components
-// ✅ Correct pattern for named exports (per Next.js docs)
-const OrderForm = dynamic(
-  () => import('./OrderForm')
-    .then(mod => mod.OrderForm)
-    .catch((error) => {
-      logger.error({ error }, 'Failed to load OrderForm')
-      return { default: () => <div className="h-64 sm:h-96 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load order form</div> }
-    }),
-  {
-    loading: () => <div className="h-64 sm:h-96 animate-pulse bg-gray-100 rounded-lg" />,
-    ssr: false
-  }
-)
-
-const OrderDetailView = dynamic(
-  () => import('./OrderDetailView')
-    .then(mod => mod.OrderDetailView)
-    .catch((error) => {
-      logger.error({ error }, 'Failed to load OrderDetailView')
-      return { default: () => <div className="h-64 sm:h-96 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load order details</div> }
-    }),
-  {
-    loading: () => <div className="h-64 sm:h-96 animate-pulse bg-gray-100 rounded-lg" />,
-    ssr: false
-  }
-)
 
 // Local types
 interface OrderFilters {
@@ -119,7 +86,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
    const hasFiltersApplied = filters.status.length > 0 || Boolean(filters.customer_search?.trim())
 
   // ✅ Use standardized hook for automatic caching
-  const { data: ordersData, isLoading: loading, error: queryError, refetch } = useOrders()
+  const { data: ordersData, isLoading: loading, error: queryError, refetch } = useOrdersList()
 
   const orders = useMemo(() => ordersData ?? [], [ordersData])
 

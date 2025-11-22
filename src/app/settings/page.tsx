@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, lazy, useState } from 'react'
+import { useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
 
@@ -15,9 +15,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { RotateCcw, Save } from '@/components/icons'
 
-// Only lazy load the heavy tabs component
-// ✅ Correct pattern for named exports with React.lazy
-const SettingsTabs = lazy(() => import('./components/tabs/SettingsTabs').then(mod => ({ default: mod.SettingsTabs })))
+import { SettingsTabs } from './components/tabs/SettingsTabs'
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('general')
@@ -63,14 +61,12 @@ const SettingsPage = () => {
           <>
             <SettingsQuickLinks />
 
-            <Suspense fallback={<SettingsLoadingSkeleton />}>
-              <SettingsTabs
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-                settings={settings}
-                onSettingChange={handleSettingChange}
-              />
-            </Suspense>
+             <SettingsTabs
+               activeTab={activeTab}
+               onTabChange={setActiveTab}
+               settings={settings}
+               onSettingChange={handleSettingChange}
+             />
           </>
         )}
 

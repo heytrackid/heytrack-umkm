@@ -5,7 +5,6 @@ import { Calendar, MessageCircle, Plus, ShoppingCart, TrendingUp, XCircle } from
 import { useUpdateOrderStatus } from '@/hooks/api/useOrders'
 import { useOrders } from '@/hooks/api/useOrders'
 import { useQueryClient } from '@tanstack/react-query'
-import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'
 
@@ -15,7 +14,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import { uiLogger } from '@/lib/logger'
 import { arrayCalculations } from '@/lib/performance/index'
 import { getErrorMessage } from '@/lib/type-guards'
 import { DashboardView } from '@/modules/orders/components/OrdersPage/DashboardView'
@@ -24,45 +22,12 @@ import { StatsCards } from '@/modules/orders/components/OrdersPage/StatsCards'
 import { StatusSummary } from '@/modules/orders/components/OrdersPage/StatusSummary'
 
 import { OrdersList } from '@/modules/orders/components/OrdersPage/OrdersList'
+import { OrdersLoading } from '@/components/loading'
+import { ServerPagination } from '@/components/ui/server-pagination'
+import { OrderForm } from '../OrderForm'
+import { OrderDetailView } from '../OrderDetailView'
 
-
-
-
-
-/**
- * Orders Page - Main Component (Refactored & Modular)
- * Split into smaller, focused components
- */
-
-
-
-// ✅ Code Splitting - Lazy load heavy components
-// ✅ Correct pattern for named exports (per Next.js docs)
-const OrderForm = dynamic(
-  () => import('../OrderForm')
-    .then(mod => mod.OrderForm)
-    .catch((error) => {
-      uiLogger.error({ error }, 'Failed to load OrderForm')
-      return { default: () => <div className="h-96 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load form</div> }
-    }),
-  {
-    loading: () => <div className="h-96 animate-pulse bg-gray-100 rounded-lg" />,
-    ssr: false
-  }
-)
-
-const OrderDetailView = dynamic(
-  () => import('../OrderDetailView')
-    .then(mod => mod.OrderDetailView)
-    .catch((error) => {
-      uiLogger.error({ error }, 'Failed to load OrderDetailView')
-      return { default: () => <div className="h-96 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load details</div> }
-    }),
-  {
-    loading: () => <div className="h-96 animate-pulse bg-gray-100 rounded-lg" />,
-    ssr: false
-  }
-)
+// Static imports used instead of dynamic imports
 
 // Import modular components
 
@@ -109,14 +74,24 @@ const OrdersPage = (_props: OrdersPageProps) => {
     })
     const hasFiltersApplied = (filters['status']?.length || 0) > 0 || Boolean(filters.customer_search?.trim())
 
-    // Fetch orders
-    const { data: ordersData, isLoading: loading, error: queryError } = useOrders()
+    // Pagination state
+    const [page, setPage] = useState(1)
+    const [limit, setLimit] = useState(20)
 
-    // Ensure orders is always an array
+    // Fetch orders with pagination
+    const { data: ordersResponse, isLoading: loading, error: queryError } = useOrders({
+        page,
+        limit,
+        search: filters.customer_search || undefined
+    })
+
+    // Extract data and pagination from response
     const orders = useMemo(() => {
-        if (!ordersData) { return [] }
-        return Array.isArray(ordersData) ? ordersData : []
-    }, [ordersData])
+        if (!ordersResponse?.data) { return [] }
+        return Array.isArray(ordersResponse.data) ? ordersResponse.data : []
+    }, [ordersResponse])
+
+    const pagination = ordersResponse?.pagination
 
     const error = queryError ? getErrorMessage(queryError) : null
 
@@ -177,28 +152,19 @@ const OrdersPage = (_props: OrdersPageProps) => {
         // Clear filters logic - to be implemented
     }, [])
 
+    // Handle pagination changes
+    const handlePageChange = useCallback((newPage: number) => {
+        setPage(newPage)
+    }, [])
+
+    const handlePageSizeChange = useCallback((newLimit: number) => {
+        setLimit(newLimit)
+        setPage(1) // Reset to first page when changing page size
+    }, [])
+
     // Loading state
     if (loading && orders.length === 0) {
-        return (
-            <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold flex items-center gap-2">
-                            <ShoppingCart className="h-8 w-8" />
-                            Order Management
-                        </h1>
-                        <p className="text-muted-foreground">
-                            Kelola pesanan dan penjualan dengan sistem terintegrasi
-                        </p>
-                    </div>
-                </div>
-                <div className="grid gap-6 lg:grid-cols-4">
-                    {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="h-32 bg-gray-100 animate-pulse rounded-lg" />
-                    ))}
-                </div>
-            </div>
-        )
+        return <OrdersLoading />
     }
 
     // Error state
@@ -283,15 +249,25 @@ const OrdersPage = (_props: OrdersPageProps) => {
                         onFilterChange={setFilters}
                         onClearFilters={handleClearFilters}
                     />
-                    <OrdersList
-                        orders={orders as unknown as Order[]}
-                        hasFilters={hasFiltersApplied}
-                        onCreateOrder={handleCreateOrder}
-                        onViewOrder={handleViewOrder}
-                        onEditOrder={handleEditOrder}
-                        onUpdateStatus={handleUpdateStatus}
-                        onClearFilters={handleClearFilters}
-                    />
+                     <OrdersList
+                         orders={orders as unknown as Order[]}
+                         hasFilters={hasFiltersApplied}
+                         onCreateOrder={handleCreateOrder}
+                         onViewOrder={handleViewOrder}
+                         onEditOrder={handleEditOrder}
+                         onUpdateStatus={handleUpdateStatus}
+                         onClearFilters={handleClearFilters}
+                     />
+
+                     {/* Pagination */}
+                     {pagination && orders.length > 0 && (
+                         <ServerPagination
+                             pagination={pagination}
+                             onPageChange={handlePageChange}
+                             onPageSizeChange={handlePageSizeChange}
+                             pageSizeOptions={[10, 20, 50, 100]}
+                         />
+                     )}
                 </SwipeableTabsContent>
 
                 <SwipeableTabsContent value="calendar" className="mt-6">

@@ -3,6 +3,7 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
 import { createSuccessResponse } from '@/lib/api-core/responses'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { apiLogger } from '@/lib/logger'
 import type { NextResponse } from 'next/server'
@@ -53,6 +54,7 @@ export const PUT = createApiRoute(
   {
     method: 'PUT',
     path: '/api/hpp/alerts/[id]/read',
+    securityPreset: SecurityPresets.basic(),
   },
   markAlertReadHandler
 )

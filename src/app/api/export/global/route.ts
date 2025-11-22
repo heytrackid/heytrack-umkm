@@ -3,6 +3,7 @@ export const runtime = 'nodejs'
 
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import { GlobalExportService } from '@/lib/export/global-export'
 import { apiLogger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
@@ -37,6 +38,10 @@ async function getGlobalExportHandler(context: RouteContext) {
 }
 
 export const GET = createApiRoute(
-  { method: 'GET', path: '/api/export/global' },
+  {
+    method: 'GET',
+    path: '/api/export/global',
+    securityPreset: SecurityPresets.basic(),
+  },
   getGlobalExportHandler
 )

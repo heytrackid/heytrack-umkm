@@ -39,13 +39,21 @@ interface ProductionConstraints {
   production_hours_per_day: number
 }
 
+interface ProductionBatchesResponse {
+  data: ProductionBatchWithDetails[]
+  total: number
+  page: number
+  limit: number
+}
+
 /**
  * Get all production batches
  */
 export function useProductionBatches() {
-  return useQuery<ProductionBatchWithDetails[]>({
+  return useQuery<ProductionBatchesResponse, Error, ProductionBatchWithDetails[]>({
     queryKey: ['production-batches'],
-    queryFn: () => fetchApi<ProductionBatchWithDetails[]>('/api/production/batches'),
+    queryFn: () => fetchApi<ProductionBatchesResponse>('/api/production/batches'),
+    select: (result) => result.data ?? [],
   })
 }
 

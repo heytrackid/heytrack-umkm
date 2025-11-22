@@ -18,8 +18,7 @@ export { UMKMTooltip } from './components/UMKMTooltip'
 
 // Lazy loaded recipe components
 export {
-    LazySmartPricingAssistant,
-    preloadRecipeComponents
+    LazySmartPricingAssistant
 } from './components/LazyComponents'
 
 // Hooks

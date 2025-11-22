@@ -1,55 +1,17 @@
 'use client'
 
-import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
-import { Suspense, useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { LoadingState } from '@/components/ui/loading-state'
 import { useAuth } from '@/hooks/useAuth'
-import { createClientLogger } from '@/lib/client-logger'
 
 import { useAIService, useChatMessages } from '@/app/ai-chatbot/hooks/index'
 
-const logger = createClientLogger('AIChatbot')
-
-// Lazy load heavy chatbot components
-// ✅ Correct pattern for named exports (per Next.js docs)
-const ChatHeader = dynamic(
-  () => import('./components/ChatHeader')
-    .then(mod => ({ default: mod.ChatHeader }))
-    .catch((error) => {
-      logger.error({ error }, 'Failed to load ChatHeader:')
-      return { default: () => <div className="h-16 bg-red-100 rounded-t-xl flex items-center justify-center text-red-600">Failed to load chat header</div> }
-    }),
-  {
-    loading: () => <div className="h-16 bg-muted animate-pulse rounded-t-xl" />
-  }
-)
-
-const ChatInput = dynamic(
-  () => import('./components/ChatInput')
-    .then(mod => ({ default: mod.ChatInput }))
-    .catch((error) => {
-      logger.error({ error }, 'Failed to load ChatInput:')
-      return { default: () => <div className="h-20 bg-red-100 flex items-center justify-center text-red-600">Failed to load chat input</div> }
-    }),
-  {
-    loading: () => <div className="h-20 bg-muted animate-pulse" />
-  }
-)
-
-const MessageList = dynamic(
-  () => import('./components/MessageList')
-    .then(mod => ({ default: mod.MessageList }))
-    .catch((error) => {
-      logger.error({ error }, 'Failed to load MessageList:')
-      return { default: () => <div className="flex-1 bg-red-100 flex items-center justify-center text-red-600">Failed to load messages</div> }
-    }),
-  {
-    loading: () => <div className="flex-1 bg-muted animate-pulse" />
-  }
-)
+import { ChatHeader } from './components/ChatHeader'
+import { ChatInput } from './components/ChatInput'
+import { MessageList } from './components/MessageList'
 
 
 
@@ -138,34 +100,28 @@ const AIChatbotPage = (): JSX.Element => {
       <div className="flex flex-col h-[calc(100vh-4rem)] safe-top max-w-5xl mx-auto w-full">
         {/* Minimal header */}
         <div className="flex-shrink-0">
-          <Suspense fallback={<div className="h-12 bg-muted animate-pulse" />}>
-            <ChatHeader />
-          </Suspense>
+          <ChatHeader />
         </div>
 
         {/* Messages area - takes remaining height */}
         <div className="flex-1 overflow-hidden relative min-h-0">
-          <Suspense fallback={<div className="flex-1 bg-muted animate-pulse" />}>
-            <MessageList
-              messages={messages}
-              isLoading={isLoading}
-              scrollAreaRef={scrollAreaRef}
-              onSuggestionClick={handleSuggestionClick}
-              onFeedbackSubmit={() => {}}
-            />
-          </Suspense>
+          <MessageList
+            messages={messages}
+            isLoading={isLoading}
+            scrollAreaRef={scrollAreaRef}
+            onSuggestionClick={handleSuggestionClick}
+            onFeedbackSubmit={() => {}}
+          />
         </div>
 
         {/* Input area - fixed at bottom with safe area */}
         <div className="flex-shrink-0">
-          <Suspense fallback={<div className="h-20 bg-muted animate-pulse" />}>
-            <ChatInput
-              input={input}
-              setInput={setInput}
-              onSendMessage={handleSendMessage}
-              isLoading={isLoading}
-            />
-          </Suspense>
+          <ChatInput
+            input={input}
+            setInput={setInput}
+            onSendMessage={handleSendMessage}
+            isLoading={isLoading}
+          />
         </div>
       </div>
     </AppLayout>

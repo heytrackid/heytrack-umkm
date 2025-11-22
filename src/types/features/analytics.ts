@@ -162,7 +162,6 @@ export interface MarketComparison {
 export interface CompetitorPrice {
   competitor_name: string
   price: number
-  quality_rating?: number
   notes?: string
 }
 

@@ -1,8 +1,6 @@
 'use client'
 
-import { Suspense, lazy } from 'react'
-
-import { CardSkeleton } from '@/components/lazy/LazyWrapper'
+import { SmartPricingAssistant } from './SmartPricingAssistant'
 
 import type { SmartPricingAssistantProps } from '@/modules/recipes/components/SmartPricingAssistant'
 
@@ -11,21 +9,14 @@ export interface SmartPricingAssistantPropsWithIndex extends SmartPricingAssista
   [key: string]: unknown
 }
 
-// Create lazy component with proper typing
-const LazySmartPricingAssistantComponent = lazy(() => import('./SmartPricingAssistant').then(module => ({ default: module.SmartPricingAssistant })))
-
-// Wrapper component that provides proper typing and suspense boundary
+// Static component - no lazy loading
 export const LazySmartPricingAssistant = (props: SmartPricingAssistantPropsWithIndex) => (
-  <Suspense fallback={<CardSkeleton />}>
-    <LazySmartPricingAssistantComponent {...props} />
-  </Suspense>
+  <SmartPricingAssistant {...props} />
 )
 
 
 
-export async function preloadRecipeComponents() {
-  await import('./SmartPricingAssistant')
-}
+// Preloading removed - using static imports now
 
 // Note: Removed unused components that were not properly implemented
 // If needed in future, they should be recreated with proper props matching SmartPricingAssistant requirements
