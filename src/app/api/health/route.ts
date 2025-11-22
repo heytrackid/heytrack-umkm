@@ -2,7 +2,7 @@
 import { createClient } from '@supabase/supabase-js'
 // Internal modules
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 
 // Types and schemas

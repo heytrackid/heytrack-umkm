@@ -108,7 +108,7 @@ export const POST = createApiRoute(
       return handleAPIError(new Error('Failed to create financial record'), 'API Route')
     }
 
-    return createSuccessResponse(data, 'Financial record created successfully', undefined, 201)
+    return createSuccessResponse(data, SUCCESS_MESSAGES.FINANCIAL_RECORD_CREATED, undefined, 201)
   }
 )
 

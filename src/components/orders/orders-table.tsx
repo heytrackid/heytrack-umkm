@@ -1,52 +1,53 @@
 'use client'
 
 import {
-  Eye,
-  Edit,
-  MoreHorizontal,
-  Trash2,
-  CheckCircle,
-  XCircle,
-   Package,
-   Truck,
-   Download,
-   RefreshCw,
-   Archive
+    Archive,
+    CheckCircle,
+    Download,
+    Edit,
+    Eye,
+    MoreHorizontal,
+    Package,
+    RefreshCw,
+    Trash2,
+    Truck,
+    XCircle
 } from '@/components/icons'
 import { useState } from 'react'
 
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { SkeletonText } from '@/components/ui/skeleton'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table'
 import { useCurrency } from '@/hooks/useCurrency'
+import { cn } from '@/lib/utils'
 
-import type { OrderItem, Order } from '@/components/orders/types'
+import type { Order, OrderItem } from '@/components/orders/types'
 
 // Extended type for table display
 interface OrderWithItems extends Order {
@@ -333,7 +334,7 @@ export const OrderComponent = ({
               orders.map((order) => (
                 <TableRow
                   key={order['id']}
-                  className={selectedOrders.includes(order['id']) ? 'bg-muted/50' : ''}
+                  className={cn(selectedOrders.includes(order['id']) && "bg-muted/50")}
                 >
                   <TableCell>
                     <Checkbox

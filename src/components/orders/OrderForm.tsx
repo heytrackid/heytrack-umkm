@@ -28,6 +28,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { LabelWithTooltip } from '@/components/ui/tooltip-helper'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useResponsive } from '@/hooks/useResponsive'
+import { cn } from '@/lib/utils'
 import { validateOrderData } from '@/lib/validations/form-validations'
 
 
@@ -211,7 +212,7 @@ export const OrderForm = ({
                     <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <div>
-                    <h2 className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
+                    <h2 className={cn("font-bold", isMobile ? "text-xl" : "text-2xl")}>
                         {order ? 'Edit Pesanan' : 'Buat Pesanan Baru'}
                     </h2>
                     <p className="text-sm text-muted-foreground">
@@ -237,7 +238,7 @@ export const OrderForm = ({
                                 {step}
                             </button>
                             {step < 3 && (
-                                <div className={`w-12 h-0.5 ${currentStep > step ? 'bg-muted0' : 'bg-muted'}`} />
+                                <div className={cn("w-12 h-0.5", currentStep > step ? "bg-muted0" : "bg-muted")} />
                             )}
                         </div>
                     ))}

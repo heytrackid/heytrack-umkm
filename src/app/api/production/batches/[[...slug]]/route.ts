@@ -2,12 +2,12 @@
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
-import { createSuccessResponse } from '@/lib/api-core/responses'
-import { SecurityPresets } from '@/utils/security/api-middleware'
+import { createSuccessResponse } from '@/lib/api-core'
 import { createApiRoute } from '@/lib/api/route-factory'
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
-import { NextResponse } from 'next/server'
 import { ProductionService, type ProductionBatchCreateData, type ProductionBatchUpdateData } from '@/services/production/ProductionService'
+import { SecurityPresets } from '@/utils/security/api-middleware'
+import { NextResponse } from 'next/server'
 
 // GET /api/production/batches or /api/production/batches/[id]
 export const GET = createApiRoute(
@@ -28,9 +28,13 @@ export const GET = createApiRoute(
       const limit = parseInt(url.searchParams.get('limit') || '50')
 
       try {
-        const productionService = new ProductionService(context.supabase)
+        const productionService = new ProductionService({
+          userId: user.id,
+          supabase: context.supabase,
+          audit: true
+        })
         const params = { limit, ...(status && { status }) }
-        const result = await productionService.getProductionBatches(user.id, params)
+        const result = await productionService.getProductionBatches(params)
 
         return createSuccessResponse(result)
       } catch (error) {
@@ -42,8 +46,12 @@ export const GET = createApiRoute(
       const { user } = context
 
       try {
-        const productionService = new ProductionService(context.supabase)
-        const batch = await productionService.getProductionBatch(user.id, id)
+        const productionService = new ProductionService({
+          userId: user.id,
+          supabase: context.supabase,
+          audit: true
+        })
+        const batch = await productionService.getProductionBatch(id)
 
         return createSuccessResponse(batch)
       } catch (error) {
@@ -75,11 +83,15 @@ export const POST = createApiRoute(
     }
 
     try {
-      const productionService = new ProductionService(context.supabase)
+      const productionService = new ProductionService({
+        userId: user.id,
+        supabase: context.supabase,
+        audit: true
+      })
       const createData = body as ProductionBatchCreateData
       if (createData.notes === undefined) delete createData.notes
 
-      const batch = await productionService.createProductionBatch(user.id, createData)
+      const batch = await productionService.createProductionBatch(createData)
 
       return createSuccessResponse(batch, SUCCESS_MESSAGES.PRODUCTION_BATCH_CREATED, undefined, 201)
     } catch (error) {
@@ -109,11 +121,15 @@ export const PUT = createApiRoute(
     }
 
     try {
-      const productionService = new ProductionService(context.supabase)
+      const productionService = new ProductionService({
+        userId: user.id,
+        supabase: context.supabase,
+        audit: true
+      })
       const updateData = body as ProductionBatchUpdateData
       if (updateData.notes === undefined) delete updateData.notes
 
-      const updatedBatch = await productionService.updateProductionBatch(user.id, id, updateData)
+      const updatedBatch = await productionService.updateProductionBatch(id, updateData)
 
       return createSuccessResponse(updatedBatch, SUCCESS_MESSAGES.PRODUCTION_BATCH_UPDATED)
     } catch (error) {
@@ -139,8 +155,12 @@ export const DELETE = createApiRoute(
     const { user } = context
 
     try {
-      const productionService = new ProductionService(context.supabase)
-      await productionService.deleteProductionBatch(user.id, id)
+      const productionService = new ProductionService({
+        userId: user.id,
+        supabase: context.supabase,
+        audit: true
+      })
+      await productionService.deleteProductionBatch(id)
 
       return createSuccessResponse(null, SUCCESS_MESSAGES.PRODUCTION_BATCH_DELETED)
     } catch (error) {

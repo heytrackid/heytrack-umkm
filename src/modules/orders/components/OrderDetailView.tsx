@@ -1,7 +1,7 @@
- 
 'use client'
 
 import { MapPin, Phone, Users } from '@/components/icons'
+import { memo, useMemo } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -25,25 +25,45 @@ interface OrderDetailViewProps {
   order: OrderWithItems
 }
 
-export const OrderDetailView = ({ order }: OrderDetailViewProps) => {
+const OrderDetailViewComponent = ({ order }: OrderDetailViewProps) => {
   const { formatCurrency } = useCurrency()
-  const statusInfo = getStatusInfo(order['status'] ?? 'PENDING')
-  const priorityInfo = getPriorityInfo(order.priority ?? 'MEDIUM')
-  const orderItems: OrderItem[] = order.order_items ?? []
-  const totalAmount = order.total_amount ?? 0
-  const taxAmount = order.tax_amount ?? 0
-  const discountAmount = order.discount ?? 0
-  const deliveryFee = order.delivery_fee ?? 0
-  const paidAmount = order.paid_amount ?? 0
-  const subtotal = totalAmount - taxAmount + discountAmount - deliveryFee
-  const outstandingAmount = totalAmount > paidAmount ? totalAmount - paidAmount : 0
-  const totalItemCount = orderItems.reduce((sum, item) => sum + (item.quantity || 0), 0)
-  let paymentStatus = 'BELUM BAYAR'
-  if (paidAmount >= totalAmount) {
-    paymentStatus = 'LUNAS'
-  } else if (paidAmount > 0) {
-    paymentStatus = 'SEBAGIAN'
-  }
+  
+  // Memoize expensive calculations
+  const statusInfo = useMemo(() => getStatusInfo(order['status'] ?? 'PENDING'), [order])
+  const priorityInfo = useMemo(() => getPriorityInfo(order.priority ?? 'MEDIUM'), [order.priority])
+  const orderItems: OrderItem[] = useMemo(() => order.order_items ?? [], [order.order_items])
+  
+  const financialData = useMemo(() => {
+    const totalAmount = order.total_amount ?? 0
+    const taxAmount = order.tax_amount ?? 0
+    const discountAmount = order.discount ?? 0
+    const deliveryFee = order.delivery_fee ?? 0
+    const paidAmount = order.paid_amount ?? 0
+    const subtotal = totalAmount - taxAmount + discountAmount - deliveryFee
+    const outstandingAmount = totalAmount > paidAmount ? totalAmount - paidAmount : 0
+    const totalItemCount = orderItems.reduce((sum, item) => sum + (item.quantity || 0), 0)
+    
+    let paymentStatus = 'BELUM BAYAR'
+    if (paidAmount >= totalAmount) {
+      paymentStatus = 'LUNAS'
+    } else if (paidAmount > 0) {
+      paymentStatus = 'SEBAGIAN'
+    }
+    
+    return {
+      totalAmount,
+      taxAmount,
+      discountAmount,
+      deliveryFee,
+      paidAmount,
+      subtotal,
+      outstandingAmount,
+      totalItemCount,
+      paymentStatus
+    }
+  }, [order.total_amount, order.tax_amount, order.discount, order.delivery_fee, order.paid_amount, orderItems])
+  
+  const { totalAmount, taxAmount, discountAmount, deliveryFee, paidAmount, subtotal, outstandingAmount, totalItemCount, paymentStatus } = financialData
 
   return (
     <SwipeableTabs defaultValue="overview" className="w-full">
@@ -232,3 +252,6 @@ export const OrderDetailView = ({ order }: OrderDetailViewProps) => {
     </SwipeableTabs>
   )
 }
+
+// Memoized export for performance
+export const OrderDetailView = memo(OrderDetailViewComponent)

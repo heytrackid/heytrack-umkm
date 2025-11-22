@@ -97,6 +97,8 @@ export const SUCCESS_MESSAGES = {
   AI_SUGGESTION_GENERATED: 'AI suggestion generated successfully',
   AI_RECIPE_GENERATED: 'AI recipe generated successfully',
   AI_SESSION_CREATED: 'AI session created successfully',
+  AI_SESSION_DELETED: 'AI session deleted successfully',
+  AI_SESSIONS_CLEARED: 'AI sessions cleared successfully',
   AI_CONTEXT_SAVED: 'AI context saved successfully',
   
   // Export/Import operations
@@ -106,6 +108,7 @@ export const SUCCESS_MESSAGES = {
   
   // Report operations
   REPORT_GENERATED: 'Report generated successfully',
+  ERROR_REPORTED: 'Error reported successfully',
 } as const
 
 // ==========================================================

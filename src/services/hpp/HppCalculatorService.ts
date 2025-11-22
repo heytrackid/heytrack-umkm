@@ -1,18 +1,18 @@
 import { HPP_CONFIG } from '@/lib/constants/hpp-config'
 import { dbLogger } from '@/lib/logger'
 import { isRecipeWithIngredients } from '@/lib/type-guards'
+import { BaseService, type ServiceContext } from '@/services/base'
 
-import type { Row, Insert, Database } from '@/types/database'
+import type { Insert, Row } from '@/types/database'
 
-import type { SupabaseClient } from '@supabase/supabase-js'
 
 
 /**
  * Consolidated HPP Calculator Service
  * Handles all HPP (Harga Pokok Produksi) calculations
  * 
+ * ✅ STANDARDIZED: Extends BaseService, uses ServiceContext
  * This is the SINGLE source of truth for HPP calculations.
- * DO NOT create duplicate services.
  */
 
 
@@ -38,42 +38,44 @@ export interface HppCalculationResult {
   }>
 }
 
-export class HppCalculatorService {
+export class HppCalculatorService extends BaseService {
   private readonly logger = dbLogger
+
+  constructor(context: ServiceContext) {
+    super(context)
+  }
 
   /**
    * Calculate HPP for a specific recipe
-   * @param supabase - Supabase client (passed from caller for proper auth context)
    * @param recipeId - Recipe ID to calculate HPP for
-   * @param userId - User ID for RLS enforcement
    */
   async calculateRecipeHpp(
-    supabase: SupabaseClient<Database>,
-    recipeId: string,
-    userId: string
+    recipeId: string
   ): Promise<HppCalculationResult> {
-    try {
-      this.logger.info({ recipeId, userId }, 'Calculating HPP for recipe')
+    return this.executeWithAudit(
+      async () => {
+        try {
+          this.logger.info({ recipeId, userId: this.context.userId }, 'Calculating HPP for recipe')
 
-      // Get recipe details with ingredients
-      const { data: recipe, error: recipeError } = await supabase
-        .from('recipes')
-        .select(`
-          *,
-          recipe_ingredients (
+          // Get recipe details with ingredients
+          const { data: recipe, error: recipeError } = await this.context.supabase
+          .from('recipes')
+          .select(`
             *,
-            ingredients:ingredient_id (
-              id,
-              name,
-              price_per_unit,
-              weighted_average_cost,
-              unit
+            recipe_ingredients (
+              *,
+              ingredients:ingredient_id (
+                id,
+                name,
+                price_per_unit,
+                weighted_average_cost,
+                unit
+              )
             )
-          )
-        `)
-        .eq('id', recipeId)
-        .eq('user_id', userId)
-        .single()
+          `)
+          .eq('id', recipeId)
+          .eq('user_id', this.context.userId)
+          .single()
 
       if (recipeError || !recipe) {
         throw new Error(`Recipe not found: ${recipeId}`)
@@ -121,22 +123,20 @@ export class HppCalculatorService {
         total_material_cost += total_cost
       }
 
-      const servings = recipeData.servings ?? 1
-      const material_cost_per_unit = servings > 0 ? total_material_cost / servings : total_material_cost
+          const servings = recipeData.servings ?? 1
+          const material_cost_per_unit = servings > 0 ? total_material_cost / servings : total_material_cost
 
-      // Calculate labor cost (per unit) from recent productions
-      const labor_cost_per_unit = await this.calculateLaborCost(supabase, recipeId, userId)
+          // Calculate labor cost (per unit) from recent productions
+          const labor_cost_per_unit = await this.calculateLaborCost(recipeId)
 
-      // Calculate overhead cost (per unit) with production-based allocation
-      const overhead_cost_per_unit = await this.calculateOverheadCost(supabase, recipeId, userId)
+          // Calculate overhead cost (per unit) with production-based allocation
+          const overhead_cost_per_unit = await this.calculateOverheadCost(recipeId)
 
-      // Apply WAC adjustment per unit only when ingredient did not already use weighted_average_cost
-      const wac_adjustment_per_unit = await this.calculateWacAdjustment(
-        supabase,
-        userId,
-        recipeIngredients as unknown as Array<RecipeIngredient & { ingredients: Ingredient | null }>,
-        servings
-      )
+          // Apply WAC adjustment per unit only when ingredient did not already use weighted_average_cost
+          const wac_adjustment_per_unit = await this.calculateWacAdjustment(
+            recipeIngredients as unknown as Array<RecipeIngredient & { ingredients: Ingredient | null }>,
+            servings
+          )
 
       // Final per-unit and per-batch totals
       const cost_per_unit =
@@ -160,16 +160,21 @@ export class HppCalculatorService {
         material_breakdown
       }
 
-      // Save calculation to database
-      await this.saveHppCalculation(supabase, result, userId)
+          // Save calculation to database
+          await this.saveHppCalculation(result)
 
-      this.logger.info({ recipe_id: recipeId, total_hpp, cost_per_unit }, 'HPP calculated successfully')
-      return result
+          this.logger.info({ recipe_id: recipeId, total_hpp, cost_per_unit }, 'HPP calculated successfully')
+          return result
 
-    } catch (error: unknown) {
-      this.logger.error({ error, recipeId }, 'Failed to calculate HPP for recipe')
-      throw error
-    }
+        } catch (error: unknown) {
+          this.logger.error({ error, recipeId }, 'Failed to calculate HPP for recipe')
+          throw error
+        }
+      },
+      'CREATE',
+      'HPP_CALCULATION',
+      recipeId
+    )
   }
 
   /**
@@ -177,19 +182,17 @@ export class HppCalculatorService {
    * Uses weighted average from last 10 completed productions
    */
   private async calculateLaborCost(
-    supabase: SupabaseClient<Database>,
-    recipeId: string,
-    userId: string
+    recipeId: string
   ): Promise<number> {
     try {
-      const { data: productions, error } = await supabase
-        .from('productions')
-        .select('labor_cost, actual_quantity')
-        .eq('recipe_id', recipeId)
-        .eq('user_id', userId)
-        .eq('status', 'COMPLETED')
-        .order('actual_end_time', { ascending: false })
-        .limit(100)
+      const { data: productions, error } = await this.context.supabase
+          .from('productions')
+          .select('labor_cost, actual_quantity')
+          .eq('recipe_id', recipeId)
+          .eq('user_id', this.context.userId)
+          .eq('status', 'COMPLETED')
+          .order('actual_end_time', { ascending: false })
+          .limit(100)
 
       if (error) {
         this.logger.warn({ error: error.message }, 'Failed to fetch productions for labor cost')
@@ -223,17 +226,15 @@ export class HppCalculatorService {
    * Uses production volume-based allocation for fairness
    */
   private async calculateOverheadCost(
-    supabase: SupabaseClient<Database>,
-    recipeId: string,
-    userId: string
+    recipeId: string
   ): Promise<number> {
     try {
       // Get active operational costs
-      const { data: operationalCosts, error } = await supabase
-        .from('operational_costs')
-        .select('amount')
-        .eq('user_id', userId)
-        .eq('is_active', true)
+      const { data: operationalCosts, error } = await this.context.supabase
+          .from('operational_costs')
+          .select('amount')
+          .eq('user_id', this.context.userId)
+          .eq('is_active', true)
 
       if (error) {
         this.logger.warn({ error: error.message }, 'Failed to fetch operational costs')
@@ -253,29 +254,29 @@ export class HppCalculatorService {
       const thirtyDaysAgo = new Date()
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-      const { data: recipeProductions } = await supabase
+      const { data: recipeProductions } = await this.context.supabase
         .from('productions')
         .select('actual_quantity')
         .eq('recipe_id', recipeId)
-        .eq('user_id', userId)
+        .eq('user_id', this.context.userId)
         .eq('status', 'COMPLETED')
         .gte('actual_end_time', thirtyDaysAgo.toISOString())
 
       const recipeVolume = (recipeProductions ?? []).reduce(
-        (sum, p) => sum + Number(p.actual_quantity ?? 0),
+        (sum: number, p: { actual_quantity: number | null }) => sum + Number(p.actual_quantity ?? 0),
         0
       )
 
       // Get total production volume for all recipes
-      const { data: allProductions } = await supabase
+      const { data: allProductions } = await this.context.supabase
         .from('productions')
         .select('actual_quantity')
-        .eq('user_id', userId)
+        .eq('user_id', this.context.userId)
         .eq('status', 'COMPLETED')
         .gte('actual_end_time', thirtyDaysAgo.toISOString())
 
       const totalVolume = (allProductions ?? []).reduce(
-        (sum, p) => sum + Number(p.actual_quantity ?? 0),
+        (sum: number, p: { actual_quantity: number | null }) => sum + Number(p.actual_quantity ?? 0),
         0
       )
 
@@ -286,10 +287,10 @@ export class HppCalculatorService {
       }
 
       // Fallback: equal allocation across active recipes
-      const { count: recipeCount } = await supabase
+      const { count: recipeCount } = await this.context.supabase
         .from('recipes')
         .select('id', { count: 'exact', head: true })
-        .eq('user_id', userId)
+        .eq('user_id', this.context.userId)
         .eq('is_active', true)
 
       if (recipeCount && recipeCount > 0) {
@@ -309,8 +310,6 @@ export class HppCalculatorService {
    * Compares current prices with historical WAC from recent purchases
    */
   private async calculateWacAdjustment(
-    supabase: SupabaseClient<Database>,
-    userId: string,
     recipeIngredients: Array<RecipeIngredient & { ingredients: Ingredient | null }>,
     servings: number
   ): Promise<number> {
@@ -331,11 +330,11 @@ export class HppCalculatorService {
       const cutoffDate = new Date()
       cutoffDate.setDate(cutoffDate.getDate() - HPP_CONFIG.WAC_MAX_AGE_DAYS)
 
-      const { data: transactions, error } = await supabase
+      const { data: transactions, error } = await this.context.supabase
         .from('stock_transactions')
         .select('ingredient_id, quantity, unit_price, total_price, created_at')
         .in('ingredient_id', ingredientIds)
-        .eq('user_id', userId)
+        .eq('user_id', this.context.userId)
         .eq('type', 'PURCHASE')
         .gte('created_at', cutoffDate.toISOString())
         .order('created_at', { ascending: false })
@@ -407,14 +406,12 @@ export class HppCalculatorService {
    * Save HPP calculation to database
    */
   private async saveHppCalculation(
-    supabase: SupabaseClient<Database>,
-    result: HppCalculationResult,
-    userId: string
+    result: HppCalculationResult
   ): Promise<void> {
     try {
       const calculationData: Insert<'hpp_calculations'> = {
         recipe_id: result.recipe_id,
-        user_id: userId,
+        user_id: this.context.userId,
         calculation_date: new Date().toISOString().split('T')[0] ?? null,
         material_cost: result.material_cost,
         labor_cost: result.labor_cost,
@@ -426,7 +423,7 @@ export class HppCalculatorService {
         notes: `Auto-calculated HPP for ${result.production_quantity} servings`
       }
 
-      const { error } = await supabase
+      const { error } = await this.context.supabase
         .from('hpp_calculations')
         .insert(calculationData)
 
@@ -435,11 +432,11 @@ export class HppCalculatorService {
       }
 
       // Update recipe with latest cost
-      await supabase
+      await this.context.supabase
         .from('recipes')
         .update({ cost_per_unit: result.cost_per_unit })
         .eq('id', result.recipe_id)
-        .eq('user_id', userId)
+        .eq('user_id', this.context.userId)
 
       this.logger.info({ recipe_id: result.recipe_id }, 'HPP calculation saved')
 
@@ -453,16 +450,14 @@ export class HppCalculatorService {
    * Get latest HPP for a recipe
    */
   async getLatestHpp(
-    supabase: SupabaseClient<Database>,
-    recipeId: string,
-    userId: string
+    recipeId: string
   ): Promise<Row<'hpp_calculations'> | null> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await this.context.supabase
         .from('hpp_calculations')
         .select()
         .eq('recipe_id', recipeId)
-        .eq('user_id', userId)
+        .eq('user_id', this.context.userId)
         .order('calculation_date', { ascending: false })
         .limit(1)
         .single()

@@ -11,17 +11,17 @@ import type { SupabaseClient } from '@supabase/supabase-js'
  * Handles automatic HPP recalculations when upstream data changes
  */
 export class HppAutomation {
-  private readonly calculator = new HppCalculatorService()
-
-  constructor() {}
-
   async recalculateRecipe(
     supabase: SupabaseClient<Database>,
     recipeId: string,
     userId: string
   ) {
     automationLogger.info({ recipeId, userId }, 'Starting automated HPP recalculation')
-    const result = await this.calculator.calculateRecipeHpp(supabase, recipeId, userId)
+    const calculator = new HppCalculatorService({
+      userId,
+      supabase
+    })
+    const result = await calculator.calculateRecipeHpp(recipeId)
     automationLogger.info({ recipeId, total_hpp: result.total_hpp }, 'HPP recalculation completed')
     return result
   }

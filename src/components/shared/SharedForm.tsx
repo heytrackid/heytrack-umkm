@@ -1,14 +1,15 @@
  
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from '@/components/icons'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, type DefaultValues, type FieldValues, type Path, type PathValue, type Resolver, type UseFormProps } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FormField } from '@/components/ui/crud-form'
 import { handleError } from '@/lib/error-handling'
+import { cn } from '@/lib/utils'
 
 import type { z } from 'zod'
 
@@ -104,17 +105,17 @@ export const SharedForm = <T extends FieldValues>({
   return (
     <Card className={className}>
       {title && (
-        <CardHeader className={compact ? 'p-4' : ''}>
-          <CardTitle className={compact ? 'text-lg' : ''}>{title}</CardTitle>
+        <CardHeader className={cn(compact && "p-4")}>
+          <CardTitle className={cn(compact && "text-lg")}>{title}</CardTitle>
           {description && (
-            <p className={`text-sm text-muted-foreground ${compact ? 'text-xs' : ''}`}>
+            <p className={cn("text-sm text-muted-foreground", compact && "text-xs")}>
               {description}
             </p>
           )}
         </CardHeader>
       )}
 
-      <CardContent className={compact ? 'p-4' : ''}>
+      <CardContent className={cn(compact && "p-4")}>
         <form onSubmit={onFormSubmit} className="space-y-6">
           {sections.map((section, sectionIndex) => (
             <div key={sectionIndex} className="space-y-4">
@@ -138,7 +139,7 @@ export const SharedForm = <T extends FieldValues>({
                   return (
                     <div
                       key={fieldIndex}
-                      className={field['type'] === 'textarea' ? 'md:col-span-2' : ''}
+                      className={cn(field['type'] === 'textarea' && "md:col-span-2")}
                     >
         <FormField
           label={field.label}

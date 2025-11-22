@@ -4,7 +4,7 @@ export const runtime = 'nodejs'
 
 import { apiLogger } from '@/lib/logger'
 import { SecurityPresets } from '@/utils/security/api-middleware'
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core'
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import type { NextResponse } from 'next/server'

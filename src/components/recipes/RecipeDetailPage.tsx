@@ -3,37 +3,37 @@
 import {
     Calculator,
     ChefHat,
+    ChevronDown,
+    ChevronUp,
     Clock,
     Edit,
+    Factory,
     Printer,
     Share2,
     Trash2,
     Users,
-    Factory,
-    ChevronDown,
-    ChevronUp,
 } from '@/components/icons'
 import { OptimizedImage } from '@/components/ui/optimized-image'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 
+import { ProductionScaler } from '@/components/recipes/ProductionScaler'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DeleteModal } from '@/components/ui/index'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ListSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
-import { ProductionScaler } from '@/components/recipes/ProductionScaler'
+import { successToast } from '@/components/ui/toast'
 import { useAuth } from '@/hooks/index'
 import { useDeleteRecipe, useRecipe } from '@/hooks/useRecipes'
-import { successToast } from '@/components/ui/toast'
 import { handleError } from '@/lib/error-handling'
 
 import type { RecipeInstruction } from '@/app/recipes/ai-generator/components/types'
-import type { Ingredient } from '@/types/database'
-import { isNonNull } from '@/types/shared/guards'
-import type { RecipeIngredientWithDetails } from '@/types/query-results'
 import { PageHeader } from '@/components/layout/PageHeader'
+import type { Ingredient } from '@/types/database'
+import type { RecipeIngredientWithDetails } from '@/types/query-results'
+import { isNonNull } from '@/types/shared/guards'
 
 // Type for ingredient with only required fields for display
 type IngredientDisplay = Pick<Ingredient, 'id' | 'name' | 'price_per_unit' | 'unit' | 'weighted_average_cost'>
@@ -44,7 +44,7 @@ interface RecipeDetailPageProps {
     recipeId: string
 }
 
-export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
+const RecipeDetailPageComponent = ({ recipeId }: RecipeDetailPageProps) => {
     const router = useRouter()
     const { isLoading: authLoading } = useAuth()
 
@@ -56,13 +56,18 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
     const { data: recipe, isLoading: loading, error } = useRecipe(recipeId)
     const deleteRecipeMutation = useDeleteRecipe()
 
-    const breadcrumbs = [{ label: 'Recipes', href: '/recipes' }, { label: recipe?.name || 'Recipe' }]
-    const action = (
+    // Memoize breadcrumbs and action
+    const breadcrumbs = useMemo(() => [
+        { label: 'Recipes', href: '/recipes' }, 
+        { label: recipe?.name || 'Recipe' }
+    ], [recipe?.name])
+    
+    const action = useMemo(() => (
       <Button variant="outline" onClick={() => router.push(`/recipes/${recipeId}/edit`)}>
         <Edit className="w-4 h-4 mr-2" />
         Edit
       </Button>
-    )
+    ), [router, recipeId])
 
     // Handle error state
     useEffect(() => {
@@ -502,3 +507,6 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
         </div>
     )
 }
+
+// Memoized export for performance
+export const RecipeDetailPage = memo(RecipeDetailPageComponent)

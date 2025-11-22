@@ -1,12 +1,11 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { apiLogger } from '@/lib/logger'
+import { BaseService, type ServiceContext } from '@/services/base'
 
 import type {
-  OperatingExpenseBreakdownEntry,
-  ProductProfitabilityEntry,
-  ProfitTrends,
+    OperatingExpenseBreakdownEntry,
+    ProductProfitabilityEntry,
+    ProfitTrends,
 } from '@/types/features/profit-report'
-import type { Database } from '@/types/database'
 
 
 
@@ -117,29 +116,31 @@ export interface SalesReport {
   }>
 }
 
-export class ReportService {
-  constructor(private supabase: SupabaseClient<Database>) {}
+export class ReportService extends BaseService {
+  constructor(context: ServiceContext) {
+    super(context)
+  }
 
-  async getInventoryReport(userId: string): Promise<InventoryReport> {
+  async getInventoryReport(): Promise<InventoryReport> {
     try {
       // Get all ingredients with stock info
-      const { data: ingredients, error } = await this.supabase
-        .from('ingredients')
-        .select(`
-          id,
-          name,
-          category,
-          current_stock,
-          reorder_point,
-          price_per_unit,
-          unit
-        `)
-        .eq('user_id', userId)
-        .eq('is_active', true)
-        .order('name')
+      const { data: ingredients, error } = await this.context.supabase
+          .from('ingredients')
+          .select(`
+            id,
+            name,
+            category,
+            current_stock,
+            reorder_point,
+            price_per_unit,
+            unit
+          `)
+          .eq('user_id', this.context.userId)
+          .eq('is_active', true)
+          .order('name')
 
       if (error) {
-        apiLogger.error({ error, userId }, 'Failed to fetch ingredients for inventory report')
+        apiLogger.error({ error, userId: this.context.userId }, 'Failed to fetch ingredients for inventory report')
         throw error
       }
 
@@ -197,13 +198,12 @@ export class ReportService {
         }
       }
     } catch (error) {
-      apiLogger.error({ error, userId }, 'Failed to generate inventory report')
+      apiLogger.error({ error, userId: this.context.userId }, 'Failed to generate inventory report')
       throw error
     }
   }
 
   async getProfitReport(
-    userId: string,
     filters: {
       startDate?: string
       endDate?: string
@@ -218,7 +218,7 @@ export class ReportService {
 
     try {
       // Get orders in date range
-      const { data: orders, error: ordersError } = await this.supabase
+      const { data: orders, error: ordersError } = await this.context.supabase
         .from('orders')
         .select(`
           id,
@@ -235,13 +235,13 @@ export class ReportService {
             )
           )
         `)
-        .eq('user_id', userId)
+        .eq('user_id', this.context.userId)
         .gte('created_at', start.toISOString())
         .lte('created_at', end.toISOString())
         .eq('status', 'DELIVERED')
 
       if (ordersError) {
-        apiLogger.error({ error: ordersError, userId }, 'Failed to fetch orders for profit report')
+        apiLogger.error({ error: ordersError, userId: this.context.userId }, 'Failed to fetch orders for profit report')
         throw ordersError
       }
 
@@ -306,15 +306,15 @@ export class ReportService {
       }
 
       // Get operating expenses
-      const { data: expenses, error: expensesError } = await this.supabase
+      const { data: expenses, error: expensesError } = await this.context.supabase
         .from('financial_records')
         .select('amount, category, description')
-        .eq('user_id', userId)
+        .eq('user_id', this.context.userId)
         .gte('date', start.toISOString())
         .lte('date', end.toISOString())
 
       if (expensesError) {
-        apiLogger.error({ error: expensesError, userId }, 'Failed to fetch expenses for profit report')
+        apiLogger.error({ error: expensesError, userId: this.context.userId }, 'Failed to fetch expenses for profit report')
         throw expensesError
       }
 
@@ -334,7 +334,7 @@ export class ReportService {
       const previousPeriodEnd = new Date(end)
       previousPeriodEnd.setMonth(previousPeriodEnd.getMonth() - 1)
 
-      const { data: previousOrders } = await this.supabase
+      const { data: previousOrders } = await this.context.supabase
         .from('orders')
         .select(`
           total_amount,
@@ -343,7 +343,7 @@ export class ReportService {
             recipes (cost_per_unit)
           )
         `)
-        .eq('user_id', userId)
+        .eq('user_id', this.context.userId)
         .gte('created_at', previousPeriodStart.toISOString())
         .lte('created_at', previousPeriodEnd.toISOString())
         .eq('status', 'DELIVERED')
@@ -430,7 +430,7 @@ export class ReportService {
         insights
       }
     } catch (error) {
-      apiLogger.error({ error, userId, filters }, 'Failed to generate profit report')
+      apiLogger.error({ error, userId: this.context.userId, filters }, 'Failed to generate profit report')
       throw error
     }
   }
@@ -556,7 +556,6 @@ export class ReportService {
   }
 
   async getSalesReport(
-    userId: string,
     filters: {
       startDate?: string
       endDate?: string
@@ -569,7 +568,7 @@ export class ReportService {
 
     try {
       // Get orders in date range
-      const { data: orders, error: ordersError } = await this.supabase
+      const { data: orders, error: ordersError } = await this.context.supabase
         .from('orders')
         .select(`
           id,
@@ -586,13 +585,13 @@ export class ReportService {
             )
           )
         `)
-        .eq('user_id', userId)
+        .eq('user_id', this.context.userId)
         .gte('created_at', start.toISOString())
         .lte('created_at', end.toISOString())
         .eq('status', 'DELIVERED')
 
       if (ordersError) {
-        apiLogger.error({ error: ordersError, userId }, 'Failed to fetch orders for sales report')
+        apiLogger.error({ error: ordersError, userId: this.context.userId }, 'Failed to fetch orders for sales report')
         throw ordersError
       }
 
@@ -679,7 +678,7 @@ export class ReportService {
         productPerformance
       }
     } catch (error) {
-      apiLogger.error({ error, userId, filters }, 'Failed to generate sales report')
+      apiLogger.error({ error, userId: this.context.userId, filters }, 'Failed to generate sales report')
       throw error
     }
   }

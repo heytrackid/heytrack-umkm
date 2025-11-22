@@ -3,7 +3,6 @@
 
 import { Check, Copy, MessageCircle, Send } from '@/components/icons';
 import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,9 +14,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useSettings } from '@/contexts/settings-context';
-import { handleError } from '@/lib/error-handling'
+import { useToast } from '@/hooks/use-toast';
 import type { OrderData } from '@/lib/communications/types';
 import { WhatsAppService } from '@/lib/communications/whatsapp';
+import { handleError } from '@/lib/error-handling';
 
 
 
@@ -50,6 +50,7 @@ export const WhatsAppFollowUp = ({
   onSent
 }: WhatsAppFollowUpProps) => {
   const { formatCurrency } = useSettings();
+  const { toast } = useToast();
   const [selectedTemplate, setSelectedTemplate] = useState<string>('order_confirmation');
   const [customMessage, setCustomMessage] = useState('');
   const [generatedMessage, setGeneratedMessage] = useState('');
@@ -147,7 +148,10 @@ export const WhatsAppFollowUp = ({
     try {
       await navigator.clipboard.writeText(text);
       setCopied(type);
-      toast.success('Berhasil disalin!');
+      toast({
+        title: 'Berhasil ✓',
+        description: 'Teks berhasil disalin ke clipboard',
+      });
       setTimeout(() => setCopied(null), 2000);
     } catch (error: unknown) {
       handleError(error as Error, 'WhatsApp FollowUp: copy text', true, 'Gagal menyalin text');
@@ -168,7 +172,10 @@ export const WhatsAppFollowUp = ({
       onSent(type, message);
     }
 
-    toast.success(`WhatsApp ${type === 'business' ? 'Business' : ''} terbuka!`);
+    toast({
+      title: 'Berhasil ✓',
+      description: `WhatsApp ${type === 'business' ? 'Business' : ''} terbuka!`,
+    });
   };
 
   useEffect(() => {

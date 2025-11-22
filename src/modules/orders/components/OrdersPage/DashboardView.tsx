@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
+import { cn } from '@/lib/utils'
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
 import { ORDER_STATUS_LABELS } from '@/modules/orders/types'
 
@@ -80,7 +81,7 @@ export const DashboardView = ({ orders, onCreateOrder }: DashboardViewProps) => 
                                     </div>
                                     <div className="text-right">
                                         <div className="font-medium">{formatCurrency(order.total_amount ?? 0)}</div>
-                                        <Badge className={`text-xs ${getStatusColor(order['status'])}`}>
+                                        <Badge className={cn("text-xs", getStatusColor(order['status']))}>
                                             {order['status'] ? ORDER_STATUS_LABELS[order['status']] : 'N/A'}
                                         </Badge>
                                     </div>
@@ -113,7 +114,7 @@ export const DashboardView = ({ orders, onCreateOrder }: DashboardViewProps) => 
                                     </div>
                                     <div className="w-full bg-muted rounded-full h-2">
                                         <div
-                                            className={`h-2 rounded-full ${config.color.replace('text-', 'bg-')}`}
+                                            className={cn("h-2 rounded-full", config.color.replace('text-', 'bg-'))}
                                             style={{ width: `${percentage}%` }}
                                         />
                                     </div>

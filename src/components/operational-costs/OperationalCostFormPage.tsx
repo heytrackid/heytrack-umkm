@@ -1,6 +1,4 @@
-import React from 'react';
-
-export const OperationalCostFormPage: React.FC = () => {
+export const OperationalCostFormPage = () => {
   return (
     <div>
       <h2>Operasional Biaya - Form</h2>
@@ -8,5 +6,3 @@ export const OperationalCostFormPage: React.FC = () => {
     </div>
   );
 };
-
-export default OperationalCostFormPage;

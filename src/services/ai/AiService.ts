@@ -1,9 +1,8 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { apiLogger } from '@/lib/logger'
-import { RateLimiter, RATE_LIMITS } from '@/lib/services/RateLimiter'
+import { RATE_LIMITS, RateLimiter } from '@/lib/services/RateLimiter'
+import { BaseService } from '@/services/base'
 import { InputSanitizer } from '@/utils/security/index'
 
-import type { Database } from '@/types/database'
 
 export interface ChatRequest {
   message: string
@@ -82,10 +81,13 @@ export interface AiSuggestions {
   }
 }
 
-export class AiService {
-  constructor(private supabase: SupabaseClient<Database>) {}
+export class AiService extends BaseService {
+  constructor(context: import('@/services/base').ServiceContext) {
+    super(context)
+  }
 
-  async chat(request: ChatRequest, userId: string): Promise<ChatResponse> {
+  async chat(request: ChatRequest): Promise<ChatResponse> {
+    const userId = this.context.userId
     const startTime = Date.now()
 
     // Rate limiting
@@ -137,7 +139,7 @@ export class AiService {
       let sessionId = session_id
       if (!sessionId) {
         // Create new session
-        const { data: session, error } = await this.supabase
+        const { data: session, error } = await this.context.supabase
           .from('chat_sessions')
           .insert({
             user_id: userId,
@@ -183,10 +185,11 @@ export class AiService {
     }
   }
 
-  async getContext(userId: string, page?: string): Promise<ContextInfo> {
+  async getContext(page?: string): Promise<ContextInfo> {
+    const userId = this.context.userId
     try {
       // Get recent activities
-      const { data: recentActivities } = await this.supabase
+      const { data: recentActivities } = await this.context.supabase
         .from('orders')
         .select('id, order_no, total_amount, created_at, status')
         .eq('user_id', userId)
@@ -194,20 +197,20 @@ export class AiService {
         .limit(5)
 
       // Get basic business data
-      const { data: recipes } = await this.supabase
+      const { data: recipes } = await this.context.supabase
         .from('recipes')
         .select('id, name')
         .eq('user_id', userId)
         .eq('is_active', true)
 
-      const { data: ingredients } = await this.supabase
+      const { data: ingredients } = await this.context.supabase
         .from('ingredients')
         .select('id, name')
         .eq('user_id', userId)
         .eq('is_active', true)
 
       // Get count of recipes with HPP calculations
-      const { data: hppData } = await this.supabase
+      const { data: hppData } = await this.context.supabase
         .from('hpp_calculations')
         .select('recipe_id')
         .eq('user_id', userId)
@@ -241,10 +244,11 @@ export class AiService {
     }
   }
 
-  async deleteContext(userId: string): Promise<void> {
+  async deleteContext(): Promise<void> {
+    const userId = this.context.userId
     try {
       // Clear user sessions (simple implementation)
-      await this.supabase
+      await this.context.supabase
         .from('chat_sessions')
         .update({ updated_at: new Date().toISOString() })
         .eq('user_id', userId)
@@ -256,7 +260,8 @@ export class AiService {
     }
   }
 
-  async generateRecipe(request: RecipeGenerationRequest, userId: string): Promise<RecipeGenerationResponse> {
+  async generateRecipe(request: RecipeGenerationRequest): Promise<RecipeGenerationResponse> {
+    const userId = this.context.userId
     const startTime = Date.now()
 
     try {
@@ -300,7 +305,8 @@ export class AiService {
     }
   }
 
-  async getSuggestions(userId: string): Promise<AiSuggestions> {
+  async getSuggestions(): Promise<AiSuggestions> {
+    const userId = this.context.userId
     try {
       // Generate data-driven suggestions based on business data
       const suggestions = await this.generateDataDrivenSuggestions(userId)
@@ -384,7 +390,7 @@ export class AiService {
   }
 
   private async saveMessage(sessionId: string, userId: string, role: 'user' | 'assistant', content: string): Promise<void> {
-    const { error } = await this.supabase
+    const { error } = await this.context.supabase
       .from('chat_messages')
       .insert({
         session_id: sessionId,
@@ -403,7 +409,7 @@ export class AiService {
     const suggestions: AiSuggestions['suggestions'] = []
 
     // Check if user has recipes
-    const { count: recipeCount } = await this.supabase
+    const { count: recipeCount } = await this.context.supabase
       .from('recipes')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', userId)
@@ -420,7 +426,7 @@ export class AiService {
     }
 
     // Check if user has recent orders
-    const { count: orderCount } = await this.supabase
+    const { count: orderCount } = await this.context.supabase
       .from('orders')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', userId)
@@ -437,7 +443,7 @@ export class AiService {
     }
 
     // Check low stock ingredients
-    const { data: lowStock } = await this.supabase
+    const { data: lowStock } = await this.context.supabase
       .from('ingredients')
       .select('name')
       .eq('user_id', userId)
@@ -458,7 +464,7 @@ export class AiService {
 
     // Check if user has uncalculated HPP
     if (recipeCount && recipeCount > 0) {
-      const { count: hppCount } = await this.supabase
+      const { count: hppCount } = await this.context.supabase
         .from('hpp_calculations')
         .select('id', { count: 'exact', head: true })
         .eq('user_id', userId)
@@ -479,7 +485,7 @@ export class AiService {
 
   private async analyzeBusinessHealth(userId: string): Promise<'excellent' | 'good' | 'needs_attention' | 'critical'> {
     // Simple business health analysis
-    const { data: orders } = await this.supabase
+    const { data: orders } = await this.context.supabase
       .from('orders')
       .select('status')
       .eq('user_id', userId)
@@ -504,7 +510,7 @@ export class AiService {
     price_per_unit: number
     unit: string
   }>> {
-    const { data: ingredients } = await this.supabase
+    const { data: ingredients } = await this.context.supabase
       .from('ingredients')
       .select('id, name, price_per_unit, unit')
       .eq('user_id', userId)
@@ -552,7 +558,7 @@ export class AiService {
 
   private async validateAndSaveRecipe(recipe: GeneratedRecipe, userId: string): Promise<unknown> {
     // Validate recipe and save to database
-    const { data, error } = await this.supabase
+    const { data, error } = await this.context.supabase
       .from('recipes')
       .insert({
         name: recipe.name,

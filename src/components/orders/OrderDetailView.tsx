@@ -1,20 +1,20 @@
 'use client'
 
 import {
+    AlertCircle,
     ArrowLeft,
-    Edit,
-    Trash2,
-    Phone,
-    MapPin,
     Calendar,
     Clock,
-    User,
-    Package,
     DollarSign,
+    Edit,
     FileText,
-    AlertCircle,
+    MapPin,
+    Package,
+    Phone,
     Printer,
-    Share2
+    Share2,
+    Trash2,
+    User
 } from '@/components/icons'
 import { useState } from 'react'
 
@@ -24,9 +24,10 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { useCurrency } from '@/hooks/useCurrency'
+import { cn } from '@/lib/utils'
 
 import { OrderStatusTimeline } from '@/components/orders/OrderStatusTimeline'
-import { getStatusInfo, getPaymentInfo, getPriorityInfo } from '@/components/orders/utils'
+import { getPaymentInfo, getPriorityInfo, getStatusInfo } from '@/components/orders/utils'
 
 import type { Order, OrderStatus, PaymentStatus, Priority } from '@/components/orders/types'
 
@@ -96,7 +97,7 @@ export const OrderDetailView = ({
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
                     <div>
-                        <h2 className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
+                        <h2 className={cn("font-bold", isMobile ? "text-xl" : "text-2xl")}>
                             {order['order_no']}
                         </h2>
                         <p className="text-sm text-muted-foreground">
@@ -138,7 +139,7 @@ export const OrderDetailView = ({
             </div>
 
             {/* Status Cards */}
-            <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
+            <div className={cn("grid gap-4", isMobile ? "grid-cols-1" : "grid-cols-3")}>
                 <Card>
                     <CardContent className="pt-6">
                         <div className="flex items-center gap-3">
@@ -194,7 +195,7 @@ export const OrderDetailView = ({
                 onStatusChange={onUpdateStatus}
             />
 
-            <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'lg:grid-cols-2'}`}>
+            <div className={cn("grid gap-6", isMobile ? "grid-cols-1" : "lg:grid-cols-2")}>
                 {/* Customer Information */}
                 <Card>
                     <CardHeader>

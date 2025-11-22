@@ -2,9 +2,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { createClientLogger } from '@/lib/client-logger'
 import { queryConfig } from '@/lib/query/query-config'
-import { buildApiUrl, fetchApi, postApi, putApi, deleteApi } from '@/lib/query/query-helpers'
+import { buildApiUrl, deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import { getErrorMessage } from '@/lib/type-guards'
 import type { Insert, Row, Update } from '@/types/database'
+import type { PaginationMeta } from '@/types/pagination'
 
 /**
  * React Query hooks for Customers
@@ -40,7 +41,7 @@ export function useCustomers(options?: UseCustomersOptions) {
 
   return useQuery({
     queryKey: ['customers', apiOptions],
-    queryFn: () => fetchApi<{ data: Customer[]; pagination: any }>(buildApiUrl('/api/customers', apiOptions as Record<string, string | number | boolean | null | undefined>)), // eslint-disable-line @typescript-eslint/no-explicit-any
+    queryFn: () => fetchApi<{ data: Customer[]; pagination: PaginationMeta }>(buildApiUrl('/api/customers', apiOptions as Record<string, string | number | boolean | null | undefined>)),
     ...queryConfig.queries.moderate,
   })
 }
@@ -52,7 +53,11 @@ export function useCustomers(options?: UseCustomersOptions) {
 export function useCustomersList(search?: string) {
   return useQuery({
     queryKey: ['customers-list', search],
-    queryFn: () => fetchApi<Customer[]>(buildApiUrl('/api/customers', { search: search || undefined } as Record<string, string | number | boolean | null | undefined>)),
+    queryFn: async () => {
+      const response = await fetchApi<{ data: Customer[] }>(buildApiUrl('/api/customers', { search: search || undefined, limit: 1000 } as Record<string, string | number | boolean | null | undefined>))
+      // Extract data array for backward compatibility
+      return Array.isArray(response) ? response : response.data
+    },
     ...queryConfig.queries.moderate,
   })
 }

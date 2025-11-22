@@ -13,7 +13,7 @@ import { PaginationQuerySchema } from '@/lib/validations'
 import { hppRecommendationUpdateSchema } from '@/lib/validations/domains/hpp'
 import { InputSanitizer } from '@/utils/security/index'
 
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core'
 
 const CreateHppRecommendationSchema = z.object({
   recipeId: z.string().uuid('Recipe ID harus valid'),

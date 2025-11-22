@@ -1,9 +1,9 @@
 
+import { handleError } from '@/lib/error-handling'
+import { deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import type { Insert, Row, Update } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { fetchApi, postApi, putApi, deleteApi } from '@/lib/query/query-helpers'
 import { toast } from 'sonner'
-import { handleError } from '@/lib/error-handling'
 
 
 
@@ -52,7 +52,11 @@ export function useIngredientPurchases(params?: {
 
   return useQuery<IngredientPurchaseWithDetails[]>({
     queryKey: ['ingredient-purchases', params],
-    queryFn: () => fetchApi<IngredientPurchaseWithDetails[]>(`/api/ingredient-purchases?${searchParams}`),
+    queryFn: async () => {
+      const response = await fetchApi<{ data: IngredientPurchaseWithDetails[] }>(`/api/ingredient-purchases?${searchParams}`)
+      // Extract data array if response has pagination structure
+      return Array.isArray(response) ? response : response.data
+    },
   })
 }
 
@@ -140,7 +144,11 @@ export function usePurchaseStats(params?: { startDate?: string; endDate?: string
 export function useIngredientPurchaseHistory(ingredientId: string | null) {
   return useQuery<IngredientPurchaseWithDetails[]>({
     queryKey: ['ingredient-purchase-history', ingredientId],
-    queryFn: () => fetchApi<IngredientPurchaseWithDetails[]>(`/api/ingredients/${ingredientId}/purchase-history`),
+    queryFn: async () => {
+      const response = await fetchApi<{ data: IngredientPurchaseWithDetails[] }>(`/api/ingredients/${ingredientId}/purchase-history`)
+      // Extract data array if response has pagination structure
+      return Array.isArray(response) ? response : response.data
+    },
     enabled: !!ingredientId,
   })
 }

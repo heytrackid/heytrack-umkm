@@ -1,5 +1,4 @@
 // External libraries
-import { z } from 'zod'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 // Internal modules
@@ -16,7 +15,7 @@ import { apiLogger } from '@/lib/logger'
 
 // Types and schemas
 import type { Database, FinancialRecordInsert, FinancialRecordUpdate, OrderInsert, OrderStatus } from '@/types/database'
-import { OrderInsertSchema } from '@/lib/validations/domains/order'
+import { OrderInsertSchema, OrderListQuerySchema, type OrderListQuery } from '@/lib/validations/domains/order'
 
 // Services
 import { PricingAssistantService } from '@/services/orders/PricingAssistantService'
@@ -28,17 +27,6 @@ import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 export const runtime = 'nodejs'
 
 type TypedSupabaseClient = SupabaseClient<Database>
-
-const OrderListQuerySchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().positive().optional().default(999999),
-  search: z.string().optional(),
-  sort_by: z.string().optional(),
-  sort_order: z.enum(['asc', 'desc']).optional(),
-  status: z.string().optional(),
-  from: z.string().optional(),
-  to: z.string().optional(),
-})
 
 const normalizeDateValue = (value?: string | null) => {
   const trimmed = value?.trim()
@@ -102,7 +90,7 @@ export const GET = createApiRoute(
     querySchema: OrderListQuerySchema,
     securityPreset: SecurityPresets.basic(),
   },
-  async (context: RouteContext, validatedQuery?: z.infer<typeof OrderListQuerySchema>) => {
+  async (context: RouteContext, validatedQuery?: OrderListQuery) => {
     const { params } = context
     const { slug, hasId } = parseRouteParams(params)
 

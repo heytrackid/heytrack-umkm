@@ -2,7 +2,7 @@
  
 
 import { AlertTriangle, Calculator, CheckCircle, Lightbulb, Target, Zap } from '@/components/icons'
-import { useCallback, useEffect, useState, type FC } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
@@ -38,7 +38,7 @@ export interface SmartPricingAssistantProps {
   onPriceUpdate: (price: number, margin: number) => void
 }
 
-export const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPriceUpdate }) => {
+export const SmartPricingAssistant = ({ recipe, onPriceUpdate }: SmartPricingAssistantProps) => {
 
   const { formatCurrency } = useCurrency()
   const [analysis, setAnalysis] = useState<SmartPricingAnalysis | null>(null)

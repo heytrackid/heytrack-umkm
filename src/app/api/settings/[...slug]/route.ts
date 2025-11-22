@@ -10,6 +10,8 @@ import { z } from 'zod'
 
 // Types and schemas
 // Constants and config
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
+
 export const runtime = 'nodejs'
 
 const BusinessSchema = z.object({
@@ -260,7 +262,7 @@ async function updateBusinessHandler(context: RouteContext, request: Request): P
     return handleAPIError(new Error('Failed to update settings'), 'API Route')
   }
 
-  return createSuccessResponse(data.settings_data?.general, 'Business settings updated successfully')
+  return createSuccessResponse(data.settings_data?.general, SUCCESS_MESSAGES.BUSINESS_SETTINGS_UPDATED)
 }
 
 // Preferences handlers
@@ -346,7 +348,7 @@ async function updatePreferencesHandler(context: RouteContext, request: Request)
     return handleAPIError(new Error('Failed to update settings'), 'API Route')
   }
 
-  return createSuccessResponse(data.settings_data, 'Preferences updated successfully')
+  return createSuccessResponse(data.settings_data, SUCCESS_MESSAGES.PREFERENCES_UPDATED)
 }
 
 // Profile handlers
@@ -496,5 +498,5 @@ async function updateProfileHandler(context: RouteContext, request: Request): Pr
       .eq('user_id', user.id)
   }
 
-  return createSuccessResponse(newUserSettings, 'Profile updated successfully')
+  return createSuccessResponse(newUserSettings, SUCCESS_MESSAGES.PROFILE_UPDATED)
 }

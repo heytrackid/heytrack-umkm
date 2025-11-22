@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { cn } from '@/lib/utils'
 
 import type { Row } from '@/types/database'
 
@@ -123,7 +124,10 @@ export const CustomerSection = ({
                             if (fieldErrors['customer_name']) { onClearError('customer_name') }
                         }}
                         required
-                        className={`mt-1 ${fieldErrors['customer_name'] ? 'border-destructive focus-visible:ring-destructive' : ''}`}
+                        className={cn(
+                            "mt-1",
+                            fieldErrors['customer_name'] && "border-destructive focus-visible:ring-destructive"
+                        )}
                         aria-invalid={Boolean(fieldErrors['customer_name'])}
                     />
                     {fieldErrors['customer_name'] && (

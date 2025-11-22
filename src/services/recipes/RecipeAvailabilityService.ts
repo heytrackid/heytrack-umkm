@@ -1,5 +1,6 @@
 import { dbLogger } from '@/lib/logger'
 import type { RecipeOption } from '@/modules/orders/types'
+import { BaseService } from '@/services/base'
 import type { Json, Row } from '@/types/database'
 import { hasKey, isArray, isRecord, safeGet, typed } from '@/types/type-utilities'
 import { createClient } from '@/utils/supabase/server'
@@ -56,7 +57,10 @@ export interface RecipeAvailabilityResult {
   warnings: string[]
 }
 
-export class RecipeAvailabilityService {
+export class RecipeAvailabilityService extends BaseService {
+  constructor(context: import('@/services/base').ServiceContext) {
+    super(context)
+  }
   /**
    * Check recipe availability considering reserved stock
    */

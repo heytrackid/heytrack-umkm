@@ -1,15 +1,15 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-import { z } from 'zod'
 import { SecurityPresets } from '@/utils/security/api-middleware'
+import { z } from 'zod'
 
+import { createSuccessResponse } from '@/lib/api-core'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { ERROR_MESSAGES } from '@/lib/constants/messages'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger, logError } from '@/lib/logger'
 import { ProductionBatchService } from '@/services/production/ProductionBatchService'
-import { createSuccessResponse } from '@/lib/api-core/responses'
-import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import type { NextResponse } from 'next/server'
 
 const parseISODate = (value: unknown): string | undefined => {
@@ -27,12 +27,18 @@ const CreateBatchSchema = z.object({
 
 // GET /api/production/suggestions - Get suggested production batches
 async function getHandler(context: RouteContext): Promise<NextResponse> {
-  const { user, request } = context
+  const { user } = context
 
   try {
-    apiLogger.info({ url: request.url }, 'GET /api/production/suggestions - Request received')
+    apiLogger.info({ userId: user.id }, 'GET /api/production/suggestions - Request received')
 
-    const suggestions = await ProductionBatchService.getSuggestedBatches(user.id)
+    const productionBatchService = new ProductionBatchService({
+      userId: user.id,
+      supabase: context.supabase,
+      audit: true
+    })
+
+    const suggestions = await productionBatchService.getSuggestedBatches()
 
     apiLogger.info({
       userId: user.id,
@@ -50,7 +56,7 @@ async function getHandler(context: RouteContext): Promise<NextResponse> {
     })
   } catch (error) {
     logError(apiLogger, error, 'GET /api/production/suggestions - Unexpected error', {
-      url: request.url,
+      userId: user.id,
     })
     return handleAPIError(error, 'GET /api/production/suggestions')
   }
@@ -58,10 +64,10 @@ async function getHandler(context: RouteContext): Promise<NextResponse> {
 
 // POST /api/production/suggestions - Create batch from suggestion
 async function postHandler(context: RouteContext, _query?: never, body?: z.infer<typeof CreateBatchSchema>): Promise<NextResponse> {
-  const { user, request } = context
+  const { user } = context
 
   try {
-    apiLogger.info({ url: request.url }, 'POST /api/production/suggestions - Request received')
+    apiLogger.info({ userId: user.id }, 'POST /api/production/suggestions - Request received')
 
     if (!body) {
       return handleAPIError(new Error('Request body is required'), 'API Route')
@@ -69,9 +75,14 @@ async function postHandler(context: RouteContext, _query?: never, body?: z.infer
 
     const { order_ids, planned_date } = body
 
-    const result = await ProductionBatchService.createBatchFromOrders(
+    const productionBatchService = new ProductionBatchService({
+      userId: user.id,
+      supabase: context.supabase,
+      audit: true
+    })
+
+    const result = await productionBatchService.createBatchFromOrders(
       order_ids,
-      user.id,
       planned_date
     )
 
@@ -94,7 +105,7 @@ async function postHandler(context: RouteContext, _query?: never, body?: z.infer
     }, 'Batch created successfully', undefined, 201)
   } catch (error) {
     logError(apiLogger, error, 'POST /api/production/suggestions - Unexpected error', {
-      url: request.url,
+      userId: user.id,
     })
     return handleAPIError(error, 'POST /api/production/suggestions')
   }

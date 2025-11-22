@@ -1,12 +1,12 @@
+import { BaseService, type ServiceContext } from '@/services/base'
 import type { Json } from '@/types/database'
 import type {
-  BusinessContext,
-  ChatMessage,
-  ChatSession,
-  MessageMetadata,
-  SessionListItem,
+    BusinessContext,
+    ChatMessage,
+    ChatSession,
+    MessageMetadata,
+    SessionListItem,
 } from '@/types/features/chat'
-import type { TypedSupabaseClient } from '@/types/type-utilities'
 
 import { logger } from '@/lib/logger'
 
@@ -28,60 +28,62 @@ interface CachedConversationContext {
   messageCount: number
 }
 
-export class ChatSessionService {
+export class ChatSessionService extends BaseService {
   private static readonly contextCache = new Map<string, CachedConversationContext>()
   private static readonly CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
+  constructor(context: ServiceContext) {
+    super(context)
+  }
   /**
    * Create a new chat session
    */
-  static async createSession(
-    supabase: TypedSupabaseClient,
-    userId: string,
+  async createSession(
     title?: string,
     contextSnapshot?: Record<string, unknown>
   ): Promise<ChatSession> {
+    return this.executeWithAudit(
+      async () => {
+        const serializedSnapshot = contextSnapshot ? JSON.parse(JSON.stringify(contextSnapshot)) as Json : null
 
-    const serializedSnapshot = contextSnapshot ? JSON.parse(JSON.stringify(contextSnapshot)) as Json : null
+        const { data, error } = await this.context.supabase
+          .from('chat_sessions')
+          .insert({
+            user_id: this.context.userId,
+            ...(title && { title }),
+            context_snapshot: serializedSnapshot,
+          })
+          .select()
+          .single();
 
-    const { data, error } = await supabase
-      .from('chat_sessions')
-      .insert({
-        user_id: userId,
-        ...(title && { title }),
-        context_snapshot: serializedSnapshot,
-      })
-      .select()
-      .single();
+        if (error) {
+          logger.error({ error, userId: this.context.userId }, 'Failed to create chat session');
+          throw new Error('Failed to create chat session');
+        }
 
-    if (error) {
-      logger.error({ error, userId }, 'Failed to create chat session');
-      throw new Error('Failed to create chat session');
-    }
+        logger.info({ sessionId: data.id, userId: this.context.userId }, 'Chat session created');
 
-    logger.info({ sessionId: data.id, userId }, 'Chat session created');
-
-    return {
-      ...data,
-      created_at: data.created_at ?? new Date().toISOString(),
-      updated_at: data.updated_at ?? new Date().toISOString(),
-      context_snapshot: (data.context_snapshot as BusinessContext | null) ?? {},
-    }
+        return {
+          ...data,
+          created_at: data.created_at ?? new Date().toISOString(),
+          updated_at: data.updated_at ?? new Date().toISOString(),
+          context_snapshot: (data.context_snapshot as BusinessContext | null) ?? {},
+        }
+      },
+      'CREATE',
+      'CHAT_SESSION'
+    )
   }
 
   /**
    * Get a session by ID
    */
-  static async getSession(
-    supabase: TypedSupabaseClient,
-    sessionId: string,
-    userId: string
-  ): Promise<ChatSession> {
-
-    const { data, error } = await supabase
+  async getSession(sessionId: string): Promise<ChatSession> {
+    const { data, error } = await this.context.supabase
       .from('chat_sessions')
       .select('id, user_id, title, context_snapshot, created_at, updated_at, deleted_at')
       .eq('id', sessionId)
-      .eq('user_id', userId)
+      .eq('user_id', this.context.userId)
       .is('deleted_at', null)
       .single();
 
@@ -100,28 +102,23 @@ export class ChatSessionService {
   /**
    * List user's sessions
    */
-  static async listSessions(
-    supabase: TypedSupabaseClient,
-    userId: string,
-    limit = 50
-  ): Promise<SessionListItem[]> {
-
-    const { data: sessions, error } = await supabase
+  async listSessions(limit = 50): Promise<SessionListItem[]> {
+    const { data: sessions, error } = await this.context.supabase
       .from('chat_sessions')
       .select('id, title, created_at, updated_at')
-      .eq('user_id', userId)
+      .eq('user_id', this.context.userId)
       .is('deleted_at', null)
       .order('updated_at', { ascending: false })
       .limit(limit);
 
     if (error) {
-      logger.error({ error, userId }, 'Failed to list sessions');
+      logger.error({ error, userId: this.context.userId }, 'Failed to list sessions');
       throw new Error('Failed to list sessions');
     }
 
     // Get message counts and last messages
     const sessionIds = sessions.map((s) => s['id']);
-    const { data: messages } = await supabase
+    const { data: messages } = await this.context.supabase
       .from('chat_messages')
       .select('session_id, content, created_at')
       .in('session_id', sessionIds)
@@ -151,9 +148,7 @@ export class ChatSessionService {
   /**
    * Get chatbot analytics for a user
    */
-  static async getChatAnalytics(
-    supabase: TypedSupabaseClient,
-    userId: string,
+  async getChatAnalytics(
     days = 30
   ): Promise<{
     totalSessions: number
@@ -167,10 +162,10 @@ export class ChatSessionService {
     startDate.setDate(startDate.getDate() - days)
 
     // Get sessions in date range
-    const { data: sessions } = await supabase
+    const { data: sessions } = await this.context.supabase
       .from('chat_sessions')
       .select('id, created_at')
-      .eq('user_id', userId)
+      .eq('user_id', this.context.userId)
       .gte('created_at', startDate.toISOString())
 
     if (!sessions || sessions.length === 0) {
@@ -187,7 +182,7 @@ export class ChatSessionService {
     const sessionIds = sessions.map(s => s.id)
 
     // Get messages for analytics
-    const { data: messages } = await supabase
+    const { data: messages } = await this.context.supabase
       .from('chat_messages')
       .select('content, metadata, created_at, role')
       .in('session_id', sessionIds)
@@ -197,7 +192,7 @@ export class ChatSessionService {
     const avgSessionLength = totalMessages / sessions.length
 
     // Analyze topics
-    const topics = this.extractTopics(messages?.map(m => ({ content: m.content } as ChatMessage)) ?? [])
+    const topics = ChatSessionService.extractTopics(messages?.map(m => ({ content: m.content } as ChatMessage)) ?? [])
     const topicCount = new Map<string, number>()
     topics.forEach(topic => {
       topicCount.set(topic, (topicCount.get(topic) ?? 0) + 1)
@@ -225,7 +220,7 @@ export class ChatSessionService {
       if (m.content) msg.content = m.content
       return msg
     })
-    const userSatisfaction = this.calculateUserSatisfaction(mappedMessages)
+    const userSatisfaction = ChatSessionService.calculateUserSatisfaction(mappedMessages)
 
     return {
       totalSessions: sessions.length,
@@ -275,100 +270,106 @@ export class ChatSessionService {
   /**
    * Update session title
    */
-  static async updateSessionTitle(
-    supabase: TypedSupabaseClient,
-    sessionId: string,
-    userId: string,
-    title: string
-  ): Promise<void> {
+  async updateSessionTitle(sessionId: string, title: string): Promise<void> {
+    return this.executeWithAudit(
+      async () => {
+        const { error } = await this.context.supabase
+          .from('chat_sessions')
+          .update({ title })
+          .eq('id', sessionId)
+          .eq('user_id', this.context.userId);
 
-    const { error } = await supabase
-      .from('chat_sessions')
-      .update({ title })
-      .eq('id', sessionId)
-      .eq('user_id', userId);
+        if (error) {
+          logger.error({ error, sessionId }, 'Failed to update session title');
+          throw new Error('Failed to update session title');
+        }
 
-    if (error) {
-      logger.error({ error, sessionId }, 'Failed to update session title');
-      throw new Error('Failed to update session title');
-    }
-
-    logger.info({ sessionId, title }, 'Session title updated');
+        logger.info({ sessionId, title }, 'Session title updated');
+      },
+      'UPDATE',
+      'CHAT_SESSION',
+      sessionId
+    )
   }
 
   /**
    * Soft delete a session
    */
-  static async deleteSession(
-    supabase: TypedSupabaseClient,
-    sessionId: string,
-    userId: string
-  ): Promise<void> {
+  async deleteSession(sessionId: string): Promise<void> {
+    return this.executeWithAudit(
+      async () => {
+        const { error } = await this.context.supabase
+          .from('chat_sessions')
+          .update({ deleted_at: new Date().toISOString() })
+          .eq('id', sessionId)
+          .eq('user_id', this.context.userId);
 
-    const { error } = await supabase
-      .from('chat_sessions')
-      .update({ deleted_at: new Date().toISOString() })
-      .eq('id', sessionId)
-      .eq('user_id', userId);
+        if (error) {
+          logger.error({ error, sessionId }, 'Failed to delete session');
+          throw new Error('Failed to delete session');
+        }
 
-    if (error) {
-      logger.error({ error, sessionId }, 'Failed to delete session');
-      throw new Error('Failed to delete session');
-    }
-
-    logger.info({ sessionId, userId }, 'Session deleted');
+        logger.info({ sessionId, userId: this.context.userId }, 'Session deleted');
+      },
+      'DELETE',
+      'CHAT_SESSION',
+      sessionId
+    )
   }
 
   /**
    * Add a message to a session
    */
-  static async addMessage(
-    supabase: TypedSupabaseClient,
+  async addMessage(
     sessionId: string,
     role: 'user' | 'assistant',
     content: string,
     metadata?: MessageMetadata
   ): Promise<ChatMessage> {
+    return this.executeWithAudit(
+      async () => {
+        const { data, error } = await this.context.supabase
+          .from('chat_messages')
+          .insert({
+            session_id: sessionId,
+            role,
+            content,
+            metadata: JSON.parse(JSON.stringify(metadata)) as Json,
+          })
+          .select()
+          .single();
 
-    const { data, error } = await supabase
-      .from('chat_messages')
-      .insert({
-        session_id: sessionId,
-        role,
-        content,
-        metadata: JSON.parse(JSON.stringify(metadata)) as Json,
-      })
-      .select()
-      .single();
+        if (error) {
+          logger.error({ error, sessionId }, 'Failed to add message');
+          throw new Error('Failed to add message');
+        }
 
-    if (error) {
-      logger.error({ error, sessionId }, 'Failed to add message');
-      throw new Error('Failed to add message');
-    }
+        // Update session's updated_at timestamp
+        await this.context.supabase
+          .from('chat_sessions')
+          .update({ updated_at: new Date().toISOString() })
+          .eq('id', sessionId);
 
-    // Update session's updated_at timestamp
-    await supabase
-      .from('chat_sessions')
-      .update({ updated_at: new Date().toISOString() })
-      .eq('id', sessionId);
+        // Invalidate context cache since conversation has changed
+        ChatSessionService.invalidateContextCache(sessionId);
 
-    // Invalidate context cache since conversation has changed
-    this.invalidateContextCache(sessionId);
-
-    return {
-      ...data,
-      metadata: (data.metadata as MessageMetadata | null) ?? {},
-    } as ChatMessage
+        return {
+          ...data,
+          metadata: (data.metadata as MessageMetadata | null) ?? {},
+        } as ChatMessage
+      },
+      'CREATE',
+      'CHAT_MESSAGE',
+      sessionId
+    )
   }
 
   /**
    * Get conversation context for AI processing
    * Returns recent messages with context awareness
    */
-  static async getConversationContext(
-    supabase: TypedSupabaseClient,
+  async getConversationContext(
     sessionId: string,
-    userId: string,
     maxMessages = 20
   ): Promise<{
     messages: ChatMessage[]
@@ -377,11 +378,11 @@ export class ChatSessionService {
     sentiment: 'positive' | 'neutral' | 'negative'
   }> {
     const cacheKey = `${sessionId}:${maxMessages}`
-    const cached = this.contextCache.get(cacheKey)
+    const cached = ChatSessionService.contextCache.get(cacheKey)
     const now = Date.now()
 
     // Check if cache is valid
-    if (cached && (now - cached.timestamp) < this.CACHE_TTL && cached.messageCount === maxMessages) {
+    if (cached && (now - cached.timestamp) < ChatSessionService.CACHE_TTL && cached.messageCount === maxMessages) {
       return {
         messages: cached.messages,
         summary: cached.summary,
@@ -390,14 +391,14 @@ export class ChatSessionService {
       }
     }
 
-    const messages = await this.getMessages(supabase, sessionId, userId, maxMessages)
+    const messages = await this.getMessages(sessionId, maxMessages)
 
     // Generate conversation summary
-    const summary = this.generateConversationSummary(messages)
+    const summary = ChatSessionService.generateConversationSummary(messages)
 
     // Extract topics and sentiment
-    const topics = this.extractTopics(messages)
-    const sentiment = this.analyzeConversationSentiment(messages)
+    const topics = ChatSessionService.extractTopics(messages)
+    const sentiment = ChatSessionService.analyzeConversationSentiment(messages)
 
     // Cache the result
     const context: CachedConversationContext = {
@@ -408,11 +409,11 @@ export class ChatSessionService {
       timestamp: now,
       messageCount: maxMessages
     }
-    this.contextCache.set(cacheKey, context)
+    ChatSessionService.contextCache.set(cacheKey, context)
 
     // Clean up old cache entries periodically
-    if (this.contextCache.size > 50) {
-      this.cleanupContextCache()
+    if (ChatSessionService.contextCache.size > 50) {
+      ChatSessionService.cleanupContextCache()
     }
 
     return {
@@ -485,17 +486,14 @@ export class ChatSessionService {
   /**
    * Get messages for a session
    */
-  static async getMessages(
-    supabase: TypedSupabaseClient,
+  async getMessages(
     sessionId: string,
-    userId: string,
     limit: number = 1000
   ): Promise<ChatMessage[]> {
-
     // Verify session belongs to user
-    await this.getSession(supabase, sessionId, userId);
+    await this.getSession(sessionId);
 
-    const { data, error } = await supabase
+    const { data, error } = await this.context.supabase
       .from('chat_messages')
       .select('id, session_id, role, content, metadata, created_at')
       .eq('session_id', sessionId)

@@ -60,5 +60,6 @@ export * from './usePreloading'
 // Re-export from other locations for backward compatibility
 export * from './api/useDashboard'
 export * from './api/useNotifications'
+export * from './api/useOrders'
 export * from './useAuth'
 

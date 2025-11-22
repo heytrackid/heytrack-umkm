@@ -7,7 +7,7 @@ import { SecurityPresets } from '@/utils/security/api-middleware'
 import { buildRecipeCostPreview } from '@/lib/costs/cost-calculations'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core'
 
 // Types and schemas
 import { isRecipeCostRecord } from '@/types/recipes/cost'

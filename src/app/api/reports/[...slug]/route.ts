@@ -2,7 +2,7 @@
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { SecurityPresets } from '@/utils/security/api-middleware'
 import { apiLogger } from '@/lib/logger'
@@ -46,8 +46,11 @@ async function getInventoryReportHandler(context: RouteContext): Promise<NextRes
   const { user } = context
 
   try {
-    const reportService = new ReportService(context.supabase)
-    const report = await reportService.getInventoryReport(user.id)
+    const reportService = new ReportService({
+      userId: user.id,
+      supabase: context.supabase
+    })
+    const report = await reportService.getInventoryReport()
 
     apiLogger.info({ userId: user.id, totalItems: report.totalItems }, 'Inventory report generated')
 
@@ -77,8 +80,11 @@ async function getProfitReportHandler(context: RouteContext, request: Request): 
     if (startDate !== null) filters.startDate = startDate
     if (endDate !== null) filters.endDate = endDate
 
-    const reportService = new ReportService(context.supabase)
-    const report = await reportService.getProfitReport(user.id, filters)
+    const reportService = new ReportService({
+      userId: user.id,
+      supabase: context.supabase
+    })
+    const report = await reportService.getProfitReport(filters)
 
     apiLogger.info({
       userId: user.id,
@@ -104,8 +110,11 @@ async function getSalesReportHandler(context: RouteContext, request: Request): P
     if (startDate !== null) filters.startDate = startDate
     if (endDate !== null) filters.endDate = endDate
 
-    const reportService = new ReportService(context.supabase)
-    const report = await reportService.getSalesReport(user.id, filters)
+    const reportService = new ReportService({
+      userId: user.id,
+      supabase: context.supabase
+    })
+    const report = await reportService.getSalesReport(filters)
 
     apiLogger.info({
       userId: user.id,

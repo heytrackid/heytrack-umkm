@@ -3,17 +3,8 @@ export const runtime = 'nodejs'
 import { isLowStock, validateStockAvailability } from '@/lib/business-rules/inventory'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { SecurityPresets } from '@/utils/security/api-middleware'
-import { NextResponse } from 'next/server'
-import { z } from 'zod'
-
-const ValidateStockItemSchema = z.object({
-  ingredientId: z.string().uuid(),
-  requiredQuantity: z.number().min(0),
-})
-
-const ValidateStockSchema = z.object({
-  items: z.array(ValidateStockItemSchema).min(1, 'At least one item is required'),
-})
+import { createSuccessResponse } from '@/lib/api-core'
+import { ValidateStockSchema } from '@/lib/validations/domains/ingredient'
 
 export const POST = createApiRoute(
   {
@@ -78,13 +69,11 @@ export const POST = createApiRoute(
     const allValid = validationResults.every((result) => result.available)
     const lowStockItems = validationResults.filter((result) => result.lowStock)
 
-    return NextResponse.json({
-      data: {
-        valid: allValid,
-        items: validationResults,
-        lowStockWarning: lowStockItems.length > 0,
-        lowStockItems,
-      },
+    return createSuccessResponse({
+      valid: allValid,
+      items: validationResults,
+      lowStockWarning: lowStockItems.length > 0,
+      lowStockItems,
     })
   }
 )

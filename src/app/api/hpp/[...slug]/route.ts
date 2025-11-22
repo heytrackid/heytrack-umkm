@@ -4,12 +4,12 @@ export const runtime = 'nodejs'
 
 
 
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core'
 import { createApiRoute } from '@/lib/api/route-factory'
-import { SecurityPresets } from '@/utils/security/api-middleware'
 import { cacheInvalidation } from '@/lib/cache'
 import { apiLogger } from '@/lib/logger'
 import { HppService } from '@/services/hpp/HppService'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
 
 
@@ -20,19 +20,21 @@ export const POST = createApiRoute(
     path: '/api/hpp',
     securityPreset: SecurityPresets.basic(),
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async (context, _query, body: any) => {
+  async (context, _query: unknown, body: unknown) => {
     const { user } = context
 
-    if (!body) {
+    if (!body || typeof body !== 'object') {
       return handleAPIError(new Error('Request body is required'), 'POST /api/hpp/calculate')
     }
 
-    const { recipeId } = body
+    const { recipeId } = body as { recipeId: string }
 
     try {
-      const hppService = new HppService(context.supabase)
-      const calculation = await hppService.calculateRecipeHpp(recipeId, user.id)
+      const hppService = new HppService({
+        userId: user.id,
+        supabase: context.supabase
+      })
+      const calculation = await hppService.calculateRecipeHpp(recipeId)
 
       cacheInvalidation.hpp()
 
@@ -61,8 +63,11 @@ export const PUT = createApiRoute(
     const { user } = context
 
     try {
-      const hppService = new HppService(context.supabase)
-      const results = await hppService.batchCalculateHpp(user.id)
+      const hppService = new HppService({
+        userId: user.id,
+        supabase: context.supabase
+      })
+      const results = await hppService.batchCalculateHpp()
 
       cacheInvalidation.hpp()
 
@@ -99,10 +104,13 @@ const getCalculationsRoute = createApiRoute(
     const recipeId = searchParams.get('recipe_id')
 
     try {
-      const hppService = new HppService(context.supabase)
+      const hppService = new HppService({
+        userId: user.id,
+        supabase: context.supabase
+      })
       const params = { page, limit, ...(recipeId && { recipe_id: recipeId }) }
       if (recipeId) params.recipe_id = recipeId
-      const result = await hppService.getCalculations(user.id, params)
+      const result = await hppService.getCalculations(params)
 
       apiLogger.info({
         userId: user.id,
@@ -132,8 +140,11 @@ export const GET = createApiRoute(
     if (!slug || slug.length === 0) {
       // GET /api/hpp - Get overview (redirect to overview for backward compatibility)
       try {
-        const hppService = new HppService(context.supabase)
-        const result = await hppService.getOverview(context.user.id)
+        const hppService = new HppService({
+          userId: context.user.id,
+          supabase: context.supabase
+        })
+        const result = await hppService.getOverview()
 
         apiLogger.info({
           userId: context.user.id,
@@ -149,8 +160,11 @@ export const GET = createApiRoute(
     } else if (slug.length === 1 && slug[0] === 'overview') {
       // GET /api/hpp/overview - Get overview
       try {
-        const hppService = new HppService(context.supabase)
-        const result = await hppService.getOverview(context.user.id)
+        const hppService = new HppService({
+          userId: context.user.id,
+          supabase: context.supabase
+        })
+        const result = await hppService.getOverview()
 
         apiLogger.info({
           userId: context.user.id,
@@ -166,8 +180,11 @@ export const GET = createApiRoute(
     } else if (slug.length === 1 && slug[0] === 'comparison') {
       // GET /api/hpp/comparison - Get recipe comparison
       try {
-        const hppService = new HppService(context.supabase)
-        const result = await hppService.getComparison(context.user.id)
+        const hppService = new HppService({
+          userId: context.user.id,
+          supabase: context.supabase
+        })
+        const result = await hppService.getComparison()
 
         apiLogger.info({
           userId: context.user.id,
@@ -214,11 +231,14 @@ export const GET = createApiRoute(
         }
 
         // Try to get latest HPP calculation
-        const hppService = new HppService(context.supabase)
+        const hppService = new HppService({
+          userId: context.user.id,
+          supabase: context.supabase
+        })
         let hppCalculation = null
 
         try {
-          const calculations = await hppService.getCalculations(context.user.id, {
+          const calculations = await hppService.getCalculations({
             recipe_id: recipeId,
             limit: 1
           })
@@ -311,19 +331,21 @@ const pricingRoute = createApiRoute(
     path: '/api/hpp/pricing',
     securityPreset: SecurityPresets.basic(),
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async (context, _query, body: any) => {
+  async (context, _query: unknown, body: unknown) => {
     const { user } = context
 
-    if (!body) {
+    if (!body || typeof body !== 'object') {
       return handleAPIError(new Error('Request body is required'), 'POST /api/hpp/pricing')
     }
 
-    const { recipeId } = body
+    const { recipeId } = body as { recipeId: string }
 
     try {
-      const hppService = new HppService(context.supabase)
-      const result = await hppService.generatePricingRecommendation(user.id, recipeId)
+      const hppService = new HppService({
+        userId: user.id,
+        supabase: context.supabase
+      })
+      const result = await hppService.generatePricingRecommendation(recipeId)
 
       apiLogger.info({
         userId: user.id,

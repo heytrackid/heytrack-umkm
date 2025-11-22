@@ -1,4 +1,5 @@
 import { dbLogger } from '@/lib/logger'
+import { BaseService } from '@/services/base'
 import type { Row } from '@/types/database'
 import { createClient } from '@/utils/supabase/client'
 
@@ -66,7 +67,10 @@ interface PricingStrategy {
   reasoning: string
 }
 
-export class PricingAssistantService {
+export class PricingAssistantService extends BaseService {
+  constructor(context: import('@/services/base').ServiceContext) {
+    super(context)
+  }
   /**
    * Generate pricing recommendation for a recipe
   */

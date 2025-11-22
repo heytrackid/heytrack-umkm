@@ -4,14 +4,8 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { calculateAverageDailyUsage, calculateReorderPoint } from '@/lib/business-rules/inventory'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { SecurityPresets } from '@/utils/security/api-middleware'
-import { createSuccessResponse } from '@/lib/api-core/responses'
-import { z } from 'zod'
-
-const CalculateReorderSchema = z.object({
-  ingredientId: z.string().uuid(),
-  leadTimeDays: z.number().min(1).max(365).optional().default(7),
-  safetyStockDays: z.number().min(0).max(365).optional().default(3),
-})
+import { createSuccessResponse } from '@/lib/api-core'
+import { CalculateReorderSchema } from '@/lib/validations/domains/ingredient'
 
 export const POST = createApiRoute(
   {

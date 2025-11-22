@@ -7,6 +7,7 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { CUSTOMER_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 import { SecurityPresets } from '@/utils/security/api-middleware'
+import { cacheInvalidation } from '@/lib/cache'
 
 // Types and schemas
 import { CustomerInsertSchema, CustomerUpdateSchema } from '@/lib/validations/domains/customer'
@@ -62,13 +63,20 @@ export const POST = createApiRoute(
     if (slug && slug.length > 0) {
       return handleAPIError(new Error('Method not allowed'), 'POST /api/customers')
     }
-    return createCreateHandler(
+    const result = await createCreateHandler(
       {
         table: 'customers',
         selectFields: 'id, name, email, phone, address, customer_type, discount_percentage, notes, is_active, loyalty_points, created_at, updated_at',
       },
       SUCCESS_MESSAGES.CUSTOMER_CREATED
     )(context, undefined, body)
+
+    // Invalidate cache after successful creation
+    if (result.status === 201) {
+      cacheInvalidation.customers()
+    }
+
+    return result
   }
 )
 
@@ -81,17 +89,24 @@ export const PUT = createApiRoute(
     securityPreset: SecurityPresets.basic(),
   },
   async (context: RouteContext, _query, body) => {
-    const { hasId } = parseRouteParams(context.params)
+    const { hasId, id } = parseRouteParams(context.params)
     if (!hasId) {
       return handleAPIError(new Error('Invalid path'), 'PUT /api/customers')
     }
-    return createUpdateHandler(
+    const result = await createUpdateHandler(
       {
         table: 'customers',
         selectFields: 'id, name, email, phone, address, customer_type, discount_percentage, notes, is_active, loyalty_points, updated_at',
       },
       SUCCESS_MESSAGES.CUSTOMER_UPDATED
     )(context, undefined, body)
+
+    // Invalidate cache after successful update
+    if (result.status === 200) {
+      cacheInvalidation.customers(id)
+    }
+
+    return result
   }
 )
 
@@ -139,6 +154,7 @@ export const DELETE = createApiRoute(
       return handleAPIError(error, 'DELETE /api/customers')
     }
 
+    cacheInvalidation.customers(id)
     return createSuccessResponse({ id }, SUCCESS_MESSAGES.CUSTOMER_DELETED)
   }
 )

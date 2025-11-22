@@ -6,6 +6,7 @@ import { CheckCircle2, Clock, Package, Truck, XCircle } from '@/components/icons
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useResponsive } from '@/hooks/useResponsive'
+import { cn } from '@/lib/utils'
 
 import type { OrderStatus } from '@/components/orders/types'
 
@@ -133,7 +134,7 @@ export const OrderStatusTimeline = ({
                                                 )}
                                             </div>
                                             <div className="flex-1">
-                                                <p className={`font-medium ${isActive ? 'text-primary' : ''}`}>
+                                                <p className={cn("font-medium", isActive && "text-primary")}>
                                                     {step.label}
                                                 </p>
                                                 <p className="text-sm text-muted-foreground">

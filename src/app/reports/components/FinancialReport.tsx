@@ -1,59 +1,72 @@
 import { DollarSign, PiggyBank, TrendingDown, TrendingUp } from '@/components/icons'
+import { memo, useMemo } from 'react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useFinancialRecords } from '@/hooks/useFinancialRecords'
 
-
-
 // Financial Report Component
 // Handles financial data filtering, calculations, and display
 
-
-
-
 interface FinancialReportProps {}
 
-export const FinancialReport = ({}: FinancialReportProps = {}) => {
+const FinancialReportComponent = ({}: FinancialReportProps = {}) => {
   const { formatCurrency } = useCurrency()
   const { data: financialRecords } = useFinancialRecords()
 
-  // Calculate financial report
-  const financialData = (financialRecords ?? []).filter((record) => !!record.date)
-
-  const financialStats = financialData.reduce(
-    (stats: { totalIncome: number; totalExpense: number }, record) => {
-      if (record['type'] === 'INCOME') {
-        stats.totalIncome += record.amount
-      }
-      if (record['type'] === 'EXPENSE') {
-        stats.totalExpense += record.amount
-      }
-      return stats
-    },
-    { totalIncome: 0, totalExpense: 0 }
+  // Memoize filtered financial data
+  const financialData = useMemo(() => 
+    (financialRecords ?? []).filter((record) => !!record.date),
+    [financialRecords]
   )
 
-  // Since date filtering is removed, no previous period comparison
-  const previousStats = { totalIncome: 0, totalExpense: 0 }
+  // Memoize all financial calculations
+  const financialMetrics = useMemo(() => {
+    const financialStats = financialData.reduce(
+      (stats: { totalIncome: number; totalExpense: number }, record) => {
+        if (record['type'] === 'INCOME') {
+          stats.totalIncome += record.amount
+        }
+        if (record['type'] === 'EXPENSE') {
+          stats.totalExpense += record.amount
+        }
+        return stats
+      },
+      { totalIncome: 0, totalExpense: 0 }
+    )
 
-  const netProfit = financialStats.totalIncome - financialStats.totalExpense
-  const profitMargin = financialStats.totalIncome > 0
-    ? (netProfit / financialStats.totalIncome) * 100
-    : 0
+    // Since date filtering is removed, no previous period comparison
+    const previousStats = { totalIncome: 0, totalExpense: 0 }
 
-  // Calculate growth percentages from previous period data
-  const incomeGrowth = previousStats.totalIncome > 0
-    ? Math.round(((financialStats.totalIncome - previousStats.totalIncome) / previousStats.totalIncome) * 100)
-    : 0
-  const expenseGrowth = previousStats.totalExpense > 0
-    ? Math.round(((financialStats.totalExpense - previousStats.totalExpense) / previousStats.totalExpense) * 100)
-    : 0
-  const previousProfit = previousStats.totalIncome - previousStats.totalExpense
-  const currentProfit = netProfit
-  const profitGrowth = previousProfit > 0
-    ? Math.round(((currentProfit - previousProfit) / previousProfit) * 100)
-    : 0
+    const netProfit = financialStats.totalIncome - financialStats.totalExpense
+    const profitMargin = financialStats.totalIncome > 0
+      ? (netProfit / financialStats.totalIncome) * 100
+      : 0
+
+    // Calculate growth percentages from previous period data
+    const incomeGrowth = previousStats.totalIncome > 0
+      ? Math.round(((financialStats.totalIncome - previousStats.totalIncome) / previousStats.totalIncome) * 100)
+      : 0
+    const expenseGrowth = previousStats.totalExpense > 0
+      ? Math.round(((financialStats.totalExpense - previousStats.totalExpense) / previousStats.totalExpense) * 100)
+      : 0
+    const previousProfit = previousStats.totalIncome - previousStats.totalExpense
+    const currentProfit = netProfit
+    const profitGrowth = previousProfit > 0
+      ? Math.round(((currentProfit - previousProfit) / previousProfit) * 100)
+      : 0
+
+    return {
+      financialStats,
+      netProfit,
+      profitMargin,
+      incomeGrowth,
+      expenseGrowth,
+      profitGrowth
+    }
+  }, [financialData])
+
+  const { financialStats, netProfit, profitMargin, incomeGrowth, expenseGrowth, profitGrowth } = financialMetrics
 
   return (
     <div className="space-y-6">
@@ -204,3 +217,6 @@ export const FinancialReport = ({}: FinancialReportProps = {}) => {
     </div>
   )
 }
+
+// Memoized export for performance
+export const FinancialReport = memo(FinancialReportComponent)

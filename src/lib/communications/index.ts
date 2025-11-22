@@ -14,17 +14,17 @@ import type { SmartNotification } from '@/lib/communications/types'
 export type * from './types'
 
 // Export all services
-export { WhatsAppService } from './whatsapp'
-export { SmartNotificationSystem } from './notifications'
 export { EmailService } from './email'
 export { CommunicationsManager } from './manager'
+export { SmartNotificationSystem } from './notifications'
+export { WhatsAppService } from './whatsapp'
 
 // Re-export convenience functions for backward compatibility
 
 /**
  * Send WhatsApp message (convenience function)
  */
-export function sendWhatsAppMessage(to: string, templateId: string, data: Record<string, unknown>): boolean {
+export const sendWhatsAppMessage = (to: string, templateId: string, data: Record<string, unknown>): boolean => {
   // This would need proper configuration in a real app
   const config = {
     businessNumber: '',
@@ -39,7 +39,7 @@ export function sendWhatsAppMessage(to: string, templateId: string, data: Record
 /**
  * Create and send notification (convenience function)
  */
-export function sendNotification(notification: Omit<SmartNotification, 'id' | 'isRead' | 'timestamp'>): void {
+export const sendNotification = (notification: Omit<SmartNotification, 'id' | 'isRead' | 'timestamp'>): void => {
   const system = SmartNotificationSystem.getInstance();
   system.addNotification(notification);
 }

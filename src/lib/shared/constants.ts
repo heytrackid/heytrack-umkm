@@ -241,3 +241,90 @@ export const THEME_CONFIG = {
   DARK: 'dark',
   SYSTEM: 'system',
 } as const
+
+// ==========================================================
+// HELPER FUNCTIONS - Single Source of Truth
+// ==========================================================
+
+/**
+ * Get order status label by value
+ */
+export function getOrderStatusLabel(status: string): string {
+  const found = ORDER_STATUSES.find(s => s.value === status)
+  return found?.label || status
+}
+
+/**
+ * Get order status color by value
+ */
+export function getOrderStatusColor(status: string): string {
+  const found = ORDER_STATUSES.find(s => s.value === status)
+  return found?.color || 'bg-secondary text-secondary-foreground'
+}
+
+/**
+ * Get payment status label by value
+ */
+export function getPaymentStatusLabel(status: string): string {
+  const found = PAYMENT_STATUSES.find(s => s.value === status)
+  return found?.label || status
+}
+
+/**
+ * Get payment status color by value
+ */
+export function getPaymentStatusColor(status: string): string {
+  const found = PAYMENT_STATUSES.find(s => s.value === status)
+  return found?.color || 'bg-secondary text-secondary-foreground'
+}
+
+/**
+ * Get payment method label by value
+ */
+export function getPaymentMethodLabel(method: string): string {
+  const found = PAYMENT_METHODS.find(m => m.value === method)
+  return found?.label || method
+}
+
+/**
+ * Get customer type label by value
+ */
+export function getCustomerTypeLabel(type: string): string {
+  const found = CUSTOMER_TYPES.find(t => t.value === type)
+  return found?.label || type
+}
+
+/**
+ * Get recipe difficulty label by value
+ */
+export function getRecipeDifficultyLabel(difficulty: string): string {
+  const found = RECIPE_DIFFICULTIES.find(d => d.value === difficulty)
+  return found?.label || difficulty
+}
+
+/**
+ * Get priority level label by value
+ */
+export function getPriorityLevelLabel(priority: string): string {
+  const found = PRIORITY_LEVELS.find(p => p.value === priority)
+  return found?.label || priority
+}
+
+/**
+ * Get priority level color by value
+ */
+export function getPriorityLevelColor(priority: string): string {
+  const found = PRIORITY_LEVELS.find(p => p.value === priority)
+  return found?.color || 'bg-secondary text-secondary-foreground'
+}
+
+// ==========================================================
+// TYPE EXPORTS
+// ==========================================================
+
+export type OrderStatus = typeof ORDER_STATUSES[number]['value']
+export type PaymentStatus = typeof PAYMENT_STATUSES[number]['value']
+export type PaymentMethod = typeof PAYMENT_METHODS[number]['value']
+export type RecipeDifficulty = typeof RECIPE_DIFFICULTIES[number]['value']
+export type CustomerType = typeof CUSTOMER_TYPES[number]['value']
+export type PriorityLevel = typeof PRIORITY_LEVELS[number]['value']

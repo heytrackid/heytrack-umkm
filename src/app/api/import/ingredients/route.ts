@@ -1,32 +1,19 @@
 export const runtime = 'nodejs'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 
-import { z } from 'zod'
 import { SecurityPresets } from '@/utils/security/api-middleware'
 
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 import { typed } from '@/types/type-utilities'
+import type { BulkImport } from '@/lib/validations/domains/ingredient'
 
 import type { NextResponse } from 'next/server'
 
-// Schema for bulk import
-const BulkImportSchema = z.object({
-  ingredients: z.array(z.object({
-    name: z.string(),
-    category: z.string().optional(),
-    unit: z.string(),
-    price_per_unit: z.number(),
-    current_stock: z.number(),
-    reorder_point: z.number(),
-    supplier: z.string().optional(),
-  })).min(1).max(1000, 'Maximum 1000 ingredients per import'),
-})
-
-type BulkImportBody = z.infer<typeof BulkImportSchema>
+type BulkImportBody = BulkImport
 
 // POST /api/import/ingredients - Bulk import ingredients
 async function importIngredientsHandler(

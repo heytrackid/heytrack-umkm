@@ -1,10 +1,8 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
-import { apiLogger } from '@/lib/logger'
 import { AIService } from '@/lib/ai/service'
+import { apiLogger } from '@/lib/logger'
+import type { HppComparison, HppOverview } from '@/modules/hpp/types'
+import { BaseService, type ServiceContext } from '@/services/base'
 import { HppCalculatorService } from './HppCalculatorService'
-import { typed } from '@/types/type-utilities'
-import type { Database } from '@/types/database'
-import type { HppOverview, HppComparison } from '@/modules/hpp/types'
 
 
 
@@ -32,15 +30,17 @@ export interface HppCalculationResult {
 
 
 
-export class HppService {
-  constructor(private supabase: SupabaseClient<Database>) {}
+export class HppService extends BaseService {
+  constructor(context: ServiceContext) {
+    super(context)
+  }
 
-  async calculateRecipeHpp(recipeId: string, userId: string): Promise<HppCalculationResult> {
-    const hppCalculator = new HppCalculatorService()
-    const calculation = await hppCalculator.calculateRecipeHpp(typed(this.supabase), recipeId, userId)
+  async calculateRecipeHpp(recipeId: string): Promise<HppCalculationResult> {
+    const hppCalculator = new HppCalculatorService(this.context)
+    const calculation = await hppCalculator.calculateRecipeHpp(recipeId)
 
     // Save calculation to database
-    const { data, error } = await this.supabase
+    const { data, error } = await this.context.supabase
       .from('hpp_calculations')
       .insert({
         recipe_id: recipeId,
@@ -51,7 +51,7 @@ export class HppService {
         cost_per_unit: calculation.cost_per_unit,
         production_quantity: calculation.production_quantity,
         wac_adjustment: calculation.wac_adjustment,
-        user_id: userId
+        user_id: this.context.userId
       })
       .select(`
         id,
@@ -68,7 +68,7 @@ export class HppService {
       .single()
 
     if (error) {
-      apiLogger.error({ error, recipeId, userId }, 'Failed to save HPP calculation')
+      apiLogger.error({ error, recipeId, userId: this.context.userId }, 'Failed to save HPP calculation')
       throw error
     }
 
@@ -89,16 +89,16 @@ export class HppService {
     }
   }
 
-  async batchCalculateHpp(userId: string): Promise<HppCalculationResult[]> {
+  async batchCalculateHpp(): Promise<HppCalculationResult[]> {
     // Get all active recipes for the user
-    const { data: recipes, error: recipesError } = await this.supabase
+    const { data: recipes, error: recipesError } = await this.context.supabase
       .from('recipes')
       .select('id')
       .eq('is_active', true)
-      .eq('user_id', userId)
+      .eq('user_id', this.context.userId)
 
     if (recipesError) {
-      apiLogger.error({ error: recipesError, userId }, 'Failed to fetch recipes for batch calculation')
+      apiLogger.error({ error: recipesError, userId: this.context.userId }, 'Failed to fetch recipes for batch calculation')
       throw recipesError
     }
 
@@ -110,10 +110,10 @@ export class HppService {
 
     for (const recipe of recipes) {
       try {
-        const calculation = await this.calculateRecipeHpp(recipe.id, userId)
+        const calculation = await this.calculateRecipeHpp(recipe.id)
         results.push(calculation)
     } catch (error) {
-      apiLogger.error({ error, userId }, 'Failed to fetch recipe for pricing recommendation')
+      apiLogger.error({ error, userId: this.context.userId }, 'Failed to fetch recipe for pricing recommendation')
       throw error
     }
     }
@@ -122,7 +122,6 @@ export class HppService {
   }
 
   async getCalculations(
-    userId: string,
     filters: {
       page?: number
       limit?: number
@@ -138,7 +137,7 @@ export class HppService {
   }> {
     const { page = 1, limit = 50, recipe_id, start_date, end_date } = filters
 
-    let query = this.supabase
+    let query = this.context.supabase
       .from('hpp_calculations')
       .select(`
         id,
@@ -152,7 +151,7 @@ export class HppService {
         cost_per_unit,
         created_at
       `, { count: 'exact' })
-      .eq('user_id', userId)
+      .eq('user_id', this.context.userId)
       .order('created_at', { ascending: false })
 
     if (recipe_id) {
@@ -174,7 +173,7 @@ export class HppService {
     const { data, error, count } = await query
 
     if (error) {
-      apiLogger.error({ error, userId, filters }, 'Failed to fetch HPP calculations')
+      apiLogger.error({ error, userId: this.context.userId, filters }, 'Failed to fetch HPP calculations')
       throw error
     }
 
@@ -202,8 +201,8 @@ export class HppService {
     }
   }
 
-  async getComparison(userId: string): Promise<HppComparison> {
-    const { data, error } = await this.supabase
+  async getComparison(): Promise<HppComparison> {
+    const { data, error } = await this.context.supabase
       .from('recipes')
       .select(`
         id,
@@ -215,12 +214,12 @@ export class HppService {
           created_at
         )
       `)
-      .eq('user_id', userId)
+      .eq('user_id', this.context.userId)
       .eq('is_active', true)
       .order('margin_percentage', { ascending: false, nullsFirst: false })
 
     if (error) {
-      apiLogger.error({ error, userId }, 'Failed to fetch recipe comparison')
+      apiLogger.error({ error, userId: this.context.userId }, 'Failed to fetch recipe comparison')
       throw error
     }
 
@@ -243,64 +242,56 @@ export class HppService {
     return recipes
   }
 
-  async getOverview(userId: string): Promise<HppOverview> {
+  async getOverview(): Promise<HppOverview> {
     // Get recipe counts
-    const { data: recipeStats, error: recipeError } = await this.supabase
+    const { data: recipeStats, error: recipeError } = await this.context.supabase
       .from('recipes')
-      .select('id, cost_per_unit, selling_price, margin_percentage', { count: 'exact' })
-      .eq('user_id', userId)
+      .select('id, name, cost_per_unit, selling_price, margin_percentage', { count: 'exact' })
+      .eq('user_id', this.context.userId)
       .eq('is_active', true)
 
     if (recipeError) {
-      apiLogger.error({ error: recipeError, userId }, 'Failed to fetch recipe stats for overview')
+      apiLogger.error({ error: recipeError, userId: this.context.userId }, 'Failed to fetch recipe stats for overview')
       throw recipeError
     }
 
-    const totalRecipes = recipeStats?.length || 0
-    const calculatedRecipes = recipeStats?.filter(r => r.cost_per_unit !== null).length || 0
-    const totalHppValue = recipeStats?.reduce((sum, r) => sum + (r.cost_per_unit || 0), 0) || 0
-    const averageMargin = calculatedRecipes > 0
-      ? recipeStats?.reduce((sum, r) => sum + (r.margin_percentage || 0), 0) / calculatedRecipes
+    const typedRecipeStats = recipeStats as Array<{
+      id: string
+      name: string
+      cost_per_unit: number | null
+      selling_price: number | null
+      margin_percentage: number | null
+    }> | null
+
+    const totalRecipes = typedRecipeStats?.length || 0
+    const calculatedRecipes = typedRecipeStats?.filter(r => r.cost_per_unit !== null).length || 0
+    const totalHppValue = typedRecipeStats ? typedRecipeStats.reduce((sum, r) => sum + (r.cost_per_unit || 0), 0) : 0
+    const averageMargin = calculatedRecipes > 0 && typedRecipeStats
+      ? typedRecipeStats.reduce((sum, r) => sum + (r.margin_percentage || 0), 0) / calculatedRecipes
       : 0
 
     // Generate alerts
     const alerts: HppOverview['alerts'] = []
 
-    recipeStats?.forEach((recipe: Record<string, unknown>) => {
-      if (!recipe['cost_per_unit']) {
-        alerts.push({
-          recipe_id: recipe['id'] as string,
-          recipe_name: recipe['name'] as string,
-          issue: 'Belum dihitung HPP',
-          severity: 'medium'
-        })
-      } else if ((recipe['margin_percentage'] as number || 0) < 20) {
-        alerts.push({
-          recipe_id: recipe['id'] as string,
-          recipe_name: recipe['name'] as string,
-          issue: `Margin rendah (${(recipe['margin_percentage'] as number)?.toFixed(1)}%)`,
-          severity: 'low'
-        })
-      }
-
-      if ((recipe['total_sold'] as number || 0) === 0) {
-        alerts.push({
-          recipe_id: recipe['id'] as string,
-          recipe_name: recipe['name'] as string,
-          issue: 'Belum pernah terjual',
-          severity: 'low'
-        })
-      }
-
-      if ((recipe['total_revenue'] as number || 0) === 0) {
-        alerts.push({
-          recipe_id: recipe['id'] as string,
-          recipe_name: recipe['name'] as string,
-          issue: 'Belum ada pendapatan',
-          severity: 'low'
-        })
-      }
-    })
+    if (typedRecipeStats) {
+      typedRecipeStats.forEach((recipe) => {
+        if (!recipe.cost_per_unit) {
+          alerts.push({
+            recipe_id: recipe.id,
+            recipe_name: recipe.name,
+            issue: 'Belum dihitung HPP',
+            severity: 'medium'
+          })
+        } else if ((recipe.margin_percentage || 0) < 20) {
+          alerts.push({
+            recipe_id: recipe.id,
+            recipe_name: recipe.name,
+            issue: `Margin rendah (${(recipe.margin_percentage)?.toFixed(1)}%)`,
+            severity: 'low'
+          })
+        }
+      })
+    }
 
     return {
       totalRecipes,
@@ -312,7 +303,6 @@ export class HppService {
   }
 
   async generatePricingRecommendation(
-    userId: string,
     recipeId: string
   ): Promise<{
     current_price: number
@@ -330,7 +320,7 @@ export class HppService {
     } | undefined
   }> {
     // Get recipe with ingredients and latest HPP calculation
-    const { data, error } = await this.supabase
+    const { data, error } = await this.context.supabase
       .from('recipes')
       .select(`
         id,
@@ -351,11 +341,11 @@ export class HppService {
         )
       `)
       .eq('id', recipeId)
-      .eq('user_id', userId)
+      .eq('user_id', this.context.userId)
       .single()
 
     if (error || !data) {
-      apiLogger.error({ error, recipeId, userId }, 'Failed to fetch recipe for pricing recommendation')
+      apiLogger.error({ error, recipeId, userId: this.context.userId }, 'Failed to fetch recipe for pricing recommendation')
       throw new Error('Recipe not found')
     }
 

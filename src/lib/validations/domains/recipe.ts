@@ -92,6 +92,14 @@ export const RecipeQuerySchema = z.object({
   max_selling_price: NonNegativeNumberSchema.optional(),
 })
 
+// Recipe list query schema with pagination
+export const RecipeListQuerySchema = RecipeQuerySchema.extend({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().positive().max(1000).optional().default(50),
+  sort_by: z.string().optional(),
+  sort_order: z.enum(['asc', 'desc']).optional(),
+})
+
 export const RecipeAvailabilityUpdateSchema = z.object({
   is_available: z.boolean(),
   reason: z.string().max(500).optional(),
@@ -103,4 +111,5 @@ export type RecipeInsert = z.infer<typeof RecipeInsertSchema>
 export type RecipeUpdate = z.infer<typeof RecipeUpdateSchema>
 export type RecipeForm = z.infer<typeof RecipeFormSchema>
 export type RecipeQuery = z.infer<typeof RecipeQuerySchema>
+export type RecipeListQuery = z.infer<typeof RecipeListQuerySchema>
 export type RecipeAvailabilityUpdate = z.infer<typeof RecipeAvailabilityUpdateSchema>

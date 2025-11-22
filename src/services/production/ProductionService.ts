@@ -1,8 +1,8 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { apiLogger } from '@/lib/logger'
 import { VALID_PRODUCTION_STATUS_TRANSITIONS } from '@/lib/validations/domains/production'
+import { BaseService, type ServiceContext } from '@/services/base'
 
-import type { Database, ProductionBatchInsert, ProductionBatchUpdate } from '@/types/database'
+import type { ProductionBatchInsert, ProductionBatchUpdate } from '@/types/database'
 
 type ProductionBatchRow = {
   actual_cost: number | null
@@ -70,11 +70,12 @@ export interface ProductionBatchesList {
   limit: number
 }
 
-export class ProductionService {
-  constructor(private supabase: SupabaseClient<Database>) {}
+export class ProductionService extends BaseService {
+  constructor(context: ServiceContext) {
+    super(context)
+  }
 
   async getProductionBatches(
-    userId: string,
     filters: {
       status?: string
       limit?: number
@@ -84,7 +85,7 @@ export class ProductionService {
     const { status, limit = 50, offset = 0 } = filters
 
     try {
-      let query = this.supabase
+      let query = this.context.supabase
         .from('production_batches')
         .select(`
           *,
@@ -94,7 +95,7 @@ export class ProductionService {
             category
           )
         `, { count: 'exact' })
-        .eq('user_id', userId)
+        .eq('user_id', this.context.userId)
         .order('created_at', { ascending: false })
 
       if (status) {
@@ -106,7 +107,7 @@ export class ProductionService {
       const { data, error, count } = await query
 
       if (error) {
-        apiLogger.error({ error, userId, filters }, 'Failed to fetch production batches')
+        apiLogger.error({ error, userId: this.context.userId, filters }, 'Failed to fetch production batches')
         throw error
       }
 
@@ -131,14 +132,14 @@ export class ProductionService {
         limit
       }
     } catch (error) {
-      apiLogger.error({ error, userId, filters }, 'Failed to get production batches')
+      apiLogger.error({ error, userId: this.context.userId, filters }, 'Failed to get production batches')
       throw error
     }
   }
 
-  async getProductionBatch(userId: string, batchId: string): Promise<ProductionBatchWithDetails> {
+  async getProductionBatch(batchId: string): Promise<ProductionBatchWithDetails> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.context.supabase
         .from('production_batches')
         .select(`
           *,
@@ -149,11 +150,11 @@ export class ProductionService {
           )
         `)
         .eq('id', batchId)
-        .eq('user_id', userId)
+        .eq('user_id', this.context.userId)
         .single()
 
       if (error || !data) {
-        apiLogger.error({ error, userId, batchId }, 'Failed to fetch production batch')
+        apiLogger.error({ error, userId: this.context.userId, batchId }, 'Failed to fetch production batch')
         throw new Error('Production batch not found')
       }
 
@@ -173,29 +174,31 @@ export class ProductionService {
         updated_at: batch.updated_at || ''
       }
     } catch (error) {
-      apiLogger.error({ error, userId, batchId }, 'Failed to get production batch')
+      apiLogger.error({ error, userId: this.context.userId, batchId }, 'Failed to get production batch')
       throw error
     }
   }
 
-  async createProductionBatch(userId: string, batchData: ProductionBatchCreateData): Promise<ProductionBatch> {
-    try {
-      // Generate batch number
-      const batchNumber = `PB-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`
+  async createProductionBatch(batchData: ProductionBatchCreateData): Promise<ProductionBatch> {
+    return this.executeWithAudit(
+      async () => {
+        try {
+          // Generate batch number
+          const batchNumber = `PB-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`
 
-      const plannedDate = (batchData.planned_date ?? new Date().toISOString().split('T')[0]) as string
-      const insertData: ProductionBatchInsert = {
-        batch_number: batchNumber,
-        recipe_id: batchData.recipe_id,
-        quantity: batchData.quantity,
-        unit: 'batch', // Default unit
-        planned_date: plannedDate,
-        status: 'PLANNED',
-        user_id: userId,
-        ...(batchData.notes && { notes: batchData.notes })
-      }
+          const plannedDate = (batchData.planned_date ?? new Date().toISOString().split('T')[0]) as string
+          const insertData: ProductionBatchInsert = {
+            batch_number: batchNumber,
+            recipe_id: batchData.recipe_id,
+            quantity: batchData.quantity,
+            unit: 'batch', // Default unit
+            planned_date: plannedDate,
+            status: 'PLANNED',
+            user_id: this.context.userId,
+            ...(batchData.notes && { notes: batchData.notes })
+          }
 
-      const { data, error } = await this.supabase
+          const { data, error } = await this.context.supabase
         .from('production_batches')
         .insert(insertData as never)
         .select(`
@@ -208,42 +211,49 @@ export class ProductionService {
         `)
         .single()
 
-      if (error) {
-        apiLogger.error({ error, userId, batchData }, 'Failed to create production batch')
-        throw error
-      }
+          if (error) {
+            apiLogger.error({ error, userId: this.context.userId, batchData }, 'Failed to create production batch')
+            throw error
+          }
 
-      const typedData = data as ProductionBatchWithRecipe
-      const batch: ProductionBatch = {
-        id: typedData.id,
-        recipe_id: typedData.recipe_id,
-        recipe_name: typedData.recipes?.name || 'Unknown Recipe',
-        planned_quantity: typedData.quantity,
-        status: typedData.status || '',
-        planned_start_time: typedData.planned_date,
-        ...(typedData.notes && { notes: typedData.notes }),
-        created_at: typedData.created_at || '',
-        updated_at: typedData.updated_at || '',
-      }
+          const typedData = data as ProductionBatchWithRecipe
+          const batch: ProductionBatch = {
+            id: typedData.id,
+            recipe_id: typedData.recipe_id,
+            recipe_name: typedData.recipes?.name || 'Unknown Recipe',
+            planned_quantity: typedData.quantity,
+            status: typedData.status || '',
+            planned_start_time: typedData.planned_date,
+            ...(typedData.notes && { notes: typedData.notes }),
+            created_at: typedData.created_at || '',
+            updated_at: typedData.updated_at || '',
+          }
 
-      apiLogger.info({ userId, batchId: batch.id, recipeId: batch.recipe_id }, 'Production batch created successfully')
+          apiLogger.info({ userId: this.context.userId, batchId: batch.id, recipeId: batch.recipe_id }, 'Production batch created successfully')
 
-      return batch
-    } catch (error) {
-      apiLogger.error({ error, userId, batchData }, 'Failed to create production batch')
-      throw error
-    }
+          return batch
+        } catch (error) {
+          apiLogger.error({ error, userId: this.context.userId, batchData }, 'Failed to create production batch')
+          throw error
+        }
+      },
+      'CREATE',
+      'PRODUCTION_BATCH',
+      undefined,
+      { batchData }
+    )
   }
 
   async updateProductionBatch(
-    userId: string,
     batchId: string,
     updateData: ProductionBatchUpdateData
   ): Promise<ProductionBatchWithDetails> {
-    try {
-      // Validate status transition if status is being updated
-      if (updateData.status) {
-        const currentBatch = await this.getProductionBatch(userId, batchId)
+    return this.executeWithAudit(
+      async () => {
+        try {
+          // Validate status transition if status is being updated
+          if (updateData.status) {
+            const currentBatch = await this.getProductionBatch(batchId)
         const validTransitions = VALID_PRODUCTION_STATUS_TRANSITIONS[currentBatch.status] || []
 
         if (!validTransitions.includes(updateData.status)) {
@@ -251,25 +261,25 @@ export class ProductionService {
         }
       }
 
-      const { data, error } = await this.supabase
-        .from('production_batches')
-        .update(updateData as ProductionBatchUpdate)
-        .eq('id', batchId)
-        .eq('user_id', userId)
-        .select(`
-          *,
-          recipes (
-            id,
-            name,
-            category
-          )
-        `)
-        .single()
+          const { data, error } = await this.context.supabase
+            .from('production_batches')
+            .update(updateData as ProductionBatchUpdate)
+            .eq('id', batchId)
+            .eq('user_id', this.context.userId)
+            .select(`
+              *,
+              recipes (
+                id,
+                name,
+                category
+              )
+            `)
+            .single()
 
-      if (error) {
-        apiLogger.error({ error, userId, batchId, updateData }, 'Failed to update production batch')
-        throw error
-      }
+          if (error) {
+            apiLogger.error({ error, userId: this.context.userId, batchId, updateData }, 'Failed to update production batch')
+            throw error
+          }
 
       const batch = data as ProductionBatchWithRecipe
       const updatedBatch = {
@@ -289,44 +299,57 @@ export class ProductionService {
         updated_at: batch.updated_at || ''
       }
 
-      // Status change logging
-      if (updateData.status) {
-        apiLogger.info({ batchId, oldStatus: batch['status'], newStatus: updateData.status }, 'Production batch status changed')
-      }
+          // Status change logging
+          if (updateData.status) {
+            apiLogger.info({ batchId, oldStatus: batch['status'], newStatus: updateData.status }, 'Production batch status changed')
+          }
 
-      apiLogger.info({ userId, batchId, status: updateData.status }, 'Production batch updated successfully')
+          apiLogger.info({ userId: this.context.userId, batchId, status: updateData.status }, 'Production batch updated successfully')
 
-      return updatedBatch
-    } catch (error) {
-      apiLogger.error({ error, userId, batchId, updateData }, 'Failed to update production batch')
-      throw error
-    }
+          return updatedBatch
+        } catch (error) {
+          apiLogger.error({ error, userId: this.context.userId, batchId, updateData }, 'Failed to update production batch')
+          throw error
+        }
+      },
+      'UPDATE',
+      'PRODUCTION_BATCH',
+      batchId,
+      { updateData }
+    )
   }
 
-  async deleteProductionBatch(userId: string, batchId: string): Promise<void> {
-    try {
-      // Check if batch can be deleted (only planned or cancelled batches)
-      const batch = await this.getProductionBatch(userId, batchId)
+  async deleteProductionBatch(batchId: string): Promise<void> {
+    return this.executeWithAudit(
+      async () => {
+        try {
+          // Check if batch can be deleted (only planned or cancelled batches)
+          const batch = await this.getProductionBatch(batchId)
 
       if (!['PLANNED', 'CANCELLED'].includes(batch.status)) {
         throw new Error('Only planned or cancelled batches can be deleted')
       }
 
-      const { error } = await this.supabase
-        .from('production_batches')
-        .delete()
-        .eq('id', batchId)
-        .eq('user_id', userId)
+          const { error } = await this.context.supabase
+            .from('production_batches')
+            .delete()
+            .eq('id', batchId)
+            .eq('user_id', this.context.userId)
 
-      if (error) {
-        apiLogger.error({ error, userId, batchId }, 'Failed to delete production batch')
-        throw error
-      }
+          if (error) {
+            apiLogger.error({ error, userId: this.context.userId, batchId }, 'Failed to delete production batch')
+            throw error
+          }
 
-      apiLogger.info({ userId, batchId }, 'Production batch deleted successfully')
-    } catch (error) {
-      apiLogger.error({ error, userId, batchId }, 'Failed to delete production batch')
-      throw error
-    }
+          apiLogger.info({ userId: this.context.userId, batchId }, 'Production batch deleted successfully')
+        } catch (error) {
+          apiLogger.error({ error, userId: this.context.userId, batchId }, 'Failed to delete production batch')
+          throw error
+        }
+      },
+      'DELETE',
+      'PRODUCTION_BATCH',
+      batchId
+    )
   }
 }

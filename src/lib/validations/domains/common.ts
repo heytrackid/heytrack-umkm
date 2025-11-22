@@ -126,6 +126,29 @@ export const HPPAnalysisQuerySchema = z.object({
   include_recommendations: z.boolean().default(true),
 })
 
+// Error reporting schemas
+export const ErrorReportSchema = z.object({
+  message: z.string().optional(),
+  msg: z.string().optional(),
+  stack: z.string().optional(),
+  url: z.string().optional(),
+  userAgent: z.string().optional(),
+  componentStack: z.string().optional(),
+  timestamp: z.union([z.number(), z.string()]).optional(),
+  errorType: z.string().optional(),
+  browser: z.string().optional(),
+  os: z.string().optional(),
+  device: z.string().optional(),
+}).refine((data) => data.message || data.msg, {
+  message: 'Either message or msg is required',
+  path: ['message']
+})
+
+export const ErrorQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(10000).default(1000),
+  offset: z.coerce.number().int().min(0).default(0),
+})
+
 // Type exports
 export type PaginationQuery = z.infer<typeof PaginationQuerySchema>
 export type DateRangeQuery = z.infer<typeof DateRangeQuerySchema>
@@ -133,3 +156,5 @@ export type FileUpload = z.infer<typeof FileUploadSchema>
 export type ImageUpload = z.infer<typeof ImageUploadSchema>
 export type ReportQuery = z.infer<typeof ReportQuerySchema>
 export type SalesQuery = z.infer<typeof SalesQuerySchema>
+export type ErrorReport = z.infer<typeof ErrorReportSchema>
+export type ErrorQuery = z.infer<typeof ErrorQuerySchema>

@@ -1,11 +1,11 @@
+import type { ChatContext } from '@/lib/ai-chatbot/types'
 import { createClientLogger } from '@/lib/client-logger'
+import { ChatSessionService } from '@/lib/services/ChatSessionService'
+import type { Database } from '@/types/database'
 import { createClient } from '@/utils/supabase/client'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 const logger = createClientLogger('ClientFile')
-import { ChatSessionService } from '@/lib/services/ChatSessionService'
-import type { ChatContext } from '@/lib/ai-chatbot/types'
-import type { Database } from '@/types/database'
-import type { SupabaseClient } from '@supabase/supabase-js'
 
 /**
  * Context Manager
@@ -39,10 +39,12 @@ export class ContextManager {
           // Note: This needs supabase client - should be passed from caller
           // For now, assuming it's called from client with browser client
           const supabase = createClient()
-          const messages = await ChatSessionService.getMessages(
-            supabase as unknown as SupabaseClient<Database>,
+          const chatService = new ChatSessionService({ 
+            userId: this['context'].userId, 
+            supabase: supabase as unknown as SupabaseClient<Database> 
+          })
+          const messages = await chatService.getMessages(
             this['context'].sessionId,
-            this['context'].userId,
             100 // Load last 100 messages for context (increased limit)
           )
 

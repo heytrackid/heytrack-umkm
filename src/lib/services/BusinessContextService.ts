@@ -1,4 +1,5 @@
 import { logger } from '@/lib/logger';
+import { BaseService, type ServiceContext } from '@/services/base';
 
 import type { Json } from '@/types/database';
 import type {
@@ -11,42 +12,41 @@ import type {
     QuickStat,
     RecipeSummary,
 } from '@/types/features/chat';
-import { createClient } from '@/utils/supabase/server';
 
 // Business Context Service - Aggregates business data for AI context
 
 const CONTEXT_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-export class BusinessContextService {
+export class BusinessContextService extends BaseService {
+  constructor(context: ServiceContext) {
+    super(context);
+  }
   /**
    * Load full business context for user
    */
-  static async loadContext(
-    userId: string,
-    currentPage?: string
-  ): Promise<BusinessContext> {
+  async loadContext(currentPage?: string): Promise<BusinessContext> {
     const startTime = Date.now();
 
     try {
       // Try to get from cache first
-      const cached = await this.getCachedContext(userId);
+      const cached = await this.getCachedContext();
       if (cached) {
-        logger.info({ userId }, 'Using cached business context');
+        logger.info({ userId: this.context.userId }, 'Using cached business context');
         return { ...cached, ...(currentPage && { currentPage }) };
       }
 
       // Load fresh context
-      const context = await this.loadFreshContext(userId, currentPage)
+      const context = await this.loadFreshContext(currentPage)
 
       // Cache the result
-      void this.cacheContext(userId, context);
+      void this.cacheContext(context);
 
       const duration = Date.now() - startTime;
-      logger.info({ userId, duration }, 'Business context loaded');
+      logger.info({ userId: this.context.userId, duration }, 'Business context loaded');
 
       return context;
     } catch (error) {
-      logger.error({ error, userId }, 'Failed to load business context');
+      logger.error({ error, userId: this.context.userId }, 'Failed to load business context');
       // Return minimal context on error
       const result: BusinessContext = { timestamp: new Date().toISOString() };
       if (currentPage) result.currentPage = currentPage;
@@ -57,22 +57,16 @@ export class BusinessContextService {
   /**
    * Load fresh context from database
    */
-  private static async loadFreshContext(
-    userId: string,
-    currentPage?: string
-  ): Promise<BusinessContext> {
-    const supabase = await createClient()
-    const resolvedSupabase = await Promise.resolve(supabase)
-
+  private async loadFreshContext(currentPage?: string): Promise<BusinessContext> {
     const [recipes, ingredients, orders, hpp, financial, insights, quickStats] =
       await Promise.all([
-        this.loadRecipes(resolvedSupabase, userId),
-        this.loadIngredients(resolvedSupabase, userId),
-        this.loadOrders(resolvedSupabase, userId),
-        this.loadHpp(resolvedSupabase, userId),
-        this.loadFinancial(resolvedSupabase, userId),
-        this.loadInsights(resolvedSupabase, userId),
-        this.loadQuickStats(resolvedSupabase, userId),
+        this.loadRecipes(),
+        this.loadIngredients(),
+        this.loadOrders(),
+        this.loadHpp(),
+        this.loadFinancial(),
+        this.loadInsights(),
+        this.loadQuickStats(),
       ])
 
     return {
@@ -91,14 +85,11 @@ export class BusinessContextService {
   /**
    * Load top recipes by usage
    */
-  private static async loadRecipes(
-    supabase: Awaited<ReturnType<typeof createClient>>,
-    userId: string
-  ): Promise<RecipeSummary[]> {
-    const { data } = await supabase
+  private async loadRecipes(): Promise<RecipeSummary[]> {
+    const { data } = await this.context.supabase
       .from('recipes')
       .select('id, name, cost_per_unit')
-      .eq('user_id', userId)
+      .eq('user_id', this.context.userId)
       .order('created_at', { ascending: false })
       .limit(100);
 
@@ -115,14 +106,11 @@ export class BusinessContextService {
   /**
    * Load ingredients with low stock priority
    */
-  private static async loadIngredients(
-    supabase: Awaited<ReturnType<typeof createClient>>,
-    userId: string
-  ): Promise<IngredientSummary[]> {
-    const { data } = await supabase
+  private async loadIngredients(): Promise<IngredientSummary[]> {
+    const { data } = await this.context.supabase
       .from('ingredients')
       .select('id, name, current_stock, unit, min_stock')
-      .eq('user_id', userId)
+      .eq('user_id', this.context.userId)
       .order('current_stock', { ascending: true })
       .limit(20);
 
@@ -143,14 +131,11 @@ export class BusinessContextService {
   /**
    * Load recent orders
    */
-  private static async loadOrders(
-    supabase: Awaited<ReturnType<typeof createClient>>,
-    userId: string
-  ): Promise<OrderSummary[]> {
-    const { data } = await supabase
+  private async loadOrders(): Promise<OrderSummary[]> {
+    const { data } = await this.context.supabase
       .from('orders')
       .select('id, customer_name, total_amount, status, created_at')
-      .eq('user_id', userId)
+      .eq('user_id', this.context.userId)
       .order('created_at', { ascending: false })
       .limit(100);
 
@@ -169,15 +154,12 @@ export class BusinessContextService {
   /**
    * Load HPP summary
    */
-  private static async loadHpp(
-    supabase: Awaited<ReturnType<typeof createClient>>,
-    userId: string
-  ): Promise<HppSummary> {
+  private async loadHpp(): Promise<HppSummary> {
     // Get latest HPP calculations
-    const { data: calculations } = await supabase
+    const { data: calculations } = await this.context.supabase
       .from('hpp_calculations')
       .select('total_hpp, created_at')
-      .eq('user_id', userId)
+      .eq('user_id', this.context.userId)
       .order('created_at', { ascending: false })
       .limit(2);
 
@@ -204,35 +186,32 @@ export class BusinessContextService {
   /**
    * Load financial summary for current month
    */
-  private static async loadFinancial(
-    supabase: Awaited<ReturnType<typeof createClient>>,
-    userId: string
-  ): Promise<FinancialSummary> {
+  private async loadFinancial(): Promise<FinancialSummary> {
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
 
     // Get revenue from orders
-    const { data: orders } = await supabase
+    const { data: orders } = await this.context.supabase
       .from('orders')
       .select('total_amount')
-      .eq('user_id', userId)
+      .eq('user_id', this.context.userId)
       .gte('created_at', startOfMonth.toISOString());
 
     const totalRevenue =
       orders?.reduce((sum, order) => sum + ((order as { total_amount: number }).total_amount ?? 0), 0) ?? 0;
 
     // Get costs from operational_costs and ingredient_purchases
-    const { data: opCosts } = await supabase
+    const { data: opCosts } = await this.context.supabase
       .from('operational_costs')
       .select('amount')
-      .eq('user_id', userId)
+      .eq('user_id', this.context.userId)
       .gte('date', startOfMonth.toISOString());
 
-    const { data: purchases } = await supabase
+    const { data: purchases } = await this.context.supabase
       .from('ingredient_purchases')
       .select('total_price')
-      .eq('user_id', userId)
+      .eq('user_id', this.context.userId)
       .gte('purchase_date', startOfMonth.toISOString());
 
     const totalCosts =
@@ -251,15 +230,11 @@ export class BusinessContextService {
   /**
    * Get cached context if available and not expired
    */
-  private static async getCachedContext(
-    userId: string
-  ): Promise<BusinessContext | null> {
-    const supabase = await createClient()
-
-    const { data } = await supabase
+  private async getCachedContext(): Promise<BusinessContext | null> {
+    const { data } = await this.context.supabase
       .from('chat_context_cache')
       .select('data, expires_at')
-      .eq('user_id', userId)
+      .eq('user_id', this.context.userId)
       .eq('context_type', 'full_context')
       .single();
 
@@ -277,18 +252,13 @@ export class BusinessContextService {
   /**
    * Cache context with TTL
    */
-  private static async cacheContext(
-    userId: string,
-    context: BusinessContext
-  ): Promise<void> {
-    const supabase = await createClient();
-
+  private async cacheContext(context: BusinessContext): Promise<void> {
     const expiresAt = new Date(Date.now() + CONTEXT_CACHE_TTL);
 
     const serializableContext = JSON.parse(JSON.stringify(context)) as Json
 
-    await supabase.from('chat_context_cache').upsert({
-      user_id: userId,
+    await this.context.supabase.from('chat_context_cache').upsert({
+      user_id: this.context.userId,
       context_type: 'full_context',
       data: serializableContext,
       expires_at: expiresAt.toISOString(),
@@ -298,16 +268,14 @@ export class BusinessContextService {
   /**
    * Invalidate cached context
    */
-  static async invalidateCache(userId: string): Promise<void> {
-    const supabase = await createClient();
-
-    await supabase
+  async invalidateCache(): Promise<void> {
+    await this.context.supabase
       .from('chat_context_cache')
       .delete()
-      .eq('user_id', userId)
+      .eq('user_id', this.context.userId)
       .eq('context_type', 'full_context');
 
-    logger.info({ userId }, 'Context cache invalidated');
+    logger.info({ userId: this.context.userId }, 'Context cache invalidated');
   }
 
   /**
@@ -389,18 +357,12 @@ export class BusinessContextService {
     return parts.join('\n')
   }
 
-  private static loadInsights(
-    _supabase: Awaited<ReturnType<typeof createClient>>,
-    _userId: string
-  ): Promise<BusinessInsight[]> {
+  private loadInsights(): Promise<BusinessInsight[]> {
     // Return empty array for now - business_insights table may not exist yet
     return Promise.resolve([])
   }
 
-  private static loadQuickStats(
-    _supabase: Awaited<ReturnType<typeof createClient>>,
-    _userId: string
-  ): Promise<QuickStat[]> {
+  private loadQuickStats(): Promise<QuickStat[]> {
     // Return empty array for now - business_quick_stats table may not exist yet
     return Promise.resolve([])
   }

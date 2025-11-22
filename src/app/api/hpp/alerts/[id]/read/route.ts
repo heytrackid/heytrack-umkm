@@ -2,7 +2,8 @@
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core'
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { SecurityPresets } from '@/utils/security/api-middleware'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { apiLogger } from '@/lib/logger'
@@ -43,7 +44,7 @@ async function markAlertReadHandler(context: RouteContext): Promise<NextResponse
 
     apiLogger.info({ alertId, userId: user.id }, 'Alert marked as read successfully')
 
-    return createSuccessResponse(data, 'Alert marked as read')
+    return createSuccessResponse(data, SUCCESS_MESSAGES.HPP_ALERT_READ)
   } catch (error) {
     return handleAPIError(error, 'PUT /api/hpp/alerts/[id]/read')
   }

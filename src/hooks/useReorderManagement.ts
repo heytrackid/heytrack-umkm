@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
 import { fetchApi } from '@/lib/query/query-helpers'
+import { useQuery } from '@tanstack/react-query'
 
 import type { ReorderSuggestionWithDetails } from '@/types/database'
 
@@ -9,7 +9,11 @@ import type { ReorderSuggestionWithDetails } from '@/types/database'
 export function useReorderSuggestions() {
   return useQuery<ReorderSuggestionWithDetails[]>({
     queryKey: ['reorder-suggestions'],
-    queryFn: () => fetchApi<ReorderSuggestionWithDetails[]>('/api/inventory/reorder-suggestions'),
+    queryFn: async () => {
+      const response = await fetchApi<{ data: ReorderSuggestionWithDetails[] }>('/api/inventory/reorder-suggestions')
+      // Extract data array if response has pagination structure
+      return Array.isArray(response) ? response : response.data
+    },
     staleTime: 60000, // 1 minute
   })
 }

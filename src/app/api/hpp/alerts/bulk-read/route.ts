@@ -2,7 +2,7 @@
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core'
 import { SecurityPresets } from '@/utils/security/api-middleware'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
@@ -13,7 +13,7 @@ async function postHandler(context: RouteContext): Promise<NextResponse> {
   const { user, supabase } = context
 
   try {
-    apiLogger.info('Marking all HPP alerts as read')
+    apiLogger.info({ userId: user.id }, 'Marking all HPP alerts as read')
 
     // Update all unread alerts for the current user
     const { data, error } = await supabase

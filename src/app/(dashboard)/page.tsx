@@ -1,10 +1,9 @@
 'use client'
 
-import { AutoSyncFinancialDashboard } from '@/components/dashboard/AutoSyncFinancialDashboard'
-import { DashboardLoading } from '@/components/loading'
 import { TopProductsWidget } from '@/components/dashboard/TopProductsWidget'
 import { MobileHeader } from '@/components/layout/mobile-header'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { DashboardLoading } from '@/components/loading'
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -15,13 +14,13 @@ import { useDashboardStats } from '@/hooks/api/useDashboard'
 
 import { ProductionScheduleWidget } from '@/components/dashboard/ProductionScheduleWidget'
 import {
-  AlertTriangle,
-  DollarSign,
-  Package,
-  Plus,
-  ShoppingCart,
-  TrendingUp,
-  Users,
+    AlertTriangle,
+    DollarSign,
+    Package,
+    Plus,
+    ShoppingCart,
+    TrendingUp,
+    Users,
 } from '@/components/icons'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -136,9 +135,6 @@ export default function DashboardPage(): JSX.Element {
             </div>
           </Card>
         </div>
-
-        {/* Auto-Sync Financial Dashboard */}
-        <AutoSyncFinancialDashboard />
 
         {/* Production Schedule Widget */}
         <ProductionScheduleWidget />

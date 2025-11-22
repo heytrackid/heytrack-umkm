@@ -2,7 +2,6 @@
 'use client'
 
 import { ArrowDownRight, ArrowUpRight, DollarSign, Minus, Package, ShoppingCart, TrendingUp } from '@/components/icons'
-import React from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -34,7 +33,7 @@ const getTrendColor = (value: number) => {
 }
 
 // Metric cards component
-export const ProfitMetrics: React.FC<ProfitMetricsProps> = ({ summary, isMobile = false }) => {
+export const ProfitMetrics = ({ summary, isMobile = false }: ProfitMetricsProps) => {
     const { formatCurrency } = useCurrency()
 
     // Early return if summary is undefined

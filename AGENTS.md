@@ -36,6 +36,91 @@
 - **Hooks**: `use` prefix (`useAuth`, `useDebounce`)
 - **Services**: PascalCase with `Service` suffix (`UserService`, `EmailService`)
 
+## Code Organization - Single Source of Truth ✅
+
+### Constants & Enums
+**Import from:** `@/lib/shared/constants`
+```typescript
+import { 
+  ORDER_STATUSES,
+  PAYMENT_METHODS,
+  CUSTOMER_TYPES,
+  getOrderStatusLabel,
+  getOrderStatusColor,
+  type OrderStatus,
+  type PaymentMethod
+} from '@/lib/shared/constants'
+```
+
+**Available:**
+- ORDER_STATUSES, PAYMENT_STATUSES, PAYMENT_METHODS
+- CUSTOMER_TYPES, RECIPE_DIFFICULTIES, INGREDIENT_UNITS
+- PRIORITY_LEVELS, BUSINESS_UNITS, USER_ROLES
+- Helper functions: `getOrderStatusLabel()`, `getOrderStatusColor()`, etc.
+- TypeScript types for all enums
+
+### Validation Schemas
+**Import from:** `@/lib/validations/common`
+```typescript
+import { 
+  PaginationQuerySchema,
+  UUIDSchema,
+  DateRangeSchema,
+  EmailSchema,
+  OrderStatusEnum
+} from '@/lib/validations/common'
+```
+
+**Available:**
+- Pagination: PaginationQuerySchema, PaginationSchema
+- Date/Time: DateRangeSchema, DateStringSchema
+- Files: FileUploadSchema, ImageUploadSchema
+- IDs: UUIDSchema, IdParamSchema, IdsParamSchema
+- Bulk: BulkDeleteSchema, BulkUpdateSchema
+- Reports: ReportQuerySchema, SalesQuerySchema
+- Base: EmailSchema, PhoneSchema, PositiveNumberSchema
+- Enums: OrderStatusEnum, PaymentMethodEnum, UserRoleEnum
+
+### Currency Formatting
+**Import from:** `@/lib/currency`
+```typescript
+import { 
+  formatCurrentCurrency,
+  getCurrentCurrency,
+  type Currency
+} from '@/lib/currency'
+```
+
+### API Routes
+**Import from:** `@/lib/api/route-factory`
+```typescript
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+
+export const runtime = 'nodejs'
+
+export const GET = createApiRoute(
+  {
+    method: 'GET',
+    path: '/api/resource',
+    querySchema: MyQuerySchema,
+    requireAuth: true,
+  },
+  async (context, validatedQuery) => {
+    // Handler logic
+  }
+)
+```
+
+**Pattern:** All API routes use `createApiRoute()` for consistency
+- Built-in auth, validation, error handling, logging
+- Always add `export const runtime = 'nodejs'` at top
+- Use security presets from `@/utils/security/api-middleware`
+
+### Documentation
+- **Full Guide:** `CONSOLIDATION_COMPLETE.md`
+- **Quick Reference:** `QUICK_CONSOLIDATION_REFERENCE.md`
+- **Migration:** `MIGRATION_GUIDE.md`
+
 
 ## HeyTrack Application Features & Logic
 

@@ -112,6 +112,8 @@ export function createCurrencyField() {
 }
 
 // Common select options
+// NOTE: For ORDER_STATUSES, PAYMENT_METHODS, CUSTOMER_TYPES - use @/lib/shared/constants
+// These are kept here only for backward compatibility with form-specific units
 export const COMMON_UNITS = [
   { value: 'kg', label: 'Kilogram' },
   { value: 'gram', label: 'Gram' },
@@ -123,27 +125,9 @@ export const COMMON_UNITS = [
   { value: 'bottle', label: 'Botol' }
 ] as const
 
-export const CUSTOMER_TYPES = [
-  { value: 'REGULAR', label: 'Regular' },
-  { value: 'VIP', label: 'VIP' },
-  { value: 'WHOLESALE', label: 'Wholesale' }
-] as const
-
-export const PAYMENT_METHODS = [
-  { value: 'cash', label: 'Tunai' },
-  { value: 'transfer', label: 'Transfer' },
-  { value: 'digital_wallet', label: 'E-Wallet' },
-  { value: 'card', label: 'Kartu' }
-] as const
-
-export const ORDER_STATUSES = [
-  { value: 'pending', label: 'Menunggu' },
-  { value: 'confirmed', label: 'Dikonfirmasi' },
-  { value: 'in_progress', label: 'Sedang Diproses' },
-  { value: 'ready', label: 'Siap Diambil' },
-  { value: 'delivered', label: 'Sudah Dikirim' },
-  { value: 'cancelled', label: 'Dibatalkan' }
-] as const
+// DEPRECATED: Import from @/lib/shared/constants instead
+// Re-export for backward compatibility
+export { CUSTOMER_TYPES, ORDER_STATUSES, PAYMENT_METHODS } from '@/lib/shared/constants'
 
 // Form layout utilities
 export const FORM_GRID_LAYOUTS = {

@@ -2,11 +2,10 @@
  
 
 
-import { Edit, Trash2, MoreVertical, ShoppingCart, Search, Filter, X, Plus } from '@/components/icons'
+import { Edit, Filter, MoreVertical, Plus, Search, ShoppingCart, Trash2, X } from '@/components/icons'
 import { useRouter } from 'next/navigation'
-import { useState, useMemo, memo, useCallback } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 
-import { DeleteModal } from '@/components/ui/index'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -19,8 +18,9 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
-import { undoableToast } from '@/components/ui/toast'
 import { FilterBadges, createFilterBadges } from '@/components/ui/filter-badges'
+import { DeleteModal } from '@/components/ui/index'
+import { undoableToast } from '@/components/ui/toast'
 
 import { Input } from '@/components/ui/input'
 import {
@@ -30,10 +30,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { SimplePagination } from '@/components/ui/simple-pagination'
-import { useSettings } from '@/contexts/settings-context'
-import { useIngredients, useDeleteIngredient } from '@/hooks/useIngredients'
 import { ServerPagination } from '@/components/ui/server-pagination'
+import { useSettings } from '@/contexts/settings-context'
+import { useDeleteIngredient, useIngredients } from '@/hooks/useIngredients'
 import { useResponsive } from '@/hooks/useResponsive'
 import { handleError } from '@/lib/error-handling'
 import { toast } from 'sonner'
@@ -497,23 +496,6 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                         )}
                     </CardContent>
                 </Card>
-            )}
-
-            {/* Pagination */}
-            {filteredData.length > 0 && (
-                <SimplePagination
-                    page={pagination.page}
-                    pageSize={pagination.pageSize}
-                    totalPages={pagination.totalPages}
-                    totalItems={filteredData.length}
-                    startIndex={pagination.startIndex}
-                    endIndex={pagination.endIndex}
-                    onPageChange={pagination.setPage}
-                    onPageSizeChange={handlePageSizeChange}
-                    canNextPage={pagination.canNextPage}
-                    canPrevPage={pagination.canPrevPage}
-                    pageSizeOptions={[12, 24, 48, 96]}
-                />
             )}
 
             {/* Pagination */}

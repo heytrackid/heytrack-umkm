@@ -1,20 +1,22 @@
 // External libraries
-import { z } from 'zod'
 import type { NextResponse } from 'next/server'
+import { z } from 'zod'
 
-// Internal modules
-import { SecurityPresets } from '@/utils/security/api-middleware'
+// Internal modules - Core
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
-import { parseRouteParams } from '@/lib/api/route-helpers'
-import { createListHandler, createGetHandler, createUpdateHandler, createDeleteHandler } from '@/lib/api/crud-helpers'
 import { createSuccessResponse } from '@/lib/api-core'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { createDeleteHandler, createGetHandler, createListHandler, createUpdateHandler, ListQuerySchema, type ListQuery } from '@/lib/api/crud-helpers'
+
+// Internal modules - Utils
+import { parseRouteParams } from '@/lib/api/route-helpers'
 import { apiLogger } from '@/lib/logger'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
 // Types and schemas
+
 // Constants and config
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
-
 export const runtime = 'nodejs'
 
 const TemplateInsertSchema = z.object({
@@ -34,10 +36,10 @@ export const GET = createApiRoute(
   {
     method: 'GET',
     path: '/api/whatsapp-templates',
+    querySchema: ListQuerySchema,
     securityPreset: SecurityPresets.basic(),
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async (context, validatedQuery: any) => {
+  async (context: RouteContext, validatedQuery?: ListQuery) => {
     const { params } = context
     const { slug } = parseRouteParams(params)
 
@@ -141,7 +143,7 @@ export const PUT = createApiRoute(
         table: 'whatsapp_templates',
         selectFields: 'id, user_id, name, category, template_content, description, variables, is_active, is_default, updated_at',
       },
-      'Template updated successfully'
+      SUCCESS_MESSAGES.WHATSAPP_TEMPLATE_UPDATED
     )(context, undefined, body)
   }
 )
@@ -162,7 +164,7 @@ export const DELETE = createApiRoute(
       {
         table: 'whatsapp_templates',
       },
-      'Template deleted successfully'
+      SUCCESS_MESSAGES.WHATSAPP_TEMPLATE_DELETED
     )(context)
   }
 )

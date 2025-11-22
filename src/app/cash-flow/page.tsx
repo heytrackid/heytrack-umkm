@@ -3,11 +3,11 @@
 import { ArrowDownIcon, ArrowUpIcon, DollarSign, Filter, Plus, Search, TrendingDown, TrendingUp } from '@/components/icons'
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
-import { CashFlowLoading } from '@/components/loading'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { CashFlowLoading } from '@/components/loading'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,9 +17,9 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { useAuth } from '@/hooks/useAuth'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useCreateFinancialRecord, useFinancialRecords } from '@/hooks/useFinancialRecords'
-import { useAuth } from '@/hooks/useAuth'
 import { handleError } from '@/lib/error-handling'
 import type { FinancialRecord } from '@/types/database'
 
@@ -53,7 +53,6 @@ const CashFlowPage = () => {
   }
 
    const { data, isLoading: loading, error: _error } = useFinancialRecords(queryParams)
-   const records = data ?? []
 
   // Form state for new transaction
   const [newTransaction, setNewTransaction] = useState({
@@ -96,26 +95,39 @@ const CashFlowPage = () => {
     }
   }
 
-  const filteredRecords = records.filter((record) => {
-    const matchesSearch = record.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          record.category?.toLowerCase().includes(searchTerm.toLowerCase())
-    return matchesSearch && record.date // Only include records with valid dates
-  })
+  // Memoize filtered records
+  const filteredRecords = useMemo(() => {
+    const records = data ?? []
+    return records.filter((record) => {
+      const matchesSearch = record.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            record.category?.toLowerCase().includes(searchTerm.toLowerCase())
+      return matchesSearch && record.date // Only include records with valid dates
+    })
+  }, [data, searchTerm])
 
-  const summary: CashFlowSummary = {
-    totalIncome: filteredRecords.filter((r) => r.type === 'INCOME').reduce((sum, r) => sum + r.amount, 0),
-    totalExpenses: filteredRecords.filter((r) => r.type === 'EXPENSE').reduce((sum, r) => sum + r.amount, 0),
-    netCashFlow: 0,
-    transactionCount: filteredRecords.length
-  }
-  summary.netCashFlow = summary.totalIncome - summary.totalExpenses
+  // Memoize summary calculations
+  const summary: CashFlowSummary = useMemo(() => {
+    const totalIncome = filteredRecords.filter((r) => r.type === 'INCOME').reduce((sum, r) => sum + r.amount, 0)
+    const totalExpenses = filteredRecords.filter((r) => r.type === 'EXPENSE').reduce((sum, r) => sum + r.amount, 0)
+    
+    return {
+      totalIncome,
+      totalExpenses,
+      netCashFlow: totalIncome - totalExpenses,
+      transactionCount: filteredRecords.length
+    }
+  }, [filteredRecords])
 
-  const expenseCategories = filteredRecords
-    .filter((r: FinancialRecord) => r.type === 'EXPENSE')
-    .reduce((acc: Record<string, number>, r: FinancialRecord) => {
-      acc[r.category] = (acc[r.category] || 0) + r.amount
-      return acc
-    }, {} as Record<string, number>)
+  // Memoize expense categories
+  const expenseCategories = useMemo(() => 
+    filteredRecords
+      .filter((r: FinancialRecord) => r.type === 'EXPENSE')
+      .reduce((acc: Record<string, number>, r: FinancialRecord) => {
+        acc[r.category] = (acc[r.category] || 0) + r.amount
+        return acc
+      }, {} as Record<string, number>),
+    [filteredRecords]
+  )
 
   // Show loading state for entire page
   if (loading) {

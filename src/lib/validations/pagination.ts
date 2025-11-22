@@ -1,18 +1,32 @@
 import { z } from 'zod'
 
+/**
+ * DEPRECATED: Import from @/lib/validations/domains/common instead
+ * This file is kept for backward compatibility only
+ * 
+ * The common.ts version has more features:
+ * - Search & sort fields
+ * - Better error handling
+ * - Higher limits for admin use
+ */
 
+// Re-export from the canonical location
+export {
+    PaginationQuerySchema,
+    type PaginationQuery
+} from '@/lib/validations/domains/common'
 
 /**
- * Pagination Query Schema
- * For validating pagination query parameters in API routes
+ * Legacy Pagination Query Schema (simple version)
+ * @deprecated Use PaginationQuerySchema from @/lib/validations/domains/common
  */
-export const PaginationQuerySchema = z.object({
+export const SimplePaginationQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(10),
   offset: z.coerce.number().int().nonnegative().optional(),
 })
 
-export type PaginationQuery = z.infer<typeof PaginationQuerySchema>
+export type SimplePaginationQuery = z.infer<typeof SimplePaginationQuerySchema>
 
 /**
  * Pagination Metadata
@@ -40,13 +54,14 @@ export interface PaginatedResponse<T> {
 
 /**
  * Validate and parse pagination query parameters
+ * @deprecated Use PaginationQuerySchema.parse() directly
  */
-export function parsePaginationQuery(searchParams: URLSearchParams): PaginationQuery {
+export function parsePaginationQuery(searchParams: URLSearchParams): SimplePaginationQuery {
   const params = {
     page: searchParams.get('page'),
     limit: searchParams.get('limit'),
     offset: searchParams.get('offset'),
   }
 
-  return PaginationQuerySchema.parse(params)
+  return SimplePaginationQuerySchema.parse(params)
 }

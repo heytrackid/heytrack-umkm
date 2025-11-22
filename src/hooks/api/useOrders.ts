@@ -1,8 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { fetchApi, postApi, putApi, deleteApi } from '@/lib/query/query-helpers'
-import { toast } from 'sonner'
 import { handleError } from '@/lib/error-handling'
-import type { Row, Insert, Update } from '@/types/database'
+import { deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
+import type { Insert, Row, Update } from '@/types/database'
+import type { PaginationMeta } from '@/types/pagination'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 type Order = Row<'orders'>
 type OrderInsert = Insert<'orders'>
@@ -23,13 +24,13 @@ export function useOrders(options?: { page?: number; limit?: number; offset?: nu
 
   return useQuery({
     queryKey: ['orders', apiOptions],
-    queryFn: (): Promise<{ data: Order[]; pagination: any }> => { // eslint-disable-line @typescript-eslint/no-explicit-any
+    queryFn: (): Promise<{ data: Order[]; pagination: PaginationMeta }> => {
       const params = new URLSearchParams()
       params.set('page', page.toString())
       params.set('limit', limit.toString())
       if (search) params.set('search', search)
 
-      return fetchApi<{ data: Order[]; pagination: any }>(`/api/orders?${params}`) // eslint-disable-line @typescript-eslint/no-explicit-any
+      return fetchApi<{ data: Order[]; pagination: PaginationMeta }>(`/api/orders?${params}`)
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   })

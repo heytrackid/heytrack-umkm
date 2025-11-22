@@ -87,6 +87,18 @@ export const OrderStatusUpdateSchema = z.object({
   notes: z.string().max(500).optional(),
 })
 
+// Order list query schema
+export const OrderListQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().positive().optional().default(999999),
+  search: z.string().optional(),
+  sort_by: z.string().optional(),
+  sort_order: z.enum(['asc', 'desc']).optional(),
+  status: z.string().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+})
+
 export type OrderItemInsert = z.infer<typeof OrderItemInsertSchema>
 export type OrderItemUpdate = z.infer<typeof OrderItemUpdateSchema>
 export type OrderInsert = z.infer<typeof OrderInsertSchema>
@@ -94,3 +106,4 @@ export type OrderUpdate = z.infer<typeof OrderUpdateSchema>
 export type OrderForm = z.infer<typeof OrderFormSchema>
 export type OrderQuery = z.infer<typeof OrderQuerySchema>
 export type OrderStatusUpdate = z.infer<typeof OrderStatusUpdateSchema>
+export type OrderListQuery = z.infer<typeof OrderListQuerySchema>

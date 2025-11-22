@@ -1,38 +1,27 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-import { NextResponse } from 'next/server'
+// External libraries
+import type { SupabaseClient } from '@supabase/supabase-js'
 
+// Internal modules - Core
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { createSuccessResponse } from '@/lib/api-core'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
+
+// Internal modules - Utils
 import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { SecurityPresets } from '@/utils/security/api-middleware'
 import { createClient } from '@/utils/supabase/server'
-import { createSuccessResponse } from '@/lib/api-core/responses'
-import { z } from 'zod'
 
-const ErrorReportSchema = z.object({
-  message: z.string().optional(),
-  msg: z.string().optional(),
-  stack: z.string().optional(),
-  url: z.string().optional(),
-  userAgent: z.string().optional(),
-  componentStack: z.string().optional(),
-  timestamp: z.union([z.number(), z.string()]).optional(),
-  errorType: z.string().optional(),
-  browser: z.string().optional(),
-  os: z.string().optional(),
-  device: z.string().optional(),
-}).refine((data) => data.message || data.msg, {
-  message: 'Either message or msg is required',
-  path: ['message']
-})
+// Types and schemas
+import type { Database } from '@/types/database'
+import { ErrorReportSchema, ErrorQuerySchema, type ErrorReport } from '@/lib/validations/domains/common'
 
-const ErrorQuerySchema = z.object({
-  limit: z.string().transform(val => parseInt(val, 10)).optional().default(1000),
-  offset: z.string().transform(val => parseInt(val, 10)).optional().default(0),
-})
+// Constants and config
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 
 async function getOptionalUserId(): Promise<string | null> {
   try {
@@ -47,7 +36,7 @@ async function getOptionalUserId(): Promise<string | null> {
   }
 }
 
-function sanitizeErrorBody(body: z.infer<typeof ErrorReportSchema>) {
+function sanitizeErrorBody(body: ErrorReport) {
   const timestamp = body.timestamp ? String(body.timestamp) : new Date().toISOString()
 
   return {
@@ -63,10 +52,10 @@ function sanitizeErrorBody(body: z.infer<typeof ErrorReportSchema>) {
 async function logErrorToDatabase(
   userId: string,
   sanitized: ReturnType<typeof sanitizeErrorBody>,
-  original: z.infer<typeof ErrorReportSchema>
+  original: ErrorReport
 ): Promise<void> {
   try {
-    const supabase = await createClient()
+    const supabase = await createClient() as SupabaseClient<Database>
     const payload = {
       user_id: userId,
       endpoint: sanitized.url ?? 'unknown',
@@ -104,7 +93,7 @@ export const GET = createApiRoute(
     const { user } = context
     const { limit, offset } = query!
 
-    const supabase = await createClient()
+    const supabase = await createClient() as SupabaseClient<Database>
 
     // Admin authorization: check against configured admin emails with a fallback.
     const adminEmailsRaw = process.env['ADMIN_EMAILS'] ?? ''
@@ -124,10 +113,7 @@ export const GET = createApiRoute(
         email: user.email
       }, 'Unauthorized access attempt to error logs')
 
-      return NextResponse.json(
-        { error: 'Forbidden - Admin access required' },
-        { status: 403 }
-      )
+      return handleAPIError(new Error('Forbidden - Admin access required'), 'GET /api/errors')
     }
 
     // Fetch recent errors from database
@@ -139,10 +125,7 @@ export const GET = createApiRoute(
 
     if (queryError) {
       apiLogger.error({ error: queryError }, 'Failed to fetch error logs')
-      return NextResponse.json(
-        { error: 'Failed to fetch error logs' },
-        { status: 500 }
-      )
+      return handleAPIError(new Error('Failed to fetch error logs'), 'GET /api/errors')
     }
 
     return createSuccessResponse({ errors })
@@ -180,6 +163,6 @@ export const POST = createApiRoute(
       apiLogger.info({ ...sanitized, userId }, 'Client-side error reported')
     }
 
-    return createSuccessResponse(null, 'Error reported successfully')
+    return createSuccessResponse(null, SUCCESS_MESSAGES.ERROR_REPORTED)
   }
 )

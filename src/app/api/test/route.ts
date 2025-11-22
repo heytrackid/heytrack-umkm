@@ -1,6 +1,6 @@
 // External libraries
 // Internal modules
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core'
 import { createApiRoute } from '@/lib/api/route-factory'
 
 // Types and schemas

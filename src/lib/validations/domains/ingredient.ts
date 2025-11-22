@@ -109,6 +109,52 @@ export const IngredientStockUpdateSchema = z.object({
   notes: z.string().max(500).optional(),
 })
 
+// Ingredient import schemas
+export const IngredientImportSchema = z.object({
+  name: z.string().min(1, 'Nama bahan wajib diisi'),
+  unit: z.string().min(1, 'Satuan wajib diisi'),
+  price_per_unit: z.number().min(0, 'Harga per satuan harus positif'),
+  current_stock: z.number().min(0).optional().default(0),
+  min_stock: z.number().min(0).optional().default(0),
+  description: z.string().optional(),
+  category: z.string().optional(),
+  supplier: z.string().optional(),
+})
+
+export const ImportIngredientsSchema = z.object({
+  ingredients: z.array(IngredientImportSchema).min(1, 'Minimal satu bahan harus diimpor'),
+})
+
+// Ingredient stock validation schemas
+export const ValidateStockItemSchema = z.object({
+  ingredientId: UUIDSchema,
+  requiredQuantity: NonNegativeNumberSchema,
+})
+
+export const ValidateStockSchema = z.object({
+  items: z.array(ValidateStockItemSchema).min(1, 'At least one item is required'),
+})
+
+// Ingredient reorder calculation schema
+export const CalculateReorderSchema = z.object({
+  ingredientId: UUIDSchema,
+  leadTimeDays: z.number().min(1).max(365).optional().default(7),
+  safetyStockDays: z.number().min(0).max(365).optional().default(3),
+})
+
+// Bulk import schema
+export const BulkImportSchema = z.object({
+  ingredients: z.array(z.object({
+    name: z.string(),
+    category: z.string().optional(),
+    unit: z.string(),
+    price_per_unit: z.number(),
+    current_stock: z.number(),
+    reorder_point: z.number(),
+    supplier: z.string().optional(),
+  })).min(1).max(1000, 'Maximum 1000 ingredients per import'),
+})
+
 export type IngredientInsert = z.infer<typeof IngredientInsertSchema>
 export type IngredientUpdate = z.infer<typeof IngredientUpdateSchema>
 export type IngredientPurchaseInsert = z.infer<typeof IngredientPurchaseInsertSchema>
@@ -116,3 +162,9 @@ export type IngredientPurchaseUpdate = z.infer<typeof IngredientPurchaseUpdateSc
 export type IngredientForm = z.infer<typeof IngredientFormSchema>
 export type IngredientQuery = z.infer<typeof IngredientQuerySchema>
 export type IngredientStockUpdate = z.infer<typeof IngredientStockUpdateSchema>
+export type IngredientImport = z.infer<typeof IngredientImportSchema>
+export type ImportIngredients = z.infer<typeof ImportIngredientsSchema>
+export type ValidateStockItem = z.infer<typeof ValidateStockItemSchema>
+export type ValidateStock = z.infer<typeof ValidateStockSchema>
+export type CalculateReorder = z.infer<typeof CalculateReorderSchema>
+export type BulkImport = z.infer<typeof BulkImportSchema>

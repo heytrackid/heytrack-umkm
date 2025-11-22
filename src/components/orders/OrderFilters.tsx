@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { cn } from '@/lib/utils'
 
 import type { OrderFilters as OrderFiltersType } from '@/components/orders/types'
 
@@ -50,7 +51,7 @@ export const OrderFilters = ({
           </div>
 
           {/* Filter Row */}
-           <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-3'}`}>
+           <div className={cn("grid gap-4", isMobile ? "grid-cols-1" : "grid-cols-2 lg:grid-cols-3")}>
             {/* Status Filter */}
             <div>
               <Select value={filters['status']} onValueChange={(value) => handleFilterChange('status', value)}>

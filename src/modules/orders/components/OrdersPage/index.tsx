@@ -2,11 +2,10 @@
 
 // Using Pino logger for all logging
 import { Calendar, MessageCircle, Plus, ShoppingCart, TrendingUp, XCircle } from '@/components/icons'
-import { useUpdateOrderStatus } from '@/hooks/api/useOrders'
-import { useOrders } from '@/hooks/api/useOrders'
+import { useOrders, useUpdateOrderStatus } from '@/hooks/api/useOrders'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import { useCallback, useMemo, useState } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 
 import type { Order, OrderStatus } from '@/types/database'
 
@@ -21,11 +20,11 @@ import { OrderFilters } from '@/modules/orders/components/OrdersPage/OrderFilter
 import { StatsCards } from '@/modules/orders/components/OrdersPage/StatsCards'
 import { StatusSummary } from '@/modules/orders/components/OrdersPage/StatusSummary'
 
-import { OrdersList } from '@/modules/orders/components/OrdersPage/OrdersList'
 import { OrdersLoading } from '@/components/loading'
 import { ServerPagination } from '@/components/ui/server-pagination'
-import { OrderForm } from '../OrderForm'
+import { OrdersList } from '@/modules/orders/components/OrdersPage/OrdersList'
 import { OrderDetailView } from '../OrderDetailView'
+import { OrderForm } from '../OrderForm'
 
 // Static imports used instead of dynamic imports
 
@@ -60,7 +59,7 @@ interface OrdersPageProps {
     enableAdvancedFeatures?: boolean
 }
 
-const OrdersPage = (_props: OrdersPageProps) => {
+const OrdersPageComponent = (_props: OrdersPageProps) => {
     const router = useRouter()
     const queryClient = useQueryClient()
 
@@ -337,4 +336,5 @@ const OrdersPage = (_props: OrdersPageProps) => {
     )
 }
 
-export { OrdersPage }
+// Memoized export for performance
+export const OrdersPage = memo(OrdersPageComponent)
