@@ -22,7 +22,7 @@ export const DEFAULT_HPP_CONFIG: HppConfig = {
 /**
  * Calculate margin percentage
  */
-export function calculateMarginPercentage(sellingPrice: number, hpp: number): number {
+export const calculateMarginPercentage = (sellingPrice: number, hpp: number): number => {
   if (sellingPrice === 0) {return 0}
   return ((sellingPrice - hpp) / sellingPrice) * 100
 }
@@ -30,24 +30,24 @@ export function calculateMarginPercentage(sellingPrice: number, hpp: number): nu
 /**
  * Calculate margin amount
  */
-export function calculateMarginAmount(sellingPrice: number, hpp: number): number {
+export const calculateMarginAmount = (sellingPrice: number, hpp: number): number => {
   return sellingPrice - hpp
 }
 
 /**
  * Calculate suggested selling price based on desired margin
  */
-export function calculateSuggestedPrice(hpp: number, marginPercentage: number): number {
+export const calculateSuggestedPrice = (hpp: number, marginPercentage: number): number => {
   return hpp * (1 + marginPercentage / 100)
 }
 
 /**
  * Calculate operational cost based on configuration
  */
-export function calculateOperationalCost(
+export const calculateOperationalCost = (
   materialCost: number,
   config: Partial<HppConfig> = {}
-): number {
+): number => {
   const {
     operationalCostPercentage = DEFAULT_HPP_CONFIG.operationalCostPercentage,
     operationalCostMinimum = DEFAULT_HPP_CONFIG.operationalCostMinimum
@@ -60,21 +60,21 @@ export function calculateOperationalCost(
  * Legacy function for backward compatibility
  * @deprecated Use calculateOperationalCost with config instead
  */
-export function calculateOperationalCostLegacy(materialCost: number, percentage = 0.15): number {
+export const calculateOperationalCostLegacy = (materialCost: number, percentage = 0.15): number => {
   return Math.max(materialCost * percentage, 2500) // Minimum 2500 IDR
 }
 
 /**
  * Round price to nearest hundred
  */
-export function roundToNearestHundred(price: number): number {
+export const roundToNearestHundred = (price: number): number => {
   return Math.round(price / 100) * 100
 }
 
 /**
  * Calculate percentage change
  */
-export function calculatePercentageChange(current: number, previous: number): number {
+export const calculatePercentageChange = (current: number, previous: number): number => {
   if (previous === 0) {return 0}
   return ((current - previous) / previous) * 100
 }
@@ -82,7 +82,7 @@ export function calculatePercentageChange(current: number, previous: number): nu
 /**
  * Format HPP breakdown for display
  */
-export function formatHppBreakdown(
+export const formatHppBreakdown = (
   materialCost: number,
   laborCost: number,
   overheadCost: number
@@ -91,7 +91,7 @@ export function formatHppBreakdown(
   labor: { amount: number; percentage: number }
   overhead: { amount: number; percentage: number }
   total: number
-} {
+} => {
   const total = materialCost + laborCost + overheadCost
 
   return {

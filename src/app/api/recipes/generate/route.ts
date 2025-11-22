@@ -1,7 +1,7 @@
 export const runtime = 'nodejs'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { SecurityPresets } from '@/utils/security/api-middleware'
 import { z } from 'zod'

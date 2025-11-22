@@ -1,9 +1,9 @@
 
+import { handleError } from '@/lib/error-handling'
+import { deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import type { Insert, Row, Update } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { fetchApi, postApi, putApi, deleteApi } from '@/lib/query/query-helpers'
 import { toast } from 'sonner'
-import { handleError } from '@/lib/error-handling'
 
 
 
@@ -36,7 +36,11 @@ export function useExpenses(params?: {
 
   return useQuery<Expense[]>({
     queryKey: ['expenses', params],
-    queryFn: () => fetchApi<Expense[]>(`/api/expenses?${searchParams}`),
+    queryFn: async () => {
+      const response = await fetchApi<{ data: Expense[] }>(`/api/expenses?${searchParams}`)
+      // Extract data array if response has pagination structure
+      return Array.isArray(response) ? response : response.data
+    },
   })
 }
 

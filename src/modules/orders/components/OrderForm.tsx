@@ -1,9 +1,9 @@
  
 'use client'
 
-import { useRecipes } from '@/hooks/useRecipes'
-import { useCustomersList } from '@/hooks/useCustomers'
 import { AlertCircle, Package, Plus, Trash2 } from '@/components/icons'
+import { useCustomersList } from '@/hooks/useCustomers'
+import { useRecipes } from '@/hooks/useRecipes'
 import { memo, useCallback, useMemo, useState, type FormEvent } from 'react'
 
 import type { Order, OrderFormProps, OrderItemWithRecipe, PaymentMethod } from '@/app/orders/types/orders-db.types'
@@ -18,6 +18,7 @@ import { warningToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
 import { ORDER_CONFIG, ORDER_PRIORITIES } from '@/lib/constants/index'
 import { safeNumber } from '@/lib/type-guards'
+import { cn } from '@/lib/utils'
 import { calculateOrderTotals, generateOrderNo } from '@/modules/orders/utils/helpers'
 
 import type { Row } from '@/types/database'
@@ -367,7 +368,10 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                   }
                 }}
                 required
-                className={`mt-1 ${fieldErrors['customer_name'] ? 'border-destructive focus-visible:ring-destructive' : ''}`}
+                className={cn(
+                  "mt-1",
+                  fieldErrors['customer_name'] && "border-destructive focus-visible:ring-destructive"
+                )}
                 aria-invalid={Boolean(fieldErrors['customer_name'])}
               />
               {fieldErrors['customer_name'] && (
@@ -725,7 +729,10 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 }}
                 min="0"
                 step="1000"
-                className={`mt-1 ${fieldErrors['paid_amount'] ? 'border-destructive focus-visible:ring-destructive' : ''}`}
+                className={cn(
+                  "mt-1",
+                  fieldErrors['paid_amount'] && "border-destructive focus-visible:ring-destructive"
+                )}
                 aria-invalid={Boolean(fieldErrors['paid_amount'])}
               />
               {fieldErrors['paid_amount'] && (

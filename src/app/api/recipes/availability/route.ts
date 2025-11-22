@@ -7,7 +7,7 @@ import { SecurityPresets } from '@/utils/security/api-middleware'
 
 import { apiLogger, logError } from '@/lib/logger'
 import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import type { NextResponse } from 'next/server'
 

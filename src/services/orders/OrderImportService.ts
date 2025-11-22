@@ -1,8 +1,8 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
-import { apiLogger } from '@/lib/logger'
 import { ERROR_MESSAGES } from '@/lib/constants/messages'
 import { APIError } from '@/lib/errors/api-error-handler'
-import type { Database, Insert, Row, OrderStatus } from '@/types/database'
+import { apiLogger } from '@/lib/logger'
+import { BaseService } from '@/services/base'
+import type { Insert, OrderStatus, Row } from '@/types/database'
 
 type OrderRow = Row<'orders'>
 type CustomerInsert = Insert<'customers'>
@@ -33,14 +33,16 @@ export interface OrderProcessingResult {
   }>
 }
 
-export class OrderImportService {
-  constructor(private supabase: SupabaseClient<Database>) {}
+export class OrderImportService extends BaseService {
+  constructor(context: import('@/services/base').ServiceContext) {
+    super(context)
+  }
 
-  async fetchRecipes(userId: string): Promise<Map<string, string>> {
-    const { data: recipes, error: recipesError } = await this.supabase
+  async fetchRecipes(): Promise<Map<string, string>> {
+    const { data: recipes, error: recipesError } = await this.context.supabase
       .from('recipes')
       .select('id, name')
-      .eq('user_id', userId)
+      .eq('user_id', this.context.userId)
 
     if (recipesError) {
       apiLogger.error({ error: recipesError }, 'Failed to fetch recipes')
@@ -52,9 +54,9 @@ export class OrderImportService {
 
   processOrders(
     orders: ImportedOrder[],
-    recipeMap: Map<string, string>,
-    userId: string
+    recipeMap: Map<string, string>
   ): OrderProcessingResult {
+    const userId = this.context.userId
     const errors: Array<{ row: number; error: string }> = []
     const customersToCreate = new Map<string, CustomerInsert>()
     const ordersToCreate: Array<{
@@ -130,7 +132,7 @@ export class OrderImportService {
     // Create customers
     const customerPromises = Array.from(customersToCreate.entries()).map(async ([customerKey, customerData]) => {
       // Check if customer exists
-      const { data: existingCustomer } = await this.supabase
+      const { data: existingCustomer } = await this.context.supabase
         .from('customers')
         .select('id')
         .eq('user_id', userId)
@@ -141,7 +143,7 @@ export class OrderImportService {
         customerIds.set(customerKey, existingCustomer.id)
       } else {
         // Create new customer
-        const { data: newCustomer, error: customerError } = await this.supabase
+        const { data: newCustomer, error: customerError } = await this.context.supabase
           .from('customers')
           .insert(customerData as never)
           .select('id')
@@ -173,7 +175,7 @@ export class OrderImportService {
       const customerId = customerIds.get(orderData.customerName)
 
       // Create order
-      const { data: newOrder, error: orderError } = await this.supabase
+      const { data: newOrder, error: orderError } = await this.context.supabase
         .from('orders')
         .insert({
           ...orderData.order,
@@ -195,14 +197,14 @@ export class OrderImportService {
         order_id: typedNewOrder.id
       }))
 
-      const { error: itemsError } = await this.supabase
+      const { error: itemsError } = await this.context.supabase
         .from('order_items')
         .insert(itemsWithOrderId as never)
 
       if (itemsError) {
         apiLogger.error({ error: itemsError }, 'Failed to create order items')
         // Rollback: delete the order
-        await this.supabase.from('orders').delete().eq('id', typedNewOrder.id)
+        await this.context.supabase.from('orders').delete().eq('id', typedNewOrder.id)
         return null
       }
 

@@ -3,7 +3,7 @@
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { parseRouteParams } from '@/lib/api/route-helpers'
 import { ListQuerySchema, createCreateHandler, createListHandler, createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core'
 import { cacheInvalidation } from '@/lib/cache'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'

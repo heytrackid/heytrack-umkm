@@ -1,13 +1,14 @@
 'use client'
 
 import { AlertCircle, Clock, Package, TrendingUp } from '@/components/icons'
+import { memo } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ListSkeleton } from '@/components/ui/skeleton-loader'
 import { useDashboardSchedule } from '@/hooks/useDashboardSchedule'
 
-export const ProductionScheduleWidget = (): JSX.Element => {
+const ProductionScheduleWidgetComponent = (): JSX.Element => {
     const { data, isLoading, error } = useDashboardSchedule()
 
     if (isLoading) {
@@ -166,3 +167,6 @@ export const ProductionScheduleWidget = (): JSX.Element => {
         </div>
     )
 }
+
+// Memoized export for performance
+export const ProductionScheduleWidget = memo(ProductionScheduleWidgetComponent)

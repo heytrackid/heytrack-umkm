@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCurrency } from '@/hooks/useCurrency'
 import { safeNumber } from '@/lib/type-guards'
+import { cn } from '@/lib/utils'
 
 
 
@@ -103,7 +104,10 @@ export const PaymentSection = ({
                         }}
                         min="0"
                         step="1000"
-                        className={`mt-1 ${fieldErrors['paid_amount'] ? 'border-destructive focus-visible:ring-destructive' : ''}`}
+                        className={cn(
+                            "mt-1",
+                            fieldErrors['paid_amount'] && "border-destructive focus-visible:ring-destructive"
+                        )}
                         aria-invalid={Boolean(fieldErrors['paid_amount'])}
                     />
                     {fieldErrors['paid_amount'] && (
@@ -145,7 +149,9 @@ export const PaymentSection = ({
                     </div>
                     <div className="flex justify-between font-medium text-base">
                         <span>Sisa:</span>
-                        <span className={totalAmount - formData.paid_amount > 0 ? 'text-foreground font-medium' : 'text-muted-foreground'}>
+                        <span className={cn(
+                            totalAmount - formData.paid_amount > 0 ? "text-foreground font-medium" : "text-muted-foreground"
+                        )}>
                             {formatCurrency(Math.max(0, totalAmount - formData.paid_amount))}
                         </span>
                     </div>

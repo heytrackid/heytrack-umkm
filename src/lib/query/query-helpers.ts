@@ -85,6 +85,11 @@ export async function fetchApi<T>(
         throw new Error(apiResponse.error || 'Request failed')
       }
 
+      // If response has pagination, return full response (data + pagination)
+      if ('pagination' in data) {
+        return data as T
+      }
+
       return apiResponse.data as T
     }
 

@@ -1,12 +1,12 @@
 // External libraries
 
 // Internal modules
-import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
-import { SecurityPresets } from '@/utils/security/api-middleware'
-import { parseRouteParams } from '@/lib/api/route-helpers'
-import { createDeleteHandler, createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
 import { calculateOffset, createPaginationMeta, createSuccessResponse } from '@/lib/api-core'
+import { createDeleteHandler, createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { parseRouteParams } from '@/lib/api/route-helpers'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
 // Types and schemas
 
@@ -24,15 +24,14 @@ export const GET = createApiRoute(
     path: '/api/expenses',
     securityPreset: SecurityPresets.basic(),
   },
-   
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async (context: RouteContext, validatedQuery: any) => {
+  async (context: RouteContext, validatedQuery: unknown) => {
     const { params } = context
     const { slug } = parseRouteParams(params)
 
     if (!slug || slug.length === 0) {
       // GET /api/expenses - List expenses
       const { user, supabase } = context
+      const query = (validatedQuery as Record<string, unknown>) || {}
       const {
         page = 1,
         limit = 1000,
@@ -42,7 +41,16 @@ export const GET = createApiRoute(
         category,
         startDate,
         endDate,
-      } = validatedQuery || {}
+      } = query as {
+        page?: number
+        limit?: number
+        sort?: string
+        order?: 'asc' | 'desc'
+        search?: string
+        category?: string
+        startDate?: string
+        endDate?: string
+      }
 
       const offset = calculateOffset(page, limit)
 

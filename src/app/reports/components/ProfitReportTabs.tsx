@@ -31,11 +31,15 @@ interface ProfitReportTabsProps {
 }
 
 // Trend tab content
-const TrendTab: React.FC<{
+const TrendTab = ({
+    profitData,
+    selectedDataPoint,
+    setSelectedDataPoint
+}: {
     profitData: PartialProfitData
     selectedDataPoint: SelectedDataPoint | null
     setSelectedDataPoint: (dataPoint: SelectedDataPoint | null) => void
-}> = ({ profitData, selectedDataPoint, setSelectedDataPoint }) => {
+}) => {
     const { formatCurrency } = useCurrency()
     const periods = profitData.profit_by_period ?? []
 
@@ -102,9 +106,9 @@ const TrendTab: React.FC<{
 }
 
 // Products tab content
-const ProductsTab: React.FC<{
+const ProductsTab = ({ profitData }: {
     profitData: ProfitData
-}> = ({ profitData }) => {
+}) => {
     const { formatCurrency } = useCurrency()
     const topProducts = profitData.top_profitable_products ?? []
     const leastProducts = profitData.least_profitable_products ?? []
@@ -175,9 +179,9 @@ const ProductsTab: React.FC<{
 }
 
 // Expenses tab content
-const ExpensesTab: React.FC<{
+const ExpensesTab = ({ profitData }: {
     profitData: ProfitData
-}> = ({ profitData }) => {
+}) => {
     const { formatCurrency } = useCurrency()
     const breakdown = profitData.operatingExpensesBreakdown ?? []
 
@@ -216,11 +220,15 @@ const ExpensesTab: React.FC<{
 }
 
 // Comparison tab content
-const ComparisonTab: React.FC<{
+const ComparisonTab = ({
+    profitData,
+    compareMode,
+    comparisonData
+}: {
     profitData: PartialProfitData
     compareMode: boolean
-    comparisonData: PartialProfitData | null
-}> = ({ profitData, compareMode, comparisonData }) => {
+    comparisonData: ProfitData | null
+}) => {
     const { formatCurrency } = useCurrency()
     const formatDateLabel = (value?: string) => {
         if (!value) { return null }
@@ -384,13 +392,13 @@ const ComparisonTab: React.FC<{
 }
 
 // Main tabbed content component
-export const ProfitReportTabs: React.FC<ProfitReportTabsProps> = ({
+export const ProfitReportTabs = ({
     profitData,
     selectedDataPoint,
     setSelectedDataPoint,
     compareMode,
     comparisonData
-}) => {
+}: ProfitReportTabsProps) => {
     const [activeTab, setActiveTab] = React.useState('trend')
 
     const renderTabContent = () => {

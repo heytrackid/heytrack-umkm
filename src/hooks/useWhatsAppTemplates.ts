@@ -1,9 +1,9 @@
 
+import { handleError } from '@/lib/error-handling'
+import { deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import type { Insert, Row, Update } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { fetchApi, postApi, putApi, deleteApi } from '@/lib/query/query-helpers'
 import { toast } from 'sonner'
-import { handleError } from '@/lib/error-handling'
 
 
 
@@ -21,7 +21,11 @@ export function useWhatsAppTemplates(params?: { category?: string; isActive?: bo
 
   return useQuery<WhatsAppTemplate[]>({
     queryKey: ['whatsapp-templates', params],
-    queryFn: () => fetchApi<WhatsAppTemplate[]>(`/api/whatsapp-templates?${searchParams}`),
+    queryFn: async () => {
+      const response = await fetchApi<{ data: WhatsAppTemplate[] }>(`/api/whatsapp-templates?${searchParams}`)
+      // Extract data array if response has pagination structure
+      return Array.isArray(response) ? response : response.data
+    },
   })
 }
 

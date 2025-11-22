@@ -4,7 +4,7 @@ export const runtime = 'nodejs'
 
 import { z } from 'zod'
 
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core'
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { apiLogger } from '@/lib/logger'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
@@ -28,10 +28,10 @@ const SuppliersImportSchema = z.object({
 
 // POST /api/suppliers/import - Import suppliers from CSV
 async function postHandler(context: RouteContext, _query?: never, body?: z.infer<typeof SuppliersImportSchema>): Promise<NextResponse> {
-  const { user, supabase, request } = context
+  const { user, supabase } = context
 
   try {
-    apiLogger.info({ url: request.url }, 'POST /api/suppliers/import - Request received')
+    apiLogger.info({ userId: user.id }, 'POST /api/suppliers/import - Request received')
 
     if (!body) {
       return handleAPIError(new Error('Request body is required'), 'API Route')

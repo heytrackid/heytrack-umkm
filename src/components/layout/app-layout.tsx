@@ -8,19 +8,20 @@ import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBo
 import { SmartBottomNav } from '@/components/navigation/SmartNavigation'
 import { TabNavigation } from '@/components/navigation/TabNavigation'
 import { Button } from '@/components/ui/button'
-import { LoadingState } from '@/components/ui/loading-state'
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+import { LoadingState } from '@/components/ui/loading-state'
 
-import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { NotificationBell } from '@/components/layout/NotificationBell'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { NotificationProvider } from '@/contexts/notification-context'
 import { useAuth } from '@/hooks/useAuth'
 import { useInstantNavigation } from '@/hooks/useInstantNavigation'
+import { cn } from '@/lib/utils'
 
 import { uiLogger } from '@/lib/client-logger'
 import { useSupabase } from '@/providers/SupabaseProvider'
@@ -267,7 +268,10 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
           {/* Main Content */}
           <main
             ref={mainContentRef}
-            className={`flex-1 overflow-auto bg-background ${isMobile ? 'pb-[calc(56px+env(safe-area-inset-bottom))]' : ''}`}
+            className={cn(
+              "flex-1 overflow-auto bg-background",
+              isMobile && "pb-[calc(56px+env(safe-area-inset-bottom))]"
+            )}
           >
             <div className="container mx-auto h-full px-4 py-6 md:px-6 md:py-8">{children}</div>
           </main>

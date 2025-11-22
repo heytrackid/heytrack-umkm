@@ -16,13 +16,13 @@ import {
     X
 } from '@/components/icons'
 import { useRouter } from 'next/navigation'
-import { useCallback, useMemo, useState } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 
 import { PageHeader } from '@/components/layout/PageHeader'
+import { RecipesLoading } from '@/components/loading'
 import { MobileRecipeCard } from '@/components/recipes/MobileRecipeCard'
 import { RecipeFormDialog } from '@/components/recipes/RecipeFormDialog'
 import { RecipeStatsCards } from '@/components/recipes/RecipeStatsCards'
-import { RecipesLoading } from '@/components/loading'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -63,7 +63,7 @@ const isRecipeArray = (data: unknown): data is Recipe[] => {
     return Array.isArray(data) && data.every(isRecipe)
 }
 
-const RecipesList = () => {
+const RecipesListComponent = () => {
     const router = useRouter()
     const { data: recipesData = [], isLoading: loading, error, refetch, isFetching } = useRecipes()
     const deleteRecipeMutation = useDeleteRecipe()
@@ -678,5 +678,5 @@ const RecipesList = () => {
     )
 }
 
-// Default export for dynamic imports
-export default RecipesList
+// Memoized export for performance
+export const RecipesList = memo(RecipesListComponent)

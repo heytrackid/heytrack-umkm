@@ -1,29 +1,20 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-import { NextResponse } from 'next/server'
-
-import { apiLogger } from '@/lib/logger'
+// Internal modules - Core
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { createSuccessResponse } from '@/lib/api-core'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
+
+// Internal modules - Utils
+import { apiLogger } from '@/lib/logger'
 import { SecurityPresets } from '@/utils/security/api-middleware'
-import { createSuccessResponse } from '@/lib/api-core/responses'
+
+// Types and schemas
+import { ImportIngredientsSchema } from '@/lib/validations/domains/ingredient'
+
+// Constants and config
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/lib/constants/messages'
-import { z } from 'zod'
-
-const IngredientImportSchema = z.object({
-  name: z.string().min(1, 'Nama bahan wajib diisi'),
-  unit: z.string().min(1, 'Satuan wajib diisi'),
-  price_per_unit: z.number().min(0, 'Harga per satuan harus positif'),
-  current_stock: z.number().min(0).optional().default(0),
-  min_stock: z.number().min(0).optional().default(0),
-  description: z.string().optional(),
-  category: z.string().optional(),
-  supplier: z.string().optional(),
-})
-
-const ImportIngredientsSchema = z.object({
-  ingredients: z.array(IngredientImportSchema).min(1, 'Minimal satu bahan harus diimpor'),
-})
 
 const sanitizeString = (value?: string | null, fallback?: string | null): string | null => {
   const trimmed = value?.trim()
@@ -72,10 +63,7 @@ export const POST = createApiRoute(
 
     if (error) {
       apiLogger.error({ error, userId: user.id }, 'Failed to import ingredients')
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.SAVE_FAILED },
-        { status: 500 }
-      )
+      return handleAPIError(new Error(ERROR_MESSAGES.SAVE_FAILED), 'POST /api/ingredients/import')
     }
 
     apiLogger.info(

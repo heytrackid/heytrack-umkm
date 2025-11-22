@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
+import { memo, useCallback, useMemo } from 'react'
 
 import { CheckCircle, Clock, DollarSign, ShoppingCart } from '@/components/icons'
 import { useSalesStats } from '@/hooks/api/useReports'
@@ -13,9 +14,7 @@ interface SalesReportProps {
   }
 }
 
-
-
-export const SalesReport = ({ dateRange }: SalesReportProps = {}) => {
+const SalesReportComponent = ({ dateRange }: SalesReportProps = {}) => {
   const { data: salesStats, isLoading } = useSalesStats(
     dateRange && (dateRange.start || dateRange.end) ? {
       dateRange: {
@@ -25,19 +24,26 @@ export const SalesReport = ({ dateRange }: SalesReportProps = {}) => {
     } : {}
   )
 
-  const safeSalesStats = salesStats ?? { totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 }
+  // Memoize safe stats
+  const safeSalesStats = useMemo(() => 
+    salesStats ?? { totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 },
+    [salesStats]
+  )
 
-  // Simplified growth calculations (no previous period comparison for now)
-  const revenueGrowth = 0
-  const orderGrowth = 0
+  // Memoize growth calculations
+  const { revenueGrowth, orderGrowth } = useMemo(() => ({
+    revenueGrowth: 0,
+    orderGrowth: 0
+  }), [])
 
-  const formatCurrency = (amount: number) => {
+  // Memoize currency formatter
+  const formatCurrency = useCallback((amount: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0,
     }).format(amount)
-  }
+  }, [])
 
   if (isLoading) {
     return (
@@ -149,3 +155,6 @@ export const SalesReport = ({ dateRange }: SalesReportProps = {}) => {
     </div>
   )
 }
+
+// Memoized export for performance
+export const SalesReport = memo(SalesReportComponent)

@@ -5,15 +5,14 @@ import { BarChart3, Calendar, Clock, DollarSign, Edit, Eye, Filter, MessageCircl
 import { useOrdersList, useUpdateOrderStatus } from '@/hooks/api/useOrders'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import { useCallback, useMemo, useState } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 
+import type { OrderItemWithRecipe, OrderWithItems } from '@/app/orders/types/orders-db.types'
 import { PageHeader } from '@/components/layout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { OrderListItem, OrderStatus } from '@/types/database'
-import type { OrderWithItems } from '@/app/orders/types/orders-db.types'
-import type { OrderItemWithRecipe } from '@/app/orders/types/orders-db.types'
 
 import { Input } from '@/components/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -21,10 +20,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useCurrency } from '@/hooks/useCurrency'
 import { getErrorMessage } from '@/lib/type-guards'
+import { cn } from '@/lib/utils'
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@/modules/orders/types'
-import { OrderForm } from './OrderForm'
 import { OrderDetailView } from './OrderDetailView'
+import { OrderForm } from './OrderForm'
 
 
 
@@ -69,7 +69,7 @@ interface OrdersPageProps {
   enableAdvancedFeatures?: boolean
 }
 
-const OrdersPage = (_props: OrdersPageProps) => {
+const OrdersPageComponent = (_props: OrdersPageProps) => {
   const router = useRouter()
   const { formatCurrency } = useCurrency()
   const queryClient = useQueryClient()
@@ -391,7 +391,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
                          </div>
                          <div className="text-right">
                            <div className="font-medium">{formatCurrency(order.total_amount ?? 0)}</div>
-                           <Badge className={`text-xs ${getStatusColor(order.status)}`}>
+                           <Badge className={cn("text-xs", getStatusColor(order.status))}>
                              {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status as OrderStatus] : 'N/A'}
                            </Badge>
                          </div>
@@ -424,7 +424,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div
-                            className={`h-2 rounded-full ${config.color.replace('text-', 'bg-')}`}
+                            className={cn("h-2 rounded-full", config.color.replace('text-', 'bg-'))}
                             style={{ width: `${percentage}%` }}
                           />
                         </div>
@@ -687,4 +687,5 @@ const OrdersPage = (_props: OrdersPageProps) => {
   )
 }
 
-export { OrdersPage }
+// Memoized export for performance
+export const OrdersPage = memo(OrdersPageComponent)

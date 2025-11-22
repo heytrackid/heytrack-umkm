@@ -54,12 +54,12 @@ export interface RecipeSummary {
 /**
  * Calculate recipe HPP (Harga Pokok Produksi)
  */
-export function calculateRecipeHPP(
+export const calculateRecipeHPP = (
   ingredients: RecipeIngredientWithDetails[],
   overheadRate: number = 0.15,
   laborCost: number = 0,
   packagingCost: number = 0
-): HppCalculationResult {
+): HppCalculationResult => {
   const ingredientCost = ingredients.reduce((total, recipeIngredient) => {
     if (!recipeIngredient.ingredient) {return total}
     
@@ -87,12 +87,12 @@ export function calculateRecipeHPP(
 /**
  * Calculate cost for a specific ingredient
  */
-export function calculateIngredientCost(
+export const calculateIngredientCost = (
   quantity: number,
   unit: string,
   unitCost: number,
   ingredientUnitType: string
-): number {
+): number => {
   const conversionFactor = getUnitConversionFactor(unit, ingredientUnitType)
   return quantity * conversionFactor * unitCost
 }
@@ -100,7 +100,7 @@ export function calculateIngredientCost(
 /**
  * Calculate profit margin
  */
-export function calculateProfitMargin(sellingPrice: number, totalCost: number): number {
+export const calculateProfitMargin = (sellingPrice: number, totalCost: number): number => {
   if (sellingPrice <= 0) {return 0}
   return ((sellingPrice - totalCost) / sellingPrice) * 100
 }
@@ -108,7 +108,7 @@ export function calculateProfitMargin(sellingPrice: number, totalCost: number): 
 /**
  * Format recipe servings with proper pluralization
  */
-export function formatRecipeServings(servings: number): string {
+export const formatRecipeServings = (servings: number): string => {
   if (servings === 1) {return '1 porsi'}
   return `${servings} porsi`
 }
@@ -116,11 +116,11 @@ export function formatRecipeServings(servings: number): string {
 /**
  * Scale recipe quantities up or down
  */
-export function scaleRecipe(
+export const scaleRecipe = (
   ingredients: RecipeIngredientWithDetails[],
   currentServings: number,
   targetServings: number
-): RecipeIngredientWithDetails[] {
+): RecipeIngredientWithDetails[] => {
   const scaleFactor = targetServings / currentServings
   
   return ingredients.map(ingredient => ({
@@ -132,7 +132,7 @@ export function scaleRecipe(
 /**
  * Validate recipe data
  */
-export function validateRecipe(recipe: Partial<Recipe>): ValidationResult {
+export const validateRecipe = (recipe: Partial<Recipe>): ValidationResult => {
   const errors: string[] = []
 
   if (!recipe.name || recipe.name.trim().length === 0) {
@@ -200,7 +200,7 @@ function getUnitConversionFactor(fromUnit: string, toUnit: string): number {
 /**
  * Get difficulty level display info
  */
-export function getDifficultyInfo(difficulty: string | null): DifficultyInfo {
+export const getDifficultyInfo = (difficulty: string | null): DifficultyInfo => {
   if (!difficulty) {
     return {
       label: 'Unknown',
@@ -245,7 +245,7 @@ export function getDifficultyInfo(difficulty: string | null): DifficultyInfo {
 /**
  * Get category display info with Indonesian localization
  */
-export function getCategoryInfo(category: string): CategoryInfo {
+export const getCategoryInfo = (category: string): CategoryInfo => {
   const categories: Record<string, { label: string; icon: string; description: string }> = {
     bread: {
       label: 'Roti',
@@ -289,7 +289,7 @@ export function getCategoryInfo(category: string): CategoryInfo {
 /**
  * Format recipe time display
  */
-export function formatRecipeTime(prepTime: number | null, cookTime: number | null): string {
+export const formatRecipeTime = (prepTime: number | null, cookTime: number | null): string => {
   const total = (prepTime ?? 0) + (cookTime ?? 0)
   const hours = Math.floor(total / 60)
   const minutes = total % 60
@@ -303,11 +303,11 @@ export function formatRecipeTime(prepTime: number | null, cookTime: number | nul
 /**
  * Calculate recipe complexity score
  */
-export function calculateComplexityScore(
+export const calculateComplexityScore = (
   ingredientCount: number,
   totalTime: number,
   difficulty: string | null
-): number {
+): number => {
   let score = 0
   
   // Ingredient complexity (0-30 points)
@@ -330,7 +330,7 @@ export function calculateComplexityScore(
 /**
  * Generate recipe summary statistics
  */
-export function generateRecipeSummary(recipe: Recipe, ingredients: RecipeIngredientWithDetails[]): RecipeSummary {
+export const generateRecipeSummary = (recipe: Recipe, ingredients: RecipeIngredientWithDetails[]): RecipeSummary => {
   const prepTime = recipe.prep_time ?? 0
   const cookTime = recipe.cook_time ?? 0
   const totalTime = prepTime + cookTime

@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
 import { fetchApi, postApi } from '@/lib/query/query-helpers'
+import { useQuery } from '@tanstack/react-query'
 
 interface RecipeAvailabilityResult {
   available: boolean
@@ -49,7 +49,11 @@ export function useRecipeAvailability(recipeId: string | null, quantity: number 
 export function useAvailableRecipes() {
   return useQuery<RecipeOption[]>({
     queryKey: ['available-recipes'],
-    queryFn: () => fetchApi<RecipeOption[]>('/api/recipes/availability/all'),
+    queryFn: async () => {
+      const response = await fetchApi<{ data: RecipeOption[] }>('/api/recipes/availability/all')
+      // Extract data array if response has pagination structure
+      return Array.isArray(response) ? response : response.data
+    },
   })
 }
 
@@ -84,7 +88,11 @@ export function useIngredientUsage(ingredientId: string | null) {
 export function useProducibleRecipes() {
   return useQuery<RecipeOption[]>({
     queryKey: ['producible-recipes'],
-    queryFn: () => fetchApi<RecipeOption[]>('/api/recipes/producible'),
+    queryFn: async () => {
+      const response = await fetchApi<{ data: RecipeOption[] }>('/api/recipes/producible')
+      // Extract data array if response has pagination structure
+      return Array.isArray(response) ? response : response.data
+    },
   })
 }
 

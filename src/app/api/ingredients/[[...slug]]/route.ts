@@ -7,6 +7,7 @@ import { createSuccessResponse } from '@/lib/api-core'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
 import { SecurityPresets } from '@/utils/security/api-middleware'
+import { cacheInvalidation } from '@/lib/cache'
 
 // Types and schemas
 import { IngredientInsertSchema, IngredientUpdateSchema } from '@/lib/validations/domains/ingredient'
@@ -16,7 +17,22 @@ import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 
 export const runtime = 'nodejs'
 
-// GET /api/ingredients or /api/ingredients/[id]
+/**
+ * GET /api/ingredients or /api/ingredients/[id]
+ * Handles ingredient listing and retrieval operations
+ *
+ * @route GET /api/ingredients - List all ingredients with pagination, search, and filtering
+ * @route GET /api/ingredients/[id] - Get a specific ingredient by ID
+ *
+ * @query {Object} [query] - Query parameters for listing
+ * @query {number} [query.page=1] - Page number for pagination
+ * @query {number} [query.limit=1000] - Number of items per page
+ * @query {string} [query.search] - Search term for filtering ingredients
+ * @query {string} [query.sort_by] - Field to sort by
+ * @query {string} [query.sort_order] - Sort order ('asc' or 'desc')
+ *
+ * @returns {Promise<NextResponse>} JSON response with ingredient data
+ */
 export const GET = createApiRoute(
   {
     method: 'GET',
@@ -49,7 +65,24 @@ export const GET = createApiRoute(
   }
 )
 
-// POST /api/ingredients - Create new ingredient
+/**
+ * POST /api/ingredients - Create new ingredient
+ * Creates a new ingredient record with validation and cache invalidation
+ *
+ * @route POST /api/ingredients
+ *
+ * @body {Object} body - Ingredient creation data
+ * @body {string} body.name - Ingredient name (required)
+ * @body {string} body.unit - Unit of measurement (required)
+ * @body {number} body.price_per_unit - Price per unit (required)
+ * @body {number} [body.current_stock=0] - Current stock quantity
+ * @body {number} [body.min_stock=0] - Minimum stock threshold
+ * @body {string} [body.description] - Ingredient description
+ * @body {string} [body.category] - Ingredient category
+ * @body {string} [body.supplier] - Supplier name
+ *
+ * @returns {Promise<NextResponse>} JSON response with created ingredient data
+ */
 export const POST = createApiRoute(
   {
     method: 'POST',
@@ -62,17 +95,43 @@ export const POST = createApiRoute(
     if (slug && slug.length > 0) {
       return handleAPIError(new Error('Method not allowed'), 'POST /api/ingredients')
     }
-    return createCreateHandler(
+    const result = await createCreateHandler(
       {
         table: 'ingredients',
         selectFields: INGREDIENT_FIELDS.LIST,
       },
       SUCCESS_MESSAGES.INGREDIENT_CREATED
     )(context, undefined, body)
+
+    // Invalidate cache after successful creation
+    if (result.status === 201) {
+      cacheInvalidation.ingredients()
+    }
+
+    return result
   }
 )
 
-// PUT /api/ingredients/[id] - Update ingredient
+/**
+ * PUT /api/ingredients/[id] - Update ingredient
+ * Updates an existing ingredient record with validation and cache invalidation
+ *
+ * @route PUT /api/ingredients/[id]
+ *
+ * @param {string} id - Ingredient ID (from URL path)
+ *
+ * @body {Object} body - Ingredient update data (partial)
+ * @body {string} [body.name] - Ingredient name
+ * @body {string} [body.unit] - Unit of measurement
+ * @body {number} [body.price_per_unit] - Price per unit
+ * @body {number} [body.current_stock] - Current stock quantity
+ * @body {number} [body.min_stock] - Minimum stock threshold
+ * @body {string} [body.description] - Ingredient description
+ * @body {string} [body.category] - Ingredient category
+ * @body {string} [body.supplier] - Supplier name
+ *
+ * @returns {Promise<NextResponse>} JSON response with updated ingredient data
+ */
 export const PUT = createApiRoute(
   {
     method: 'PUT',
@@ -85,17 +144,35 @@ export const PUT = createApiRoute(
     if (!slug || slug.length !== 1) {
       return handleAPIError(new Error('Invalid path'), 'PUT /api/ingredients')
     }
-    return createUpdateHandler(
+    const result = await createUpdateHandler(
       {
         table: 'ingredients',
         selectFields: INGREDIENT_FIELDS.LIST,
       },
       SUCCESS_MESSAGES.INGREDIENT_UPDATED
     )(context, undefined, body)
+
+    // Invalidate cache after successful update
+    if (result.status === 200) {
+      const { id } = parseRouteParams(context.params)
+      cacheInvalidation.ingredients(id)
+    }
+
+    return result
   }
 )
 
-// DELETE /api/ingredients/[id] - Delete ingredient
+/**
+ * DELETE /api/ingredients/[id] - Delete ingredient
+ * Deletes an ingredient record with foreign key validation and cache invalidation
+ *
+ * @route DELETE /api/ingredients/[id]
+ *
+ * @param {string} id - Ingredient ID (from URL path)
+ *
+ * @returns {Promise<NextResponse>} JSON response confirming deletion
+ * @throws {Error} If ingredient is in use by recipes or has purchase history
+ */
 export const DELETE = createApiRoute(
   {
     method: 'DELETE',
@@ -125,6 +202,7 @@ export const DELETE = createApiRoute(
       return handleAPIError(error, 'DELETE /api/ingredients')
     }
 
+    cacheInvalidation.ingredients(id)
     return createSuccessResponse({ id }, SUCCESS_MESSAGES.INGREDIENT_DELETED)
   }
 )

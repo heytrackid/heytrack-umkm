@@ -15,15 +15,15 @@ export { cn }
 
 // Currency utilities
 export {
-  formatCurrency,
-  formatCurrencyInput,
-  formatCurrentCurrency,
-  getCurrencyName,
-  getCurrencySymbol,
-  getCurrentCurrency,
-  getSupportedCurrencies,
-  isValidCurrencyAmount,
-  parseCurrencyString
+    formatCurrency,
+    formatCurrencyInput,
+    formatCurrentCurrency,
+    getCurrencyName,
+    getCurrencySymbol,
+    getCurrentCurrency,
+    getSupportedCurrencies,
+    isValidCurrencyAmount,
+    parseCurrencyString
 } from '@/lib/currency'
 
 export type { Currency } from '@/lib/currency'
@@ -262,12 +262,17 @@ export const calculateTrend = (current: number, previous: number): { value: numb
 // CONSTANTS
 // ==========================================================
 
+// DEPRECATED: Import from @/lib/shared/constants for ORDER_STATUSES, PAYMENT_METHODS, etc.
+// These constants are kept for backward compatibility but should be migrated
+
 export const BUSINESS_TYPES = {
   FOOD: 'food',
   RETAIL: 'retail',
   SERVICE: 'service'
 } as const
 
+// DEPRECATED: Use @/lib/shared/constants instead
+// Kept for backward compatibility - these use lowercase values (non-standard)
 export const ORDER_STATUSES = {
   PENDING: 'pending',
   CONFIRMED: 'confirmed',
@@ -277,6 +282,7 @@ export const ORDER_STATUSES = {
   CANCELLED: 'cancelled'
 } as const
 
+// DEPRECATED: Use @/lib/shared/constants instead
 export const PAYMENT_METHODS = {
   CASH: 'cash',
   TRANSFER: 'transfer',

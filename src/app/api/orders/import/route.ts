@@ -2,10 +2,10 @@
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
-import { z } from 'zod'
 import { SecurityPresets } from '@/utils/security/api-middleware'
+import { z } from 'zod'
 
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { cacheInvalidation } from '@/lib/cache'
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
@@ -43,13 +43,13 @@ async function postHandler(context: RouteContext, _query?: never, body?: z.infer
     const { orders } = body
 
     // Create service instance and process orders
-    const orderImportService = new OrderImportService(supabase)
+    const orderImportService = new OrderImportService({ userId: user.id, supabase })
 
     // Get all recipes for mapping
-    const recipeMap = await orderImportService.fetchRecipes(user.id)
+    const recipeMap = await orderImportService.fetchRecipes()
 
     // Process orders
-    const result = orderImportService.processOrders(orders, recipeMap, user.id)
+    const result = orderImportService.processOrders(orders, recipeMap)
     const { errors, customersToCreate, ordersToCreate } = result
 
     // Return validation errors if any

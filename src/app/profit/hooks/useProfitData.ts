@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
 import type { ExportFormat, ProfitData, ProfitFilters } from '@/app/profit/components/types'
+import type { ProfitReport } from '@/services/reports/ReportService'
 
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
@@ -33,13 +34,49 @@ export function useProfitData() {
        const errorMessage = (errorData as { error?: string }).error || 'Gagal mengambil data laporan laba'
        throw new Error(errorMessage)
      }
-     const result = await response.json() as { success?: boolean; data?: ProfitData }
-     // API returns {success: true, data: ProfitData}
-     if (result.success && result.data) {
-       return result.data
-     }
-     // Fallback for unwrapped responses
-     return result as unknown as ProfitData
+      const result = await response.json() as { success?: boolean; data?: ProfitReport }
+      // API returns {success: true, data: ProfitReport}
+      if (result.success && result.data) {
+        const apiData = result.data
+
+        // Calculate missing margins
+        const totalRevenue = apiData.summary.totalRevenue
+        const grossProfit = apiData.summary.grossProfit
+        const netProfit = apiData.summary.netProfit
+
+        const grossProfitMargin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0
+        const netProfitMargin = apiData.summary.profitMargin // This is already net profit margin
+
+        const transformedData: ProfitData = {
+          summary: {
+            total_revenue: totalRevenue,
+            total_cogs: apiData.summary.totalCOGS,
+            gross_profit: grossProfit,
+            gross_profit_margin: grossProfitMargin,
+            total_operating_expenses: apiData.summary.totalOperatingExpenses,
+            net_profit: netProfit,
+            net_profit_margin: netProfitMargin,
+          },
+          products: (apiData.productProfitability || []).map(p => ({
+            product_name: p.product_name,
+            quantity_sold: p.total_quantity,
+            revenue: p.total_revenue,
+            cogs: p.total_cogs,
+            profit: p.gross_profit,
+            profit_margin: p.gross_margin,
+          })),
+          ingredients: [], // TODO: Implement ingredient cost tracking in API
+          operating_expenses: (apiData.operating_expenses_breakdown || []).map(e => ({
+            category: e.category,
+            total_amount: e.total,
+          })),
+          trends: apiData.trends,
+        }
+
+        return transformedData
+      }
+      // Fallback for unwrapped responses
+      return result as unknown as ProfitData
    }
 
     

@@ -2,12 +2,13 @@ export const runtime = 'nodejs'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
-import { SecurityPresets } from '@/utils/security/api-middleware'
 import { apiLogger } from '@/lib/logger'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
-import { typed } from '@/types/type-utilities'
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core'
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
+import { typed } from '@/types/type-utilities'
 
 // GET /api/ai/sessions or /api/ai/sessions/[id]
 async function getHandler(context: RouteContext) {
@@ -59,9 +60,10 @@ async function getHandler(context: RouteContext) {
       const { user, supabase } = context
 
       // Get session and messages
+      const chatService = new ChatSessionService({ userId: user.id, supabase: typed(supabase) })
       const [session, messages] = await Promise.all([
-        ChatSessionService.getSession(typed(supabase), id!, user.id),
-        ChatSessionService.getMessages(typed(supabase), id!, user.id),
+        chatService.getSession(id!),
+        chatService.getMessages(id!),
       ])
 
       apiLogger.info(
@@ -95,7 +97,7 @@ async function deleteHandler(context: RouteContext) {
         .eq('user_id', user.id)
 
       if (!sessions || sessions.length === 0) {
-        return createSuccessResponse({ success: true, message: 'No sessions to delete' })
+        return createSuccessResponse({ success: true }, SUCCESS_MESSAGES.AI_SESSIONS_CLEARED)
       }
 
       const sessionIds = sessions.map(s => s.id)
@@ -139,10 +141,11 @@ async function deleteHandler(context: RouteContext) {
       const { user, supabase } = context
 
       // Delete session
-      await ChatSessionService.deleteSession(typed(supabase), id!, user.id)
+      const chatService = new ChatSessionService({ userId: user.id, supabase: typed(supabase) })
+      await chatService.deleteSession(id!)
 
       apiLogger.info({ userId: user.id, sessionId: id }, 'Session deleted')
-      return createSuccessResponse(null, 'Session deleted successfully')
+      return createSuccessResponse(null, SUCCESS_MESSAGES.AI_SESSION_DELETED)
     } catch (error) {
       return handleAPIError(new Error('Failed to delete session'), 'API Route')
     }

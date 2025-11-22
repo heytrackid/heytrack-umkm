@@ -2,11 +2,11 @@
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
-import { createSuccessResponse } from '@/lib/api-core/responses'
-import { SecurityPresets } from '@/utils/security/api-middleware'
+import { createSuccessResponse } from '@/lib/api-core'
 import { createApiRoute } from '@/lib/api/route-factory'
 import { apiLogger } from '@/lib/logger'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
 // GET /api/inventory/alerts or /api/inventory/alerts/[id]
 export const GET = createApiRoute(
@@ -23,8 +23,12 @@ export const GET = createApiRoute(
       const { user } = context
 
       try {
-        const alertService = new InventoryAlertService()
-        const alerts = await alertService.getActiveAlerts(user.id)
+        const alertService = new InventoryAlertService({
+          userId: user.id,
+          supabase: context.supabase,
+          audit: true
+        })
+        const alerts = await alertService.getActiveAlerts()
 
         apiLogger.info({ userId: user.id, alertCount: alerts.length }, 'GET /api/inventory/alerts - Success')
         return createSuccessResponse(alerts)
@@ -54,8 +58,11 @@ export const POST = createApiRoute(
     const { user } = context
 
     try {
-      const alertService = new InventoryAlertService()
-      await alertService.checkLowStockAlerts(user.id)
+      const alertService = new InventoryAlertService({
+        userId: user.id,
+        supabase: context.supabase
+      })
+      await alertService.checkLowStockAlerts()
 
       apiLogger.info({ userId: user.id }, 'POST /api/inventory/alerts - Success')
       return createSuccessResponse({ message: 'Inventory alerts checked successfully' })
@@ -82,8 +89,12 @@ export const PUT = createApiRoute(
     const id = slug[0]!
 
     try {
-      const alertService = new InventoryAlertService()
-      await alertService.acknowledgeAlert(id, context.user.id)
+      const alertService = new InventoryAlertService({
+        userId: context.user.id,
+        supabase: context.supabase,
+        audit: true
+      })
+      await alertService.acknowledgeAlert(id)
 
       return createSuccessResponse({ message: 'Alert acknowledged successfully' })
     } catch (error: unknown) {

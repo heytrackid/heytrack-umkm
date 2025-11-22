@@ -24,13 +24,18 @@ export type AuditResource =
   | 'expenses'
   | 'financial_records'
   | 'production_batches'
+  | 'PRODUCTION_BATCH'
   | 'inventory'
+  | 'INVENTORY_ALERT'
   | 'settings'
   | 'reports'
   | 'hpp'
+  | 'HPP_CALCULATION'
   | 'ai_sessions'
   | 'whatsapp_templates'
   | 'users'
+  | 'CHAT_SESSION'
+  | 'CHAT_MESSAGE'
 
 export interface AuditLogEntry {
   userId: string

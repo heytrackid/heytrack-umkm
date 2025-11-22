@@ -1,12 +1,12 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
+import { createSuccessResponse } from '@/lib/api-core'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
-import { SecurityPresets } from '@/utils/security/api-middleware'
-import { AiService } from '@/services/ai/AiService'
-import type { ChatRequest, RecipeGenerationRequest } from '@/services/ai/AiService'
-import { createSuccessResponse } from '@/lib/api-core/responses'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
+import type { ChatRequest, RecipeGenerationRequest } from '@/services/ai/AiService'
+import { AiService } from '@/services/ai/AiService'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 import type { NextResponse } from 'next/server'
 
 // GET /api/ai/[...slug] - Dynamic AI routes
@@ -89,9 +89,9 @@ async function chatHandler(context: RouteContext): Promise<NextResponse> {
   const { user } = context
 
   try {
-    const aiService = new AiService(context.supabase)
+    const aiService = new AiService({ userId: user.id, supabase: context.supabase })
     const body = await context.request.json() as ChatRequest
-    const result = await aiService.chat(body, user.id)
+    const result = await aiService.chat(body)
 
     return createSuccessResponse(result)
   } catch (error) {
@@ -105,10 +105,10 @@ async function getContextHandler(context: RouteContext): Promise<NextResponse> {
 
   try {
     const url = new URL(request.url)
-    const page = url.searchParams.get('page') || undefined
+    const page = url.searchParams.get('page')
 
-    const aiService = new AiService(context.supabase)
-    const result = await aiService.getContext(user.id, page)
+    const aiService = new AiService({ userId: user.id, supabase: context.supabase })
+    const result = await aiService.getContext(page ?? undefined)
 
     return createSuccessResponse(result)
   } catch (error) {
@@ -121,8 +121,8 @@ async function deleteContextHandler(context: RouteContext): Promise<NextResponse
   const { user } = context
 
   try {
-    const aiService = new AiService(context.supabase)
-    await aiService.deleteContext(user.id)
+    const aiService = new AiService({ userId: user.id, supabase: context.supabase })
+    await aiService.deleteContext()
 
     return createSuccessResponse({ message: 'Context deleted successfully' })
   } catch (error) {
@@ -135,9 +135,9 @@ async function generateRecipeHandler(context: RouteContext): Promise<NextRespons
   const { user } = context
 
   try {
-    const aiService = new AiService(context.supabase)
+    const aiService = new AiService({ userId: user.id, supabase: context.supabase })
     const body = await context.request.json() as RecipeGenerationRequest
-    const result = await aiService.generateRecipe(body, user.id)
+    const result = await aiService.generateRecipe(body)
 
     return createSuccessResponse(result)
   } catch (error) {
@@ -150,8 +150,8 @@ async function getSuggestionsHandler(context: RouteContext): Promise<NextRespons
   const { user } = context
 
   try {
-    const aiService = new AiService(context.supabase)
-    const result = await aiService.getSuggestions(user.id)
+    const aiService = new AiService({ userId: user.id, supabase: context.supabase })
+    const result = await aiService.getSuggestions()
 
     return createSuccessResponse(result)
   } catch (error) {

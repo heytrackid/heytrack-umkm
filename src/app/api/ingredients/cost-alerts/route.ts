@@ -1,10 +1,8 @@
-// External libraries
-import { NextResponse } from 'next/server'
-
 // Internal modules
 import { createApiRoute } from '@/lib/api/route-factory'
 import { SecurityPresets } from '@/utils/security/api-middleware'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { createSuccessResponse } from '@/lib/api-core'
 
 // Types and schemas
 import type { CostChangeAlert } from '@/types/recipes/cost'
@@ -155,7 +153,7 @@ export const GET = createApiRoute(
         })
       }
 
-      return NextResponse.json({ alerts })
+      return createSuccessResponse({ alerts })
     } catch (error) {
       return handleAPIError(error, 'GET /api/ingredients/cost-alerts')
     }

@@ -3,9 +3,10 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 export const runtime = 'nodejs'
 
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { SecurityPresets } from '@/utils/security/api-middleware'
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { createClient } from '@supabase/supabase-js'
 
 interface EnvVarDiagnostics {
@@ -117,7 +118,7 @@ async function getDiagnosticsHandler(context: RouteContext) {
     diagnostics.supabase_connectivity = await checkSupabaseConnectivity()
     diagnostics.deployment_status = 'operational'
 
-    return createSuccessResponse(diagnostics)
+    return createSuccessResponse(diagnostics, SUCCESS_MESSAGES.FETCHED)
   } catch (error) {
     return handleAPIError(error, 'GET /api/diagnostics')
   }

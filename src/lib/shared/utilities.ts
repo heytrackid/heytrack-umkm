@@ -4,6 +4,8 @@
 
 /**
  * Currency formatting utilities
+ * DEPRECATED: Use @/lib/currency for currency formatting
+ * This function is kept for backward compatibility only
  */
 export function formatCurrency(
   amount: number | string,

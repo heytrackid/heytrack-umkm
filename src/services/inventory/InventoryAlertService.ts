@@ -1,10 +1,16 @@
+/**
+ * Inventory Alert Service
+ * Manages inventory alerts for low stock, out of stock, and reorder notifications
+ * 
+ * ✅ STANDARDIZED: Extends BaseService, uses ServiceContext
+ */
+
 import 'server-only'
 
 import { dbLogger } from '@/lib/logger'
+import { BaseService, type ServiceContext } from '@/services/base'
 import type { Database, Insert, InventoryAlertInsert } from '@/types/database'
 import type { Json } from '@/types/supabase-generated'
-import { createClient } from '@/utils/supabase/server'
-
 
 const normalizeError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error))
@@ -99,102 +105,104 @@ const isValidAlert = (
   alert: PendingInventoryAlert | null
 ): alert is PendingInventoryAlert => alert !== null
 
-/**
- * Service for managing inventory alerts
- * SERVER-ONLY: Uses server client for database operations
- */
-export class InventoryAlertService {
+export class InventoryAlertService extends BaseService {
   private readonly logger = dbLogger
+
+  constructor(context: ServiceContext) {
+    super(context)
+  }
 
   /**
    * Check and create alerts for low stock ingredients
    */
-  async checkLowStockAlerts(userId: string): Promise<void> {
-    try {
-      const supabase = await createClient()
-      const { data: ingredients, error } = await supabase
-        .from('ingredients')
-        .select()
-        .eq('user_id', userId)
-        .eq('is_active', true) as { data: IngredientRow[] | null; error: Error | null }
+  async checkLowStockAlerts(): Promise<void> {
+    return this.executeWithAudit(
+      async () => {
+        try {
+          const { data: ingredients, error } = await this.context.supabase
+            .from('ingredients')
+            .select()
+            .eq('user_id', this.context.userId)
+            .eq('is_active', true) as { data: IngredientRow[] | null; error: Error | null }
 
-      if (error) {
-        throw new Error(`Failed to fetch ingredients: ${error.message}`)
-      }
-
-      if (!ingredients || ingredients.length === 0) {
-        return
-      }
-
-      await this.deactivateResolvedAlerts(userId, ingredients)
-
-      const alerts = ingredients
-        .map((ingredient) => buildAlertPayload(ingredient))
-        .filter(isValidAlert)
-
-      if (alerts.length === 0) {
-        return
-      }
-
-      await Promise.all(
-        alerts.map(async (alert) => {
-          const { data: existingAlert } = await supabase
-            .from('inventory_alerts')
-            .select('id')
-            .eq('ingredient_id', alert.ingredient_id)
-            .eq('alert_type', alert.alert_type)
-            .eq('is_active', true)
-            .eq('user_id', userId)
-            .single()
-
-          if (!existingAlert) {
-            await supabase
-              .from('inventory_alerts')
-              .insert({
-                ...alert,
-                user_id: userId,
-                is_active: true,
-                ...(alert.metadata && { metadata: alert.metadata as Json })
-              } as InventoryAlertInsert)
+          if (error) {
+            throw new Error(`Failed to fetch ingredients: ${error.message}`)
           }
-        })
-      )
 
-      this.logger.info(
-        {
-          userId,
-          alertCount: alerts.length
-        },
-        'Inventory alerts created'
-      )
-    } catch (error) {
-      const normalizedError = normalizeError(error)
-      this.logger.error({ error: normalizedError, userId }, 'Failed to check low stock alerts')
-      throw normalizedError
-    }
+          if (!ingredients || ingredients.length === 0) {
+            return
+          }
+
+          await this.deactivateResolvedAlerts(ingredients)
+
+          const alerts = ingredients
+            .map((ingredient) => buildAlertPayload(ingredient))
+            .filter(isValidAlert)
+
+          if (alerts.length === 0) {
+            return
+          }
+
+          await Promise.all(
+            alerts.map(async (alert) => {
+              const { data: existingAlert } = await this.context.supabase
+                .from('inventory_alerts')
+                .select('id')
+                .eq('ingredient_id', alert.ingredient_id)
+                .eq('alert_type', alert.alert_type)
+                .eq('is_active', true)
+                .eq('user_id', this.context.userId)
+                .single()
+
+              if (!existingAlert) {
+                await this.context.supabase
+                  .from('inventory_alerts')
+                  .insert({
+                    ...alert,
+                    user_id: this.context.userId,
+                    is_active: true,
+                    ...(alert.metadata && { metadata: alert.metadata as Json })
+                  } as InventoryAlertInsert)
+              }
+            })
+          )
+
+          this.logger.info(
+            {
+              userId: this.context.userId,
+              alertCount: alerts.length
+            },
+            'Inventory alerts created'
+          )
+        } catch (error) {
+          const normalizedError = normalizeError(error)
+          this.logger.error({ error: normalizedError, userId: this.context.userId }, 'Failed to check low stock alerts')
+          throw normalizedError
+        }
+      },
+      'CREATE',
+      'INVENTORY_ALERT'
+    )
   }
 
   /**
    * Deactivate alerts for ingredients that are now above threshold
    */
   private async deactivateResolvedAlerts(
-    userId: string,
     ingredients: StockSnapshot[]
   ): Promise<void> {
     try {
-      const supabase = await createClient()
-      
       const updatePromises = ingredients
         .filter(isStockHealthy)
         .map(async (ingredient) => {
-          await supabase
+          await this.context.supabase
             .from('inventory_alerts')
             .update({
               is_active: false,
               resolved_at: new Date().toISOString()
             } as never)
             .eq('ingredient_id', ingredient['id'])
-            .eq('user_id', userId)
+            .eq('user_id', this.context.userId)
             .eq('is_active', true)
         })
 
@@ -207,79 +215,82 @@ export class InventoryAlertService {
   /**
    * Check single ingredient and create alert if needed
    */
-  async checkIngredientAlert(ingredientId: string, userId: string): Promise<void> {
-    try {
-      const supabase = await createClient()
-      
-      const { data: ingredient, error } = await supabase
-        .from('ingredients')
-        .select()
-        .eq('id', ingredientId)
-        .eq('user_id', userId)
-        .single() as { data: IngredientRow | null; error: Error | null }
+  async checkIngredientAlert(ingredientId: string): Promise<void> {
+    return this.executeWithAudit(
+      async () => {
+        try {
+          const { data: ingredient, error } = await this.context.supabase
+            .from('ingredients')
+            .select()
+            .eq('id', ingredientId)
+            .eq('user_id', this.context.userId)
+            .single() as { data: IngredientRow | null; error: Error | null }
 
-      if (error || !ingredient) {
-        return
-      }
+          if (error || !ingredient) {
+            return
+          }
 
-      if (isStockHealthy(ingredient)) {
-        await this.deactivateResolvedAlerts(userId, [ingredient])
-        return
-      }
+          if (isStockHealthy(ingredient)) {
+            await this.deactivateResolvedAlerts([ingredient])
+            return
+          }
 
-      const alertPayload = buildAlertPayload(ingredient)
+          const alertPayload = buildAlertPayload(ingredient)
 
-      if (!alertPayload) {
-        return
-      }
+          if (!alertPayload) {
+            return
+          }
 
-      const { data: existingAlert } = await supabase
-        .from('inventory_alerts')
-        .select('id')
-        .eq('ingredient_id', ingredientId)
-        .eq('alert_type', alertPayload.alert_type)
-        .eq('is_active', true)
-        .eq('user_id', userId)
-        .single()
+          const { data: existingAlert } = await this.context.supabase
+            .from('inventory_alerts')
+            .select('id')
+            .eq('ingredient_id', ingredientId)
+            .eq('alert_type', alertPayload.alert_type)
+            .eq('is_active', true)
+            .eq('user_id', this.context.userId)
+            .single()
 
-      if (!existingAlert) {
-        await supabase
-          .from('inventory_alerts')
-          .insert({
-            alert_type: alertPayload.alert_type,
-            severity: alertPayload.severity,
-            message: alertPayload.message,
-            ingredient_id: alertPayload.ingredient_id,
-            user_id: userId,
-            is_active: true,
-            ...(alertPayload.metadata && { metadata: alertPayload.metadata as Json })
-          })
+          if (!existingAlert) {
+            await this.context.supabase
+              .from('inventory_alerts')
+              .insert({
+                alert_type: alertPayload.alert_type,
+                severity: alertPayload.severity,
+                message: alertPayload.message,
+                ingredient_id: alertPayload.ingredient_id,
+                user_id: this.context.userId,
+                is_active: true,
+                ...(alertPayload.metadata && { metadata: alertPayload.metadata as Json })
+              })
 
-        this.logger.info({
-          ingredientId,
-          alertType: alertPayload.alert_type
-        }, 'Inventory alert created')
-      }
+            this.logger.info({
+              ingredientId,
+              alertType: alertPayload.alert_type
+            }, 'Inventory alert created')
+          }
 
-    } catch (error) {
-      this.logger.error({ error: normalizeError(error), ingredientId }, 'Failed to check ingredient alert')
-    }
+        } catch (error) {
+          this.logger.error({ error: normalizeError(error), ingredientId }, 'Failed to check ingredient alert')
+        }
+      },
+      'CREATE',
+      'INVENTORY_ALERT',
+      ingredientId
+    )
   }
 
   /**
    * Get active alerts for user
    */
-  async getActiveAlerts(userId: string): Promise<ActiveInventoryAlert[]> {
+  async getActiveAlerts(): Promise<ActiveInventoryAlert[]> {
     try {
-      const supabase = await createClient()
-      
-      const { data: alerts, error } = await supabase
+      const { data: alerts, error } = await this.context.supabase
         .from('inventory_alerts')
         .select(`
           *,
           ingredient:ingredients(name, unit, current_stock)
         `)
-        .eq('user_id', userId)
+        .eq('user_id', this.context.userId)
         .eq('is_active', true)
         .order('severity', { ascending: false })
         .order('created_at', { ascending: false }) as { data: ActiveInventoryAlert[] | null; error: Error | null }
@@ -291,7 +302,7 @@ export class InventoryAlertService {
       return alerts ?? []
 
     } catch (error) {
-      this.logger.error({ error: normalizeError(error), userId }, 'Failed to get active alerts')
+      this.logger.error({ error: normalizeError(error), userId: this.context.userId }, 'Failed to get active alerts')
       return []
     }
   }
@@ -299,24 +310,29 @@ export class InventoryAlertService {
   /**
    * Acknowledge alert
    */
-  async acknowledgeAlert(alertId: string, userId: string): Promise<void> {
-    try {
-      const supabase = await createClient()
-      
-      await supabase
-        .from('inventory_alerts')
-        .update({
-          acknowledged_at: new Date().toISOString()
-        } as never)
-        .eq('id', alertId)
-        .eq('user_id', userId)
+  async acknowledgeAlert(alertId: string): Promise<void> {
+    return this.executeWithAudit(
+      async () => {
+        try {
+          await this.context.supabase
+            .from('inventory_alerts')
+            .update({
+              acknowledged_at: new Date().toISOString()
+            } as never)
+            .eq('id', alertId)
+            .eq('user_id', this.context.userId)
 
-      this.logger.info({ alertId }, 'Alert acknowledged')
+          this.logger.info({ alertId }, 'Alert acknowledged')
 
-    } catch (error) {
-      const normalizedError = normalizeError(error)
-      this.logger.error({ error: normalizedError, alertId }, 'Failed to acknowledge alert')
-      throw normalizedError
-    }
+        } catch (error) {
+          const normalizedError = normalizeError(error)
+          this.logger.error({ error: normalizedError, alertId }, 'Failed to acknowledge alert')
+          throw normalizedError
+        }
+      },
+      'UPDATE',
+      'INVENTORY_ALERT',
+      alertId
+    )
   }
 }

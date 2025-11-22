@@ -1,10 +1,11 @@
 import { useToast } from '@/hooks/use-toast'
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { createClientLogger } from '@/lib/client-logger'
 import { queryConfig } from '@/lib/query/query-config'
-import { buildApiUrl, fetchApi, postApi, putApi, deleteApi } from '@/lib/query/query-helpers'
+import { buildApiUrl, deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import { getErrorMessage } from '@/lib/type-guards'
 import type { Insert, Row, Update } from '@/types/database'
+import type { PaginationMeta } from '@/types/pagination'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 
 const logger = createClientLogger('Hook')
@@ -44,7 +45,7 @@ export function useIngredients(options?: UseIngredientsOptions) {
 
   return useQuery({
     queryKey: ['ingredients', apiOptions],
-    queryFn: () => fetchApi<{ data: Ingredient[]; pagination: any }>(buildApiUrl('/api/ingredients', apiOptions as Record<string, string | number | boolean | null | undefined>)), // eslint-disable-line @typescript-eslint/no-explicit-any
+    queryFn: () => fetchApi<{ data: Ingredient[]; pagination: PaginationMeta }>(buildApiUrl('/api/ingredients', apiOptions as Record<string, string | number | boolean | null | undefined>)),
     ...queryConfig.queries.moderate,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000,
@@ -59,7 +60,13 @@ export function useIngredients(options?: UseIngredientsOptions) {
 export function useIngredientsList(search?: string) {
   return useQuery({
     queryKey: ['ingredients-list', search],
-    queryFn: () => fetchApi<Ingredient[]>(buildApiUrl('/api/ingredients', { search: search || undefined, limit: 1000 } as Record<string, string | number | boolean | null | undefined>)),
+    queryFn: async () => {
+      const response = await fetchApi<{ data: Ingredient[]; pagination: PaginationMeta }>(
+        buildApiUrl('/api/ingredients', { search: search || undefined, limit: 1000 } as Record<string, string | number | boolean | null | undefined>)
+      )
+      // Extract data array for backward compatibility
+      return response.data
+    },
     ...queryConfig.queries.moderate,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000,

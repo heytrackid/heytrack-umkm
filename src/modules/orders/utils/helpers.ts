@@ -7,14 +7,14 @@ import type { OrderStatus } from '@/modules/orders/types'
 /**
  * Get status information for an order
  */
-export function getStatusInfo(status: string) {
+export const getStatusInfo = (status: string) => {
   return ORDER_STATUS_CONFIG[status as OrderStatus] || ORDER_STATUS_CONFIG.PENDING
 }
 
 /**
  * Get priority information for an order
  */
-export function getPriorityInfo(_priority: string) {
+export const getPriorityInfo = (_priority: string) => {
   switch (_priority.toLowerCase()) {
     case 'high':
       return {
@@ -42,7 +42,7 @@ export function getPriorityInfo(_priority: string) {
 /**
  * Generate order number with timestamp
  */
-export function generateOrderNo(): string {
+export const generateOrderNo = (): string => {
   const today = new Date()
   const [datePart] = today.toISOString().split('T')
   const dateStr = (datePart ?? '').replace(/-/g, '')
@@ -57,7 +57,7 @@ interface OrderItemWithPrice {
 /**
  * Calculate order totals
  */
-export function calculateOrderTotals(orderItems: OrderItemWithPrice[], discount = 0, taxRate = 0, deliveryFee = 0) {
+export const calculateOrderTotals = (orderItems: OrderItemWithPrice[], discount = 0, taxRate = 0, deliveryFee = 0) => {
   const subtotal = orderItems.reduce((sum, item) => sum + item.total_price, 0)
   const taxAmount = subtotal * (taxRate / 100)
   const totalAmount = subtotal - discount + taxAmount + deliveryFee
@@ -73,7 +73,7 @@ export function calculateOrderTotals(orderItems: OrderItemWithPrice[], discount 
 /**
  * Get payment status from amounts
  */
-export function getPaymentStatus(totalAmount: number, paidAmount: number): string {
+export const getPaymentStatus = (totalAmount: number, paidAmount: number): string => {
   if (paidAmount >= totalAmount) {return 'PAID'}
   if (paidAmount > 0) {return 'PARTIAL'}
   return 'UNPAID'

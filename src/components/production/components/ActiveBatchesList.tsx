@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { cn } from '@/lib/utils'
 
 
 import type { ProductionBatch } from '@/types/production'
@@ -93,8 +94,10 @@ export const ActiveBatchesList = ({
                 return (
                   <div
                     key={batch['id']}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedBatch === batch['id'] ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
-                      }`}
+                    className={cn(
+                      "p-4 border rounded-lg cursor-pointer transition-all",
+                      selectedBatch === batch['id'] ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
+                    )}
                     onClick={() => onBatchSelect(batch['id'])}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
@@ -113,7 +116,7 @@ export const ActiveBatchesList = ({
                           Quantity: {batch.quantity || 0} | Status: {batch['status']}
                         </p>
                       </div>
-                      <Badge className={`${getStatusColor((batch['status'] ?? 'PLANNED') as ProductionStatus)} text-white`}>
+                      <Badge className={cn(getStatusColor((batch['status'] ?? 'PLANNED') as ProductionStatus), "text-white")}>
                         {batch['status'] ?? 'PLANNED'}
                       </Badge>
                     </div>

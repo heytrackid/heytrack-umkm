@@ -6,7 +6,8 @@ import { z } from 'zod'
 import { apiLogger } from '@/lib/logger'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { SecurityPresets } from '@/utils/security/api-middleware'
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core'
+import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 
 const OrderItemSchema = z.object({
   unit_price: z.number().finite().min(0, { message: 'unit_price must be >= 0' }),
@@ -71,6 +72,6 @@ export const POST = createApiRoute(
       total: pricing.total_amount
     }, 'Order price calculated')
 
-    return createSuccessResponse(pricing)
+    return createSuccessResponse(pricing, SUCCESS_MESSAGES.FETCHED)
   }
 )

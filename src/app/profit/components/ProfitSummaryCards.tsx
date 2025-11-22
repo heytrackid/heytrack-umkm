@@ -73,10 +73,10 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
         <CardContent>
           <div>
             <p className="text-2xl font-bold text-foreground">{formatCurrency(summary.gross_profit)}</p>
-            <div className="flex items-center gap-1 mt-1">
-              <p className="text-xs text-muted-foreground">
-                Margin: {summary.gross_profit_margin.toFixed(1)}%
-              </p>
+             <div className="flex items-center gap-1 mt-1">
+               <p className="text-xs text-muted-foreground">
+                 Margin: {(summary.gross_profit_margin ?? 0).toFixed(1)}%
+               </p>
               {grossProfitGrowth !== 0 && (
                 <p className={`text-xs flex items-center gap-1 ${getTrendColor(grossProfitGrowth)}`}>
                   {getTrendElement(grossProfitGrowth)}
@@ -107,10 +107,10 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
              <p className="text-2xl font-bold text-foreground">
                {formatCurrency(summary.net_profit)}
             </p>
-            <div className="flex items-center gap-1 mt-1">
-              <p className="text-xs text-muted-foreground">
-                Margin: {summary.net_profit_margin.toFixed(1)}%
-              </p>
+             <div className="flex items-center gap-1 mt-1">
+               <p className="text-xs text-muted-foreground">
+                 Margin: {(summary.net_profit_margin ?? 0).toFixed(1)}%
+               </p>
               {netProfitGrowth !== 0 && (
                 <p className={`text-xs flex items-center gap-1 ${getTrendColor(netProfitGrowth)}`}>
                   {getTrendElement(netProfitGrowth)}

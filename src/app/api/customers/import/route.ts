@@ -2,7 +2,7 @@
 // Similar to supplier import functionality
 
 import { createApiRoute } from '@/lib/api/route-factory'
-import { createSuccessResponse } from '@/lib/api-core/responses'
+import { createSuccessResponse } from '@/lib/api-core'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { apiLogger } from '@/lib/logger'

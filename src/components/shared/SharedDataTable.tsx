@@ -1,26 +1,26 @@
 'use client'
 
 import {
-  Search,
-  Plus,
-  Eye,
-  Edit,
-  Trash2,
-  MoreVertical,
-  Download,
-  RefreshCw
+    Download,
+    Edit,
+    Eye,
+    MoreVertical,
+    Plus,
+    RefreshCw,
+    Search,
+    Trash2
 } from '@/components/icons'
-import { type ReactNode, useEffect, useState, useMemo } from 'react'
+import { memo, type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Input } from '@/components/ui/input'
@@ -28,6 +28,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SkeletonText } from '@/components/ui/skeleton'
 import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
 import { VirtualizedTable } from '@/components/ui/virtualized-table'
+import { cn } from '@/lib/utils'
 
 /* eslint-disable */
 
@@ -87,7 +88,7 @@ interface SharedDataTableProps<T> {
  * - Mobile responsive design
  * - CRUD actions
  */
-export const SharedDataTable = <T extends Record<string, unknown>>({
+const SharedDataTableComponent = <T extends Record<string, unknown>>({
   data,
   columns,
   onAdd,
@@ -178,14 +179,14 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
 
 
 
-  function handleFilterChange(columnKey: string, value: string) {
+  const handleFilterChange = useCallback((columnKey: string, value: string) => {
     setFilters(prev => ({
       ...prev,
       [columnKey]: value
     }))
-  }
+  }, [])
 
-  function handleExport() {
+  const handleExport = useCallback(() => {
     if (!exportable) { return }
 
     const csvContent = [
@@ -207,14 +208,17 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
     document['body'].appendChild(link)
     link.click()
     document['body'].removeChild(link)
-  }
+  }, [exportable, processedData, columns, title])
+
+  // Memoize filters for efficient dependency comparison
+  const memoizedFilters = useMemo(() => JSON.stringify(filters), [filters])
 
   // Reset pagination when filters change
   useEffect(() => {
     if (enablePagination) {
       void setCurrentPage(1)
     }
-  }, [searchTerm, JSON.stringify(filters), rowsPerPage, enablePagination])
+  }, [searchTerm, memoizedFilters, rowsPerPage, enablePagination])
 
   // Reset to valid page when data changes
   useEffect(() => {
@@ -243,12 +247,12 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
     <Card className={className}>
       {/* Header */}
       {(title || onAdd || refreshable) && (
-        <CardHeader className={compact ? 'p-4' : ''}>
+        <CardHeader className={cn(compact && "p-4")}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              {title && <CardTitle className={compact ? 'text-lg' : ''}>{title}</CardTitle>}
+              {title && <CardTitle className={cn(compact && "text-lg")}>{title}</CardTitle>}
               {description && (
-                <p className={`text-sm text-muted-foreground ${compact ? 'text-xs' : ''}`}>
+                <p className={cn("text-sm text-muted-foreground", compact && "text-xs")}>
                   {description}
                 </p>
               )}
@@ -276,7 +280,7 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
         </CardHeader>
       )}
 
-      <CardContent className={compact ? 'p-4' : ''}>
+      <CardContent className={cn(compact && "p-4")}>
         {/* Search and Filters */}
         <div className="space-y-4 mb-6">
           {/* Search */}
@@ -417,3 +421,6 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
     </Card>
   )
 }
+
+// Memoized export for performance
+export const SharedDataTable = memo(SharedDataTableComponent) as typeof SharedDataTableComponent

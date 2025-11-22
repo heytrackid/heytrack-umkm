@@ -1,8 +1,7 @@
- 
 'use client'
 
 import { AlertTriangle, Package, RefreshCw, Search, ShoppingCart, TrendingUp } from '@/components/icons'
-import { useState } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -12,44 +11,49 @@ import { Progress } from '@/components/ui/progress'
 import { useSettings } from '@/contexts/settings-context'
 import { useInventoryAlerts } from '@/hooks/useInventoryAlerts'
 import { useReorderSuggestions } from '@/hooks/useReorderManagement'
+import { cn } from '@/lib/utils'
 import type { ReorderSuggestionWithDetails } from '@/types/database'
 
-export const InventoryDashboard = (): JSX.Element => {
+const InventoryDashboardComponent = (): JSX.Element => {
   const { formatCurrency } = useSettings()
   const { data: alertsData, isLoading: alertsLoading, refetch: refetchAlerts } = useInventoryAlerts()
   const { data: reorderData = [], isLoading: reorderLoading, refetch: refetchReorder } = useReorderSuggestions()
 
-  // Calculate summary from reorder data
-  const reorderSummary = {
+  const [searchTerm, setSearchTerm] = useState('')
+
+  // Memoize expensive calculations
+  const reorderSummary = useMemo(() => ({
     total_suggestions: reorderData.length,
     total_estimated_cost: reorderData.reduce((sum, item) => sum + (item.estimated_cost || 0), 0),
     urgent_count: reorderData.filter(item => item.priority === 'high').length,
     high_count: reorderData.filter(item => item.priority === 'high').length,
     medium_count: reorderData.filter(item => item.priority === 'medium').length,
     low_count: reorderData.filter(item => item.priority === 'low').length,
-  }
-  const [searchTerm, setSearchTerm] = useState('')
+  }), [reorderData])
 
-  // Mock inventory status from alerts data
-  const inventoryStatus = {
+  const inventoryStatus = useMemo(() => ({
     total_ingredients: (alertsData || []).length,
     healthy_stock_count: 0,
     low_stock_count: (alertsData || []).filter((a) => a.alert_type === 'low_stock').length,
     out_of_stock_count: (alertsData || []).filter((a) => a.alert_type === 'out_of_stock').length,
     total_value: 0,
-  }
+  }), [alertsData])
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     refetchAlerts()
     refetchReorder()
-  }
+  }, [refetchAlerts, refetchReorder])
 
-  const filteredAlerts = (alertsData || []).filter((alert) =>
-    alert.ingredient_name?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredAlerts = useMemo(() => 
+    (alertsData || []).filter((alert) =>
+      alert.ingredient_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    ), [alertsData, searchTerm]
   )
 
-  const filteredSuggestions = (reorderData || []).filter((suggestion: ReorderSuggestionWithDetails) =>
-    suggestion.ingredient_name?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredSuggestions = useMemo(() => 
+    (reorderData || []).filter((suggestion: ReorderSuggestionWithDetails) =>
+      suggestion.ingredient_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    ), [reorderData, searchTerm]
   )
 
   if (alertsLoading || reorderLoading) {
@@ -99,7 +103,7 @@ export const InventoryDashboard = (): JSX.Element => {
             />
           </div>
           <Button onClick={handleRefresh} disabled={alertsLoading || reorderLoading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${(alertsLoading || reorderLoading) ? 'animate-spin' : ''}`} />
+            <RefreshCw className={cn("h-4 w-4 mr-2", (alertsLoading || reorderLoading) && "animate-spin")} />
             Refresh
           </Button>
         </div>
@@ -296,4 +300,6 @@ export const InventoryDashboard = (): JSX.Element => {
   )
 }
 
+// Memoized export for performance
+export const InventoryDashboard = memo(InventoryDashboardComponent)
 

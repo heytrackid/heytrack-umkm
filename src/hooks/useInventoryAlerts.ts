@@ -1,9 +1,9 @@
 import { createClientLogger } from '@/lib/client-logger'
+import { handleError } from '@/lib/error-handling'
 import { deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
+import type { RestockSuggestion, RestockSuggestionsSummary } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { handleError } from '@/lib/error-handling'
-import type { RestockSuggestion, RestockSuggestionsSummary } from '@/types/database'
 
 const logger = createClientLogger('useInventoryAlerts')
 
@@ -24,7 +24,11 @@ interface ActiveInventoryAlert {
 export function useInventoryAlerts() {
   return useQuery<ActiveInventoryAlert[]>({
     queryKey: ['inventory-alerts'],
-    queryFn: () => fetchApi<ActiveInventoryAlert[]>('/api/inventory/alerts'),
+    queryFn: async () => {
+      const response = await fetchApi<{ data: ActiveInventoryAlert[] }>('/api/inventory/alerts')
+      // Extract data array if response has pagination structure
+      return Array.isArray(response) ? response : response.data
+    },
   })
 }
 
