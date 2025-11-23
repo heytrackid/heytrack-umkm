@@ -15,6 +15,7 @@ import { toast } from 'sonner'
 import { PurchaseForm } from '@/app/ingredients/purchases/components/PurchaseForm'
 import { PurchasesTable } from '@/app/ingredients/purchases/components/PurchasesTable'
 import { PurchaseStats } from '@/app/ingredients/purchases/components/PurchaseStats'
+import type { IngredientPurchase } from '@/app/ingredients/purchases/components/types'
 
 
 
@@ -27,9 +28,9 @@ const IngredientPurchasesLayout = (): JSX.Element => {
 
   // Delete modal state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [purchaseToDelete, setPurchaseToDelete] = useState<any>(null)
+  const [purchaseToDelete, setPurchaseToDelete] = useState<IngredientPurchase | null>(null)
   const [isBulkDelete, setIsBulkDelete] = useState(false)
-  const [purchasesToDelete, setPurchasesToDelete] = useState<any[]>([])
+  const [purchasesToDelete, setPurchasesToDelete] = useState<IngredientPurchase[]>([])
 
   // Handle auth errors
   useEffect(() => {
@@ -62,7 +63,7 @@ const IngredientPurchasesLayout = (): JSX.Element => {
       unit_price: formData.unit_price,
       total_price: totalPrice,
       supplier: formData.supplier ?? null,
-      purchase_date: formData.purchase_date ?? new Date().toISOString().split('T')[0],
+       purchase_date: formData.purchase_date || null,
       notes: formData.notes ?? null,
     })
   }
@@ -103,11 +104,11 @@ const IngredientPurchasesLayout = (): JSX.Element => {
         />
 
         {/* Purchase Stats - Lazy Loaded */}
-        <PurchaseStats purchases={purchases as any} />
+        <PurchaseStats purchases={purchases as IngredientPurchase[]} />
 
         {/* Purchases Table - Lazy Loaded */}
-        <PurchasesTable 
-          purchases={purchases as any} 
+        <PurchasesTable
+          purchases={purchases as IngredientPurchase[]}
           onRefresh={() => void refetchPurchases()}
           onEdit={(_purchase) => {
             // TODO: Implement edit functionality
@@ -142,7 +143,7 @@ const IngredientPurchasesLayout = (): JSX.Element => {
                   await deletePurchase.mutateAsync(purchase.id)
                 }
                 toast.success(`${purchasesToDelete.length} pembelian berhasil dihapus`)
-              } else {
+              } else if (purchaseToDelete) {
                 // Single delete
                 await deletePurchase.mutateAsync(purchaseToDelete.id)
               }

@@ -56,6 +56,7 @@ export function PurchaseForm({ ingredients, onSubmit, onSuccess }: PurchaseFormP
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<PurchaseFormValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(purchaseFormSchema) as any,
     defaultValues: {
       ingredient_id: '',
