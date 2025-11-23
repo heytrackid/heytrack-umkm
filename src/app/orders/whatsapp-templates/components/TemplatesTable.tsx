@@ -25,16 +25,16 @@ const TemplatesTable = ({
     onEdit,
     onDelete,
     onBulkDelete,
-    onToggleDefault,
+    onToggleDefault: _onToggleDefault,
     onPreview,
-    onDuplicate,
+    onDuplicate: _onDuplicate,
     onRefresh
 }: TemplatesTableProps) => {
-    const getCategoryLabel = (category: string) => 
+    const getCategoryLabel = (category: string) =>
         TEMPLATE_CATEGORIES.find((cat) => cat.value === category)?.label ?? category
 
     return (
-        <SharedDataTable
+        <SharedDataTable<WhatsAppTemplate>
             data={templates}
             columns={[
                 {
@@ -131,8 +131,8 @@ const TemplatesTable = ({
             emptyDescription="Klik 'Tambah Template' untuk membuat yang pertama"
             exportable={true}
             refreshable={true}
-            onRefresh={onRefresh}
-            onBulkDelete={onBulkDelete}
+            {...(onRefresh && { onRefresh })}
+            {...(onBulkDelete && { onBulkDelete })}
             enableBulkActions={!!onBulkDelete}
             enablePagination={true}
             pageSizeOptions={[10, 25, 50]}

@@ -2,7 +2,7 @@
 // WhatsApp Templates Types
 // Type definitions for WhatsApp template management
 
-export interface WhatsAppTemplate {
+export interface WhatsAppTemplate extends Record<string, unknown> {
   id: string
   name: string
   description: string | null

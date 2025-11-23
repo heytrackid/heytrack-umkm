@@ -64,7 +64,7 @@ const IngredientPurchasesLayout = (): JSX.Element => {
       supplier: formData.supplier ?? null,
       purchase_date: formData.purchase_date ?? new Date().toISOString().split('T')[0],
       notes: formData.notes ?? null,
-    } as any)
+    })
   }
 
   // Show loading state while auth is initializing

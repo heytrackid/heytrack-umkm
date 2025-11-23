@@ -18,7 +18,6 @@ const FinancialReportComponent = ({}: FinancialReportProps = {}) => {
   const financialData = useMemo(() => {
     if (!financialRecords) return []
     if (!Array.isArray(financialRecords)) {
-      console.error('financialRecords is not an array:', financialRecords)
       return []
     }
     return financialRecords.filter((record) => !!record.date)

@@ -6,6 +6,7 @@ import { memo, useMemo, useState } from 'react'
 import { SharedDataTable } from '@/components/shared/SharedDataTable'
 import { DeleteConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { useDeleteOrder } from '@/hooks/api/useOrders'
+import { successToast } from '@/hooks/use-toast'
 
 import type { Row } from '@/types/database'
 
@@ -78,7 +79,7 @@ const OrderSection = ({
       for (const order of ordersToDelete) {
         await deleteOrderMutation.mutateAsync(order.id)
       }
-      toast.success(`${ordersToDelete.length} pesanan berhasil dihapus`)
+       successToast(`${ordersToDelete.length} pesanan berhasil dihapus`)
       router.refresh()
     } catch (error) {
       // Error handling is done in mutation

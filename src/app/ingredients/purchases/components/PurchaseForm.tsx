@@ -75,7 +75,7 @@ export function PurchaseForm({ ingredients, onSubmit, onSuccess }: PurchaseFormP
       setOpen(false)
       onSuccess()
     } catch (error) {
-      console.error('Error submitting purchase:', error)
+      // Error handled by mutation
     } finally {
       setIsSubmitting(false)
     }

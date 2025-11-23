@@ -2,6 +2,7 @@ import { createSuccessResponse } from '@/lib/api-core'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { z } from 'zod'
+import type { Row } from '@/types/database'
 
 export const runtime = 'nodejs'
 
@@ -36,13 +37,13 @@ async function getStatsHandler(context: RouteContext, query?: z.infer<typeof Sta
 
     // Calculate statistics
     const totalPurchases = purchases?.length ?? 0
-    const totalAmount = purchases?.reduce((sum: number, p: any) => sum + (p.total_price || 0), 0) ?? 0
+    const totalAmount = purchases?.reduce((sum: number, p: Row<'ingredient_purchases'>) => sum + (p.total_price || 0), 0) ?? 0
     const averagePrice = totalPurchases > 0 ? totalAmount / totalPurchases : 0
 
     // Get top suppliers
     const supplierMap = new Map<string, { total_purchases: number; total_amount: number }>()
     
-    purchases?.forEach((purchase: any) => {
+    purchases?.forEach((purchase: Row<'ingredient_purchases'>) => {
       const supplierName = purchase.supplier || 'Unknown'
       const existing = supplierMap.get(supplierName) || { total_purchases: 0, total_amount: 0 }
       supplierMap.set(supplierName, {
