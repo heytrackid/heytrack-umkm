@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { buildApiUrl, fetchApi } from '@/lib/query/query-helpers'
 import { queryConfig } from '@/lib/query/query-config'
+import { buildApiUrl, fetchApi } from '@/lib/query/query-helpers'
 import type { Row } from '@/types/database'
 
 type Order = Row<'orders'>
@@ -145,8 +145,16 @@ export function useSalesStats(options?: { dateRange?: { start?: string; end?: st
       if (options?.dateRange?.start) params.set('start_date', options.dateRange.start)
       if (options?.dateRange?.end) params.set('end_date', options.dateRange.end)
 
-      const data = await fetchApi<{ orders: Order[] }>(`/api/orders?${params}`)
-      const orders = data.orders || []
+      const response = await fetchApi<{ data: Order[]; pagination?: unknown }>(`/api/orders?${params}`)
+      
+      // Handle paginated response structure
+      let orders: Order[] = []
+      if (response && typeof response === 'object' && 'data' in response) {
+        orders = Array.isArray(response.data) ? response.data : []
+      } else if (Array.isArray(response)) {
+        orders = response
+      }
+      
       const totalOrders = orders.length
       const totalRevenue = orders.reduce((sum: number, order: Order) => sum + (order.total_amount || 0), 0)
       const completedOrders = orders.filter((order: Order) => order.status === 'READY').length

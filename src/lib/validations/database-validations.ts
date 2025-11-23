@@ -1,15 +1,14 @@
 import { z } from 'zod'
 
 import {
-
-  UUIDSchema,
-  EmailSchema,
-  PhoneSchema,
-  DateStringSchema,
-  PositiveNumberSchema,
-  NonNegativeNumberSchema,
-  OrderStatusEnum,
-  PaymentMethodEnum
+    DateStringSchema,
+    EmailSchema,
+    NonNegativeNumberSchema,
+    OrderStatusEnum,
+    PaymentMethodEnum,
+    PhoneSchema,
+    PositiveNumberSchema,
+    UUIDSchema
 } from '@/lib/validations/base-validations'
 
 // Database validation schemas
@@ -206,6 +205,7 @@ export const IngredientPurchaseInsertSchema = z.object({
   supplier: z.string().max(255).optional().nullable(),
   quantity: PositiveNumberSchema,
   unit_price: NonNegativeNumberSchema,
+  total_price: NonNegativeNumberSchema,
   purchase_date: DateStringSchema.optional(),
   notes: z.string().max(500).optional().nullable()
 })

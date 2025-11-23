@@ -162,15 +162,7 @@ const renderInventoryCard = (title: string, data: Record<string, unknown>, isExp
           <div className="pt-3 border-t border-orange-200 dark:border-orange-700 space-y-2">
             <div className="text-xs text-muted-foreground mb-2">Aksi Cepat:</div>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs h-7"
-                onClick={() => window.open('/ingredients/purchases', '_blank')}
-              >
-                <Package className="h-3 w-3 mr-1" />
-                Beli Bahan
-              </Button>
+
               <Button
                 variant="outline"
                 size="sm"

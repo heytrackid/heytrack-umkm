@@ -602,6 +602,7 @@ export type Database = {
         Row: {
           cost_per_unit: number | null
           created_at: string | null
+          created_by: string | null
           expense_id: string | null
           id: string
           ingredient_id: string
@@ -612,11 +613,13 @@ export type Database = {
           total_price: number
           unit_price: number
           updated_at: string | null
+          updated_by: string | null
           user_id: string
         }
         Insert: {
           cost_per_unit?: number | null
           created_at?: string | null
+          created_by?: string | null
           expense_id?: string | null
           id?: string
           ingredient_id: string
@@ -627,11 +630,13 @@ export type Database = {
           total_price: number
           unit_price: number
           updated_at?: string | null
+          updated_by?: string | null
           user_id: string
         }
         Update: {
           cost_per_unit?: number | null
           created_at?: string | null
+          created_by?: string | null
           expense_id?: string | null
           id?: string
           ingredient_id?: string
@@ -642,6 +647,7 @@ export type Database = {
           total_price?: number
           unit_price?: number
           updated_at?: string | null
+          updated_by?: string | null
           user_id?: string
         }
         Relationships: [

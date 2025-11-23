@@ -1,9 +1,9 @@
 import { createClientLogger } from '@/lib/client-logger'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { fetchApi, postApi, patchApi, deleteApi } from '@/lib/query/query-helpers'
-import { toast } from 'sonner'
 import { handleError } from '@/lib/error-handling'
+import { deleteApi, fetchApi, patchApi, postApi } from '@/lib/query/query-helpers'
 import type { FinancialRecord } from '@/types/database'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 const logger = createClientLogger('useFinancialRecords')
 
@@ -24,9 +24,17 @@ export function useFinancialRecords(params?: {
 
   return useQuery<FinancialRecord[]>({
     queryKey: ['financial-records', params],
-    queryFn: () => {
+    queryFn: async () => {
       const url = `/api/financial/records${searchParams.toString() ? `?${searchParams}` : ''}`
-      return fetchApi<FinancialRecord[]>(url)
+      const response = await fetchApi<{ data: FinancialRecord[]; pagination?: unknown }>(url)
+      
+      // Handle paginated response structure
+      if (response && typeof response === 'object' && 'data' in response) {
+        return Array.isArray(response.data) ? response.data : []
+      }
+      
+      // Fallback for direct array response
+      return Array.isArray(response) ? response : []
     },
     staleTime: 30000,
   })

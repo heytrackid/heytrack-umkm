@@ -2,8 +2,8 @@
  
 
 
-import { Edit, Filter, MoreVertical, Plus, Search, ShoppingCart, Trash2, X } from '@/components/icons'
-import { useRouter } from 'next/navigation'
+import { Edit, Filter, MoreVertical, Plus, Search, Trash2, X } from '@/components/icons'
+
 import { memo, useCallback, useMemo, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -54,7 +54,6 @@ interface IngredientsListProps {
 }
 
 const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
-    const router = useRouter()
     const { formatCurrency } = useSettings()
     const deleteIngredient = useDeleteIngredient()
 
@@ -192,9 +191,7 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
         setIsDeleteDialogOpen(true)
     }, [])
 
-    const handleQuickBuy = useCallback((ingredient: Ingredient) => {
-        router.push(`/ingredients/purchases?ingredient=${ingredient['id']}`)
-    }, [router])
+
 
     const handleConfirmDelete = useCallback(async () => {
         if (!selectedIngredient) { return }
@@ -350,7 +347,6 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                     ingredients={ingredients}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
-                    onQuickBuy={handleQuickBuy}
                 />
             ) : (
                 <Card>
@@ -450,14 +446,7 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                                                                     <Edit className="h-4 w-4 mr-2" />
                                                                     Edit
                                                                 </DropdownMenuItem>
-                                                                <DropdownMenuItem
-                                                                    onClick={() => handleQuickBuy(item)}
-                                                                    disabled={currentStock > minStock}
-                                                                    className={currentStock <= minStock ? 'bg-muted text-muted-foreground focus:bg-muted/80 focus:text-muted-foreground' : ''}
-                                                                >
-                                                                    <ShoppingCart className="h-4 w-4 mr-2" />
-                                                                    {currentStock <= minStock ? 'Quick Reorder' : 'Stok Cukup'}
-                                                                </DropdownMenuItem>
+
                                                                 <DropdownMenuSeparator />
                                                                 <DropdownMenuItem
                                                                     onClick={() => handleDelete(item)}

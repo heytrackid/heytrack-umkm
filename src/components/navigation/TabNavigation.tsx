@@ -3,17 +3,16 @@
 import { useRef, useState } from 'react'
 import {
     Bot,
-    Box,
     ChefHat,
     ChevronDown,
     DollarSign,
+    Factory,
     FileText,
     Home,
     Package,
     Receipt,
     Settings,
     ShoppingCart,
-    Store,
     TrendingUp,
     Truck,
     Users,
@@ -73,7 +72,7 @@ const navigationGroups = [
       {
         title: 'Produksi',
         url: '/production',
-        icon: Box
+        icon: Factory
       }
     ]
   },
@@ -84,11 +83,6 @@ const navigationGroups = [
         title: 'Supplier',
         url: '/suppliers',
         icon: Truck
-      },
-      {
-        title: 'Pembelian',
-        url: '/ingredients/purchases',
-        icon: Store
       }
     ]
   },

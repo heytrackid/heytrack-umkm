@@ -1,16 +1,16 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { BreadcrumbPatterns, PageBreadcrumb } from '@/components/ui/index'
+import { BreadcrumbPatterns, DeleteModal, PageBreadcrumb } from '@/components/ui/index'
 import { useAuth } from '@/hooks/index'
-import { useCreateIngredientPurchase, useIngredientPurchases } from '@/hooks/useIngredientPurchases'
+import { useCreateIngredientPurchase, useDeleteIngredientPurchase, useIngredientPurchases } from '@/hooks/useIngredientPurchases'
 import { useIngredientsList } from '@/hooks/useIngredients'
 import { handleError } from '@/lib/error-handling'
+import { toast } from 'sonner'
 
-import type { Insert } from '@/types/database'
 
 import { PurchaseForm } from '@/app/ingredients/purchases/components/PurchaseForm'
 import { PurchasesTable } from '@/app/ingredients/purchases/components/PurchasesTable'
@@ -19,10 +19,17 @@ import { PurchaseStats } from '@/app/ingredients/purchases/components/PurchaseSt
 
 
 const IngredientPurchasesLayout = (): JSX.Element => {
-  const { data: purchases = [], isLoading: _purchasesLoading, error: purchasesError } = useIngredientPurchases()
+  const { data: purchases = [], isLoading: _purchasesLoading, error: purchasesError, refetch: refetchPurchases } = useIngredientPurchases()
   const { data: ingredients = [], isLoading: _ingredientsLoading } = useIngredientsList()
   const createPurchase = useCreateIngredientPurchase()
+  const deletePurchase = useDeleteIngredientPurchase()
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
+
+  // Delete modal state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [purchaseToDelete, setPurchaseToDelete] = useState<any>(null)
+  const [isBulkDelete, setIsBulkDelete] = useState(false)
+  const [purchasesToDelete, setPurchasesToDelete] = useState<any[]>([])
 
   // Handle auth errors
   useEffect(() => {
@@ -42,9 +49,9 @@ const IngredientPurchasesLayout = (): JSX.Element => {
     ingredient_id: string;
     quantity: number;
     unit_price: number;
-    supplier: string | null | undefined;
-    purchase_date: string | undefined;
-    notes: string | null | undefined;
+    supplier?: string | null | undefined;
+    purchase_date?: string | undefined;
+    notes?: string | null | undefined;
   }) => {
     const totalPrice = formData.quantity * formData.unit_price;
 
@@ -53,12 +60,11 @@ const IngredientPurchasesLayout = (): JSX.Element => {
       ingredient_id: formData.ingredient_id,
       quantity: formData.quantity,
       unit_price: formData.unit_price,
-      supplier: formData.supplier ?? null,
-      purchase_date: formData.purchase_date ?? '',
-      notes: formData.notes ?? null,
       total_price: totalPrice,
-      user_id: 'temp' // Will be overridden by API
-    } as Insert<'ingredient_purchases'>)
+      supplier: formData.supplier ?? null,
+      purchase_date: formData.purchase_date ?? new Date().toISOString().split('T')[0],
+      notes: formData.notes ?? null,
+    } as any)
   }
 
   // Show loading state while auth is initializing
@@ -97,10 +103,61 @@ const IngredientPurchasesLayout = (): JSX.Element => {
         />
 
         {/* Purchase Stats - Lazy Loaded */}
-        <PurchaseStats purchases={purchases} />
+        <PurchaseStats purchases={purchases as any} />
 
         {/* Purchases Table - Lazy Loaded */}
-        <PurchasesTable purchases={purchases} />
+        <PurchasesTable 
+          purchases={purchases as any} 
+          onRefresh={() => void refetchPurchases()}
+          onEdit={(_purchase) => {
+            // TODO: Implement edit functionality
+            toast.info('Fitur edit sedang dalam pengembangan')
+          }}
+          onDelete={(purchase) => {
+            setPurchaseToDelete(purchase)
+            setIsBulkDelete(false)
+            setIsDeleteModalOpen(true)
+          }}
+          onBulkDelete={(purchasesToDelete) => {
+            setPurchasesToDelete(purchasesToDelete)
+            setIsBulkDelete(true)
+            setIsDeleteModalOpen(true)
+          }}
+        />
+
+        {/* Delete Confirmation Modal */}
+        <DeleteModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => {
+            setIsDeleteModalOpen(false)
+            setPurchaseToDelete(null)
+            setPurchasesToDelete([])
+            setIsBulkDelete(false)
+          }}
+          onConfirm={async () => {
+            try {
+              if (isBulkDelete) {
+                // Bulk delete
+                for (const purchase of purchasesToDelete) {
+                  await deletePurchase.mutateAsync(purchase.id)
+                }
+                toast.success(`${purchasesToDelete.length} pembelian berhasil dihapus`)
+              } else {
+                // Single delete
+                await deletePurchase.mutateAsync(purchaseToDelete.id)
+              }
+              setIsDeleteModalOpen(false)
+              setPurchaseToDelete(null)
+              setPurchasesToDelete([])
+              setIsBulkDelete(false)
+            } catch (error) {
+              // Error handled by mutation
+            }
+          }}
+          entityName={isBulkDelete ? 'Pembelian' : 'Pembelian'}
+          itemName={isBulkDelete ? `${purchasesToDelete.length} item` : purchaseToDelete?.ingredient?.name || 'item ini'}
+          isLoading={deletePurchase.isPending}
+        />
       </div>
     </AppLayout>
   )

@@ -94,8 +94,8 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
         credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) {throw new Error('Failed to fetch recipes')}
-      const payload = await response.json() as Recipe[] | RecipesListResponse | null
-
+      const result = await response.json()
+      const payload = result.data as Recipe[] | RecipesListResponse | null
       let recipeCount = 0
       if (Array.isArray(payload)) {
         recipeCount = payload.length
@@ -133,7 +133,8 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
         credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) {throw new Error('Failed to fetch overview')}
-      return response.json() as Promise<HppOverview>
+      const result = await response.json()
+      return result.data as HppOverview
     },
     staleTime: 60 * 1000, // 1 minute
     refetchOnWindowFocus: false
@@ -154,8 +155,8 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
         throw new Error('Failed to fetch recipe with HPP data')
       }
 
-      const data = await response.json()
-
+      const result = await response.json()
+      const data = result.data
       // Transform API response to match RecipeWithCosts interface
       return {
         ...data.recipe,
@@ -179,8 +180,8 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
         credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) {throw new Error('Failed to fetch comparison')}
-      const payload = await response.json() as HppComparison[] | HppComparisonResponse | null
-      if (!payload) { return [] }
+      const result = await response.json()
+      const payload = result.data as HppComparison[] | HppComparisonResponse | null
       if (Array.isArray(payload)) { return payload }
       if (isHppComparisonResponse(payload)) { return payload.recipes }
       return []

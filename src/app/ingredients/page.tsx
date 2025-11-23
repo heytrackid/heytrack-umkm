@@ -11,29 +11,27 @@ import { IngredientsList } from '@/components/ingredients/IngredientsList'
 import { PageHeader } from '@/components/layout'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 import { StatCardPatterns, StatsCards } from '@/components/ui/index'
 import { ListSkeleton, StatsSkeleton, TableSkeleton } from '@/components/ui/skeleton-loader'
 import { handleError } from '@/lib/error-handling'
-import { useSettings } from '@/contexts/settings-context'
+
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useCostChangeAlerts } from '@/hooks/useCostAlerts'
-import { useIngredientPurchases } from '@/hooks/useIngredientPurchases'
+
 import { useImportIngredients, useIngredientsList } from '@/hooks/useIngredients'
 import type { Row } from '@/types/database'
 import { useQueryClient } from '@tanstack/react-query'
 
 const IngredientsPage = () => {
   const { data: ingredients, isLoading: loading, error } = useIngredientsList();
-  const { formatCurrency } = useSettings();
+
   const router = useRouter();
   const queryClient = useQueryClient();
   const { hasSignificantChanges } = useCostChangeAlerts();
   const isMobile = useIsMobile();
 
-  // Fetch recent purchases
-  const { data: allPurchases } = useIngredientPurchases()
-  const purchases = allPurchases?.slice(0, 10)
+
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const importIngredientsMutation = useImportIngredients();
@@ -81,10 +79,7 @@ const IngredientsPage = () => {
                   <Upload className="h-4 w-4 mr-2" />
                   Import
                 </Button>
-                <Button variant="outline" disabled className="w-full sm:w-auto">
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Pembelian
-                </Button>
+
                 <Button disabled className="w-full sm:w-auto">
                   <Plus className="h-4 w-4 mr-2" />
                   Tambah
@@ -115,26 +110,28 @@ const IngredientsPage = () => {
           description="Kelola stok dan harga bahan baku"
           actions={
             <div className="flex flex-col sm:flex-row gap-2 w-full">
-                <Button
-                  variant="outline"
-                  onClick={() => setImportDialogOpen(true)}
-                  className="w-full sm:w-auto"
-                >
-                <Upload className="h-4 w-4 mr-2" />
-                Import
-              </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => router.push('/ingredients/purchases')}
-                  className="w-full sm:w-auto"
-                >
+              <Button
+                variant="outline"
+                onClick={() => router.push('/ingredients/purchases')}
+                className="w-full sm:w-auto"
+              >
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 Pembelian
               </Button>
-                <Button
-                  onClick={() => setShowAddDialog(true)}
-                  className="w-full sm:w-auto"
-                >
+
+              <Button
+                variant="outline"
+                onClick={() => setImportDialogOpen(true)}
+                className="w-full sm:w-auto"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Import
+              </Button>
+
+              <Button
+                onClick={() => setShowAddDialog(true)}
+                className="w-full sm:w-auto"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Tambah
               </Button>
@@ -196,41 +193,7 @@ const IngredientsPage = () => {
           <IngredientsList onAdd={() => setShowAddDialog(true)} />
         )}
 
-        {/* Recent Purchases */}
-        {purchases && purchases.length > 0 && (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Pembelian Terbaru</CardTitle>
-                <Button variant="ghost" size="sm" onClick={() => router.push('/ingredients/purchases')}>
-                  Lihat Semua
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-               <div className="space-y-3">
-                 {(purchases || []).slice(0, 5).map((purchase) => (
-                  <div key={purchase.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <p className="font-medium">
-                        {typeof purchase.supplier === 'string' 
-                          ? purchase.supplier 
-                          : purchase.supplier?.name || 'Supplier'}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {purchase.purchase_date ? new Date(purchase.purchase_date).toLocaleDateString('id-ID') : 'N/A'}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium">{formatCurrency(purchase.total_price || 0)}</p>
-                      <p className="text-sm text-muted-foreground">Completed</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+
 
         {/* Import Dialog */}
         <ImportDialog

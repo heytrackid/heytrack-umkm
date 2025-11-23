@@ -96,14 +96,14 @@ const CashFlowPage = () => {
   }
 
   // Memoize filtered records
-  const filteredRecords = useMemo(() => {
-    const records = data ?? []
-    return records.filter((record) => {
-      const matchesSearch = record.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            record.category?.toLowerCase().includes(searchTerm.toLowerCase())
-      return matchesSearch && record.date // Only include records with valid dates
-    })
-  }, [data, searchTerm])
+   const filteredRecords = useMemo(() => {
+     const records = data ?? []
+     return records.filter((record) => {
+       const matchesSearch = record.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             record.category?.toLowerCase().includes(searchTerm.toLowerCase())
+       return matchesSearch && record.date // Only include records with valid dates
+     })
+   }, [data, searchTerm])
 
   // Memoize summary calculations
   const summary: CashFlowSummary = useMemo(() => {

@@ -1,0 +1,46 @@
+**Prompt untuk AI (Versi Maksimal 30 per Kategori):**
+
+Saya ingin Anda membuat data dummy yang realistis dan masuk akal untuk aplikasi manajemen bisnis kuliner bernama HeyTrack. Hasilkan SQL INSERT statements yang bisa langsung dijalankan di Supabase SQL Editor. Data harus konsisten, variatif, dan relevan dengan operasi restoran/bakery di Indonesia. Batasi maksimal 30 entri per tabel/kategori agar tidak terlalu banyak.
+
+**Persyaratan Data:**
+
+1. **Suppliers** (maks 30): Nama supplier lokal/internasional, tipe (preferred/standard/trial), kontak, alamat, rating, lead_time_days.
+
+2. **Ingredients** (maks 30): Nama bahan kuliner realistis, unit, harga_per_unit (IDR), stock_awal, reorder_point, kategori.
+
+3. **Supplier_Ingredients** (maks 30 relasi): Setiap supplier menyediakan 1-3 ingredients dengan harga spesifik.
+
+4. **Recipes** (maks 30): Nama resep, deskripsi, kategori, waktu_prep/cook, servings, difficulty, image_url.
+
+5. **Recipe_Ingredients** (maks 30 per resep, total ~100): Quantity realistis per resep.
+
+6. **Customers** (maks 30): Nama, kontak, alamat, tipe, total_orders, last_order_date.
+
+7. **Orders** (maks 30): order_no, customer_id, tanggal, status, total_amount, payment_method/status, notes.
+
+8. **Order_Items** (maks 30 per order, total ~60): order_id, recipe_id, quantity, price.
+
+9. **Financial_Records** (maks 30): record_type, transaction_type, amount, description, category, date, reference_id.
+
+10. **Ingredient_Purchases** (maks 30): supplier_id, ingredient_id, quantity, unit_price, total_cost, purchase_date, status.
+
+11. **Productions** (maks 30): recipe_id, batch_size, status, start/end_date, notes.
+
+12. **Hpp_Calculations** (maks 30): recipe_id, total_cost, profit_margin, recommended_price, calculated_at.
+
+13. **Notifications** (maks 30): user_id, type, title, message, is_read, created_at.
+
+14. **User_Profiles** (maks 5): id, email, full_name, role, created_at.
+
+15. **App_Settings** (maks 10): key-value pairs.
+
+16. **WhatsApp_Templates** (maks 5): name, template_text.
+
+**Aturan Data:**
+- Bahasa Indonesia untuk nama relevan.
+- Harga IDR: Ingredients 10k-500k/kg, Recipes 25k-150k/serving.
+- Tanggal: Spread 6 bulan lalu sampai sekarang.
+- FK valid, variasi status/tipe, realistis.
+- Output: SQL INSERT per tabel, dengan komentar, COMMIT di akhir.
+
+Hasilkan SQL lengkap yang siap dijalankan.

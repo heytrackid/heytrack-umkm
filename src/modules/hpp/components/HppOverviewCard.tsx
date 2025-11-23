@@ -86,16 +86,16 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps): JSX.Element
                     </div>
 
                     {/* Peringatan */}
-                    <div className={`p-4 rounded-lg border ${overview.alerts.length > 0
+                    <div className={`p-4 rounded-lg border ${(overview.alerts?.length ?? 0) > 0
                         ? 'border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/10'
                         : 'border-border/20 bg-muted/20'
                         }`}>
                         <div className="text-2xl font-bold mb-1 text-muted-foreground">
-                            {overview.alerts.length}
+                            {(overview.alerts?.length ?? 0)}
                         </div>
                         <div className="text-xs text-muted-foreground">Peringatan Baru</div>
                         <div className="flex items-center gap-1 mt-1 text-xs">
-                            {overview.alerts.length > 0 ? (
+                            {(overview.alerts?.length ?? 0) > 0 ? (
                                 <>
                                     <Bell className="h-3 w-3 text-muted-foreground" />
                                     <span className="text-muted-foreground">Perlu tindakan</span>
