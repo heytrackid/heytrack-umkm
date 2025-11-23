@@ -1,208 +1,256 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus } from '@/components/icons'
-import { useState } from 'react'
-import { useForm, useWatch } from 'react-hook-form'
-
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from '@/components/ui/dialog'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { handleError } from '@/lib/error-handling'
-import { IngredientPurchaseInsertSchema, type IngredientPurchaseInsert } from '@/lib/validations/database-validations'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import type { Row } from '@/types/database'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import * as z from 'zod'
 
-import type { AvailableIngredient } from '@/app/ingredients/purchases/components/types'
+const purchaseFormSchema = z.object({
+  ingredient_id: z.string().min(1, 'Pilih bahan baku'),
+  quantity: z.coerce.number().positive('Jumlah harus lebih dari 0'),
+  unit_price: z.coerce.number().min(0, 'Harga tidak boleh negatif'),
+  supplier: z.string().optional().nullable(),
+  purchase_date: z.string().optional(),
+  notes: z.string().optional().nullable(),
+})
 
+type PurchaseFormValues = z.infer<typeof purchaseFormSchema>
 
 interface PurchaseFormProps {
-  ingredients: AvailableIngredient[]
-  onSubmit: (formData: {
-    ingredient_id: string
-    quantity: number
-    unit_price: number
-    supplier: string | null | undefined
-    purchase_date: string | undefined
-    notes: string | null | undefined
-  }) => void
+  ingredients: Array<Row<'ingredients'>>
+  onSubmit: (data: PurchaseFormValues) => Promise<void>
   onSuccess: () => void
 }
 
-const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps): JSX.Element => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+export function PurchaseForm({ ingredients, onSubmit, onSuccess }: PurchaseFormProps): JSX.Element {
+  const [open, setOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const form = useForm<IngredientPurchaseInsert>({
-    resolver: zodResolver(IngredientPurchaseInsertSchema),
+  const form = useForm<PurchaseFormValues>({
+    resolver: zodResolver(purchaseFormSchema) as any,
     defaultValues: {
       ingredient_id: '',
-      supplier: '',
       quantity: 0,
       unit_price: 0,
+      supplier: '',
       purchase_date: new Date().toISOString().split('T')[0],
-      notes: ''
-    }
+      notes: '',
+    },
   })
 
-  const handleSubmit = (data: IngredientPurchaseInsert) => {
+  const handleSubmit = async (data: PurchaseFormValues) => {
     try {
-      onSubmit({
-        ingredient_id: data.ingredient_id,
-        quantity: data.quantity,
-        unit_price: data.unit_price,
-        supplier: data.supplier,
-        purchase_date: data.purchase_date,
-        notes: data.notes
-      })
-
-      // Reset form
-      form.reset({
-        ingredient_id: '',
-        supplier: '',
-        quantity: 0,
-        unit_price: 0,
-        purchase_date: new Date().toISOString().split('T')[0],
-        notes: ''
-      })
-
-      setIsDialogOpen(false)
+      setIsSubmitting(true)
+      await onSubmit(data)
+      form.reset()
+      setOpen(false)
       onSuccess()
     } catch (error) {
-      handleError(error, 'Create ingredient purchase', true, 'Gagal menambahkan pembelian')
+      // Error handled by mutation
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
-  const watchedQty = useWatch({ control: form.control, name: 'quantity' })
-  const watchedPrice = useWatch({ control: form.control, name: 'unit_price' })
-  const watchedIngredientId = useWatch({ control: form.control, name: 'ingredient_id' })
-  const total = watchedQty && watchedPrice ? watchedQty * watchedPrice : 0
+  const selectedIngredient = ingredients.find(
+    (ing) => ing.id === form.watch('ingredient_id')
+  )
+
+  const quantity = form.watch('quantity') || 0
+  const unitPrice = form.watch('unit_price') || 0
+  const totalPrice = quantity * unitPrice
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           Tambah Pembelian
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
-        <form onSubmit={form.handleSubmit(handleSubmit)}>
-          <DialogHeader>
-            <DialogTitle className="text-wrap-mobile">Tambah Pembelian Bahan Baku</DialogTitle>
-            <DialogDescription>
-              Input detail pembelian bahan baku baru
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="ingredient_id">Bahan Baku *</Label>
-              <Select
-                value={watchedIngredientId}
-                onValueChange={(value: string) => form.setValue('ingredient_id', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ingredients.map((ing) => (
-                    <SelectItem key={ing['id']} value={ing['id']}>
-                      {ing.name} ({ing.unit})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {form.formState.errors.ingredient_id && (
-                <p className="text-sm text-muted-foreground">{form.formState.errors.ingredient_id.message}</p>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Tambah Pembelian Bahan Baku</DialogTitle>
+          <DialogDescription>
+            Catat pembelian bahan baku untuk update stok dan harga otomatis
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="ingredient_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Bahan Baku *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih bahan baku" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {ingredients.map((ingredient) => (
+                        <SelectItem key={ingredient.id} value={ingredient.id}>
+                          {ingredient.name} ({ingredient.unit})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
               )}
-            </div>
+            />
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="quantity">Jumlah *</Label>
-                <Input
-                  id="qty_beli"
-                  type="number"
-                  step="0.01"
-                  {...form.register('quantity', { valueAsNumber: true })}
-                />
-                {form.formState.errors.quantity && (
-                  <p className="text-sm text-muted-foreground">{form.formState.errors.quantity.message}</p>
+              <FormField
+                control={form.control}
+                name="quantity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Jumlah *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0"
+                        {...field}
+                      />
+                    </FormControl>
+                    {selectedIngredient && (
+                      <p className="text-xs text-muted-foreground">
+                        Satuan: {selectedIngredient.unit}
+                      </p>
+                    )}
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </div>
+              />
 
-              <div className="space-y-2">
-                <Label htmlFor="unit_price">Harga Satuan *</Label>
-                <Input
-                  id="unit_price"
-                  type="number"
-                  step="0.01"
-                  {...form.register('unit_price', { valueAsNumber: true })}
-                />
-                {form.formState.errors.unit_price && (
-                  <p className="text-sm text-muted-foreground">{form.formState.errors.unit_price.message}</p>
+              <FormField
+                control={form.control}
+                name="unit_price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Harga Satuan *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="supplier">Supplier</Label>
-              <Input
-                id="supplier"
-                {...form.register('supplier', { value: '' })}
               />
-              {form.formState.errors.supplier && (
-                <p className="text-sm text-muted-foreground">{form.formState.errors.supplier.message}</p>
-              )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="tanggal_beli">Tanggal Pembelian *</Label>
-              <Input
-                id="tanggal_beli"
-                type="date"
-                {...form.register('purchase_date')}
-              />
-              {form.formState.errors.purchase_date && (
-                <p className="text-sm text-muted-foreground">{form.formState.errors.purchase_date.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="catatan">Catatan</Label>
-              <Input
-                id="catatan"
-                {...form.register('notes')}
-              />
-              {form.formState.errors.notes && (
-                <p className="text-sm text-muted-foreground">{form.formState.errors.notes.message}</p>
-              )}
-            </div>
-
-            {total > 0 && (
-              <div className="p-3 bg-muted rounded-lg">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">Total:</span>
-                  <span className="text-lg font-bold">
-                    Rp {total.toLocaleString()}
-                  </span>
-                </div>
+            {totalPrice > 0 && (
+              <div className="rounded-lg bg-muted p-3">
+                <p className="text-sm font-medium">Total Pembelian</p>
+                <p className="text-2xl font-bold">
+                  Rp {totalPrice.toLocaleString('id-ID')}
+                </p>
               </div>
             )}
-          </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Batal
-            </Button>
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? 'Menyimpan...' : 'Simpan Pembelian'}
-            </Button>
-          </DialogFooter>
-        </form>
+            <FormField
+              control={form.control}
+              name="supplier"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Supplier</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Nama supplier (opsional)"
+                      {...field}
+                      value={field.value ?? ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="purchase_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tanggal Pembelian</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Catatan</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Catatan tambahan (opsional)"
+                      {...field}
+                      value={field.value ?? ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={isSubmitting}
+              >
+                Batal
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Menyimpan...' : 'Simpan Pembelian'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   )
 }
-
-export { PurchaseForm }

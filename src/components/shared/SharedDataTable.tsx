@@ -1,26 +1,26 @@
 'use client'
 
 import {
-    Download,
-    Edit,
-    Eye,
-    MoreVertical,
-    Plus,
-    RefreshCw,
-    Search,
-    Trash2
+  Download,
+  Edit,
+  Eye,
+  MoreVertical,
+  Plus,
+  RefreshCw,
+  Search,
+  Trash2
 } from '@/components/icons'
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Input } from '@/components/ui/input'
@@ -54,6 +54,7 @@ interface SharedDataTableProps<T> {
   onView?: (item: T) => void
   onEdit?: (item: T) => void
   onDelete?: (item: T) => void
+  onBulkDelete?: (items: T[]) => void
   onRefresh?: () => void
 
   // Configuration
@@ -66,6 +67,7 @@ interface SharedDataTableProps<T> {
   loading?: boolean
   exportable?: boolean
   refreshable?: boolean
+  enableBulkActions?: boolean
 
   // Pagination
   enablePagination?: boolean
@@ -95,6 +97,7 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
   onView,
   onEdit,
   onDelete,
+  onBulkDelete,
   onRefresh,
   title,
   description,
@@ -105,6 +108,7 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
   loading = false,
   exportable = false,
   refreshable = true,
+  enableBulkActions = false,
   enablePagination = true,
   pageSizeOptions,
   initialPageSize,
@@ -123,6 +127,7 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
     initialPageSize || pageSizeOptions?.[0] || 10
   )
   const [currentPage, setCurrentPage] = useState(1)
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
 
   // Computed values
   const sanitizedPageSizeOptions = useMemo(() => {
@@ -185,6 +190,36 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
       [columnKey]: value
     }))
   }, [])
+
+  // Bulk selection handlers
+  const handleSelectAll = useCallback(() => {
+    if (selectedItems.size === paginatedData.length) {
+      setSelectedItems(new Set())
+    } else {
+      const allIds = new Set(paginatedData.map(item => String(item['id'])))
+      setSelectedItems(allIds)
+    }
+  }, [paginatedData, selectedItems.size])
+
+  const handleSelectItem = useCallback((itemId: string) => {
+    setSelectedItems(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId)
+      } else {
+        newSet.add(itemId)
+      }
+      return newSet
+    })
+  }, [])
+
+  const handleBulkDelete = useCallback(() => {
+    if (!onBulkDelete || selectedItems.size === 0) return
+    
+    const itemsToDelete = paginatedData.filter(item => selectedItems.has(String(item['id'])))
+    onBulkDelete(itemsToDelete)
+    setSelectedItems(new Set())
+  }, [onBulkDelete, paginatedData, selectedItems])
 
   const handleExport = useCallback(() => {
     if (!exportable) { return }
@@ -258,6 +293,16 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
               )}
             </div>
             <div className="flex gap-2">
+              {enableBulkActions && selectedItems.size > 0 && (
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  onClick={handleBulkDelete}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Hapus {selectedItems.size} item
+                </Button>
+              )}
               {refreshable && onRefresh && (
                 <Button variant="outline" size="sm" onClick={onRefresh}>
                   <RefreshCw className="h-4 w-4" />
@@ -338,25 +383,79 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
           )
         ) : (
           <div className="space-y-4">
+            {enableBulkActions && (
+              <div className="flex items-center gap-3 mb-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.size === paginatedData.length && paginatedData.length > 0}
+                    onChange={handleSelectAll}
+                    className="cursor-pointer w-4 h-4"
+                  />
+                  <span className="text-sm text-muted-foreground">
+                    Pilih semua ({paginatedData.length})
+                  </span>
+                </label>
+                {selectedItems.size > 0 && (
+                  <div className="flex-1 flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg px-3 py-2">
+                    <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                      {selectedItems.size} item dipilih
+                    </span>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setSelectedItems(new Set())}
+                      >
+                        Batal
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        onClick={handleBulkDelete}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Hapus
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
             <VirtualizedTable
               data={paginatedData}
-              columns={columns.map(col => {
-                const base = {
-                  header: col.header,
-                  accessor: col.key,
-                }
-                if (col.render) {
-                  return {
-                    ...base,
-                    cell: (item: T) => {
-                      const value = getValue(item, col.key)
-                      return col.render!(value, item)
+              columns={([
+                ...(enableBulkActions ? [{
+                  header: '☑',
+                  accessor: 'select' as keyof T,
+                  cell: (item: T) => (
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.has(String(item['id']))}
+                      onChange={() => handleSelectItem(String(item['id']))}
+                      className="cursor-pointer w-4 h-4"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  )
+                }] : []),
+                ...columns.map(col => {
+                  const base = {
+                    header: col.header,
+                    accessor: col.key,
+                  }
+                  if (col.render) {
+                    return {
+                      ...base,
+                      cell: (item: T) => {
+                        const value = getValue(item, col.key)
+                        return col.render!(value, item)
+                      }
                     }
                   }
-                }
-                return base
-              }).concat(onView || onEdit || onDelete ? [{
-                header: 'Actions',
+                  return base
+                }),
+                ...(onView || onEdit || onDelete ? [{
+                header: 'Aksi',
                 accessor: 'actions' as keyof T,
                 cell: (item: T) => (
                   <DropdownMenu>
@@ -366,12 +465,12 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       {onView && (
                         <DropdownMenuItem onClick={() => onView(item)}>
                           <Eye className="h-4 w-4 mr-2" />
-                          View
+                          Lihat
                         </DropdownMenuItem>
                       )}
                       {onEdit && (
@@ -386,13 +485,14 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
                           className="text-red-600"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
+                          Hapus
                         </DropdownMenuItem>
                       )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )
-              }] : [])}
+              }] : [])
+              ] as any)}
               className="border rounded-lg"
             />
 

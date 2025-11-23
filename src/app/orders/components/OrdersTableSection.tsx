@@ -1,17 +1,12 @@
 'use client'
 
-import { ChevronLeft, ChevronRight, Edit, Eye, MoreVertical, Trash2 } from '@/components/icons'
 import { useRouter } from 'next/navigation'
-import { memo, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
 
+import { SharedDataTable } from '@/components/shared/SharedDataTable'
 import { DeleteConfirmationDialog } from '@/components/ui/confirmation-dialog'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
-import { LoadingButton } from '@/components/ui/loading-button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { TableSkeleton } from '@/components/ui/skeleton-loader'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-
 import { useDeleteOrder } from '@/hooks/api/useOrders'
+import { successToast } from '@/hooks/use-toast'
 
 import type { Row } from '@/types/database'
 
@@ -29,11 +24,6 @@ const OrderSection = ({
   formatDate: (d: string) => string
   isLoading?: boolean
 }) => {
-
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
-
   // Delete confirmation state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [orderToDelete, setOrderToDelete] = useState<OrderForTable | null>(null)
@@ -42,40 +32,18 @@ const OrderSection = ({
   const router = useRouter()
 
   const ORDER_STATUS_CONFIG: Record<string, { label: string; color: string }> = useMemo(() => ({
-    PENDING: { label: "Pending", color: 'bg-secondary text-secondary-foreground' },
-    CONFIRMED: { label: "Confirmed", color: 'bg-muted text-foreground' },
-    IN_PROGRESS: { label: "In Production", color: 'bg-muted text-foreground' },
-    COMPLETED: { label: "Completed", color: 'bg-muted text-white' },
-    CANCELLED: { label: "Cancelled", color: 'bg-muted0 text-white' }
+    PENDING: { label: "Pending", color: 'bg-yellow-100 text-yellow-800' },
+    CONFIRMED: { label: "Confirmed", color: 'bg-blue-100 text-blue-800' },
+    IN_PROGRESS: { label: "In Production", color: 'bg-purple-100 text-purple-800' },
+    COMPLETED: { label: "Completed", color: 'bg-green-100 text-green-800' },
+    CANCELLED: { label: "Cancelled", color: 'bg-red-100 text-red-800' }
   }), [])
 
   const PAYMENT_STATUS_CONFIG: Record<string, { label: string; color: string }> = useMemo(() => ({
-    UNPAID: { label: "Unpaid", color: 'bg-secondary text-secondary-foreground' },
-    PARTIAL: { label: "Partial", color: 'bg-muted text-foreground' },
-    PAID: { label: "Paid", color: 'bg-muted text-foreground' }
+    UNPAID: { label: "Unpaid", color: 'bg-red-100 text-red-800' },
+    PARTIAL: { label: "Partial", color: 'bg-yellow-100 text-yellow-800' },
+    PAID: { label: "Paid", color: 'bg-green-100 text-green-800' }
   }), [])
-
-  // Calculate pagination
-  const totalItems = orders.length
-  const totalPages = Math.ceil(totalItems / pageSize)
-
-  // Get paginated data
-  const paginatedOrders = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize
-    const endIndex = startIndex + pageSize
-    return orders.slice(startIndex, endIndex)
-  }, [orders, currentPage, pageSize])
-
-  // Reset to page 1 when orders change (using ref to avoid cascading renders)
-  const prevOrdersLengthRef = useRef(orders.length)
-  // Reset to first page when orders length changes
-  useEffect(() => {
-    if (prevOrdersLengthRef.current !== orders.length) {
-      prevOrdersLengthRef.current = orders.length
-      // Use setTimeout to avoid setState during render cycle
-      setTimeout(() => setCurrentPage(1), 0)
-    }
-  }, [orders.length])
 
   // Delete handler
   const handleDeleteOrder = async (): Promise<void> => {
@@ -104,150 +72,135 @@ const OrderSection = ({
     setDeleteDialogOpen(true)
   }
 
-  if (isLoading) {
-    return <TableSkeleton rows={10} columns={8} />
+  const handleBulkDelete = async (ordersToDelete: OrderForTable[]): Promise<void> => {
+    try {
+      // For bulk delete, we'll delete them one by one
+      // In production, you'd want a bulk delete API endpoint
+      for (const order of ordersToDelete) {
+        await deleteOrderMutation.mutateAsync(order.id)
+      }
+       successToast(`${ordersToDelete.length} pesanan berhasil dihapus`)
+      router.refresh()
+    } catch (error) {
+      // Error handling is done in mutation
+    }
   }
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="bg-muted/50">No. Pesanan</TableHead>
-            <TableHead className="bg-muted/50">Pelanggan</TableHead>
-            <TableHead className="bg-muted/50">Tanggal Order</TableHead>
-            <TableHead className="bg-muted/50">Tanggal Kirim</TableHead>
-            <TableHead className="bg-muted/50">Status</TableHead>
-            <TableHead className="bg-muted/50">Payment</TableHead>
-            <TableHead className="bg-muted/50 text-right">Total</TableHead>
-            <TableHead className="bg-muted/50 text-center w-32">Aksi</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {paginatedOrders.map((order: OrderForTable) => (
-            <TableRow key={order['id']}>
-              <TableCell className="font-medium">{order['order_no']}</TableCell>
-              <TableCell>
-                <div className="flex flex-col">
-                  <span className="font-medium">{order['customer_name'] ?? '-'}</span>
-                  {order.customer_phone && (
-                    <span className="text-xs text-muted-foreground">{order.customer_phone}</span>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>{order.order_date ? formatDate(order.order_date) : '-'}</TableCell>
-              <TableCell>{order.delivery_date ? formatDate(order.delivery_date) : '-'}</TableCell>
-              <TableCell>
-                <span className={`text-xs px-2 py-1 rounded ${order['status'] ? ORDER_STATUS_CONFIG[order['status']]?.color : 'bg-secondary text-secondary-foreground'}`}>
-                  {order['status'] ? (ORDER_STATUS_CONFIG[order['status']]?.label ?? order['status']) : 'Unknown'}
+    <>
+      <SharedDataTable
+        data={orders}
+        columns={[
+          {
+            key: 'order_no',
+            header: 'No. Pesanan',
+            render: (value) => <span className="font-medium">{value as string}</span>,
+            sortable: true,
+          },
+          {
+            key: 'customer_name',
+            header: 'Pelanggan',
+            render: (_, item) => (
+              <div className="flex flex-col">
+                <span className="font-medium">{item.customer_name ?? '-'}</span>
+                {item.customer_phone && (
+                  <span className="text-xs text-muted-foreground">{item.customer_phone}</span>
+                )}
+              </div>
+            ),
+            sortable: true,
+          },
+          {
+            key: 'order_date',
+            header: 'Tanggal Order',
+            render: (value) => value ? formatDate(value as string) : '-',
+            sortable: true,
+          },
+          {
+            key: 'delivery_date',
+            header: 'Tanggal Kirim',
+            render: (value) => value ? formatDate(value as string) : '-',
+            sortable: true,
+          },
+          {
+            key: 'status',
+            header: 'Status',
+            render: (value) => {
+              const status = value as string
+              const config = ORDER_STATUS_CONFIG[status] ?? { label: status, color: 'bg-secondary text-secondary-foreground' }
+              return (
+                <span className={`text-xs px-2 py-1 rounded ${config.color}`}>
+                  {config.label}
                 </span>
-              </TableCell>
-              <TableCell>
-                <span className={`text-xs px-2 py-1 rounded ${order.payment_status ? PAYMENT_STATUS_CONFIG[order.payment_status]?.color : 'bg-secondary text-secondary-foreground'}`}>
-                  {order.payment_status ? (PAYMENT_STATUS_CONFIG[order.payment_status]?.label ?? order.payment_status) : 'Unknown'}
+              )
+            },
+            filterable: true,
+            filterType: 'select',
+            filterOptions: [
+              { label: 'Pending', value: 'PENDING' },
+              { label: 'Confirmed', value: 'CONFIRMED' },
+              { label: 'In Progress', value: 'IN_PROGRESS' },
+              { label: 'Completed', value: 'COMPLETED' },
+              { label: 'Cancelled', value: 'CANCELLED' },
+            ],
+          },
+          {
+            key: 'payment_status',
+            header: 'Payment',
+            render: (value) => {
+              const status = value as string
+              const config = PAYMENT_STATUS_CONFIG[status] ?? { label: status, color: 'bg-secondary text-secondary-foreground' }
+              return (
+                <span className={`text-xs px-2 py-1 rounded ${config.color}`}>
+                  {config.label}
                 </span>
-              </TableCell>
-              <TableCell className="text-right font-medium">
-                {formatCurrency(order.total_amount ?? 0)}
-              </TableCell>
-              <TableCell className="text-center">
-                 <DropdownMenu>
-                   <DropdownMenuTrigger asChild>
-                     <LoadingButton variant="ghost" size="sm" hapticFeedback hapticType="light">
-                       <MoreVertical className="h-4 w-4" />
-                     </LoadingButton>
-                   </DropdownMenuTrigger>
-                   <DropdownMenuContent align="end">
-                     <DropdownMenuItem onClick={() => handleViewOrder(order)}>
-                       <Eye className="mr-2 h-4 w-4" />
-                       Lihat Detail
-                     </DropdownMenuItem>
-                     <DropdownMenuItem onClick={() => handleEditOrder(order)}>
-                       <Edit className="mr-2 h-4 w-4" />
-                       Edit
-                     </DropdownMenuItem>
-                     <DropdownMenuItem
-                       className="text-red-600 focus:text-red-600"
-                       onClick={() => handleDeleteClick(order)}
-                     >
-                       <Trash2 className="mr-2 h-4 w-4" />
-                       Hapus
-                     </DropdownMenuItem>
-                   </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between px-4 py-4 border-t bg-muted/30">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">
-              Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalItems)} of {totalItems} orders
-            </span>
-          </div>
-
-          <div className="flex items-center gap-6">
-            {/* Page Size Selector */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Per page</span>
-              <Select value={pageSize.toString()} onValueChange={(value: string) => setPageSize(Number(value))}>
-                <SelectTrigger className="w-20 h-8">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                  <SelectItem value="100">100</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Page Navigation */}
-            <div className="flex items-center gap-2">
-               <LoadingButton
-                 variant="outline"
-                 size="sm"
-                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                 disabled={currentPage === 1}
-                 hapticFeedback
-                 hapticType="light"
-               >
-                 <ChevronLeft className="h-4 w-4" />
-               </LoadingButton>
-
-               <span className="text-sm font-medium">
-                 Page {currentPage} of {totalPages}
-               </span>
-
-               <LoadingButton
-                 variant="outline"
-                 size="sm"
-                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                 disabled={currentPage === totalPages}
-                 hapticFeedback
-                 hapticType="light"
-               >
-                 <ChevronRight className="h-4 w-4" />
-               </LoadingButton>
-            </div>
-          </div>
-        </div>
-      )}
+              )
+            },
+            filterable: true,
+            filterType: 'select',
+            filterOptions: [
+              { label: 'Unpaid', value: 'UNPAID' },
+              { label: 'Partial', value: 'PARTIAL' },
+              { label: 'Paid', value: 'PAID' },
+            ],
+          },
+          {
+            key: 'total_amount',
+            header: 'Total',
+            render: (value) => (
+              <div className="text-right font-medium">
+                {formatCurrency((value as number) ?? 0)}
+              </div>
+            ),
+            sortable: true,
+            className: 'text-right',
+          },
+        ]}
+        loading={isLoading}
+        onView={handleViewOrder}
+        onEdit={handleEditOrder}
+        onDelete={handleDeleteClick}
+        onBulkDelete={handleBulkDelete}
+        enableBulkActions={true}
+        searchPlaceholder="Cari pesanan, pelanggan..."
+        emptyMessage="Belum ada pesanan"
+        emptyDescription="Pesanan akan muncul di sini setelah dibuat"
+        exportable={true}
+        refreshable={false}
+        enablePagination={true}
+        pageSizeOptions={[10, 20, 50, 100]}
+        initialPageSize={20}
+      />
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        itemName={`Order ${orderToDelete?.id ?? ''}`}
+        itemName={`Order ${orderToDelete?.order_no ?? ''}`}
         onConfirm={handleDeleteOrder}
         loading={deleteOrderMutation.isPending}
       />
-    </div>
+    </>
   )
 }
 

@@ -11,14 +11,14 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { useDeleteWhatsAppTemplate, useGenerateDefaultTemplates, useUpdateWhatsAppTemplate, useWhatsAppTemplates } from '@/hooks/api/useWhatsAppTemplates'
 import { useAuth } from '@/hooks/index'
-import { useWhatsAppTemplates, useUpdateWhatsAppTemplate, useDeleteWhatsAppTemplate, useGenerateDefaultTemplates } from '@/hooks/api/useWhatsAppTemplates'
 import { handleError } from '@/lib/error-handling'
 import { toast } from 'sonner'
 
-import TemplatesTable from './TemplatesTable'
 import TemplateForm from './TemplateForm'
 import TemplatePreview from './TemplatePreview'
+import TemplatesTable from './TemplatesTable'
 
 
 const WhatsAppTemplatesLayout = () => {
@@ -71,6 +71,17 @@ const WhatsAppTemplatesLayout = () => {
             // Error handling is done in the mutation
         }
     }, [deleteMutation, templateToDelete])
+
+    const handleBulkDelete = useCallback(async (templatesToDelete: WhatsAppTemplate[]) => {
+        try {
+            for (const template of templatesToDelete) {
+                await deleteMutation.mutateAsync(template.id)
+            }
+            toast.success(`${templatesToDelete.length} template berhasil dihapus`)
+        } catch (error) {
+            // Error handling is done in the mutation
+        }
+    }, [deleteMutation])
 
     const handleToggleDefault = useCallback(async (template: WhatsAppTemplate) => {
         await updateMutation.mutateAsync({
@@ -251,6 +262,7 @@ const WhatsAppTemplatesLayout = () => {
                     isLoading={loading}
                     onEdit={handleEdit}
                     onDelete={handleDeleteRequest}
+                    onBulkDelete={handleBulkDelete}
                     onToggleDefault={handleToggleDefault}
                     onPreview={handlePreview}
                     onDuplicate={handleDuplicate}

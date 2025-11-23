@@ -1,5 +1,5 @@
+import { NonNegativeNumberSchema, PositiveNumberSchema, UUIDSchema } from '@/lib/validations/base-validations'
 import { z } from 'zod'
-import { UUIDSchema, PositiveNumberSchema, NonNegativeNumberSchema } from '@/lib/validations/base-validations'
 
 
 /**
@@ -46,7 +46,7 @@ export const IngredientPurchaseInsertSchema = z.object({
   supplier_id: UUIDSchema,
   quantity: PositiveNumberSchema,
   unit_price: PositiveNumberSchema,
-  total_cost: PositiveNumberSchema,
+  total_price: PositiveNumberSchema,
   purchase_date: z.string().datetime(),
   status: IngredientPurchaseStatus.default('pending'),
   expiry_date: z.string().datetime().optional(),

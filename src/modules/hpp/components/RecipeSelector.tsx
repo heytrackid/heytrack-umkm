@@ -32,7 +32,7 @@ export const RecipeSelector = ({ recipes, selectedRecipeId, onRecipeSelect, isLo
                     <SelectValue placeholder="Pilih produk yang ingin dihitung..." />
                 </SelectTrigger>
                 <SelectContent>
-                    {recipes.map((r) => (
+                    {(recipes || []).map((r) => (
                         <SelectItem key={r['id']} value={r['id']}>
                             {r.name}
                         </SelectItem>

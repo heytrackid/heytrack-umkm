@@ -1,36 +1,39 @@
-import type { Row } from '@/types/database'
+import type { LucideIcon } from '@/components/icons'
 
-// Ingredient Purchases Types
-// Type definitions for ingredient purchase management
-
-
-type IngredientPurchaseBase = Row<'ingredient_purchases'>
-type Ingredient = Row<'ingredients'>
-
-// Re-export base type with relations
-export interface IngredientPurchase extends Omit<IngredientPurchaseBase, 'supplier'> {
-  ingredient?: Pick<Ingredient, 'id' | 'name' | 'unit'>
-  supplier?: {
+export interface IngredientPurchase {
+  id: string
+  user_id: string
+  ingredient_id: string
+  supplier_id?: string | null
+  supplier?: string | { id: string; name: string } | null
+  quantity: number
+  unit_price: number
+  total_price: number
+  purchase_date: string
+  notes?: string | null
+  created_at: string
+  updated_at: string
+  ingredient?: {
     id: string
     name: string
-  } | string | null
-}
-
-export interface PurchaseFormData {
-  ingredient_id: string
-  quantity: string
-  unit_price: string
-  supplier: string
-  purchase_date: string
-  notes: string
+    unit: string
+  }
 }
 
 export interface StatsItem {
   title: string
-  value: number | string
+  value: string | number
+  icon: LucideIcon
   color: string
   bgColor: string
   description: string
 }
 
-export type AvailableIngredient = Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>
+export interface PurchaseFormData {
+  ingredient_id: string
+  quantity: number
+  unit_price: number
+  supplier?: string | null
+  purchase_date?: string
+  notes?: string | null
+}

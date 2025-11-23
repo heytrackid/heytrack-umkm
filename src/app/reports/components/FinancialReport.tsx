@@ -14,11 +14,14 @@ const FinancialReportComponent = ({}: FinancialReportProps = {}) => {
   const { formatCurrency } = useCurrency()
   const { data: financialRecords } = useFinancialRecords()
 
-  // Memoize filtered financial data
-  const financialData = useMemo(() => 
-    (financialRecords ?? []).filter((record) => !!record.date),
-    [financialRecords]
-  )
+  // Memoize filtered financial data with extra safety checks
+  const financialData = useMemo(() => {
+    if (!financialRecords) return []
+    if (!Array.isArray(financialRecords)) {
+      return []
+    }
+    return financialRecords.filter((record) => !!record.date)
+  }, [financialRecords])
 
   // Memoize all financial calculations
   const financialMetrics = useMemo(() => {

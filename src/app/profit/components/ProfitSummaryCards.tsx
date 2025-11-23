@@ -1,6 +1,6 @@
 'use client'
 
-import { TrendingUp, TrendingDown, DollarSign, Package, ArrowUpRight, ArrowDownRight, Minus } from '@/components/icons'
+import { ArrowDownRight, ArrowUpRight, DollarSign, Minus, Package, TrendingDown, TrendingUp } from '@/components/icons'
  
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -75,7 +75,7 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
             <p className="text-2xl font-bold text-foreground">{formatCurrency(summary.gross_profit)}</p>
              <div className="flex items-center gap-1 mt-1">
                <p className="text-xs text-muted-foreground">
-                 Margin: {(summary.gross_profit_margin ?? 0).toFixed(1)}%
+                 Margin: {((summary?.gross_profit_margin ?? 0) || 0).toFixed(1)}%
                </p>
               {grossProfitGrowth !== 0 && (
                 <p className={`text-xs flex items-center gap-1 ${getTrendColor(grossProfitGrowth)}`}>
@@ -109,7 +109,7 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
             </p>
              <div className="flex items-center gap-1 mt-1">
                <p className="text-xs text-muted-foreground">
-                 Margin: {(summary.net_profit_margin ?? 0).toFixed(1)}%
+                 Margin: {((summary?.net_profit_margin ?? 0) || 0).toFixed(1)}%
                </p>
               {netProfitGrowth !== 0 && (
                 <p className={`text-xs flex items-center gap-1 ${getTrendColor(netProfitGrowth)}`}>

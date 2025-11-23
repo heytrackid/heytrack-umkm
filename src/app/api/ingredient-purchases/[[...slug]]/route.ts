@@ -2,13 +2,13 @@
 import { z } from 'zod'
 
 // Internal modules
-import { createApiRoute, type RouteContext, type RouteHandler } from '@/lib/api/route-factory'
-import { SecurityPresets } from '@/utils/security/api-middleware'
-import { ListQuerySchema, createListHandler, createCreateHandler, createGetHandler, createDeleteHandler } from '@/lib/api/crud-helpers'
 import { withQueryValidation } from '@/lib/api-core'
+import { ListQuerySchema, createCreateHandler, createDeleteHandler, createGetHandler, createListHandler } from '@/lib/api/crud-helpers'
+import { createApiRoute, type RouteContext, type RouteHandler } from '@/lib/api/route-factory'
 import { triggerWorkflow } from '@/lib/automation/workflows/index'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
 // Types and schemas
 import type { IngredientPurchaseUpdate } from '@/types/database'
@@ -16,10 +16,20 @@ import type { IngredientPurchaseUpdate } from '@/types/database'
 // Constants and config
 export const runtime = 'nodejs'
 
+const CreatePurchaseSchema = z.object({
+  ingredient_id: z.string().uuid('ID bahan baku tidak valid'),
+  quantity: z.number().positive('Jumlah harus lebih dari 0'),
+  unit_price: z.number().min(0, 'Harga tidak boleh negatif'),
+  total_price: z.number().min(0, 'Total tidak boleh negatif'),
+  supplier: z.string().nullable().optional(),
+  purchase_date: z.string().optional(),
+  notes: z.string().nullable().optional(),
+})
+
 const UpdatePurchaseSchema = z.object({
   quantity: z.number().positive().optional(),
-  price_per_unit: z.number().positive().optional(),
-  total_cost: z.number().positive().optional(),
+  unit_price: z.number().positive().optional(),
+  total_price: z.number().positive().optional(),
   supplier: z.string().min(1).optional(),
   purchase_date: z.string().optional(),
   status: z.enum(['pending', 'ordered', 'received', 'cancelled']).optional(),
@@ -68,6 +78,7 @@ export const POST = createApiRoute(
   {
     method: 'POST',
     path: '/api/ingredient-purchases',
+    bodySchema: CreatePurchaseSchema,
     securityPreset: SecurityPresets.basic(),
   },
   async (context, _query, body) => {
