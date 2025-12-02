@@ -1,8 +1,8 @@
 // Internal modules
-import { createApiRoute } from '@/lib/api/route-factory'
-import { SecurityPresets } from '@/utils/security/api-middleware'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { createSuccessResponse } from '@/lib/api-core'
+import { createApiRoute } from '@/lib/api/route-factory'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
 // Types and schemas
 import type { CostChangeAlert } from '@/types/recipes/cost'
@@ -38,7 +38,7 @@ export const GET = createApiRoute(
     path: '/api/ingredients/cost-alerts',
     securityPreset: SecurityPresets.enhanced(),
   },
-  async ({ supabase }) => {
+  async ({ supabase, user }) => {
     try {
       const windowHours = 24
       const since = new Date(Date.now() - windowHours * 60 * 60 * 1000)
@@ -59,6 +59,7 @@ export const GET = createApiRoute(
             )
           )
         `)
+        .eq('user_id', user.id)
 
       if (error) {
         throw error
@@ -77,6 +78,7 @@ export const GET = createApiRoute(
           .from('ingredient_purchases')
           .select('ingredient_id, unit_price, purchase_date')
           .in('ingredient_id', ingredientIds)
+          .eq('user_id', user.id)
           .order('purchase_date', { ascending: false })
 
         if (purchasesError) {

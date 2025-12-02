@@ -2,9 +2,9 @@
 'use client'
 
 import { ArrowLeft, Plus, Save, Trash2 } from '@/components/icons'
+import { handleError } from '@/lib/error-handling'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { handleError } from '@/lib/error-handling'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -19,11 +19,11 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 
-import { useCreateRecipeWithIngredients, useUpdateRecipeWithIngredients, useRecipe } from '@/hooks/useRecipes'
-import { useIngredientsList } from '@/hooks/useIngredients'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { useIngredientsList } from '@/hooks/useIngredients'
+import { useCreateRecipeWithIngredients, useRecipe, useUpdateRecipeWithIngredients } from '@/hooks/useRecipes'
 
-import type { Row, Database } from '@/types/database'
+import type { Row } from '@/types/database'
 
 type RecipeInsert = Row<'recipes'>
 type Ingredient = Row<'ingredients'>
@@ -81,15 +81,27 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
                 setFormData(recipeData)
                 // Load recipe ingredients from the response
                 if (recipeData.recipe_ingredients && Array.isArray(recipeData.recipe_ingredients)) {
-                    setRecipeIngredients(
-                        recipeData.recipe_ingredients.map((ri: Database['public']['Tables']['recipe_ingredients']['Row']) => ({
-                            id: ri.id,
-                            ingredient_id: ri.ingredient_id,
-                            quantity: ri.quantity,
-                            unit: ri.unit,
-                            notes: '',
-                        }))
-                    )
+                    const mappedIngredients = recipeData.recipe_ingredients.map((ri: unknown) => {
+                        // API returns nested 'ingredients' object, not 'ingredient_id'
+                        const recipeIngredient = ri as { 
+                            id: string
+                            ingredient_id?: string
+                            quantity: number
+                            unit: string
+                            notes?: string
+                            ingredients?: { id: string; name: string }
+                        }
+                        // Extract ingredient_id from nested ingredients object if available
+                        const ingredientId = recipeIngredient.ingredient_id || recipeIngredient.ingredients?.id || ''
+                        return {
+                            id: recipeIngredient.id,
+                            ingredient_id: ingredientId,
+                            quantity: recipeIngredient.quantity,
+                            unit: recipeIngredient.unit,
+                            notes: recipeIngredient.notes || '',
+                        }
+                    })
+                    setRecipeIngredients(mappedIngredients)
                 }
             }, 0)
         }
@@ -392,21 +404,28 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
                             recipeIngredients.map((ri, index) => (
                                 <div key={index} className="flex gap-3 items-start">
                                     <div className="flex-1 grid gap-3 md:grid-cols-4">
-                                        <Select
-                                            value={ri.ingredient_id}
-                                            onValueChange={(value) => updateIngredient(index, 'ingredient_id', value)}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Pilih bahan" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {availableIngredients.map((ing) => (
-                                                    <SelectItem key={ing['id']} value={ing['id']}>
-                                                        {ing.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                        {(() => {
+                                            const selectedIngredient = availableIngredients.find(ing => ing.id === ri.ingredient_id)
+                                            return (
+                                                <Select
+                                                    value={ri.ingredient_id || ''}
+                                                    onValueChange={(value) => updateIngredient(index, 'ingredient_id', value)}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Pilih bahan">
+                                                            {selectedIngredient?.name}
+                                                        </SelectValue>
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {availableIngredients.map((ing) => (
+                                                            <SelectItem key={ing.id} value={ing.id}>
+                                                                {ing.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            )
+                                        })()}
 
                                         <Input
                                             type="number"

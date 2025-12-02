@@ -1,13 +1,13 @@
 // Internal modules
+import { createSuccessResponse } from '@/lib/api-core'
+import { createCreateHandler, createGetHandler, createListHandler, createUpdateHandler, ListQuerySchema } from '@/lib/api/crud-helpers'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { parseRouteParams } from '@/lib/api/route-helpers'
-import { createCreateHandler, createListHandler, createGetHandler, createUpdateHandler, ListQuerySchema } from '@/lib/api/crud-helpers'
-import { createSuccessResponse } from '@/lib/api-core'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { cacheInvalidation } from '@/lib/cache'
 import { CUSTOMER_FIELDS } from '@/lib/database/query-fields'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { SecurityPresets } from '@/utils/security/api-middleware'
-import { cacheInvalidation } from '@/lib/cache'
 
 // Types and schemas
 import { CustomerInsertSchema, CustomerUpdateSchema } from '@/lib/validations/domains/customer'
@@ -38,12 +38,16 @@ export const GET = createApiRoute(
         defaultOrder: 'asc',
         searchFields: ['name', 'email', 'phone'],
       })(context, validatedQuery)
-    } else if (hasId) {
+    } else if (hasId && slug[0]) {
       // GET /api/customers/[id] - Get single customer
+      const contextWithId = {
+        ...context,
+        params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+      }
       return createGetHandler({
         table: 'customers',
         selectFields: 'id, user_id, name, email, phone, address, customer_type, discount_percentage, notes, is_active, loyalty_points, created_at, updated_at',
-      })(context)
+      })(contextWithId)
     } else {
       return handleAPIError(new Error('Invalid path'), 'GET /api/customers')
     }
@@ -90,8 +94,12 @@ export const PUT = createApiRoute(
   },
   async (context: RouteContext, _query, body) => {
     const { hasId, id } = parseRouteParams(context.params)
-    if (!hasId) {
+    if (!hasId || !id) {
       return handleAPIError(new Error('Invalid path'), 'PUT /api/customers')
+    }
+    const contextWithId = {
+      ...context,
+      params: { ...context.params, id: id } as Record<string, string | string[]>
     }
     const result = await createUpdateHandler(
       {
@@ -99,7 +107,7 @@ export const PUT = createApiRoute(
         selectFields: 'id, name, email, phone, address, customer_type, discount_percentage, notes, is_active, loyalty_points, updated_at',
       },
       SUCCESS_MESSAGES.CUSTOMER_UPDATED
-    )(context, undefined, body)
+    )(contextWithId, undefined, body)
 
     // Invalidate cache after successful update
     if (result.status === 200) {

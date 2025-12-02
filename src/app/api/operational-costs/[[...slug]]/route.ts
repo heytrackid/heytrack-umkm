@@ -1,12 +1,9 @@
 // External libraries
 // Internal modules
-import { createSuccessResponse } from '@/lib/api-core'
-import { createCreateHandler, createDeleteHandler, createListHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
+import { createCreateHandler, createDeleteHandler, createGetHandler, createListHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { parseRouteParams } from '@/lib/api/route-helpers'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { apiLogger } from '@/lib/logger'
-import { isValidUUID } from '@/lib/type-guards'
 import { SecurityPresets } from '@/utils/security/api-middleware'
 // Types and schemas
 import { OperationalCostInsertSchema, OperationalCostUpdateSchema } from '@/lib/validations/domains/finance'
@@ -36,28 +33,16 @@ export const GET = createApiRoute(
         defaultOrder: 'desc',
         searchFields: ['description', 'category'],
       })(context, validatedQuery as { page: number; limit: number; sort?: string; order?: 'asc' | 'desc'; search?: string } | undefined)
-    } else if (slug.length === 1) {
+    } else if (slug.length === 1 && slug[0]) {
       // GET /api/operational-costs/[id] - Get single operational cost
-      const id = slug[0]
-      if (!isValidUUID(id)) {
-        return handleAPIError(new Error('Invalid operational cost ID format'), 'API Route')
+      const contextWithId = {
+        ...context,
+        params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
       }
-
-      const { data, error } = await context.supabase
-        .from('operational_costs')
-        .select('id, user_id, name, amount, frequency, category, created_at, updated_at')
-        .eq('id', id)
-        .single()
-
-      if (error) {
-        if (error['code'] === 'PGRST116') {
-          return handleAPIError(new Error('Operational cost not found'), 'API Route')
-        }
-        apiLogger.error({ error }, 'Error fetching operational cost')
-        return handleAPIError(new Error('Failed to fetch operational cost'), 'API Route')
-      }
-
-      return createSuccessResponse(data)
+      return createGetHandler({
+        table: 'operational_costs',
+        selectFields: '*',
+      })(contextWithId)
     } else {
       return handleAPIError(new Error('Invalid path'), 'API Route')
     }
@@ -96,8 +81,12 @@ export const PUT = createApiRoute(
   },
   async (context, _query, body) => {
     const slug = context.params?.['slug'] as string[] | undefined
-    if (!slug || slug.length !== 1) {
+    if (!slug || slug.length !== 1 || !slug[0]) {
       return handleAPIError(new Error('Invalid path'), 'API Route')
+    }
+    const contextWithId = {
+      ...context,
+      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
     }
     return createUpdateHandler(
       {
@@ -105,7 +94,7 @@ export const PUT = createApiRoute(
         selectFields: '*',
       },
       SUCCESS_MESSAGES.OPERATIONAL_COST_UPDATED
-    )(context, undefined, body)
+    )(contextWithId, undefined, body)
   }
 )
 
@@ -118,14 +107,18 @@ export const DELETE = createApiRoute(
   },
   async (context) => {
     const slug = context.params?.['slug'] as string[] | undefined
-    if (!slug || slug.length !== 1) {
+    if (!slug || slug.length !== 1 || !slug[0]) {
       return handleAPIError(new Error('Invalid path'), 'API Route')
+    }
+    const contextWithId = {
+      ...context,
+      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
     }
     return createDeleteHandler(
       {
         table: 'operational_costs',
       },
       SUCCESS_MESSAGES.OPERATIONAL_COST_DELETED
-    )(context)
+    )(contextWithId)
   }
 )

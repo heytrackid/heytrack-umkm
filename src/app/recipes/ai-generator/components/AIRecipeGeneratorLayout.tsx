@@ -16,10 +16,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { useGenerateRecipe } from '@/hooks/api/useAIRecipe'
 import { useAuth, useAuthMe } from '@/hooks/index'
-import { useIngredients } from '@/hooks/useIngredients'
+import { useIngredientsList } from '@/hooks/useIngredients'
 import { useCreateRecipeWithIngredients } from '@/hooks/useRecipes'
 import { handleError } from '@/lib/error-handling'
-import { toast } from 'sonner'
 
 import type { Insert } from '@/types/database'
 
@@ -50,11 +49,11 @@ const AIRecipeGeneratorPage = () => {
   const [servings, setServings] = useState(12)
   const [targetPrice, setTargetPrice] = useState('')
   const [dietaryRestrictions, setDietaryRestrictions] = useState<string[]>([])
-  const { data: ingredients = [] } = useIngredients()
+  const { data: ingredients = [] } = useIngredientsList()
 
   // Transform ingredients to AvailableIngredient format
   const availableIngredients = useMemo(() => {
-    return ingredients.map(ing => ({
+    return (ingredients || []).map(ing => ({
       id: ing.id,
       name: ing.name,
       current_stock: ing.current_stock ?? 0,
@@ -480,9 +479,17 @@ const AIRecipeGeneratorPage = () => {
                         <div className="pt-2 border-t">
                           <span className="text-muted-foreground text-sm">Bahan Utama:</span>
                           <div className="flex flex-wrap gap-1 mt-1">
-                            {[...selectedIngredients.slice(0, 3), ...customIngredients.slice(0, 3)].map((ing, idx) => (
-                              <Badge key={idx} variant="secondary" className="text-xs">
-                                {typeof ing === 'string' ? ing : 'Bahan dari inventory'}
+                            {selectedIngredients.slice(0, 3).map((ingId, idx) => {
+                              const ingredient = availableIngredients.find(i => i.id === ingId)
+                              return (
+                                <Badge key={idx} variant="secondary" className="text-xs">
+                                  {ingredient?.name || ingId}
+                                </Badge>
+                              )
+                            })}
+                            {customIngredients.slice(0, 3).map((ing, idx) => (
+                              <Badge key={`custom-${idx}`} variant="secondary" className="text-xs">
+                                {ing}
                               </Badge>
                             ))}
                             {(selectedIngredients.length + customIngredients.length) > 3 && (

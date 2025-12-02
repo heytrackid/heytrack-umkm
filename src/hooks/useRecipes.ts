@@ -1,17 +1,16 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
 import { useToast } from '@/hooks/use-toast'
-import { createClientLogger } from '@/lib/client-logger'
-import { getErrorMessage } from '@/lib/type-guards'
 import type { ApiErrorResponse, ApiSuccessResponse } from '@/lib/api-core'
-import { buildApiUrl, deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
+import { createClientLogger } from '@/lib/client-logger'
 import { queryConfig } from '@/lib/query/query-config'
+import { buildApiUrl, deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
+import { getErrorMessage } from '@/lib/type-guards'
 
 const logger = createClientLogger('Hook')
 
-import type { Insert, Row, Update } from '@/types/database'
-import type { RecipeWithIngredients } from '@/types/database'
+import type { Insert, RecipeWithIngredients, Row, Update } from '@/types/database'
 import type { SmartPricingAnalysis } from '@/types/features/analytics'
 
 /**
@@ -77,20 +76,17 @@ export function useRecipes(options?: UseRecipesOptions) {
   return queryResult
 }
 
-interface RecipeApiResponse {
-  data: RecipeWithIngredients
-}
-
 /**
  * Fetch single recipe by ID
  */
 export function useRecipe(id: string | null) {
-  return useQuery<RecipeApiResponse['data'] | null>({
+  return useQuery<RecipeWithIngredients | null>({
     queryKey: ['recipe', id],
     queryFn: async () => {
       if (!id) {return null}
-      const response = await fetchApi<RecipeApiResponse>(`/api/recipes/${id}`)
-      return response.data
+      // fetchApi already extracts .data from the API response
+      const recipe = await fetchApi<RecipeWithIngredients>(`/api/recipes/${id}`)
+      return recipe ?? null
     },
     enabled: Boolean(id),
     ...queryConfig.queries.moderate,

@@ -41,6 +41,8 @@ const CashFlowPage = () => {
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [dateFilter, setDateFilter] = useState<string>('all')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
   // React Query hooks
   const createMutation = useCreateFinancialRecord()
@@ -104,6 +106,14 @@ const CashFlowPage = () => {
        return matchesSearch && record.date // Only include records with valid dates
      })
    }, [data, searchTerm])
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredRecords.length / itemsPerPage)
+  // Ensure current page is valid after filtering
+  const validCurrentPage = Math.min(currentPage, Math.max(1, totalPages))
+  const startIndex = (validCurrentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedRecords = filteredRecords.slice(startIndex, endIndex)
 
   // Memoize summary calculations
   const summary: CashFlowSummary = useMemo(() => {
@@ -372,7 +382,7 @@ const CashFlowPage = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                       {filteredRecords.map((record: FinancialRecord) => (
+                       {paginatedRecords.map((record: FinancialRecord) => (
                         <TableRow key={record.id}>
                            <TableCell>
                              {record.date ? format(new Date(record.date), 'dd MMM yyyy', { locale: idLocale }) : '-'}
@@ -397,7 +407,7 @@ const CashFlowPage = () => {
 
                 {/* Mobile Cards */}
                 <div className="md:hidden space-y-3">
-                   {filteredRecords.map((record: FinancialRecord) => (
+                   {paginatedRecords.map((record: FinancialRecord) => (
                     <Card key={record.id} className="p-4">
                       <div className="flex justify-between items-start mb-2">
                         <div>
@@ -421,6 +431,61 @@ const CashFlowPage = () => {
                     </Card>
                   ))}
                 </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                    <div className="text-sm text-muted-foreground">
+                      Menampilkan {startIndex + 1}-{Math.min(endIndex, filteredRecords.length)} dari {filteredRecords.length} transaksi
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                      >
+                        Sebelumnya
+                      </Button>
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1)
+                          .filter(page => {
+                            // Show first page, last page, current page, and pages around current
+                            return page === 1 || 
+                                   page === totalPages || 
+                                   Math.abs(page - currentPage) <= 1
+                          })
+                          .map((page, index, array) => {
+                            // Add ellipsis if there's a gap
+                            const prevPage = array[index - 1]
+                            const showEllipsis = prevPage && page - prevPage > 1
+                            
+                            return (
+                              <div key={page} className="flex items-center gap-1">
+                                {showEllipsis && <span className="px-2">...</span>}
+                                <Button
+                                  variant={currentPage === page ? 'default' : 'outline'}
+                                  size="sm"
+                                  onClick={() => setCurrentPage(page)}
+                                  className="w-8 h-8 p-0"
+                                >
+                                  {page}
+                                </Button>
+                              </div>
+                            )
+                          })}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                      >
+                        Selanjutnya
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </CardContent>

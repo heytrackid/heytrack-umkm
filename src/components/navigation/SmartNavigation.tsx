@@ -1,21 +1,21 @@
 'use client'
 
-import { LayoutDashboard, ShoppingCart, Users, Package, Utensils, DollarSign, Settings, TrendingUp, Plus, Search, Truck, MoreHorizontal, Receipt, MessageSquare } from '@/components/icons'
+import { DollarSign, LayoutDashboard, MessageSquare, MoreHorizontal, Package, Plus, Receipt, Search, Settings, ShoppingCart, TrendingUp, Truck, Users, Utensils } from '@/components/icons'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Fragment, type ReactNode, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
 } from '@/components/ui/sheet'
 import { useInstantNavigation } from '@/hooks/useInstantNavigation'
-import { useAdvancedLinkPreloading, useAdvancedButtonPreloading } from '@/hooks/usePreloading'
+import { useAdvancedButtonPreloading, useAdvancedLinkPreloading } from '@/hooks/usePreloading'
 import { cn } from '@/lib/utils'
 
 
@@ -183,28 +183,43 @@ const navigationItems = [
     preloadTargets: ['/orders', '/cash-flow']
   },
   {
-    title: 'Bahan',
-    href: '/ingredients',
-    icon: Package,
-    preloadTargets: ['/recipes', '/orders']
-  },
-  {
-    title: 'Resep',
-    href: '/recipes',
-    icon: Utensils,
-    preloadTargets: ['/ingredients', '/hpp']
+    title: 'Hitung HPP',
+    href: '/hpp',
+    icon: TrendingUp,
+    badge: '💰',
+    preloadTargets: ['/ingredients', '/recipes', '/operational-costs'],
+    submenu: [
+      {
+        title: 'Bahan Baku',
+        href: '/ingredients',
+        icon: Package,
+        description: 'Kelola stok bahan baku'
+      },
+      {
+        title: 'Biaya Operasional',
+        href: '/operational-costs',
+        icon: Receipt,
+        description: 'Kelola biaya operasional'
+      },
+      {
+        title: 'Resep Produk',
+        href: '/recipes',
+        icon: Utensils,
+        description: 'Kelola resep dan produk'
+      },
+      {
+        title: 'Kalkulator HPP',
+        href: '/hpp/calculator',
+        icon: TrendingUp,
+        description: 'Hitung HPP & harga jual'
+      }
+    ]
   },
   {
     title: 'Pemasok',
     href: '/suppliers',
     icon: Truck,
     preloadTargets: ['/ingredients', '/recipes']
-  },
-  {
-    title: 'HPP',
-    href: '/hpp',
-    icon: TrendingUp,
-    preloadTargets: ['/recipes', '/hpp']
   },
   {
     title: 'Arus Kas',
@@ -217,12 +232,6 @@ const navigationItems = [
     href: '/settings',
     icon: Settings,
     preloadTargets: ['/dashboard']
-  },
-  {
-    title: 'Biaya Operasional',
-    href: '/operational-costs',
-    icon: Receipt,
-    preloadTargets: ['/orders', '/production']
   },
   {
     title: 'Chatbot AI',
@@ -239,18 +248,20 @@ const navigationItems = [
 interface NavItemProps {
   item: typeof navigationItems[0]
   index: number
+  onSubmenuClick?: (() => void) | undefined
 }
 
-export const NavItem = ({ item, index }: NavItemProps) => {
+export const NavItem = ({ item, index, onSubmenuClick }: NavItemProps) => {
   const pathname = usePathname()
   const linkPreloading = useAdvancedLinkPreloading()
   const { navigateInstant } = useInstantNavigation()
   const [isHovered, setIsHovered] = useState(false)
 
-  // Enhanced active state detection
+  // Enhanced active state detection - check submenu items too
   const isActive = pathname === item.href ||
     (item.href !== '/' && pathname.startsWith(item.href)) ||
-    (item.href === '/dashboard' && pathname === '/')
+    (item.href === '/dashboard' && pathname === '/') ||
+    (item.submenu?.some(sub => pathname === sub.href || pathname.startsWith(sub.href)))
 
   const handleMouseEnter = () => {
     setIsHovered(true)
@@ -265,17 +276,19 @@ export const NavItem = ({ item, index }: NavItemProps) => {
 
   const handleClick = () => {
     triggerHapticFeedback('light')
+    if (item.submenu && onSubmenuClick) {
+      onSubmenuClick()
+    } else {
+      navigateInstant(item.href)
+    }
   }
 
   return (
     <button
-      onClick={() => {
-        handleClick()
-        navigateInstant(item.href)
-      }}
+      onClick={handleClick}
       className={cn(
         "flex flex-col items-center space-y-1 px-2 py-2 sm:px-4 sm:py-3 text-xs sm:text-[13px] font-medium transition-all duration-200 rounded-lg min-w-[50px] sm:min-w-[60px] flex-1 max-w-[70px] sm:max-w-[80px] relative group touch-manipulation",
-        "min-h-[56px] active:scale-95", // Ensure minimum touch target size (44px is iOS minimum, we use 56px for comfort)
+        "min-h-[56px] active:scale-95",
         isActive && "text-primary bg-primary/10  scale-105",
         isHovered && !isActive && "hover:opacity-80"
       )}
@@ -293,6 +306,9 @@ export const NavItem = ({ item, index }: NavItemProps) => {
           )}
           data-testid="nav-icon"
         />
+        {item.badge && (
+          <span className="absolute -top-1 -right-1 text-[10px]">{item.badge}</span>
+        )}
         {/* Active indicator dot */}
         <div
           className={cn(
@@ -315,11 +331,17 @@ export const NavItem = ({ item, index }: NavItemProps) => {
 // Smart Mobile Bottom Navigation
 export const SmartBottomNav = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null)
   const mainItems = navigationItems.slice(0, 4) // First 4 items for mobile
   const additionalItems = navigationItems.slice(4) // Remaining items for menu
 
   const handleMoreClick = () => {
     triggerHapticFeedback('medium')
+  }
+
+  const handleSubmenuClick = (itemHref: string) => {
+    setActiveSubmenu(activeSubmenu === itemHref ? null : itemHref)
+    setIsMenuOpen(true)
   }
 
   return (
@@ -337,6 +359,7 @@ export const SmartBottomNav = () => {
             key={item.href}
             item={item}
             index={index}
+            onSubmenuClick={item.submenu ? () => handleSubmenuClick(item.href) : undefined}
           />
         ))}
 
@@ -362,37 +385,98 @@ export const SmartBottomNav = () => {
         aria-label="Additional navigation menu"
       >
         <SheetHeader>
-          <SheetTitle>Lainnya</SheetTitle>
-          <SheetDescription>Menu navigasi tambahan untuk fitur lainnya</SheetDescription>
+          <SheetTitle>
+            {activeSubmenu ? navigationItems.find(i => i.href === activeSubmenu)?.title : 'Lainnya'}
+          </SheetTitle>
+          <SheetDescription>
+            {activeSubmenu ? 'Pilih menu untuk melanjutkan' : 'Menu navigasi tambahan untuk fitur lainnya'}
+          </SheetDescription>
         </SheetHeader>
         <div
           className="flex flex-col gap-3 mt-6 px-4 animate-in slide-in-from-bottom-4 duration-300 overflow-y-auto"
           role="menu"
           aria-label="Additional navigation options"
         >
-          {additionalItems.map((item, index) => (
-            <SmartLink
-              key={item.href}
-              href={item.href}
-              className="flex items-center space-x-4 p-4 rounded-xl border  hover: hover:scale-105 transition-all duration-200 bg-card hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-              activeClassName="border-primary bg-primary/15 ring-2 ring-primary/20 text-primary font-semibold"
-              preloadDelay={100}
-              onClick={() => {
-                triggerHapticFeedback('light')
-                setIsMenuOpen(false)
-              }}
-              style={{ animationDelay: `${index * 50}ms` }}
-              role="menuitem"
-            >
-              <div className="flex-shrink-0 p-2 rounded-lg bg-primary/10">
-                <item.icon className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <span className="text-sm font-medium">{item.title}</span>
-                {item.badge && <span className="ml-2 text-xs">{item.badge}</span>}
-              </div>
-            </SmartLink>
-          ))}
+          {activeSubmenu ? (
+            // Show submenu items
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveSubmenu(null)}
+                className="mb-2"
+              >
+                ← Kembali
+              </Button>
+              {navigationItems
+                .find(i => i.href === activeSubmenu)
+                ?.submenu?.map((subItem, index) => (
+                  <SmartLink
+                    key={subItem.href}
+                    href={subItem.href}
+                    className="flex items-center space-x-4 p-4 rounded-xl border hover:scale-105 transition-all duration-200 bg-card hover:bg-accent/50"
+                    activeClassName="border-primary bg-primary/15 ring-2 ring-primary/20 text-primary font-semibold"
+                    onClick={() => {
+                      triggerHapticFeedback('light')
+                      setIsMenuOpen(false)
+                      setActiveSubmenu(null)
+                    }}
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <div className="flex-shrink-0 p-2 rounded-lg bg-primary/10">
+                      <subItem.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium">{subItem.title}</div>
+                      {subItem.description && (
+                        <div className="text-xs text-muted-foreground mt-0.5">{subItem.description}</div>
+                      )}
+                    </div>
+                  </SmartLink>
+                ))}
+            </>
+          ) : (
+            // Show main additional items
+            additionalItems.map((item, index) => (
+              <Fragment key={item.href}>
+                {item.submenu ? (
+                  <button
+                    onClick={() => setActiveSubmenu(item.href)}
+                    className="flex items-center space-x-4 p-4 rounded-xl border hover:scale-105 transition-all duration-200 bg-card hover:bg-accent/50 text-left"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <div className="flex-shrink-0 p-2 rounded-lg bg-primary/10">
+                      <item.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-sm font-medium">{item.title}</span>
+                      {item.badge && <span className="ml-2 text-xs">{item.badge}</span>}
+                    </div>
+                    <span className="text-muted-foreground">→</span>
+                  </button>
+                ) : (
+                  <SmartLink
+                    href={item.href}
+                    className="flex items-center space-x-4 p-4 rounded-xl border hover:scale-105 transition-all duration-200 bg-card hover:bg-accent/50"
+                    activeClassName="border-primary bg-primary/15 ring-2 ring-primary/20 text-primary font-semibold"
+                    onClick={() => {
+                      triggerHapticFeedback('light')
+                      setIsMenuOpen(false)
+                    }}
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <div className="flex-shrink-0 p-2 rounded-lg bg-primary/10">
+                      <item.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-sm font-medium">{item.title}</span>
+                      {item.badge && <span className="ml-2 text-xs">{item.badge}</span>}
+                    </div>
+                  </SmartLink>
+                )}
+              </Fragment>
+            ))
+          )}
         </div>
        </SheetContent>
      </Sheet>

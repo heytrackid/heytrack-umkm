@@ -1,22 +1,22 @@
 // External libraries
-import { z } from 'zod'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { z } from 'zod'
 
 // Internal modules
+import { createPaginationMeta, createSuccessResponse } from '@/lib/api-core'
+import { createDeleteHandler, createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { parseRouteParams } from '@/lib/api/route-helpers'
-import { createDeleteHandler, createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
-import { createPaginationMeta, createSuccessResponse } from '@/lib/api-core'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { cacheInvalidation, withCache } from '@/lib/cache'
 import { generateCacheKey } from '@/lib/cache/cache-manager'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { SecurityPresets } from '@/utils/security/api-middleware'
 
 // Types and schemas
-import type { Database, RecipeIngredientInsert, RecipeInsert } from '@/types/database'
 import { RecipeInsertSchema } from '@/lib/validations/domains/recipe'
+import type { Database, RecipeIngredientInsert, RecipeInsert } from '@/types/database'
 
 // Constants and config
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
@@ -117,12 +117,17 @@ export const GET = createApiRoute(
       const response = createSuccessResponse(result.data, undefined, result.pagination)
       response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
       return response as import('next/server').NextResponse
-    } else if (slug.length === 1) {
+    } else if (slug.length === 1 && slug[0]) {
       // GET /api/recipes/[id] - Get single recipe
+      // Pass the ID from slug to context.params for createGetHandler
+      const contextWithId = {
+        ...context,
+        params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+      }
       return createGetHandler({
         table: 'recipes',
         selectFields: RECIPE_FIELDS.DETAIL,
-      })(context)
+      })(contextWithId)
     } else {
       return handleAPIError(new Error('Invalid path'), 'GET /api/recipes')
     }
@@ -210,13 +215,18 @@ export const PUT = createApiRoute(
   },
   async (context: RouteContext, _query, body) => {
     const slug = context.params?.['slug'] as string[] | undefined
-    if (!slug || slug.length !== 1) {
+    if (!slug || slug.length !== 1 || !slug[0]) {
       return handleAPIError(new Error('Invalid path'), 'PUT /api/recipes')
+    }
+    // Pass the ID from slug to context.params for createUpdateHandler
+    const contextWithId = {
+      ...context,
+      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
     }
     return createUpdateHandler({
       table: 'recipes',
       selectFields: RECIPE_FIELDS.DETAIL,
-    }, SUCCESS_MESSAGES.RECIPE_UPDATED)(context, undefined, body)
+    }, SUCCESS_MESSAGES.RECIPE_UPDATED)(contextWithId, undefined, body)
   }
 )
 
@@ -229,14 +239,19 @@ export const DELETE = createApiRoute(
   },
   async (context: RouteContext) => {
     const slug = context.params?.['slug'] as string[] | undefined
-    if (!slug || slug.length !== 1) {
+    if (!slug || slug.length !== 1 || !slug[0]) {
       return handleAPIError(new Error('Invalid path'), 'DELETE /api/recipes')
+    }
+    // Pass the ID from slug to context.params for createDeleteHandler
+    const contextWithId = {
+      ...context,
+      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
     }
     return createDeleteHandler(
       {
         table: 'recipes',
       },
       SUCCESS_MESSAGES.RECIPE_DELETED
-    )(context)
+    )(contextWithId)
   }
 )

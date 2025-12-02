@@ -175,3 +175,8 @@ export const Loader2Icon = createIcon("ph:spinner-gap");
 export const OctagonXIcon = createIcon("ph:warning-octagon");
 export const TriangleAlertIcon = createIcon("ph:warning");
 
+
+// Additional missing icons
+export const Building2 = createIcon("ph:buildings");
+export const Circle = createIcon("ph:circle");
+export const SkipForward = createIcon("ph:skip-forward");

@@ -3,12 +3,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { LoadingButton } from '@/components/ui/loading-button'
-import { handleError } from '@/lib/error-handling'
-import { toast } from 'sonner'
-import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 import { useCreateIngredient, useUpdateIngredient } from '@/hooks/useIngredients'
+import { handleError } from '@/lib/error-handling'
+import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 
 import type { Row } from '@/types/database'
 
@@ -71,14 +70,13 @@ export const IngredientFormDialog = ({
                 await createMutation.mutateAsync(data as never) // Type mismatch between form and database schema
             }
 
-            toast.success(`${data.name} berhasil ${ingredient ? 'diperbarui' : 'ditambahkan'}`)
-
+            // Toast already handled by mutation hook
             form.reset()
             onOpenChange(false)
             void onSuccess?.()
         } catch (error: unknown) {
-            // Error handling is done by the mutations
-            handleError(error, 'Ingredient form submission', true, 'Terjadi kesalahan')
+            // Error toast already handled by mutation hook
+            handleError(error, 'Ingredient form submission', false, undefined)
         }
     }
 

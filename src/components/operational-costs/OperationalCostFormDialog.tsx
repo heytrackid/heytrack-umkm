@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -16,11 +16,10 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { handleError } from '@/lib/error-handling'
-import { toast } from 'sonner'
 import { useCreateOperationalCost, useUpdateOperationalCost } from '@/hooks/useOperationalCosts'
+import { handleError } from '@/lib/error-handling'
 
-import type { Row, Insert } from '@/types/database'
+import type { Insert, Row } from '@/types/database'
 
 
 type OperationalCost = Row<'operational_costs'>
@@ -88,12 +87,12 @@ export const OperationalCostFormDialog = ({
                 await createMutation.mutateAsync(formData as Insert<'operational_costs'>)
             }
 
-            toast.success(`${formData.description} berhasil ${cost ? 'diperbarui' : 'ditambahkan'}`)
-
+            // Toast already handled by mutation hook
             onOpenChange(false)
             onSuccess?.()
         } catch (error: unknown) {
-            handleError(error as Error, 'Operational Cost Form: submit', true, 'Terjadi kesalahan')
+            // Error toast already handled by mutation hook
+            handleError(error as Error, 'Operational Cost Form: submit', false, undefined)
         }
     }
 

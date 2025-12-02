@@ -2,16 +2,16 @@
 import { z } from 'zod'
 
 // Internal modules
+import { createSuccessResponse } from '@/lib/api-core'
 import { createApiRoute } from '@/lib/api/route-factory'
-import { SecurityPresets } from '@/utils/security/api-middleware'
 import { buildRecipeCostPreview } from '@/lib/costs/cost-calculations'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
-import { createSuccessResponse } from '@/lib/api-core'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
 // Types and schemas
-import { isRecipeCostRecord } from '@/types/recipes/cost'
 import type { RecipeCostPreview, RecipeCostRecord } from '@/types/recipes/cost'
+import { isRecipeCostRecord } from '@/types/recipes/cost'
 
 // Constants and config
 export const runtime = 'nodejs'
@@ -33,12 +33,20 @@ export const POST = createApiRoute(
     bodySchema: CostPreviewsRequestSchema,
     securityPreset: SecurityPresets.enhanced(),
   },
-  async ({ supabase }, body) => {
+  async ({ supabase }, _query, body) => {
+    if (!body) {
+      apiLogger.warn({}, 'No body provided to cost-previews endpoint')
+      return createSuccessResponse({})
+    }
+
     const { recipeIds } = body as CostPreviewsRequest
 
     if (!recipeIds || recipeIds.length === 0) {
+      apiLogger.debug({}, 'Empty recipeIds array, returning empty result')
       return createSuccessResponse({})
     }
+
+    apiLogger.debug({ recipeIds }, 'Fetching cost previews for recipes')
 
     try {
       const { data, error: recipesError } = await supabase
@@ -50,7 +58,8 @@ export const POST = createApiRoute(
           updated_at,
           recipe_ingredients (
             quantity,
-            ingredients:ingredient_id (
+            unit,
+            ingredients (
               id,
               name,
               price_per_unit,

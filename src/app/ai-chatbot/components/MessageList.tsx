@@ -14,7 +14,7 @@ import { TypingIndicator } from '@/app/ai-chatbot/components/TypingIndicator'
 interface MessageListProps {
   messages: Message[]
   isLoading: boolean
-  scrollAreaRef: RefObject<HTMLDivElement>
+  scrollAreaRef: RefObject<HTMLDivElement | null>
   onSuggestionClick: (suggestion: string) => void
   onFeedbackSubmit: ((messageId: string, rating: number, comment?: string | undefined) => void) | undefined
 }

@@ -2,24 +2,24 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 // Internal modules
-import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
-import { SecurityPresets } from '@/utils/security/api-middleware'
-import { parseRouteParams } from '@/lib/api/route-helpers'
-import { createDeleteHandler, createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
 import { createPaginationMeta, createSuccessResponse } from '@/lib/api-core'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { createDeleteHandler, createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { parseRouteParams } from '@/lib/api/route-helpers'
 import { cacheInvalidation, withCache } from '@/lib/cache'
 import { generateCacheKey } from '@/lib/cache/cache-manager'
 import { ORDER_FIELDS } from '@/lib/database/query-fields'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
 // Types and schemas
-import type { Database, FinancialRecordInsert, FinancialRecordUpdate, OrderInsert, OrderStatus } from '@/types/database'
 import { OrderInsertSchema, OrderListQuerySchema, type OrderListQuery } from '@/lib/validations/domains/order'
+import type { Database, FinancialRecordInsert, FinancialRecordUpdate, OrderInsert, OrderStatus } from '@/types/database'
 
 // Services
-import { PricingAssistantService } from '@/services/orders/PricingAssistantService'
 import { CustomerPreferencesService } from '@/services/orders/CustomerPreferencesService'
+import { PricingAssistantService } from '@/services/orders/PricingAssistantService'
 
 // Constants and config
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
@@ -112,8 +112,12 @@ export const GET = createApiRoute(
 
       const pagination = createPaginationMeta(count ?? 0, page, limit)
       return createSuccessResponse(orders, undefined, pagination)
-    } else if (hasId) {
+    } else if (hasId && slug[0]) {
       // GET /api/orders/[id] - Get single order
+      const contextWithId = {
+        ...context,
+        params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+      }
       return createGetHandler({
         table: 'orders',
         selectFields: `
@@ -133,7 +137,7 @@ export const GET = createApiRoute(
             )
           )
         `,
-      })(context)
+      })(contextWithId)
     } else {
       return handleAPIError(new Error('Invalid path'), 'GET /api/orders')
     }
@@ -306,8 +310,12 @@ export const PUT = createApiRoute(
   },
   async (context: RouteContext, _query, body) => {
     const slug = context.params?.['slug'] as string[] | undefined
-    if (!slug || slug.length !== 1) {
+    if (!slug || slug.length !== 1 || !slug[0]) {
       return handleAPIError(new Error('Invalid path'), 'PUT /api/orders')
+    }
+    const contextWithId = {
+      ...context,
+      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
     }
     return createUpdateHandler({
       table: 'orders',
@@ -322,7 +330,7 @@ export const PUT = createApiRoute(
           total_price
         )
       `,
-    }, SUCCESS_MESSAGES.ORDER_UPDATED)(context, undefined, body)
+    }, SUCCESS_MESSAGES.ORDER_UPDATED)(contextWithId, undefined, body)
   }
 )
 
@@ -335,14 +343,18 @@ export const DELETE = createApiRoute(
   },
   async (context: RouteContext) => {
     const slug = context.params?.['slug'] as string[] | undefined
-    if (!slug || slug.length !== 1) {
+    if (!slug || slug.length !== 1 || !slug[0]) {
       return handleAPIError(new Error('Invalid path'), 'DELETE /api/orders')
+    }
+    const contextWithId = {
+      ...context,
+      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
     }
     return createDeleteHandler(
       {
         table: 'orders',
       },
       SUCCESS_MESSAGES.ORDER_DELETED
-    )(context)
+    )(contextWithId)
   }
 )

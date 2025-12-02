@@ -1,8 +1,8 @@
 import type {
-  IngredientCostSnapshot,
-  RecipeCostPreview,
-  RecipeCostRecord,
-  RecipeIngredientSnapshot
+    IngredientCostSnapshot,
+    RecipeCostPreview,
+    RecipeCostRecord,
+    RecipeIngredientSnapshot
 } from '@/types/recipes/cost'
 
 export interface IngredientCostContribution {
@@ -40,8 +40,8 @@ export const extractIngredientContributions = (
     // Handle missing ingredients gracefully
     if (!entry.ingredients) {
       return {
-        ingredientId: entry.ingredient_id,
-        ingredientName: `Unknown Ingredient (${entry.ingredient_id})`,
+        ingredientId: 'unknown',
+        ingredientName: 'Unknown Ingredient',
         quantity,
         unitPrice: 0,
         costContribution: 0,

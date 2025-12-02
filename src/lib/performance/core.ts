@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 import { createLogger } from '@/lib/logger'
 
@@ -115,7 +115,7 @@ export function useRenderTime(componentName: string) {
  */
 export function useBatchedUpdates() {
   const updates = useRef<Array<() => void>>([])
-  const timeoutRef = useRef<NodeJS.Timeout>()
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   const batchUpdate = useCallback((update: () => void) => {
     updates.current.push(update)

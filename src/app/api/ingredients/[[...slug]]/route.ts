@@ -1,13 +1,13 @@
 // External libraries
 // Internal modules
+import { createSuccessResponse } from '@/lib/api-core'
+import { ListQuerySchema, createCreateHandler, createGetHandler, createListHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { parseRouteParams } from '@/lib/api/route-helpers'
-import { ListQuerySchema, createCreateHandler, createListHandler, createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
-import { createSuccessResponse } from '@/lib/api-core'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
-import { SecurityPresets } from '@/utils/security/api-middleware'
 import { cacheInvalidation } from '@/lib/cache'
+import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
 // Types and schemas
 import { IngredientInsertSchema, IngredientUpdateSchema } from '@/lib/validations/domains/ingredient'
@@ -53,12 +53,17 @@ export const GET = createApiRoute(
         defaultOrder: 'asc',
         searchFields: ['name'],
       })(context, validatedQuery)
-    } else if (slug && slug.length === 1) {
+    } else if (slug && slug.length === 1 && slug[0]) {
       // GET /api/ingredients/[id] - Get single ingredient
+      // Pass the ID from slug to context.params for createGetHandler
+      const contextWithId = {
+        ...context,
+        params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+      }
       return createGetHandler({
         table: 'ingredients',
         selectFields: INGREDIENT_FIELDS.LIST,
-      })(context)
+      })(contextWithId)
     } else {
       return handleAPIError(new Error('Invalid path'), 'GET /api/ingredients')
     }
@@ -141,8 +146,13 @@ export const PUT = createApiRoute(
   },
   async (context: RouteContext, _query, body) => {
     const { slug } = parseRouteParams(context.params)
-    if (!slug || slug.length !== 1) {
+    if (!slug || slug.length !== 1 || !slug[0]) {
       return handleAPIError(new Error('Invalid path'), 'PUT /api/ingredients')
+    }
+    // Pass the ID from slug to context.params for createUpdateHandler
+    const contextWithId = {
+      ...context,
+      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
     }
     const result = await createUpdateHandler(
       {
@@ -150,7 +160,7 @@ export const PUT = createApiRoute(
         selectFields: INGREDIENT_FIELDS.LIST,
       },
       SUCCESS_MESSAGES.INGREDIENT_UPDATED
-    )(context, undefined, body)
+    )(contextWithId, undefined, body)
 
     // Invalidate cache after successful update
     if (result.status === 200) {

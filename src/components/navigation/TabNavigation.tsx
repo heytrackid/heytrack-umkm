@@ -1,32 +1,31 @@
 'use client'
 
-import { useRef, useState } from 'react'
 import {
-    Bot,
-    ChefHat,
-    ChevronDown,
-    DollarSign,
-    Factory,
-    FileText,
-    Home,
-    Package,
-    Receipt,
-    Settings,
-    ShoppingCart,
-    TrendingUp,
-    Truck,
-    Users,
-    Wallet
+  Bot,
+  ChefHat,
+  ChevronDown,
+  Factory,
+  FileText,
+  Home,
+  Package,
+  Receipt,
+  Settings,
+  ShoppingCart,
+  TrendingUp,
+  Truck,
+  Users,
+  Wallet
 } from '@/components/icons'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
@@ -57,18 +56,33 @@ const navigationGroups = [
     ]
   },
   {
-    label: 'Produksi',
+    label: 'Hitung HPP',
     items: [
-      {
-        title: 'Resep',
-        url: '/recipes',
-        icon: ChefHat
-      },
       {
         title: 'Bahan Baku',
         url: '/ingredients',
         icon: Package
       },
+      {
+        title: 'Biaya Operasional',
+        url: '/operational-costs',
+        icon: Receipt
+      },
+      {
+        title: 'Resep Produk',
+        url: '/recipes',
+        icon: ChefHat
+      },
+      {
+        title: 'Kalkulator HPP',
+        url: '/hpp/calculator',
+        icon: TrendingUp
+      }
+    ]
+  },
+  {
+    label: 'Produksi',
+    items: [
       {
         title: 'Produksi',
         url: '/production',
@@ -90,11 +104,6 @@ const navigationGroups = [
     label: 'Keuangan',
     items: [
       {
-        title: 'HPP Calculator',
-        url: '/hpp',
-        icon: DollarSign
-      },
-      {
         title: 'Arus Kas',
         url: '/cash-flow',
         icon: Wallet
@@ -103,11 +112,6 @@ const navigationGroups = [
          title: 'Laba',
          url: '/profit',
          icon: TrendingUp
-       },
-       {
-         title: 'Biaya Operasional',
-         url: '/operational-costs',
-         icon: Receipt
        }
      ]
   },
@@ -138,6 +142,7 @@ export function TabNavigation() {
 
   // State for controlling dropdown open/close on hover
   const [utamaOpen, setUtamaOpen] = useState(false)
+  const [hitungHppOpen, setHitungHppOpen] = useState(false)
   const [produksiOpen, setProduksiOpen] = useState(false)
   const [pengadaanOpen, setPengadaanOpen] = useState(false)
   const [keuanganOpen, setKeuanganOpen] = useState(false)
@@ -146,6 +151,7 @@ export function TabNavigation() {
 
   // Refs for close timeouts to allow moving from trigger to content
   const utamaTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const hitungHppTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const produksiTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const pengadaanTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const keuanganTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -181,6 +187,7 @@ export function TabNavigation() {
             const getOpenState = () => {
               switch (group.label) {
                 case 'Utama': return utamaOpen
+                case 'Hitung HPP': return hitungHppOpen
                 case 'Produksi': return produksiOpen
                 case 'Pengadaan': return pengadaanOpen
                 case 'Keuangan': return keuanganOpen
@@ -192,6 +199,7 @@ export function TabNavigation() {
             const getSetOpenState = () => {
               switch (group.label) {
                 case 'Utama': return setUtamaOpen
+                case 'Hitung HPP': return setHitungHppOpen
                 case 'Produksi': return setProduksiOpen
                 case 'Pengadaan': return setPengadaanOpen
                 case 'Keuangan': return setKeuanganOpen
@@ -203,6 +211,7 @@ export function TabNavigation() {
             const getTimeoutRef = () => {
               switch (group.label) {
                 case 'Utama': return utamaTimeoutRef
+                case 'Hitung HPP': return hitungHppTimeoutRef
                 case 'Produksi': return produksiTimeoutRef
                 case 'Pengadaan': return pengadaanTimeoutRef
                 case 'Keuangan': return keuanganTimeoutRef

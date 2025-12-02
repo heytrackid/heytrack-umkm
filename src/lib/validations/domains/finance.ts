@@ -61,7 +61,7 @@ export const OperationalCostInsertSchema = z.object({
   supplier: z.string().max(255).optional().nullable(),
   reference: z.string().max(100).optional().nullable(),
   is_active: z.boolean().optional(),
-  user_id: UUIDSchema,
+  user_id: UUIDSchema.optional(), // Optional because API will add it
 })
 
 export const OperationalCostUpdateSchema = OperationalCostInsertSchema.partial()

@@ -9,7 +9,7 @@ interface BusinessStats { totalOrders: number; pendingOrders: number; totalReven
 interface UseChatMessagesResult {
   messages: Message[]
   isLoading: boolean
-  scrollAreaRef: RefObject<HTMLDivElement>
+  scrollAreaRef: RefObject<HTMLDivElement | null>
   addMessage: (message: Message) => void
   setLoading: (loading: boolean) => void
   currentSessionId: string | null

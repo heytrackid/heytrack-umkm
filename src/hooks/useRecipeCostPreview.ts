@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query'
 import { createClientLogger } from '@/lib/client-logger'
-import { fetchApi, postApi } from '@/lib/query/query-helpers'
+import { postApi } from '@/lib/query/query-helpers'
 import type { RecipeCostPreview } from '@/types/recipes/cost'
+import { useQuery } from '@tanstack/react-query'
 
 const logger = createClientLogger('RecipeCostPreview')
 
@@ -13,10 +13,17 @@ export function useRecipeCostPreview(recipeId: string | null) {
   return useQuery({
     queryKey: ['recipe-cost-preview', recipeId],
     queryFn: async (): Promise<RecipeCostPreview | null> => {
-      if (!recipeId) return null
+      if (!recipeId) {
+        logger.debug({}, 'No recipeId provided, skipping cost preview fetch')
+        return null
+      }
 
       try {
-        return await fetchApi<RecipeCostPreview>(`/api/recipes/${recipeId}/cost-preview`)
+        // Use the batch endpoint for single recipe
+        const result = await postApi<Record<string, RecipeCostPreview>>('/api/recipes/cost-previews', { 
+          recipeIds: [recipeId] 
+        })
+        return result[recipeId] || null
       } catch (error) {
         logger.error({ error, recipeId }, 'Failed to fetch recipe cost preview')
         return null
@@ -25,6 +32,7 @@ export function useRecipeCostPreview(recipeId: string | null) {
     enabled: Boolean(recipeId),
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
+    retry: false, // Don't retry on error
   })
 }
 

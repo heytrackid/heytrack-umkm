@@ -88,12 +88,16 @@ export const GET = createApiRoute(
       const pagination = createPaginationMeta(count ?? 0, page, limit)
 
       return createSuccessResponse(data, undefined, pagination)
-    } else if (slug && slug.length === 1) {
+    } else if (slug && slug.length === 1 && slug[0]) {
       // GET /api/expenses/[id] - Get single expense
+      const contextWithId = {
+        ...context,
+        params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+      }
       return createGetHandler({
         table: 'financial_records',
         selectFields: '*',
-      })(context)
+      })(contextWithId)
     } else {
       return handleAPIError(new Error('Invalid path'), 'API Route')
     }
@@ -111,7 +115,7 @@ export const PUT = createApiRoute(
   },
   async (context, _query, body) => {
     const slug = context.params?.['slug']
-    if (!slug || slug.length !== 1) {
+    if (!slug || slug.length !== 1 || !slug[0]) {
       return handleAPIError(new Error('Invalid path'), 'API Route')
     }
 
@@ -119,10 +123,14 @@ export const PUT = createApiRoute(
       return handleAPIError(new Error('Request body is required'), 'API Route')
     }
 
+    const contextWithId = {
+      ...context,
+      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+    }
     return createUpdateHandler({
       table: 'financial_records',
       selectFields: '*',
-    }, SUCCESS_MESSAGES.EXPENSE_UPDATED)(context, undefined, body)
+    }, SUCCESS_MESSAGES.EXPENSE_UPDATED)(contextWithId, undefined, body)
   }
 )
 
@@ -176,14 +184,18 @@ export const DELETE = createApiRoute(
   },
   async (context) => {
     const slug = context.params?.['slug']
-    if (!slug || slug.length !== 1) {
+    if (!slug || slug.length !== 1 || !slug[0]) {
       return handleAPIError(new Error('Invalid path'), 'API Route')
+    }
+    const contextWithId = {
+      ...context,
+      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
     }
     return createDeleteHandler(
       {
         table: 'financial_records',
       },
       SUCCESS_MESSAGES.EXPENSE_DELETED
-    )(context)
+    )(contextWithId)
   }
 )
