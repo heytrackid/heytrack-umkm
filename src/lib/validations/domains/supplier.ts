@@ -1,6 +1,5 @@
 import { z } from 'zod'
 
-import { EmailSchema, PhoneSchema } from '@/lib/validations/base-validations'
 
 
 /**
@@ -12,15 +11,15 @@ import { EmailSchema, PhoneSchema } from '@/lib/validations/base-validations'
 // Supplier database schemas
 export const SupplierInsertSchema = z.object({
   name: z.string().min(1, 'Nama supplier wajib diisi').max(255, 'Nama supplier maksimal 255 karakter'),
-  contact_person: z.string().max(255, 'Contact person maksimal 255 karakter').optional().nullable(),
-  email: EmailSchema.optional().nullable(),
-  phone: PhoneSchema.optional().nullable(),
-  address: z.string().max(500, 'Alamat maksimal 500 karakter').optional().nullable(),
+  contact_person: z.string().max(255, 'Contact person maksimal 255 karakter').optional().nullable().or(z.literal('')),
+  email: z.string().email('Format email tidak valid').optional().nullable().or(z.literal('')),
+  phone: z.string().max(20, 'Nomor telepon maksimal 20 karakter').optional().nullable().or(z.literal('')),
+  address: z.string().max(500, 'Alamat maksimal 500 karakter').optional().nullable().or(z.literal('')),
   supplier_type: z.enum(['preferred', 'standard', 'trial', 'blacklisted']).default('standard').optional().nullable(),
-  payment_terms: z.string().max(100, 'Syarat pembayaran maksimal 100 karakter').optional().nullable(),
+  payment_terms: z.string().max(100, 'Syarat pembayaran maksimal 100 karakter').optional().nullable().or(z.literal('')),
   lead_time_days: z.number().int().positive('Lead time harus positif').optional().nullable(),
   is_active: z.boolean().default(true).optional().nullable(),
-  notes: z.string().max(1000, 'Catatan maksimal 1000 karakter').optional().nullable(),
+  notes: z.string().max(1000, 'Catatan maksimal 1000 karakter').optional().nullable().or(z.literal('')),
   bank_details: z.object({
     bank_name: z.string().max(100, 'Nama bank maksimal 100 karakter').optional(),
     account_holder: z.string().max(255, 'Nama pemegang rekening maksimal 255 karakter').optional(),

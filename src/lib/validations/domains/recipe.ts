@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { UUIDSchema, PositiveNumberSchema, NonNegativeNumberSchema } from '@/lib/validations/base-validations'
+import { NonNegativeNumberSchema, PositiveNumberSchema, UUIDSchema } from '@/lib/validations/base-validations'
 
 
 /**
@@ -26,22 +26,22 @@ export const RecipeInsertSchema = z.object({
   servings: PositiveNumberSchema,
   prep_time: NonNegativeNumberSchema.optional(),
   cook_time: NonNegativeNumberSchema.optional(),
-  total_time: NonNegativeNumberSchema.optional(),
-  difficulty: z.enum(['EASY', 'MEDIUM', 'HARD']).default('MEDIUM'),
+  difficulty: z.enum(['EASY', 'MEDIUM', 'HARD', 'easy', 'medium', 'hard']).transform(val => val.toUpperCase() as 'EASY' | 'MEDIUM' | 'HARD').default('MEDIUM'),
   category: z.string().max(100).optional().nullable(),
-  cuisine_type: z.string().max(100).optional().nullable(),
-  cost_per_serving: NonNegativeNumberSchema.optional(),
+  cost_per_unit: NonNegativeNumberSchema.optional(),
   selling_price: NonNegativeNumberSchema.optional(),
-  profit_margin: NonNegativeNumberSchema.max(100).optional(),
+  margin_percentage: NonNegativeNumberSchema.max(100).optional(),
   is_active: z.boolean().default(true).optional(),
-  is_available: z.boolean().default(true).optional(),
   image_url: z.string().url().optional().nullable(),
-  instructions: z.array(z.object({
-    step_number: PositiveNumberSchema,
-    instruction: z.string().min(1, 'Instruction is required').max(1000),
-    duration: NonNegativeNumberSchema.optional(),
-    notes: z.string().max(500).optional(),
-  })).optional(),
+  instructions: z.union([
+    z.string().max(10000).optional().nullable(),
+    z.array(z.object({
+      step_number: PositiveNumberSchema,
+      instruction: z.string().min(1, 'Instruction is required').max(1000),
+      duration: NonNegativeNumberSchema.optional(),
+      notes: z.string().max(500).optional(),
+    })).transform(arr => arr ? JSON.stringify(arr) : null)
+  ]).optional(),
   ingredients: z.array(RecipeIngredientInsertSchema).min(1, 'Recipe must have at least one ingredient'),
 })
 
@@ -56,12 +56,10 @@ export const RecipeFormSchema = z.object({
   cook_time: z.number().min(0).optional(),
   difficulty: z.enum(['easy', 'medium', 'hard']).default('medium'),
   category: z.string().optional(),
-  cuisine_type: z.string().optional(),
-  cost_per_serving: z.number().min(0).optional(),
+  cost_per_unit: z.number().min(0).optional(),
   selling_price: z.number().min(0).optional(),
-  profit_margin: z.number().min(0).max(100).optional(),
+  margin_percentage: z.number().min(0).max(100).optional(),
   is_active: z.boolean().default(true),
-  is_available: z.boolean().default(true),
   image_url: z.string().url().optional().or(z.literal('')),
   instructions: z.array(z.object({
     step_number: z.number().positive(),
@@ -82,10 +80,8 @@ export const RecipeFormSchema = z.object({
 export const RecipeQuerySchema = z.object({
   search: z.string().optional(),
   category: z.string().optional(),
-  cuisine_type: z.string().optional(),
   difficulty: z.enum(['easy', 'medium', 'hard']).optional(),
   is_active: z.boolean().optional(),
-  is_available: z.boolean().optional(),
   min_cost: NonNegativeNumberSchema.optional(),
   max_cost: NonNegativeNumberSchema.optional(),
   min_selling_price: NonNegativeNumberSchema.optional(),
@@ -100,8 +96,8 @@ export const RecipeListQuerySchema = RecipeQuerySchema.extend({
   sort_order: z.enum(['asc', 'desc']).optional(),
 })
 
-export const RecipeAvailabilityUpdateSchema = z.object({
-  is_available: z.boolean(),
+export const RecipeActiveUpdateSchema = z.object({
+  is_active: z.boolean(),
   reason: z.string().max(500).optional(),
 })
 
@@ -112,4 +108,4 @@ export type RecipeUpdate = z.infer<typeof RecipeUpdateSchema>
 export type RecipeForm = z.infer<typeof RecipeFormSchema>
 export type RecipeQuery = z.infer<typeof RecipeQuerySchema>
 export type RecipeListQuery = z.infer<typeof RecipeListQuerySchema>
-export type RecipeAvailabilityUpdate = z.infer<typeof RecipeAvailabilityUpdateSchema>
+export type RecipeActiveUpdate = z.infer<typeof RecipeActiveUpdateSchema>

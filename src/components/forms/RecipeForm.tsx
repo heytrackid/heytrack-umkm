@@ -1,7 +1,7 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from '@/components/icons'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { memo } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 
@@ -13,11 +13,11 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { handleError } from '@/lib/error-handling'
-import { toast } from 'sonner'
 import {
   RecipeFormSchema,
   type RecipeForm as RecipeFormData
 } from '@/lib/validations/domains/recipe'
+import { toast } from 'sonner'
 
 import type { Row } from '@/types/database'
 
@@ -48,7 +48,6 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
       difficulty: (initialData?.difficulty as 'easy' | 'hard' | 'medium') || 'medium',
 
       is_active: initialData?.is_active ?? true,
-      is_available: initialData?.is_available ?? true,
       selling_price: initialData?.selling_price ?? 0,
       ingredients: []
     }

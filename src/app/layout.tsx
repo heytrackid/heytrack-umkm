@@ -76,22 +76,16 @@ const RootLayout = async ({
             <Providers>
                    <SettingsProvider>
                      <ReactQueryProvider>
-                       <PreloadingProvider
-                         enableSmartPreloading={false}
-                         enableIdlePreloading={false}
-                         enableNetworkAware={false}
-                         debug={false}
-                         >
-                           <GlobalErrorBoundary>
-                         {/* Header temporarily disabled during development */}
-                         {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
-                         <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm font-medium text-orange-700 dark:text-orange-300">
-                           🚧 Development Mode - Auth Disabled
-                         </div>
-                       </header> */}
-                         {children}
-                           </GlobalErrorBoundary>
-                         </PreloadingProvider>
+                         <PreloadingProvider
+                           enableSmartPreloading={false}
+                           enableIdlePreloading={false}
+                           enableNetworkAware={false}
+                           debug={false}
+                           >
+                             <GlobalErrorBoundary>
+                           {children}
+                             </GlobalErrorBoundary>
+                           </PreloadingProvider>
                        </ReactQueryProvider>
                      </SettingsProvider>
             </Providers>

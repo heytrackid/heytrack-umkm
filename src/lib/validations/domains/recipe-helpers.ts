@@ -96,7 +96,12 @@ export class RecipeValidationHelpers {
   static validateUpdate(data: unknown): { success: boolean; data?: RecipeUpdate; errors?: string[] } {
     try {
       const validatedData = EnhancedRecipeUpdateSchema.parse(data)
-      return { success: true, data: validatedData }
+      // Transform instructions array to string if needed for DB compatibility
+      const transformedData = {
+        ...validatedData,
+        instructions: validatedData.instructions ? JSON.stringify(validatedData.instructions) : undefined
+      }
+      return { success: true, data: transformedData as RecipeUpdate }
     } catch (error) {
       if (error instanceof z.ZodError) {
         const errors = error.issues.map(error => `${error.path.join('.')}: ${error.message}`)

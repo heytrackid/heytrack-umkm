@@ -100,6 +100,12 @@ export function createCreateHandler<TTable extends TableName, TInsert = unknown>
 ) {
   const { table, selectFields = '*', userIdField = 'user_id' } = config
 
+  // Tables that have created_by/updated_by columns
+  const tablesWithAuditFields = [
+    'recipes', 'ingredients', 'customers', 'orders', 'productions', 
+    'operational_costs', 'ingredient_purchases'
+  ]
+
   return async (context: RouteContext, _query?: never, body?: TInsert): Promise<NextResponse> => {
     try {
       const { user, supabase } = context
@@ -109,21 +115,25 @@ export function createCreateHandler<TTable extends TableName, TInsert = unknown>
       }
 
       // Add user context to the data
-      const dataWithUser = {
+      const dataWithUser: Record<string, unknown> = {
         ...body,
         [userIdField]: user.id,
-        created_by: user.id,
-        updated_by: user.id,
-      } as never
+      }
+
+      // Only add audit fields for tables that support them
+      if (tablesWithAuditFields.includes(table)) {
+        dataWithUser['created_by'] = user.id
+        dataWithUser['updated_by'] = user.id
+      }
 
       const { data, error } = await supabase
         .from(table as never)
-        .insert(dataWithUser)
+        .insert(dataWithUser as never)
         .select(selectFields)
         .single()
 
       if (error) {
-        apiLogger.error({ error, table }, 'Failed to create resource')
+        apiLogger.error({ error, table, body: dataWithUser }, 'Failed to create resource')
         return handleAPIError(error, `POST /api/${table}`)
       }
 
@@ -184,6 +194,12 @@ export function createUpdateHandler<TTable extends TableName, TUpdate = unknown>
 ) {
   const { table, selectFields = '*', userIdField = 'user_id' } = config
 
+  // Tables that have updated_by column
+  const tablesWithAuditFields = [
+    'recipes', 'ingredients', 'customers', 'orders', 'productions', 
+    'operational_costs', 'ingredient_purchases'
+  ]
+
   return async (context: RouteContext, _query?: never, body?: TUpdate): Promise<NextResponse> => {
     try {
       const { user, supabase, params } = context
@@ -197,15 +213,15 @@ export function createUpdateHandler<TTable extends TableName, TUpdate = unknown>
         return handleAPIError(new Error('Request body is required'), `PUT /api/${table}`)
       }
 
-      // Add updated_by to track changes
-      const dataWithUser = {
-        ...body,
-        updated_by: user.id,
-      } as never
+      // Add updated_by to track changes only for tables that support it
+      const dataWithUser: Record<string, unknown> = { ...body }
+      if (tablesWithAuditFields.includes(table)) {
+        dataWithUser['updated_by'] = user.id
+      }
 
       const { data, error } = await supabase
         .from(table as never)
-        .update(dataWithUser)
+        .update(dataWithUser as never)
         .eq('id', id)
         .eq(userIdField, user.id)
         .select(selectFields)

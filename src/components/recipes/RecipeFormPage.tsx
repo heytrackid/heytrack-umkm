@@ -404,28 +404,21 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
                             recipeIngredients.map((ri, index) => (
                                 <div key={index} className="flex gap-3 items-start">
                                     <div className="flex-1 grid gap-3 md:grid-cols-4">
-                                        {(() => {
-                                            const selectedIngredient = availableIngredients.find(ing => ing.id === ri.ingredient_id)
-                                            return (
-                                                <Select
-                                                    value={ri.ingredient_id || ''}
-                                                    onValueChange={(value) => updateIngredient(index, 'ingredient_id', value)}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Pilih bahan">
-                                                            {selectedIngredient?.name}
-                                                        </SelectValue>
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {availableIngredients.map((ing) => (
-                                                            <SelectItem key={ing.id} value={ing.id}>
-                                                                {ing.name}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            )
-                                        })()}
+                                        <Select
+                                            value={ri.ingredient_id || ''}
+                                            onValueChange={(value) => updateIngredient(index, 'ingredient_id', value)}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Pilih bahan" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {availableIngredients.map((ing) => (
+                                                    <SelectItem key={ing.id} value={ing.id}>
+                                                        {ing.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
 
                                         <Input
                                             type="number"

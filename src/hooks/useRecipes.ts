@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
 import { useToast } from '@/hooks/use-toast'
-import type { ApiErrorResponse, ApiSuccessResponse } from '@/lib/api-core'
 import { createClientLogger } from '@/lib/client-logger'
 import { queryConfig } from '@/lib/query/query-config'
 import { buildApiUrl, deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
@@ -223,14 +222,11 @@ export function useCreateRecipeWithIngredients() {
     }) => {
       const payload = {
         ...data.recipe,
-        recipe_ingredients: data.ingredients,
+        ingredients: data.ingredients,
       }
-      const response = await postApi<ApiSuccessResponse<Recipe> | ApiErrorResponse>('/api/recipes', payload)
-      
-      if (!('success' in response) || !response.success) {
-        throw new Error(response?.error ?? 'Failed to create recipe')
-      }
-      return response.data
+      // fetchApi already extracts .data from ApiSuccessResponse and throws on error
+      const recipe = await postApi<Recipe>('/api/recipes', payload)
+      return recipe
     },
     onSuccess: (data) => {
       // Invalidate recipes list
@@ -243,7 +239,8 @@ export function useCreateRecipeWithIngredients() {
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
-      logger.error({ error: message }, 'Failed to create recipe with ingredients')
+      // Log full error object for debugging
+      logger.error({ error, message, errorType: typeof error, errorKeys: error ? Object.keys(error as object) : [] }, 'Failed to create recipe with ingredients')
 
       toast({
         title: 'Error',
@@ -276,14 +273,11 @@ export function useUpdateRecipeWithIngredients() {
     }) => {
       const payload = {
         ...data.recipe,
-        recipe_ingredients: data.ingredients,
+        ingredients: data.ingredients,
       }
-      const response = await putApi<ApiSuccessResponse<Recipe> | ApiErrorResponse>(`/api/recipes/${data.id}`, payload)
-      
-      if (!('success' in response) || !response.success) {
-        throw new Error(response?.error ?? 'Failed to update recipe')
-      }
-      return response.data
+      // fetchApi already extracts .data from ApiSuccessResponse and throws on error
+      const recipe = await putApi<Recipe>(`/api/recipes/${data.id}`, payload)
+      return recipe
     },
     onSuccess: (data, variables) => {
       // Invalidate recipes list and specific recipe
