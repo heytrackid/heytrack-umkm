@@ -1,14 +1,14 @@
 // External libraries
-import { z } from 'zod'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { z } from 'zod'
 
 // Internal modules
-import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { createSuccessResponse } from '@/lib/api-core'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
-import { SecurityPresets } from '@/utils/security/api-middleware'
 import { typed } from '@/types/type-utilities'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
 // Types and schemas
 import type { Database, OrderStatus } from '@/types/database'
@@ -157,7 +157,7 @@ async function getDashboardStatsHandler(context: RouteContext, query: z.infer<ty
     const currentPeriodRevenue = currentPeriodOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0)
     const comparisonRevenue = comparisonOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0)
     const activeOrders = orders.filter(o => o.status === 'PENDING' || o.status === 'IN_PROGRESS').length
-    const vipCustomers = customers.filter(c => c.customer_type === 'VIP').length
+    const vipCustomers = customers.filter(c => c.customer_type === 'vip').length
     const lowStockItems = ingredients.filter(i => (i.current_stock || 0) <= (i.min_stock || 0)).length
     const expensesTotal = expenses.reduce((sum, e) => sum + (e.amount || 0), 0)
 

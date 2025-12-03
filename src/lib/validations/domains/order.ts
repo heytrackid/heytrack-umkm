@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { UUIDSchema, PositiveNumberSchema, NonNegativeNumberSchema, DateStringSchema } from '@/lib/validations/base-validations'
+import { DateStringSchema, NonNegativeNumberSchema, PositiveNumberSchema, UUIDSchema } from '@/lib/validations/base-validations'
 
 
 /**
@@ -33,7 +33,7 @@ export const OrderInsertSchema = z.object({
   delivery_time: z.string().max(50).optional().nullable(),
   status: z.enum(['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELLED']).default('PENDING'),
   payment_status: z.enum(['UNPAID', 'PARTIAL', 'PAID', 'REFUNDED']).default('UNPAID'),
-  payment_method: z.enum(['CASH', 'TRANSFER', 'QRIS', 'CREDIT_CARD']).optional().nullable(),
+  payment_method: z.enum(['CASH', 'BANK_TRANSFER', 'CREDIT_CARD', 'DIGITAL_WALLET', 'OTHER']).optional().nullable(),
   subtotal: NonNegativeNumberSchema,
   tax_amount: NonNegativeNumberSchema.default(0),
   discount_amount: NonNegativeNumberSchema.default(0),

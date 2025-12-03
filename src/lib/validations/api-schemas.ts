@@ -1,20 +1,17 @@
 import { z } from 'zod'
 
-import { 
-
-
-/**
- * API Request Validation Schemas
- * 
- * Comprehensive Zod schemas for all API endpoints
- * Use these schemas to validate request bodies and ensure type safety
- * 
- * NOTE: Order schemas now use domain schemas as source of truth
- */
-
-  OrderInsertSchema, 
-  OrderUpdateSchema as DomainOrderUpdateSchema, 
-  OrderStatusUpdateSchema
+import {
+    OrderUpdateSchema as DomainOrderUpdateSchema,
+    /**
+     * API Request Validation Schemas
+     *
+     * Comprehensive Zod schemas for all API endpoints
+     * Use these schemas to validate request bodies and ensure type safety
+     *
+     * NOTE: Order schemas now use domain schemas as source of truth
+     */
+    OrderInsertSchema,
+    OrderStatusUpdateSchema
 } from '@/lib/validations/domains/order'
 
 // ==================================
@@ -107,7 +104,7 @@ export const CreateCustomerSchema = z.object({
   phone: PhoneSchema,
   address: z.string().max(500).optional(),
   notes: z.string().max(1000).optional(),
-  customer_type: z.enum(['new', 'regular', 'vip', 'inactive']).default('regular'),
+  customer_type: z.enum(['regular', 'retail', 'wholesale', 'vip']).default('regular'),
   discount_percentage: z.number().min(0).max(100).default(0),
   is_active: z.boolean().default(true),
 })

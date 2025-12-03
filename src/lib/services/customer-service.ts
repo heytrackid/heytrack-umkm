@@ -2,15 +2,15 @@
 // Example service demonstrating business logic separation
 
 import { SanitizationPresets, sanitizeObject } from '@/lib/sanitization'
-import { BaseService, ServiceResult } from './base-service'
 import type { Customer, CustomerInsert, CustomerUpdate } from '@/types/database'
+import { BaseService, ServiceResult } from './base-service'
 
 export interface CreateCustomerData {
   name: string
   email: string
   phone?: string
   address?: string
-  customer_type?: 'regular' | 'vip'
+  customer_type?: 'regular' | 'retail' | 'wholesale' | 'vip'
   discount_percentage?: number
   notes?: string
 }
@@ -257,7 +257,7 @@ export class CustomerService extends BaseService {
     }
 
     // Customer type validation
-    if (data.customer_type && !['regular', 'vip'].includes(data.customer_type)) {
+    if (data.customer_type && !['regular', 'retail', 'wholesale', 'vip'].includes(data.customer_type)) {
       throw new Error('Invalid customer type')
     }
   }

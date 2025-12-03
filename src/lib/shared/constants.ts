@@ -60,9 +60,10 @@ export const RECIPE_DIFFICULTIES = [
  * Customer types
  */
 export const CUSTOMER_TYPES = [
-  { value: 'REGULAR', label: 'Pelanggan Biasa' },
-  { value: 'VIP', label: 'VIP' },
-  { value: 'WHOLESALE', label: 'Grosir' },
+  { value: 'regular', label: 'Pelanggan Biasa' },
+  { value: 'retail', label: 'Retail' },
+  { value: 'vip', label: 'VIP' },
+  { value: 'wholesale', label: 'Grosir' },
 ] as const
 
 /**

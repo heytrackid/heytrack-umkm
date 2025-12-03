@@ -32,7 +32,7 @@ export const CustomerInsertSchema = z.object({
     .optional()
     .nullable(),
   
-  customer_type: z.enum(['retail', 'wholesale', 'vip', 'regular'])
+  customer_type: z.enum(['regular', 'retail', 'wholesale', 'vip'])
     .optional()
     .nullable(),
   
@@ -69,7 +69,7 @@ export const CustomerUpdateSchema = CustomerInsertSchema.partial().extend({
  */
 export const CustomerQuerySchema = z.object({
   search: z.string().optional(),
-  customer_type: z.enum(['retail', 'wholesale', 'vip', 'regular']).optional(),
+  customer_type: z.enum(['regular', 'retail', 'wholesale', 'vip']).optional(),
   is_active: z.boolean().optional(),
   page: z.number().int().positive().optional(),
   limit: z.number().int().positive().max(100).optional(),

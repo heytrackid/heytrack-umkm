@@ -69,7 +69,7 @@ export class ProductionServices {
         recipe_id: batch.recipe_id,
         planned_quantity: batch.quantity,
         produced_quantity: 0,
-        status: 'planned',
+        status: 'PLANNED',
         notes: newBatch.notes,
         created_by: recipe.user_id,
         user_id: recipe.user_id
@@ -236,14 +236,14 @@ export class ProductionServices {
   async updateBatchStatus(batchId: string, status: ProductionBatch['status']): Promise<void> {
     try {
       const supabase = await createClient()
-      const normalizedStatus = status === 'pending' ? 'planned' : status
+      const normalizedStatus = status === 'pending' ? 'PLANNED' : status.toUpperCase()
 
       const { error } = await supabase
         .from('production_batches')
         .update({
           status: normalizedStatus,
           updated_at: new Date().toISOString(),
-          completed_at: normalizedStatus === 'completed' ? new Date().toISOString() : null
+          completed_at: normalizedStatus === 'COMPLETED' ? new Date().toISOString() : null
         } as never)
         .eq('id', batchId)
 
@@ -264,7 +264,7 @@ export class ProductionServices {
       const { data, error } = await supabase
         .from('production_batches')
         .select('id, status, recipe_id, quantity, planned_date, completed_at, notes')
-        .in('status', ['planned', 'in_progress'])
+        .in('status', ['PLANNED', 'IN_PROGRESS'])
         .order('planned_date', { ascending: true })
 
       if (error) {

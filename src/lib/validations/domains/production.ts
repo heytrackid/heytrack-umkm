@@ -4,7 +4,7 @@ import { z } from 'zod'
  * Validation schemas for Production domain
  */
 
-export const ProductionBatchStatus = z.enum(['planned', 'in_progress', 'completed', 'cancelled'])
+export const ProductionBatchStatus = z.enum(['PLANNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])
 
 export const ProductionBatchCreateSchema = z.object({
   recipe_id: z.string().uuid('ID resep tidak valid'),
@@ -16,7 +16,7 @@ export const ProductionBatchCreateSchema = z.object({
   quantity: z.number().positive('Jumlah harus lebih dari 0').finite(),
   planned_date: z.string().datetime('Format tanggal tidak valid'),
   unit: z.string().min(1, 'Unit harus diisi').max(20, 'Unit maksimal 20 karakter'),
-  status: ProductionBatchStatus.default('planned'),
+  status: ProductionBatchStatus.default('PLANNED'),
   notes: z.string().max(1000, 'Catatan maksimal 1000 karakter').optional().nullable(),
 })
 
@@ -41,10 +41,10 @@ export const ProductionBatchStatusUpdateSchema = z.object({
 
 // Status transition validation
 export const VALID_PRODUCTION_STATUS_TRANSITIONS: Record<string, string[]> = {
-  planned: ['in_progress', 'cancelled'],
-  in_progress: ['completed', 'cancelled'],
-  completed: [],
-  cancelled: [],
+  PLANNED: ['IN_PROGRESS', 'CANCELLED'],
+  IN_PROGRESS: ['COMPLETED', 'CANCELLED'],
+  COMPLETED: [],
+  CANCELLED: [],
 }
 
 export type ProductionBatchCreateInput = z.infer<typeof ProductionBatchCreateSchema>

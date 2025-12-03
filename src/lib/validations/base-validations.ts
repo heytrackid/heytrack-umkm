@@ -33,7 +33,7 @@ export const NonNegativeNumberSchema = z.number().nonnegative()
 // Enums
 export const OrderStatusEnum = z.enum(['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELLED'])
 export const PaymentMethodEnum = z.enum(['CASH', 'BANK_TRANSFER', 'CREDIT_CARD', 'DIGITAL_WALLET', 'OTHER'])
-export const UserRoleEnum = z.enum(['OWNER', 'MANAGER', 'STAFF', 'VIEWER'])
+export const UserRoleEnum = z.enum(['super_admin', 'admin', 'manager', 'staff', 'viewer'])
 export const ProductionStatusEnum = z.enum(['PLANNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])
 export const BusinessUnitEnum = z.enum(['RESTAURANT', 'CAFE', 'UMKM', 'CATERING', 'OTHER'])
 export const RecordTypeEnum = z.enum(['INCOME', 'EXPENSE'])
