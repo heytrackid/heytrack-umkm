@@ -8,8 +8,8 @@ import { createErrorResponse, handleAPIError, withQueryValidation } from '@/lib/
 import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase'
 
-import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { SecurityPresets } from '@/utils/security/api-middleware'
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
 
 export interface RouteContext {
   user: { id: string; email: string | null }
@@ -92,6 +92,12 @@ export function createApiRoute<TQuery = unknown, TBody = unknown>(
           
           if (!validation.success) {
             const errorMessages = validation.error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`)
+            apiLogger.error({ 
+              path, 
+              validationErrors: validation.error.issues,
+              errorMessages,
+              receivedData: rawBody 
+            }, 'Request body validation failed')
             return createErrorResponse('Invalid request data', 400, errorMessages)
           }
           

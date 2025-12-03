@@ -144,6 +144,9 @@ importers:
       jose:
         specifier: ^6.1.1
         version: 6.1.2
+      lucide-react:
+        specifier: ^0.555.0
+        version: 0.555.0(react@18.3.1)
       next:
         specifier: ^16.0.6
         version: 16.0.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -3984,6 +3987,11 @@ packages:
 
   lucide-react@0.508.0:
     resolution: {integrity: sha512-gcP16PnexqtOFrTtv98kVsGzTfnbPekzZiQfByi2S89xfk7E/4uKE1USZqccIp58v42LqkO7MuwpCqshwSrJCg==}
+    peerDependencies:
+      react: ^18.3.1
+
+  lucide-react@0.555.0:
+    resolution: {integrity: sha512-D8FvHUGbxWBRQM90NZeIyhAvkFfsh3u9ekrMvJ30Z6gnpBHS6HC6ldLg7tL45hwiIz/u66eKDtdA23gwwGsAHA==}
     peerDependencies:
       react: ^18.3.1
 
@@ -9370,6 +9378,10 @@ snapshots:
       react: 18.3.1
 
   lucide-react@0.508.0(react@18.3.1):
+    dependencies:
+      react: 18.3.1
+
+  lucide-react@0.555.0(react@18.3.1):
     dependencies:
       react: 18.3.1
 
