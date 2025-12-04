@@ -1,8 +1,8 @@
 import { createClientLogger } from '@/lib/client-logger'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { postApi } from '@/lib/query/query-helpers'
-import { toast } from 'sonner'
 import { handleError } from '@/lib/error-handling'
+import { fetchApi, postApi } from '@/lib/query/query-helpers'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 const logger = createClientLogger('useFinancialSync')
 
@@ -17,6 +17,27 @@ interface AutoSyncResponse {
   message: string
 }
 
+interface SyncStatusResponse {
+  unsynced: {
+    orders: number
+    purchases: number
+  }
+  total: number
+  needsSync: boolean
+}
+
+/**
+ * Get sync status - check if there are unsynced transactions
+ */
+export function useSyncStatus() {
+  return useQuery<SyncStatusResponse>({
+    queryKey: ['financial-sync-status'],
+    queryFn: () => fetchApi<SyncStatusResponse>('/api/financial/auto-sync'),
+    staleTime: 60 * 1000, // 1 minute
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+  })
+}
+
 /**
  * Auto-sync financial data
  */
@@ -26,11 +47,19 @@ export function useAutoSyncFinancial() {
   return useMutation<AutoSyncResponse>({
     mutationFn: () => postApi<AutoSyncResponse>('/api/financial/auto-sync'),
     onSuccess: (data) => {
+      // Invalidate all related queries
       queryClient.invalidateQueries({ queryKey: ['financial-records'] })
+      queryClient.invalidateQueries({ queryKey: ['financial-sync-status'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['reports'] })
+      queryClient.invalidateQueries({ queryKey: ['orders'] })
+      queryClient.invalidateQueries({ queryKey: ['ingredient-purchases'] })
       
-      toast.success(`${data.total} transaksi berhasil disinkronkan`)
+      if (data.total > 0) {
+        toast.success(`${data.total} transaksi berhasil disinkronkan`)
+      } else {
+        toast.info('Semua transaksi sudah tersinkronisasi')
+      }
       logger.info({ data }, 'Financial data synced')
     },
     onError: (error) => handleError(error, 'Auto-sync financial data', true, 'Gagal sinkronisasi data keuangan'),
@@ -50,6 +79,7 @@ export function useSyncFinancialRecord() {
     }) => postApi('/api/financial/sync', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['financial-records'] })
+      queryClient.invalidateQueries({ queryKey: ['financial-sync-status'] })
       toast.success('Record berhasil disinkronkan')
     },
     onError: (error) => handleError(error, 'Sync financial record', true, 'Gagal sinkronisasi record'),

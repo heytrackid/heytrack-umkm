@@ -139,3 +139,35 @@ export function useImportSuppliers() {
     },
   })
 }
+
+/**
+ * Bulk delete suppliers
+ */
+export function useBulkDeleteSuppliers() {
+  const queryClient = useQueryClient()
+  const logger = createClientLogger('useBulkDeleteSuppliers')
+
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      // Delete one by one to handle individual errors
+      const results = await Promise.allSettled(
+        ids.map(id => deleteApi(`/api/suppliers/${id}`))
+      )
+      
+      const failed = results.filter(r => r.status === 'rejected')
+      if (failed.length > 0) {
+        throw new Error(`Failed to delete ${failed.length} of ${ids.length} suppliers`)
+      }
+      
+      return { deletedCount: ids.length }
+    },
+    onSuccess: (_, variables) => {
+      void queryClient.invalidateQueries({ queryKey: ['suppliers'] })
+      logger.info({ count: variables.length }, 'Suppliers bulk deleted successfully')
+    },
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error)
+      logger.error({ error: message }, 'Failed to bulk delete suppliers')
+    },
+  })
+}

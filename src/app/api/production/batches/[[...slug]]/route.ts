@@ -100,7 +100,7 @@ export const POST = createApiRoute(
   }
 )
 
-// PUT /api/production/batches/[id] - Update batch
+// PUT /api/production/batches/[id] - Update batch with inventory sync
 export const PUT = createApiRoute(
   {
     method: 'PUT',
@@ -114,13 +114,21 @@ export const PUT = createApiRoute(
     }
 
     const id = slug[0]!
-    const { user } = context
+    const { user, supabase } = context
 
     if (!body) {
       return handleAPIError(new Error('Request body is required'), 'API Route')
     }
 
     try {
+      // Get current batch state before update
+      const { data: currentBatch } = await supabase
+        .from('production_batches')
+        .select('status, recipe_id, quantity')
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .single()
+
       const productionService = new ProductionService({
         userId: user.id,
         supabase: context.supabase,
@@ -130,6 +138,30 @@ export const PUT = createApiRoute(
       if (updateData.notes === undefined) delete updateData.notes
 
       const updatedBatch = await productionService.updateProductionBatch(id, updateData)
+
+      // If status changed to COMPLETED, deduct inventory
+      if (updateData.status === 'COMPLETED' && currentBatch?.status !== 'COMPLETED') {
+        try {
+          const { InventorySyncService } = await import('@/services/inventory/InventorySyncService')
+          const inventoryService = new InventorySyncService({ userId: user.id, supabase })
+          
+          // Deduct stock for all recipe ingredients
+          const multiplier = Number(currentBatch?.quantity ?? 1)
+          await inventoryService.deductStockForRecipeProduction(
+            currentBatch!.recipe_id,
+            id,
+            multiplier
+          )
+          
+          // Log success
+          const { apiLogger } = await import('@/lib/logger')
+          apiLogger.info({ batchId: id, recipeId: currentBatch?.recipe_id, multiplier }, 'Inventory deducted for completed production')
+        } catch (inventoryError) {
+          // Log but don't fail the update
+          const { apiLogger } = await import('@/lib/logger')
+          apiLogger.error({ error: inventoryError, batchId: id }, 'Failed to deduct inventory for production (batch still updated)')
+        }
+      }
 
       return createSuccessResponse(updatedBatch, SUCCESS_MESSAGES.PRODUCTION_BATCH_UPDATED)
     } catch (error) {

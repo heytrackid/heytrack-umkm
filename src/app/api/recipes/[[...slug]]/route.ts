@@ -201,6 +201,18 @@ export const POST = createApiRoute(
     cacheInvalidation.recipes()
     apiLogger.info({ userId: user.id, recipeId: createdRecipe.id }, 'Recipe created')
 
+    // Trigger initial HPP calculation for new recipe with ingredients
+    if (ingredients && ingredients.length > 0) {
+      try {
+        const { HppTriggerService } = await import('@/services/hpp/HppTriggerService')
+        const hppTrigger = new HppTriggerService({ userId: user.id, supabase: typedSupabase })
+        await hppTrigger.onRecipeIngredientsChange(createdRecipe.id)
+        apiLogger.info({ recipeId: createdRecipe.id }, 'Initial HPP calculated for new recipe')
+      } catch (hppError) {
+        apiLogger.error({ error: hppError, recipeId: createdRecipe.id }, 'Failed to calculate initial HPP')
+      }
+    }
+
     return createSuccessResponse(recipe, SUCCESS_MESSAGES.RECIPE_CREATED, undefined, 201)
   }
 )

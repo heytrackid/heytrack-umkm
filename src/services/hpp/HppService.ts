@@ -2,90 +2,48 @@ import { AIService } from '@/lib/ai/service'
 import { apiLogger } from '@/lib/logger'
 import type { HppComparison, HppOverview } from '@/modules/hpp/types'
 import { BaseService, type ServiceContext } from '@/services/base'
-import { HppCalculatorService } from './HppCalculatorService'
+import { HppCalculatorService, type HppCalculationResult as CalculatorResult } from './HppCalculatorService'
 
+/**
+ * HPP Service - High-level HPP operations
+ * 
+ * NOTE: For direct HPP calculations, use HppCalculatorService directly.
+ * This service provides additional features like batch calculations,
+ * comparisons, overviews, and AI-powered pricing recommendations.
+ */
 
-
-export interface HppCalculationResult {
-  id: string
-  recipe_id: string
-  recipe_name: string
-  material_cost: number
-  labor_cost: number
-  overhead_cost: number
-  total_hpp: number
-  cost_per_unit: number
-  wac_adjustment: number
-  production_quantity: number
-  material_breakdown: Array<{
-    ingredient_id: string
-    ingredient_name: string
-    quantity: number
-    unit: string
-    unit_price: number
-    total_cost: number
-  }>
-  created_at: string
+export interface HppCalculationResult extends CalculatorResult {
+  id?: string
+  recipe_name?: string
+  created_at?: string
 }
 
-
-
 export class HppService extends BaseService {
+  private calculator: HppCalculatorService
+
   constructor(context: ServiceContext) {
     super(context)
+    this.calculator = new HppCalculatorService(context)
   }
 
+  /**
+   * Calculate HPP for a recipe
+   * Delegates to HppCalculatorService which handles saving
+   */
   async calculateRecipeHpp(recipeId: string): Promise<HppCalculationResult> {
-    const hppCalculator = new HppCalculatorService(this.context)
-    const calculation = await hppCalculator.calculateRecipeHpp(recipeId)
+    // HppCalculatorService already saves to database, so we just call it
+    const calculation = await this.calculator.calculateRecipeHpp(recipeId)
 
-    // Save calculation to database
-    const { data, error } = await this.context.supabase
-      .from('hpp_calculations')
-      .insert({
-        recipe_id: recipeId,
-        material_cost: calculation.material_cost,
-        labor_cost: calculation.labor_cost,
-        overhead_cost: calculation.overhead_cost,
-        total_hpp: calculation.total_hpp,
-        cost_per_unit: calculation.cost_per_unit,
-        production_quantity: calculation.production_quantity,
-        wac_adjustment: calculation.wac_adjustment,
-        user_id: this.context.userId
-      })
-      .select(`
-        id,
-        recipe_id,
-        recipes (
-          name
-        ),
-        material_cost,
-        operational_cost,
-        total_hpp,
-        cost_per_unit,
-        created_at
-      `)
+    // Get recipe name for the result
+    const { data: recipe } = await this.context.supabase
+      .from('recipes')
+      .select('name')
+      .eq('id', recipeId)
       .single()
 
-    if (error) {
-      apiLogger.error({ error, recipeId, userId: this.context.userId }, 'Failed to save HPP calculation')
-      throw error
-    }
-
-    const typedData = data as unknown
     return {
-      id: (typedData as Record<string, unknown>)['id'] as string,
-      recipe_id: (typedData as Record<string, unknown>)['recipe_id'] as string,
-      recipe_name: ((typedData as Record<string, unknown>)['recipes'] as Record<string, unknown>)?.['name'] as string || 'Unknown Recipe',
-      material_cost: calculation.material_cost,
-      labor_cost: calculation.labor_cost,
-      overhead_cost: calculation.overhead_cost,
-      total_hpp: calculation.total_hpp,
-      cost_per_unit: calculation.cost_per_unit,
-      wac_adjustment: calculation.wac_adjustment,
-      production_quantity: calculation.production_quantity,
-      material_breakdown: calculation.material_breakdown,
-      created_at: (typedData as Record<string, unknown>)['created_at'] as string
+      ...calculation,
+      recipe_name: recipe?.name ?? 'Unknown Recipe'
     }
   }
 
