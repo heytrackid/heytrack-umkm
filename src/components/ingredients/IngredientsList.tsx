@@ -513,17 +513,6 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                 onOpenChange={setShowFormDialog}
                 {...(editingIngredient ? { ingredient: editingIngredient } : {})}
             />
-
-            {/* Add Button for Mobile */}
-            {isMobile && (
-                <Button
-                    onClick={handleAdd}
-                    className="fixed bottom-6 right-6 z-50 h-16 w-16 rounded-full shadow-lg"
-                    size="lg"
-                >
-                    <Plus className="h-6 w-6" />
-                </Button>
-            )}
         </div>
     )
 }

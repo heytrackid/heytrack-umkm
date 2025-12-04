@@ -330,63 +330,126 @@ export class AiService extends BaseService {
   private async generateContextualResponse(message: string, businessContext: ContextInfo): Promise<string> {
     // Analyze business context and provide contextual responses
     const lowerMessage = message.toLowerCase()
+    const recipeCount = businessContext.business_data.recipes_count || 0
+    const ingredientCount = businessContext.business_data.ingredients_count || 0
+    const calculatedRecipes = businessContext.business_data.calculated_recipes_count || 0
+    const recentOrders = businessContext.recent_activities || []
 
-    // Check for price-related queries
-    if (lowerMessage.includes('harga') || lowerMessage.includes('price') || lowerMessage.includes('hpp')) {
-      const recipeCount = businessContext.business_data.recipes_count || 0
-      const calculatedRecipes = businessContext.business_data.calculated_recipes_count || 0
+    // ===== GREETING & GENERAL =====
+    if (lowerMessage.match(/^(hai|halo|hi|hello|hey|selamat|pagi|siang|sore|malam)/)) {
+      const greeting = this.getTimeBasedGreeting()
+      const hasData = recipeCount > 0 || ingredientCount > 0 || recentOrders.length > 0
+      
+      if (!hasData) {
+        return `${greeting} 👋\n\nSelamat datang di HeyTrack! Saya asisten AI yang siap bantu bisnis kuliner kamu.\n\n🚀 **Yuk mulai setup:**\n1. Tambah bahan baku di menu **Bahan Baku**\n2. Buat resep produk di menu **Resep**\n3. Hitung HPP untuk tentukan harga jual\n\nMau mulai dari mana?`
+      }
+      
+      return `${greeting} 👋\n\n📊 **Ringkasan bisnis kamu:**\n• ${recipeCount} resep terdaftar\n• ${ingredientCount} jenis bahan baku\n• ${recentOrders.length} pesanan terbaru\n\nAda yang bisa saya bantu hari ini? 😊`
+    }
 
+    // ===== BUSINESS HEALTH / KONDISI =====
+    if (lowerMessage.match(/(kondisi|kesehatan|gimana|bagaimana).*(bisnis|usaha|toko)/i) || 
+        lowerMessage.includes('ringkasan') || lowerMessage.includes('summary')) {
+      const completedOrders = recentOrders.filter(o => o.status === 'DELIVERED').length
+      const pendingOrders = recentOrders.filter(o => o.status === 'PENDING').length
+      const totalRevenue = recentOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0)
+      
+      let healthStatus = '🟢 Excellent'
+      let advice = 'Bisnis kamu berjalan dengan baik!'
+      
+      if (recipeCount === 0 || ingredientCount === 0) {
+        healthStatus = '🟡 Perlu Setup'
+        advice = 'Lengkapi dulu data resep dan bahan baku untuk tracking yang lebih akurat.'
+      } else if (pendingOrders > 5) {
+        healthStatus = '🟠 Perlu Perhatian'
+        advice = `Ada ${pendingOrders} pesanan pending yang perlu diproses.`
+      }
+      
+      return `📊 **Kondisi Bisnis Kamu**\n\nStatus: ${healthStatus}\n\n**Data Terkini:**\n• Resep: ${recipeCount} (${calculatedRecipes} sudah ada HPP)\n• Bahan Baku: ${ingredientCount} jenis\n• Pesanan Terbaru: ${recentOrders.length}\n• Selesai: ${completedOrders} | Pending: ${pendingOrders}\n• Revenue: Rp ${totalRevenue.toLocaleString('id-ID')}\n\n💡 **Saran:** ${advice}`
+    }
+
+    // ===== HPP & PRICING =====
+    if (lowerMessage.match(/(harga|price|hpp|biaya|cost|margin|untung|profit)/i)) {
       if (calculatedRecipes === 0) {
-        return 'Anda belum memiliki perhitungan HPP. Silakan buat resep dan hitung HPP terlebih dahulu di menu Resep.'
+        return `💰 **Tentang HPP (Harga Pokok Produksi)**\n\nKamu belum punya perhitungan HPP. HPP penting untuk:\n• Menentukan harga jual yang tepat\n• Menghitung margin keuntungan\n• Analisis profitabilitas produk\n\n**Langkah selanjutnya:**\n1. Pastikan sudah ada resep (kamu punya ${recipeCount} resep)\n2. Buka menu **HPP Calculator**\n3. Pilih resep dan hitung HPP\n\nMau saya bantu jelaskan cara hitung HPP?`
       }
 
-      return `Anda memiliki ${calculatedRecipes} resep dengan HPP terhitung dari total ${recipeCount} resep. Lihat detail di menu Laporan > Laba/Rugi untuk informasi lengkap harga pokok produksi.`
+      const uncalculated = recipeCount - calculatedRecipes
+      return `💰 **Status HPP Kamu**\n\n✅ ${calculatedRecipes} resep sudah ada HPP\n${uncalculated > 0 ? `⚠️ ${uncalculated} resep belum dihitung HPP` : '🎉 Semua resep sudah ada HPP!'}\n\n**Tips Pricing:**\n• Margin ideal UMKM: 30-50%\n• Jangan lupa hitung biaya operasional\n• Review HPP berkala saat harga bahan berubah\n\nBuka **HPP Calculator** untuk detail lengkap atau **Laporan > Profit** untuk analisis.`
     }
 
-    // Check for recipe-related queries
-    if (lowerMessage.includes('resep') || lowerMessage.includes('recipe')) {
-      const recipeCount = businessContext.business_data.recipes_count || 0
-
+    // ===== RECIPES =====
+    if (lowerMessage.match(/(resep|recipe|menu|produk|masak)/i)) {
       if (recipeCount === 0) {
-        return 'Anda belum memiliki resep. Mari mulai membuat resep pertama Anda di menu Resep.'
+        return `👨‍🍳 **Resep Produk**\n\nKamu belum punya resep. Resep penting untuk:\n• Standarisasi produksi\n• Perhitungan HPP akurat\n• Konsistensi rasa\n\n**Cara buat resep:**\n1. Buka menu **Resep** > **Tambah Resep**\n2. Atau gunakan **AI Recipe Generator** untuk generate otomatis!\n\n✨ Mau coba generate resep dengan AI?`
       }
 
-      return `Anda memiliki ${recipeCount} resep terdaftar. Saya bisa membantu Anda membuat resep baru atau mengoptimalkan resep existing. Apa yang ingin Anda lakukan?`
+      return `👨‍🍳 **Resep Kamu**\n\nTotal: ${recipeCount} resep terdaftar\nDengan HPP: ${calculatedRecipes} resep\n\n**Yang bisa kamu lakukan:**\n• Buat resep baru di menu **Resep**\n• Generate resep dengan **AI Recipe Generator**\n• Hitung HPP di **HPP Calculator**\n\nMau saya bantu apa?`
     }
 
-    // Check for ingredient-related queries
-    if (lowerMessage.includes('bahan') || lowerMessage.includes('ingredient') || lowerMessage.includes('stok')) {
-      const ingredientCount = businessContext.business_data.ingredients_count || 0
-
+    // ===== INGREDIENTS / STOCK =====
+    if (lowerMessage.match(/(bahan|ingredient|stok|stock|inventory|persediaan|habis|restock)/i)) {
       if (ingredientCount === 0) {
-        return 'Anda belum memiliki data bahan baku. Silakan tambahkan bahan baku terlebih dahulu di menu Bahan Baku.'
+        return `📦 **Bahan Baku**\n\nKamu belum punya data bahan baku. Data ini penting untuk:\n• Tracking stok real-time\n• Perhitungan HPP akurat\n• Alert stok rendah otomatis\n\n**Cara menambah:**\n1. Buka menu **Bahan Baku**\n2. Klik **Tambah Bahan**\n3. Atau **Import** dari file CSV\n\nMulai dengan 5-10 bahan utama dulu ya!`
       }
 
-      return `Anda memiliki ${ingredientCount} jenis bahan baku terdaftar. Untuk monitoring stok dan pengelolaan bahan, gunakan menu Bahan Baku.`
+      // Check for low stock
+      const { data: lowStock } = await this.context.supabase
+        .from('ingredients')
+        .select('name, current_stock, min_stock')
+        .eq('user_id', this.context.userId)
+        .eq('is_active', true)
+        .lt('current_stock', 10)
+        .limit(5)
+
+      let stockAlert = ''
+      if (lowStock && lowStock.length > 0) {
+        const items = lowStock.map(i => `• ${i.name}: ${i.current_stock ?? 0} ${(i.current_stock ?? 0) <= 0 ? '❌' : '⚠️'}`).join('\n')
+        stockAlert = `\n\n🚨 **Stok Rendah:**\n${items}\n\nSegera restock ya!`
+      }
+
+      return `📦 **Bahan Baku Kamu**\n\nTotal: ${ingredientCount} jenis bahan${stockAlert}\n\n**Menu Bahan Baku:**\n• Lihat semua stok\n• Catat pembelian baru\n• Set minimum stok untuk alert\n\nAda yang mau ditanyakan tentang stok?`
     }
 
-    // Check for order-related queries
-    if (lowerMessage.includes('pesanan') || lowerMessage.includes('order') || lowerMessage.includes('penjualan')) {
-      const recentOrders = businessContext.recent_activities || []
-
+    // ===== ORDERS =====
+    if (lowerMessage.match(/(pesanan|order|penjualan|transaksi|customer|pelanggan)/i)) {
       if (recentOrders.length === 0) {
-        return 'Belum ada data pesanan. Mari mulai mencatat pesanan pertama Anda di menu Pesanan.'
+        return `🛒 **Pesanan**\n\nBelum ada data pesanan. Fitur pesanan membantu:\n• Catat order dari customer\n• Track status pengerjaan\n• Kirim notifikasi WhatsApp\n• Analisis penjualan\n\n**Cara buat pesanan:**\n1. Buka menu **Pesanan**\n2. Klik **Pesanan Baru**\n3. Pilih customer & produk\n\nMau coba buat pesanan pertama?`
       }
 
-      const completedOrders = recentOrders.filter((order) => order.status === 'DELIVERED').length
-      return `Anda memiliki ${recentOrders.length} pesanan terbaru dengan ${completedOrders} sudah selesai. Lihat detail di menu Pesanan.`
+      const completedOrders = recentOrders.filter(o => o.status === 'DELIVERED').length
+      const pendingOrders = recentOrders.filter(o => o.status === 'PENDING').length
+      const inProgressOrders = recentOrders.filter(o => o.status === 'IN_PROGRESS').length
+
+      return `🛒 **Pesanan Terbaru**\n\n📊 **Status:**\n• ✅ Selesai: ${completedOrders}\n• 🔄 Diproses: ${inProgressOrders}\n• ⏳ Pending: ${pendingOrders}\n\n${pendingOrders > 0 ? `⚠️ Ada ${pendingOrders} pesanan pending yang perlu diproses!\n\n` : ''}Buka menu **Pesanan** untuk detail lengkap.`
     }
 
-    // Default contextual response
-    const hasData = (businessContext.business_data.recipes_count || 0) > 0 ||
-                   (businessContext.business_data.ingredients_count || 0) > 0 ||
-                   (businessContext.recent_activities?.length || 0) > 0
+    // ===== PROFIT / LAPORAN =====
+    if (lowerMessage.match(/(laporan|report|analisis|analysis|profit|laba|rugi|revenue|pendapatan)/i)) {
+      return `📈 **Laporan & Analisis**\n\nHeyTrack menyediakan berbagai laporan:\n\n**📊 Laporan Tersedia:**\n• **Profit/Loss** - Analisis laba rugi\n• **Sales Report** - Tren penjualan\n• **Inventory Report** - Pergerakan stok\n\n**Tips:**\n• Review laporan mingguan untuk insight\n• Bandingkan periode untuk lihat tren\n• Export ke Excel untuk analisis lanjutan\n\nBuka menu **Laporan** untuk mulai analisis!`
+    }
+
+    // ===== HELP / BANTUAN =====
+    if (lowerMessage.match(/(bantu|help|cara|gimana|bagaimana|tutorial|panduan)/i)) {
+      return `🤝 **Saya Bisa Bantu Apa?**\n\n**Topik yang bisa ditanyakan:**\n\n📦 **Bahan Baku**\n"Gimana cara tambah bahan?"\n"Stok apa yang rendah?"\n\n👨‍🍳 **Resep**\n"Cara buat resep baru"\n"Generate resep dengan AI"\n\n💰 **HPP & Harga**\n"Cara hitung HPP"\n"Berapa margin ideal?"\n\n🛒 **Pesanan**\n"Status pesanan terbaru"\n"Cara buat pesanan"\n\n📈 **Laporan**\n"Analisis profit bulan ini"\n"Kondisi bisnis saya"\n\nTanyakan apa saja! 😊`
+    }
+
+    // ===== DEFAULT RESPONSE =====
+    const hasData = recipeCount > 0 || ingredientCount > 0 || recentOrders.length > 0
 
     if (hasData) {
-      return 'Halo! Saya melihat bisnis kuliner Anda sudah memiliki beberapa data. Saya bisa membantu dengan resep, perhitungan harga, bahan baku, dan pesanan. Apa yang ingin Anda ketahui?'
+      return `Hmm, saya kurang paham maksudnya 🤔\n\nCoba tanyakan tentang:\n• **Kondisi bisnis** - "Gimana kondisi bisnis saya?"\n• **Stok bahan** - "Bahan apa yang perlu restock?"\n• **HPP & Harga** - "Berapa HPP resep saya?"\n• **Pesanan** - "Ada berapa pesanan pending?"\n\nAtau ketik **"bantuan"** untuk lihat semua topik!`
     }
 
-    return 'Selamat datang di asisten AI bisnis kuliner! Mari mulai membangun bisnis Anda. Saya bisa membantu dengan membuat resep, menghitung harga pokok produksi, mengelola bahan baku, dan mencatat pesanan. Apa yang ingin Anda mulai?'
+    return `👋 Halo! Selamat datang di HeyTrack!\n\nSaya asisten AI yang siap bantu bisnis kuliner kamu. Sepertinya kamu baru mulai ya?\n\n🚀 **Langkah awal:**\n1. Tambah **Bahan Baku** yang kamu pakai\n2. Buat **Resep** produk\n3. Hitung **HPP** untuk tentukan harga\n4. Mulai catat **Pesanan**\n\nMau mulai dari mana? Atau ketik **"bantuan"** untuk lihat semua yang bisa saya bantu! 😊`
+  }
+
+  private getTimeBasedGreeting(): string {
+    const hour = new Date().getHours()
+    if (hour < 11) return 'Selamat pagi'
+    if (hour < 15) return 'Selamat siang'
+    if (hour < 18) return 'Selamat sore'
+    return 'Selamat malam'
   }
 
   private async saveMessage(sessionId: string, userId: string, role: 'user' | 'assistant', content: string): Promise<void> {

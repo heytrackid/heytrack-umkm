@@ -1,11 +1,12 @@
-import { Send, Loader2 } from '@/components/icons'
-import { type FormEvent } from 'react'
+import { Loader2, Send } from '@/components/icons'
 import type { ChangeEvent, KeyboardEvent } from 'react'
+import { type FormEvent } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
+import { QuickActionTemplates } from '@/app/ai-chatbot/components/QuickActionTemplates'
 import { SuggestionChips } from '@/app/ai-chatbot/components/SuggestionChips'
 
 interface ChatInputProps {
@@ -30,6 +31,12 @@ export const ChatInput = ({ input, setInput, onSendMessage, isLoading }: ChatInp
   return (
     <div className="border-t border-border/20 bg-background px-4 py-4 safe-bottom">
       <div className="space-y-3 max-w-4xl mx-auto">
+        {/* Quick Action Templates */}
+        <QuickActionTemplates
+          onSelectTemplate={handleSuggestionClick}
+          disabled={isLoading}
+        />
+
         {/* Quick Suggestions */}
         <SuggestionChips
           onSuggestionClick={handleSuggestionClick}
