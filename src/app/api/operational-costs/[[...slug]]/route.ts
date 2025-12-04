@@ -49,7 +49,7 @@ export const GET = createApiRoute(
   }
 )
 
-// POST /api/operational-costs - Create operational cost
+// POST /api/operational-costs - Create operational cost with HPP trigger
 export const POST = createApiRoute(
   {
     method: 'POST',
@@ -61,17 +61,33 @@ export const POST = createApiRoute(
     if (slug && slug.length > 0) {
       return handleAPIError(new Error('Method not allowed'), 'API Route')
     }
-    return createCreateHandler(
+
+    const result = await createCreateHandler(
       {
         table: 'operational_costs',
         selectFields: '*',
       },
       SUCCESS_MESSAGES.OPERATIONAL_COST_CREATED
     )(context, undefined, body)
+
+    // Trigger HPP recalculation for all recipes when operational costs change
+    if (result.status === 201) {
+      try {
+        const { HppTriggerService } = await import('@/services/hpp/HppTriggerService')
+        const { user, supabase } = context
+        const hppTrigger = new HppTriggerService({ userId: user.id, supabase })
+        await hppTrigger.onOperationalCostsChange()
+      } catch (hppError) {
+        const { apiLogger } = await import('@/lib/logger')
+        apiLogger.error({ error: hppError }, 'Failed to trigger HPP recalculation on operational cost create')
+      }
+    }
+
+    return result
   }
 )
 
-// PUT /api/operational-costs/[id] - Update operational cost
+// PUT /api/operational-costs/[id] - Update operational cost with HPP trigger
 export const PUT = createApiRoute(
   {
     method: 'PUT',
@@ -88,13 +104,29 @@ export const PUT = createApiRoute(
       ...context,
       params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
     }
-    return createUpdateHandler(
+
+    const result = await createUpdateHandler(
       {
         table: 'operational_costs',
         selectFields: '*',
       },
       SUCCESS_MESSAGES.OPERATIONAL_COST_UPDATED
     )(contextWithId, undefined, body)
+
+    // Trigger HPP recalculation when operational costs change
+    if (result.status === 200 && body && 'amount' in body) {
+      try {
+        const { HppTriggerService } = await import('@/services/hpp/HppTriggerService')
+        const { user, supabase } = context
+        const hppTrigger = new HppTriggerService({ userId: user.id, supabase })
+        await hppTrigger.onOperationalCostsChange()
+      } catch (hppError) {
+        const { apiLogger } = await import('@/lib/logger')
+        apiLogger.error({ error: hppError }, 'Failed to trigger HPP recalculation on operational cost update')
+      }
+    }
+
+    return result
   }
 )
 

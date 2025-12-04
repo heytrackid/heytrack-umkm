@@ -118,8 +118,9 @@ export const POST = createApiRoute(
 )
 
 /**
- * PUT /api/ingredients/[id] - Update ingredient
- * Updates an existing ingredient record with validation and cache invalidation
+ * PUT /api/ingredients/[id] - Update ingredient with HPP trigger
+ * Updates an existing ingredient record with validation, cache invalidation,
+ * and automatic HPP recalculation when price changes
  *
  * @route PUT /api/ingredients/[id]
  *
@@ -145,14 +146,21 @@ export const PUT = createApiRoute(
     securityPreset: SecurityPresets.basic(),
   },
   async (context: RouteContext, _query, body) => {
-    const { slug } = parseRouteParams(context.params)
+    const { slug, id } = parseRouteParams(context.params)
     if (!slug || slug.length !== 1 || !slug[0]) {
       return handleAPIError(new Error('Invalid path'), 'PUT /api/ingredients')
     }
+
+    const { user, supabase } = context
+    const ingredientId = slug[0]
+
+    // Check if price is being updated
+    const priceChanged = body && ('price_per_unit' in body || 'weighted_average_cost' in body)
+
     // Pass the ID from slug to context.params for createUpdateHandler
     const contextWithId = {
       ...context,
-      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+      params: { ...context.params, id: ingredientId } as Record<string, string | string[]>
     }
     const result = await createUpdateHandler(
       {
@@ -164,8 +172,20 @@ export const PUT = createApiRoute(
 
     // Invalidate cache after successful update
     if (result.status === 200) {
-      const { id } = parseRouteParams(context.params)
       cacheInvalidation.ingredients(id)
+
+      // Trigger HPP recalculation if price changed
+      if (priceChanged) {
+        try {
+          const { HppTriggerService } = await import('@/services/hpp/HppTriggerService')
+          const hppTrigger = new HppTriggerService({ userId: user.id, supabase })
+          await hppTrigger.onIngredientPriceChange(ingredientId)
+        } catch (hppError) {
+          // Log but don't fail the update
+          const { apiLogger } = await import('@/lib/logger')
+          apiLogger.error({ error: hppError, ingredientId }, 'Failed to trigger HPP recalculation on price change')
+        }
+      }
     }
 
     return result

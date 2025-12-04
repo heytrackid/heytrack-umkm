@@ -293,6 +293,17 @@ export const POST = createApiRoute(
       }
     }
 
+    // Update customer stats if order is DELIVERED
+    if (orderStatus === 'DELIVERED' && body.customer_id && body.total_amount) {
+      try {
+        const { CustomerStatsService } = await import('@/services/stats/CustomerStatsService')
+        const statsService = new CustomerStatsService({ userId: user.id, supabase: typedSupabase })
+        await statsService.updateStatsFromOrder(body.customer_id, body.total_amount)
+      } catch (statsError) {
+        apiLogger.warn({ error: statsError, customerId: body.customer_id }, 'Failed to update customer stats')
+      }
+    }
+
     cacheInvalidation.orders()
     apiLogger.info({ userId: user.id, orderId: createdOrder.id, incomeRecorded: Boolean(incomeRecordId) }, 'POST /api/orders - Success')
 
@@ -300,7 +311,7 @@ export const POST = createApiRoute(
   }
 )
 
-// PUT /api/orders/[id] - Update order
+// PUT /api/orders/[id] - Update order with financial sync
 export const PUT = createApiRoute(
   {
     method: 'PUT',
@@ -313,6 +324,85 @@ export const PUT = createApiRoute(
     if (!slug || slug.length !== 1 || !slug[0]) {
       return handleAPIError(new Error('Invalid path'), 'PUT /api/orders')
     }
+
+    const { user, supabase } = context
+    const orderId = slug[0]
+    const typedSupabase = supabase as TypedSupabaseClient
+
+    // Get current order state
+    const { data: currentOrder } = await typedSupabase
+      .from('orders')
+      .select('status, total_amount, order_no, customer_name, customer_id, delivery_date, order_date, financial_record_id')
+      .eq('id', orderId)
+      .eq('user_id', user.id)
+      .single()
+
+    if (!currentOrder) {
+      return handleAPIError(new Error('Order not found'), 'PUT /api/orders')
+    }
+
+    const newStatus = body?.status as OrderStatus | undefined
+    const statusChanged = newStatus && newStatus !== currentOrder.status
+
+    // Handle financial record sync based on status change
+    if (statusChanged) {
+      // Import FinancialSyncService dynamically to avoid circular deps
+      const { FinancialSyncService } = await import('@/services/financial/FinancialSyncService')
+      const financialService = new FinancialSyncService({ userId: user.id, supabase: typedSupabase })
+
+      // If changing TO DELIVERED - create income record
+      if (newStatus === 'DELIVERED' && !currentOrder.financial_record_id) {
+        try {
+          await financialService.createIncomeFromOrder(
+            orderId,
+            currentOrder.order_no,
+            body?.total_amount ?? currentOrder.total_amount ?? 0,
+            body?.customer_name ?? currentOrder.customer_name ?? undefined,
+            body?.delivery_date ?? currentOrder.delivery_date ?? currentOrder.order_date ?? undefined
+          )
+          apiLogger.info({ orderId }, 'Income record created on status change to DELIVERED')
+        } catch (err) {
+          apiLogger.error({ error: err, orderId }, 'Failed to create income record on status change')
+        }
+      }
+
+      // If changing TO CANCELLED - reverse income record
+      if (newStatus === 'CANCELLED' && currentOrder.financial_record_id) {
+        try {
+          await financialService.reverseOrderIncome(orderId)
+          apiLogger.info({ orderId }, 'Income record reversed on order cancellation')
+        } catch (err) {
+          apiLogger.error({ error: err, orderId }, 'Failed to reverse income record on cancellation')
+        }
+      }
+
+      // Update customer stats based on status change
+      const customerId = body?.customer_id ?? currentOrder.customer_id
+      const orderAmount = body?.total_amount ?? currentOrder.total_amount ?? 0
+      
+      if (customerId && orderAmount > 0) {
+        try {
+          const { CustomerStatsService } = await import('@/services/stats/CustomerStatsService')
+          const statsService = new CustomerStatsService({ userId: user.id, supabase: typedSupabase })
+          
+          // If changing TO DELIVERED - increment customer stats
+          if (newStatus === 'DELIVERED' && currentOrder.status !== 'DELIVERED') {
+            await statsService.updateStatsFromOrder(customerId, orderAmount)
+            apiLogger.info({ orderId, customerId }, 'Customer stats updated on DELIVERED')
+          }
+          
+          // If changing FROM DELIVERED to CANCELLED - reverse customer stats
+          if (newStatus === 'CANCELLED' && currentOrder.status === 'DELIVERED') {
+            await statsService.reverseStatsFromOrder(customerId, orderAmount)
+            apiLogger.info({ orderId, customerId }, 'Customer stats reversed on CANCELLED')
+          }
+        } catch (statsError) {
+          apiLogger.warn({ error: statsError, customerId }, 'Failed to update customer stats on status change')
+        }
+      }
+    }
+
+    // Proceed with standard update
     const contextWithId = {
       ...context,
       params: { ...context.params, id: slug[0] } as Record<string, string | string[]>

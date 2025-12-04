@@ -12,29 +12,13 @@ import { Label } from '@/components/ui/label'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { handleError } from '@/lib/error-handling'
 import { useRecipes } from '@/hooks/useRecipes'
+import { handleError } from '@/lib/error-handling'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 
 
 
-
-interface ApiErrorPayload {
-    message?: string
-}
-
-
-
-
-
-const isApiErrorPayload = (value: unknown): value is ApiErrorPayload => {
-    if (typeof value !== 'object' || value === null) {
-        return false
-    }
-    const { message } = value as { message?: unknown }
-    return message === undefined || typeof message === 'string'
-}
 
 interface ProductionFormDialogProps {
     open: boolean
@@ -62,19 +46,8 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
             planned_date: string
             notes: string | null
         }) => {
-            const response = await fetch('/api/production-batches', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-            })
-
-            if (!response.ok) {
-                const errorPayload: unknown = await response.json()
-                const errorMessage = isApiErrorPayload(errorPayload) ? errorPayload.message : undefined
-                throw new Error(errorMessage ?? 'Gagal membuat batch produksi')
-            }
-
-            return response.json()
+            const { postApi } = await import('@/lib/query/query-helpers')
+            return postApi('/api/production-batches', data)
         },
         onSuccess: () => {
             void queryClient.invalidateQueries({ queryKey: ['production-batches'] })

@@ -1,28 +1,62 @@
 'use client'
 
 import { DollarSign, TrendingUp, Truck, Upload, Users } from '@/components/icons'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { generateSuppliersTemplate, parseSuppliersCSV } from '@/components/import/csv-helpers'
 import { ImportDialog } from '@/components/import/ImportDialog'
 import { AppLayout } from '@/components/layout/app-layout'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-
-import { SupplierForm } from '@/app/suppliers/components/SupplierForm'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { SharedDataTable } from '@/components/shared/SharedDataTable'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
 import { BreadcrumbPatterns, PageBreadcrumb, StatsCards } from '@/components/ui/index'
-import { useCreateSupplier, useImportSuppliers, useSuppliers } from '@/hooks/useSuppliers'
+import {
+    useBulkDeleteSuppliers,
+    useCreateSupplier,
+    useDeleteSupplier,
+    useImportSuppliers,
+    useSuppliers,
+    useUpdateSupplier
+} from '@/hooks/useSuppliers'
+import { toast } from 'sonner'
 
+import { SupplierEditDialog } from '@/app/suppliers/components/SupplierEditDialog'
+import { SupplierForm } from '@/app/suppliers/components/SupplierForm'
 import type { Supplier } from './components/types'
 
 const SuppliersPage = (): JSX.Element => {
-    const { data: suppliersData } = useSuppliers()
+    const { data: suppliersData, refetch, isLoading } = useSuppliers()
     const suppliers = suppliersData as Supplier[] | undefined
     const [importDialogOpen, setImportDialogOpen] = useState(false)
     const importSuppliersMutation = useImportSuppliers()
     const createSupplierMutation = useCreateSupplier()
+    const deleteSupplierMutation = useDeleteSupplier()
+    const bulkDeleteMutation = useBulkDeleteSuppliers()
+    const updateSupplierMutation = useUpdateSupplier()
+
+    // Delete confirmation state
+    const [deleteConfirm, setDeleteConfirm] = useState<{
+        show: boolean
+        supplier: Supplier | null
+        bulk: boolean
+        suppliers: Supplier[]
+    }>({ show: false, supplier: null, bulk: false, suppliers: [] })
+
+    // Edit dialog state
+    const [editDialog, setEditDialog] = useState<{
+        open: boolean
+        supplier: Supplier | null
+    }>({ open: false, supplier: null })
 
     // Calculate stats
     const totalSuppliers = suppliers?.length ?? 0
@@ -41,6 +75,125 @@ const SuppliersPage = (): JSX.Element => {
             sum + (Number(s.lead_time_days) || 0), 0
         ) / suppliers.length
         : 0
+
+    // Table columns
+    const columns = [
+        {
+            key: 'name' as const,
+            header: 'Nama',
+            sortable: true,
+            render: (value: unknown) => (
+                <span className="font-medium">{String(value)}</span>
+            )
+        },
+        {
+            key: 'contact_person' as const,
+            header: 'Kontak',
+            render: (value: unknown) => String(value || '-')
+        },
+        {
+            key: 'email' as const,
+            header: 'Email',
+            hideOnMobile: true,
+            render: (value: unknown) => String(value || '-')
+        },
+        {
+            key: 'supplier_type' as const,
+            header: 'Tipe',
+            filterable: true,
+            filterType: 'select' as const,
+            filterOptions: [
+                { label: 'Preferred', value: 'preferred' },
+                { label: 'Standard', value: 'standard' },
+                { label: 'Trial', value: 'trial' },
+                { label: 'Blacklisted', value: 'blacklisted' },
+            ],
+            render: (value: unknown) => {
+                const type = String(value || 'standard')
+                const styles: Record<string, string> = {
+                    preferred: 'bg-blue-100 text-blue-800',
+                    standard: 'bg-green-100 text-green-800',
+                    trial: 'bg-yellow-100 text-yellow-800',
+                    blacklisted: 'bg-red-100 text-red-800',
+                }
+                const labels: Record<string, string> = {
+                    preferred: 'Preferred',
+                    standard: 'Standard',
+                    trial: 'Trial',
+                    blacklisted: 'Blacklisted',
+                }
+                return (
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${styles[type] || 'bg-green-100 text-green-800'}`}>
+                        {labels[type] || 'Standard'}
+                    </span>
+                )
+            }
+        },
+        {
+            key: 'is_active' as const,
+            header: 'Status',
+            filterable: true,
+            filterType: 'select' as const,
+            filterOptions: [
+                { label: 'Aktif', value: 'true' },
+                { label: 'Tidak Aktif', value: 'false' },
+            ],
+            render: (value: unknown) => (
+                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    value ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                }`}>
+                    {value ? 'Aktif' : 'Tidak Aktif'}
+                </span>
+            )
+        },
+        {
+            key: 'rating' as const,
+            header: 'Rating',
+            hideOnMobile: true,
+            render: (value: unknown) => value ? `${value}/5` : '-'
+        },
+    ]
+
+    // Handlers
+    const handleDelete = useCallback((supplier: Supplier) => {
+        setDeleteConfirm({ show: true, supplier, bulk: false, suppliers: [] })
+    }, [])
+
+    const handleBulkDelete = useCallback((suppliersToDelete: Supplier[]) => {
+        setDeleteConfirm({ show: true, supplier: null, bulk: true, suppliers: suppliersToDelete })
+    }, [])
+
+    const confirmDelete = useCallback(async () => {
+        try {
+            if (deleteConfirm.bulk && deleteConfirm.suppliers.length > 0) {
+                const ids = deleteConfirm.suppliers.map(s => s.id)
+                await bulkDeleteMutation.mutateAsync(ids)
+                toast.success(`${deleteConfirm.suppliers.length} supplier berhasil dihapus`)
+            } else if (deleteConfirm.supplier) {
+                await deleteSupplierMutation.mutateAsync(deleteConfirm.supplier.id)
+                toast.success('Supplier berhasil dihapus')
+            }
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Gagal menghapus supplier')
+        } finally {
+            setDeleteConfirm({ show: false, supplier: null, bulk: false, suppliers: [] })
+        }
+    }, [deleteConfirm, bulkDeleteMutation, deleteSupplierMutation])
+
+    const handleEdit = useCallback((supplier: Supplier) => {
+        setEditDialog({ open: true, supplier })
+    }, [])
+
+    const handleEditSubmit = useCallback(async (data: Partial<Supplier>) => {
+        if (!editDialog.supplier) return
+        
+        await updateSupplierMutation.mutateAsync({
+            id: editDialog.supplier.id,
+            data
+        })
+        toast.success('Supplier berhasil diupdate')
+        setEditDialog({ open: false, supplier: null })
+    }, [editDialog.supplier, updateSupplierMutation])
 
     return (
         <AppLayout>
@@ -109,69 +262,66 @@ const SuppliersPage = (): JSX.Element => {
                      }
                  ]} />
 
-                {/* Main Content */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Daftar Supplier</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="rounded-md border">
-                            <Table>
-                                <TableHeader>
-                                     <TableRow>
-                                         <TableHead>Nama</TableHead>
-                                         <TableHead>Kontak</TableHead>
-                                         <TableHead>Email</TableHead>
-                                         <TableHead>Tipe</TableHead>
-                                         <TableHead>Status</TableHead>
-                                         <TableHead className="text-right">Rating</TableHead>
-                                     </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {!suppliers || suppliers.length === 0 ? (
-                                        <TableRow>
-                                            <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                                                Belum ada data supplier
-                                            </TableCell>
-                                        </TableRow>
-                                    ) : (
-                                         suppliers.map((supplier) => (
-                                             <TableRow key={supplier.id}>
-                                                 <TableCell className="font-medium">{supplier.name}</TableCell>
-                                                 <TableCell>{supplier.contact_person ?? '-'}</TableCell>
-                                                 <TableCell>{supplier.email ?? '-'}</TableCell>
-                                                 <TableCell>
-                                                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                                         supplier.supplier_type === 'preferred' ? 'bg-blue-100 text-blue-800' :
-                                                         supplier.supplier_type === 'standard' ? 'bg-green-100 text-green-800' :
-                                                         supplier.supplier_type === 'trial' ? 'bg-yellow-100 text-yellow-800' :
-                                                         'bg-red-100 text-red-800'
-                                                     }`}>
-                                                         {supplier.supplier_type === 'preferred' ? 'Preferred' :
-                                                          supplier.supplier_type === 'standard' ? 'Standard' :
-                                                          supplier.supplier_type === 'trial' ? 'Trial' : 'Blacklisted'}
-                                                     </span>
-                                                 </TableCell>
-                                                 <TableCell>
-                                                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                                         supplier.is_active
-                                                             ? 'bg-green-100 text-green-800'
-                                                             : 'bg-gray-100 text-gray-800'
-                                                     }`}>
-                                                         {supplier.is_active ? 'Aktif' : 'Tidak Aktif'}
-                                                     </span>
-                                                 </TableCell>
-                                                 <TableCell className="text-right">
-                                                     {supplier.rating ? `${supplier.rating}/5` : '-'}
-                                                 </TableCell>
-                                             </TableRow>
-                                         ))
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </div>
-                    </CardContent>
-                </Card>
+                {/* Data Table */}
+                <SharedDataTable
+                    data={suppliers || []}
+                    columns={columns}
+                    title="Daftar Supplier"
+                    searchPlaceholder="Cari supplier..."
+                    emptyMessage="Belum ada data supplier"
+                    emptyDescription="Tambahkan supplier baru untuk memulai"
+                    loading={isLoading}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onBulkDelete={handleBulkDelete}
+                    onRefresh={() => refetch()}
+                    enableBulkActions={true}
+                    enablePagination={true}
+                    pageSizeOptions={[10, 25, 50, 100]}
+                    exportable={true}
+                    refreshable={true}
+                />
+
+                {/* Delete Confirmation Dialog */}
+                <AlertDialog 
+                    open={deleteConfirm.show} 
+                    onOpenChange={(open) => !open && setDeleteConfirm({ show: false, supplier: null, bulk: false, suppliers: [] })}
+                >
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>
+                                {deleteConfirm.bulk 
+                                    ? `Hapus ${deleteConfirm.suppliers.length} Supplier?`
+                                    : 'Hapus Supplier?'
+                                }
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                {deleteConfirm.bulk 
+                                    ? `Anda akan menghapus ${deleteConfirm.suppliers.length} supplier. Tindakan ini tidak dapat dibatalkan.`
+                                    : `Anda akan menghapus supplier "${deleteConfirm.supplier?.name}". Tindakan ini tidak dapat dibatalkan.`
+                                }
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Batal</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={confirmDelete}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                                Hapus
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+
+                {/* Edit Dialog */}
+                <SupplierEditDialog
+                    open={editDialog.open}
+                    supplier={editDialog.supplier}
+                    onOpenChange={(open) => !open && setEditDialog({ open: false, supplier: null })}
+                    onSubmit={handleEditSubmit}
+                    isLoading={updateSupplierMutation.isPending}
+                />
 
                 {/* Import Dialog */}
                 <ImportDialog

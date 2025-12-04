@@ -4,25 +4,25 @@
 'use client'
 
 import { Plus, Upload } from '@/components/icons'
-import { useCallback, useMemo, useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCustomers, useDeleteCustomer, useImportCustomers } from '@/hooks/useCustomers'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useCallback, useMemo, useState } from 'react'
 
-import { Button } from '@/components/ui/button'
-import { PageHeader } from '@/components/layout/PageHeader'
 import { ImportDialog } from '@/components/import/ImportDialog'
 import { generateCustomersTemplate, parseCustomersCSV } from '@/components/import/csv-helpers'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { Button } from '@/components/ui/button'
 import { useSettings } from '@/contexts/settings-context'
-import { toast } from 'sonner'
 import { useResponsive } from '@/hooks/useResponsive'
 import { handleError } from '@/lib/error-handling'
+import { toast } from 'sonner'
 
 
+import { ServerPagination } from '@/components/ui/server-pagination'
 import { CustomerDialog } from './CustomerDialog'
 import { CustomerSearchFilters } from './CustomerSearchFilters'
 import { CustomerStats } from './CustomerStats'
 import { CustomersTable } from './CustomersTable'
-import { ServerPagination } from '@/components/ui/server-pagination'
 
 import type { Customer } from './types'
 
@@ -65,11 +65,8 @@ export const CustomersLayout = (): JSX.Element => {
   const importCustomersMutation = useImportCustomers()
   const bulkDeleteMutation = useMutation({
     mutationFn: async (customerIds: string[]) => {
-      await Promise.all(
-        customerIds.map(id =>
-          fetch(`/api/customers/${id}`, { method: 'DELETE' })
-        )
-      )
+      const { deleteApi } = await import('@/lib/query/query-helpers')
+      await Promise.all(customerIds.map(id => deleteApi(`/api/customers/${id}`)))
     },
     onSuccess: (_, customerIds) => {
       queryClient.invalidateQueries({ queryKey: ['customers'] })
