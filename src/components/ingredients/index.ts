@@ -6,7 +6,8 @@
  */
 
 export { EnhancedEmptyState } from './EnhancedEmptyState'
-export { StockBadge, CompactStockIndicator } from './StockBadge'
 export { EnhancedIngredientForm } from './EnhancedIngredientForm'
+export { InventorySummaryCard } from './InventorySummaryCard'
 export { MobileIngredientCard, MobileIngredientList } from './MobileIngredientCard'
+export { CompactStockIndicator, StockBadge } from './StockBadge'
 
