@@ -2,7 +2,7 @@
  
 
 
-import { Edit, Filter, MoreVertical, Plus, Search, Trash2, X } from '@/components/icons'
+import { Edit, MoreVertical, Plus, Search, Trash2, X } from '@/components/icons'
 
 import { memo, useCallback, useMemo, useState } from 'react'
 
@@ -40,6 +40,7 @@ import { toast } from 'sonner'
 import type { Row } from '@/types/database'
 
 import { IngredientFormDialog } from '@/components/ingredients/IngredientFormDialog'
+import { InventorySummaryCard } from '@/components/ingredients/InventorySummaryCard'
 import { MobileIngredientList } from '@/components/ingredients/MobileIngredientCard'
 import { StockBadge } from '@/components/ingredients/StockBadge'
 
@@ -47,6 +48,7 @@ import { StockBadge } from '@/components/ingredients/StockBadge'
 
 type Ingredient = Row<'ingredients'>
 type StockFilter = 'all' | 'low' | 'normal' | 'out'
+type ExpiryFilter = 'all' | 'expired' | 'expiring' | 'safe'
 type CategoryFilter = 'all' | 'Bahan Basah' | 'Bahan Kering' | 'Buah' | 'Bumbu' | 'Dairy' | 'Kemasan' | 'Lainnya' | 'Protein' | 'Sayuran'
 
 interface IngredientsListProps {
@@ -68,6 +70,7 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
     // Filter and pagination states
     const [searchTerm, setSearchTerm] = useState('')
     const [stockFilter, setStockFilter] = useState<StockFilter>('all')
+    const [expiryFilter, setExpiryFilter] = useState<ExpiryFilter>('all')
     const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
     const [supplierFilter, setSupplierFilter] = useState('all')
     const [page, setPage] = useState(1)
@@ -95,6 +98,9 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
     const filteredData = useMemo(() => {
         if (!ingredients) { return [] }
 
+        const today = new Date()
+        const sevenDaysFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
+
         return ingredients.filter((item: Ingredient) => {
             // Search filter
             const matchesSearch = !searchTerm || item.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -112,6 +118,21 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                 matchesStock = currentStock > minStock
             }
 
+            // Expiry filter
+            let matchesExpiry = true
+            if (expiryFilter !== 'all' && item.expiry_date) {
+                const expiryDate = new Date(item.expiry_date)
+                if (expiryFilter === 'expired') {
+                    matchesExpiry = expiryDate <= today
+                } else if (expiryFilter === 'expiring') {
+                    matchesExpiry = expiryDate > today && expiryDate <= sevenDaysFromNow
+                } else if (expiryFilter === 'safe') {
+                    matchesExpiry = expiryDate > sevenDaysFromNow
+                }
+            } else if (expiryFilter !== 'all' && !item.expiry_date) {
+                matchesExpiry = expiryFilter === 'safe' // Items without expiry are considered safe
+            }
+
             // Category filter
             const matchesCategory = categoryFilter === 'all' ||
                 (item.category ?? 'Lainnya') === categoryFilter
@@ -120,9 +141,9 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
             const matchesSupplier = supplierFilter === 'all' ||
                 (item.supplier ?? '') === supplierFilter
 
-            return matchesSearch && matchesStock && matchesCategory && matchesSupplier
+            return matchesSearch && matchesStock && matchesExpiry && matchesCategory && matchesSupplier
         }).sort((a: Ingredient, b: Ingredient) => a.name.localeCompare(b.name))
-    }, [ingredients, searchTerm, stockFilter, categoryFilter, supplierFilter])
+    }, [ingredients, searchTerm, stockFilter, expiryFilter, categoryFilter, supplierFilter])
 
     // Handle pagination changes
     const handlePageChange = useCallback((newPage: number) => {
@@ -139,12 +160,14 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
         {
             search: searchTerm,
             stock: stockFilter,
+            expiry: expiryFilter,
             category: categoryFilter,
             supplier: supplierFilter
         },
         {
             search: 'Search',
             stock: 'Stock',
+            expiry: 'Expiry',
             category: 'Category',
             supplier: 'Supplier'
         },
@@ -154,6 +177,9 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
             }
             if (newFilters.stock !== undefined) {
                 setStockFilter(newFilters.stock as StockFilter)
+            }
+            if (newFilters.expiry !== undefined) {
+                setExpiryFilter(newFilters.expiry as ExpiryFilter)
             }
             if (newFilters.category !== undefined) {
                 setCategoryFilter(newFilters.category as CategoryFilter)
@@ -167,6 +193,7 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
     const handleClearAllFilters = useCallback(() => {
         setSearchTerm('')
         setStockFilter('all')
+        setExpiryFilter('all')
         setCategoryFilter('all')
         setSupplierFilter('all')
     }, [])
@@ -217,7 +244,7 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
         }
     }, [selectedIngredient, deleteIngredient])
 
-    const hasActiveFilters = Boolean(searchTerm) || stockFilter !== 'all' || categoryFilter !== 'all' || supplierFilter !== 'all'
+    const hasActiveFilters = Boolean(searchTerm) || stockFilter !== 'all' || expiryFilter !== 'all' || categoryFilter !== 'all' || supplierFilter !== 'all'
 
     // Empty state
     if (!isLoading && (!ingredients || ingredients.length === 0)) {
@@ -244,6 +271,9 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
 
     return (
         <div className="space-y-4">
+            {/* Inventory Summary */}
+            <InventorySummaryCard ingredients={ingredients} />
+
             {/* Search and Filter Bar */}
             <Card>
                 <CardContent className="p-4">
@@ -262,8 +292,7 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
 
                             {/* Stock Filter */}
                             <Select value={stockFilter} onValueChange={(v) => setStockFilter(v as StockFilter)}>
-                                <SelectTrigger className="w-full sm:w-[180px]">
-                                    <Filter className="h-4 w-4 mr-2" />
+                                <SelectTrigger className="w-full sm:w-[150px]">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -274,6 +303,19 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                                 </SelectContent>
                             </Select>
 
+                            {/* Expiry Filter */}
+                            <Select value={expiryFilter} onValueChange={(v) => setExpiryFilter(v as ExpiryFilter)}>
+                                <SelectTrigger className="w-full sm:w-[150px]">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Semua Expiry</SelectItem>
+                                    <SelectItem value="expired">Expired</SelectItem>
+                                    <SelectItem value="expiring">Segera Expired</SelectItem>
+                                    <SelectItem value="safe">Aman</SelectItem>
+                                </SelectContent>
+                            </Select>
+
                             {/* Clear Filters */}
                             {hasActiveFilters && (
                                 <Button
@@ -281,43 +323,64 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                                     size="icon"
                                     onClick={handleClearAllFilters}
                                     className="shrink-0"
+                                    aria-label="Hapus semua filter"
                                 >
                                     <X className="h-4 w-4" />
                                 </Button>
                             )}
                         </div>
 
-                        {/* Category Filter */}
-                        <div className="flex gap-2 overflow-x-auto pb-1">
-                            {(['all', 'Bahan Kering', 'Bahan Basah', 'Bumbu', 'Protein', 'Sayuran', 'Buah', 'Dairy', 'Kemasan', 'Lainnya'] as CategoryFilter[]).map((cat) => (
-                                <Button
-                                    key={cat}
-                                    variant={categoryFilter === cat ? 'default' : 'outline'}
-                                    size="sm"
-                                    onClick={() => setCategoryFilter(cat)}
-                                    className="whitespace-nowrap"
-                                >
-                                    {cat === 'all' ? 'Semua Kategori' : cat}
-                                </Button>
-                            ))}
-                        </div>
-
-                        {/* Supplier Filter */}
-                        <Select
-                            value={supplierFilter}
-                            onValueChange={setSupplierFilter}
-                        >
-                            <SelectTrigger className="w-full sm:w-[180px]">
-                                <SelectValue placeholder="Supplier" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {suppliers.map((supplier) => (
-                                    <SelectItem key={supplier} value={supplier}>
-                                        {supplier === 'all' ? 'Semua Supplier' : supplier}
-                                    </SelectItem>
+                        {/* Category & Supplier Filters Row */}
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            {/* Category Filter - Dropdown on mobile, buttons on desktop */}
+                            <div className="hidden sm:flex gap-2 overflow-x-auto pb-1 flex-1">
+                                {(['all', 'Bahan Kering', 'Bahan Basah', 'Bumbu', 'Protein', 'Sayuran', 'Buah', 'Dairy', 'Kemasan', 'Lainnya'] as CategoryFilter[]).map((cat) => (
+                                    <Button
+                                        key={cat}
+                                        variant={categoryFilter === cat ? 'default' : 'outline'}
+                                        size="sm"
+                                        onClick={() => setCategoryFilter(cat)}
+                                        className="whitespace-nowrap"
+                                    >
+                                        {cat === 'all' ? 'Semua' : cat}
+                                    </Button>
                                 ))}
-                            </SelectContent>
-                        </Select>
+                            </div>
+
+                            {/* Category Dropdown for Mobile */}
+                            <Select 
+                                value={categoryFilter} 
+                                onValueChange={(v) => setCategoryFilter(v as CategoryFilter)}
+                            >
+                                <SelectTrigger className="w-full sm:hidden">
+                                    <SelectValue placeholder="Kategori" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {(['all', 'Bahan Kering', 'Bahan Basah', 'Bumbu', 'Protein', 'Sayuran', 'Buah', 'Dairy', 'Kemasan', 'Lainnya'] as CategoryFilter[]).map((cat) => (
+                                        <SelectItem key={cat} value={cat}>
+                                            {cat === 'all' ? 'Semua Kategori' : cat}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            {/* Supplier Filter */}
+                            <Select
+                                value={supplierFilter}
+                                onValueChange={setSupplierFilter}
+                            >
+                                <SelectTrigger className="w-full sm:w-[180px]">
+                                    <SelectValue placeholder="Supplier" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {suppliers.map((supplier) => (
+                                        <SelectItem key={supplier} value={supplier}>
+                                            {supplier === 'all' ? 'Semua Supplier' : supplier}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
 
                     {/* Active Filter Badges */}
@@ -330,7 +393,10 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                     {/* Results Count */}
                     <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
                         <span>
-                            Menampilkan {filteredData.length} dari {ingredients?.length || 0} bahan
+                            {hasActiveFilters 
+                                ? `${filteredData.length} hasil filter dari ${pagination?.total || ingredients?.length || 0} total bahan`
+                                : `Halaman ${page} • ${ingredients?.length || 0} dari ${pagination?.total || ingredients?.length || 0} bahan`
+                            }
                         </span>
                         {hasActiveFilters && (
                             <Badge variant="secondary" className="text-xs">
@@ -355,12 +421,12 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                             <table className="w-full">
                                 <thead className="bg-muted/50">
                                     <tr className="border-b">
-                                        <th className="text-left p-4 font-medium text-sm">Nama Bahan</th>
-                                        <th className="text-left p-4 font-medium text-sm">Satuan</th>
-                                        <th className="text-right p-4 font-medium text-sm">Harga/Unit</th>
-                                        <th className="text-center p-4 font-medium text-sm">Stok</th>
-                                        <th className="text-right p-4 font-medium text-sm">Total Nilai</th>
-                                        <th className="text-center p-4 font-medium text-sm w-[100px]">Aksi</th>
+                                        <th scope="col" className="text-left p-4 font-semibold text-sm text-foreground">Nama Bahan</th>
+                                        <th scope="col" className="text-left p-4 font-semibold text-sm text-foreground">Satuan</th>
+                                        <th scope="col" className="text-right p-4 font-semibold text-sm text-foreground">Harga/Unit</th>
+                                        <th scope="col" className="text-center p-4 font-semibold text-sm text-foreground">Stok</th>
+                                        <th scope="col" className="text-right p-4 font-semibold text-sm text-foreground">Total Nilai</th>
+                                        <th scope="col" className="text-center p-4 font-semibold text-sm text-foreground w-[100px]">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -370,8 +436,18 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                                         const resolvedUnitPrice = item.price_per_unit ?? item.weighted_average_cost
                                         const unitPriceValue = typeof resolvedUnitPrice === 'number' ? resolvedUnitPrice : null
                                         const totalValue = unitPriceValue !== null ? currentStock * unitPriceValue : null
+                                        
+                                        // Stock status for visual indicator
+                                        const isOutOfStock = currentStock <= 0
+                                        const isLowStock = currentStock > 0 && currentStock <= minStock
+                                        const stockBorderClass = isOutOfStock 
+                                            ? 'border-l-4 border-l-red-500' 
+                                            : isLowStock 
+                                                ? 'border-l-4 border-l-yellow-500' 
+                                                : ''
+                                        
                                         return (
-                                            <tr key={item['id']} className="border-b hover:bg-muted/30 transition-colors">
+                                            <tr key={item['id']} className={`border-b hover:bg-muted/30 transition-colors ${stockBorderClass}`}>
                                                 <td className="p-4">
                                                     <div className="flex items-center gap-2">
                                                         <div className="font-medium">{item.name}</div>
@@ -435,7 +511,7 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                                                     <div className="flex justify-center">
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
-                                                                <Button variant="ghost" size="sm">
+                                                                <Button variant="ghost" size="sm" aria-label={`Menu aksi untuk ${item.name}`}>
                                                                     <MoreVertical className="h-4 w-4" />
                                                                 </Button>
                                                             </DropdownMenuTrigger>

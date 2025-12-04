@@ -1,11 +1,11 @@
 'use client'
 
 import {
-    Edit,
-    Trash2,
     ChevronDown,
     ChevronUp,
-    ShoppingCart
+    Edit,
+    ShoppingCart,
+    Trash2
 } from '@/components/icons'
 import { useState } from 'react'
 
@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils'
 
 import type { Row } from '@/types/database'
 
-import { StockBadge, CompactStockIndicator } from '@/components/ingredients/StockBadge'
+import { StockBadge } from '@/components/ingredients/StockBadge'
 
 
 type Ingredient = Row<'ingredients'>
@@ -86,20 +86,19 @@ export const MobileIngredientCard = ({
                         </Button>
                     </div>
 
-                    {/* Stock Indicator */}
+                    {/* Stock Indicator - Single unified display */}
                     <div className="flex items-center justify-between">
-                        <CompactStockIndicator
-                            currentStock={ingredient.current_stock ?? 0}
-                            minStock={ingredient.min_stock ?? 0}
-                            unit={ingredient.unit || ''}
-                        />
                         <StockBadge
                             currentStock={ingredient.current_stock ?? 0}
                             minStock={ingredient.min_stock ?? 0}
                             unit={ingredient.unit || ''}
                             compact
-                            showIcon={false}
                         />
+                        {ingredient.category && (
+                            <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                                {ingredient.category}
+                            </span>
+                        )}
                     </div>
 
                     {/* Expanded Details */}
