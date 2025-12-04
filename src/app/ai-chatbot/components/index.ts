@@ -5,5 +5,7 @@ export { DataCard } from './DataCard'
 export { FeedbackWidget } from './FeedbackWidget'
 export { MessageBubble } from './MessageBubble'
 export { MessageList } from './MessageList'
+export { QuickActionTemplates } from './QuickActionTemplates'
 export { SuggestionChips } from './SuggestionChips'
 export { TypingIndicator } from './TypingIndicator'
+

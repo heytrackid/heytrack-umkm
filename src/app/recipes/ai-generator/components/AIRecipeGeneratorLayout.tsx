@@ -481,9 +481,11 @@ const AIRecipeGeneratorPage = () => {
                           <div className="flex flex-wrap gap-1 mt-1">
                             {selectedIngredients.slice(0, 3).map((ingId, idx) => {
                               const ingredient = availableIngredients.find(i => i.id === ingId)
+                              // Only show if we found the ingredient name, skip if not found
+                              if (!ingredient?.name) return null
                               return (
                                 <Badge key={idx} variant="secondary" className="text-xs">
-                                  {ingredient?.name || ingId}
+                                  {ingredient.name}
                                 </Badge>
                               )
                             })}

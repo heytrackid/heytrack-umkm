@@ -1,18 +1,18 @@
 'use client'
 
+import { Loader2, Sparkles } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2, Sparkles } from '@/components/icons'
+import { handleApiError, handleError } from '@/lib/error-handling'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { handleError, handleApiError } from '@/lib/error-handling'
 
-import { useMutation } from '@tanstack/react-query'
 import { postApi } from '@/lib/query/query-helpers'
+import { useMutation } from '@tanstack/react-query'
 
 interface GeneratedRecipe {
   name: string
@@ -27,20 +27,40 @@ interface GeneratedRecipe {
     quantity: number
     unit: string
     notes?: string
+    estimated_cost?: number
   }>
   instructions: string[]
   tips?: string
+  estimated_total_cost?: number
+  suggested_price?: number
 }
 
 interface AIRecipeGeneratorProps {
   onRecipeGenerated?: (recipe: GeneratedRecipe) => void
 }
 
+const DIETARY_OPTIONS = [
+  { value: 'halal', label: '🕌 Halal' },
+  { value: 'vegetarian', label: '🥬 Vegetarian' },
+  { value: 'vegan', label: '🌱 Vegan' },
+  { value: 'gluten-free', label: '🌾 Bebas Gluten' },
+  { value: 'dairy-free', label: '🥛 Bebas Susu' },
+  { value: 'low-sugar', label: '🍬 Rendah Gula' },
+]
+
+const QUICK_TEMPLATES = [
+  { name: 'Nasi Goreng Spesial', prompt: 'Nasi goreng dengan telur, ayam, dan sayuran, bumbu khas Indonesia' },
+  { name: 'Ayam Geprek', prompt: 'Ayam goreng crispy dengan sambal bawang pedas' },
+  { name: 'Es Teh Manis', prompt: 'Minuman teh manis dingin yang menyegarkan' },
+  { name: 'Martabak Manis', prompt: 'Martabak manis dengan topping coklat dan keju' },
+]
+
 export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps): JSX.Element {
   const [open, setOpen] = useState(false)
   const [prompt, setPrompt] = useState('')
   const [servings, setServings] = useState('4')
   const [cuisine, setCuisine] = useState('')
+  const [dietary, setDietary] = useState<string[]>([])
   const [generatedRecipe, setGeneratedRecipe] = useState<GeneratedRecipe | null>(null)
 
   // ✅ Use React Query mutation instead of manual fetch
@@ -64,7 +84,7 @@ export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps)
 
     setGeneratedRecipe(null)
     generateRecipeMutation.mutate({
-      prompt,
+      prompt: dietary.length > 0 ? `${prompt} (${dietary.join(', ')})` : prompt,
       servings: parseInt(servings),
       ...(cuisine ? { cuisine } : {}),
     })
@@ -86,6 +106,7 @@ export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps)
     setPrompt('')
     setServings('4')
     setCuisine('')
+    setDietary([])
     setGeneratedRecipe(null)
   }
 
@@ -108,6 +129,27 @@ export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps)
         <div className="space-y-6">
           {!generatedRecipe ? (
             <>
+              {/* Quick Templates */}
+              {!prompt && (
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">🚀 Template Cepat</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {QUICK_TEMPLATES.map((template) => (
+                      <Button
+                        key={template.name}
+                        variant="outline"
+                        size="sm"
+                        className="text-xs"
+                        onClick={() => setPrompt(template.prompt)}
+                        disabled={generateRecipeMutation.isPending}
+                      >
+                        {template.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-4">
                 <div className="grid gap-2">
                   <Label htmlFor="prompt">Deskripsi Resep</Label>
@@ -155,6 +197,32 @@ export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps)
                     </Select>
                   </div>
                 </div>
+
+                {/* Dietary Restrictions */}
+                <div className="grid gap-2">
+                  <Label className="text-sm">Preferensi Diet (Opsional)</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {DIETARY_OPTIONS.map((option) => (
+                      <Button
+                        key={option.value}
+                        type="button"
+                        variant={dietary.includes(option.value) ? 'default' : 'outline'}
+                        size="sm"
+                        className="text-xs"
+                        onClick={() => {
+                          setDietary((prev) =>
+                            prev.includes(option.value)
+                              ? prev.filter((d) => d !== option.value)
+                              : [...prev, option.value]
+                          )
+                        }}
+                        disabled={generateRecipeMutation.isPending}
+                      >
+                        {option.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               <div className="flex gap-2">
@@ -186,11 +254,29 @@ export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps)
                 <div className="bg-primary/10 p-4 rounded-lg">
                   <h3 className="font-semibold text-lg mb-2">{generatedRecipe.name}</h3>
                   <p className="text-sm text-muted-foreground">{generatedRecipe.description}</p>
-                  <div className="flex gap-4 mt-3 text-sm">
+                  <div className="flex flex-wrap gap-4 mt-3 text-sm">
                     <span>🍽️ {generatedRecipe.servings} porsi</span>
                     <span>⏱️ {generatedRecipe.prep_time + generatedRecipe.cook_time} menit</span>
                     <span>📊 {generatedRecipe.difficulty}</span>
                   </div>
+                  
+                  {/* Cost Estimation */}
+                  {(generatedRecipe.estimated_total_cost || generatedRecipe.suggested_price) && (
+                    <div className="mt-3 pt-3 border-t border-primary/20">
+                      <div className="flex flex-wrap gap-4 text-sm">
+                        {generatedRecipe.estimated_total_cost && (
+                          <span className="text-orange-600 font-medium">
+                            💰 Est. HPP: Rp {generatedRecipe.estimated_total_cost.toLocaleString('id-ID')}
+                          </span>
+                        )}
+                        {generatedRecipe.suggested_price && (
+                          <span className="text-green-600 font-medium">
+                            🏷️ Saran Harga: Rp {generatedRecipe.suggested_price.toLocaleString('id-ID')}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>
