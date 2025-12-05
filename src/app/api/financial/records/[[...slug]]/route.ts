@@ -56,10 +56,15 @@ export const GET = createApiRoute(
       })(context, validatedQuery)
     } else if (slug.length === 1) {
       // GET /api/financial/records/[id] - Get single record
+      // Pass the ID from slug to context.params for createGetHandler
+      const contextWithId = {
+        ...context,
+        params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+      }
       return createGetHandler({
         table: 'financial_records',
         selectFields: '*',
-      })(context)
+      })(contextWithId)
     } else {
       return handleAPIError(new Error('Invalid path'), 'API Route')
     }
@@ -126,10 +131,15 @@ export const PUT = createApiRoute(
     if (!slug || slug.length !== 1) {
       return handleAPIError(new Error('Invalid path'), 'API Route')
     }
+    // Pass the ID from slug to context.params for createUpdateHandler
+    const contextWithId = {
+      ...context,
+      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+    }
     return createUpdateHandler({
       table: 'financial_records',
       selectFields: '*',
-    }, SUCCESS_MESSAGES.FINANCIAL_RECORD_UPDATED)(context, undefined, body)
+    }, SUCCESS_MESSAGES.FINANCIAL_RECORD_UPDATED)(contextWithId, undefined, body)
   }
 )
 
@@ -145,11 +155,16 @@ export const DELETE = createApiRoute(
     if (!slug || slug.length !== 1) {
       return handleAPIError(new Error('Invalid path'), 'API Route')
     }
+    // Pass the ID from slug to context.params for createDeleteHandler
+    const contextWithId = {
+      ...context,
+      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+    }
     return createDeleteHandler(
       {
         table: 'financial_records',
       },
       SUCCESS_MESSAGES.FINANCIAL_RECORD_DELETED
-    )(context)
+    )(contextWithId)
   }
 )

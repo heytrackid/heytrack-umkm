@@ -1,10 +1,10 @@
 // External libraries
 // Internal modules
+import { ListQuerySchema, createDeleteHandler, createGetHandler, createListHandler } from '@/lib/api/crud-helpers'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
-import { SecurityPresets } from '@/utils/security/api-middleware'
 import { parseRouteParams } from '@/lib/api/route-helpers'
-import { ListQuerySchema, createListHandler, createGetHandler, createDeleteHandler } from '@/lib/api/crud-helpers'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
 export const runtime = 'nodejs'
 
@@ -31,10 +31,15 @@ export const GET = createApiRoute(
       })(context, validatedQuery)
     } else if (slug && slug.length === 1) {
       // GET /api/sales/[id] - Get single sale record
+      // Pass the ID from slug to context.params for createGetHandler
+      const contextWithId = {
+        ...context,
+        params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+      }
       return createGetHandler({
         table: 'financial_records',
         selectFields: '*',
-      })(context)
+      })(contextWithId)
     } else {
       return handleAPIError(new Error('Invalid path'), 'API Route')
     }
@@ -53,11 +58,16 @@ export const DELETE = createApiRoute(
     if (!slug || slug.length !== 1) {
       return handleAPIError(new Error('Invalid path'), 'API Route')
     }
+    // Pass the ID from slug to context.params for createDeleteHandler
+    const contextWithId = {
+      ...context,
+      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+    }
     return createDeleteHandler(
       {
         table: 'financial_records',
       },
       'Sale record deleted successfully'
-    )(context)
+    )(contextWithId)
   }
 )

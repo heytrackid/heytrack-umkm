@@ -66,10 +66,15 @@ export const GET = createApiRoute(
       })(context, validatedQuery)
     } else if (slug.length === 1) {
       // GET /api/ingredient-purchases/[id] - Get single purchase
+      // Pass the ID from slug to context.params for createGetHandler
+      const contextWithId = {
+        ...context,
+        params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+      }
       return createGetHandler({
         table: 'ingredient_purchases',
         selectFields: '*, ingredient:ingredients(id, name, unit)',
-      })(context)
+      })(contextWithId)
     } else {
       return handleAPIError(new Error('Invalid path'), 'API Route')
     }
