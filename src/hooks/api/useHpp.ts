@@ -1,10 +1,10 @@
-import type { HppCalculationInput, HppRecommendationInput, HppRecommendationUpdate } from '@/lib/validations/domains/hpp'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { successToast } from '@/hooks/use-toast'
 import { handleError } from '@/lib/error-handling'
+import type { HppCalculationInput, HppRecommendationInput, HppRecommendationUpdate } from '@/lib/validations/domains/hpp'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { buildApiUrl, deleteApi, fetchApi, patchApi, postApi } from '@/lib/query/query-helpers'
 import { queryConfig } from '@/lib/query/query-config'
+import { buildApiUrl, deleteApi, fetchApi, patchApi, postApi } from '@/lib/query/query-helpers'
 
 interface HppCalculation {
   recipeId: string
@@ -90,7 +90,7 @@ interface HppRecommendationsApiResponse {
 export function useCalculateHpp() {
   return useMutation({
     mutationFn: async (input: HppCalculationInput): Promise<HppCalculation> => {
-      const response = await postApi<HppCalculationApiResponse>('/api/hpp/calculate', input)
+      const response = await postApi<HppCalculationApiResponse>('/api/hpp', input)
       return response.data
     },
     onError: (error) => handleError(error, 'Calculate HPP', true, 'Gagal menghitung biaya produksi'),
@@ -203,7 +203,7 @@ export function useCalculateAllHpp() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (): Promise<void> => patchApi('/api/hpp/calculate'),
+    mutationFn: (): Promise<void> => patchApi('/api/hpp'),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['hpp'] })
       successToast('Berhasil', 'Semua biaya produksi berhasil dihitung')

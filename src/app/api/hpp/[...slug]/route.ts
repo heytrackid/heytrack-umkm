@@ -88,6 +88,41 @@ export const PUT = createApiRoute(
   }
 )
 
+// PATCH /api/hpp - Batch calculate HPP for all recipes (alias for PUT)
+export const PATCH = createApiRoute(
+  {
+    method: 'PATCH',
+    path: '/api/hpp',
+    securityPreset: SecurityPresets.basic(),
+  },
+  async (context) => {
+    const { user } = context
+
+    try {
+      const hppService = new HppService({
+        userId: user.id,
+        supabase: context.supabase
+      })
+      const results = await hppService.batchCalculateHpp()
+
+      cacheInvalidation.hpp()
+
+      apiLogger.info({
+        userId: user.id,
+        calculatedCount: results.length
+      }, 'Batch HPP calculation completed')
+
+      return createSuccessResponse({
+        calculated: results.length,
+        failed: 0,
+        success: true
+      })
+    } catch (error) {
+      return handleAPIError(error, 'PATCH /api/hpp')
+    }
+  }
+)
+
 // GET /api/hpp/calculations - Get HPP calculations history
 const getCalculationsRoute = createApiRoute(
   {

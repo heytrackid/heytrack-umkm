@@ -1,608 +1,217 @@
 'use client'
- 
-
-
-import { Edit, MoreVertical, Plus, Search, Trash2, X } from '@/components/icons'
 
 import { memo, useCallback, useMemo, useState } from 'react'
 
+import { SharedDataTable, type Column, type ServerPaginationMeta } from '@/components/shared/SharedDataTable'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
-import { FilterBadges, createFilterBadges } from '@/components/ui/filter-badges'
 import { DeleteModal } from '@/components/ui/index'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table'
 import { undoableToast } from '@/components/ui/toast'
-
-import { Input } from '@/components/ui/input'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
-import { ServerPagination } from '@/components/ui/server-pagination'
 import { useSettings } from '@/contexts/settings-context'
 import { infoToast } from '@/hooks/use-toast'
 import { useDeleteIngredient, useIngredients } from '@/hooks/useIngredients'
-import { useResponsive } from '@/hooks/useResponsive'
 import { handleError } from '@/lib/error-handling'
-
-import type { Row } from '@/types/database'
 
 import { IngredientFormDialog } from '@/components/ingredients/IngredientFormDialog'
 import { InventorySummaryCard } from '@/components/ingredients/InventorySummaryCard'
-import { MobileIngredientList } from '@/components/ingredients/MobileIngredientCard'
 import { StockBadge } from '@/components/ingredients/StockBadge'
 
-
+import type { Row } from '@/types/database'
 
 type Ingredient = Row<'ingredients'>
-type StockFilter = 'all' | 'low' | 'normal' | 'out'
-type ExpiryFilter = 'all' | 'expired' | 'expiring' | 'safe'
-type CategoryFilter = 'all' | 'Bahan Basah' | 'Bahan Kering' | 'Buah' | 'Bumbu' | 'Dairy' | 'Kemasan' | 'Lainnya' | 'Protein' | 'Sayuran'
 
 interface IngredientsListProps {
-    onAdd?: () => void
+  onAdd?: () => void
 }
 
-const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
-    const { formatCurrency } = useSettings()
-    const deleteIngredient = useDeleteIngredient()
+const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}): JSX.Element => {
+  const { formatCurrency } = useSettings()
+  const deleteIngredient = useDeleteIngredient()
 
-    const { isMobile } = useResponsive()
+  // Modal states
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null)
+  const [showFormDialog, setShowFormDialog] = useState(false)
+  const [editingIngredient, setEditingIngredient] = useState<Ingredient | undefined>(undefined)
 
-    // Modal states
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-    const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null)
-    const [showFormDialog, setShowFormDialog] = useState(false)
-    const [editingIngredient, setEditingIngredient] = useState<Ingredient | undefined>(undefined)
+  // Pagination state
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(20)
+  const [searchTerm, setSearchTerm] = useState('')
 
-    // Filter and pagination states
-    const [searchTerm, setSearchTerm] = useState('')
-    const [stockFilter, setStockFilter] = useState<StockFilter>('all')
-    const [expiryFilter, setExpiryFilter] = useState<ExpiryFilter>('all')
-    const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
-    const [supplierFilter, setSupplierFilter] = useState('all')
-    const [page, setPage] = useState(1)
-    const [limit, setLimit] = useState(12)
+  // Fetch ingredients with pagination
+  const { data: ingredientsResponse, isLoading, refetch } = useIngredients({
+    page,
+    limit,
+    search: searchTerm.trim() || undefined
+  })
 
-    // Fetch ingredients with pagination
-    const { data: ingredientsResponse, isLoading } = useIngredients({
-      page,
-      limit,
-      search: searchTerm.trim() || undefined
-    })
+  const ingredients = useMemo(() => ingredientsResponse?.data || [], [ingredientsResponse?.data])
+  const pagination = ingredientsResponse?.pagination
 
-    // Extract data and pagination from response
-    const ingredients = useMemo(() => ingredientsResponse?.data || [], [ingredientsResponse?.data])
-    const pagination = ingredientsResponse?.pagination
+  // Server pagination meta
+  const serverPagination: ServerPaginationMeta | undefined = pagination ? {
+    total: pagination.total,
+    page: pagination.page,
+    limit: pagination.limit,
+    pages: pagination.pages,
+    hasNext: pagination.hasNext,
+    hasPrev: pagination.hasPrev,
+  } : undefined
 
-    // Get unique suppliers
-    const suppliers = useMemo(() => {
-        if (!ingredients) return ['all']
-        const unique = Array.from(new Set(ingredients.map((i: Ingredient) => i.supplier).filter((s: string | null) => s && s.trim()))) as string[]
-        return ['all', ...unique]
-    }, [ingredients])
+  // Handlers
+  const handleEdit = useCallback((ingredient: Ingredient) => {
+    setEditingIngredient(ingredient)
+    setShowFormDialog(true)
+  }, [])
 
-    // Filter and sort data
-    const filteredData = useMemo(() => {
-        if (!ingredients) { return [] }
-
-        const today = new Date()
-        const sevenDaysFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
-
-        return ingredients.filter((item: Ingredient) => {
-            // Search filter
-            const matchesSearch = !searchTerm || item.name.toLowerCase().includes(searchTerm.toLowerCase())
-
-            // Stock filter
-            let matchesStock = true
-            const currentStock = item.current_stock ?? 0
-            const minStock = item.min_stock ?? 0
-
-            if (stockFilter === 'low') {
-                matchesStock = currentStock > 0 && currentStock <= minStock
-            } else if (stockFilter === 'out') {
-                matchesStock = currentStock <= 0
-            } else if (stockFilter === 'normal') {
-                matchesStock = currentStock > minStock
-            }
-
-            // Expiry filter
-            let matchesExpiry = true
-            if (expiryFilter !== 'all' && item.expiry_date) {
-                const expiryDate = new Date(item.expiry_date)
-                if (expiryFilter === 'expired') {
-                    matchesExpiry = expiryDate <= today
-                } else if (expiryFilter === 'expiring') {
-                    matchesExpiry = expiryDate > today && expiryDate <= sevenDaysFromNow
-                } else if (expiryFilter === 'safe') {
-                    matchesExpiry = expiryDate > sevenDaysFromNow
-                }
-            } else if (expiryFilter !== 'all' && !item.expiry_date) {
-                matchesExpiry = expiryFilter === 'safe' // Items without expiry are considered safe
-            }
-
-            // Category filter
-            const matchesCategory = categoryFilter === 'all' ||
-                (item.category ?? 'Lainnya') === categoryFilter
-
-            // Supplier filter
-            const matchesSupplier = supplierFilter === 'all' ||
-                (item.supplier ?? '') === supplierFilter
-
-            return matchesSearch && matchesStock && matchesExpiry && matchesCategory && matchesSupplier
-        }).sort((a: Ingredient, b: Ingredient) => a.name.localeCompare(b.name))
-    }, [ingredients, searchTerm, stockFilter, expiryFilter, categoryFilter, supplierFilter])
-
-    // Handle pagination changes
-    const handlePageChange = useCallback((newPage: number) => {
-        setPage(newPage)
-    }, [])
-
-    const handlePageSizeChange = useCallback((newLimit: number) => {
-        setLimit(newLimit)
-        setPage(1) // Reset to first page when changing page size
-    }, [])
-
-    // Create filter badges
-    const activeFilters = createFilterBadges(
-        {
-            search: searchTerm,
-            stock: stockFilter,
-            expiry: expiryFilter,
-            category: categoryFilter,
-            supplier: supplierFilter
-        },
-        {
-            search: 'Search',
-            stock: 'Stock',
-            expiry: 'Expiry',
-            category: 'Category',
-            supplier: 'Supplier'
-        },
-        (newFilters) => {
-            if (newFilters.search !== undefined) {
-                setSearchTerm(newFilters.search)
-            }
-            if (newFilters.stock !== undefined) {
-                setStockFilter(newFilters.stock as StockFilter)
-            }
-            if (newFilters.expiry !== undefined) {
-                setExpiryFilter(newFilters.expiry as ExpiryFilter)
-            }
-            if (newFilters.category !== undefined) {
-                setCategoryFilter(newFilters.category as CategoryFilter)
-            }
-            if (newFilters.supplier !== undefined) {
-                setSupplierFilter(newFilters.supplier)
-            }
-        }
-    )
-
-    const handleClearAllFilters = useCallback(() => {
-        setSearchTerm('')
-        setStockFilter('all')
-        setExpiryFilter('all')
-        setCategoryFilter('all')
-        setSupplierFilter('all')
-    }, [])
-
-    // Handlers
-    const handleEdit = useCallback((ingredient: Ingredient) => {
-        setEditingIngredient(ingredient)
-        setShowFormDialog(true)
-    }, [])
-
-    const handleAdd = useCallback(() => {
-        if (onAdd) {
-            onAdd()
-        } else {
-            setEditingIngredient(undefined)
-            setShowFormDialog(true)
-        }
-    }, [onAdd])
-
-    const handleDelete = useCallback((ingredient: Ingredient) => {
-        setSelectedIngredient(ingredient)
-        setIsDeleteDialogOpen(true)
-    }, [])
-
-
-
-    const handleConfirmDelete = useCallback(async () => {
-        if (!selectedIngredient) { return }
-
-        try {
-            await deleteIngredient.mutateAsync(selectedIngredient['id'])
-
-            // Enhanced toast with undo functionality
-            undoableToast({
-                title: `${selectedIngredient.name} dihapus`,
-                description: 'Bahan baku telah dihapus dari sistem',
-                onUndo: () => {
-                    // Note: Would need an undelete API endpoint for real undo
-                    infoToast('Info', 'Fitur undo sedang dikembangkan - Anda bisa menambahkan kembali bahan baku ini')
-                },
-                duration: 6000
-            })
-
-            setIsDeleteDialogOpen(false)
-            setSelectedIngredient(null)
-        } catch (error) {
-            handleError(error as Error, 'Ingredients List: delete ingredient', true, 'Gagal menghapus bahan baku')
-        }
-    }, [selectedIngredient, deleteIngredient])
-
-    const hasActiveFilters = Boolean(searchTerm) || stockFilter !== 'all' || expiryFilter !== 'all' || categoryFilter !== 'all' || supplierFilter !== 'all'
-
-    // Empty state
-    if (!isLoading && (!ingredients || ingredients.length === 0)) {
-        return (
-            <>
-                <EmptyState
-                    {...EmptyStatePresets.ingredients}
-                    actions={[
-                        {
-                            label: 'Tambah Bahan Baru',
-                            onClick: handleAdd,
-                            icon: Plus
-                        }
-                    ]}
-                />
-                <IngredientFormDialog
-                    open={showFormDialog}
-                    onOpenChange={setShowFormDialog}
-                    {...(editingIngredient ? { ingredient: editingIngredient } : {})}
-                />
-            </>
-        )
+  const handleAdd = useCallback(() => {
+    if (onAdd) {
+      onAdd()
+    } else {
+      setEditingIngredient(undefined)
+      setShowFormDialog(true)
     }
+  }, [onAdd])
 
-    return (
-        <div className="space-y-4">
-            {/* Inventory Summary */}
-            <InventorySummaryCard ingredients={ingredients} />
+  const handleDelete = useCallback((ingredient: Ingredient) => {
+    setSelectedIngredient(ingredient)
+    setIsDeleteDialogOpen(true)
+  }, [])
 
-            {/* Search and Filter Bar */}
-            <Card>
-                <CardContent className="p-4">
-                    <div className="flex flex-col gap-3">
-                        <div className="flex flex-col sm:flex-row gap-3">
-                            {/* Search */}
-                            <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Cari bahan baku..."
-                                    value={searchTerm}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-                                    className="pl-9"
-                                />
-                            </div>
+  const handleConfirmDelete = useCallback(async () => {
+    if (!selectedIngredient) return
 
-                            {/* Stock Filter */}
-                            <Select value={stockFilter} onValueChange={(v) => setStockFilter(v as StockFilter)}>
-                                <SelectTrigger className="w-full sm:w-[150px]">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Semua Stok</SelectItem>
-                                    <SelectItem value="normal">Stok Normal</SelectItem>
-                                    <SelectItem value="low">Stok Rendah</SelectItem>
-                                    <SelectItem value="out">Stok Habis</SelectItem>
-                                </SelectContent>
-                            </Select>
+    try {
+      await deleteIngredient.mutateAsync(selectedIngredient.id)
+      undoableToast({
+        title: `${selectedIngredient.name} dihapus`,
+        description: 'Bahan baku telah dihapus dari sistem',
+        onUndo: () => {
+          infoToast('Info', 'Fitur undo sedang dikembangkan - Anda bisa menambahkan kembali bahan baku ini')
+        },
+        duration: 6000
+      })
+      setIsDeleteDialogOpen(false)
+      setSelectedIngredient(null)
+    } catch (error) {
+      handleError(error as Error, 'Ingredients List: delete ingredient', true, 'Gagal menghapus bahan baku')
+    }
+  }, [selectedIngredient, deleteIngredient])
 
-                            {/* Expiry Filter */}
-                            <Select value={expiryFilter} onValueChange={(v) => setExpiryFilter(v as ExpiryFilter)}>
-                                <SelectTrigger className="w-full sm:w-[150px]">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Semua Expiry</SelectItem>
-                                    <SelectItem value="expired">Expired</SelectItem>
-                                    <SelectItem value="expiring">Segera Expired</SelectItem>
-                                    <SelectItem value="safe">Aman</SelectItem>
-                                </SelectContent>
-                            </Select>
-
-                            {/* Clear Filters */}
-                            {hasActiveFilters && (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={handleClearAllFilters}
-                                    className="shrink-0"
-                                    aria-label="Hapus semua filter"
-                                >
-                                    <X className="h-4 w-4" />
-                                </Button>
-                            )}
-                        </div>
-
-                        {/* Category & Supplier Filters Row */}
-                        <div className="flex flex-col sm:flex-row gap-3">
-                            {/* Category Filter - Dropdown on mobile, buttons on desktop */}
-                            <div className="hidden sm:flex gap-2 overflow-x-auto pb-1 flex-1">
-                                {(['all', 'Bahan Kering', 'Bahan Basah', 'Bumbu', 'Protein', 'Sayuran', 'Buah', 'Dairy', 'Kemasan', 'Lainnya'] as CategoryFilter[]).map((cat) => (
-                                    <Button
-                                        key={cat}
-                                        variant={categoryFilter === cat ? 'default' : 'outline'}
-                                        size="sm"
-                                        onClick={() => setCategoryFilter(cat)}
-                                        className="whitespace-nowrap"
-                                    >
-                                        {cat === 'all' ? 'Semua' : cat}
-                                    </Button>
-                                ))}
-                            </div>
-
-                            {/* Category Dropdown for Mobile */}
-                            <Select 
-                                value={categoryFilter} 
-                                onValueChange={(v) => setCategoryFilter(v as CategoryFilter)}
-                            >
-                                <SelectTrigger className="w-full sm:hidden">
-                                    <SelectValue placeholder="Kategori" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {(['all', 'Bahan Kering', 'Bahan Basah', 'Bumbu', 'Protein', 'Sayuran', 'Buah', 'Dairy', 'Kemasan', 'Lainnya'] as CategoryFilter[]).map((cat) => (
-                                        <SelectItem key={cat} value={cat}>
-                                            {cat === 'all' ? 'Semua Kategori' : cat}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-
-                            {/* Supplier Filter */}
-                            <Select
-                                value={supplierFilter}
-                                onValueChange={setSupplierFilter}
-                            >
-                                <SelectTrigger className="w-full sm:w-[180px]">
-                                    <SelectValue placeholder="Supplier" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {suppliers.map((supplier) => (
-                                        <SelectItem key={supplier} value={supplier}>
-                                            {supplier === 'all' ? 'Semua Supplier' : supplier}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-
-                    {/* Active Filter Badges */}
-                    <FilterBadges 
-                        filters={activeFilters}
-                        onClearAll={handleClearAllFilters}
-                        className="mt-3"
-                    />
-
-                    {/* Results Count */}
-                    <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
-                        <span>
-                            {hasActiveFilters 
-                                ? `${filteredData.length} hasil filter dari ${pagination?.total || ingredients?.length || 0} total bahan`
-                                : `Halaman ${page} • ${ingredients?.length || 0} dari ${pagination?.total || ingredients?.length || 0} bahan`
-                            }
-                        </span>
-                        {hasActiveFilters && (
-                            <Badge variant="secondary" className="text-xs">
-                                {activeFilters.length} filter aktif
-                            </Badge>
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Data Display */}
-            {isMobile ? (
-                <MobileIngredientList
-                    ingredients={ingredients}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                />
-            ) : (
-                <Card>
-                    <CardContent className="p-0">
-                        <div className="overflow-x-auto">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow className="hover:bg-transparent">
-                                        <TableHead className="w-[300px]">Nama Bahan</TableHead>
-                                        <TableHead>Satuan</TableHead>
-                                        <TableHead className="text-right">Harga/Unit</TableHead>
-                                        <TableHead className="text-center">Stok</TableHead>
-                                        <TableHead className="text-right">Total Nilai</TableHead>
-                                        <TableHead className="text-center w-[50px]"></TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {ingredients.map((item: Ingredient) => {
-                                        const currentStock = item.current_stock ?? 0
-                                        const minStock = item.min_stock ?? 0
-                                        const resolvedUnitPrice = item.price_per_unit ?? item.weighted_average_cost
-                                        const unitPriceValue = typeof resolvedUnitPrice === 'number' ? resolvedUnitPrice : null
-                                        const totalValue = unitPriceValue !== null ? currentStock * unitPriceValue : null
-                                        
-                                        // Stock status for visual indicator
-                                        const isOutOfStock = currentStock <= 0
-                                        const isLowStock = currentStock > 0 && currentStock <= minStock
-                                        const stockBorderClass = isOutOfStock 
-                                            ? 'border-l-4 border-l-rose-500 bg-rose-50/30 hover:bg-rose-50/50 dark:bg-rose-900/10' 
-                                            : isLowStock 
-                                                ? 'border-l-4 border-l-amber-500 bg-amber-50/30 hover:bg-amber-50/50 dark:bg-amber-900/10' 
-                                                : 'border-l-4 border-l-transparent'
-                                        
-                                        return (
-                                            <TableRow key={item['id']} className={`group transition-colors ${stockBorderClass}`}>
-                                                <TableCell className="font-medium">
-                                                    <div className="flex flex-col gap-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-base">{item.name}</span>
-                                                            {item.category && (
-                                                                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5 font-normal text-muted-foreground">
-                                                                    {item.category}
-                                                                </Badge>
-                                                            )}
-                                                        </div>
-                                                        {item.description && (
-                                                            <span className="text-xs text-muted-foreground line-clamp-1">
-                                                                {item.description}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="text-muted-foreground">{item.unit}</TableCell>
-                                                <TableCell className="text-right font-medium tabular-nums">
-                                                    {unitPriceValue !== null ? formatCurrency(unitPriceValue) : '-'}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className="flex flex-col items-center gap-1.5">
-                                                        <StockBadge
-                                                            currentStock={currentStock}
-                                                            minStock={minStock}
-                                                            unit={item.unit}
-                                                            compact
-                                                        />
-                                                        {(() => {
-                                                            if (!item.expiry_date) { return null }
-                                                            const expiryDate = new Date(item.expiry_date)
-                                                            const today = new Date()
-                                                            const daysUntilExpiry = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-
-                                                            if (daysUntilExpiry <= 0) {
-                                                                return (
-                                                                    <Badge variant="destructive" className="text-[10px] h-5 px-1.5">
-                                                                        Expired
-                                                                    </Badge>
-                                                                )
-                                                            } if (daysUntilExpiry <= 7) {
-                                                                return (
-                                                                    <Badge variant="destructive" className="text-[10px] h-5 px-1.5 bg-rose-100 text-rose-700 hover:bg-rose-200 border-rose-200 dark:bg-rose-900/30 dark:text-rose-400">
-                                                                        {daysUntilExpiry} hari
-                                                                    </Badge>
-                                                                )
-                                                            } if (daysUntilExpiry <= 14) {
-                                                                return (
-                                                                    <Badge variant="secondary" className="text-[10px] h-5 px-1.5 bg-amber-100 text-amber-800 hover:bg-amber-200 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400">
-                                                                        {daysUntilExpiry} hari
-                                                                    </Badge>
-                                                                )
-                                                            }
-                                                            return null
-                                                        })()}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="text-right font-semibold tabular-nums">
-                                                    {totalValue !== null ? formatCurrency(totalValue) : '-'}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className="flex justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <DropdownMenu>
-                                                            <DropdownMenuTrigger asChild>
-                                                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                                    <MoreVertical className="h-4 w-4 text-muted-foreground" />
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent align="end">
-                                                                <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                                                                <DropdownMenuSeparator />
-                                                                <DropdownMenuItem onClick={() => handleEdit(item)}>
-                                                                    <Edit className="h-4 w-4 mr-2" />
-                                                                    Edit
-                                                                </DropdownMenuItem>
-
-                                                                <DropdownMenuSeparator />
-                                                                <DropdownMenuItem
-                                                                    onClick={() => handleDelete(item)}
-                                                                    className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/10"
-                                                                >
-                                                                    <Trash2 className="h-4 w-4 mr-2" />
-                                                                    Hapus
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        )
-                                    })}
-                                </TableBody>
-                            </Table>
-                        </div>
-
-                        {/* Empty filtered state */}
-                        {filteredData.length === 0 && (
-                            <div className="p-8">
-                                <EmptyState
-                                    {...EmptyStatePresets.search}
-                                    compact
-                                    actions={[
-                                        {
-                                            label: 'Hapus Filter',
-                                            onClick: handleClearAllFilters,
-                                            variant: 'outline',
-                                            icon: X
-                                        }
-                                    ]}
-                                />
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+  // Column definitions
+  const columns: Array<Column<Ingredient>> = useMemo(() => [
+    {
+      key: 'name',
+      header: 'Nama Bahan',
+      render: (_, item) => (
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <span className="text-base font-medium">{item.name}</span>
+            {item.category && (
+              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5 font-normal text-muted-foreground">
+                {item.category}
+              </Badge>
             )}
-
-            {/* Pagination */}
-            {pagination && ingredients.length > 0 && (
-                <ServerPagination
-                    pagination={pagination}
-                    onPageChange={handlePageChange}
-                    onPageSizeChange={handlePageSizeChange}
-                    pageSizeOptions={[12, 24, 48, 96]}
-                />
-            )}
-
-            {/* Delete Modal */}
-            <DeleteModal
-                isOpen={isDeleteDialogOpen}
-                onClose={() => setIsDeleteDialogOpen(false)}
-                onConfirm={handleConfirmDelete}
-                entityName="Bahan Baku"
-                itemName={selectedIngredient?.name ?? ''}
-                isLoading={deleteIngredient.isPending}
-            />
-
-            {/* Form Dialog */}
-            <IngredientFormDialog
-                open={showFormDialog}
-                onOpenChange={setShowFormDialog}
-                {...(editingIngredient ? { ingredient: editingIngredient } : {})}
-            />
+          </div>
+          {item.description && (
+            <span className="text-xs text-muted-foreground line-clamp-1">{item.description}</span>
+          )}
         </div>
-    )
+      )
+    },
+    {
+      key: 'unit',
+      header: 'Satuan',
+      render: (_, item) => <span className="text-muted-foreground">{item.unit}</span>
+    },
+    {
+      key: 'price_per_unit',
+      header: 'Harga/Unit',
+      render: (_, item) => {
+        const unitPrice = item.price_per_unit ?? item.weighted_average_cost
+        return <span className="font-medium tabular-nums">{unitPrice ? formatCurrency(unitPrice) : '-'}</span>
+      }
+    },
+    {
+      key: 'current_stock',
+      header: 'Stok',
+      render: (_, item) => {
+        const currentStock = item.current_stock ?? 0
+        const minStock = item.min_stock ?? 0
+        return (
+          <div className="flex flex-col items-center gap-1.5">
+            <StockBadge currentStock={currentStock} minStock={minStock} unit={item.unit} compact />
+            {item.expiry_date && (() => {
+              const expiryDate = new Date(item.expiry_date)
+              const today = new Date()
+              const daysUntilExpiry = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+              if (daysUntilExpiry <= 0) {
+                return <Badge variant="destructive" className="text-[10px] h-5 px-1.5">Expired</Badge>
+              }
+              if (daysUntilExpiry <= 7) {
+                return <Badge variant="destructive" className="text-[10px] h-5 px-1.5 bg-rose-100 text-rose-700">{daysUntilExpiry} hari</Badge>
+              }
+              if (daysUntilExpiry <= 14) {
+                return <Badge variant="secondary" className="text-[10px] h-5 px-1.5 bg-amber-100 text-amber-800">{daysUntilExpiry} hari</Badge>
+              }
+              return null
+            })()}
+          </div>
+        )
+      }
+    },
+    {
+      key: 'total_value',
+      header: 'Total Nilai',
+      render: (_, item) => {
+        const currentStock = item.current_stock ?? 0
+        const unitPrice = item.price_per_unit ?? item.weighted_average_cost
+        const totalValue = unitPrice ? currentStock * unitPrice : null
+        return <span className="font-semibold tabular-nums">{totalValue !== null ? formatCurrency(totalValue) : '-'}</span>
+      }
+    }
+  ], [formatCurrency])
+
+
+
+  return (
+    <div className="space-y-4">
+      <InventorySummaryCard ingredients={ingredients} />
+
+      <SharedDataTable
+        data={ingredients}
+        columns={columns}
+        loading={isLoading}
+        serverPagination={serverPagination}
+        onPageChange={setPage}
+        onPageSizeChange={(size) => { setLimit(size); setPage(1) }}
+        onSearchChange={(search) => { setSearchTerm(search); setPage(1) }}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onRefresh={() => void refetch()}
+        onAdd={handleAdd}
+        addButtonText="Tambah Bahan"
+        searchPlaceholder="Cari bahan baku..."
+        emptyMessage="Belum Ada Bahan Baku"
+        emptyDescription="Tambahkan bahan baku untuk mulai mengelola inventory dan menghitung HPP produk Anda."
+        pageSizeOptions={[12, 24, 50, 100]}
+      />
+
+      <IngredientFormDialog
+        open={showFormDialog}
+        onOpenChange={setShowFormDialog}
+        {...(editingIngredient ? { ingredient: editingIngredient } : {})}
+      />
+
+      <DeleteModal
+        isOpen={isDeleteDialogOpen}
+        onClose={() => { setIsDeleteDialogOpen(false); setSelectedIngredient(null) }}
+        onConfirm={handleConfirmDelete}
+        entityName="Bahan Baku"
+        itemName={selectedIngredient?.name ?? ''}
+      />
+    </div>
+  )
 }
 
 export const IngredientsList = memo(IngredientsListComponent)
-
-

@@ -54,8 +54,7 @@ export function RevenueChart({ data, className }: RevenueChartProps) {
     return generateSampleData(dateRange)
   }, [data, dateRange])
 
-  // Debug logging
-  console.log('[RevenueChart] chartData:', chartData?.length, 'items, first:', chartData?.[0])
+
 
   const chartConfig = {
     revenue: {

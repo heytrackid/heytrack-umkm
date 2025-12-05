@@ -2,9 +2,9 @@
 import { z } from 'zod'
 
 // Internal modules
-import { createApiRoute } from '@/lib/api/route-factory'
-import { ListQuerySchema, createListHandler, createGetHandler, createUpdateHandler, createDeleteHandler } from '@/lib/api/crud-helpers'
 import { createSuccessResponse, withQueryValidation } from '@/lib/api-core'
+import { ListQuerySchema, createDeleteHandler, createGetHandler, createListHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
+import { createApiRoute } from '@/lib/api/route-factory'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { SecurityPresets } from '@/utils/security/api-middleware'
 
@@ -95,17 +95,18 @@ export const POST = createApiRoute(
       date: body.date,
       reference: `MANUAL-${Date.now()}`,
       created_by: user.id,
-      updated_by: user.id,
     }
 
     const { data, error } = await supabase
-      .from('financial_records' as never)
-      .insert(insertData as never)
+      .from('financial_records')
+      .insert(insertData)
       .select()
       .single()
 
     if (error) {
-      return handleAPIError(new Error('Failed to create financial record'), 'API Route')
+      const { apiLogger } = await import('@/lib/logger')
+      apiLogger.error({ error, insertData }, 'Failed to create financial record')
+      return handleAPIError(new Error(`Failed to create financial record: ${error.message}`), 'API Route')
     }
 
     return createSuccessResponse(data, SUCCESS_MESSAGES.FINANCIAL_RECORD_CREATED, undefined, 201)

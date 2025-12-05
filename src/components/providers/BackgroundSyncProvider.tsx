@@ -74,7 +74,7 @@ export function BackgroundSyncProvider({ children }: { children: React.ReactNode
 
       // 2. HPP Sync - Batch calculate for recipes without HPP
       try {
-        const hppResult = await patchApi<HppBatchResponse>('/api/hpp/calculate')
+        const hppResult = await patchApi<HppBatchResponse>('/api/hpp')
         
         if (hppResult.calculated > 0) {
           logger.info({ calculated: hppResult.calculated }, 'HPP batch calculation completed')

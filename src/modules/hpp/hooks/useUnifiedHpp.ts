@@ -195,7 +195,7 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
   // Calculate HPP
   const calculateHpp = useMutation<unknown, unknown, string>({
     mutationFn: async (recipeId: string) => {
-      const response = await fetch('/api/hpp/calculate', {
+      const response = await fetch('/api/hpp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ recipeId }),

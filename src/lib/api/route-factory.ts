@@ -83,28 +83,39 @@ export function createApiRoute<TQuery = unknown, TBody = unknown>(
         validatedQuery = queryValidation as TQuery
       }
 
-      // 3. Body validation
+      // 3. Body parsing and validation
       let validatedBody: TBody | undefined
-      if (bodySchema && ['POST', 'PUT', 'PATCH'].includes(method)) {
+      if (['POST', 'PUT', 'PATCH'].includes(method)) {
         try {
           const rawBody = await request.json()
-          const validation = bodySchema.safeParse(rawBody)
           
-          if (!validation.success) {
-            const errorMessages = validation.error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`)
-            apiLogger.error({ 
-              path, 
-              validationErrors: validation.error.issues,
-              errorMessages,
-              receivedData: rawBody 
-            }, 'Request body validation failed')
-            return createErrorResponse('Invalid request data', 400, errorMessages)
+          if (bodySchema) {
+            const validation = bodySchema.safeParse(rawBody)
+            
+            if (!validation.success) {
+              const errorMessages = validation.error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`)
+              apiLogger.error({ 
+                path, 
+                validationErrors: validation.error.issues,
+                errorMessages,
+                receivedData: rawBody 
+              }, 'Request body validation failed')
+              return createErrorResponse('Invalid request data', 400, errorMessages)
+            }
+            
+            validatedBody = validation.data
+          } else {
+            // No schema, just pass the raw body
+            validatedBody = rawBody as TBody
           }
-          
-          validatedBody = validation.data
         } catch (error) {
-          apiLogger.error({ error, path }, 'Failed to parse request body')
-          return createErrorResponse('Invalid JSON in request body', 400)
+          // Only log error if body was expected (not for empty bodies on some endpoints)
+          if (bodySchema) {
+            apiLogger.error({ error, path }, 'Failed to parse request body')
+            return createErrorResponse('Invalid JSON in request body', 400)
+          }
+          // For routes without bodySchema, empty body is acceptable
+          validatedBody = undefined
         }
       }
 
