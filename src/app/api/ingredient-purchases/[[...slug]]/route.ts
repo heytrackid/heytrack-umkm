@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 // Internal modules
 import { createSuccessResponse, withQueryValidation } from '@/lib/api-core'
-import { ListQuerySchema, createDeleteHandler, createGetHandler, createListHandler } from '@/lib/api/crud-helpers'
+import { ListQuerySchema, createGetHandler, createListHandler } from '@/lib/api/crud-helpers'
 import { createApiRoute, type RouteContext, type RouteHandler } from '@/lib/api/route-factory'
 import { cacheInvalidation } from '@/lib/cache'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
@@ -179,7 +179,7 @@ export const POST = createApiRoute(
   }
 )
 
-// PUT /api/ingredient-purchases/[id] - Update purchase
+// PUT /api/ingredient-purchases/[id] - Update purchase with stock adjustment
 async function updatePurchaseHandler(
   context: RouteContext,
   _query?: never,
@@ -200,10 +200,14 @@ async function updatePurchaseHandler(
   // Get current purchase data for comparison
   const { data: currentPurchase } = await supabase
     .from('ingredient_purchases')
-    .select('ingredient_id, quantity, unit_price')
+    .select('ingredient_id, quantity, unit_price, total_price')
     .eq('id', id)
     .eq('user_id', user.id)
     .single()
+
+  if (!currentPurchase) {
+    return { error: 'Purchase not found', status: 404 }
+  }
 
   // Update purchase
   const { data, error } = await supabase
@@ -218,8 +222,38 @@ async function updatePurchaseHandler(
     return { error: 'Failed to update purchase', status: 500 }
   }
 
+  // If quantity changed, adjust stock accordingly
+  const quantityChanged = body.quantity !== undefined && body.quantity !== currentPurchase.quantity
+  if (quantityChanged) {
+    try {
+      const quantityDiff = (body.quantity ?? 0) - (currentPurchase.quantity ?? 0)
+      const inventoryService = new InventorySyncService({ userId: user.id, supabase })
+      
+      if (quantityDiff > 0) {
+        // Quantity increased - add more stock
+        await inventoryService.updateStockFromPurchase(
+          currentPurchase.ingredient_id,
+          quantityDiff,
+          body.unit_price ?? currentPurchase.unit_price ?? 0,
+          `${id}-adjustment`
+        )
+        apiLogger.info({ purchaseId: id, quantityAdded: quantityDiff }, 'Stock increased from purchase update')
+      } else if (quantityDiff < 0) {
+        // Quantity decreased - reverse the difference
+        await inventoryService.reverseStockFromPurchase(
+          currentPurchase.ingredient_id,
+          Math.abs(quantityDiff),
+          `${id}-adjustment`
+        )
+        apiLogger.info({ purchaseId: id, quantityRemoved: Math.abs(quantityDiff) }, 'Stock decreased from purchase update')
+      }
+    } catch (stockError) {
+      apiLogger.error({ error: stockError, purchaseId: id }, 'Failed to adjust stock on purchase update')
+    }
+  }
+
   // If quantity or price changed, trigger HPP recalculation
-  if (currentPurchase && (body.quantity || body.unit_price)) {
+  if (body.quantity || body.unit_price) {
     try {
       const hppTrigger = new HppTriggerService({ userId: user.id, supabase })
       await hppTrigger.onIngredientPriceChange(currentPurchase.ingredient_id)
@@ -228,7 +262,7 @@ async function updatePurchaseHandler(
     }
   }
 
-  cacheInvalidation.ingredients()
+  cacheInvalidation.ingredients(currentPurchase.ingredient_id)
 
   return { data }
 }
@@ -242,7 +276,7 @@ export const PUT = createApiRoute(
   updatePurchaseHandler as RouteHandler<never, z.infer<typeof UpdatePurchaseSchema>>
 )
 
-// DELETE /api/ingredient-purchases/[id] - Delete purchase
+// DELETE /api/ingredient-purchases/[id] - Delete purchase with proper cleanup
 export const DELETE = createApiRoute(
   {
     method: 'DELETE',
@@ -251,14 +285,89 @@ export const DELETE = createApiRoute(
   },
   async (context) => {
     const slug = context.params?.['slug'] as string[] | undefined
-    if (!slug || slug.length !== 1) {
+    if (!slug || slug.length !== 1 || !slug[0]) {
       return handleAPIError(new Error('Invalid path'), 'API Route')
     }
-    return createDeleteHandler(
-      {
-        table: 'ingredient_purchases',
-      },
-      'Purchase record deleted successfully'
-    )(context)
+
+    const { user, supabase } = context
+    const purchaseId = slug[0]
+
+    // Get purchase data before deletion for cleanup
+    const { data: purchaseToDelete, error: fetchError } = await supabase
+      .from('ingredient_purchases')
+      .select('id, ingredient_id, quantity, unit_price, total_price, expense_id, supplier')
+      .eq('id', purchaseId)
+      .eq('user_id', user.id)
+      .single()
+
+    if (fetchError || !purchaseToDelete) {
+      return handleAPIError(new Error('Purchase not found'), 'DELETE /api/ingredient-purchases')
+    }
+
+    // 1. Cleanup: Reverse stock adjustment
+    try {
+      const inventoryService = new InventorySyncService({ userId: user.id, supabase })
+      await inventoryService.reverseStockFromPurchase(
+        purchaseToDelete.ingredient_id,
+        purchaseToDelete.quantity,
+        purchaseId
+      )
+      apiLogger.info({ purchaseId, ingredientId: purchaseToDelete.ingredient_id, quantity: purchaseToDelete.quantity }, 'Stock reversed from purchase deletion')
+    } catch (stockError) {
+      apiLogger.warn({ error: stockError, purchaseId }, 'Failed to reverse stock on purchase deletion')
+    }
+
+    // 2. Cleanup: Delete linked expense record if exists
+    if (purchaseToDelete.expense_id) {
+      const { error: expenseError } = await supabase
+        .from('financial_records')
+        .delete()
+        .eq('id', purchaseToDelete.expense_id)
+        .eq('user_id', user.id)
+
+      if (expenseError) {
+        apiLogger.warn({ error: expenseError, purchaseId, expenseId: purchaseToDelete.expense_id }, 'Failed to delete linked expense record')
+      } else {
+        apiLogger.info({ purchaseId, expenseId: purchaseToDelete.expense_id }, 'Linked expense record deleted')
+      }
+    }
+
+    // 3. Cleanup: Reverse supplier stats if supplier was tracked
+    if (purchaseToDelete.supplier && purchaseToDelete.total_price) {
+      try {
+        const { SupplierStatsService } = await import('@/services/stats/SupplierStatsService')
+        const supplierService = new SupplierStatsService({ userId: user.id, supabase })
+        await supplierService.reverseStatsFromPurchase(purchaseToDelete.supplier, purchaseToDelete.total_price)
+        apiLogger.info({ purchaseId, supplier: purchaseToDelete.supplier }, 'Supplier stats reversed on purchase deletion')
+      } catch (supplierError) {
+        apiLogger.warn({ error: supplierError, supplier: purchaseToDelete.supplier }, 'Failed to reverse supplier stats on deletion')
+      }
+    }
+
+    // 4. Delete the purchase record
+    const { error: deleteError } = await supabase
+      .from('ingredient_purchases')
+      .delete()
+      .eq('id', purchaseId)
+      .eq('user_id', user.id)
+
+    if (deleteError) {
+      return handleAPIError(deleteError, 'DELETE /api/ingredient-purchases')
+    }
+
+    // 5. Trigger HPP recalculation for affected recipes
+    try {
+      const hppTrigger = new HppTriggerService({ userId: user.id, supabase })
+      await hppTrigger.onIngredientPriceChange(purchaseToDelete.ingredient_id)
+      apiLogger.info({ ingredientId: purchaseToDelete.ingredient_id }, 'HPP recalculation triggered after purchase deletion')
+    } catch (hppError) {
+      apiLogger.warn({ error: hppError, ingredientId: purchaseToDelete.ingredient_id }, 'Failed to trigger HPP recalculation')
+    }
+
+    cacheInvalidation.ingredients(purchaseToDelete.ingredient_id)
+
+    apiLogger.info({ userId: user.id, purchaseId }, 'DELETE /api/ingredient-purchases - Success with cleanup')
+
+    return createSuccessResponse({ id: purchaseId }, 'Purchase record deleted and stock reversed successfully')
   }
 )

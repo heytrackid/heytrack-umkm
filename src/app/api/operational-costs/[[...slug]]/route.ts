@@ -130,7 +130,7 @@ export const PUT = createApiRoute(
   }
 )
 
-// DELETE /api/operational-costs/[id] - Delete operational cost
+// DELETE /api/operational-costs/[id] - Delete operational cost with HPP trigger
 export const DELETE = createApiRoute(
   {
     method: 'DELETE',
@@ -146,11 +146,26 @@ export const DELETE = createApiRoute(
       ...context,
       params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
     }
-    return createDeleteHandler(
+    const result = await createDeleteHandler(
       {
         table: 'operational_costs',
       },
       SUCCESS_MESSAGES.OPERATIONAL_COST_DELETED
     )(contextWithId)
+
+    // Trigger HPP recalculation when operational costs change
+    if (result.status === 200) {
+      try {
+        const { HppTriggerService } = await import('@/services/hpp/HppTriggerService')
+        const { user, supabase } = context
+        const hppTrigger = new HppTriggerService({ userId: user.id, supabase })
+        await hppTrigger.onOperationalCostsChange()
+      } catch (hppError) {
+        const { apiLogger } = await import('@/lib/logger')
+        apiLogger.error({ error: hppError }, 'Failed to trigger HPP recalculation on operational cost delete')
+      }
+    }
+
+    return result
   }
 )

@@ -28,6 +28,117 @@ export class InventorySyncService extends BaseService {
   }
 
   /**
+   * Reverse stock update when purchase is deleted
+   * Deducts the quantity that was added and recalculates WAC
+   */
+  async reverseStockFromPurchase(
+    ingredientId: string,
+    quantity: number,
+    reference?: string
+  ): Promise<StockUpdateResult> {
+    return this.executeWithAudit(
+      async () => {
+        // Get current ingredient data
+        const { data: ingredient, error: fetchError } = await this.context.supabase
+          .from('ingredients')
+          .select('id, name, current_stock, weighted_average_cost, price_per_unit')
+          .eq('id', ingredientId)
+          .eq('user_id', this.context.userId)
+          .single()
+
+        if (fetchError || !ingredient) {
+          throw new Error(`Ingredient not found: ${ingredientId}`)
+        }
+
+        const previousStock = Number(ingredient.current_stock ?? 0)
+        const previousWac = Number(ingredient.weighted_average_cost ?? ingredient.price_per_unit ?? 0)
+
+        // Deduct the quantity that was added by the purchase
+        const newStock = Math.max(0, previousStock - quantity)
+
+        // WAC stays the same when reversing (simplified approach)
+        // A more accurate approach would require tracking all purchase history
+        const newWac = previousWac
+
+        // Update ingredient stock
+        const { error: updateError } = await this.context.supabase
+          .from('ingredients')
+          .update({
+            current_stock: newStock,
+            updated_at: new Date().toISOString(),
+            updated_by: this.context.userId
+          })
+          .eq('id', ingredientId)
+          .eq('user_id', this.context.userId)
+
+        if (updateError) {
+          throw new Error(`Failed to reverse ingredient stock: ${updateError.message}`)
+        }
+
+        // Create stock transaction record for the reversal
+        const { data: transaction, error: txError } = await this.context.supabase
+          .from('stock_transactions')
+          .insert({
+            user_id: this.context.userId,
+            ingredient_id: ingredientId,
+            type: 'ADJUSTMENT' as StockTransactionType,
+            quantity: -quantity, // Negative for reversal
+            unit_price: previousWac,
+            total_price: quantity * previousWac,
+            reference: reference ? `Purchase Deleted: ${reference}` : `Purchase reversal - ${new Date().toISOString()}`,
+            notes: `Stock reversed from ${previousStock} to ${newStock} due to purchase deletion`,
+            created_by: this.context.userId
+          })
+          .select('id')
+          .single()
+
+        if (txError) {
+          this.logger.warn({ error: txError }, 'Failed to create stock reversal transaction record')
+        }
+
+        // Create stock log entry
+        await this.context.supabase
+          .from('inventory_stock_logs')
+          .insert({
+            ingredient_id: ingredientId,
+            change_type: 'ADJUSTMENT',
+            quantity_before: previousStock,
+            quantity_changed: -quantity,
+            quantity_after: newStock,
+            reason: 'Purchase deleted - stock reversed',
+            reference_type: 'ingredient_purchase',
+            reference_id: reference ?? null,
+            triggered_by: this.context.userId,
+            metadata: {
+              action: 'purchase_deletion_reversal'
+            }
+          })
+
+        this.logger.info({
+          ingredientId,
+          ingredientName: ingredient.name,
+          previousStock,
+          newStock,
+          quantityReversed: quantity
+        }, 'Stock reversed from purchase deletion')
+
+        return {
+          ingredient_id: ingredientId,
+          previous_stock: previousStock,
+          new_stock: newStock,
+          previous_wac: previousWac,
+          new_wac: newWac,
+          transaction_id: transaction?.id ?? null
+        }
+      },
+      'UPDATE',
+      'INGREDIENT',
+      ingredientId,
+      { action: 'stock_reversal_from_purchase_deletion', quantity }
+    )
+  }
+
+  /**
    * Update stock after purchase and recalculate WAC
    * WAC Formula: (Old Stock × Old WAC + New Qty × New Price) / (Old Stock + New Qty)
    */
@@ -387,5 +498,67 @@ export class InventorySyncService extends BaseService {
       ingredientId,
       { action: 'stock_adjustment', adjustment, reason, adjustmentType }
     )
+  }
+
+  /**
+   * Restore stock when a completed production batch is cancelled
+   * This reverses the deductions made during production completion
+   */
+  async restoreStockForCancelledProduction(
+    recipeId: string,
+    productionId: string,
+    multiplier: number = 1
+  ): Promise<StockUpdateResult[]> {
+    // Get recipe ingredients
+    const { data: recipeIngredients, error } = await this.context.supabase
+      .from('recipe_ingredients')
+      .select(`
+        ingredient_id,
+        quantity,
+        ingredients:ingredient_id (name)
+      `)
+      .eq('recipe_id', recipeId)
+      .eq('user_id', this.context.userId)
+
+    if (error || !recipeIngredients) {
+      throw new Error(`Failed to fetch recipe ingredients: ${error?.message}`)
+    }
+
+    // Get recipe name
+    const { data: recipe } = await this.context.supabase
+      .from('recipes')
+      .select('name')
+      .eq('id', recipeId)
+      .single()
+
+    const results: StockUpdateResult[] = []
+
+    for (const ri of recipeIngredients) {
+      try {
+        const ingredientData = ri.ingredients as { name: string } | null
+        const quantityToRestore = Number(ri.quantity) * multiplier
+        
+        // Use adjustStock to add back the quantity
+        const result = await this.adjustStock(
+          ri.ingredient_id,
+          quantityToRestore, // Positive = add back
+          `Production cancelled: ${recipe?.name ?? productionId} (restored ${quantityToRestore} units)`,
+          'ADJUSTMENT'
+        )
+        results.push(result)
+        
+        this.logger.info({
+          ingredientId: ri.ingredient_id,
+          ingredientName: ingredientData?.name,
+          quantityRestored: quantityToRestore,
+          productionId
+        }, 'Stock restored for cancelled production')
+      } catch (err) {
+        this.logger.error({ error: err, ingredientId: ri.ingredient_id }, 'Failed to restore stock for ingredient')
+        // Continue with other ingredients
+      }
+    }
+
+    return results
   }
 }

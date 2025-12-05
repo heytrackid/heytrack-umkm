@@ -175,7 +175,7 @@ export const POST = createApiRoute(
   }
 )
 
-// DELETE /api/expenses/[id] - Delete expense
+// DELETE /api/expenses/[id] - Delete expense with validation
 export const DELETE = createApiRoute(
   {
     method: 'DELETE',
@@ -187,9 +187,28 @@ export const DELETE = createApiRoute(
     if (!slug || slug.length !== 1 || !slug[0]) {
       return handleAPIError(new Error('Invalid path'), 'API Route')
     }
+
+    const { user, supabase } = context
+    const expenseId = slug[0]
+
+    // Check if expense is linked to a purchase (auto-generated expense)
+    const { data: linkedPurchase } = await supabase
+      .from('ingredient_purchases')
+      .select('id')
+      .eq('expense_id', expenseId)
+      .eq('user_id', user.id)
+      .single()
+
+    if (linkedPurchase) {
+      return handleAPIError(
+        new Error('Cannot delete this expense because it is linked to a purchase. Delete the purchase instead to remove both records.'),
+        'DELETE /api/expenses'
+      )
+    }
+
     const contextWithId = {
       ...context,
-      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+      params: { ...context.params, id: expenseId } as Record<string, string | string[]>
     }
     return createDeleteHandler(
       {

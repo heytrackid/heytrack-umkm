@@ -3,7 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 // Internal modules
 import { createPaginationMeta, createSuccessResponse } from '@/lib/api-core'
-import { createDeleteHandler, createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
+import { createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { parseRouteParams } from '@/lib/api/route-helpers'
 import { cacheInvalidation, withCache } from '@/lib/cache'
@@ -97,7 +97,7 @@ export const GET = createApiRoute(
     if (!slug || slug.length === 0) {
       // GET /api/orders - List orders
       const { user, supabase } = context
-      const { page = 1, limit = 999999, search, sort_by, sort_order, status, from, to } = validatedQuery!
+      const { page = 1, limit = 100, search, sort_by, sort_order, status, from, to } = validatedQuery!
 
       const paramsFetch: FetchOrdersParams = { page, limit, status: status || null, user_id: user.id }
       if (search) paramsFetch.search = search
@@ -305,6 +305,10 @@ export const POST = createApiRoute(
     }
 
     cacheInvalidation.orders()
+    if (incomeRecordId) {
+      // Invalidate financial records cache when income is recorded
+      cacheInvalidation.all() // Using all() as there's no specific financialRecords invalidation
+    }
     apiLogger.info({ userId: user.id, orderId: createdOrder.id, incomeRecorded: Boolean(incomeRecordId) }, 'POST /api/orders - Success')
 
     return createSuccessResponse({ ...createdOrder, income_recorded: Boolean(incomeRecordId) }, SUCCESS_MESSAGES.ORDER_CREATED, undefined, 201)
@@ -332,7 +336,7 @@ export const PUT = createApiRoute(
     // Get current order state
     const { data: currentOrder } = await typedSupabase
       .from('orders')
-      .select('status, total_amount, order_no, customer_name, customer_id, delivery_date, order_date, financial_record_id')
+      .select('status, total_amount, order_no, customer_name, customer_id, delivery_date, order_date, financial_record_id, notes')
       .eq('id', orderId)
       .eq('user_id', user.id)
       .single()
@@ -363,6 +367,12 @@ export const PUT = createApiRoute(
           apiLogger.info({ orderId }, 'Income record created on status change to DELIVERED')
         } catch (err) {
           apiLogger.error({ error: err, orderId }, 'Failed to create income record on status change')
+          // Mark order as needing financial sync retry
+          await typedSupabase
+            .from('orders')
+            .update({ notes: `[SYNC_NEEDED] ${body?.notes ?? currentOrder.notes ?? ''}`.trim() })
+            .eq('id', orderId)
+            .eq('user_id', user.id)
         }
       }
 
@@ -424,7 +434,7 @@ export const PUT = createApiRoute(
   }
 )
 
-// DELETE /api/orders/[id] - Delete order
+// DELETE /api/orders/[id] - Delete order with proper cleanup
 export const DELETE = createApiRoute(
   {
     method: 'DELETE',
@@ -436,15 +446,66 @@ export const DELETE = createApiRoute(
     if (!slug || slug.length !== 1 || !slug[0]) {
       return handleAPIError(new Error('Invalid path'), 'DELETE /api/orders')
     }
-    const contextWithId = {
-      ...context,
-      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+
+    const { user, supabase } = context
+    const orderId = slug[0]
+    const typedSupabase = supabase as TypedSupabaseClient
+
+    // Get order data before deletion for cleanup
+    const { data: orderToDelete, error: fetchError } = await typedSupabase
+      .from('orders')
+      .select('id, status, total_amount, customer_id, financial_record_id')
+      .eq('id', orderId)
+      .eq('user_id', user.id)
+      .single()
+
+    if (fetchError || !orderToDelete) {
+      return handleAPIError(new Error('Order not found'), 'DELETE /api/orders')
     }
-    return createDeleteHandler(
-      {
-        table: 'orders',
-      },
-      SUCCESS_MESSAGES.ORDER_DELETED
-    )(contextWithId)
+
+    // 1. Cleanup: Delete linked financial record if exists
+    if (orderToDelete.financial_record_id) {
+      const { error: finError } = await typedSupabase
+        .from('financial_records')
+        .delete()
+        .eq('id', orderToDelete.financial_record_id)
+        .eq('user_id', user.id)
+
+      if (finError) {
+        apiLogger.warn({ error: finError, orderId, recordId: orderToDelete.financial_record_id }, 'Failed to delete linked financial record')
+      } else {
+        apiLogger.info({ orderId, recordId: orderToDelete.financial_record_id }, 'Linked financial record deleted')
+      }
+    }
+
+    // 2. Cleanup: Reverse customer stats if order was DELIVERED
+    if (orderToDelete.status === 'DELIVERED' && orderToDelete.customer_id && orderToDelete.total_amount) {
+      try {
+        const { CustomerStatsService } = await import('@/services/stats/CustomerStatsService')
+        const statsService = new CustomerStatsService({ userId: user.id, supabase: typedSupabase })
+        await statsService.reverseStatsFromOrder(orderToDelete.customer_id, orderToDelete.total_amount)
+        apiLogger.info({ orderId, customerId: orderToDelete.customer_id }, 'Customer stats reversed on order deletion')
+      } catch (statsError) {
+        apiLogger.warn({ error: statsError, customerId: orderToDelete.customer_id }, 'Failed to reverse customer stats on deletion')
+      }
+    }
+
+    // 3. Delete the order (CASCADE will handle order_items, payments, stock_reservations)
+    const { error: deleteError } = await typedSupabase
+      .from('orders')
+      .delete()
+      .eq('id', orderId)
+      .eq('user_id', user.id)
+
+    if (deleteError) {
+      return handleAPIError(deleteError, 'DELETE /api/orders')
+    }
+
+    cacheInvalidation.orders()
+    cacheInvalidation.all() // Invalidate financial records cache too
+
+    apiLogger.info({ userId: user.id, orderId }, 'DELETE /api/orders - Success with cleanup')
+
+    return createSuccessResponse({ id: orderId }, SUCCESS_MESSAGES.ORDER_DELETED)
   }
 )

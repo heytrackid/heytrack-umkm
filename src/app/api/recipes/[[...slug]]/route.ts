@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 // Internal modules
 import { createPaginationMeta, createSuccessResponse } from '@/lib/api-core'
-import { createDeleteHandler, createGetHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
+import { createGetHandler } from '@/lib/api/crud-helpers'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { parseRouteParams } from '@/lib/api/route-helpers'
 import { cacheInvalidation, withCache } from '@/lib/cache'
@@ -34,6 +34,13 @@ const RecipeListQuerySchema = z.object({
   status: z.string().optional(),
 })
 
+const RecipeIngredientSchema = z.object({
+  ingredient_id: z.string().uuid(),
+  quantity: z.number().positive(),
+  unit: z.string().min(1),
+  notes: z.string().optional(),
+})
+
 const RecipeUpdateSchema = z.object({
   name: z.string().min(1).optional(),
   description: z.string().optional(),
@@ -43,6 +50,7 @@ const RecipeUpdateSchema = z.object({
   servings: z.number().int().positive().optional(),
   selling_price: z.number().positive().optional(),
   is_active: z.boolean().optional(),
+  ingredients: z.array(RecipeIngredientSchema).optional(),
 })
 
 // GET /api/recipes or /api/recipes/[id]
@@ -217,7 +225,7 @@ export const POST = createApiRoute(
   }
 )
 
-// PUT /api/recipes/[id] - Update recipe
+// PUT /api/recipes/[id] - Update recipe with ingredients and HPP trigger
 export const PUT = createApiRoute(
   {
     method: 'PUT',
@@ -230,19 +238,105 @@ export const PUT = createApiRoute(
     if (!slug || slug.length !== 1 || !slug[0]) {
       return handleAPIError(new Error('Invalid path'), 'PUT /api/recipes')
     }
-    // Pass the ID from slug to context.params for createUpdateHandler
-    const contextWithId = {
-      ...context,
-      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+
+    const { user, supabase } = context
+    const recipeId = slug[0]
+    const typedSupabase = supabase as TypedSupabaseClient
+
+    if (!body) {
+      return handleAPIError(new Error('Request body is required'), 'PUT /api/recipes')
     }
-    return createUpdateHandler({
-      table: 'recipes',
-      selectFields: RECIPE_FIELDS.DETAIL,
-    }, SUCCESS_MESSAGES.RECIPE_UPDATED)(contextWithId, undefined, body)
+
+    // Separate ingredients from recipe data
+    const { ingredients, ...recipeData } = body
+
+    // Build update object with proper null handling for optional fields
+    const updateData: Record<string, unknown> = {
+      updated_by: user.id,
+      updated_at: new Date().toISOString()
+    }
+    
+    // Only include fields that are explicitly provided
+    if (recipeData['name'] !== undefined) updateData['name'] = recipeData['name']
+    if (recipeData['description'] !== undefined) updateData['description'] = recipeData['description'] ?? null
+    if (recipeData['image_url'] !== undefined) updateData['image_url'] = recipeData['image_url'] ?? null
+    if (recipeData['prep_time'] !== undefined) updateData['prep_time'] = recipeData['prep_time'] ?? null
+    if (recipeData['cook_time'] !== undefined) updateData['cook_time'] = recipeData['cook_time'] ?? null
+    if (recipeData['servings'] !== undefined) updateData['servings'] = recipeData['servings'] ?? null
+    if (recipeData['selling_price'] !== undefined) updateData['selling_price'] = recipeData['selling_price'] ?? null
+    if (recipeData['is_active'] !== undefined) updateData['is_active'] = recipeData['is_active']
+
+    // Update recipe base data
+    const { data: updatedRecipe, error: recipeError } = await typedSupabase
+      .from('recipes')
+      .update(updateData)
+      .eq('id', recipeId)
+      .eq('user_id', user.id)
+      .select(RECIPE_FIELDS.DETAIL)
+      .single()
+
+    if (recipeError) {
+      apiLogger.error({ error: recipeError, recipeId }, 'Failed to update recipe')
+      return handleAPIError(recipeError, 'PUT /api/recipes')
+    }
+
+    // Update ingredients if provided
+    let ingredientsChanged = false
+    if (ingredients && ingredients.length > 0) {
+      // Delete existing ingredients
+      const { error: deleteError } = await typedSupabase
+        .from('recipe_ingredients')
+        .delete()
+        .eq('recipe_id', recipeId)
+        .eq('user_id', user.id)
+
+      if (deleteError) {
+        apiLogger.error({ error: deleteError, recipeId }, 'Failed to delete old recipe ingredients')
+        return handleAPIError(deleteError, 'PUT /api/recipes')
+      }
+
+      // Insert new ingredients
+      const recipeIngredients = ingredients.map((ing) => ({
+        recipe_id: recipeId,
+        ingredient_id: ing.ingredient_id,
+        quantity: ing.quantity,
+        unit: ing.unit,
+        notes: ing.notes ?? null,
+        user_id: user.id
+      })) as RecipeIngredientInsert[]
+
+      const { error: insertError } = await typedSupabase
+        .from('recipe_ingredients')
+        .insert(recipeIngredients)
+
+      if (insertError) {
+        apiLogger.error({ error: insertError, recipeId }, 'Failed to insert new recipe ingredients')
+        return handleAPIError(insertError, 'PUT /api/recipes')
+      }
+
+      ingredientsChanged = true
+      apiLogger.info({ recipeId, ingredientCount: ingredients.length }, 'Recipe ingredients updated')
+    }
+
+    // Trigger HPP recalculation if ingredients changed
+    if (ingredientsChanged) {
+      try {
+        const { HppTriggerService } = await import('@/services/hpp/HppTriggerService')
+        const hppTrigger = new HppTriggerService({ userId: user.id, supabase: typedSupabase })
+        await hppTrigger.onRecipeIngredientsChange(recipeId)
+        apiLogger.info({ recipeId }, 'HPP recalculated after ingredients update')
+      } catch (hppError) {
+        apiLogger.error({ error: hppError, recipeId }, 'Failed to recalculate HPP after ingredients update')
+      }
+    }
+
+    cacheInvalidation.recipes(recipeId)
+
+    return createSuccessResponse(updatedRecipe, SUCCESS_MESSAGES.RECIPE_UPDATED)
   }
 )
 
-// DELETE /api/recipes/[id] - Delete recipe
+// DELETE /api/recipes/[id] - Delete recipe with FK validation
 export const DELETE = createApiRoute(
   {
     method: 'DELETE',
@@ -254,16 +348,61 @@ export const DELETE = createApiRoute(
     if (!slug || slug.length !== 1 || !slug[0]) {
       return handleAPIError(new Error('Invalid path'), 'DELETE /api/recipes')
     }
-    // Pass the ID from slug to context.params for createDeleteHandler
-    const contextWithId = {
-      ...context,
-      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+
+    const { user, supabase } = context
+    const recipeId = slug[0]
+    const typedSupabase = supabase as TypedSupabaseClient
+
+    // Check if recipe is used in orders (FK RESTRICT will block anyway, but give user-friendly message)
+    const { data: orderItems } = await typedSupabase
+      .from('order_items')
+      .select('id')
+      .eq('recipe_id', recipeId)
+      .limit(1)
+
+    if (orderItems && orderItems.length > 0) {
+      return handleAPIError(
+        new Error('Cannot delete recipe because it is used in existing orders. Consider deactivating the recipe instead.'),
+        'DELETE /api/recipes'
+      )
     }
-    return createDeleteHandler(
-      {
-        table: 'recipes',
-      },
-      SUCCESS_MESSAGES.RECIPE_DELETED
-    )(contextWithId)
+
+    // Check if recipe is used in production batches
+    const { data: productionBatches } = await typedSupabase
+      .from('production_batches')
+      .select('id')
+      .eq('recipe_id', recipeId)
+      .eq('user_id', user.id)
+      .limit(1)
+
+    if (productionBatches && productionBatches.length > 0) {
+      return handleAPIError(
+        new Error('Cannot delete recipe because it has production history. Consider deactivating the recipe instead.'),
+        'DELETE /api/recipes'
+      )
+    }
+
+    // Proceed with delete
+    const { error } = await typedSupabase
+      .from('recipes')
+      .delete()
+      .eq('id', recipeId)
+      .eq('user_id', user.id)
+
+    if (error) {
+      // Handle FK constraint error with user-friendly message
+      if (error.code === '23503') {
+        return handleAPIError(
+          new Error('Cannot delete recipe because it is currently in use. Consider deactivating the recipe instead.'),
+          'DELETE /api/recipes'
+        )
+      }
+      return handleAPIError(error, 'DELETE /api/recipes')
+    }
+
+    cacheInvalidation.recipes(recipeId)
+    apiLogger.info({ userId: user.id, recipeId }, 'Recipe deleted')
+
+    return createSuccessResponse({ id: recipeId }, SUCCESS_MESSAGES.RECIPE_DELETED)
   }
 )

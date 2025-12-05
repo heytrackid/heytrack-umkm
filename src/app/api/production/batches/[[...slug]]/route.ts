@@ -163,6 +163,47 @@ export const PUT = createApiRoute(
         }
       }
 
+      // If status changed FROM COMPLETED to CANCELLED, restore inventory and cleanup financial records
+      if (updateData.status === 'CANCELLED' && currentBatch?.status === 'COMPLETED') {
+        const { apiLogger } = await import('@/lib/logger')
+        
+        // Restore inventory
+        try {
+          const { InventorySyncService } = await import('@/services/inventory/InventorySyncService')
+          const inventoryService = new InventorySyncService({ userId: user.id, supabase })
+          
+          // Restore stock for all recipe ingredients (add back)
+          const multiplier = Number(currentBatch?.quantity ?? 1)
+          await inventoryService.restoreStockForCancelledProduction(
+            currentBatch!.recipe_id,
+            id,
+            multiplier
+          )
+          
+          apiLogger.info({ batchId: id, recipeId: currentBatch?.recipe_id, multiplier }, 'Inventory restored for cancelled production')
+        } catch (inventoryError) {
+          apiLogger.error({ error: inventoryError, batchId: id }, 'Failed to restore inventory for cancelled production')
+        }
+
+        // Cleanup production financial records
+        try {
+          const batchReference = `PRODUCTION-${id.slice(-8)}`
+          const { error: deleteFinError } = await supabase
+            .from('financial_records')
+            .delete()
+            .eq('user_id', user.id)
+            .like('reference', `${batchReference}%`)
+
+          if (deleteFinError) {
+            apiLogger.warn({ error: deleteFinError, batchId: id }, 'Failed to delete production financial records')
+          } else {
+            apiLogger.info({ batchId: id, reference: batchReference }, 'Production financial records deleted on cancellation')
+          }
+        } catch (finError) {
+          apiLogger.error({ error: finError, batchId: id }, 'Error cleaning up production financial records')
+        }
+      }
+
       return createSuccessResponse(updatedBatch, SUCCESS_MESSAGES.PRODUCTION_BATCH_UPDATED)
     } catch (error) {
       return handleAPIError(error, 'PUT /api/production/batches/[id]')
