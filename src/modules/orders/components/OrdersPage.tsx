@@ -1,9 +1,11 @@
 'use client'
 
 // Using Pino logger for all logging
-import { BarChart3, Calendar, Clock, DollarSign, Edit, Eye, Filter, MessageCircle, Plus, Search, ShoppingCart, TrendingUp, XCircle } from '@/components/icons'
+import { BarChart3, Calendar, Clock, DollarSign, Edit, Eye, Filter, MessageCircle, Plus, Search, ShoppingCart, XCircle } from '@/components/icons'
 import { useOrdersList, useUpdateOrderStatus } from '@/hooks/api/useOrders'
 import { useQueryClient } from '@tanstack/react-query'
+import { format, subDays } from 'date-fns'
+import { id as idLocale } from 'date-fns/locale'
 import { useRouter } from 'next/navigation'
 import { memo, useCallback, useMemo, useState } from 'react'
 
@@ -12,6 +14,7 @@ import { PageHeader } from '@/components/layout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { AreaChartComponent, BarChartComponent, PieChartComponent } from '@/components/ui/charts'
 import type { OrderListItem, OrderStatus } from '@/types/database'
 
 import { Input } from '@/components/ui'
@@ -635,17 +638,108 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
         </SwipeableTabsContent>
 
         <SwipeableTabsContent value="analytics" className="mt-6">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center py-12">
-                <TrendingUp className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="font-medium mb-2">Analitik Penjualan</h3>
-                <p className="text-sm text-muted-foreground">
-                  Grafik penjualan dan tren bisnis akan ditampilkan di sini
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            {/* Analytics Summary Cards */}
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="text-sm text-muted-foreground">Rata-rata Nilai Pesanan</div>
+                  <div className="text-2xl font-bold">{formatCurrency(stats.average_order_value)}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="text-sm text-muted-foreground">Total Pelanggan</div>
+                  <div className="text-2xl font-bold">{stats.total_customers}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="text-sm text-muted-foreground">Tingkat Penyelesaian</div>
+                  <div className="text-2xl font-bold">
+                    {stats.total_orders > 0 
+                      ? ((stats.completed_orders / stats.total_orders) * 100).toFixed(1) 
+                      : 0}%
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Charts Grid */}
+            <div className="grid gap-4 md:grid-cols-2">
+              {/* Order Status Pie Chart */}
+              <PieChartComponent
+                data={[
+                  { name: 'Pending', value: stats.pending_orders },
+                  { name: 'Confirmed', value: stats.confirmed_orders },
+                  { name: 'Produksi', value: stats.in_production_orders },
+                  { name: 'Selesai', value: stats.completed_orders },
+                  { name: 'Batal', value: stats.cancelled_orders },
+                ].filter(d => d.value > 0)}
+                title="Distribusi Status Pesanan"
+                description="Breakdown status pesanan saat ini"
+                dataKey="value"
+                nameKey="name"
+                height={250}
+                donut
+                showLegend
+                config={{
+                  'Pending': { label: 'Pending', color: '#f59e0b' },
+                  'Confirmed': { label: 'Confirmed', color: '#3b82f6' },
+                  'Produksi': { label: 'Produksi', color: '#8b5cf6' },
+                  'Selesai': { label: 'Selesai', color: '#22c55e' },
+                  'Batal': { label: 'Batal', color: '#ef4444' },
+                }}
+              />
+
+              {/* Revenue by Payment Status */}
+              <BarChartComponent
+                data={[
+                  { name: 'Dibayar', value: stats.paid_revenue },
+                  { name: 'Tertunda', value: stats.pending_revenue },
+                ]}
+                title="Pendapatan per Status Pembayaran"
+                description="Perbandingan pendapatan dibayar vs tertunda"
+                dataKey="value"
+                xAxisKey="name"
+                height={250}
+                config={{
+                  value: { label: 'Jumlah', color: '#3b82f6' },
+                }}
+              />
+            </div>
+
+            {/* Daily Orders Trend */}
+            {orders.length > 0 && (
+              <AreaChartComponent
+                data={(() => {
+                  const last14Days = Array.from({ length: 14 }, (_, i) => {
+                    const date = subDays(new Date(), 13 - i)
+                    const dateStr = format(date, 'yyyy-MM-dd')
+                    const dayOrders = (orders as unknown as OrderListItem[]).filter(o => 
+                      o.order_date?.startsWith(dateStr)
+                    )
+                    return {
+                      date: format(date, 'dd MMM', { locale: idLocale }),
+                      pesanan: dayOrders.length,
+                      pendapatan: dayOrders.reduce((sum, o) => sum + (o.total_amount ?? 0), 0),
+                    }
+                  })
+                  return last14Days
+                })()}
+                title="Tren Pesanan 14 Hari Terakhir"
+                description="Jumlah pesanan dan pendapatan harian"
+                dataKey={['pesanan', 'pendapatan']}
+                xAxisKey="date"
+                height={300}
+                showLegend
+                config={{
+                  pesanan: { label: 'Pesanan', color: '#3b82f6' },
+                  pendapatan: { label: 'Pendapatan', color: '#22c55e' },
+                }}
+              />
+            )}
+          </div>
         </SwipeableTabsContent>
       </SwipeableTabs>
 

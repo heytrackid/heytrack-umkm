@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { handleError } from '@/lib/error-handling'
-import { toast } from 'sonner'
+import { successToast } from '@/hooks/use-toast'
 
 import type { Row } from '@/types/database'
 
@@ -70,7 +70,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
   const handleSubmit = async (data: CustomerFormData): Promise<void> => {
     try {
       await onSubmit(data)
-      toast.success('Data customer berhasil disimpan')
+      successToast('Berhasil', 'Data customer berhasil disimpan')
       if (!initialData) {
         form.reset()
       }

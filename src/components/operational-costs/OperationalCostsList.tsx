@@ -42,7 +42,7 @@ import {
 } from '@/components/ui/select'
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { useSettings } from '@/contexts/settings-context'
-import { toast } from 'sonner'
+import { successToast } from '@/hooks/use-toast'
 import { handleError } from '@/lib/error-handling'
 import { useOperationalCosts, useDeleteOperationalCost } from '@/hooks/useOperationalCosts'
 import { usePagination } from '@/hooks/usePagination'
@@ -101,7 +101,7 @@ export const OperationalCostsList = () => {
         mutationFn: () => postApi<{ count: number }>('/operational-costs/quick-setup', {}),
         onSuccess: (data) => {
             const templatesAdded = data.count ?? COST_CATEGORIES.length
-            toast.success(`${templatesAdded} template biaya operasional berhasil ditambahkan`)
+            successToast("Berhasil", `${templatesAdded} template biaya operasional berhasil ditambahkan`)
             
             // Invalidate and refetch costs
             void queryClient.invalidateQueries({ queryKey: ['operational-costs'] })

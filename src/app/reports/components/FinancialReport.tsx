@@ -1,27 +1,65 @@
+'use client'
+
 import { DollarSign, PiggyBank, TrendingDown, TrendingUp } from '@/components/icons'
-import { memo, useMemo } from 'react'
+import { endOfMonth, format, isWithinInterval, parseISO, startOfMonth } from 'date-fns'
+import { id } from 'date-fns/locale'
+import { memo, useMemo, useState } from 'react'
+import type { DateRange } from 'react-day-picker'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { AreaChartComponent, PieChartComponent, type ChartConfig } from '@/components/ui/charts'
+import { DateRangePicker } from '@/components/ui/date-range-picker'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useFinancialRecords } from '@/hooks/useFinancialRecords'
 
 // Financial Report Component
 // Handles financial data filtering, calculations, and display
 
-interface FinancialReportProps {}
+interface FinancialReportProps {
+  dateRange?: DateRange
+  onDateRangeChange?: (range: DateRange | undefined) => void
+}
 
-const FinancialReportComponent = ({}: FinancialReportProps = {}) => {
+const FinancialReportComponent = ({ dateRange: externalDateRange, onDateRangeChange }: FinancialReportProps = {}) => {
   const { formatCurrency } = useCurrency()
   const { data: financialRecords } = useFinancialRecords()
+  
+  const defaultRange: DateRange = {
+    from: startOfMonth(new Date()),
+    to: endOfMonth(new Date()),
+  }
+  
+  const [internalDateRange, setInternalDateRange] = useState<DateRange>(defaultRange)
+  
+  const dateRange = externalDateRange ?? internalDateRange
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    if (onDateRangeChange) {
+      onDateRangeChange(range)
+    } else {
+      setInternalDateRange(range ?? defaultRange)
+    }
+  }
 
-  // Memoize filtered financial data with extra safety checks
+  // Memoize filtered financial data with date range filter
   const financialData = useMemo(() => {
     if (!financialRecords) return []
     if (!Array.isArray(financialRecords)) {
       return []
     }
-    return financialRecords.filter((record) => !!record.date)
-  }, [financialRecords])
+    return financialRecords.filter((record) => {
+      if (!record.date) return false
+      
+      if (dateRange?.from && dateRange?.to) {
+        try {
+          const recordDate = parseISO(record.date)
+          return isWithinInterval(recordDate, { start: dateRange.from, end: dateRange.to })
+        } catch {
+          return true
+        }
+      }
+      return true
+    })
+  }, [financialRecords, dateRange])
 
   // Memoize all financial calculations
   const financialMetrics = useMemo(() => {
@@ -71,8 +109,52 @@ const FinancialReportComponent = ({}: FinancialReportProps = {}) => {
 
   const { financialStats, netProfit, profitMargin, incomeGrowth, expenseGrowth, profitGrowth } = financialMetrics
 
+  // Chart data for trends
+  const trendChartData = useMemo(() => {
+    const dailyData: Record<string, { date: string; income: number; expense: number }> = {}
+    
+    financialData.forEach((record) => {
+      if (!record.date) return
+      const dateKey = format(parseISO(record.date), 'dd MMM', { locale: id })
+      
+      if (!dailyData[dateKey]) {
+        dailyData[dateKey] = { date: dateKey, income: 0, expense: 0 }
+      }
+      
+      if (record.type === 'INCOME') {
+        dailyData[dateKey]!.income += record.amount
+      } else {
+        dailyData[dateKey]!.expense += record.amount
+      }
+    })
+    
+    return Object.values(dailyData)
+  }, [financialData])
+
+  // Pie chart data for breakdown
+  const pieChartData = useMemo(() => [
+    { name: 'Pemasukan', value: financialStats.totalIncome },
+    { name: 'Pengeluaran', value: financialStats.totalExpense },
+  ], [financialStats])
+
+  const chartConfig: ChartConfig = {
+    income: { label: 'Pemasukan', color: 'hsl(142, 76%, 36%)' },
+    expense: { label: 'Pengeluaran', color: 'hsl(0, 84%, 60%)' },
+  }
+
   return (
     <div className="space-y-6">
+      {/* Date Range Picker */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h3 className="text-lg font-semibold">Laporan Keuangan</h3>
+        <DateRangePicker
+          value={dateRange}
+          onChange={handleDateRangeChange}
+          placeholder="Pilih periode"
+          className="w-full sm:w-auto"
+        />
+      </div>
+
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="hover: ">
@@ -133,9 +215,40 @@ const FinancialReportComponent = ({}: FinancialReportProps = {}) => {
         </Card>
       </div>
 
+      {/* Charts Section */}
+      {trendChartData.length > 0 && (
+        <div className="grid gap-4 md:grid-cols-2">
+          <AreaChartComponent
+            data={trendChartData}
+            title="Tren Keuangan"
+            description="Pemasukan vs Pengeluaran harian"
+            dataKey={['income', 'expense']}
+            xAxisKey="date"
+            config={chartConfig}
+            height={280}
+            showLegend
+          />
+          
+          <PieChartComponent
+            data={pieChartData}
+            title="Komposisi Keuangan"
+            description="Perbandingan pemasukan dan pengeluaran"
+            dataKey="value"
+            nameKey="name"
+            config={{
+              Pemasukan: { label: 'Pemasukan', color: 'hsl(142, 76%, 36%)' },
+              Pengeluaran: { label: 'Pengeluaran', color: 'hsl(0, 84%, 60%)' },
+            }}
+            height={280}
+            donut
+            showLegend
+          />
+        </div>
+      )}
+
       {/* Financial Breakdown */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border-0 ">
+        <Card>
           <CardHeader>
             <CardTitle>Ringkasan Keuangan</CardTitle>
           </CardHeader>
@@ -172,21 +285,21 @@ const FinancialReportComponent = ({}: FinancialReportProps = {}) => {
           </CardContent>
         </Card>
 
-        <Card className="border-0 ">
+        <Card>
           <CardHeader>
             <CardTitle>Analisis Keuangan</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span>Pengeluaran terhadap Pemasukan</span>
+                <span className="text-sm sm:text-base">Pengeluaran terhadap Pemasukan</span>
                 <span className="font-medium">
                   {((financialStats.totalExpense / (financialStats.totalIncome || 1)) * 100).toFixed(1)}%
                 </span>
               </div>
               <div className="w-full bg-muted rounded-full h-2.5">
                  <div
-                   className="bg-red-600 h-2.5 rounded-full"
+                   className="bg-red-600 h-2.5 rounded-full transition-all"
                    style={{
                      width: `${Math.min(100, (financialStats.totalExpense / (financialStats.totalIncome || 1)) * 100)}%`
                    }}
@@ -194,14 +307,14 @@ const FinancialReportComponent = ({}: FinancialReportProps = {}) => {
               </div>
               
               <div className="flex justify-between mt-4">
-                <span>Margin Keuntungan</span>
+                <span className="text-sm sm:text-base">Margin Keuntungan</span>
                 <span className="font-medium">{profitMargin.toFixed(1)}%</span>
               </div>
               <div className="w-full bg-muted rounded-full h-2.5">
                  <div
-                   className="bg-green-600 h-2.5 rounded-full"
+                   className="bg-green-600 h-2.5 rounded-full transition-all"
                    style={{
-                     width: `${Math.min(100, profitMargin)}%`
+                     width: `${Math.min(100, Math.max(0, profitMargin))}%`
                    }}
                  />
               </div>

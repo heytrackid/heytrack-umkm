@@ -4,7 +4,7 @@ function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="skeleton"
-      className={cn("bg-gray-200/80 animate-pulse rounded-md", className)}
+      className={cn("bg-muted/50 animate-pulse rounded-md", className)}
       {...props}
     />
   )
@@ -46,4 +46,5 @@ function SkeletonTable({ rows, cols, className, ...props }: React.ComponentProps
   )
 }
 
-export { Skeleton, SkeletonText, SkeletonButton, SkeletonAvatar, SkeletonTable }
+export { Skeleton, SkeletonAvatar, SkeletonButton, SkeletonTable, SkeletonText }
+

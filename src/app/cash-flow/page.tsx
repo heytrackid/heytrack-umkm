@@ -1,9 +1,10 @@
 'use client'
 
 import { ArrowDownIcon, ArrowUpIcon, DollarSign, Filter, Plus, Search, TrendingDown, TrendingUp } from '@/components/icons'
-import { format } from 'date-fns'
+import { endOfMonth, format, isWithinInterval, parseISO, startOfMonth } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 import { useMemo, useState } from 'react'
+import type { DateRange } from 'react-day-picker'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -11,6 +12,8 @@ import { CashFlowLoading } from '@/components/loading'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { AreaChartComponent, PieChartComponent } from '@/components/ui/charts'
+import { DateRangePicker } from '@/components/ui/date-range-picker'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { Input } from '@/components/ui/input'
@@ -39,7 +42,10 @@ const CashFlowPage = () => {
 
   const [searchTerm, setSearchTerm] = useState('')
   const [typeFilter, setTypeFilter] = useState<string>('all')
-  const [dateFilter, setDateFilter] = useState<string>('all')
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: startOfMonth(new Date()),
+    to: endOfMonth(new Date()),
+  })
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
@@ -97,15 +103,66 @@ const CashFlowPage = () => {
     }
   }
 
-  // Memoize filtered records
+  // Memoize filtered records with date range
    const filteredRecords = useMemo(() => {
      const records = data ?? []
      return records.filter((record) => {
        const matchesSearch = record.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                              record.category?.toLowerCase().includes(searchTerm.toLowerCase())
-       return matchesSearch && record.date // Only include records with valid dates
+       
+       // Date range filter
+       let matchesDateRange = true
+       if (dateRange?.from && dateRange?.to && record.date) {
+         try {
+           const recordDate = parseISO(record.date)
+           matchesDateRange = isWithinInterval(recordDate, { start: dateRange.from, end: dateRange.to })
+         } catch {
+           matchesDateRange = true
+         }
+       }
+       
+       return matchesSearch && record.date && matchesDateRange
      })
-   }, [data, searchTerm])
+   }, [data, searchTerm, dateRange])
+
+  // Chart data for trends
+  const chartData = useMemo(() => {
+    const dailyData: Record<string, { date: string; income: number; expense: number }> = {}
+    
+    filteredRecords.forEach((record) => {
+      if (!record.date) return
+      const dateKey = format(parseISO(record.date), 'dd MMM', { locale: idLocale })
+      
+      if (!dailyData[dateKey]) {
+        dailyData[dateKey] = { date: dateKey, income: 0, expense: 0 }
+      }
+      
+      if (record.type === 'INCOME') {
+        dailyData[dateKey]!.income += record.amount
+      } else {
+        dailyData[dateKey]!.expense += record.amount
+      }
+    })
+    
+    return Object.values(dailyData).slice(-14) // Last 14 days
+  }, [filteredRecords])
+
+  // Pie chart data for expense categories
+  const pieChartData = useMemo(() => {
+    const categoryTotals: Record<string, number> = {}
+    
+    filteredRecords
+      .filter((r) => r.type === 'EXPENSE')
+      .forEach((record) => {
+        const category = record.category || 'Lainnya'
+        categoryTotals[category] = (categoryTotals[category] || 0) + record.amount
+      })
+    
+    return Object.entries(categoryTotals)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 6) // Top 6 categories
+  }, [filteredRecords])
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredRecords.length / itemsPerPage)
@@ -128,16 +185,7 @@ const CashFlowPage = () => {
     }
   }, [filteredRecords])
 
-  // Memoize expense categories
-  const expenseCategories = useMemo(() => 
-    filteredRecords
-      .filter((r: FinancialRecord) => r.type === 'EXPENSE')
-      .reduce((acc: Record<string, number>, r: FinancialRecord) => {
-        acc[r.category] = (acc[r.category] || 0) + r.amount
-        return acc
-      }, {} as Record<string, number>),
-    [filteredRecords]
-  )
+
 
   // Show loading state for entire page
   if (loading) {
@@ -229,53 +277,77 @@ const CashFlowPage = () => {
         {/* Summary Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Pemasukan</CardTitle>
-              <ArrowUpIcon className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {formatCurrency(summary.totalIncome)}
+            <CardContent className="p-6">
+              <div className="flex flex-col space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">Total Pemasukan</span>
+                  <div className="p-2 bg-emerald-100/50 dark:bg-emerald-900/20 rounded-lg">
+                    <ArrowUpIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-500">
+                    {formatCurrency(summary.totalIncome)}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Pengeluaran</CardTitle>
-              <ArrowDownIcon className="h-4 w-4 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {formatCurrency(summary.totalExpenses)}
+            <CardContent className="p-6">
+              <div className="flex flex-col space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">Total Pengeluaran</span>
+                  <div className="p-2 bg-rose-100/50 dark:bg-rose-900/20 rounded-lg">
+                    <ArrowDownIcon className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-2xl font-bold text-rose-600 dark:text-rose-500">
+                    {formatCurrency(summary.totalExpenses)}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Arus Kas Bersih</CardTitle>
-              {summary.netCashFlow >= 0 ? (
-                <TrendingUp className="h-4 w-4 text-green-600" aria-label="Positive cash flow" />
-              ) : (
-                <TrendingDown className="h-4 w-4 text-red-600" aria-label="Negative cash flow" />
-              )}
-            </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold ${summary.netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {formatCurrency(summary.netCashFlow)}
+            <CardContent className="p-6">
+              <div className="flex flex-col space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">Arus Kas Bersih</span>
+                  <div className={`p-2 rounded-lg ${summary.netCashFlow >= 0 ? 'bg-emerald-100/50 dark:bg-emerald-900/20' : 'bg-rose-100/50 dark:bg-rose-900/20'}`}>
+                    {summary.netCashFlow >= 0 ? (
+                      <TrendingUp className={`h-4 w-4 ${summary.netCashFlow >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`} aria-label="Positive cash flow" />
+                    ) : (
+                      <TrendingDown className={`h-4 w-4 ${summary.netCashFlow >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`} aria-label="Negative cash flow" />
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <div className={`text-2xl font-bold ${summary.netCashFlow >= 0 ? 'text-emerald-600 dark:text-emerald-500' : 'text-rose-600 dark:text-rose-500'}`}>
+                    {formatCurrency(summary.netCashFlow)}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Transaksi</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" aria-label="Total Transaksi" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {summary.transactionCount}
+            <CardContent className="p-6">
+              <div className="flex flex-col space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">Total Transaksi</span>
+                  <div className="p-2 bg-blue-100/50 dark:bg-blue-900/20 rounded-lg">
+                    <DollarSign className="h-4 w-4 text-blue-600 dark:text-blue-400" aria-label="Total Transaksi" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-2xl font-bold">
+                    {summary.transactionCount}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -290,65 +362,75 @@ const CashFlowPage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Cari transaksi..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Cari transaksi..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
                 </div>
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger className="w-full sm:w-48">
+                    <SelectValue placeholder="Tipe Transaksi" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua Tipe</SelectItem>
+                    <SelectItem value="income">Pemasukan</SelectItem>
+                    <SelectItem value="expense">Pengeluaran</SelectItem>
+                  </SelectContent>
+                </Select>
+                <DateRangePicker
+                  value={dateRange}
+                  onChange={setDateRange}
+                  placeholder="Pilih periode"
+                  className="w-full sm:w-auto"
+                />
               </div>
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue placeholder="Tipe Transaksi" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua Tipe</SelectItem>
-                  <SelectItem value="income">Pemasukan</SelectItem>
-                  <SelectItem value="expense">Pengeluaran</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={dateFilter} onValueChange={setDateFilter}>
-                <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue placeholder="Periode" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua Waktu</SelectItem>
-                  <SelectItem value="today">Hari Ini</SelectItem>
-                  <SelectItem value="week">7 Hari Terakhir</SelectItem>
-                  <SelectItem value="month">30 Hari Terakhir</SelectItem>
-                  <SelectItem value="quarter">3 Bulan Terakhir</SelectItem>
-                  <SelectItem value="year">1 Tahun Terakhir</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </CardContent>
         </Card>
 
-        {/* Expense Categories Breakdown */}
-        {Object.keys(expenseCategories).length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Breakdown Pengeluaran per Kategori</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {Object.entries(expenseCategories)
-                  .sort(([,a], [,b]) => (b as number) - (a as number))
-                  .map(([category, amount]) => (
-                    <div key={category} className="flex justify-between items-center">
-                      <span className="text-sm">{category}</span>
-                      <span className="font-medium text-red-600">{formatCurrency(amount as number)}</span>
-                    </div>
-                  ))}
-              </div>
-            </CardContent>
-          </Card>
+        {/* Charts Section */}
+        {filteredRecords.length > 0 && (
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Trend Chart */}
+            <AreaChartComponent
+              data={chartData}
+              title="Tren Arus Kas"
+              description="Pemasukan vs Pengeluaran"
+              dataKey={['income', 'expense']}
+              xAxisKey="date"
+              config={{
+                income: { label: 'Pemasukan', color: 'hsl(142, 76%, 36%)' },
+                expense: { label: 'Pengeluaran', color: 'hsl(0, 84%, 60%)' },
+              }}
+              height={250}
+              showLegend
+            />
+            
+            {/* Expense Categories Pie Chart */}
+            {pieChartData.length > 0 && (
+              <PieChartComponent
+                data={pieChartData}
+                title="Kategori Pengeluaran"
+                description="Distribusi pengeluaran per kategori"
+                dataKey="value"
+                nameKey="name"
+                height={250}
+                donut
+                showLegend
+              />
+            )}
+          </div>
         )}
+
+
 
         {/* Transactions Table */}
         <Card>

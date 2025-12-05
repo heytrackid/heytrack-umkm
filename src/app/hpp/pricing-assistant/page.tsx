@@ -17,7 +17,7 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { useRecipes } from '@/hooks/useRecipes'
 import { usePricingAssistant, type PricingRecommendation } from '@/hooks/api/useHpp'
 import { handleError } from '@/lib/error-handling'
-import { toast } from 'sonner'
+import { successToast, } from '@/hooks/use-toast'
 
 const pricingBreadcrumbs = [
   { label: 'Dashboard', href: '/' },
@@ -45,7 +45,7 @@ const PricingAssistantPage = (): JSX.Element => {
     try {
       const result = await pricingAssistantMutation.mutateAsync(selectedRecipe)
       setRecommendation(result)
-      toast.success('Pricing recommendation generated successfully')
+      successToast('Berhasil', 'Pricing recommendation generated successfully')
     } catch (_error) {
       handleError(_error as Error, 'HPP Pricing Assistant: generate recommendation', true, 'Gagal membuat rekomendasi harga')
     }

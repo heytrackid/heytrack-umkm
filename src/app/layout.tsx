@@ -1,6 +1,5 @@
 import { StackProvider, StackTheme } from "@stackframe/stack";
 import { Analytics } from '@vercel/analytics/next';
-import { Poppins } from 'next/font/google';
 import { Suspense } from 'react';
 import { stackServerApp } from "../stack/server";
 
@@ -19,14 +18,15 @@ import { SupabaseProvider } from '@/providers/SupabaseProvider';
 import type { Metadata } from 'next';
 import type { ReactElement, ReactNode } from 'react';
 
+import { Inter } from 'next/font/google';
+
 import "./globals.css";
 
 
 
-const poppins = Poppins({
-  variable: "--font-poppins",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -68,7 +68,7 @@ const RootLayout = async ({
         )}
       </head>
       <body
-        className={`${poppins.variable} antialiased min-h-[100svh] m-0 p-0 w-full font-sans`}
+        className={`${inter.variable} antialiased min-h-[100svh] m-0 p-0 w-full font-sans`}
         suppressHydrationWarning
       ><StackProvider app={stackServerApp}><StackTheme>
         <Suspense fallback={null}>

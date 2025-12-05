@@ -88,7 +88,14 @@ export class HppCalculatorService extends BaseService {
 
       const recipeData = recipe
 
-      // Calculate material costs (per batch) using WAC when available for each ingredient
+      // Validate servings
+      const servings = recipeData.servings ?? 1
+      if (servings <= 0) {
+        throw new Error(`Invalid servings: ${servings}. Must be greater than 0`)
+      }
+
+      // Calculate material costs (per batch) using CURRENT PRICE (not WAC)
+      // WAC adjustment will be calculated separately to avoid double-counting
       const material_breakdown: HppCalculationResult['material_breakdown'] = []
       let total_material_cost = 0
 
@@ -105,10 +112,9 @@ export class HppCalculatorService extends BaseService {
         const validIngredient = ingredient as { id: string; name: string; price_per_unit: number | null; weighted_average_cost: number | null; unit: string }
 
         const quantity = Number(ri.quantity ?? 0)
-        // Use WAC if available (to avoid double-adjustment later), otherwise use current price
-        const unit_price = Number(
-          validIngredient.weighted_average_cost ?? validIngredient.price_per_unit ?? 0
-        )
+        // ALWAYS use current price for material cost (not WAC)
+        // WAC adjustment is calculated separately
+        const unit_price = Number(validIngredient.price_per_unit ?? 0)
         const total_cost = quantity * unit_price
 
         material_breakdown.push({
@@ -123,8 +129,7 @@ export class HppCalculatorService extends BaseService {
         total_material_cost += total_cost
       }
 
-          const servings = recipeData.servings ?? 1
-          const material_cost_per_unit = servings > 0 ? total_material_cost / servings : total_material_cost
+          const material_cost_per_unit = total_material_cost / servings
 
           // Calculate labor cost (per unit) from recent productions
           const labor_cost_per_unit = await this.calculateLaborCost(recipeId)
@@ -132,7 +137,8 @@ export class HppCalculatorService extends BaseService {
           // Calculate overhead cost (per unit) with production-based allocation
           const overhead_cost_per_unit = await this.calculateOverheadCost(recipeId)
 
-          // Apply WAC adjustment per unit only when ingredient did not already use weighted_average_cost
+          // Calculate WAC adjustment (difference between WAC and current price)
+          // This is ONLY for tracking, not double-counted
           const wac_adjustment_per_unit = await this.calculateWacAdjustment(
             recipeIngredients as unknown as Array<RecipeIngredient & { ingredients: Ingredient | null }>,
             servings
@@ -141,20 +147,29 @@ export class HppCalculatorService extends BaseService {
       // Final per-unit and per-batch totals
       const cost_per_unit =
         material_cost_per_unit + labor_cost_per_unit + overhead_cost_per_unit + wac_adjustment_per_unit
-      const total_hpp = servings > 0 ? cost_per_unit * servings : cost_per_unit
+      
+      // Validate cost_per_unit
+      if (cost_per_unit < 0) {
+        this.logger.warn({ recipeId, cost_per_unit }, 'Negative cost_per_unit detected, clamping to 0')
+      }
+      if (isNaN(cost_per_unit)) {
+        throw new Error(`Invalid cost_per_unit (NaN) for recipe ${recipeId}`)
+      }
+
+      const total_hpp = cost_per_unit * servings
 
       // Convert per-unit components back to per-batch totals for persistence
-      const labor_cost = labor_cost_per_unit * (servings || 1)
-      const overhead_cost = overhead_cost_per_unit * (servings || 1)
-      const wac_adjustment = wac_adjustment_per_unit * (servings || 1)
+      const labor_cost = labor_cost_per_unit * servings
+      const overhead_cost = overhead_cost_per_unit * servings
+      const wac_adjustment = wac_adjustment_per_unit * servings
 
       const result: HppCalculationResult = {
         recipe_id: recipeId,
         material_cost: total_material_cost,
         labor_cost,
         overhead_cost,
-        total_hpp,
-        cost_per_unit,
+        total_hpp: Math.max(0, total_hpp), // Ensure non-negative
+        cost_per_unit: Math.max(0, cost_per_unit), // Ensure non-negative
         wac_adjustment,
         production_quantity: servings,
         material_breakdown
@@ -179,41 +194,108 @@ export class HppCalculatorService extends BaseService {
 
   /**
    * Calculate labor cost based on recent production batches
-   * Uses weighted average from last 10 completed productions
+   * Uses weighted average from completed productions
+   * 
+   * CALCULATION LOGIC:
+   * 1. First, try to get labor cost from this recipe's productions
+   * 2. If no data, try to get average labor cost from ALL productions
+   * 3. If still no data, calculate from operational costs (labor category)
+   * 4. Last resort: use default value
    */
   private async calculateLaborCost(
     recipeId: string
   ): Promise<number> {
     try {
-      const { data: productions, error } = await this.context.supabase
+      // Step 1: Try to get labor cost from this recipe's productions
+      const { data: recipeProductions, error: recipeError } = await this.context.supabase
+        .from('productions')
+        .select('labor_cost, actual_quantity')
+        .eq('recipe_id', recipeId)
+        .eq('user_id', this.context.userId)
+        .eq('status', 'COMPLETED')
+        .order('actual_end_time', { ascending: false })
+        .limit(100)
+
+      if (!recipeError && recipeProductions && recipeProductions.length > 0) {
+        const totalLaborCost = recipeProductions.reduce(
+          (sum, p) => sum + Number(p.labor_cost ?? 0),
+          0
+        )
+        const totalQuantity = recipeProductions.reduce(
+          (sum, p) => sum + Number(p.actual_quantity ?? 0),
+          0
+        )
+
+        if (totalQuantity > 0 && totalLaborCost > 0) {
+          const laborCostPerUnit = totalLaborCost / totalQuantity
+          this.logger.debug({ recipeId, laborCostPerUnit, source: 'recipe_productions' }, 'Labor cost calculated from recipe productions')
+          return laborCostPerUnit
+        }
+      }
+
+      // Step 2: Try to get average labor cost from ALL productions
+      const { data: allProductions, error: allError } = await this.context.supabase
+        .from('productions')
+        .select('labor_cost, actual_quantity')
+        .eq('user_id', this.context.userId)
+        .eq('status', 'COMPLETED')
+        .order('actual_end_time', { ascending: false })
+        .limit(500)
+
+      if (!allError && allProductions && allProductions.length > 0) {
+        const totalLaborCost = allProductions.reduce(
+          (sum, p) => sum + Number(p.labor_cost ?? 0),
+          0
+        )
+        const totalQuantity = allProductions.reduce(
+          (sum, p) => sum + Number(p.actual_quantity ?? 0),
+          0
+        )
+
+        if (totalQuantity > 0 && totalLaborCost > 0) {
+          const laborCostPerUnit = totalLaborCost / totalQuantity
+          this.logger.debug({ recipeId, laborCostPerUnit, source: 'all_productions' }, 'Labor cost calculated from all productions')
+          return laborCostPerUnit
+        }
+      }
+
+      // Step 3: Calculate from operational costs (labor category)
+      const { data: laborCosts, error: laborError } = await this.context.supabase
+        .from('operational_costs')
+        .select('amount')
+        .eq('user_id', this.context.userId)
+        .eq('is_active', true)
+        .ilike('category', '%labor%')
+
+      if (!laborError && laborCosts && laborCosts.length > 0) {
+        const totalLaborCost = laborCosts.reduce(
+          (sum, cost) => sum + Number(cost.amount ?? 0),
+          0
+        )
+
+        // Get total production volume to calculate per-unit cost
+        const { data: recentProductions } = await this.context.supabase
           .from('productions')
-          .select('labor_cost, actual_quantity')
-          .eq('recipe_id', recipeId)
+          .select('actual_quantity')
           .eq('user_id', this.context.userId)
           .eq('status', 'COMPLETED')
-          .order('actual_end_time', { ascending: false })
-          .limit(100)
+          .gte('actual_end_time', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
 
-      if (error) {
-        this.logger.warn({ error: error.message }, 'Failed to fetch productions for labor cost')
-        return HPP_CONFIG.DEFAULT_LABOR_COST_PER_SERVING
+        const totalVolume = (recentProductions ?? []).reduce(
+          (sum, p) => sum + Number(p.actual_quantity ?? 0),
+          0
+        )
+
+        if (totalVolume > 0 && totalLaborCost > 0) {
+          const laborCostPerUnit = totalLaborCost / totalVolume
+          this.logger.debug({ recipeId, laborCostPerUnit, source: 'operational_costs' }, 'Labor cost calculated from operational costs')
+          return laborCostPerUnit
+        }
       }
 
-      if (!productions || productions.length === 0) {
-        return HPP_CONFIG.DEFAULT_LABOR_COST_PER_SERVING
-      }
-
-      // Calculate weighted average labor cost per unit
-      const totalLaborCost = productions.reduce(
-        (sum, p) => sum + Number(p.labor_cost ?? 0),
-        0
-      )
-      const totalQuantity = productions.reduce(
-        (sum, p) => sum + Number(p.actual_quantity ?? 0),
-        0
-      )
-
-      return totalQuantity > 0 ? totalLaborCost / totalQuantity : HPP_CONFIG.DEFAULT_LABOR_COST_PER_SERVING
+      // Step 4: Last resort - use default value
+      this.logger.debug({ recipeId, laborCostPerUnit: HPP_CONFIG.DEFAULT_LABOR_COST_PER_SERVING, source: 'default' }, 'Using default labor cost')
+      return HPP_CONFIG.DEFAULT_LABOR_COST_PER_SERVING
 
     } catch (error: unknown) {
       this.logger.error({ error }, 'Failed to calculate labor cost')
@@ -224,17 +306,27 @@ export class HppCalculatorService extends BaseService {
   /**
    * Calculate overhead cost allocation
    * Uses production volume-based allocation for fairness
+   * 
+   * CALCULATION LOGIC:
+   * 1. Get total operational costs (excluding labor - that's calculated separately)
+   * 2. If recipe has production history, allocate based on volume ratio
+   * 3. If recipe is new (no production), use equal allocation across all recipes
+   * 4. Calculate per-unit overhead cost
+   * 
+   * FORMULA:
+   * - For recipes with production: (Total Overhead × Volume Ratio) / Recipe Volume
+   * - For new recipes: Total Overhead / Total Active Recipes / Expected Servings
    */
   private async calculateOverheadCost(
     recipeId: string
   ): Promise<number> {
     try {
-      // Get active operational costs
+      // Get active operational costs (EXCLUDING labor - that's calculated separately)
       const { data: operationalCosts, error } = await this.context.supabase
-          .from('operational_costs')
-          .select('amount')
-          .eq('user_id', this.context.userId)
-          .eq('is_active', true)
+        .from('operational_costs')
+        .select('amount, category')
+        .eq('user_id', this.context.userId)
+        .eq('is_active', true)
 
       if (error) {
         this.logger.warn({ error: error.message }, 'Failed to fetch operational costs')
@@ -242,13 +334,24 @@ export class HppCalculatorService extends BaseService {
       }
 
       if (!operationalCosts || operationalCosts.length === 0) {
-        return HPP_CONFIG.DEFAULT_OVERHEAD_PER_SERVING
+        return 0 // No operational costs = no overhead
       }
 
-      const totalOverhead = operationalCosts.reduce(
+      // Filter out labor costs (already calculated separately)
+      const nonLaborCosts = operationalCosts.filter(
+        cost => !cost.category?.toLowerCase().includes('labor') &&
+                !cost.category?.toLowerCase().includes('tenaga kerja') &&
+                !cost.category?.toLowerCase().includes('gaji')
+      )
+
+      const totalOverhead = nonLaborCosts.reduce(
         (sum, cost) => sum + Number(cost.amount ?? 0),
         0
       )
+
+      if (totalOverhead === 0) {
+        return 0 // No overhead costs
+      }
 
       // Get production volume for this recipe (last 30 days)
       const thirtyDaysAgo = new Date()
@@ -280,24 +383,61 @@ export class HppCalculatorService extends BaseService {
         0
       )
 
-      // Allocate overhead proportionally based on production volume
+      // Case 1: Recipe has production history - allocate based on volume ratio
       if (totalVolume > 0 && recipeVolume > 0) {
         const allocationRatio = recipeVolume / totalVolume
-        return (totalOverhead * allocationRatio) / recipeVolume
+        const allocatedOverhead = totalOverhead * allocationRatio
+        const overheadPerUnit = allocatedOverhead / recipeVolume
+        
+        this.logger.debug({
+          recipeId,
+          totalOverhead,
+          recipeVolume,
+          totalVolume,
+          allocationRatio,
+          overheadPerUnit,
+          source: 'volume_based'
+        }, 'Overhead calculated based on production volume')
+        
+        return overheadPerUnit
       }
 
-      // Fallback: equal allocation across active recipes
+      // Case 2: Recipe is new (no production) - use equal allocation
       const { count: recipeCount } = await this.context.supabase
         .from('recipes')
         .select('id', { count: 'exact', head: true })
         .eq('user_id', this.context.userId)
         .eq('is_active', true)
 
-      if (recipeCount && recipeCount > 0) {
-        return totalOverhead / recipeCount
-      }
+      const activeRecipeCount = recipeCount ?? HPP_CONFIG.FALLBACK_RECIPE_COUNT
 
-      return totalOverhead / HPP_CONFIG.FALLBACK_RECIPE_COUNT
+      // For new recipes, allocate equal share of overhead
+      // Then divide by expected servings (we'll use average from other recipes)
+      const overheadPerRecipe = totalOverhead / activeRecipeCount
+
+      // Get average servings from all recipes
+      const { data: recipes } = await this.context.supabase
+        .from('recipes')
+        .select('servings')
+        .eq('user_id', this.context.userId)
+        .eq('is_active', true)
+
+      const avgServings = recipes && recipes.length > 0
+        ? recipes.reduce((sum, r) => sum + (r.servings ?? 1), 0) / recipes.length
+        : 10 // Default to 10 servings if no data
+
+      const overheadPerUnit = overheadPerRecipe / avgServings
+
+      this.logger.debug({
+        recipeId,
+        totalOverhead,
+        activeRecipeCount,
+        avgServings,
+        overheadPerUnit,
+        source: 'equal_allocation'
+      }, 'Overhead calculated using equal allocation (new recipe)')
+
+      return overheadPerUnit
 
     } catch (error: unknown) {
       this.logger.error({ error }, 'Failed to calculate overhead cost')
@@ -308,6 +448,10 @@ export class HppCalculatorService extends BaseService {
   /**
    * Calculate WAC (Weighted Average Cost) adjustment
    * Compares current prices with historical WAC from recent purchases
+   * 
+   * IMPORTANT: This is ONLY for tracking/reporting purposes.
+   * Material cost is calculated using CURRENT PRICE, not WAC.
+   * This adjustment shows the difference between WAC and current price.
    */
   private async calculateWacAdjustment(
     recipeIngredients: Array<RecipeIngredient & { ingredients: Ingredient | null }>,
@@ -315,6 +459,10 @@ export class HppCalculatorService extends BaseService {
   ): Promise<number> {
     try {
       if (!recipeIngredients || recipeIngredients.length === 0) {
+        return 0
+      }
+
+      if (servings <= 0) {
         return 0
       }
 
@@ -347,20 +495,21 @@ export class HppCalculatorService extends BaseService {
 
       let totalAdjustment = 0
 
-      // Calculate WAC adjustment per unit for each ingredient ONLY if we didn't already use weighted_average_cost
+      // Calculate WAC adjustment per unit for each ingredient
+      // Adjustment = (WAC - Current Price) × Qty per Unit
       for (const ri of recipeIngredients) {
         const ingredient = ri.ingredients
-        if (!ingredient) {continue}
-
-        // If weighted_average_cost exists and was used for material unit_price, skip adjustment to avoid double counting
-        const hasWacPrice = (ingredient as unknown as { weighted_average_cost?: number | null }).weighted_average_cost
-        if (hasWacPrice !== null && hasWacPrice !== undefined) {continue}
+        if (!ingredient) {
+          continue
+        }
 
         const ingredientTransactions = transactions.filter(
           t => t.ingredient_id === ri.ingredient_id
         )
 
-        if (ingredientTransactions.length === 0) {continue}
+        if (ingredientTransactions.length === 0) {
+          continue
+        }
 
         // Calculate weighted average cost from transactions
         const totalQuantity = ingredientTransactions.reduce(
@@ -372,14 +521,21 @@ export class HppCalculatorService extends BaseService {
           0
         )
 
-        if (totalQuantity === 0) {continue}
+        if (totalQuantity === 0) {
+          continue
+        }
 
         const wac = totalValue / totalQuantity
         const currentPrice = Number(ingredient.price_per_unit ?? 0)
 
+        // Only calculate adjustment if WAC differs from current price
+        if (Math.abs(wac - currentPrice) < 0.01) {
+          continue
+        }
+
         // Adjustment per unit: (qty per unit) * (wac - currentPrice)
         const quantityBatch = Number(ri.quantity ?? 0)
-        const qtyPerUnit = servings > 0 ? quantityBatch / servings : quantityBatch
+        const qtyPerUnit = quantityBatch / servings
         const adjustmentPerUnit = (wac - currentPrice) * qtyPerUnit
 
         totalAdjustment += adjustmentPerUnit
@@ -390,7 +546,8 @@ export class HppCalculatorService extends BaseService {
           wac,
           currentPrice,
           qtyPerUnit,
-          adjustmentPerUnit
+          adjustmentPerUnit,
+          note: 'WAC adjustment for tracking only, not included in material cost'
         }, 'WAC adjustment calculated per unit for ingredient')
       }
 

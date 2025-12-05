@@ -13,8 +13,8 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { useDeleteWhatsAppTemplate, useGenerateDefaultTemplates, useUpdateWhatsAppTemplate, useWhatsAppTemplates } from '@/hooks/api/useWhatsAppTemplates'
 import { useAuth } from '@/hooks/index'
+import { successToast, } from '@/hooks/use-toast'
 import { handleError } from '@/lib/error-handling'
-import { toast } from 'sonner'
 
 import TemplateForm from './TemplateForm'
 import TemplatePreview from './TemplatePreview'
@@ -77,7 +77,7 @@ const WhatsAppTemplatesLayout = () => {
             for (const template of templatesToDelete) {
                 await deleteMutation.mutateAsync(template.id)
             }
-            toast.success(`${templatesToDelete.length} template berhasil dihapus`)
+            successToast("Berhasil", `${templatesToDelete.length} template berhasil dihapus`)
         } catch (error) {
             // Error handling is done in the mutation
         }
@@ -109,7 +109,7 @@ const WhatsAppTemplatesLayout = () => {
     }, [])
 
     const handleSuccess = useCallback(async () => {
-        toast.success(editingTemplate?.id ? 'Template berhasil diupdate' : 'Template berhasil dibuat')
+        successToast('Berhasil', editingTemplate?.id ? 'Template berhasil diupdate' : 'Template berhasil dibuat')
         setEditingTemplate(null)
     }, [editingTemplate])
 

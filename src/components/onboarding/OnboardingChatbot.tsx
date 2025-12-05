@@ -219,17 +219,17 @@ export function OnboardingChatbot({ className }: OnboardingChatbotProps) {
     )
   }
 
-  // Open state - full chatbot interface (responsive)
+  // Open state - chatbot interface (floating card style like AI chatbot)
   return (
     <div className={cn(
       'fixed z-50',
-      // Mobile: full screen modal style
-      'inset-x-0 bottom-0 top-auto',
-      // Desktop: floating card
-      'sm:inset-auto sm:bottom-6 sm:right-6 sm:w-96',
+      // Mobile: floating card at bottom right
+      'bottom-20 right-4 w-[calc(100%-2rem)] max-w-sm',
+      // Desktop: floating card at bottom right
+      'sm:bottom-6 sm:right-6 sm:w-96',
       className
     )}>
-      <Card className="shadow-2xl border-primary/20 flex flex-col h-[60vh] sm:h-auto sm:max-h-[500px] overflow-hidden rounded-t-2xl sm:rounded-2xl">
+      <Card className="shadow-2xl border-primary/20 flex flex-col max-h-[60vh] sm:max-h-[500px] overflow-hidden rounded-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-3 sm:p-4 border-b bg-gradient-to-r from-primary/10 to-transparent">
           <div className="flex items-center gap-2 sm:gap-3">

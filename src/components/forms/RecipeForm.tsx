@@ -17,7 +17,7 @@ import {
   RecipeFormSchema,
   type RecipeForm as RecipeFormData
 } from '@/lib/validations/domains/recipe'
-import { toast } from 'sonner'
+import { successToast } from '@/hooks/use-toast'
 
 import type { Row } from '@/types/database'
 
@@ -56,7 +56,7 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
   const handleSubmit = async (data: RecipeFormData) => {
     try {
       await onSubmit(data)
-      toast.success('Resep berhasil disimpan')
+      successToast('Berhasil', 'Resep berhasil disimpan')
       if (!initialData) {
         form.reset()
       }

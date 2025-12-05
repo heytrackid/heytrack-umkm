@@ -9,10 +9,10 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { toast } from 'sonner'
-import { handleError } from '@/lib/error-handling'
-import { useCurrency } from '@/hooks/useCurrency'
 import { useHppRecommendations } from '@/hooks/api/useHpp'
+import { infoToast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/useCurrency'
+import { handleError } from '@/lib/error-handling'
 
 const recommendationsBreadcrumbs = [
   { label: 'Dashboard', href: '/' },
@@ -35,7 +35,7 @@ const HppRecommendationsPage = (): JSX.Element => {
   const markAsImplemented = (recommendationId: string) => {
     try {
       // In a real implementation, this would call an API to update the recommendation
-      toast(`Implementation tracking for recommendation ${recommendationId} will be available in the API`)
+      infoToast('Info', `Implementation tracking for recommendation ${recommendationId} will be available in the API`)
     } catch (error) {
       handleError(error as Error, 'HPP Recommendations: update', true, 'Gagal memperbarui rekomendasi')
     }

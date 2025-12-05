@@ -20,6 +20,7 @@ const badgeVariants = cva(
          "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
          "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+        dot: "border-transparent bg-transparent pl-0 gap-1.5",
       },
     },
     defaultVariants: {
@@ -36,6 +37,25 @@ const Badge = ({
 }: ComponentProps<'span'> &
   VariantProps<typeof badgeVariants> & { asChild?: boolean }) => {
   const Comp = asChild ? Slot :"span"
+  
+  if (variant === 'dot') {
+    return (
+      <Comp
+        data-slot="badge"
+        className={cn(badgeVariants({ variant }), className)}
+        {...props}
+      >
+        <span className={cn("h-1.5 w-1.5 rounded-full", 
+          className?.includes('text-emerald') ? "bg-emerald-500" :
+          className?.includes('text-blue') ? "bg-blue-500" :
+          className?.includes('text-amber') ? "bg-amber-500" :
+          className?.includes('text-rose') ? "bg-rose-500" :
+          "bg-primary"
+        )} />
+        {props.children}
+      </Comp>
+    )
+  }
 
   return (
     <Comp

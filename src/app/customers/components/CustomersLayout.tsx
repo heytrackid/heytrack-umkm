@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button'
 import { useSettings } from '@/contexts/settings-context'
 import { useResponsive } from '@/hooks/useResponsive'
 import { handleError } from '@/lib/error-handling'
-import { toast } from 'sonner'
+import { successToast, } from '@/hooks/use-toast'
 
 
 import { ServerPagination } from '@/components/ui/server-pagination'
@@ -70,7 +70,7 @@ export const CustomersLayout = (): JSX.Element => {
     },
     onSuccess: (_, customerIds) => {
       queryClient.invalidateQueries({ queryKey: ['customers'] })
-      toast.success(`${customerIds.length} pelanggan berhasil dihapus`)
+      successToast("Berhasil", `${customerIds.length} pelanggan berhasil dihapus`)
       setSelectedItems([])
     },
     onError: (error) => handleError(error, 'Delete customers', true, 'Gagal menghapus pelanggan')

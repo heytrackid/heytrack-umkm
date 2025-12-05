@@ -294,6 +294,8 @@ export class ReportService extends BaseService {
       for (const product of productMap.values()) {
         const profit = product.revenue - product.cogs
         const profitMargin = product.revenue > 0 ? (profit / product.revenue) * 100 : 0
+        const isLossMaking = profit < 0
+        const isLowMargin = profitMargin < 15 && profitMargin >= 0
 
         productProfitability.push({
           product_name: product.recipe_name,
@@ -301,7 +303,9 @@ export class ReportService extends BaseService {
           total_cogs: product.cogs,
           gross_profit: profit,
           gross_margin: profitMargin,
-          total_quantity: product.quantity_sold
+          total_quantity: product.quantity_sold,
+          is_loss_making: isLossMaking,
+          is_low_margin: isLowMargin
         })
       }
 
@@ -404,6 +408,11 @@ export class ReportService extends BaseService {
         operatingExpenses
       })
 
+      // Sort products by profitability
+      const sortedByProfit = [...productProfitability].sort((a, b) => b.gross_profit - a.gross_profit)
+      const topProfitable = sortedByProfit.slice(0, 5)
+      const leastProfitable = sortedByProfit.slice(-5).reverse()
+
       return {
         period: {
           start: start.toISOString(),
@@ -423,8 +432,8 @@ export class ReportService extends BaseService {
         },
         trends,
         productProfitability,
-        top_profitable_products: [],
-        least_profitable_products: [],
+        top_profitable_products: topProfitable,
+        least_profitable_products: leastProfitable,
         operating_expenses_breakdown: operatingExpenses,
         profit_by_period: [],
         insights
@@ -437,6 +446,8 @@ export class ReportService extends BaseService {
 
   /**
    * Generate automated insights from profit report data
+   * 
+   * IMPORTANT: All calculations are validated to ensure accuracy
    */
   private generateProfitInsights(data: {
     totalRevenue: number
@@ -465,39 +476,78 @@ export class ReportService extends BaseService {
       impact?: 'high' | 'medium' | 'low'
     }> = []
 
-    // Profit margin analysis
-    if (data.profitMargin < 10) {
-      insights.push({
-        type: 'danger',
-        title: 'Margin Keuntungan Rendah',
-        description: `Margin keuntungan Anda sebesar ${data.profitMargin.toFixed(1)}% berada di bawah standar industri (minimal 15-25%).`,
-        recommendation: 'Tinjau ulang harga jual atau optimalkan biaya bahan baku dan operasional.',
-        impact: 'high'
-      })
-    } else if (data.profitMargin > 40) {
+    // Validate data integrity
+    if (data.totalRevenue < 0 || data.totalCOGS < 0 || data.totalOperatingExpenses < 0) {
       insights.push({
         type: 'warning',
-        title: 'Margin Keuntungan Tinggi',
-        description: `Margin keuntungan ${data.profitMargin.toFixed(1)}% cukup tinggi. Pastikan tidak mempengaruhi volume penjualan.`,
-        recommendation: 'Evaluasi apakah harga masih kompetitif di pasar.',
-        impact: 'medium'
+        title: 'Data Tidak Valid',
+        description: 'Ditemukan nilai negatif dalam data laporan. Silakan verifikasi data.',
+        impact: 'high'
       })
-    } else {
+      return insights
+    }
+
+    // Net profit analysis (PRIORITY 1 - most important)
+    if (data.netProfit < 0) {
+      insights.push({
+        type: 'danger',
+        title: 'Kerugian Bersih',
+        description: `Bisnis mengalami kerugian bersih sebesar ${Math.abs(data.netProfit).toLocaleString('id-ID')} dalam periode ini.`,
+        recommendation: 'Segera tinjau struktur biaya dan strategi pricing untuk kembali ke zona profit.',
+        impact: 'high'
+      })
+    } else if (data.netProfit > 0) {
       insights.push({
         type: 'success',
-        title: 'Margin Keuntungan Optimal',
-        description: `Margin keuntungan ${data.profitMargin.toFixed(1)}% dalam kisaran yang sehat.`,
-        impact: 'low'
+        title: 'Keuntungan Bersih Positif',
+        description: `Bisnis menghasilkan keuntungan bersih sebesar ${data.netProfit.toLocaleString('id-ID')}.`,
+        impact: 'high'
       })
     }
 
-    // Loss-making products
+    // Profit margin analysis (based on NET profit, not gross)
+    if (data.totalRevenue > 0) {
+      if (data.profitMargin < 5) {
+        insights.push({
+          type: 'danger',
+          title: 'Margin Keuntungan Sangat Rendah',
+          description: `Margin keuntungan bersih Anda sebesar ${data.profitMargin.toFixed(1)}% sangat rendah dan tidak sustainable.`,
+          recommendation: 'Tinjau ulang harga jual, optimalkan biaya bahan baku, dan kurangi biaya operasional.',
+          impact: 'high'
+        })
+      } else if (data.profitMargin < 15) {
+        insights.push({
+          type: 'warning',
+          title: 'Margin Keuntungan Rendah',
+          description: `Margin keuntungan bersih Anda sebesar ${data.profitMargin.toFixed(1)}% berada di bawah standar industri (minimal 15-25%).`,
+          recommendation: 'Tinjau ulang harga jual atau optimalkan biaya bahan baku dan operasional.',
+          impact: 'high'
+        })
+      } else if (data.profitMargin > 50) {
+        insights.push({
+          type: 'warning',
+          title: 'Margin Keuntungan Sangat Tinggi',
+          description: `Margin keuntungan ${data.profitMargin.toFixed(1)}% sangat tinggi. Pastikan tidak mempengaruhi volume penjualan.`,
+          recommendation: 'Evaluasi apakah harga masih kompetitif di pasar.',
+          impact: 'medium'
+        })
+      } else if (data.profitMargin >= 15 && data.profitMargin <= 50) {
+        insights.push({
+          type: 'success',
+          title: 'Margin Keuntungan Optimal',
+          description: `Margin keuntungan ${data.profitMargin.toFixed(1)}% dalam kisaran yang sehat.`,
+          impact: 'low'
+        })
+      }
+    }
+
+    // Loss-making products (only if count > 0)
     if (data.lossMakingProductsCount > 0) {
       insights.push({
         type: 'danger',
-        title: 'Produk Rugi',
-        description: `Terdapat ${data.lossMakingProductsCount} produk yang menimbulkan kerugian.`,
-        recommendation: 'Evaluasi harga pokok produksi dan pertimbangkan penghentian produk yang tidak menguntungkan.',
+        title: `${data.lossMakingProductsCount} Produk Rugi`,
+        description: `Terdapat ${data.lossMakingProductsCount} produk yang menimbulkan kerugian (margin negatif).`,
+        recommendation: 'Evaluasi harga pokok produksi dan pertimbangkan penghentian atau repricing produk yang tidak menguntungkan.',
         impact: 'high'
       })
     }
@@ -517,38 +567,74 @@ export class ReportService extends BaseService {
       })
     }
 
-    // Operating expenses analysis
-    const topExpense = data.operatingExpenses.sort((a, b) => b.total - a.total)[0]
-    if (topExpense && topExpense.percentage > 30) {
-      insights.push({
-        type: 'warning',
-        title: 'Biaya Operasional Dominan',
-        description: `Kategori ${topExpense.category} menyumbang ${topExpense.percentage.toFixed(1)}% dari total biaya operasional.`,
-        recommendation: 'Evaluasi efisiensi dalam kategori biaya ini dan cari alternatif yang lebih hemat.',
-        impact: 'medium'
-      })
+    // COGS ratio analysis (relative to revenue)
+    if (data.totalRevenue > 0) {
+      const cogsRatio = (data.totalCOGS / data.totalRevenue) * 100
+      if (cogsRatio > 75) {
+        insights.push({
+          type: 'danger',
+          title: 'Biaya Bahan Baku Sangat Tinggi',
+          description: `Biaya bahan baku mencapai ${cogsRatio.toFixed(1)}% dari total revenue. Ini meninggalkan margin sangat kecil.`,
+          recommendation: 'Optimalkan penggunaan bahan baku, negosiasikan harga dengan supplier, atau naikkan harga jual.',
+          impact: 'high'
+        })
+      } else if (cogsRatio > 65) {
+        insights.push({
+          type: 'warning',
+          title: 'Biaya Bahan Baku Tinggi',
+          description: `Biaya bahan baku mencapai ${cogsRatio.toFixed(1)}% dari total revenue.`,
+          recommendation: 'Optimalkan penggunaan bahan baku atau negosiasikan harga dengan supplier.',
+          impact: 'high'
+        })
+      }
     }
 
-    // COGS ratio analysis
-    const cogsRatio = (data.totalCOGS / data.totalRevenue) * 100
-    if (cogsRatio > 70) {
-      insights.push({
-        type: 'warning',
-        title: 'Biaya Bahan Baku Tinggi',
-        description: `Biaya bahan baku mencapai ${cogsRatio.toFixed(1)}% dari total revenue.`,
-        recommendation: 'Optimalkan penggunaan bahan baku atau negosiasikan harga dengan supplier.',
-        impact: 'high'
-      })
+    // Operating expenses ratio analysis
+    if (data.totalRevenue > 0) {
+      const opexRatio = (data.totalOperatingExpenses / data.totalRevenue) * 100
+      if (opexRatio > 40) {
+        insights.push({
+          type: 'warning',
+          title: 'Biaya Operasional Tinggi',
+          description: `Biaya operasional mencapai ${opexRatio.toFixed(1)}% dari total revenue.`,
+          recommendation: 'Evaluasi efisiensi operasional dan cari peluang penghematan biaya.',
+          impact: 'high'
+        })
+      }
     }
 
-    // Net profit analysis
-    if (data.netProfit < 0) {
+    // Top operating expense category analysis
+    if (data.operatingExpenses.length > 0) {
+      const topExpense = data.operatingExpenses.sort((a, b) => b.total - a.total)[0]
+      if (topExpense && topExpense.percentage > 35) {
+        insights.push({
+          type: 'warning',
+          title: 'Kategori Biaya Dominan',
+          description: `Kategori "${topExpense.category}" menyumbang ${topExpense.percentage.toFixed(1)}% dari total biaya operasional.`,
+          recommendation: 'Evaluasi efisiensi dalam kategori biaya ini dan cari alternatif yang lebih hemat.',
+          impact: 'medium'
+        })
+      }
+    }
+
+    // Gross profit analysis
+    if (data.grossProfit < 0) {
       insights.push({
         type: 'danger',
-        title: 'Kerugian Bersih',
-        description: 'Bisnis mengalami kerugian bersih dalam periode ini.',
-        recommendation: 'Segera tinjau struktur biaya dan strategi pricing untuk kembali ke zona profit.',
+        title: 'Kerugian Kotor',
+        description: 'Harga jual lebih rendah dari biaya bahan baku. Ini sangat kritis.',
+        recommendation: 'Segera naikkan harga jual atau kurangi biaya bahan baku.',
         impact: 'high'
+      })
+    }
+
+    // If no insights generated, add a neutral one
+    if (insights.length === 0) {
+      insights.push({
+        type: 'info',
+        title: 'Laporan Stabil',
+        description: 'Tidak ada masalah signifikan terdeteksi dalam laporan keuangan.',
+        impact: 'low'
       })
     }
 

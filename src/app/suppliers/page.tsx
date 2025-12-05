@@ -28,7 +28,7 @@ import {
     useSuppliers,
     useUpdateSupplier
 } from '@/hooks/useSuppliers'
-import { toast } from 'sonner'
+import { successToast, errorToast } from '@/hooks/use-toast'
 
 import { SupplierEditDialog } from '@/app/suppliers/components/SupplierEditDialog'
 import { SupplierForm } from '@/app/suppliers/components/SupplierForm'
@@ -168,13 +168,13 @@ const SuppliersPage = (): JSX.Element => {
             if (deleteConfirm.bulk && deleteConfirm.suppliers.length > 0) {
                 const ids = deleteConfirm.suppliers.map(s => s.id)
                 await bulkDeleteMutation.mutateAsync(ids)
-                toast.success(`${deleteConfirm.suppliers.length} supplier berhasil dihapus`)
+                successToast("Berhasil", `${deleteConfirm.suppliers.length} supplier berhasil dihapus`)
             } else if (deleteConfirm.supplier) {
                 await deleteSupplierMutation.mutateAsync(deleteConfirm.supplier.id)
-                toast.success('Supplier berhasil dihapus')
+                successToast('Berhasil', 'Supplier berhasil dihapus')
             }
         } catch (error) {
-            toast.error(error instanceof Error ? error.message : 'Gagal menghapus supplier')
+            errorToast('Error', error instanceof Error ? error.message : 'Gagal menghapus supplier')
         } finally {
             setDeleteConfirm({ show: false, supplier: null, bulk: false, suppliers: [] })
         }
@@ -191,7 +191,7 @@ const SuppliersPage = (): JSX.Element => {
             id: editDialog.supplier.id,
             data
         })
-        toast.success('Supplier berhasil diupdate')
+        successToast('Berhasil', 'Supplier berhasil diupdate')
         setEditDialog({ open: false, supplier: null })
     }, [editDialog.supplier, updateSupplierMutation])
 

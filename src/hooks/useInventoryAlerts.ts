@@ -3,7 +3,7 @@ import { handleError } from '@/lib/error-handling'
 import { deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import type { RestockSuggestion, RestockSuggestionsSummary } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import { successToast } from '@/hooks/use-toast'
 
 const logger = createClientLogger('useInventoryAlerts')
 
@@ -59,7 +59,7 @@ export function useAcknowledgeAlert() {
     mutationFn: (alertId: string) => putApi(`/api/inventory/alerts/${alertId}/acknowledge`, {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory-alerts'] })
-      toast.success('Alert berhasil ditandai')
+      successToast('Berhasil', 'Alert berhasil ditandai')
     },
     onError: (error) => handleError(error, 'Acknowledge alert', true, 'Gagal menandai alert'),
   })
@@ -75,7 +75,7 @@ export function useDismissAlert() {
     mutationFn: (alertId: string) => deleteApi(`/api/inventory/alerts/${alertId}/dismiss`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory-alerts'] })
-      toast.success('Alert berhasil dihapus')
+      successToast('Berhasil', 'Alert berhasil dihapus')
     },
     onError: (error) => handleError(error, 'Dismiss alert', true, 'Gagal menghapus alert'),
   })

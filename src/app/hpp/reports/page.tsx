@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import { toast } from 'sonner'
+import { successToast, } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useHppOverview } from '@/hooks/useHppData'
 import { useResponsive } from '@/hooks/useResponsive'
@@ -123,7 +123,7 @@ const HppReportsPage = (): JSX.Element => {
       // Simulate report generation
       await new Promise(resolve => setTimeout(resolve, 2000))
 
-      toast.success(`Report generated successfully in ${config.format.toUpperCase()} format`)
+      successToast("Berhasil", `Report generated successfully in ${config.format.toUpperCase()} format`)
 
     } catch (error) {
       handleError(error, 'Generate HPP report', true, 'Failed to generate report')

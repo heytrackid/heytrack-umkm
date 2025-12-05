@@ -8,10 +8,10 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { toast } from 'sonner'
-import { handleError } from '@/lib/error-handling'
+import { infoToast, successToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useIngredientsList } from '@/hooks/useIngredients'
+import { handleError } from '@/lib/error-handling'
 
 import type { Row } from '@/types/database'
 
@@ -49,7 +49,7 @@ const WacEnginePage = (): JSX.Element => {
       setCalculating(true)
       // This would normally call a WAC API endpoint
       // For now, we'll simulate the calculation
-      toast('WAC calculation endpoint not yet implemented')
+      infoToast('Info', 'WAC calculation endpoint not yet implemented')
     } catch (error) {
       handleError(error as Error, 'HPP WAC: calculate', true, 'Gagal menghitung WAC')
     } finally {
@@ -61,12 +61,12 @@ const WacEnginePage = (): JSX.Element => {
   const recalculateAll = () => {
     try {
       setRecalculating(true)
-      toast('Full WAC recalculation started')
+      infoToast('Info', 'Full WAC recalculation started')
 
       // Simulate recalculation
       timeoutRef.current = setTimeout(() => {
         setRecalculating(false)
-        toast.success('WAC recalculation completed')
+        successToast('Berhasil', 'WAC recalculation completed')
       }, 2000)
     } catch (error) {
       handleError(error as Error, 'HPP WAC: recalculate all', true, 'Gagal menghitung ulang WAC')

@@ -6,7 +6,7 @@
 export type OrderStatus =
   | 'PENDING'
   | 'CONFIRMED'
-  | 'PROCESSING'
+  | 'IN_PROGRESS'
   | 'READY'
   | 'DELIVERED'
   | 'CANCELLED'
@@ -26,8 +26,8 @@ export function validateStatusTransition(
 } {
   const validTransitions: Record<OrderStatus, OrderStatus[]> = {
     PENDING: ['CONFIRMED', 'CANCELLED'],
-    CONFIRMED: ['PROCESSING', 'CANCELLED'],
-    PROCESSING: ['READY', 'CANCELLED'],
+    CONFIRMED: ['IN_PROGRESS', 'CANCELLED'],
+    IN_PROGRESS: ['READY', 'CANCELLED'],
     READY: ['DELIVERED', 'CANCELLED'],
     DELIVERED: [], // Final state
     CANCELLED: [], // Final state

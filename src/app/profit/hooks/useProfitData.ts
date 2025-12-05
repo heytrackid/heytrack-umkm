@@ -1,5 +1,6 @@
-import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { format } from 'date-fns'
+import { useState } from 'react'
 
 import type { ExportFormat, ProfitData, ProfitFilters } from '@/app/profit/components/types'
 import type { ProfitReport } from '@/services/reports/ReportService'
@@ -19,13 +20,29 @@ export function useProfitData() {
   
   const [filters, setFilters] = useState<ProfitFilters>(() => {
     return {
-      selectedPeriod: 'month'
+      selectedPeriod: 'month',
+      dateRange: undefined
     }
   })
 
   const selectedPeriod = filters.selectedPeriod ?? 'month'
 
-  const swrKey = `/api/reports/profit?period=${selectedPeriod}`
+  // Build API URL with optional date range parameters
+  const buildApiUrl = () => {
+    const params = new URLSearchParams()
+    params.append('period', selectedPeriod)
+    
+    if (filters.dateRange?.from) {
+      params.append('start_date', format(filters.dateRange.from, 'yyyy-MM-dd'))
+    }
+    if (filters.dateRange?.to) {
+      params.append('end_date', format(filters.dateRange.to, 'yyyy-MM-dd'))
+    }
+    
+    return `/api/reports/profit?${params.toString()}`
+  }
+
+  const swrKey = buildApiUrl()
 
    const fetchProfitData = async (url: string): Promise<ProfitData> => {
      const response = await fetch(url)
@@ -81,7 +98,7 @@ export function useProfitData() {
 
     
     const { data: profitData, error, refetch, isLoading } = useQuery<ProfitData>({
-      queryKey: ['profit', selectedPeriod],
+      queryKey: ['profit', selectedPeriod, filters.dateRange?.from?.toISOString(), filters.dateRange?.to?.toISOString()],
       queryFn: () => fetchProfitData(swrKey),
       staleTime: 5 * 60 * 1000, // 5 minutes
       gcTime: 10 * 60 * 1000, // 10 minutes

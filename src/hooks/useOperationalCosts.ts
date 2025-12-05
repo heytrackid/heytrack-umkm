@@ -1,9 +1,9 @@
 
+import { successToast } from '@/hooks/use-toast'
 import { handleError } from '@/lib/error-handling'
 import { deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import type { Insert, Row, Update } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
 
 
 
@@ -58,7 +58,7 @@ export function useCreateOperationalCost() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['operational-costs'] })
       queryClient.invalidateQueries({ queryKey: ['operational-cost-stats'] })
-      toast.success('Biaya operasional berhasil ditambahkan')
+      successToast('Berhasil', 'Biaya operasional berhasil ditambahkan')
     },
     onError: (error) => handleError(error, 'Create operational cost', true, 'Gagal menambahkan biaya operasional'),
   })
@@ -76,7 +76,7 @@ export function useUpdateOperationalCost() {
       queryClient.invalidateQueries({ queryKey: ['operational-costs'] })
       queryClient.invalidateQueries({ queryKey: ['operational-cost', id] })
       queryClient.invalidateQueries({ queryKey: ['operational-cost-stats'] })
-      toast.success('Biaya operasional berhasil diperbarui')
+      successToast('Berhasil', 'Biaya operasional berhasil diperbarui')
     },
     onError: (error) => handleError(error, 'Update operational cost', true, 'Gagal memperbarui biaya operasional'),
   })
@@ -93,7 +93,7 @@ export function useDeleteOperationalCost() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['operational-costs'] })
       queryClient.invalidateQueries({ queryKey: ['operational-cost-stats'] })
-      toast.success('Biaya operasional berhasil dihapus')
+      successToast('Berhasil', 'Biaya operasional berhasil dihapus')
     },
     onError: (error) => handleError(error, 'Delete operational cost', true, 'Gagal menghapus biaya operasional'),
   })
@@ -119,7 +119,7 @@ export function useQuickSetupOperationalCosts() {
     mutationFn: () => postApi('/api/operational-costs/quick-setup'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['operational-costs'] })
-      toast.success('Biaya operasional default berhasil dibuat')
+      successToast('Berhasil', 'Biaya operasional default berhasil dibuat')
     },
     onError: (error) => handleError(error, 'Quick setup operational costs', true, 'Gagal membuat biaya operasional default'),
   })

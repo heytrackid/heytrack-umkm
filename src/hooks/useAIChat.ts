@@ -2,7 +2,7 @@
 import { handleError } from '@/lib/error-handling'
 import { deleteApi, fetchApi, postApi } from '@/lib/query/query-helpers'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import { successToast } from '@/hooks/use-toast'
 
 
 
@@ -111,7 +111,7 @@ export function useDeleteChatSession() {
     mutationFn: (sessionId: string) => deleteApi(`/api/ai/sessions/${sessionId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chat-sessions'] })
-      toast.success('Sesi chat berhasil dihapus')
+      successToast('Berhasil', 'Sesi chat berhasil dihapus')
     },
     onError: (error) => handleError(error, 'Delete chat session', true, 'Gagal menghapus sesi chat'),
   })

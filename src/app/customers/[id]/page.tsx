@@ -4,7 +4,7 @@ import { ArrowLeft, Edit, Mail, MapPin, Phone, ShoppingCart, Trash2, TrendingUp,
 import { useRouter } from 'next/navigation'
 import { use, useState } from 'react'
 import { handleError } from '@/lib/error-handling'
-import { toast } from 'sonner'
+import { successToast, } from '@/hooks/use-toast'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -63,7 +63,7 @@ const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }): JS
   const handleDelete = async (): Promise<void> => {
     try {
       await deleteCustomerMutation.mutateAsync(id)
-      toast.success('Pelanggan berhasil dihapus')
+      successToast('Berhasil', 'Pelanggan berhasil dihapus')
       router.push('/customers')
     } catch (error) {
       handleError(error, 'Delete customer', true, 'Gagal menghapus pelanggan')

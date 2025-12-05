@@ -14,7 +14,7 @@ import { BreadcrumbPatterns, PageBreadcrumb } from '@/components/ui/page-breadcr
 import { PageHeader } from '@/components/layout/PageHeader'
 import { useAuth } from '@/hooks/index'
 import { useCreateIngredient } from '@/hooks/useIngredients'
-import { toast } from 'sonner'
+import { successToast, } from '@/hooks/use-toast'
 import { handleError } from '@/lib/error-handling'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 
@@ -71,7 +71,7 @@ const NewIngredientPage = (): JSX.Element => {
 
       await createIngredientMutation.mutateAsync(payload)
 
-      toast.success(`Bahan baku "${data.name}" berhasil ditambahkan`)
+      successToast("Berhasil", `Bahan baku "${data.name}" berhasil ditambahkan`)
 
       router.push('/ingredients')
     } catch (error) {

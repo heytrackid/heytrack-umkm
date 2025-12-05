@@ -311,6 +311,36 @@ export {
 } from './input-otp'
 
 // ==========================================================
+// CHART & DATE COMPONENTS
+// ==========================================================
+
+export {
+    Calendar,
+    CalendarDayButton
+} from './calendar'
+
+export {
+    ChartContainer, ChartLegend,
+    ChartLegendContent,
+    ChartStyle, ChartTooltip,
+    ChartTooltipContent
+} from './chart'
+
+export {
+    DatePicker, DateRangePicker
+} from './date-range-picker'
+
+export {
+    AreaChartComponent,
+    BarChartComponent,
+    LineChartComponent, MiniChart, PieChartComponent
+} from './charts'
+
+export type { ChartConfig } from './chart'
+export type { SimpleChartConfig } from './charts'
+export type { DateRangePreset } from './date-range-picker'
+
+// ==========================================================
 // LEGACY COMPATIBILITY
 // ==========================================================
 

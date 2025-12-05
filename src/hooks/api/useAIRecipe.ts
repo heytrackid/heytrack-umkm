@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { handleApiError } from '@/lib/error-handling'
-import { toast } from 'sonner'
+import { successToast } from '@/hooks/use-toast'
 import { postApi } from '@/lib/query/query-helpers'
 import type { GeneratedRecipe } from '@/app/recipes/ai-generator/components/types'
 
@@ -34,7 +34,7 @@ export function useGenerateRecipe(onSuccess?: (data: GeneratedRecipe) => void) {
       return data.recipe
     },
     onSuccess: (data) => {
-      toast.success('AI telah meracik resep profesional untuk Anda')
+      successToast('Berhasil', 'AI telah meracik resep profesional untuk Anda')
       onSuccess?.(data)
     },
     onError: (error) => handleApiError(error, 'Generate recipe', 'Terjadi kesalahan saat membuat resep. Silakan coba lagi.')

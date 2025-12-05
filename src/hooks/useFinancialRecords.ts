@@ -1,9 +1,9 @@
+import { successToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
 import { handleError } from '@/lib/error-handling'
 import { deleteApi, fetchApi, patchApi, postApi } from '@/lib/query/query-helpers'
 import type { FinancialRecord } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
 
 const logger = createClientLogger('useFinancialRecords')
 
@@ -47,10 +47,10 @@ export function useCreateFinancialRecord() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: { type: 'INCOME' | 'EXPENSE'; description: string; category: string; amount: number; date: string; }) => postApi('/api/financial-records', data),
+    mutationFn: (data: { type: 'INCOME' | 'EXPENSE'; description: string; category: string; amount: number; date: string; }) => postApi('/api/financial/records', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['financial-records'] })
-      toast.success('Financial record created successfully')
+      successToast('Berhasil', 'Catatan keuangan berhasil dibuat')
       logger.info('Financial record created')
     },
     onError: (error) => handleError(error, 'Create financial record', true, 'Gagal membuat catatan keuangan'),
@@ -64,10 +64,10 @@ export function useUpdateFinancialRecord() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<FinancialRecord> }) => patchApi(`/api/financial-records/${id}`, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<FinancialRecord> }) => patchApi(`/api/financial/records/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['financial-records'] })
-      toast.success('Financial record updated successfully')
+      successToast('Berhasil', 'Catatan keuangan berhasil diperbarui')
       logger.info('Financial record updated')
     },
     onError: (error) => handleError(error, 'Update financial record', true, 'Gagal memperbarui catatan keuangan'),
@@ -81,10 +81,10 @@ export function useDeleteFinancialRecord() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (id: string) => deleteApi(`/api/financial-records/${id}`),
+    mutationFn: (id: string) => deleteApi(`/api/financial/records/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['financial-records'] })
-      toast.success('Financial record deleted successfully')
+      successToast('Berhasil', 'Catatan keuangan berhasil dihapus')
       logger.info('Financial record deleted')
     },
     onError: (error) => handleError(error, 'Delete financial record', true, 'Gagal menghapus catatan keuangan'),

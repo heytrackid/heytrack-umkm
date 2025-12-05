@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { handleError } from '@/lib/error-handling'
-import { toast } from 'sonner'
+import { successToast, } from '@/hooks/use-toast'
 import { useExportOrders } from '@/hooks/api/useOrders'
 
 
@@ -39,7 +39,7 @@ const OrdersQuickActions = ({ _t: _ }: OrdersQuickActionsProps) => {
       anchor.remove()
       URL.revokeObjectURL(url)
 
-      toast.success('File orders berhasil diunduh.')
+      successToast('Berhasil', 'File orders berhasil diunduh.')
     } catch (error) {
       handleError(error as Error, 'Orders Quick Actions: export', true, 'Terjadi kesalahan saat mengekspor pesanan')
     }

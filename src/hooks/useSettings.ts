@@ -1,8 +1,8 @@
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
-import { toast } from 'sonner'
+import { successToast } from '@/hooks/use-toast'
 import { handleError } from '@/lib/error-handling'
+import { fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 
 
@@ -58,7 +58,7 @@ export function useUpdateUserProfile() {
     mutationFn: (data: Partial<UserProfile>) => putApi('/api/settings/profile', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-profile'] })
-      toast.success('Profil berhasil diperbarui')
+      successToast('Berhasil', 'Profil berhasil diperbarui')
     },
     onError: (error) => handleError(error, 'Update user profile', true, 'Gagal memperbarui profil'),
   })
@@ -84,7 +84,7 @@ export function useUpdateBusinessSettings() {
     mutationFn: (data: Partial<BusinessSettings>) => putApi('/api/settings/business', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business-settings'] })
-      toast.success('Pengaturan bisnis berhasil diperbarui')
+      successToast('Berhasil', 'Pengaturan bisnis berhasil diperbarui')
     },
     onError: (error) => handleError(error, 'Update business settings', true, 'Gagal memperbarui pengaturan bisnis'),
   })
@@ -110,7 +110,7 @@ export function useUpdateNotificationPreferences() {
     mutationFn: (data: Partial<NotificationPreferences>) => putApi('/api/settings/preferences', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notification-preferences'] })
-      toast.success('Preferensi notifikasi berhasil diperbarui')
+      successToast('Berhasil', 'Preferensi notifikasi berhasil diperbarui')
     },
     onError: (error) => handleError(error, 'Update notification preferences', true, 'Gagal memperbarui preferensi notifikasi'),
   })
@@ -123,7 +123,7 @@ export function useChangePassword() {
   return useMutation({
     mutationFn: (data: { current_password: string; new_password: string }) => postApi('/api/settings/change-password', data),
     onSuccess: () => {
-      toast.success('Password berhasil diubah')
+      successToast('Berhasil', 'Password berhasil diubah')
     },
     onError: (error) => handleError(error, 'Change password', true, 'Gagal mengubah password'),
   })
@@ -150,7 +150,7 @@ export function useUploadBusinessLogo() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business-settings'] })
-      toast.success('Logo berhasil diupload')
+      successToast('Berhasil', 'Logo berhasil diupload')
     },
     onError: (error) => handleError(error, 'Upload business logo', true, 'Gagal mengupload logo'),
   })

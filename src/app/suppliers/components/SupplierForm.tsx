@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { uiLogger } from '@/lib/logger'
-import { toast } from 'sonner'
+import { successToast, errorToast } from '@/hooks/use-toast'
 
 const SupplierFormSchema = z.object({
   name: z.string().min(1, 'Nama supplier wajib diisi'),
@@ -53,11 +53,11 @@ const SupplierForm = ({ onSubmit }: SupplierFormProps): JSX.Element => {
       
       form.reset()
       setIsDialogOpen(false)
-      toast.success('Supplier berhasil ditambahkan')
+      successToast('Berhasil', 'Supplier berhasil ditambahkan')
     } catch (error) {
       const normalizedError = error instanceof Error ? error : new Error(String(error))
       uiLogger.error({ error: normalizedError }, 'Error creating supplier')
-      toast.error(normalizedError.message || 'Gagal menambahkan supplier')
+      errorToast('Error', normalizedError.message || 'Gagal menambahkan supplier')
     }
   }
 

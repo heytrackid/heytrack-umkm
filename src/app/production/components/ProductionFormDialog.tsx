@@ -2,7 +2,7 @@
 
 import { Loader2 } from '@/components/icons'
 import { useState } from 'react'
-import { toast } from 'sonner'
+import { successToast, } from '@/hooks/use-toast'
 
 import { Button } from '@/components/ui/button'
 
@@ -51,7 +51,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
         },
         onSuccess: () => {
             void queryClient.invalidateQueries({ queryKey: ['production-batches'] })
-            toast.success('Batch produksi berhasil dibuat')
+            successToast('Berhasil', 'Batch produksi berhasil dibuat')
             onSuccess()
             onOpenChange(false)
             resetForm()

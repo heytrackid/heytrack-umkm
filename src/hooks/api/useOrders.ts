@@ -1,9 +1,9 @@
+import { successToast } from '@/hooks/use-toast'
 import { handleError } from '@/lib/error-handling'
 import { deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import type { Insert, Row, Update } from '@/types/database'
 import type { PaginationMeta } from '@/types/pagination'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
 
 type Order = Row<'orders'>
 type OrderInsert = Insert<'orders'>
@@ -73,7 +73,7 @@ export function useCreateOrder() {
     mutationFn: (order: OrderInsert): Promise<Order> => postApi<Order>('/api/orders', order),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['orders'] })
-      toast.success('Pesanan berhasil dibuat')
+      successToast('Berhasil', 'Pesanan berhasil dibuat')
     },
     onError: (error) => handleError(error, 'Create order', true, 'Gagal membuat pesanan'),
   })
@@ -86,7 +86,7 @@ export function useUpdateOrder() {
     mutationFn: ({ id, order }: { id: string; order: OrderUpdate }): Promise<Order> => putApi<Order>(`/api/orders/${id}`, order),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['orders'] })
-      toast.success('Pesanan berhasil diperbarui')
+      successToast('Berhasil', 'Pesanan berhasil diperbarui')
     },
     onError: (error) => handleError(error, 'Update order', true, 'Gagal memperbarui pesanan'),
   })
@@ -114,7 +114,7 @@ export function useDeleteOrder() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['orders'] })
-      toast.success('Pesanan berhasil dihapus')
+      successToast('Berhasil', 'Pesanan berhasil dihapus')
     },
     onError: (error) => handleError(error, 'Delete order', false),
   })

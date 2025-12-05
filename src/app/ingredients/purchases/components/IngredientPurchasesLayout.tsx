@@ -6,10 +6,10 @@ import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { BreadcrumbPatterns, DeleteModal, PageBreadcrumb } from '@/components/ui/index'
 import { useAuth } from '@/hooks/index'
+import { infoToast, successToast } from '@/hooks/use-toast'
 import { useCreateIngredientPurchase, useDeleteIngredientPurchase, useIngredientPurchases } from '@/hooks/useIngredientPurchases'
 import { useIngredientsList } from '@/hooks/useIngredients'
 import { handleError } from '@/lib/error-handling'
-import { toast } from 'sonner'
 
 
 import { PurchaseForm } from '@/app/ingredients/purchases/components/PurchaseForm'
@@ -112,7 +112,7 @@ const IngredientPurchasesLayout = (): JSX.Element => {
           onRefresh={() => void refetchPurchases()}
           onEdit={(_purchase) => {
             // TODO: Implement edit functionality
-            toast.info('Fitur edit sedang dalam pengembangan')
+            infoToast('Info', 'Fitur edit sedang dalam pengembangan')
           }}
           onDelete={(purchase) => {
             setPurchaseToDelete(purchase)
@@ -142,7 +142,7 @@ const IngredientPurchasesLayout = (): JSX.Element => {
                 for (const purchase of purchasesToDelete) {
                   await deletePurchase.mutateAsync(purchase.id)
                 }
-                toast.success(`${purchasesToDelete.length} pembelian berhasil dihapus`)
+                successToast("Berhasil", `${purchasesToDelete.length} pembelian berhasil dihapus`)
               } else if (purchaseToDelete) {
                 // Single delete
                 await deletePurchase.mutateAsync(purchaseToDelete.id)

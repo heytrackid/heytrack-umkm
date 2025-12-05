@@ -1,9 +1,9 @@
 
+import { successToast } from '@/hooks/use-toast'
 import { handleError } from '@/lib/error-handling'
 import { deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import type { Insert, Row, Update } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
 
 
 
@@ -66,7 +66,7 @@ export function useCreateExpense() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expenses'] })
       queryClient.invalidateQueries({ queryKey: ['expense-stats'] })
-      toast.success('Pengeluaran berhasil dicatat')
+      successToast('Berhasil', 'Pengeluaran berhasil dicatat')
     },
     onError: (error) => handleError(error, 'Create expense', true, 'Gagal mencatat pengeluaran'),
   })
@@ -84,7 +84,7 @@ export function useUpdateExpense() {
       queryClient.invalidateQueries({ queryKey: ['expenses'] })
       queryClient.invalidateQueries({ queryKey: ['expense', id] })
       queryClient.invalidateQueries({ queryKey: ['expense-stats'] })
-      toast.success('Pengeluaran berhasil diperbarui')
+      successToast('Berhasil', 'Pengeluaran berhasil diperbarui')
     },
     onError: (error) => handleError(error, 'Update expense', true, 'Gagal memperbarui pengeluaran'),
   })
@@ -101,7 +101,7 @@ export function useDeleteExpense() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expenses'] })
       queryClient.invalidateQueries({ queryKey: ['expense-stats'] })
-      toast.success('Pengeluaran berhasil dihapus')
+      successToast('Berhasil', 'Pengeluaran berhasil dihapus')
     },
     onError: (error) => handleError(error, 'Delete expense', true, 'Gagal menghapus pengeluaran'),
   })

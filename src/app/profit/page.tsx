@@ -7,6 +7,7 @@ import { AppLayout } from '@/components/layout/app-layout'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { BarChartComponent } from '@/components/ui/charts'
 import { StatsSkeleton } from '@/components/ui/index'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { useResponsive } from '@/hooks/useResponsive'
@@ -217,6 +218,40 @@ const ProfitReportPage = () => {
                 isMobile={isMobile}
               />
             )}
+
+            {/* Product Profitability Charts */}
+            <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
+              <BarChartComponent
+                data={products.slice(0, 10).map(p => ({ 
+                  name: p.product_name.length > 15 ? p.product_name.substring(0, 15) + '...' : p.product_name, 
+                  Pendapatan: p.revenue, 
+                  Laba: p.profit 
+                }))}
+                title="Pendapatan vs Laba per Produk"
+                description="Top 10 produk berdasarkan pendapatan"
+                dataKey={['Pendapatan', 'Laba']}
+                xAxisKey="name"
+                height={isMobile ? 250 : 300}
+                config={{
+                  Pendapatan: { label: 'Pendapatan', color: '#3b82f6' },
+                  Laba: { label: 'Laba', color: '#10b981' }
+                }}
+              />
+              <BarChartComponent
+                data={products.slice(0, 10).map(p => ({ 
+                  name: p.product_name.length > 15 ? p.product_name.substring(0, 15) + '...' : p.product_name, 
+                  Margin: p.profit_margin 
+                }))}
+                title="Margin Laba per Produk"
+                description="Persentase margin laba kotor"
+                dataKey="Margin"
+                xAxisKey="name"
+                height={isMobile ? 250 : 300}
+                config={{
+                  Margin: { label: 'Margin (%)', color: '#8b5cf6' }
+                }}
+              />
+            </div>
 
             {/* Product Profitability Table */}
             <ProductProfitabilityTable

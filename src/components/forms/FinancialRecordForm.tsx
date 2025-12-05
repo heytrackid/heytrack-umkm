@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { handleError } from '@/lib/error-handling'
-import { toast } from 'sonner'
+import { successToast } from '@/hooks/use-toast'
 import {
   FinancialRecordSchema,
   type FinancialRecordFormData
@@ -52,7 +52,7 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
   const handleSubmit = async (data: FinancialRecordFormData) => {
     try {
       await onSubmit(data)
-      toast.success('Catatan keuangan berhasil disimpan')
+      successToast('Berhasil', 'Catatan keuangan berhasil disimpan')
       if (!initialData) {
         form.reset()
       }

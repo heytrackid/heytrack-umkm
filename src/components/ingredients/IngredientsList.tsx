@@ -20,6 +20,14 @@ import {
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { FilterBadges, createFilterBadges } from '@/components/ui/filter-badges'
 import { DeleteModal } from '@/components/ui/index'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table'
 import { undoableToast } from '@/components/ui/toast'
 
 import { Input } from '@/components/ui/input'
@@ -32,10 +40,10 @@ import {
 } from '@/components/ui/select'
 import { ServerPagination } from '@/components/ui/server-pagination'
 import { useSettings } from '@/contexts/settings-context'
+import { infoToast } from '@/hooks/use-toast'
 import { useDeleteIngredient, useIngredients } from '@/hooks/useIngredients'
 import { useResponsive } from '@/hooks/useResponsive'
 import { handleError } from '@/lib/error-handling'
-import { toast } from 'sonner'
 
 import type { Row } from '@/types/database'
 
@@ -232,7 +240,7 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                 description: 'Bahan baku telah dihapus dari sistem',
                 onUndo: () => {
                     // Note: Would need an undelete API endpoint for real undo
-                    toast('Fitur undo sedang dikembangkan - Anda bisa menambahkan kembali bahan baku ini')
+                    infoToast('Info', 'Fitur undo sedang dikembangkan - Anda bisa menambahkan kembali bahan baku ini')
                 },
                 duration: 6000
             })
@@ -418,18 +426,18 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                 <Card>
                     <CardContent className="p-0">
                         <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead className="bg-muted/50">
-                                    <tr className="border-b">
-                                        <th scope="col" className="text-left p-4 font-semibold text-sm text-foreground">Nama Bahan</th>
-                                        <th scope="col" className="text-left p-4 font-semibold text-sm text-foreground">Satuan</th>
-                                        <th scope="col" className="text-right p-4 font-semibold text-sm text-foreground">Harga/Unit</th>
-                                        <th scope="col" className="text-center p-4 font-semibold text-sm text-foreground">Stok</th>
-                                        <th scope="col" className="text-right p-4 font-semibold text-sm text-foreground">Total Nilai</th>
-                                        <th scope="col" className="text-center p-4 font-semibold text-sm text-foreground w-[100px]">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="hover:bg-transparent">
+                                        <TableHead className="w-[300px]">Nama Bahan</TableHead>
+                                        <TableHead>Satuan</TableHead>
+                                        <TableHead className="text-right">Harga/Unit</TableHead>
+                                        <TableHead className="text-center">Stok</TableHead>
+                                        <TableHead className="text-right">Total Nilai</TableHead>
+                                        <TableHead className="text-center w-[50px]"></TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
                                     {ingredients.map((item: Ingredient) => {
                                         const currentStock = item.current_stock ?? 0
                                         const minStock = item.min_stock ?? 0
@@ -441,34 +449,36 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                                         const isOutOfStock = currentStock <= 0
                                         const isLowStock = currentStock > 0 && currentStock <= minStock
                                         const stockBorderClass = isOutOfStock 
-                                            ? 'border-l-4 border-l-red-500' 
+                                            ? 'border-l-4 border-l-rose-500 bg-rose-50/30 hover:bg-rose-50/50 dark:bg-rose-900/10' 
                                             : isLowStock 
-                                                ? 'border-l-4 border-l-yellow-500' 
-                                                : ''
+                                                ? 'border-l-4 border-l-amber-500 bg-amber-50/30 hover:bg-amber-50/50 dark:bg-amber-900/10' 
+                                                : 'border-l-4 border-l-transparent'
                                         
                                         return (
-                                            <tr key={item['id']} className={`border-b hover:bg-muted/30 transition-colors ${stockBorderClass}`}>
-                                                <td className="p-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="font-medium">{item.name}</div>
-                                                        {item.category && (
-                                                            <Badge variant="outline" className="text-xs">
-                                                                {item.category}
-                                                            </Badge>
+                                            <TableRow key={item['id']} className={`group transition-colors ${stockBorderClass}`}>
+                                                <TableCell className="font-medium">
+                                                    <div className="flex flex-col gap-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-base">{item.name}</span>
+                                                            {item.category && (
+                                                                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5 font-normal text-muted-foreground">
+                                                                    {item.category}
+                                                                </Badge>
+                                                            )}
+                                                        </div>
+                                                        {item.description && (
+                                                            <span className="text-xs text-muted-foreground line-clamp-1">
+                                                                {item.description}
+                                                            </span>
                                                         )}
                                                     </div>
-                                                    {item.description && (
-                                                        <div className="text-xs text-muted-foreground mt-0.5">
-                                                            {item.description}
-                                                        </div>
-                                                    )}
-                                                </td>
-                                                <td className="p-4 text-sm">{item.unit}</td>
-                                                <td className="p-4 text-right text-sm font-medium">
+                                                </TableCell>
+                                                <TableCell className="text-muted-foreground">{item.unit}</TableCell>
+                                                <TableCell className="text-right font-medium tabular-nums">
                                                     {unitPriceValue !== null ? formatCurrency(unitPriceValue) : '-'}
-                                                </td>
-                                                <td className="p-4">
-                                                    <div className="flex flex-col items-center gap-1">
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex flex-col items-center gap-1.5">
                                                         <StockBadge
                                                             currentStock={currentStock}
                                                             minStock={minStock}
@@ -483,36 +493,36 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
 
                                                             if (daysUntilExpiry <= 0) {
                                                                 return (
-                                                                    <Badge variant="destructive" className="text-xs">
+                                                                    <Badge variant="destructive" className="text-[10px] h-5 px-1.5">
                                                                         Expired
                                                                     </Badge>
                                                                 )
                                                             } if (daysUntilExpiry <= 7) {
                                                                 return (
-                                                                    <Badge variant="destructive" className="text-xs">
-                                                                        {daysUntilExpiry} hari lagi
+                                                                    <Badge variant="destructive" className="text-[10px] h-5 px-1.5 bg-rose-100 text-rose-700 hover:bg-rose-200 border-rose-200 dark:bg-rose-900/30 dark:text-rose-400">
+                                                                        {daysUntilExpiry} hari
                                                                     </Badge>
                                                                 )
                                                             } if (daysUntilExpiry <= 14) {
                                                                 return (
-                                                                    <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">
-                                                                        {daysUntilExpiry} hari lagi
+                                                                    <Badge variant="secondary" className="text-[10px] h-5 px-1.5 bg-amber-100 text-amber-800 hover:bg-amber-200 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400">
+                                                                        {daysUntilExpiry} hari
                                                                     </Badge>
                                                                 )
                                                             }
                                                             return null
                                                         })()}
                                                     </div>
-                                                </td>
-                                                <td className="p-4 text-right text-sm font-semibold">
+                                                </TableCell>
+                                                <TableCell className="text-right font-semibold tabular-nums">
                                                     {totalValue !== null ? formatCurrency(totalValue) : '-'}
-                                                </td>
-                                                <td className="p-4">
-                                                    <div className="flex justify-center">
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
-                                                                <Button variant="ghost" size="sm" aria-label={`Menu aksi untuk ${item.name}`}>
-                                                                    <MoreVertical className="h-4 w-4" />
+                                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                                    <MoreVertical className="h-4 w-4 text-muted-foreground" />
                                                                 </Button>
                                                             </DropdownMenuTrigger>
                                                             <DropdownMenuContent align="end">
@@ -526,7 +536,7 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                                                                 <DropdownMenuSeparator />
                                                                 <DropdownMenuItem
                                                                     onClick={() => handleDelete(item)}
-                                                                    className="text-red-600"
+                                                                    className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/10"
                                                                 >
                                                                     <Trash2 className="h-4 w-4 mr-2" />
                                                                     Hapus
@@ -534,12 +544,12 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}) => {
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
                                                     </div>
-                                                </td>
-                                            </tr>
+                                                </TableCell>
+                                            </TableRow>
                                         )
                                     })}
-                                </tbody>
-                            </table>
+                                </TableBody>
+                            </Table>
                         </div>
 
                         {/* Empty filtered state */}

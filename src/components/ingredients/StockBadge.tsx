@@ -47,21 +47,21 @@ export const StockBadge = memo(({
     const statusConfig = {
         out: {
             label: 'Habis',
-            color: 'bg-red-100 text-red-800 border-red-200',
+            color: 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-800',
             icon: XCircle,
-            iconColor: 'text-red-600'
+            iconColor: 'text-rose-600 dark:text-rose-400'
         },
         low: {
-            label: 'Stok Rendah',
-            color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+            label: 'Menipis',
+            color: 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800',
             icon: AlertTriangle,
-            iconColor: 'text-yellow-600'
+            iconColor: 'text-amber-600 dark:text-amber-400'
         },
         normal: {
-            label: 'Normal',
-            color: 'bg-muted text-muted-foreground border-border/20',
+            label: 'Aman',
+            color: 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800',
             icon: CheckCircle,
-            iconColor: 'text-muted-foreground'
+            iconColor: 'text-emerald-600 dark:text-emerald-400'
         }
     }
 

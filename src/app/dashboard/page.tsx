@@ -1,8 +1,8 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
-import { fetchApi } from '@/lib/query/query-helpers'
 import { BarChart3, Calculator, ChefHat, Package, ShoppingCart, Sparkles, Users } from '@/components/icons'
+import { fetchApi } from '@/lib/query/query-helpers'
+import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
@@ -20,6 +20,7 @@ import { DashboardHeaderSkeleton, RecentOrdersSkeleton, StockAlertSkeleton } fro
 import { useAuth } from '@/hooks/useAuth'
 import { useCurrency } from '@/hooks/useCurrency'
 
+import { RevenueChart } from '@/components/dashboard/RevenueChart'
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import HppDashboardWidget from './components/HppDashboardWidget'
 import RecentOrdersSection from './components/RecentOrdersSection'
@@ -220,6 +221,9 @@ const DashboardPage = () => {
             }}
             formatCurrency={formatCurrency}
           />
+
+          {/* Revenue Chart */}
+          <RevenueChart />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <RecentOrdersSection orders={dashboardData?.orders?.recent ?? []} />

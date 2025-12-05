@@ -1,7 +1,7 @@
 
 import { useMutation } from '@tanstack/react-query'
 
-import { toast } from 'sonner'
+import { successToast } from '@/hooks/use-toast'
 import { handleError } from '@/lib/error-handling'
 
 
@@ -34,7 +34,7 @@ export function useGlobalExport() {
       return { success: true }
     },
     onSuccess: () => {
-      toast.success('Data berhasil diexport')
+      successToast('Berhasil', 'Data berhasil diexport')
     },
     onError: (error) => handleError(error, 'Global export', true, 'Gagal export data'),
   })
@@ -76,7 +76,7 @@ export function useEntityExport() {
       return { success: true }
     },
     onSuccess: () => {
-      toast.success('Data berhasil diexport')
+      successToast('Berhasil', 'Data berhasil diexport')
     },
     onError: (error) => handleError(error, 'Entity export', true, 'Gagal export data'),
   })

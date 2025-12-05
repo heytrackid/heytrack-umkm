@@ -3,7 +3,7 @@ import { handleError } from '@/lib/error-handling'
 import { deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import type { Insert, Row, Update } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import { successToast } from '@/hooks/use-toast'
 
 
 
@@ -50,7 +50,7 @@ export function useCreateWhatsAppTemplate() {
     mutationFn: (data: Omit<WhatsAppTemplateInsert, 'user_id'>) => postApi('/api/whatsapp-templates', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['whatsapp-templates'] })
-      toast.success('Template WhatsApp berhasil dibuat')
+      successToast('Berhasil', 'Template WhatsApp berhasil dibuat')
     },
     onError: (error) => handleError(error, 'Create WhatsApp template', true, 'Gagal membuat template WhatsApp'),
   })
@@ -67,7 +67,7 @@ export function useUpdateWhatsAppTemplate() {
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['whatsapp-templates'] })
       queryClient.invalidateQueries({ queryKey: ['whatsapp-template', id] })
-      toast.success('Template WhatsApp berhasil diperbarui')
+      successToast('Berhasil', 'Template WhatsApp berhasil diperbarui')
     },
     onError: (error) => handleError(error, 'Update WhatsApp template', true, 'Gagal memperbarui template WhatsApp'),
   })
@@ -83,7 +83,7 @@ export function useDeleteWhatsAppTemplate() {
     mutationFn: (id: string) => deleteApi(`/api/whatsapp-templates/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['whatsapp-templates'] })
-      toast.success('Template WhatsApp berhasil dihapus')
+      successToast('Berhasil', 'Template WhatsApp berhasil dihapus')
     },
     onError: (error) => handleError(error, 'Delete WhatsApp template', true, 'Gagal menghapus template WhatsApp'),
   })
@@ -110,7 +110,7 @@ export function useGenerateDefaultTemplates() {
     mutationFn: () => postApi('/api/whatsapp-templates/generate-defaults'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['whatsapp-templates'] })
-      toast.success('Template default berhasil dibuat')
+      successToast('Berhasil', 'Template default berhasil dibuat')
     },
     onError: (error) => handleError(error, 'Generate default templates', true, 'Gagal membuat template default'),
   })

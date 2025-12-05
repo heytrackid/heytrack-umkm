@@ -1,26 +1,26 @@
 'use client'
 
 import {
-  Download,
-  Edit,
-  Eye,
-  MoreVertical,
-  Plus,
-  RefreshCw,
-  Search,
-  Trash2
+    Download,
+    Edit,
+    Eye,
+    MoreVertical,
+    Plus,
+    RefreshCw,
+    Search,
+    Trash2
 } from '@/components/icons'
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Input } from '@/components/ui/input'
@@ -138,7 +138,10 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
 
   // Filter data (sorting not supported in VirtualizedTable)
   const processedData = useMemo(() => {
-    return data.filter(item => {
+    // Safety check: ensure data is an array
+    const safeData = Array.isArray(data) ? data : []
+    
+    return safeData.filter(item => {
       // Search filter
       const matchesSearch = !searchTerm || columns.some(col => {
         const value = getValue(item, col.key)

@@ -1,6 +1,5 @@
 'use client'
 
-import { Download, User } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { memo, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 
@@ -24,7 +23,6 @@ import { useAuth } from '@/hooks/useAuth'
 import { useInstantNavigation } from '@/hooks/useInstantNavigation'
 import { cn } from '@/lib/utils'
 
-import { uiLogger } from '@/lib/client-logger'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { useResponsive } from '@/utils/responsive'
 
@@ -34,7 +32,7 @@ interface AppLayoutProps {
 }
 
 export const AppLayout = memo(({ children }: AppLayoutProps) => {
-  const { user, isLoading: loading, isAuthenticated } = useAuth()
+  const { user, isLoading: loading } = useAuth()
   const { prefetchRoute } = useInstantNavigation()
   const router = useRouter()
   const mainContentRef = useRef<HTMLDivElement>(null)
@@ -169,66 +167,28 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
       <NotificationProvider>
         <div className="min-h-screen bg-background">
           {/* Top Header */}
-        <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-4 md:px-6">
-          <div className="flex items-center gap-2">
-            {!isMobile && (
-              <>
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <span className="font-bold text-sm">HT</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-semibold text-sm">HeyTrack</span>
-                  <span className="text-muted-foreground text-xs">UMKM Management</span>
-                </div>
-              </>
-            )}
-          </div>
-
-            <div className="flex items-center gap-2">
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={async () => {
-                  try {
-                    const response = await fetch('/api/export/global')
-                    if (response.ok) {
-                      const blob = await response.blob()
-                      const url = window.URL.createObjectURL(blob)
-                      const a = document.createElement('a')
-                      a.href = url
-                      a.download = `heytrack-export-${new Date().toISOString().split('T')[0]}.xlsx`
-                      document['body'].appendChild(a)
-                      a.click()
-                      document['body'].removeChild(a)
-                      window.URL.revokeObjectURL(url)
-                    } else {
-                      uiLogger.error({}, 'Failed to export data')
-                    }
-                  } catch (error) {
-                    uiLogger.error({ error }, 'Error exporting data')
-                  }
-                }}
-                title="Export Data"
-              >
-                <Download className="h-4 w-4" />
-              </Button>
+          <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6">
+             <div className="flex-1">
+               <h1 className="text-sm font-semibold text-foreground/80">
+                 HeyTrack
+               </h1>
+             </div>
+             <div className="flex items-center gap-2">
               <ThemeToggle />
               {!loading && user && <NotificationBell />}
-
-              {/* User Authentication */}
-              {loading && <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />}
-
+              
+              {/* User Profile Dropdown */}
               {!loading && user && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <User className="mr-2 h-4 w-4" />
-                      <span className="hidden sm:inline">{user.email?.split('@')[0]}</span>
+                    <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full">
+                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-xs">
+                          {user.email?.charAt(0).toUpperCase()}
+                        </div>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
-                    <div className="px-2 py-1.5 text-sm font-medium">{user.email}</div>
+                    <div className="px-2 py-1.5 text-sm font-medium truncate">{user.email}</div>
                     <DropdownMenuItem onClick={() => router.push('/settings')}>
                       Pengaturan
                     </DropdownMenuItem>
@@ -241,26 +201,7 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
-
-              {!loading && !isAuthenticated && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => router.push('/handler/sign-in')}
-                  >
-                    Masuk
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => router.push('/handler/sign-up')}
-                    className="hidden sm:inline-flex"
-                  >
-                    Daftar
-                  </Button>
-                </div>
-              )}
-            </div>
+             </div>
           </header>
 
           {/* Tab Navigation - Desktop Only */}
@@ -270,17 +211,19 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
           <main
             ref={mainContentRef}
             className={cn(
-              "flex-1 overflow-auto bg-background",
+              "flex-1 overflow-auto bg-background p-4 md:p-6",
               isMobile && "pb-[calc(56px+env(safe-area-inset-bottom))]"
             )}
           >
-            <div className="container mx-auto h-full px-4 py-6 md:px-6 md:py-8">{children}</div>
+            <div className="container mx-auto max-w-7xl space-y-4">
+              {children}
+            </div>
           </main>
 
         {/* Bottom Navigation for Mobile */}
         {isMobile && <SmartBottomNav />}
 
-        {/* Welcome Modal & Onboarding Chatbot - shows for authenticated users */}
+        {/* Welcome Modal & Onboarding Chatbot */}
         {!loading && user && (
           <>
             <WelcomeModal />

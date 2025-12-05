@@ -14,7 +14,7 @@ import { Progress } from '@/components/ui/progress'
 import { Slider } from '@/components/ui/slider'
 import { useAuth } from '@/hooks/index'
 import { handleError } from '@/lib/error-handling'
-import { toast } from 'sonner'
+import { successToast, } from '@/hooks/use-toast'
 
 import { RecipeSelector } from '@/modules/hpp/components/RecipeSelector'
 import { useUnifiedHpp } from '@/modules/hpp/hooks/useUnifiedHpp'
@@ -181,7 +181,7 @@ export const HppWizardLayout = () => {
         margin: marginPercentage
       })
 
-      toast.success('Kalkulasi HPP berhasil disimpan!')
+      successToast('Berhasil', 'Kalkulasi HPP berhasil disimpan!')
       router.push('/hpp')
     } catch (error) {
       handleError(error as Error, 'HPP Wizard: save calculation', true, 'Gagal menyimpan kalkulasi')

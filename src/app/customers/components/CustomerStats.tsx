@@ -51,45 +51,81 @@ const CustomerStats = ({
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardContent className="p-4 text-center">
-          <Users className="h-8 w-8 text-primary mx-auto mb-2" />
-          <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-            {stats.total}
+      <Card className="border-border/50 shadow-sm hover:shadow-md transition-all duration-200">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between space-y-0 pb-2">
+            <p className="text-sm font-medium text-muted-foreground">Total Pelanggan</p>
+            <div className="p-2 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-200/20">
+              <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">Total Pelanggan</p>
+          <div className="space-y-1">
+            <div className={`font-bold tracking-tight ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
+              {stats.total}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Terdaftar di sistem
+            </p>
+          </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="p-4 text-center">
-          <UserPlus className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-          <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-            {stats.active}
+      <Card className="border-border/50 shadow-sm hover:shadow-md transition-all duration-200">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between space-y-0 pb-2">
+            <p className="text-sm font-medium text-muted-foreground">Pelanggan Aktif</p>
+            <div className="p-2 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-lg border border-emerald-200/20">
+              <UserPlus className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">Pelanggan Aktif</p>
+          <div className="space-y-1">
+            <div className={`font-bold tracking-tight ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
+              {stats.active}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Status aktif saat ini
+            </p>
+          </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="p-4 text-center">
-          <div className="h-8 w-8 text-muted-foreground mx-auto mb-2 flex items-center justify-center font-bold text-lg">
-            {settings.currency.symbol}
+      <Card className="border-border/50 shadow-sm hover:shadow-md transition-all duration-200">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between space-y-0 pb-2">
+            <p className="text-sm font-medium text-muted-foreground">Rata-rata Belanja</p>
+            <div className="p-2 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-lg border border-violet-200/20">
+              <span className="h-4 w-4 flex items-center justify-center font-bold text-violet-600 dark:text-violet-400">
+                {settings.currency.symbol}
+              </span>
+            </div>
           </div>
-          <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-            {formatCurrency(stats.averageSpent)}
+          <div className="space-y-1">
+            <div className={`font-bold tracking-tight ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
+              {formatCurrency(stats.averageSpent)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Per pelanggan
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground">Rata-rata Belanja</p>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="p-4 text-center">
-          <div className="h-8 w-8 text-orange-600 mx-auto mb-2 flex items-center justify-center font-bold text-lg">#</div>
-          <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-            {Math.round(stats.averageOrders)}
+      <Card className="border-border/50 shadow-sm hover:shadow-md transition-all duration-200">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between space-y-0 pb-2">
+            <p className="text-sm font-medium text-muted-foreground">Rata-rata Order</p>
+            <div className="p-2 bg-gradient-to-br from-orange-500/10 to-amber-500/10 rounded-lg border border-orange-200/20">
+              <span className="h-4 w-4 flex items-center justify-center font-bold text-orange-600 dark:text-orange-400">#</span>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">Rata-rata Order</p>
+          <div className="space-y-1">
+            <div className={`font-bold tracking-tight ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
+              {Math.round(stats.averageOrders)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Transaksi per pelanggan
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>

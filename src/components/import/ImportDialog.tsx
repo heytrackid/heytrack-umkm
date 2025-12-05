@@ -12,7 +12,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog'
 import { handleError } from '@/lib/error-handling'
-import { toast } from 'sonner'
+import { successToast } from '@/hooks/use-toast'
 import { uiLogger } from '@/lib/logger'
 
 interface ImportDialogProps {
@@ -86,7 +86,7 @@ export const ImportDialog = ({
             setResult(result)
 
             if (result.success) {
-                toast.success(`${result.count} data berhasil diimport`)
+                successToast("Berhasil", `${result.count} data berhasil diimport`)
 
                 // Close dialog after 2 seconds
                 setTimeout(() => {

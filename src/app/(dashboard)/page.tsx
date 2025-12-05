@@ -1,5 +1,6 @@
 'use client'
 
+import { RevenueChart } from '@/components/dashboard/RevenueChart'
 import { TopProductsWidget } from '@/components/dashboard/TopProductsWidget'
 import { MobileHeader } from '@/components/layout/mobile-header'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -135,6 +136,9 @@ export default function DashboardPage(): JSX.Element {
             </div>
           </Card>
         </div>
+
+        {/* Revenue Chart */}
+        <RevenueChart />
 
         {/* Production Schedule Widget */}
         <ProductionScheduleWidget />

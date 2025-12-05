@@ -1,9 +1,8 @@
-
+import { successToast } from '@/hooks/use-toast'
+import { handleError } from '@/lib/error-handling'
+import { deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import type { Insert, Update } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { fetchApi, postApi, putApi, deleteApi } from '@/lib/query/query-helpers'
-import { toast } from 'sonner'
-import { handleError } from '@/lib/error-handling'
 
 
 
@@ -78,7 +77,7 @@ export function useCreateProductionBatch() {
     mutationFn: (data: Partial<ProductionBatchInsert>) => postApi('/api/production/batches', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['production-batches'] })
-      toast.success('Batch produksi berhasil dibuat')
+      successToast('Berhasil', 'Batch produksi berhasil dibuat')
     },
     onError: (error) => handleError(error, 'Create production batch', true, 'Gagal membuat batch produksi'),
   })
@@ -95,7 +94,7 @@ export function useUpdateProductionBatch() {
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['production-batches'] })
       queryClient.invalidateQueries({ queryKey: ['production-batch', id] })
-      toast.success('Batch produksi berhasil diperbarui')
+      successToast('Berhasil', 'Batch produksi berhasil diperbarui')
     },
     onError: (error) => handleError(error, 'Update production batch', true, 'Gagal memperbarui batch produksi'),
   })
@@ -111,7 +110,7 @@ export function useDeleteProductionBatch() {
     mutationFn: (id: string) => deleteApi(`/api/production/batches/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['production-batches'] })
-      toast.success('Batch produksi berhasil dihapus')
+      successToast('Berhasil', 'Batch produksi berhasil dihapus')
     },
     onError: (error) => handleError(error, 'Delete production batch', true, 'Gagal menghapus batch produksi'),
   })
@@ -142,7 +141,7 @@ export function useSyncBatchWithInventory() {
     onSuccess: (_, batchId) => {
       queryClient.invalidateQueries({ queryKey: ['production-batch', batchId] })
       queryClient.invalidateQueries({ queryKey: ['ingredients'] })
-      toast.success('Inventori berhasil disinkronkan')
+      successToast('Berhasil', 'Inventori berhasil disinkronkan')
     },
     onError: (error) => handleError(error, 'Sync batch with inventory', true, 'Gagal sinkronisasi inventori'),
   })
@@ -158,7 +157,7 @@ export function useLinkBatchToOrder() {
     mutationFn: ({ batchId, orderId }: { batchId: string; orderId: string }) => postApi(`/api/production/batches/${batchId}/link-order`, { orderId }),
     onSuccess: (_, { batchId }) => {
       queryClient.invalidateQueries({ queryKey: ['production-batch', batchId] })
-      toast.success('Batch berhasil dihubungkan dengan pesanan')
+      successToast('Berhasil', 'Batch berhasil dihubungkan dengan pesanan')
     },
     onError: (error) => handleError(error, 'Link batch to order', true, 'Gagal menghubungkan dengan pesanan'),
   })
@@ -184,7 +183,7 @@ export function useUpdateProductionConstraints() {
     mutationFn: (constraints: ProductionConstraints) => putApi('/api/production/capacity', constraints),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['production-capacity'] })
-      toast.success('Kapasitas produksi berhasil diperbarui')
+      successToast('Berhasil', 'Kapasitas produksi berhasil diperbarui')
     },
     onError: (error) => handleError(error, 'Update production constraints', true, 'Gagal memperbarui kapasitas produksi'),
   })

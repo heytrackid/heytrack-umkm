@@ -13,7 +13,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { PageBreadcrumb } from '@/components/ui/page-breadcrumb'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { useUpdateIngredient } from '@/hooks/useIngredients'
-import { toast } from 'sonner'
+import { successToast, } from '@/hooks/use-toast'
 import { handleError } from '@/lib/error-handling'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 import { useIngredient } from '@/hooks/useIngredients'
@@ -87,7 +87,7 @@ const EditIngredientPage = (): JSX.Element | null => {
 
             await updateIngredientMutation.mutateAsync({ id, data: payload })
 
-            toast.success(`Bahan baku "${data.name}" berhasil diperbarui`)
+            successToast("Berhasil", `Bahan baku "${data.name}" berhasil diperbarui`)
 
             router.push('/ingredients')
         } catch (error) {

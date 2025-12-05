@@ -1,3 +1,4 @@
+import type { DateRange } from 'react-day-picker'
 
 /**
  * Profit Report Module Types
@@ -38,10 +39,9 @@ export interface ProfitData {
   }
 }
 
-
-
 export interface ProfitFilters {
   selectedPeriod: PeriodType
+  dateRange?: DateRange | undefined
 }
 
 export interface ProfitFiltersProps {

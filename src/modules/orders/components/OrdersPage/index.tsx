@@ -9,6 +9,7 @@ import { memo, useCallback, useMemo, useState } from 'react'
 
 import type { Order, OrderStatus } from '@/types/database'
 
+import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -185,41 +186,30 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold flex items-center gap-2">
-                        <ShoppingCart className="h-8 w-8" />
-                        Kelola Pesanan
-                    </h1>
-                    <p className="text-muted-foreground">
-                        Kelola pesanan dan penjualan dengan sistem terintegrasi
-                    </p>
-                </div>
-                <Button onClick={handleCreateOrder}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Pesanan Baru
-                </Button>
-            </div>
-
-            {/* Stats Overview */}
-            <StatsCards stats={stats} />
-
-            {/* Quick Actions */}
-            <Card>
-                <CardContent className="p-4">
-                    <div className="flex flex-wrap gap-2">
+            <PageHeader
+                title="Kelola Pesanan"
+                description="Kelola pesanan dan penjualan dengan sistem terintegrasi"
+                icon={<ShoppingCart className="h-8 w-8 text-primary" />}
+                actions={
+                    <div className="flex items-center gap-2">
                         <Button
                             variant="outline"
-                            size="sm"
                             onClick={() => router.push('/orders/whatsapp-templates')}
                             className="flex items-center gap-2"
                         >
                             <MessageCircle className="h-4 w-4" />
                             Template WhatsApp
                         </Button>
+                        <Button onClick={handleCreateOrder}>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Pesanan Baru
+                        </Button>
                     </div>
-                </CardContent>
-            </Card>
+                }
+            />
+
+            {/* Stats Overview */}
+            <StatsCards stats={stats} />
 
             {/* Status Summary */}
             <StatusSummary stats={stats} />

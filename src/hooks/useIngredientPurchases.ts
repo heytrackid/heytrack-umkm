@@ -1,9 +1,9 @@
 
+import { successToast } from '@/hooks/use-toast'
 import { handleError } from '@/lib/error-handling'
 import { deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import type { Insert, Row, Update } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
 
 
 
@@ -83,7 +83,7 @@ export function useCreateIngredientPurchase() {
       queryClient.invalidateQueries({ queryKey: ['ingredient-purchases'] })
       queryClient.invalidateQueries({ queryKey: ['ingredients'] })
       queryClient.invalidateQueries({ queryKey: ['purchase-stats'] })
-      toast.success('Pembelian bahan berhasil dicatat')
+      successToast('Berhasil', 'Pembelian bahan berhasil dicatat')
     },
     onError: (error) => handleError(error, 'Create ingredient purchase', true, 'Gagal mencatat pembelian bahan'),
   })
@@ -101,7 +101,7 @@ export function useUpdateIngredientPurchase() {
       queryClient.invalidateQueries({ queryKey: ['ingredient-purchases'] })
       queryClient.invalidateQueries({ queryKey: ['ingredient-purchase', id] })
       queryClient.invalidateQueries({ queryKey: ['purchase-stats'] })
-      toast.success('Pembelian bahan berhasil diperbarui')
+      successToast('Berhasil', 'Pembelian bahan berhasil diperbarui')
     },
     onError: (error) => handleError(error, 'Update ingredient purchase', true, 'Gagal memperbarui pembelian bahan'),
   })
@@ -118,7 +118,7 @@ export function useDeleteIngredientPurchase() {
      onSuccess: () => {
        queryClient.invalidateQueries({ queryKey: ['ingredient-purchases'] })
        queryClient.invalidateQueries({ queryKey: ['purchase-stats'] })
-       toast.success('Pembelian bahan berhasil dihapus')
+       successToast('Berhasil', 'Pembelian bahan berhasil dihapus')
      },
      onError: (error) => handleError(error, 'Delete ingredient purchase', true, 'Gagal menghapus pembelian bahan'),
   })

@@ -7,9 +7,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { successToast } from '@/hooks/use-toast'
 import { handleApiError, handleError } from '@/lib/error-handling'
 import { useState } from 'react'
-import { toast } from 'sonner'
 
 import { postApi } from '@/lib/query/query-helpers'
 import { useMutation } from '@tanstack/react-query'
@@ -69,9 +69,7 @@ export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps)
       postApi<{ recipe: GeneratedRecipe }>('/recipes/generate', data),
     onSuccess: (data) => {
       setGeneratedRecipe(data.recipe)
-      toast.success('Resep berhasil dibuat!', {
-        description: 'AI telah membuat resep untuk Anda',
-      })
+      successToast('Resep berhasil dibuat!', 'AI telah membuat resep untuk Anda')
     },
     onError: (error) => handleApiError(error, 'AI Recipe Generator', 'Gagal membuat resep')
   })
@@ -96,9 +94,7 @@ export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps)
       setOpen(false)
       setPrompt('')
       setGeneratedRecipe(null)
-      toast.success('Resep siap digunakan', {
-        description: 'Silakan lengkapi informasi tambahan dan simpan resep',
-      })
+      successToast('Resep siap digunakan', 'Silakan lengkapi informasi tambahan dan simpan resep')
     }
   }
 

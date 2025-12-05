@@ -109,7 +109,7 @@ export function handleError(
     uiLogger.info({ context }, 'Auth error detected, redirecting to login')
     // Use window.location for client-side redirect
     if (typeof window !== 'undefined') {
-      window.location.href = '/auth/login'
+      window.location.href = '/handler/sign-in'
     }
   }
 }

@@ -149,37 +149,65 @@ const IngredientsPage = () => {
 
         {/* Alert for Low Stock */}
         {(lowStockCount > 0 || outOfStockCount > 0) && (
-          <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
-              <div className="flex-1">
-                <h3 className="font-semibold text-orange-900 text-sm mb-1">
-                  Peringatan Stok
+          <div className="rounded-xl border border-orange-200 bg-orange-50/50 p-4 dark:bg-orange-900/10 dark:border-orange-900/30">
+            <div className="flex items-start gap-4">
+              <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg shrink-0">
+                <AlertTriangle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              </div>
+              <div className="flex-1 space-y-1">
+                <h3 className="font-semibold text-orange-900 dark:text-orange-200 text-sm">
+                  Perhatian Diperlukan
                 </h3>
-                <p className="text-sm text-orange-700">
-                  {outOfStockCount > 0 && `${outOfStockCount} bahan habis`}
-                  {outOfStockCount > 0 && lowStockCount > 0 && ', '}
-                  {lowStockCount > 0 && `${lowStockCount} bahan stok rendah`}
-                  . Segera lakukan pemesanan.
+                <p className="text-sm text-orange-700 dark:text-orange-300/90 leading-relaxed">
+                  {outOfStockCount > 0 && (
+                    <span className="font-medium">
+                      {outOfStockCount} bahan habis
+                    </span>
+                  )}
+                  {outOfStockCount > 0 && lowStockCount > 0 && ' dan '}
+                  {lowStockCount > 0 && (
+                    <span className="font-medium">
+                      {lowStockCount} bahan stok menipis
+                    </span>
+                  )}
+                  . Segera lakukan pemesanan untuk menjaga ketersediaan stok.
                 </p>
               </div>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="bg-white/50 border-orange-200 hover:bg-white text-orange-700 hover:text-orange-800 dark:bg-transparent dark:border-orange-800 dark:text-orange-300 dark:hover:bg-orange-900/20"
+                onClick={() => router.push('/ingredients/purchases/new')}
+              >
+                Buat Pesanan
+              </Button>
             </div>
           </div>
         )}
 
         {/* Alert for Cost Changes */}
         {hasSignificantChanges && (
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-              <div className="flex-1">
-                <h3 className="font-semibold text-blue-900 text-sm mb-1">
+          <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-4 dark:bg-blue-900/10 dark:border-blue-900/30">
+            <div className="flex items-start gap-4">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg shrink-0">
+                <AlertTriangle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div className="flex-1 space-y-1">
+                <h3 className="font-semibold text-blue-900 dark:text-blue-200 text-sm">
                   Perubahan Harga Bahan
                 </h3>
-                <p className="text-sm text-blue-700">
-                  Beberapa bahan mengalami perubahan harga signifikan. Periksa resep yang terpengaruh untuk update HPP.
+                <p className="text-sm text-blue-700 dark:text-blue-300/90 leading-relaxed">
+                  Terdeteksi perubahan harga signifikan pada beberapa bahan baku. Mohon periksa resep yang terpengaruh untuk memastikan HPP tetap akurat.
                 </p>
               </div>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="bg-white/50 border-blue-200 hover:bg-white text-blue-700 hover:text-blue-800 dark:bg-transparent dark:border-blue-800 dark:text-blue-300 dark:hover:bg-blue-900/20"
+                onClick={() => router.push('/hpp')}
+              >
+                Cek HPP
+              </Button>
             </div>
           </div>
         )}
