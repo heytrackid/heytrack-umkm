@@ -49,8 +49,7 @@ export * from './useChatHistory'
 export * from './useContextAwareChat'
 export * from './useDashboardSchedule'
 
-// Financial Sync & Export
-export * from './useFinancialSync'
+// Export utilities
 export * from './useGlobalExport'
 
 // Shared utilities

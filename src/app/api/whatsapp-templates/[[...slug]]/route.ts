@@ -3,10 +3,10 @@ import type { NextResponse } from 'next/server'
 import { z } from 'zod'
 
 // Internal modules - Core
-import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { createSuccessResponse } from '@/lib/api-core'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { createDeleteHandler, createGetHandler, createListHandler, createUpdateHandler, ListQuerySchema, type ListQuery } from '@/lib/api/crud-helpers'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 
 // Internal modules - Utils
 import { parseRouteParams } from '@/lib/api/route-helpers'
@@ -52,12 +52,16 @@ export const GET = createApiRoute(
         defaultOrder: 'desc',
         searchFields: ['name', 'category'],
       })(context, validatedQuery)
-    } else if (slug && slug.length === 1) {
+    } else if (slug && slug.length === 1 && slug[0]) {
       // GET /api/whatsapp-templates/[id] - Get single template
+      const contextWithId = {
+        ...context,
+        params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+      }
       return createGetHandler({
         table: 'whatsapp_templates',
         selectFields: 'id, user_id, name, category, template_content, description, variables, is_active, is_default, created_at, updated_at',
-      })(context)
+      })(contextWithId)
     } else {
       return handleAPIError(new Error('Invalid path'), 'API Route')
     }
@@ -135,8 +139,12 @@ export const PUT = createApiRoute(
   },
   async (context, _query, body) => {
     const slug = context.params?.['slug'] as string[] | undefined
-    if (!slug || slug.length !== 1) {
-      return handleAPIError(new Error('Invalid path'), 'API Route')
+    if (!slug || slug.length !== 1 || !slug[0]) {
+      return handleAPIError(new Error('Invalid path'), 'PUT /api/whatsapp-templates/[id]')
+    }
+    const contextWithId = {
+      ...context,
+      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
     }
     return createUpdateHandler(
       {
@@ -144,7 +152,7 @@ export const PUT = createApiRoute(
         selectFields: 'id, user_id, name, category, template_content, description, variables, is_active, is_default, updated_at',
       },
       SUCCESS_MESSAGES.WHATSAPP_TEMPLATE_UPDATED
-    )(context, undefined, body)
+    )(contextWithId, undefined, body)
   }
 )
 
@@ -157,14 +165,18 @@ export const DELETE = createApiRoute(
   },
   async (context) => {
     const slug = context.params?.['slug'] as string[] | undefined
-    if (!slug || slug.length !== 1) {
-      return handleAPIError(new Error('Invalid path'), 'API Route')
+    if (!slug || slug.length !== 1 || !slug[0]) {
+      return handleAPIError(new Error('Invalid path'), 'DELETE /api/whatsapp-templates/[id]')
+    }
+    const contextWithId = {
+      ...context,
+      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
     }
     return createDeleteHandler(
       {
         table: 'whatsapp_templates',
       },
       SUCCESS_MESSAGES.WHATSAPP_TEMPLATE_DELETED
-    )(context)
+    )(contextWithId)
   }
 )

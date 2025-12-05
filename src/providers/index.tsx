@@ -6,7 +6,6 @@ import { ThemeProvider } from 'next-themes'
 import { useState } from 'react'
 import { Toaster } from 'sonner'
 
-import { BackgroundSyncProvider } from '@/components/providers/BackgroundSyncProvider'
 import { commonQueryOptions } from '@/lib/query/query-config'
 
 /**
@@ -42,9 +41,7 @@ export function Providers({ children }: { children: React.ReactNode }): JSX.Elem
         enableSystem
         disableTransitionOnChange
       >
-        <BackgroundSyncProvider>
-          {children}
-        </BackgroundSyncProvider>
+        {children}
         <Toaster position="top-right" richColors />
       </ThemeProvider>
       <ReactQueryDevtools initialIsOpen={false} />

@@ -44,7 +44,7 @@ export const GET = createApiRoute(
         selectFields: '*',
       })(contextWithId)
     } else {
-      return handleAPIError(new Error('Invalid path'), 'API Route')
+      return handleAPIError(new Error('Invalid path'), 'GET /api/operational-costs')
     }
   }
 )
@@ -59,7 +59,7 @@ export const POST = createApiRoute(
   async (context, _query, body) => {
     const slug = context.params?.['slug'] as string[] | undefined
     if (slug && slug.length > 0) {
-      return handleAPIError(new Error('Method not allowed'), 'API Route')
+      return handleAPIError(new Error('Method not allowed'), 'POST /api/operational-costs')
     }
 
     const result = await createCreateHandler(
@@ -98,7 +98,7 @@ export const PUT = createApiRoute(
   async (context, _query, body) => {
     const slug = context.params?.['slug'] as string[] | undefined
     if (!slug || slug.length !== 1 || !slug[0]) {
-      return handleAPIError(new Error('Invalid path'), 'API Route')
+      return handleAPIError(new Error('Invalid path'), 'PUT /api/operational-costs/[id]')
     }
     const contextWithId = {
       ...context,
@@ -140,7 +140,7 @@ export const DELETE = createApiRoute(
   async (context) => {
     const slug = context.params?.['slug'] as string[] | undefined
     if (!slug || slug.length !== 1 || !slug[0]) {
-      return handleAPIError(new Error('Invalid path'), 'API Route')
+      return handleAPIError(new Error('Invalid path'), 'DELETE /api/operational-costs/[id]')
     }
     const contextWithId = {
       ...context,

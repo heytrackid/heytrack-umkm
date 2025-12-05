@@ -39,17 +39,17 @@ export const GET = createApiRoute(
           searchFields: ['name', 'contact_person', 'email'],
         })(context, validatedQuery)
     } else if (slug && slug.length === 1 && slug[0]) {
-       // GET /api/suppliers/[id] - Get single supplier
-        const contextWithId = {
-          ...context,
-          params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
-        }
-        return createGetHandler({
-          table: 'suppliers',
-          selectFields: 'id, name, contact_person, email, phone, address, supplier_type, payment_terms, lead_time_days, notes, is_active, total_spent, rating, created_at, updated_at',
-        })(contextWithId)
+      // GET /api/suppliers/[id] - Get single supplier
+      const contextWithId = {
+        ...context,
+        params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+      }
+      return createGetHandler({
+        table: 'suppliers',
+        selectFields: 'id, name, contact_person, email, phone, address, supplier_type, payment_terms, lead_time_days, notes, is_active, total_spent, rating, created_at, updated_at',
+      })(contextWithId)
     } else {
-      return handleAPIError(new Error('Invalid path'), 'API Route')
+      return handleAPIError(new Error('Invalid path'), 'GET /api/suppliers')
     }
   }
 )
@@ -65,15 +65,15 @@ export const POST = createApiRoute(
   async (context: RouteContext, _query, body) => {
     const slug = context.params?.['slug'] as string[] | undefined
     if (slug && slug.length > 0) {
-      return handleAPIError(new Error('Method not allowed'), 'API Route')
+      return handleAPIError(new Error('Method not allowed'), 'POST /api/suppliers')
     }
-      return createCreateHandler(
-        {
-          table: 'suppliers',
-          selectFields: 'id, name, contact_person, email, phone, address, supplier_type, payment_terms, lead_time_days, notes, is_active, created_at, updated_at',
-        },
-        SUCCESS_MESSAGES.SUPPLIER_CREATED
-      )(context, undefined, body)
+    return createCreateHandler(
+      {
+        table: 'suppliers',
+        selectFields: 'id, name, contact_person, email, phone, address, supplier_type, payment_terms, lead_time_days, notes, is_active, created_at, updated_at',
+      },
+      SUCCESS_MESSAGES.SUPPLIER_CREATED
+    )(context, undefined, body)
   }
 )
 
@@ -88,19 +88,19 @@ export const PUT = createApiRoute(
   async (context: RouteContext, _query, body) => {
     const slug = context.params?.['slug'] as string[] | undefined
     if (!slug || slug.length !== 1 || !slug[0]) {
-      return handleAPIError(new Error('Invalid path'), 'API Route')
+      return handleAPIError(new Error('Invalid path'), 'PUT /api/suppliers/[id]')
     }
-      const contextWithId = {
-        ...context,
-        params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
-      }
-      return createUpdateHandler(
-        {
-          table: 'suppliers',
-          selectFields: 'id, name, contact_person, email, phone, address, supplier_type, payment_terms, lead_time_days, notes, is_active, updated_at',
-        },
-        SUCCESS_MESSAGES.SUPPLIER_UPDATED
-      )(contextWithId, undefined, body)
+    const contextWithId = {
+      ...context,
+      params: { ...context.params, id: slug[0] } as Record<string, string | string[]>
+    }
+    return createUpdateHandler(
+      {
+        table: 'suppliers',
+        selectFields: 'id, name, contact_person, email, phone, address, supplier_type, payment_terms, lead_time_days, notes, is_active, updated_at',
+      },
+      SUCCESS_MESSAGES.SUPPLIER_UPDATED
+    )(contextWithId, undefined, body)
   }
 )
 
@@ -114,11 +114,10 @@ export const DELETE = createApiRoute(
   async (context: RouteContext) => {
     const { user, supabase } = context
     const slug = context.params?.['slug'] as string[] | undefined
-    const id = slug && slug.length === 1 ? slug[0] : null
-
-    if (!id) {
-      return handleAPIError(new Error('Supplier ID is required'), 'API Route')
+    if (!slug || slug.length !== 1 || !slug[0]) {
+      return handleAPIError(new Error('Invalid path'), 'DELETE /api/suppliers/[id]')
     }
+    const id = slug[0]
 
     // Check if supplier is used in ingredients
     const { data: ingredients } = await supabase
@@ -129,7 +128,7 @@ export const DELETE = createApiRoute(
       .limit(1)
 
     if (ingredients && ingredients.length > 0) {
-      return handleAPIError(new Error('Cannot delete supplier with existing ingredients'), 'API Route')
+      return handleAPIError(new Error('Cannot delete supplier with existing ingredients'), 'DELETE /api/suppliers/[id]')
     }
 
     // Delete supplier
@@ -141,7 +140,7 @@ export const DELETE = createApiRoute(
 
     if (error) {
       apiLogger.error({ error, id }, 'Failed to delete supplier')
-      return handleAPIError(new Error('Failed to delete supplier'), 'API Route')
+      return handleAPIError(error, 'DELETE /api/suppliers/[id]')
     }
 
     cacheInvalidation.suppliers()

@@ -40,9 +40,9 @@ export const GET = createApiRoute(
       } catch (error) {
         return handleAPIError(error, 'GET /api/production/batches')
       }
-    } else if (slug.length === 1) {
+    } else if (slug.length === 1 && slug[0]) {
       // GET /api/production/batches/[id] - Get single batch
-      const id = slug[0]!!!
+      const id = slug[0]
       const { user } = context
 
       try {
@@ -109,11 +109,11 @@ export const PUT = createApiRoute(
   },
   async (context, _query, body): Promise<NextResponse> => {
     const slug = context.params?.['slug'] as string[] | undefined
-    if (!slug || slug.length !== 1) {
-      return handleAPIError(new Error('Invalid path'), 'API Route')
+    if (!slug || slug.length !== 1 || !slug[0]) {
+      return handleAPIError(new Error('Invalid path'), 'PUT /api/production/batches/[id]')
     }
 
-    const id = slug[0]!
+    const id = slug[0]
     const { user, supabase } = context
 
     if (!body) {
@@ -220,11 +220,11 @@ export const DELETE = createApiRoute(
   },
   async (context): Promise<NextResponse> => {
     const slug = context.params?.['slug'] as string[] | undefined
-    if (!slug || slug.length !== 1) {
-      return handleAPIError(new Error('Invalid path'), 'API Route')
+    if (!slug || slug.length !== 1 || !slug[0]) {
+      return handleAPIError(new Error('Invalid path'), 'DELETE /api/production/batches/[id]')
     }
 
-    const id = slug[0]!
+    const id = slug[0]
     const { user } = context
 
     try {
