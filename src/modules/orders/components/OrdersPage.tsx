@@ -1,8 +1,9 @@
 'use client'
 
 // Using Pino logger for all logging
-import { BarChart3, Calendar, Clock, DollarSign, Edit, Eye, Filter, MessageCircle, Plus, Search, ShoppingCart, XCircle } from '@/components/icons'
-import { useOrdersList, useUpdateOrderStatus } from '@/hooks/api/useOrders'
+import { BarChart3, Calendar, Clock, DollarSign, MessageCircle, Plus, ShoppingCart, XCircle } from '@/components/icons'
+import { SharedDataTable, type Column } from '@/components/shared/SharedDataTable'
+import { useOrdersList } from '@/hooks/api/useOrders'
 import { useQueryClient } from '@tanstack/react-query'
 import { format, subDays } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
@@ -17,9 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AreaChartComponent, BarChartComponent, PieChartComponent } from '@/components/ui/charts'
 import type { OrderListItem, OrderStatus } from '@/types/database'
 
-import { Input } from '@/components/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useCurrency } from '@/hooks/useCurrency'
 import { getErrorMessage } from '@/lib/type-guards'
@@ -42,12 +41,6 @@ const arrayCalculations = {
 } as const;
 
 // Local types
-interface OrderFilters {
-  status: OrderStatus[]
-  payment_status: string[]
-  customer_search?: string
-}
-
 interface OrderStats {
   total_orders: number
   pending_orders: number
@@ -72,6 +65,81 @@ interface OrdersPageProps {
   enableAdvancedFeatures?: boolean
 }
 
+// Column definitions for SharedDataTable
+const createOrderColumns = (
+  formatCurrency: (amount: number) => string,
+  formatDate: (date: string) => string,
+  getStatusColor: (status: OrderStatus | null) => string,
+  getPaymentStatusColor: (status: string | null) => string
+): Column<OrderListItem & Record<string, unknown>>[] => [
+  {
+    key: 'order_no',
+    header: 'No. Pesanan',
+    sortable: true,
+    render: (value: unknown) => <span className="font-medium">{String(value)}</span>
+  },
+  {
+    key: 'customer_name',
+    header: 'Pelanggan',
+    sortable: true,
+    render: (value: unknown) => String(value ?? 'N/A')
+  },
+  {
+    key: 'order_date',
+    header: 'Tanggal',
+    sortable: true,
+    hideOnMobile: true,
+    render: (value: unknown) => value ? formatDate(String(value)) : '-'
+  },
+  {
+    key: 'total_amount',
+    header: 'Total',
+    sortable: true,
+    render: (value: unknown) => <span className="font-medium">{formatCurrency(Number(value ?? 0))}</span>
+  },
+  {
+    key: 'status',
+    header: 'Status',
+    sortable: true,
+    filterable: true,
+    filterType: 'select',
+    filterOptions: Object.entries(ORDER_STATUS_CONFIG).map(([value, config]) => ({
+      value,
+      label: config.label
+    })),
+    render: (value: unknown) => (
+      <Badge className={getStatusColor(value as OrderStatus)}>
+        {value && String(value) in ORDER_STATUS_LABELS 
+          ? ORDER_STATUS_LABELS[value as OrderStatus] 
+          : 'N/A'}
+      </Badge>
+    )
+  },
+  {
+    key: 'payment_status',
+    header: 'Pembayaran',
+    hideOnMobile: true,
+    filterable: true,
+    filterType: 'select',
+    filterOptions: [
+      { value: 'UNPAID', label: 'Belum Bayar' },
+      { value: 'PARTIAL', label: 'Sebagian' },
+      { value: 'PAID', label: 'Lunas' }
+    ],
+    render: (value: unknown) => (
+      <Badge className={getPaymentStatusColor(value as string)}>
+        {value ? PAYMENT_STATUS_LABELS[String(value).toUpperCase() as keyof typeof PAYMENT_STATUS_LABELS] || 'N/A' : 'N/A'}
+      </Badge>
+    )
+  },
+  {
+    key: 'delivery_date',
+    header: 'Tgl Kirim',
+    hideOnMobile: true,
+    render: (value: unknown) => value ? formatDate(String(value)) : '-'
+  }
+]
+
 const OrdersPageComponent = (_props: OrdersPageProps) => {
   const router = useRouter()
   const { formatCurrency } = useCurrency()
@@ -80,63 +148,40 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
   type ActiveView = 'analytics' | 'calendar' | 'dashboard' | 'list'
   const [activeView, setActiveView] = useState<ActiveView>('dashboard')
 
-  // Filters
-  const [filters, setFilters] = useState<OrderFilters>({
-    status: [],
-    payment_status: [],
-    customer_search: ''
-  })
-   const hasFiltersApplied = filters.status.length > 0 || Boolean(filters.customer_search?.trim())
-
   // ✅ Use standardized hook for automatic caching
   const { data: ordersData, isLoading: loading, error: queryError, refetch } = useOrdersList()
 
-  const orders = useMemo(() => ordersData ?? [], [ordersData])
+  const orders = useMemo((): OrderListItem[] => {
+    if (!ordersData) return []
+    // Handle both array and object response formats
+    if (Array.isArray(ordersData)) return ordersData as OrderListItem[]
+    if (typeof ordersData === 'object' && 'data' in ordersData) {
+      return ((ordersData as { data: OrderListItem[] }).data ?? [])
+    }
+    return []
+  }, [ordersData])
 
   const error = queryError ? getErrorMessage(queryError) : null
 
-  // Filter orders based on search and status
-  const filteredOrders = useMemo(() => {
-    let result: OrderListItem[] = orders as unknown as OrderListItem[]
-
-    // Apply search filter
-    if (filters.customer_search?.trim()) {
-      const term = filters.customer_search.toLowerCase()
-        result = result.filter((order: OrderListItem) =>
-          order.order_no?.toLowerCase().includes(term) ||
-          order.customer_name?.toLowerCase().includes(term)
-        )
-    }
-
-    // Apply status filter
-    if (filters.status.length > 0) {
-      result = result.filter((order: OrderListItem) =>
-        order.status && filters.status.includes(order.status)
-      )
-    }
-
-    return result
-  }, [orders, filters.customer_search, filters.status])
-
   // ✅ Calculate stats with useMemo for performance (use all orders, not filtered)
   const stats = useMemo<OrderStats>(() => ({
-    total_orders: (orders as unknown as OrderListItem[]).length,
-    pending_orders: (orders as unknown as OrderListItem[]).filter((o: OrderListItem) => o.status === 'PENDING').length,
-    confirmed_orders: (orders as unknown as OrderListItem[]).filter((o: OrderListItem) => o.status === 'CONFIRMED').length,
-    in_production_orders: (orders as unknown as OrderListItem[]).filter((o: OrderListItem) => o.status === 'IN_PROGRESS').length,
-    completed_orders: (orders as unknown as OrderListItem[]).filter((o: OrderListItem) => o.status === 'DELIVERED').length,
-    cancelled_orders: (orders as unknown as OrderListItem[]).filter((o: OrderListItem) => o.status === 'CANCELLED').length,
+    total_orders: orders.length,
+    pending_orders: orders.filter((o) => o.status === 'PENDING').length,
+    confirmed_orders: orders.filter((o) => o.status === 'CONFIRMED').length,
+    in_production_orders: orders.filter((o) => o.status === 'IN_PROGRESS').length,
+    completed_orders: orders.filter((o) => o.status === 'DELIVERED').length,
+    cancelled_orders: orders.filter((o) => o.status === 'CANCELLED').length,
     total_revenue: orders.reduce((sum, o) => sum + Number(o.total_amount ?? 0), 0),
     pending_revenue: arrayCalculations.sum(
-      (orders as unknown as OrderListItem[]).filter((o: OrderListItem) => o.payment_status === 'UNPAID'),
+      orders.filter((o) => o.payment_status === 'UNPAID') as unknown as Record<string, unknown>[],
       'total_amount'
     ),
     paid_revenue: arrayCalculations.sum(
-      (orders as unknown as OrderListItem[]).filter((o: OrderListItem) => o.payment_status !== 'UNPAID'),
+      orders.filter((o) => o.payment_status !== 'UNPAID') as unknown as Record<string, unknown>[],
       'total_amount'
     ),
-    average_order_value: arrayCalculations.average(orders as unknown as OrderListItem[], 'total_amount'),
-    total_customers: new Set((orders as unknown as OrderListItem[]).filter((o: OrderListItem) => o.customer_name).map((o: OrderListItem) => o.customer_name)).size,
+    average_order_value: arrayCalculations.average(orders as unknown as Record<string, unknown>[], 'total_amount'),
+    total_customers: new Set(orders.filter((o) => o.customer_name).map((o) => o.customer_name)).size,
     repeat_customers: 0,
     period_growth: 0,
     revenue_growth: 0,
@@ -162,6 +207,12 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
     year: 'numeric'
   })
 
+  // Memoized columns for SharedDataTable
+  const orderColumns = useMemo(
+    () => createOrderColumns(formatCurrency, formatDate, getStatusColor, getPaymentStatusColor),
+    [formatCurrency]
+  )
+
   // Dialog states
   const [showOrderForm, setShowOrderForm] = useState(false)
   const [showOrderDetail, setShowOrderDetail] = useState(false)
@@ -181,12 +232,6 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
     setSelectedOrder(order)
     setShowOrderDetail(true)
   }, [])
-
-  const updateOrderStatusMutation = useUpdateOrderStatus()
-
-  const handleUpdateStatus = useCallback(async (orderId: string, newStatus: OrderStatus) => {
-    await updateOrderStatusMutation.mutateAsync({ orderId, newStatus })
-  }, [updateOrderStatusMutation])
 
   // Only show loading skeleton on initial load (when no data yet)
   if (loading && orders.length === 0) {
@@ -441,186 +486,25 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
         </SwipeableTabsContent>
 
         <SwipeableTabsContent value="list" className="mt-6">
-          {/* Filters */}
-          <Card className="mb-6">
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                <div className="flex gap-4 flex-wrap">
-                  <div className="flex-1 min-w-[200px]">
-                    <div className="relative">
-                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Cari nama pelanggan atau nomor pesanan..."
-                        value={filters.customer_search ?? ''}
-                        onChange={(e) => setFilters(prev => ({ ...prev, customer_search: e.target.value }))}
-                        className="pl-8"
-                      />
-                    </div>
-                  </div>
-
-                  <Select
-                    value={filters['status']?.join(',') || 'all'}
-                    onValueChange={(value) => {
-                      setFilters(prev => ({
-                        ...prev,
-                        status: value === 'all' ? [] : [value as OrderStatus]
-                      }))
-                    }}
-                  >
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Semua Status</SelectItem>
-                      {Object.entries(ORDER_STATUS_CONFIG).map(([status, config]) => (
-                        <SelectItem key={status} value={status}>
-                          {config.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-
-
-                   <Button variant="outline">
-                     <Filter className="h-4 w-4 mr-2" />
-                     Filter Lainnya
-                   </Button>
-                </div>
-
-                {/* Search Results Info */}
-                <div className="flex items-center justify-between text-sm">
-                  <div className="text-muted-foreground">
-                    Menampilkan <span className="font-semibold text-foreground">{filteredOrders.length}</span> pesanan
-                    {hasFiltersApplied && (
-                      <span> (dari total {stats.total_orders} pesanan)</span>
-                    )}
-                  </div>
-                  {hasFiltersApplied && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setFilters({ status: [], payment_status: [], customer_search: '' })}
-                      className="h-8"
-                    >
-                      <XCircle className="h-3 w-3 mr-1" />
-                      Hapus Filter
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Orders List */}
-          <div className="space-y-4">
-            {filteredOrders.length === 0 ? (
-              <Card>
-                <CardContent className="py-16">
-                  <div className="text-center">
-                    <ShoppingCart className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                    <h3 className="text-lg font-semibold mb-2">
-                      {hasFiltersApplied
-                        ? 'Tidak Ada Pesanan yang Cocok'
-                        : 'Belum Ada Pesanan'}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {hasFiltersApplied
-                        ? 'Coba ubah filter atau kata kunci pencarian'
-                        : 'Klik tombol "Pesanan Baru" untuk membuat pesanan pertama'}
-                    </p>
-                    {hasFiltersApplied ? (
-                      <Button
-                        variant="outline"
-                      onClick={() => setFilters({ status: [], payment_status: [], customer_search: '' })}
-                      >
-                        <XCircle className="h-4 w-4 mr-2" />
-                        Hapus Filter
-                      </Button>
-                    ) : (
-          <Button onClick={handleCreateOrder}>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Buat Pesanan Pertama
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <>
-                {filteredOrders.map((order: OrderListItem) => (
-                  <Card key={order.id} className="hover: ">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="space-y-1">
-                          <div className="font-semibold text-lg">{order.order_no}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {order.customer_name ?? 'N/A'} • {order.order_date ? formatDate(order.order_date) : 'N/A'}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge className={getStatusColor(order.status)}>
-                            {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status as OrderStatus] : 'N/A'}
-                          </Badge>
-                          <Badge className={getPaymentStatusColor(order.payment_status ?? null)}>
-                            {order.payment_status ? PAYMENT_STATUS_LABELS[order.payment_status.toUpperCase() as keyof typeof PAYMENT_STATUS_LABELS] || 'N/A' : 'N/A'}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div>
-                          <div className="text-sm text-muted-foreground">Item</div>
-                          <div className="font-medium">
-                            N/A
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-sm text-muted-foreground">Total Tagihan</div>
-                          <div className="font-medium text-lg">{formatCurrency(order.total_amount ?? 0)}</div>
-                        </div>
-                        <div>
-                          <div className="text-sm text-muted-foreground">Tanggal Kirim</div>
-                          <div className="font-medium">{order.delivery_date ? formatDate(order.delivery_date) : '-'}</div>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-2 flex-wrap">
-                        <Button variant="outline" size="sm" onClick={() => handleViewOrder(order as unknown as OrderWithItems)}>
-                          <Eye className="h-3 w-3 mr-1" />
-                          Detail
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleEditOrder(order as unknown as OrderWithItems)}>
-                          <Edit className="h-3 w-3 mr-1" />
-                          Edit
-                        </Button>
-                        {order.status && order.status in ORDER_STATUS_CONFIG && ORDER_STATUS_CONFIG[order.status as OrderStatus]?.nextStatuses && ORDER_STATUS_CONFIG[order.status as OrderStatus].nextStatuses.length > 0 && (
-                          <Select
-                            value={order.status}
-                            onValueChange={(newStatus) => handleUpdateStatus(order.id, newStatus as OrderStatus)}
-                          >
-                            <SelectTrigger className="w-full sm:w-[200px] h-8 text-sm">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value={order.status ?? 'PENDING'} disabled>
-                                {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status as OrderStatus] : 'Status Tidak Diketahui'}
-                              </SelectItem>
-                              {ORDER_STATUS_CONFIG[order.status as OrderStatus]?.nextStatuses?.map((status: OrderStatus) => (
-                                <SelectItem key={status} value={status}>
-                                  {status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[status] : status}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </>
-            )}
-          </div>
+          <SharedDataTable<OrderListItem & Record<string, unknown>>
+            data={orders as (OrderListItem & Record<string, unknown>)[]}
+            columns={orderColumns}
+            title="Daftar Pesanan"
+            description="Kelola semua pesanan pelanggan"
+            onAdd={handleCreateOrder}
+            addButtonText="Pesanan Baru"
+            onView={(item: OrderListItem & Record<string, unknown>) => handleViewOrder(item as unknown as OrderWithItems)}
+            onEdit={(item: OrderListItem & Record<string, unknown>) => handleEditOrder(item as unknown as OrderWithItems)}
+            searchPlaceholder="Cari nomor pesanan atau nama pelanggan..."
+            emptyMessage="Belum Ada Pesanan"
+            emptyDescription="Klik tombol 'Pesanan Baru' untuk membuat pesanan pertama"
+            loading={loading}
+            refreshable
+            onRefresh={() => void refetch()}
+            enablePagination
+            initialPageSize={10}
+            pageSizeOptions={[10, 25, 50, 100]}
+          />
         </SwipeableTabsContent>
 
         <SwipeableTabsContent value="calendar" className="mt-6">

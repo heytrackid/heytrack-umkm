@@ -1,11 +1,11 @@
-import { useMutation } from '@tanstack/react-query'
-import { useSupabase } from '@/providers/SupabaseProvider'
-import { handleApiError } from '@/lib/error-handling'
-import { successToast } from '@/hooks/use-toast'
-import { postApi } from '@/lib/query/query-helpers'
 import type { GeneratedRecipe } from '@/app/recipes/ai-generator/components/types'
+import { successToast } from '@/hooks/use-toast'
+import { handleApiError } from '@/lib/error-handling'
+import { postApi } from '@/lib/query/query-helpers'
+import { useSupabase } from '@/providers/SupabaseProvider'
+import { useMutation } from '@tanstack/react-query'
 
-interface GenerateRecipeParams {
+export interface GenerateRecipeParams {
   name: string
   type: string
   servings: number

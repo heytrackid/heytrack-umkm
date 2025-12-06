@@ -1,0 +1,330 @@
+'use client'
+
+// Using Pino logger for all logging
+import { Calendar, MessageCircle, Plus, ShoppingCart, TrendingUp, XCircle } from '@/components/icons'
+import { useOrders, useUpdateOrderStatus } from '@/hooks/api/useOrders'
+import { useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
+import { memo, useCallback, useMemo, useState } from 'react'
+
+import type { Order, OrderStatus } from '@/types/database'
+
+import { PageHeader } from '@/components/layout/PageHeader'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
+import { arrayCalculations } from '@/lib/performance/index'
+import { getErrorMessage } from '@/lib/type-guards'
+import { DashboardView } from '@/modules/orders/components/OrdersPageComponents/DashboardView'
+import { OrderFilters } from '@/modules/orders/components/OrdersPageComponents/OrderFilters'
+import { StatsCards } from '@/modules/orders/components/OrdersPageComponents/StatsCards'
+import { StatusSummary } from '@/modules/orders/components/OrdersPageComponents/StatusSummary'
+
+import { OrdersLoading } from '@/components/loading'
+import { ServerPagination } from '@/components/ui/server-pagination'
+import { OrdersList } from '@/modules/orders/components/OrdersPageComponents/OrdersList'
+import { OrderDetailView } from '../OrderDetailView'
+import { OrderForm } from '../OrderForm'
+
+// Static imports used instead of dynamic imports
+
+// Import modular components
+
+interface OrdersPageFilters {
+    status: OrderStatus[]
+    payment_status: string[]
+    customer_search?: string
+}
+
+interface OrderStats {
+    total_orders: number
+    pending_orders: number
+    confirmed_orders: number
+    in_production_orders: number
+    completed_orders: number
+    cancelled_orders: number
+    total_revenue: number
+    pending_revenue: number
+    paid_revenue: number
+    average_order_value: number
+    total_customers: number
+    repeat_customers: number
+    period_growth: number
+    revenue_growth: number
+    order_growth: number
+}
+
+interface OrdersPageProps {
+    userRole?: 'admin' | 'manager' | 'staff'
+    enableAdvancedFeatures?: boolean
+}
+
+const OrdersPageComponent = (_props: OrdersPageProps) => {
+    const router = useRouter()
+    const queryClient = useQueryClient()
+
+    type ActiveView = 'analytics' | 'calendar' | 'dashboard' | 'list'
+    const [activeView, setActiveView] = useState<ActiveView>('dashboard')
+
+    const [filters, setFilters] = useState<OrdersPageFilters>({
+        status: [],
+        payment_status: [],
+        customer_search: ''
+    })
+    const hasFiltersApplied = (filters['status']?.length || 0) > 0 || Boolean(filters.customer_search?.trim())
+
+    // Pagination state
+    const [page, setPage] = useState(1)
+    const [limit, setLimit] = useState(20)
+
+    // Fetch orders with pagination
+    const { data: ordersResponse, isLoading: loading, error: queryError } = useOrders({
+        page,
+        limit,
+        search: filters.customer_search || undefined
+    })
+
+    // Extract data and pagination from response
+    const orders = useMemo(() => {
+        if (!ordersResponse?.data) { return [] }
+        return Array.isArray(ordersResponse.data) ? ordersResponse.data : []
+    }, [ordersResponse])
+
+    const pagination = ordersResponse?.pagination
+
+    const error = queryError ? getErrorMessage(queryError) : null
+
+    // Calculate stats with safe array operations
+    const stats = useMemo<OrderStats>(() => {
+        // Guard against non-array
+        const safeOrders = Array.isArray(orders) ? orders : []
+
+        return {
+            total_orders: safeOrders.length,
+            pending_orders: safeOrders.filter(o => o['status'] === 'PENDING').length,
+            confirmed_orders: safeOrders.filter(o => o['status'] === 'CONFIRMED').length,
+            in_production_orders: safeOrders.filter(o => o['status'] === 'IN_PROGRESS').length,
+            completed_orders: safeOrders.filter(o => o['status'] === 'DELIVERED').length,
+            cancelled_orders: safeOrders.filter(o => o['status'] === 'CANCELLED').length,
+            total_revenue: arrayCalculations.sum(safeOrders, 'total_amount'),
+            pending_revenue: arrayCalculations.sum(
+                safeOrders.filter(o => o.payment_status === 'UNPAID'),
+                'total_amount'
+            ),
+            paid_revenue: safeOrders.reduce((sum) => sum + 0, 0), // paid_amount not available in OrderListItem
+            average_order_value: arrayCalculations.average(safeOrders, 'total_amount'),
+            total_customers: new Set(safeOrders.filter(o => o.customer_id).map(o => o.customer_id)).size,
+            repeat_customers: 0,
+            period_growth: 0,
+            revenue_growth: 0,
+            order_growth: 0
+        }
+    }, [orders])
+
+    // Dialog states
+    const [showOrderForm, setShowOrderForm] = useState(false)
+    const [showOrderDetail, setShowOrderDetail] = useState(false)
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+
+    const handleCreateOrder = useCallback(() => {
+        setSelectedOrder(null)
+        setShowOrderForm(true)
+    }, [])
+
+    const handleEditOrder = useCallback((order: Order) => {
+        setSelectedOrder(order)
+        setShowOrderForm(true)
+    }, [])
+
+    const handleViewOrder = useCallback((order: Order) => {
+        setSelectedOrder(order)
+        setShowOrderDetail(true)
+    }, [])
+
+    const updateOrderStatusMutation = useUpdateOrderStatus()
+
+    const handleUpdateStatus = useCallback(async (orderId: string, newStatus: OrderStatus) => {
+        await updateOrderStatusMutation.mutateAsync({ orderId, newStatus })
+    }, [updateOrderStatusMutation])
+
+    const handleClearFilters = useCallback(() => {
+        // Clear filters logic - to be implemented
+    }, [])
+
+    // Handle pagination changes
+    const handlePageChange = useCallback((newPage: number) => {
+        setPage(newPage)
+    }, [])
+
+    const handlePageSizeChange = useCallback((newLimit: number) => {
+        setLimit(newLimit)
+        setPage(1) // Reset to first page when changing page size
+    }, [])
+
+    // Loading state
+    if (loading && orders.length === 0) {
+        return <OrdersLoading />
+    }
+
+    // Error state
+    if (error) {
+        return (
+            <Card>
+                <CardContent className="pt-6">
+                    <div className="text-center py-8">
+                        <XCircle className="h-12 w-12 text-gray-600 dark:text-gray-400 mx-auto mb-4" />
+                        <h3 className="font-medium mb-2">Gagal Memuat Data</h3>
+                        <p className="text-sm text-muted-foreground mb-4">{error}</p>
+                        <Button onClick={() => router.refresh()}>Coba Lagi</Button>
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    return (
+        <div className="space-y-6">
+            {/* Header */}
+            <PageHeader
+                title="Kelola Pesanan"
+                description="Kelola pesanan dan penjualan dengan sistem terintegrasi"
+                icon={<ShoppingCart className="h-8 w-8 text-primary" />}
+                actions={
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => router.push('/orders/whatsapp-templates')}
+                            className="flex items-center gap-2"
+                        >
+                            <MessageCircle className="h-4 w-4" />
+                            Template WhatsApp
+                        </Button>
+                        <Button onClick={handleCreateOrder}>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Pesanan Baru
+                        </Button>
+                    </div>
+                }
+            />
+
+            {/* Stats Overview */}
+            <StatsCards stats={stats} />
+
+            {/* Status Summary */}
+            <StatusSummary stats={stats} />
+
+            {/* Navigation Tabs */}
+            <SwipeableTabs value={activeView} onValueChange={(value) => setActiveView(value as ActiveView)}>
+                <SwipeableTabsList>
+                    <SwipeableTabsTrigger value="dashboard">Ringkasan</SwipeableTabsTrigger>
+                    <SwipeableTabsTrigger value="list">Daftar Pesanan</SwipeableTabsTrigger>
+                    <SwipeableTabsTrigger value="calendar">Kalender</SwipeableTabsTrigger>
+                    <SwipeableTabsTrigger value="analytics">Analitik</SwipeableTabsTrigger>
+                </SwipeableTabsList>
+
+                <SwipeableTabsContent value="dashboard" className="mt-6">
+                    <DashboardView
+                        orders={orders as unknown as Order[]}
+                        onCreateOrder={() => setShowOrderForm(true)}
+                    />
+                </SwipeableTabsContent>
+
+                <SwipeableTabsContent value="list" className="mt-6">
+                    <OrderFilters
+                        filters={filters}
+                        totalOrders={stats.total_orders}
+                        filteredCount={orders.length}
+                        onFilterChange={setFilters}
+                        onClearFilters={handleClearFilters}
+                    />
+                     <OrdersList
+                         orders={orders as unknown as Order[]}
+                         hasFilters={hasFiltersApplied}
+                         onCreateOrder={handleCreateOrder}
+                         onViewOrder={handleViewOrder}
+                         onEditOrder={handleEditOrder}
+                         onUpdateStatus={handleUpdateStatus}
+                         onClearFilters={handleClearFilters}
+                     />
+
+                     {/* Pagination */}
+                     {pagination && orders.length > 0 && (
+                         <ServerPagination
+                             pagination={pagination}
+                             onPageChange={handlePageChange}
+                             onPageSizeChange={handlePageSizeChange}
+                             pageSizeOptions={[10, 20, 50, 100]}
+                         />
+                     )}
+                </SwipeableTabsContent>
+
+                <SwipeableTabsContent value="calendar" className="mt-6">
+                    <Card>
+                        <CardContent className="pt-6">
+                            <div className="text-center py-12">
+                                <Calendar className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                                <h3 className="font-medium mb-2">Tampilan Kalender</h3>
+                                <p className="text-sm text-muted-foreground">
+                                    Kalender pesanan berdasarkan tanggal kirim akan ditampilkan di sini
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </SwipeableTabsContent>
+
+                <SwipeableTabsContent value="analytics" className="mt-6">
+                    <Card>
+                        <CardContent className="pt-6">
+                            <div className="text-center py-12">
+                                <TrendingUp className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                                <h3 className="font-medium mb-2">Analitik Penjualan</h3>
+                                <p className="text-sm text-muted-foreground">
+                                    Grafik penjualan dan tren bisnis akan ditampilkan di sini
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </SwipeableTabsContent>
+            </SwipeableTabs>
+
+            {/* Order Form Dialog */}
+            <Dialog open={showOrderForm} onOpenChange={setShowOrderForm}>
+                <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="text-lg sm:text-xl">
+                            {selectedOrder ? `Edit Pesanan ${selectedOrder['order_no']}` : 'Buat Pesanan Baru'}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <OrderForm
+                        {...(selectedOrder && { order: { ...selectedOrder, items: [] } })}
+                        onSubmit={async () => {
+                            await queryClient.invalidateQueries({ queryKey: ['orders'] })
+                            setShowOrderForm(false)
+                            setSelectedOrder(null)
+                        }}
+                        onCancel={() => {
+                            setShowOrderForm(false)
+                            setSelectedOrder(null)
+                        }}
+                    />
+                </DialogContent>
+            </Dialog>
+
+            {/* Order Detail Dialog */}
+            <Dialog open={showOrderDetail} onOpenChange={setShowOrderDetail}>
+                <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="text-lg sm:text-xl">
+                            Detail Pesanan {selectedOrder?.order_no}
+                        </DialogTitle>
+                    </DialogHeader>
+                    {selectedOrder && <OrderDetailView order={selectedOrder} />}
+                </DialogContent>
+            </Dialog>
+        </div>
+    )
+}
+
+// Memoized export for performance
+export const OrdersPage = memo(OrdersPageComponent)

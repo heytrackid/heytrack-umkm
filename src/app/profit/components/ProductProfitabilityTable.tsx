@@ -1,105 +1,126 @@
-import { TrendingUp, TrendingDown } from '@/components/icons'
+'use client'
 
+import { TrendingDown, TrendingUp } from '@/components/icons'
+import { useMemo } from 'react'
+
+import { SharedDataTable, type Column } from '@/components/shared/SharedDataTable'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 
 import type { ProfitData } from '@/app/profit/components/types'
 
+type ProductProfit = ProfitData['products'][number]
 
 interface ProductProfitabilityTableProps {
   products: ProfitData['products']
   formatCurrency: (amount: number) => string
+  loading?: boolean
 }
 
 export const ProductProfitabilityTable = ({
   products,
-  formatCurrency
+  formatCurrency,
+  loading = false
 }: ProductProfitabilityTableProps) => {
   // Function to determine badge variant based on margin
   const getMarginBadgeVariant = (margin: number) => {
-    if (margin >= 30) {
-      return 'default'
-    }
-    if (margin >= 15) {
-      return 'secondary'
-    }
+    if (margin >= 30) return 'default'
+    if (margin >= 15) return 'secondary'
     return 'destructive'
   }
 
   // Function to get profit trend indicator
   const getProfitTrend = (margin: number) => {
-    if (margin >= 30) {
-      return <TrendingUp className="h-4 w-4 text-green-600" />
-    }
-    if (margin >= 15) {
-      return <TrendingUp className="h-4 w-4 text-yellow-600" />
-    }
+    if (margin >= 30) return <TrendingUp className="h-4 w-4 text-green-600" />
+    if (margin >= 15) return <TrendingUp className="h-4 w-4 text-yellow-600" />
     return <TrendingDown className="h-4 w-4 text-red-600" />
   }
 
-  return (
-    <Card className="border-0 ">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              Detail Profitabilitas Produk
-            </CardTitle>
-            <CardDescription>
-              Analisis keuntungan per produk menggunakan WAC
-            </CardDescription>
+  const columns = useMemo((): Column<ProductProfit & Record<string, unknown>>[] => [
+    {
+      key: 'product_name',
+      header: 'Produk',
+      sortable: true,
+      render: (_, item) => (
+        <div className="flex items-center gap-2">
+          {getProfitTrend(item.profit_margin)}
+          <span className="font-medium">{item.product_name}</span>
+        </div>
+      )
+    },
+    {
+      key: 'quantity_sold',
+      header: 'Terjual',
+      sortable: true,
+      className: 'text-right',
+      render: (value) => <div className="text-right">{Number(value)}</div>
+    },
+    {
+      key: 'revenue',
+      header: 'Pendapatan',
+      sortable: true,
+      className: 'text-right',
+      render: (value) => <div className="text-right">{formatCurrency(Number(value))}</div>
+    },
+    {
+      key: 'cogs',
+      header: 'HPP',
+      sortable: true,
+      className: 'text-right',
+      render: (value) => (
+        <div className="text-right text-orange-600">{formatCurrency(Number(value))}</div>
+      )
+    },
+    {
+      key: 'profit',
+      header: 'Laba',
+      sortable: true,
+      className: 'text-right',
+      render: (value) => {
+        const profit = Number(value)
+        return (
+          <div className={`text-right font-semibold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {formatCurrency(profit)}
           </div>
-          <Badge variant="outline" className="text-xs">
-            {products.length} produk
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto rounded-lg border">
-          <table className="w-full">
-            <thead className="bg-muted">
-              <tr>
-                <th className="text-left py-3 px-4 font-medium rounded-l-lg">Produk</th>
-                <th className="text-right py-3 px-4 font-medium">Terjual</th>
-                <th className="text-right py-3 px-4 font-medium">Pendapatan</th>
-                <th className="text-right py-3 px-4 font-medium">HPP</th>
-                <th className="text-right py-3 px-4 font-medium">Laba</th>
-                <th className="text-right py-3 px-4 font-medium rounded-r-lg">Margin</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(products || []).map((product, index) => (
-                <tr 
-                  key={index} 
-                  className="border-b hover:bg-muted/30 transition-colors last:border-b-0"
-                >
-                  <td className="py-3 px-4 font-medium">
-                    <div className="flex items-center gap-2">
-                      {getProfitTrend(product.profit_margin)}
-                      <span>{product.product_name}</span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 text-right">{product.quantity_sold}</td>
-                  <td className="py-3 px-4 text-right">{formatCurrency(product.revenue)}</td>
-                  <td className="py-3 px-4 text-right text-orange-600">
-                    {formatCurrency(product.cogs)}
-                  </td>
-                  <td className={`py-3 px-4 text-right font-semibold ${product.profit >= 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                    {formatCurrency(product.profit)}
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <Badge variant={getMarginBadgeVariant(product.profit_margin)}>
-                      {product.profit_margin.toFixed(1)}%
-                    </Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </CardContent>
-    </Card>
+        )
+      }
+    },
+    {
+      key: 'profit_margin',
+      header: 'Margin',
+      sortable: true,
+      className: 'text-right',
+      render: (value) => {
+        const margin = Number(value)
+        return (
+          <div className="text-right">
+            <Badge variant={getMarginBadgeVariant(margin)}>
+              {margin.toFixed(1)}%
+            </Badge>
+          </div>
+        )
+      }
+    }
+  ], [formatCurrency])
+
+  return (
+    <SharedDataTable<ProductProfit & Record<string, unknown>>
+      data={(products || []) as (ProductProfit & Record<string, unknown>)[]}
+      columns={columns}
+      title="Detail Profitabilitas Produk"
+      description="Analisis keuntungan per produk menggunakan WAC"
+      loading={loading}
+      emptyMessage="Belum ada data profitabilitas"
+      emptyDescription="Data profitabilitas produk akan muncul setelah ada penjualan"
+      searchPlaceholder="Cari produk..."
+      enablePagination
+      pageSizeOptions={[10, 25, 50]}
+      initialPageSize={10}
+      exportable
+      headerActions={
+        <Badge variant="outline" className="text-xs">
+          {products.length} produk
+        </Badge>
+      }
+    />
   )
 }

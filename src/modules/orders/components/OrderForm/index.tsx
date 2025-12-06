@@ -1,9 +1,9 @@
 'use client'
 
 // Using Pino logger for all logging
-import { useRecipes } from '@/hooks/useRecipes'
-import { useCustomersList } from '@/hooks/useCustomers'
 import { AlertCircle } from '@/components/icons'
+import { useCustomersList } from '@/hooks/useCustomers'
+import { useRecipes } from '@/hooks/useRecipes'
 import { memo, useCallback, useState, type FormEvent } from 'react'
 
 import type { Order, OrderFormProps, OrderItemWithRecipe, PaymentMethod } from '@/app/orders/types/orders-db.types'
@@ -15,8 +15,8 @@ import { ORDER_CONFIG } from '@/modules/orders/constants'
 import { calculateOrderTotals, generateOrderNo } from '@/modules/orders/utils/helpers'
 
 import { CustomerSection } from './CustomerSection'
-import { ItemsSection } from './ItemsSection'
 import { DeliverySection } from './DeliverySection'
+import { ItemsSection } from './ItemsSection'
 import { PaymentSection } from './PaymentSection'
 
 interface FormState {
@@ -347,3 +347,10 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
 })
 
 OrderForm.displayName = 'OrderForm'
+
+// Re-export section components for external use
+export { CustomerSection } from './CustomerSection'
+export { DeliverySection } from './DeliverySection'
+export { ItemsSection } from './ItemsSection'
+export { PaymentSection } from './PaymentSection'
+

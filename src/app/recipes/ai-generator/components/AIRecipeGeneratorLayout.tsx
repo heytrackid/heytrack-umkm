@@ -1,301 +1,83 @@
 // @ts-nocheck
 'use client'
 
-import { ChefHat, Package, Sparkles } from '@/components/icons'
-import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { ChefHat } from '@/components/icons'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { useGenerateRecipe } from '@/hooks/api/useAIRecipe'
-import { useAuth, useAuthMe } from '@/hooks/index'
-import { useIngredientsList } from '@/hooks/useIngredients'
-import { useCreateRecipeWithIngredients } from '@/hooks/useRecipes'
-import { handleError } from '@/lib/error-handling'
 
-import type { Insert } from '@/types/database'
+// Split components
+import { AIGeneratorActions } from './AIGeneratorActions'
+import { AIGeneratorPreview } from './AIGeneratorPreview'
+import { LivePreview } from './LivePreview'
+import { ProductDetailsForm } from './ProductDetailsForm'
+import { RecipeTemplates } from './RecipeTemplates'
+import { UnifiedIngredientInput } from './UnifiedIngredientInput'
+import { useAIRecipeGenerator } from './useAIRecipeGenerator'
 
-import { GeneratedRecipeDisplay } from '@/app/recipes/ai-generator/components/GeneratedRecipeDisplay'
-import { UnifiedIngredientInput } from '@/app/recipes/ai-generator/components/UnifiedIngredientInput'
+import type { RecipeTemplate } from './RecipeTemplates'
 
-import type { GeneratedRecipe } from '@/app/recipes/ai-generator/components/types'
-
-// AI Recipe Generator - Complete Rebuild
-// Single-page interface with real-time preview and unified ingredient management
+/**
+ * AI Recipe Generator Page
+ * 
+ * Refactored for better maintainability:
+ * - useAIRecipeGenerator: All business logic
+ * - RecipeTemplates: Quick start templates
+ * - ProductDetailsForm: Product details form fields
+ * - AIGeneratorActions: Action buttons
+ * - LivePreview: Real-time preview card
+ * - AIGeneratorPreview: Generation result display
+ */
 
 const AIRecipeGeneratorPage = () => {
-  const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
-  const { data: authData } = useAuthMe()
-  const router = useRouter()
+  const {
+    // Auth state
+    isAuthLoading,
+    isAuthenticated,
 
-  // Generation state - declare before mutation
-  const [generatedRecipe, setGeneratedRecipe] = useState<GeneratedRecipe | null>(null)
+    // Form state
+    formState,
+    updateFormField,
+    resetForm,
 
-  const generateRecipeMutation = useGenerateRecipe((data: GeneratedRecipe) => {
-    setGeneratedRecipe(data)
-  })
-  const createRecipeWithIngredients = useCreateRecipeWithIngredients()
+    // Validation
+    isFormValid,
+    isProductNameValid,
+    isIngredientsValid,
+    isServingsValid,
+    isTargetPriceValid,
 
-  // Form state
-  const [productName, setProductName] = useState('')
-  const [productType, setProductType] = useState('main-dish')
-  const [servings, setServings] = useState(12)
-  const [targetPrice, setTargetPrice] = useState('')
-  const [dietaryRestrictions, setDietaryRestrictions] = useState<string[]>([])
-  const { data: ingredients = [] } = useIngredientsList()
+    // Data
+    availableIngredients,
+    generatedRecipe,
 
-  // Transform ingredients to AvailableIngredient format
-  const availableIngredients = useMemo(() => {
-    return (ingredients || []).map(ing => ({
-      id: ing.id,
-      name: ing.name,
-      current_stock: ing.current_stock ?? 0,
-      unit: ing.unit,
-      price_per_unit: ing.price_per_unit,
-      minimum_stock: ing.min_stock ?? undefined
-    }))
-  }, [ingredients])
+    // UI state
+    activeTab,
+    setActiveTab,
+    hasUnsavedChanges,
+    lastSaved,
+    uiError,
+    setUiError,
 
-  // Selected ingredients state
-  const [selectedIngredients, setSelectedIngredients] = useState<string[]>([])
-  const [customIngredients, setCustomIngredients] = useState<string[]>([])
-  const [specialInstructions, setSpecialInstructions] = useState('')
+    // Actions
+    handleGenerate,
+    handleSaveRecipe,
+    saveDraft,
 
-   // UI state
-   const [activeTab, setActiveTab] = useState<'input' | 'preview'>('input')
-   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-   const [lastSaved, setLastSaved] = useState<Date | null>(null)
-   const [uiError, setUiError] = useState<string | null>(null)
+    // Mutation state
+    isGenerating
+  } = useAIRecipeGenerator()
 
-  // Enhanced form validation
-  const isProductNameValid = productName.trim().length >= 3
-  const isIngredientsValid = (selectedIngredients.length + customIngredients.length) >= 3
-  const isServingsValid = servings >= 1
-  const isTargetPriceValid = targetPrice === '' || parseFloat(targetPrice) > 0
+  // Handle template selection
+  const handleSelectTemplate = (template: RecipeTemplate) => {
+    updateFormField('productName', template.name)
+    updateFormField('productType', template.type)
+    updateFormField('servings', template.servings)
+    updateFormField('customIngredients', template.ingredients)
+  }
 
-  const isFormValid = isProductNameValid && isIngredientsValid && isServingsValid
-
-  // Handle auth errors
-  useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      handleError(new Error('Authentication required'), 'AI Recipe Generator: auth check', true, 'Sesi Anda telah berakhir. Silakan login kembali.')
-      router.push('/auth/login')
-    }
-  }, [isAuthLoading, isAuthenticated, router])
-
-
-
-  const handleGenerate = useCallback(async () => {
-    // More comprehensive validation before submission
-    if (!isProductNameValid) {
-      handleError(new Error('Validation: Nama produk harus minimal 3 karakter'), 'AI Recipe Generator: validation', true, 'Nama produk harus minimal 3 karakter')
-      return
-    }
-
-    if (!isIngredientsValid) {
-      handleError(new Error('Validation: Minimal 3 bahan diperlukan untuk generate resep'), 'AI Recipe Generator: validation', true, 'Minimal 3 bahan diperlukan untuk generate resep')
-      return
-    }
-
-    if (!isServingsValid) {
-      handleError(new Error('Validation: Jumlah porsi harus lebih dari 0'), 'AI Recipe Generator: validation', true, 'Jumlah porsi harus lebih dari 0')
-      return
-    }
-
-    if (targetPrice && !isTargetPriceValid) {
-      handleError(new Error('Validation: Target harga harus berupa angka positif'), 'AI Recipe Generator: validation', true, 'Target harga harus berupa angka positif')
-      return
-    }
-
-    setGeneratedRecipe(null)
-    setActiveTab('preview')
-
-    generateRecipeMutation.mutate({
-      name: productName,
-      type: productType,
-      servings,
-      targetPrice: targetPrice ? parseFloat(targetPrice) : undefined,
-      dietaryRestrictions,
-      preferredIngredients: selectedIngredients,
-      customIngredients: customIngredients,
-      specialInstructions: specialInstructions.trim() || undefined
-    })
-  }, [productName, productType, servings, targetPrice, dietaryRestrictions, selectedIngredients, customIngredients, specialInstructions, isProductNameValid, isIngredientsValid, isServingsValid, isTargetPriceValid, generateRecipeMutation])
-
-  const handleSaveRecipe = useCallback(async () => {
-    if (!generatedRecipe) { return }
-    if (!authData?.userId) {
-      throw new Error('User not authenticated')
-    }
-
-    try {
-      const userId = authData.userId
-
-      // Prepare recipe data
-      const recipeData: Insert<'recipes'> = {
-        user_id: userId,
-        name: generatedRecipe.name,
-        category: generatedRecipe.category,
-        servings: generatedRecipe.servings,
-        prep_time: generatedRecipe.prep_time_minutes,
-        cook_time: generatedRecipe.bake_time_minutes,
-        description: generatedRecipe.description,
-        instructions: JSON.stringify(generatedRecipe.instructions),
-        is_active: true
-      }
-
-      // Prepare ingredients data
-      const ingredientsData = generatedRecipe.ingredients
-        .map((ing) => {
-          const ingredient = availableIngredients.find(
-            i => i.name.toLowerCase() === ing.name.toLowerCase()
-          )
-
-          if (!ingredient) {
-            return null
-          }
-
-          return {
-            ingredient_id: ingredient.id,
-            quantity: ing.quantity,
-            unit: ing.unit,
-            notes: ''
-          }
-        })
-        .filter((value): value is { ingredient_id: string; quantity: number; unit: string; notes: string } => value !== null)
-
-      // Use React Query mutation
-      await createRecipeWithIngredients.mutateAsync({
-        recipe: recipeData,
-        ingredients: ingredientsData
-      })
-
-      // Reset form on success
-      setGeneratedRecipe(null)
-      setProductName('')
-      setServings(12)
-      setTargetPrice('')
-      setSelectedIngredients([])
-      setCustomIngredients([])
-      setSpecialInstructions('')
-      setActiveTab('input')
-
-    } catch (error: unknown) {
-      const errorMessage = error as Error
-
-      if (errorMessage.message.includes('authentication')) {
-        handleError(errorMessage, 'AI Recipe Generator: save recipe', true, 'Sesi Anda telah habis. Silakan login kembali.')
-      } else if (errorMessage.message.includes('database') || errorMessage.message.includes('insert')) {
-        handleError(errorMessage, 'AI Recipe Generator: save recipe', true, 'Gagal menyimpan resep ke database. Silakan coba lagi.')
-      } else {
-        handleError(errorMessage, 'AI Recipe Generator: save recipe', true, 'Terjadi kesalahan saat menyimpan resep.')
-      }
-    }
-  }, [generatedRecipe, availableIngredients, createRecipeWithIngredients, authData])
-
-  const handleNewRecipe = useCallback(() => {
-    setGeneratedRecipe(null)
-    setProductName('')
-    setServings(12)
-    setTargetPrice('')
-    setSelectedIngredients([])
-    setCustomIngredients([])
-    setSpecialInstructions('')
-    setActiveTab('input')
-  }, [])
-
-  // Auto-save draft functionality
-  const saveDraft = useCallback(() => {
-    const draft = {
-      productName,
-      productType,
-      servings,
-      targetPrice,
-      dietaryRestrictions,
-      selectedIngredients,
-      customIngredients,
-      specialInstructions,
-      timestamp: new Date().toISOString()
-    }
-
-    try {
-      localStorage.setItem('recipe-generator-draft', JSON.stringify(draft))
-      setLastSaved(new Date())
-      setHasUnsavedChanges(false)
-    } catch {
-      // Silently fail for localStorage issues
-    }
-  }, [productName, productType, servings, targetPrice, dietaryRestrictions, selectedIngredients, customIngredients, specialInstructions])
-
-  const loadDraft = useCallback(() => {
-    try {
-      const saved = localStorage.getItem('recipe-generator-draft')
-      if (saved) {
-        const draft = JSON.parse(saved)
-        setProductName(draft.productName || '')
-        setProductType(draft.productType || 'bread')
-        setServings(draft.servings || 12)
-        setTargetPrice(draft.targetPrice || '')
-        setDietaryRestrictions(draft.dietaryRestrictions || [])
-        setSelectedIngredients(draft.selectedIngredients || [])
-        setCustomIngredients(draft.customIngredients || [])
-        setSpecialInstructions(draft.specialInstructions || '')
-        setLastSaved(new Date(draft.timestamp))
-        return true
-      }
-    } catch {
-      // Silently fail for localStorage issues
-    }
-    return false
-  }, [])
-
-
-
-  // Auto-save effect
-  useEffect(() => {
-    const autoSaveInterval = setInterval(() => {
-      if (hasUnsavedChanges && (productName || selectedIngredients.length > 0 || customIngredients.length > 0)) {
-        saveDraft()
-      }
-    }, 5000) // Save every 5 seconds
-
-    return () => clearInterval(autoSaveInterval)
-  }, [hasUnsavedChanges, productName, selectedIngredients, customIngredients, saveDraft])
-
-  // Track unsaved changes (using ref to avoid cascading renders)
-  const isInitialMount = useRef(true)
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false
-      return
-    }
-    // Only set to true if there's actual content
-    if (productName || selectedIngredients.length > 0 || customIngredients.length > 0) {
-      // Use setTimeout to avoid setState during render cycle
-      setTimeout(() => setHasUnsavedChanges(true), 0)
-    }
-  }, [productName, productType, servings, targetPrice, dietaryRestrictions, selectedIngredients, customIngredients, specialInstructions])
-
-  // Load draft on mount
-  useEffect(() => {
-    const hasDraft = loadDraft()
-    if (hasDraft) {
-      // Use setTimeout to avoid setState during render cycle
-      setTimeout(() => setHasUnsavedChanges(false), 0)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Remove loadDraft from dependencies to avoid cascading renders
-
-
-
-  // Show loading state while auth is initializing
+  // Loading state
   if (isAuthLoading) {
     return (
       <AppLayout>
@@ -311,7 +93,7 @@ const AIRecipeGeneratorPage = () => {
     )
   }
 
-  // Don't render if not authenticated
+  // Not authenticated
   if (!isAuthenticated) {
     return (
       <AppLayout>
@@ -322,12 +104,14 @@ const AIRecipeGeneratorPage = () => {
     )
   }
 
-
+  const showTemplates = !formState.productName && 
+    formState.selectedIngredients.length === 0 && 
+    formState.customIngredients.length === 0
 
   return (
     <AppLayout>
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
-        {/* Error display for UI errors */}
+        {/* Error display */}
         {uiError && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 p-6">
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
@@ -412,7 +196,7 @@ const AIRecipeGeneratorPage = () => {
                 <Button
                   variant={activeTab === 'preview' ? 'default' : 'ghost'}
                   onClick={() => setActiveTab('preview')}
-                  disabled={!generatedRecipe && !generateRecipeMutation.isPending}
+                  disabled={!generatedRecipe && !isGenerating}
                   className={`px-4 py-2 flex-1 text-sm transition-all duration-200 ${
                     activeTab === 'preview'
                       ? 'shadow-sm transform scale-[1.02]'
@@ -431,284 +215,39 @@ const AIRecipeGeneratorPage = () => {
             {activeTab === 'input' && (
               <div className="space-y-6 lg:col-span-7 w-full">
                 {/* Live Preview */}
-                {(productName || selectedIngredients.length > 0 || customIngredients.length > 0) && (
-                  <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="flex items-center gap-2 text-base">
-                        <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center">
-                          👁️
-                        </div>
-                        Live Preview
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">Nama:</span>
-                          <p className="font-medium truncate">{productName || 'Belum diisi'}</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Jenis:</span>
-                          <p className="font-medium">
-                            {productType === 'main-dish' ? '🍽️ Makanan Utama' :
-                             productType === 'side-dish' ? '🥗 Lauk Pendamping' :
-                             productType === 'snack' ? '🍿 Camilan' :
-                             productType === 'beverage' ? '🥤 Minuman' :
-                             productType === 'dessert' ? '🍰 Dessert' :
-                             productType === 'culinary' ? '🥘 Masakan Umum' : '🍲 Lainnya'}
-                          </p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Porsi:</span>
-                          <p className="font-medium">{servings} porsi</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Bahan:</span>
-                          <p className="font-medium">{selectedIngredients.length + customIngredients.length} bahan</p>
-                        </div>
-                      </div>
-
-                      {targetPrice && (
-                        <div className="pt-2 border-t">
-                          <span className="text-muted-foreground text-sm">Target Harga:</span>
-                          <p className="font-medium">Rp {parseInt(targetPrice).toLocaleString('id-ID')}</p>
-                        </div>
-                      )}
-
-                      {(selectedIngredients.length > 0 || customIngredients.length > 0) && (
-                        <div className="pt-2 border-t">
-                          <span className="text-muted-foreground text-sm">Bahan Utama:</span>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {selectedIngredients.slice(0, 3).map((ingId, idx) => {
-                              const ingredient = availableIngredients.find(i => i.id === ingId)
-                              // Only show if we found the ingredient name, skip if not found
-                              if (!ingredient?.name) return null
-                              return (
-                                <Badge key={idx} variant="secondary" className="text-xs">
-                                  {ingredient.name}
-                                </Badge>
-                              )
-                            })}
-                            {customIngredients.slice(0, 3).map((ing, idx) => (
-                              <Badge key={`custom-${idx}`} variant="secondary" className="text-xs">
-                                {ing}
-                              </Badge>
-                            ))}
-                            {(selectedIngredients.length + customIngredients.length) > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{(selectedIngredients.length + customIngredients.length) - 3} lainnya
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {isFormValid && (
-                        <div className="pt-2 border-t">
-                          <Badge className="bg-green-500 text-white">
-                            ✅ Siap untuk generate resep!
-                          </Badge>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
+                <LivePreview
+                  productName={formState.productName}
+                  productType={formState.productType}
+                  servings={formState.servings}
+                  targetPrice={formState.targetPrice}
+                  selectedIngredients={formState.selectedIngredients}
+                  customIngredients={formState.customIngredients}
+                  availableIngredients={availableIngredients}
+                  isFormValid={isFormValid}
+                />
 
                 {/* Quick Start Templates */}
-                {!productName && selectedIngredients.length === 0 && customIngredients.length === 0 && (
-                  <Card className="border-2 border-dashed border-primary/30">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center">
-                          🚀
-                        </div>
-                        Contoh Resep UMKM
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground">
-                        Pilih contoh untuk memulai lebih cepat
-                      </p>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {[
-                          {
-                            id: 'nasi-goreng',
-                            name: 'Nasi Goreng Spesial',
-                            type: 'main-dish',
-                            servings: 4,
-                            ingredients: ['nasi putih', 'telur ayam', 'bawang putih', 'bawang merah', 'kecap manis', 'sayuran'],
-                            icon: '🍚'
-                          },
-                          {
-                            id: 'ayam-goreng',
-                            name: 'Ayam Goreng Crispy',
-                            type: 'main-dish',
-                            servings: 6,
-                            ingredients: ['ayam', 'tepung terigu', 'telur ayam', 'bawang putih', 'ketumbar', 'minyak goreng'],
-                            icon: '🍗'
-                          },
-                          {
-                            id: 'jus-buah',
-                            name: 'Jus Buah Segar',
-                            type: 'beverage',
-                            servings: 4,
-                            ingredients: ['buah jeruk', 'buah apel', 'madu', 'air', 'es batu'],
-                            icon: '🧃'
-                          },
-                          {
-                            id: 'martabak-manis',
-                            name: 'Martabak Manis',
-                            type: 'dessert',
-                            servings: 8,
-                            ingredients: ['tepung terigu', 'telur ayam', 'gula pasir', 'susu', 'keju', 'meses'],
-                            icon: '🥞'
-                          },
-                          {
-                            id: 'sate-ayam',
-                            name: 'Sate Ayam Madura',
-                            type: 'main-dish',
-                            servings: 6,
-                            ingredients: ['ayam', 'kecap manis', 'bawang merah', 'bawang putih', 'ketumbar', 'tusuk sate'],
-                            icon: '🍢'
-                          },
-                          {
-                            id: 'bakso-malang',
-                            name: 'Bakso Malang',
-                            type: 'main-dish',
-                            servings: 8,
-                            ingredients: ['daging sapi', 'tepung tapioka', 'bawang putih', 'telur ayam', 'mie', 'tahu'],
-                            icon: '🥟'
-                          }
-                        ].map((template) => (
-                          <Card
-                            key={template.id}
-                            className="cursor-pointer hover:shadow-md transition-shadow border hover:border-primary/50"
-                            onClick={() => {
-                              setProductName(template.name)
-                              setProductType(template.type as 'main-dish' | 'side-dish' | 'snack' | 'beverage' | 'dessert' | 'bread' | 'other')
-                              setServings(template.servings)
-                              setCustomIngredients(template.ingredients)
-                              setActiveTab('input')
-                            }}
-                          >
-                            <CardContent className="p-4">
-                              <div className="flex items-center gap-3">
-                                <div className="text-2xl">{template.icon}</div>
-                                <div className="flex-1 min-w-0">
-                                  <h3 className="font-medium text-sm truncate">{template.name}</h3>
-                                  <p className="text-xs text-muted-foreground">
-                                    {template.servings} porsi • {template.ingredients.length} bahan
-                                  </p>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
+                {showTemplates && (
+                  <RecipeTemplates onSelectTemplate={handleSelectTemplate} />
                 )}
 
                 {/* Product Details */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2">
-                      <Package className="h-5 w-5" />
-                      Detail Produk
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="productName" className="flex items-center gap-1">
-                        Nama Produk *
-                        {!isProductNameValid && productName && (
-                          <span className="text-xs text-red-500">min 3 karakter</span>
-                        )}
-                      </Label>
-                      <Input
-                        id="productName"
-                        placeholder="Contoh: Roti Tawar Premium, Brownies Coklat"
-                        value={productName}
-                        onChange={(e) => setProductName(e.target.value)}
-                        disabled={generateRecipeMutation.isPending}
-                        className={!isProductNameValid && productName ? "border-red-500 focus:border-red-500" : ""}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="productType">Jenis Produk *</Label>
-                        <Select value={productType} onValueChange={setProductType} disabled={generateRecipeMutation.isPending}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="main-dish">🍽️ Makanan Utama</SelectItem>
-                            <SelectItem value="side-dish">🥗 Lauk Pendamping</SelectItem>
-                            <SelectItem value="snack">🍿 Camilan</SelectItem>
-                            <SelectItem value="beverage">🥤 Minuman</SelectItem>
-                            <SelectItem value="dessert">🍰 Dessert</SelectItem>
-                            <SelectItem value="culinary">🥘 Masakan Umum</SelectItem>
-                            <SelectItem value="other">🍲 Lainnya</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="servings" className="flex items-center gap-1">
-                          Jumlah Hasil *
-                          {!isServingsValid && servings === 0 && (
-                            <span className="text-xs text-red-500">harus &gt; 0</span>
-                          )}
-                        </Label>
-                        <Input
-                          id="servings"
-                          type="number"
-                          min="1"
-                          placeholder="12"
-                          value={servings}
-                          onChange={(e) => setServings(parseInt(e.target.value) || 12)}
-                          disabled={generateRecipeMutation.isPending}
-                          className={!isServingsValid && servings === 0 ? "border-red-500 focus:border-red-500" : ""}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="targetPrice" className="flex items-center gap-1">
-                        Target Harga Jual (opsional)
-                        {targetPrice && !isTargetPriceValid && (
-                          <span className="text-xs text-red-500">harga harus positif</span>
-                        )}
-                      </Label>
-                      <div className="flex gap-2">
-                        <div className="px-3 py-2 bg-muted rounded-md text-sm flex items-center">Rp</div>
-                        <Input
-                          id="targetPrice"
-                          type="number"
-                          min="0"
-                          placeholder="25000"
-                          value={targetPrice}
-                          onChange={(e) => setTargetPrice(e.target.value)}
-                          disabled={generateRecipeMutation.isPending}
-                          className="flex-1"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="specialInstructions">Instruksi Khusus (opsional)</Label>
-                      <Textarea
-                        id="specialInstructions"
-                        placeholder="Contoh: Buat versi diet, tanpa gula, atau dengan bahan lokal..."
-                        value={specialInstructions}
-                        onChange={(e) => setSpecialInstructions(e.target.value)}
-                        disabled={generateRecipeMutation.isPending}
-                        rows={2}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                <ProductDetailsForm
+                  productName={formState.productName}
+                  productType={formState.productType}
+                  servings={formState.servings}
+                  targetPrice={formState.targetPrice}
+                  specialInstructions={formState.specialInstructions}
+                  isProductNameValid={isProductNameValid}
+                  isServingsValid={isServingsValid}
+                  isTargetPriceValid={isTargetPriceValid}
+                  disabled={isGenerating}
+                  onProductNameChange={(v) => updateFormField('productName', v)}
+                  onProductTypeChange={(v) => updateFormField('productType', v)}
+                  onServingsChange={(v) => updateFormField('servings', v)}
+                  onTargetPriceChange={(v) => updateFormField('targetPrice', v)}
+                  onSpecialInstructionsChange={(v) => updateFormField('specialInstructions', v)}
+                />
 
                 {/* Ingredients */}
                 <UnifiedIngredientInput
@@ -720,157 +259,43 @@ const AIRecipeGeneratorPage = () => {
                     current_stock: ing.current_stock ?? 0,
                     ...(ing.minimum_stock !== undefined && { minimum_stock: ing.minimum_stock })
                   }))}
-                  selectedIngredients={selectedIngredients}
-                  customIngredients={customIngredients}
-                  onSelectionChange={setSelectedIngredients}
-                  onCustomIngredientsChange={setCustomIngredients}
-                  productType={productType}
-                  disabled={generateRecipeMutation.isPending}
+                  selectedIngredients={formState.selectedIngredients}
+                  customIngredients={formState.customIngredients}
+                  onSelectionChange={(v) => updateFormField('selectedIngredients', v)}
+                  onCustomIngredientsChange={(v) => updateFormField('customIngredients', v)}
+                  productType={formState.productType}
+                  disabled={isGenerating}
                 />
 
                 {/* Action Buttons */}
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="space-y-4">
-                      {/* Generate Button */}
-                      <Button
-                        onClick={handleGenerate}
-                        disabled={generateRecipeMutation.isPending || !isFormValid}
-                        size="lg"
-                        className="w-full h-14 text-lg bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-                      >
-                        {generateRecipeMutation.isPending ? (
-                          <>
-                            <ChefHat className="h-5 w-5 mr-2 animate-spin" />
-                            AI Sedang Meracik...
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="h-5 w-5 mr-2" />
-                            Generate Resep dengan AI
-                          </>
-                        )}
-                      </Button>
-
-                      {/* Secondary Actions */}
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        <Button
-                          variant="outline"
-                          onClick={saveDraft}
-                          disabled={!hasUnsavedChanges}
-                          className="flex-1"
-                        >
-                          💾 Save Draft
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={handleNewRecipe}
-                          className="flex-1"
-                        >
-                          🔄 Reset Form
-                        </Button>
-                      </div>
-
-                      {!isFormValid && !generateRecipeMutation.isPending && (
-                        <div className="text-sm text-muted-foreground space-y-1 p-3 bg-muted/50 rounded-lg">
-                          <p className="font-medium text-orange-600">⚠️ Lengkapi form untuk generate:</p>
-                          {!isProductNameValid && <p>• Nama produk minimal 3 karakter</p>}
-                          {!isIngredientsValid && <p>• Minimal 3 bahan diperlukan</p>}
-                          {!isServingsValid && <p>• Jumlah porsi harus lebih dari 0</p>}
-                        </div>
-                      )}
-
-                      {isFormValid && !generateRecipeMutation.isPending && (
-                        <div className="text-sm text-green-600 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
-                          <p className="font-medium">✅ Form siap! Klik generate untuk membuat resep.</p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                <AIGeneratorActions
+                  isFormValid={isFormValid}
+                  isGenerating={isGenerating}
+                  isProductNameValid={isProductNameValid}
+                  isIngredientsValid={isIngredientsValid}
+                  isServingsValid={isServingsValid}
+                  hasUnsavedChanges={hasUnsavedChanges}
+                  onGenerate={handleGenerate}
+                  onSaveDraft={saveDraft}
+                  onReset={resetForm}
+                />
               </div>
             )}
 
             {/* Preview Panel */}
             <div className="space-y-6 lg:col-span-5 w-full">
-              {generateRecipeMutation.isPending && (
-                <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 animate-pulse">
-                  <CardContent className="py-16">
-                    <div className="text-center space-y-8">
-                      <div className="relative">
-                        <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mx-auto animate-bounce">
-                          <ChefHat className="h-12 w-12 text-white" />
-                        </div>
-                        <div className="absolute inset-0 h-24 w-24 rounded-full bg-gradient-to-br from-primary to-primary/80 mx-auto animate-ping opacity-20" />
-                      </div>
-
-                      <div className="space-y-3">
-                        <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                          ✨ AI sedang meracik resep...
-                        </h3>
-                        <p className="text-muted-foreground max-w-md mx-auto">
-                          Membuat resep profesional yang disesuaikan dengan kebutuhan bisnis Anda
-                        </p>
-                      </div>
-
-                      <div className="max-w-md mx-auto space-y-2">
-                        <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
-                          <div className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full" style={{
-                            animation: 'loading-progress 3s infinite',
-                            width: '0%'
-                          }} />
-                        </div>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>Memahami permintaan Anda</span>
-                          <span>Meracik resep unggulan</span>
-                        </div>
-                      </div>
-
-                      <style jsx>{`
-                        @keyframes loading-progress {
-                          0% { width: 0%; }
-                          50% { width: 70%; }
-                          100% { width: 100%; }
-                        }
-                      `}</style>
-
-                      <div className="text-xs text-muted-foreground bg-muted/30 px-4 py-2 rounded-full inline-block">
-                        ⏱️ Estimasi selesai dalam 15-30 detik
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {generatedRecipe && activeTab === 'preview' && (
-                <GeneratedRecipeDisplay
-                  recipe={generatedRecipe}
-                  onSave={handleSaveRecipe}
-                  onGenerateAgain={handleNewRecipe}
-                  availableIngredients={availableIngredients}
-                />
-              )}
-
-              {!generateRecipeMutation.isPending && !generatedRecipe && activeTab === 'preview' && (
-                <Card className="border-2 border-dashed border-primary/30">
-                  <CardContent className="py-16">
-                    <div className="text-center space-y-4">
-                      <div className="h-16 w-16 mx-auto bg-gradient-to-br from-primary/10 to-primary/20 rounded-2xl flex items-center justify-center">
-                        <ChefHat className="h-8 w-8 text-primary" />
-                      </div>
-                      <h3 className="text-lg font-semibold">Preview Resep AI</h3>
-                      <p className="text-muted-foreground">
-                        Isi form di sebelah kiri untuk melihat preview resep yang akan dihasilkan
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+              <AIGeneratorPreview
+                isGenerating={isGenerating}
+                generatedRecipe={generatedRecipe}
+                activeTab={activeTab}
+                availableIngredients={availableIngredients}
+                onSave={handleSaveRecipe}
+                onGenerateAgain={resetForm}
+              />
             </div>
           </div>
         </div>
       </div>
-
     </AppLayout>
   )
 }

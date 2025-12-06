@@ -1,20 +1,14 @@
 'use client'
 
 import {
-    Archive,
     CheckCircle,
-    Download,
-    Edit,
-    Eye,
-    MoreHorizontal,
     Package,
     RefreshCw,
-    Trash2,
-    Truck,
-    XCircle
+    Truck
 } from '@/components/icons'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
+import { SharedDataTable, type Column, type CustomAction } from '@/components/shared/SharedDataTable'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -27,25 +21,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { SkeletonText } from '@/components/ui/skeleton'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table'
 import { useCurrency } from '@/hooks/useCurrency'
-import { cn } from '@/lib/utils'
 
 import type { Order, OrderItem } from '@/components/orders/types'
 
@@ -62,7 +38,30 @@ interface OrderProps {
   onDeleteOrder?: (order: OrderWithItems) => void
   onUpdateStatus?: (orderId: string, status: string) => void
   onBulkAction?: (action: string, orderIds: string[]) => void
+  onRefresh?: () => void
 }
+
+// Status configurations
+const STATUS_CONFIG = {
+  'PENDING': { label: 'Pending', color: 'bg-muted text-muted-foreground' },
+  'CONFIRMED': { label: 'Dikonfirmasi', color: 'bg-blue-50 text-blue-700' },
+  'IN_PROGRESS': { label: 'Sedang Diproses', color: 'bg-yellow-50 text-yellow-700' },
+  'READY': { label: 'Siap Diantar', color: 'bg-green-50 text-green-700' },
+  'DELIVERED': { label: 'Dikirim', color: 'bg-green-50 text-green-700' },
+  'CANCELLED': { label: 'Dibatalkan', color: 'bg-destructive/10 text-destructive' }
+} as const
+
+const PAYMENT_STATUS_CONFIG = {
+  'UNPAID': { label: 'Belum Dibayar', color: 'bg-red-50 text-red-700' },
+  'PARTIAL': { label: 'Dibayar Sebagian', color: 'bg-yellow-50 text-yellow-700' },
+  'PAID': { label: 'Lunas', color: 'bg-green-50 text-green-700' }
+} as const
+
+const PRIORITY_CONFIG = {
+  'low': { label: 'Rendah', color: 'bg-secondary text-secondary-foreground' },
+  'normal': { label: 'Normal', color: 'bg-muted text-muted-foreground' },
+  'high': { label: 'Tinggi', color: 'bg-muted text-foreground' }
+} as const
 
 export const OrderComponent = ({
   orders,
@@ -71,64 +70,22 @@ export const OrderComponent = ({
   onEditOrder,
   onDeleteOrder,
   onUpdateStatus,
-  onBulkAction
+  onBulkAction,
+  onRefresh
 }: OrderProps) => {
   const { formatCurrency } = useCurrency()
-  const [selectedOrders, setSelectedOrders] = useState<string[]>([])
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [orderToDelete, setOrderToDelete] = useState<OrderWithItems | null>(null)
 
-  // Status configurations
-  const statusConfig = {
-    'PENDING': { label: 'Pending', color: 'bg-muted text-muted-foreground', textColor: 'text-muted-foreground' },
-    'CONFIRMED': { label: 'Dikonfirmasi', color: 'bg-blue-50 text-blue-700', textColor: 'text-blue-700' },
-    'IN_PROGRESS': { label: 'Sedang Diproses', color: 'bg-yellow-50 text-yellow-700', textColor: 'text-yellow-700' },
-    'READY': { label: 'Siap Diantar', color: 'bg-green-50 text-green-700', textColor: 'text-green-700' },
-    'DELIVERED': { label: 'Dikirim', color: 'bg-green-50 text-green-700', textColor: 'text-green-700' },
-    'CANCELLED': { label: 'Dibatalkan', color: 'bg-destructive/10 text-destructive', textColor: 'text-destructive' }
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '-'
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    })
   }
 
-  const paymentStatusConfig = {
-    'UNPAID': { label: 'Belum Dibayar', color: 'bg-red-50 text-red-700' },
-    'PARTIAL': { label: 'Dibayar Sebagian', color: 'bg-yellow-50 text-yellow-700' },
-    'PAID': { label: 'Lunas', color: 'bg-green-50 text-green-700' }
-  }
-
-  const priorityConfig = {
-    'low': { label: 'Rendah', color: 'bg-secondary text-secondary-foreground' },
-    'normal': { label: 'Normal', color: 'bg-muted text-muted-foreground' },
-    'high': { label: 'Tinggi', color: 'bg-muted text-foreground' }
-  }
-
-  // Selection handlers
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedOrders(orders.map(order => order['id']))
-    } else {
-      setSelectedOrders([])
-    }
-  }
-
-  const handleSelectOrder = (orderId: string, checked: boolean) => {
-    if (checked) {
-      setSelectedOrders(prev => [...prev, orderId])
-    } else {
-      setSelectedOrders(prev => prev.filter(id => id !== orderId))
-    }
-  }
-
-  const isAllSelected = orders.length > 0 && selectedOrders.length === orders.length
-  const isIndeterminate = selectedOrders.length > 0 && selectedOrders.length < orders.length
-
-  // Bulk actions
-  const handleBulkAction = (action: string) => {
-    if (onBulkAction && selectedOrders.length > 0) {
-      onBulkAction(action, selectedOrders)
-      setSelectedOrders([]) // Clear selection after action
-    }
-  }
-
-  // Delete handler
   const handleDeleteOrder = (order: OrderWithItems) => {
     setOrderToDelete(order)
     setShowDeleteDialog(true)
@@ -142,361 +99,196 @@ export const OrderComponent = ({
     setOrderToDelete(null)
   }
 
-  const getStatusBadge = (status: string | null) => {
-    const config = statusConfig[(status ?? 'PENDING') as keyof typeof statusConfig] ?? statusConfig.PENDING
-    return (
-      <Badge className={config.color}>
-        {config.label}
-      </Badge>
-    )
+  const handleBulkDelete = (items: OrderWithItems[]) => {
+    if (onBulkAction) {
+      onBulkAction('delete', items.map(item => item.id))
+    }
   }
 
-  const getPaymentBadge = (status: string | null) => {
-    const config = paymentStatusConfig[(status ?? 'UNPAID') as keyof typeof paymentStatusConfig] ?? paymentStatusConfig.UNPAID
-    return (
-      <Badge variant="outline" className={config.color}>
-        {config.label}
-      </Badge>
-    )
-  }
+  // Column definitions
+  const columns = useMemo((): Column<OrderWithItems & Record<string, unknown>>[] => [
+    {
+      key: 'order_no',
+      header: 'No. Pesanan',
+      sortable: true,
+      render: (_, item) => (
+        <div className="space-y-1">
+          <div className="font-medium">{item.order_no}</div>
+          <div className="text-sm text-muted-foreground">
+            {item.order_items?.length ?? 0} item • {item.order_items?.reduce((sum, i) => sum + i.quantity, 0) ?? 0} produk
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'customer_name',
+      header: 'Pelanggan',
+      sortable: true,
+      render: (_, item) => (
+        <div className="space-y-1">
+          <div className="font-medium">{item.customer_name}</div>
+          {item.customer_phone && (
+            <div className="text-sm text-muted-foreground">{item.customer_phone}</div>
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      filterable: true,
+      filterType: 'select',
+      filterOptions: Object.entries(STATUS_CONFIG).map(([value, config]) => ({
+        value,
+        label: config.label
+      })),
+      render: (value, item) => {
+        const status = (value as string) ?? 'PENDING'
+        const config = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.PENDING
+        return (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge className={config.color}>{config.label}</Badge>
+              {onUpdateStatus && (
+                <div className="flex gap-1">
+                  {status === 'PENDING' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                      onClick={(e) => { e.stopPropagation(); onUpdateStatus(item.id, 'CONFIRMED') }}
+                      title="Konfirmasi pesanan"
+                    >
+                      <CheckCircle className="h-3 w-3" />
+                    </Button>
+                  )}
+                  {status === 'CONFIRMED' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      onClick={(e) => { e.stopPropagation(); onUpdateStatus(item.id, 'READY') }}
+                      title="Tandai siap kirim"
+                    >
+                      <Package className="h-3 w-3" />
+                    </Button>
+                  )}
+                  {status === 'READY' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                      onClick={(e) => { e.stopPropagation(); onUpdateStatus(item.id, 'DELIVERED') }}
+                      title="Tandai dikirim"
+                    >
+                      <Truck className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+            {item.priority !== 'normal' && item.priority && (
+              <Badge variant="secondary" className={PRIORITY_CONFIG[item.priority as keyof typeof PRIORITY_CONFIG]?.color}>
+                {PRIORITY_CONFIG[item.priority as keyof typeof PRIORITY_CONFIG]?.label}
+              </Badge>
+            )}
+          </div>
+        )
+      }
+    },
+    {
+      key: 'order_date',
+      header: 'Tanggal',
+      sortable: true,
+      hideOnMobile: true,
+      render: (_, item) => (
+        <div className="space-y-1 text-sm">
+          <div>Pesan: {formatDate(item.order_date)}</div>
+          {item.delivery_date && (
+            <div className="text-muted-foreground">
+              Kirim: {formatDate(item.delivery_date)}
+            </div>
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'total_amount',
+      header: 'Pembayaran',
+      sortable: true,
+      render: (_, item) => {
+        const paymentStatus = (item.payment_status ?? 'UNPAID') as keyof typeof PAYMENT_STATUS_CONFIG
+        const paymentConfig = PAYMENT_STATUS_CONFIG[paymentStatus] ?? PAYMENT_STATUS_CONFIG.UNPAID
+        return (
+          <div className="space-y-2">
+            <div className="font-medium">{formatCurrency(item.total_amount ?? 0)}</div>
+            <Badge variant="outline" className={paymentConfig.color}>
+              {paymentConfig.label}
+            </Badge>
+            {(item.paid_amount ?? 0) > 0 && item.payment_status !== 'PAID' && (
+              <div className="text-xs text-muted-foreground">
+                Dibayar: {formatCurrency(item.paid_amount ?? 0)}
+              </div>
+            )}
+          </div>
+        )
+      }
+    }
+  ], [formatCurrency, onUpdateStatus])
 
-  const getPriorityBadge = (priority: string | null) => {
-    const config = priorityConfig[(priority ?? 'normal') as keyof typeof priorityConfig] ?? priorityConfig.normal
-    return (
-      <Badge variant="secondary" className={config.color}>
-        {config.label}
-      </Badge>
-    )
-  }
-
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) { return '-' }
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    })
-  }
-
-  // Using formatCurrency from useCurrency hook
-
-  if (loading) {
-    return (
-      <div className="border rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12" />
-              <TableHead>No. Pesanan</TableHead>
-              <TableHead>Pelanggan</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Tanggal</TableHead>
-              <TableHead>Pembayaran</TableHead>
-              <TableHead className="w-12" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[1, 2, 3, 4, 5].map((i) => (
-              <TableRow key={i}>
-                {[1, 2, 3, 4, 5, 6, 7].map((j) => (
-                  <TableCell key={j}>
-                    <SkeletonText className="h-4 w-full" />
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    )
-  }
+  // Custom actions for status updates
+  const customActions = useMemo((): CustomAction<OrderWithItems & Record<string, unknown>>[] => {
+    if (!onUpdateStatus) return []
+    return [
+      {
+        label: 'Konfirmasi Pesanan',
+        icon: CheckCircle,
+        onClick: (item) => onUpdateStatus(item.id, 'CONFIRMED'),
+        show: (item) => item.status === 'PENDING'
+      },
+      {
+        label: 'Mulai Proses',
+        icon: RefreshCw,
+        onClick: (item) => onUpdateStatus(item.id, 'IN_PROGRESS'),
+        show: (item) => item.status === 'CONFIRMED'
+      },
+      {
+        label: 'Siap Antar',
+        icon: Package,
+        onClick: (item) => onUpdateStatus(item.id, 'READY'),
+        show: (item) => item.status === 'IN_PROGRESS'
+      },
+      {
+        label: 'Kirim Pesanan',
+        icon: Truck,
+        onClick: (item) => onUpdateStatus(item.id, 'DELIVERED'),
+        show: (item) => item.status === 'READY'
+      }
+    ]
+  }, [onUpdateStatus])
 
   return (
     <>
-      {/* Bulk Actions Bar */}
-      {selectedOrders.length > 0 && (
-        <div className="flex items-center justify-between p-4 bg-muted border border-border/20 rounded-lg mb-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">
-              {selectedOrders.length} pesanan dipilih
-            </span>
-          </div>
-
-            <div className="flex items-center gap-2 flex-wrap">
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => handleBulkAction('confirm')}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Konfirmasi ({selectedOrders.length})
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleBulkAction('ready')}
-              >
-                <Package className="h-4 w-4 mr-2" />
-                Siap Kirim
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleBulkAction('shipped')}
-              >
-                <Truck className="h-4 w-4 mr-2" />
-                Dikirim
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleBulkAction('export')}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  Lainnya
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => handleBulkAction('archive')}>
-                  <Archive className="h-4 w-4 mr-2" />
-                  Arsipkan
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleBulkAction('cancel')}>
-                  <XCircle className="h-4 w-4 mr-2" />
-                  Batalkan
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => handleBulkAction('delete')}
-                  className="text-red-600"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Hapus
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedOrders([])}
-            >
-              Batal
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* Data Table */}
-      <div className="border rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader className="bg-muted">
-            <TableRow>
-              <TableHead className="w-12">
-                <Checkbox
-                  checked={isAllSelected}
-                  onCheckedChange={handleSelectAll}
-                  ref={(el) => {
-                    if (el) {
-                      (el as HTMLInputElement).indeterminate = isIndeterminate;
-                    }
-                  }}
-                />
-              </TableHead>
-              <TableHead>No. Pesanan</TableHead>
-              <TableHead>Pelanggan</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Tanggal</TableHead>
-              <TableHead>Pembayaran</TableHead>
-              <TableHead className="w-12">Aksi</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {orders.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
-                  <Package className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>Tidak ada pesanan</p>
-                  <p className="text-sm">Belum ada pesanan yang dibuat</p>
-                </TableCell>
-              </TableRow>
-            ) : (
-              orders.map((order) => (
-                <TableRow
-                  key={order['id']}
-                  className={cn(selectedOrders.includes(order['id']) && "bg-muted/50")}
-                >
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedOrders.includes(order['id'])}
-                      onCheckedChange={(checked) => handleSelectOrder(order['id'], Boolean(checked))}
-                    />
-                  </TableCell>
-
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="font-medium">{order['order_no']}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {order.order_items?.length ?? 0} item • {order.order_items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0} produk
-                      </div>
-                    </div>
-                  </TableCell>
-
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="font-medium">{order['customer_name']}</div>
-                      {order.customer_phone && (
-                        <div className="text-sm text-muted-foreground">{order.customer_phone}</div>
-                      )}
-                    </div>
-                  </TableCell>
-
-                   <TableCell>
-                     <div className="space-y-2">
-                       <div className="flex items-center gap-2">
-                         {getStatusBadge(order['status'])}
-                         <div className="flex gap-1">
-                           {order['status'] === 'PENDING' && (
-                             <Button
-                               variant="ghost"
-                               size="sm"
-                               className="h-6 w-6 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                               onClick={() => onUpdateStatus?.(order['id'], 'CONFIRMED')}
-                               title="Konfirmasi pesanan"
-                             >
-                               <CheckCircle className="h-3 w-3" />
-                             </Button>
-                           )}
-                           {order['status'] === 'CONFIRMED' && (
-                             <Button
-                               variant="ghost"
-                               size="sm"
-                               className="h-6 w-6 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                               onClick={() => onUpdateStatus?.(order['id'], 'READY')}
-                               title="Tandai siap kirim"
-                             >
-                               <Package className="h-3 w-3" />
-                             </Button>
-                           )}
-                           {order['status'] === 'READY' && (
-                             <Button
-                               variant="ghost"
-                               size="sm"
-                               className="h-6 w-6 p-0 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
-                               onClick={() => onUpdateStatus?.(order['id'], 'SHIPPED')}
-                               title="Tandai dikirim"
-                             >
-                               <Truck className="h-3 w-3" />
-                             </Button>
-                           )}
-                         </div>
-                       </div>
-                       {order.priority !== 'normal' && getPriorityBadge(order.priority)}
-                     </div>
-                   </TableCell>
-
-                  <TableCell>
-                    <div className="space-y-1 text-sm">
-                      <div>Pesan: {formatDate(order.order_date)}</div>
-                      {order.delivery_date && (
-                        <div className="text-muted-foreground">
-                          Kirim: {formatDate(order.delivery_date)}
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-
-                  <TableCell>
-                    <div className="space-y-2">
-                      <div className="font-medium">{formatCurrency(order.total_amount ?? 0)}</div>
-                      {getPaymentBadge(order.payment_status)}
-                      {(order.paid_amount ?? 0) > 0 && order.payment_status !== 'PAID' && (
-                        <div className="text-xs text-muted-foreground">
-                          Dibayar: {formatCurrency(order.paid_amount ?? 0)}
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onViewOrder(order)}>
-                          <Eye className="h-4 w-4 mr-2" />
-                          Lihat Detail
-                        </DropdownMenuItem>
-
-                        <DropdownMenuItem onClick={() => onEditOrder(order)}>
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit
-                        </DropdownMenuItem>
-
-
-                        <DropdownMenuSeparator />
-
-                        {order['status'] === 'PENDING' && onUpdateStatus && (
-                          <DropdownMenuItem onClick={() => onUpdateStatus(order['id'], 'CONFIRMED')}>
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Konfirmasi Pesanan
-                          </DropdownMenuItem>
-                        )}
-
-                        {order['status'] === 'CONFIRMED' && onUpdateStatus && (
-                          <DropdownMenuItem onClick={() => onUpdateStatus(order['id'], 'IN_PROGRESS')}>
-                            <RefreshCw className="h-4 w-4 mr-2" />
-                            Mulai Proses
-                          </DropdownMenuItem>
-                        )}
-
-                        {order['status'] === 'IN_PROGRESS' && onUpdateStatus && (
-                          <DropdownMenuItem onClick={() => onUpdateStatus(order['id'], 'READY')}>
-                            <Package className="h-4 w-4 mr-2" />
-                            Siap Antar
-                          </DropdownMenuItem>
-                        )}
-
-                        {order['status'] === 'READY' && onUpdateStatus && (
-                          <DropdownMenuItem onClick={() => onUpdateStatus(order['id'], 'DELIVERED')}>
-                            <Truck className="h-4 w-4 mr-2" />
-                            Kirim Pesanan
-                          </DropdownMenuItem>
-                        )}
-
-                        <DropdownMenuSeparator />
-
-                        {onDeleteOrder && (
-                          <DropdownMenuItem
-                            onClick={() => handleDeleteOrder(order)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Hapus
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <SharedDataTable<OrderWithItems & Record<string, unknown>>
+        data={orders as (OrderWithItems & Record<string, unknown>)[]}
+        columns={columns}
+        loading={loading}
+        onView={onViewOrder}
+        onEdit={onEditOrder}
+        {...(onDeleteOrder && { onDelete: handleDeleteOrder })}
+        {...(onBulkAction && { onBulkDelete: handleBulkDelete })}
+        customActions={customActions}
+        searchPlaceholder="Cari pesanan, pelanggan..."
+        emptyMessage="Tidak ada pesanan"
+        emptyDescription="Belum ada pesanan yang dibuat"
+        exportable
+        refreshable={!!onRefresh}
+        {...(onRefresh && { onRefresh })}
+        enableBulkActions={!!onBulkAction}
+        enablePagination
+        pageSizeOptions={[10, 25, 50, 100]}
+        initialPageSize={10}
+      />
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
@@ -504,7 +296,7 @@ export const OrderComponent = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Hapus Pesanan</AlertDialogTitle>
             <AlertDialogDescription>
-              Apakah Anda yakin ingin menghapus pesanan &#34;{orderToDelete?.order_no}&#34;? Tindakan ini tidak dapat dibatalkan.
+              Apakah Anda yakin ingin menghapus pesanan &quot;{orderToDelete?.order_no}&quot;? Tindakan ini tidak dapat dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -518,4 +310,3 @@ export const OrderComponent = ({
     </>
   )
 }
-

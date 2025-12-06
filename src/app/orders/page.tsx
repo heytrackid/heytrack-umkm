@@ -1,7 +1,7 @@
 'use client'
 
 import { AppLayout } from '@/components/layout/app-layout'
-import { OrdersPage as OrdersPageComponent } from '@/modules/orders/components/OrdersPage/index'
+import { OrdersPage as OrdersPageComponent } from '@/modules/orders/components/OrdersPage'
 
 const OrdersPage = () => (
   <AppLayout>

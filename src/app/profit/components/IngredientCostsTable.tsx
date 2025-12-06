@@ -1,49 +1,74 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+'use client'
+
+import { SharedDataTable, type Column } from '@/components/shared/SharedDataTable'
+import { useMemo } from 'react'
 
 import type { ProfitData } from '@/app/profit/components/types'
 
+type IngredientCost = ProfitData['ingredients'][number]
 
 interface IngredientCostsTableProps {
   ingredients: ProfitData['ingredients']
   formatCurrency: (amount: number) => string
+  loading?: boolean
 }
 
 export const IngredientCostsTable = ({
   ingredients,
-  formatCurrency
-}: IngredientCostsTableProps) => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Biaya Bahan Baku (WAC)</CardTitle>
-      <CardDescription>
-        Rincian biaya bahan baku dengan metode Weighted Average Cost
-      </CardDescription>
-    </CardHeader>
-    <CardContent>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b">
-              <th className="text-left py-3 px-4 font-medium">Bahan Baku</th>
-              <th className="text-right py-3 px-4 font-medium">Jumlah Terpakai</th>
-              <th className="text-right py-3 px-4 font-medium">Harga WAC</th>
-              <th className="text-right py-3 px-4 font-medium">Total Biaya</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(ingredients || []).map((ingredient, index) => (
-              <tr key={index} className="border-b hover:bg-muted/50">
-                <td className="py-3 px-4">{ingredient['ingredient_name']}</td>
-                <td className="py-3 px-4 text-right">{ingredient.quantity_used.toFixed(2)}</td>
-                <td className="py-3 px-4 text-right">{formatCurrency(ingredient.wac_cost)}</td>
-                <td className="py-3 px-4 text-right font-medium">
-                  {formatCurrency(ingredient.total_cost)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </CardContent>
-  </Card>
-)
+  formatCurrency,
+  loading = false
+}: IngredientCostsTableProps) => {
+  const columns = useMemo((): Column<IngredientCost & Record<string, unknown>>[] => [
+    {
+      key: 'ingredient_name',
+      header: 'Bahan Baku',
+      sortable: true,
+      render: (value) => <span className="font-medium">{String(value)}</span>
+    },
+    {
+      key: 'quantity_used',
+      header: 'Jumlah Terpakai',
+      sortable: true,
+      className: 'text-right',
+      render: (value) => (
+        <div className="text-right">{Number(value).toFixed(2)}</div>
+      )
+    },
+    {
+      key: 'wac_cost',
+      header: 'Harga WAC',
+      sortable: true,
+      className: 'text-right',
+      render: (value) => (
+        <div className="text-right">{formatCurrency(Number(value))}</div>
+      )
+    },
+    {
+      key: 'total_cost',
+      header: 'Total Biaya',
+      sortable: true,
+      className: 'text-right',
+      render: (value) => (
+        <div className="text-right font-medium">{formatCurrency(Number(value))}</div>
+      )
+    }
+  ], [formatCurrency])
+
+  return (
+    <SharedDataTable<IngredientCost & Record<string, unknown>>
+      data={(ingredients || []) as (IngredientCost & Record<string, unknown>)[]}
+      columns={columns}
+      title="Biaya Bahan Baku (WAC)"
+      description="Rincian biaya bahan baku dengan metode Weighted Average Cost"
+      loading={loading}
+      emptyMessage="Belum ada data biaya bahan baku"
+      emptyDescription="Data biaya bahan baku akan muncul setelah ada transaksi"
+      searchPlaceholder="Cari bahan baku..."
+      enablePagination
+      pageSizeOptions={[10, 25, 50]}
+      initialPageSize={10}
+      exportable
+      compact
+    />
+  )
+}

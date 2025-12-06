@@ -43,12 +43,24 @@ export function useOrders(options?: { page?: number; limit?: number; offset?: nu
 export function useOrdersList(search?: string) {
   return useQuery({
     queryKey: ['orders-list', search],
-    queryFn: (): Promise<Order[]> => {
+    queryFn: async (): Promise<Order[]> => {
       const params = new URLSearchParams()
       params.set('limit', '1000')
       if (search) params.set('search', search)
 
-      return fetchApi<Order[]>(`/api/orders?${params}`)
+      const response = await fetchApi<{ data: Order[] } | Order[]>(`/api/orders?${params}`)
+      
+      // Handle both array and object response formats
+      if (Array.isArray(response)) {
+        return response
+      }
+      
+      // If response is an object with data property, extract it
+      if (response && typeof response === 'object' && 'data' in response) {
+        return response.data
+      }
+      
+      return []
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
