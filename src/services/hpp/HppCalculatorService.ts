@@ -69,6 +69,7 @@ export class HppCalculatorService extends BaseService {
                 name,
                 price_per_unit,
                 weighted_average_cost,
+                waste_factor,
                 unit
               )
             )
@@ -109,13 +110,23 @@ export class HppCalculatorService extends BaseService {
         }
         
         // Type assertion after validation
-        const validIngredient = ingredient as { id: string; name: string; price_per_unit: number | null; weighted_average_cost: number | null; unit: string }
+        const validIngredient = ingredient as { 
+          id: string
+          name: string
+          price_per_unit: number | null
+          weighted_average_cost: number | null
+          unit: string
+          waste_factor?: number | null
+        }
 
         const quantity = Number(ri.quantity ?? 0)
         // ALWAYS use current price for material cost (not WAC)
         // WAC adjustment is calculated separately
         const unit_price = Number(validIngredient.price_per_unit ?? 0)
-        const total_cost = quantity * unit_price
+        
+        // Apply waste factor (default 1.0 = no waste, 1.05 = 5% waste)
+        const waste_factor = Number(validIngredient.waste_factor ?? 1.0)
+        const total_cost = quantity * unit_price * waste_factor
 
         material_breakdown.push({
           ingredient_id: validIngredient['id'],

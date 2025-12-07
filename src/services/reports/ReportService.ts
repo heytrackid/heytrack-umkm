@@ -58,7 +58,9 @@ export interface ProfitReport {
     totalOperatingExpenses: number
     grossProfit: number
     netProfit: number
-    profitMargin: number
+    grossMargin: number
+    netMargin: number
+    profitMargin: number // Deprecated: use netMargin instead
     has_loss_making_products?: boolean
     loss_making_products_count?: number
     has_unrealistic_margins?: boolean
@@ -326,11 +328,13 @@ export class ReportService extends BaseService {
 
       const grossProfit = totalRevenue - totalCOGS
       const netProfit = grossProfit - totalOperatingExpenses
-      const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0
+      const grossMargin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0
+      const netMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0
+      const profitMargin = netMargin // Keep for backward compatibility
 
       // Business validation
       const lossMakingProductsCount = productProfitability.filter(p => p.is_loss_making).length
-      const unrealisticMargin = profitMargin > 80 || profitMargin < -50 // Flag unrealistic margins
+      const unrealisticMargin = grossMargin > 90 || grossMargin < -50 || netMargin > 50 || netMargin < -50
 
       // Calculate actual trends from historical data
       const previousPeriodStart = new Date(start)
@@ -400,6 +404,8 @@ export class ReportService extends BaseService {
         totalOperatingExpenses,
         grossProfit,
         netProfit,
+        grossMargin,
+        netMargin,
         profitMargin,
         lossMakingProductsCount,
         unrealisticMargin,
@@ -425,7 +431,9 @@ export class ReportService extends BaseService {
           totalOperatingExpenses,
           grossProfit,
           netProfit,
-          profitMargin,
+          grossMargin,
+          netMargin,
+          profitMargin, // Deprecated: use netMargin instead
           has_loss_making_products: lossMakingProductsCount > 0,
           loss_making_products_count: lossMakingProductsCount,
           has_unrealistic_margins: unrealisticMargin
@@ -455,6 +463,8 @@ export class ReportService extends BaseService {
     totalOperatingExpenses: number
     grossProfit: number
     netProfit: number
+    grossMargin: number
+    netMargin: number
     profitMargin: number
     lossMakingProductsCount: number
     unrealisticMargin: boolean
@@ -505,37 +515,72 @@ export class ReportService extends BaseService {
       })
     }
 
-    // Profit margin analysis (based on NET profit, not gross)
+    // Gross margin analysis (COGS efficiency)
     if (data.totalRevenue > 0) {
-      if (data.profitMargin < 5) {
+      if (data.grossMargin < 30) {
         insights.push({
           type: 'danger',
-          title: 'Margin Keuntungan Sangat Rendah',
-          description: `Margin keuntungan bersih Anda sebesar ${data.profitMargin.toFixed(1)}% sangat rendah dan tidak sustainable.`,
-          recommendation: 'Tinjau ulang harga jual, optimalkan biaya bahan baku, dan kurangi biaya operasional.',
+          title: 'Margin Kotor Sangat Rendah',
+          description: `Margin kotor ${data.grossMargin.toFixed(1)}% sangat rendah. Standar industri F&B: 60-70%.`,
+          recommendation: 'Segera naikkan harga jual atau kurangi biaya bahan baku secara drastis.',
           impact: 'high'
         })
-      } else if (data.profitMargin < 15) {
+      } else if (data.grossMargin < 50) {
         insights.push({
           type: 'warning',
-          title: 'Margin Keuntungan Rendah',
-          description: `Margin keuntungan bersih Anda sebesar ${data.profitMargin.toFixed(1)}% berada di bawah standar industri (minimal 15-25%).`,
-          recommendation: 'Tinjau ulang harga jual atau optimalkan biaya bahan baku dan operasional.',
+          title: 'Margin Kotor Rendah',
+          description: `Margin kotor ${data.grossMargin.toFixed(1)}% di bawah standar industri F&B (60-70%).`,
+          recommendation: 'Optimalkan harga jual atau negosiasikan harga bahan baku dengan supplier.',
           impact: 'high'
         })
-      } else if (data.profitMargin > 50) {
-        insights.push({
-          type: 'warning',
-          title: 'Margin Keuntungan Sangat Tinggi',
-          description: `Margin keuntungan ${data.profitMargin.toFixed(1)}% sangat tinggi. Pastikan tidak mempengaruhi volume penjualan.`,
-          recommendation: 'Evaluasi apakah harga masih kompetitif di pasar.',
-          impact: 'medium'
-        })
-      } else if (data.profitMargin >= 15 && data.profitMargin <= 50) {
+      } else if (data.grossMargin >= 60 && data.grossMargin <= 75) {
         insights.push({
           type: 'success',
-          title: 'Margin Keuntungan Optimal',
-          description: `Margin keuntungan ${data.profitMargin.toFixed(1)}% dalam kisaran yang sehat.`,
+          title: 'Margin Kotor Optimal',
+          description: `Margin kotor ${data.grossMargin.toFixed(1)}% sesuai standar industri F&B (60-70%).`,
+          impact: 'low'
+        })
+      } else if (data.grossMargin > 75) {
+        insights.push({
+          type: 'warning',
+          title: 'Margin Kotor Sangat Tinggi',
+          description: `Margin kotor ${data.grossMargin.toFixed(1)}% sangat tinggi. Pastikan harga tetap kompetitif.`,
+          recommendation: 'Evaluasi apakah harga jual masih sesuai dengan pasar.',
+          impact: 'medium'
+        })
+      }
+    }
+
+    // Net margin analysis (overall profitability)
+    if (data.totalRevenue > 0) {
+      if (data.netMargin < 5) {
+        insights.push({
+          type: 'danger',
+          title: 'Margin Bersih Sangat Rendah',
+          description: `Margin bersih ${data.netMargin.toFixed(1)}% sangat rendah dan tidak sustainable. Standar industri F&B: 10-20%.`,
+          recommendation: 'Kurangi biaya operasional dan tingkatkan efisiensi bisnis.',
+          impact: 'high'
+        })
+      } else if (data.netMargin < 10) {
+        insights.push({
+          type: 'warning',
+          title: 'Margin Bersih Rendah',
+          description: `Margin bersih ${data.netMargin.toFixed(1)}% di bawah standar industri F&B (10-20%).`,
+          recommendation: 'Evaluasi efisiensi operasional dan cari peluang penghematan biaya.',
+          impact: 'high'
+        })
+      } else if (data.netMargin >= 10 && data.netMargin <= 25) {
+        insights.push({
+          type: 'success',
+          title: 'Margin Bersih Sehat',
+          description: `Margin bersih ${data.netMargin.toFixed(1)}% dalam kisaran yang sehat untuk bisnis F&B.`,
+          impact: 'low'
+        })
+      } else if (data.netMargin > 25) {
+        insights.push({
+          type: 'success',
+          title: 'Margin Bersih Sangat Baik',
+          description: `Margin bersih ${data.netMargin.toFixed(1)}% sangat baik. Bisnis Anda sangat profitable!`,
           impact: 'low'
         })
       }

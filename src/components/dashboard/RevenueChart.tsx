@@ -1,7 +1,6 @@
 'use client'
 
-import { eachDayOfInterval, format, subDays } from 'date-fns'
-import { id } from 'date-fns/locale'
+import { subDays } from 'date-fns'
 import { useMemo, useState } from 'react'
 import type { DateRange } from 'react-day-picker'
 
@@ -26,21 +25,6 @@ interface RevenueChartProps {
   className?: string
 }
 
-// Generate sample data for demo
-const generateSampleData = (dateRange: DateRange | undefined): RevenueData[] => {
-  const from = dateRange?.from ?? subDays(new Date(), 30)
-  const to = dateRange?.to ?? new Date()
-  
-  const days = eachDayOfInterval({ start: from, end: to })
-  
-  return days.map((day) => ({
-    date: format(day, 'dd MMM', { locale: id }),
-    revenue: Math.floor(Math.random() * 5000000) + 1000000,
-    orders: Math.floor(Math.random() * 50) + 10,
-    expenses: Math.floor(Math.random() * 2000000) + 500000,
-  }))
-}
-
 export function RevenueChart({ data, className }: RevenueChartProps) {
   const { formatCurrency } = useCurrency()
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -48,11 +32,10 @@ export function RevenueChart({ data, className }: RevenueChartProps) {
     to: new Date(),
   })
 
-  // Use provided data or generate sample
+  // Use provided data only - no mock data
   const chartData = useMemo(() => {
-    if (data && data.length > 0) return data
-    return generateSampleData(dateRange)
-  }, [data, dateRange])
+    return data && data.length > 0 ? data : []
+  }, [data])
 
 
 
@@ -79,13 +62,19 @@ export function RevenueChart({ data, className }: RevenueChartProps) {
     return { totalRevenue, totalOrders, totalExpenses }
   }, [chartData])
 
+  const hasData = chartData.length > 0
+
   return (
     <Card className={className}>
       <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2">
         <div>
           <CardTitle className="text-base sm:text-lg">Tren Pendapatan</CardTitle>
           <CardDescription className="text-xs sm:text-sm">
-            Total: {formatCurrency(totals.totalRevenue)} dari {totals.totalOrders} pesanan
+            {hasData ? (
+              <>Total: {formatCurrency(totals.totalRevenue)} dari {totals.totalOrders} pesanan</>
+            ) : (
+              <>Belum ada data pendapatan</>
+            )}
           </CardDescription>
         </div>
         <DateRangePicker
@@ -95,6 +84,14 @@ export function RevenueChart({ data, className }: RevenueChartProps) {
         />
       </CardHeader>
       <CardContent className="p-2 sm:p-6">
+        {!hasData ? (
+          <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+            <div className="text-center">
+              <p className="text-sm">Belum ada data untuk ditampilkan</p>
+              <p className="text-xs mt-1">Buat order pertama Anda untuk melihat tren pendapatan</p>
+            </div>
+          </div>
+        ) : (
         <Tabs defaultValue="revenue" className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-4">
             <TabsTrigger value="revenue" className="text-xs sm:text-sm">Pendapatan</TabsTrigger>
@@ -152,6 +149,7 @@ export function RevenueChart({ data, className }: RevenueChartProps) {
             </ChartContainer>
           </TabsContent>
         </Tabs>
+        )}
       </CardContent>
     </Card>
   )
@@ -160,8 +158,7 @@ export function RevenueChart({ data, className }: RevenueChartProps) {
 // Compact version for widgets
 export function RevenueChartCompact({ data, className }: RevenueChartProps) {
   const chartData = useMemo(() => {
-    if (data && data.length > 0) return data
-    return generateSampleData({ from: subDays(new Date(), 7), to: new Date() })
+    return data && data.length > 0 ? data : []
   }, [data])
 
   const chartConfig = {
@@ -171,22 +168,30 @@ export function RevenueChartCompact({ data, className }: RevenueChartProps) {
     },
   }
 
+  const hasData = chartData.length > 0
+
   return (
     <div className={className}>
-      <ChartContainer config={chartConfig} className="w-full" style={{ height: 200 }}>
-        <AreaChart data={chartData} margin={{ left: 0, right: 0, top: 10, bottom: 0 }}>
-          <defs>
-            <linearGradient id="fillRevenueCompact" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={chartConfig.revenue.color} stopOpacity={0.8} />
-              <stop offset="95%" stopColor={chartConfig.revenue.color} stopOpacity={0.1} />
-            </linearGradient>
-          </defs>
-          <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
-          <YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={12} tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : v} />
-          <ChartTooltip content={<ChartTooltipContent />} />
-          <Area type="monotone" dataKey="revenue" stroke={chartConfig.revenue.color} fill="url(#fillRevenueCompact)" />
-        </AreaChart>
-      </ChartContainer>
+      {!hasData ? (
+        <div className="flex items-center justify-center h-[200px] text-muted-foreground">
+          <p className="text-xs">Belum ada data</p>
+        </div>
+      ) : (
+        <ChartContainer config={chartConfig} className="w-full" style={{ height: 200 }}>
+          <AreaChart data={chartData} margin={{ left: 0, right: 0, top: 10, bottom: 0 }}>
+            <defs>
+              <linearGradient id="fillRevenueCompact" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={chartConfig.revenue.color} stopOpacity={0.8} />
+                <stop offset="95%" stopColor={chartConfig.revenue.color} stopOpacity={0.1} />
+              </linearGradient>
+            </defs>
+            <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+            <YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={12} tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : v} />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Area type="monotone" dataKey="revenue" stroke={chartConfig.revenue.color} fill="url(#fillRevenueCompact)" />
+          </AreaChart>
+        </ChartContainer>
+      )}
     </div>
   )
 }

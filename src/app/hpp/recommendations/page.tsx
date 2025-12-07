@@ -261,51 +261,16 @@ const HppRecommendationsPage = (): JSX.Element => {
           })()}
         </div>
 
-        {/* Sample Recommendations */}
+        {/* Empty State */}
         {recommendations.length === 0 && !loading && (
           <Card>
-            <CardHeader>
-              <CardTitle>Sample Recommendations</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-sm text-muted-foreground mb-4">
-                Berikut adalah contoh jenis rekomendasi yang akan dihasilkan sistem:
-              </div>
-
-              <div className="space-y-3">
-                <div className="p-4 border rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-semibold">Supplier Cost Reduction</span>
-                    <Badge variant="default">High</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Bahan baku X memiliki harga 15% lebih murah di supplier Y. Potensi penghematan: Rp 2.5 juta per bulan.
-                  </p>
-                </div>
-
-                <div className="p-4 border rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Lightbulb className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-semibold">Recipe Optimization</span>
-                    <Badge variant="secondary">Medium</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Mengurangi jumlah bahan Z sebesar 10% tidak mempengaruhi kualitas akhir. Potensi penghematan: Rp 800 ribu per bulan.
-                  </p>
-                </div>
-
-                <div className="p-4 border rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-semibold">Bulk Purchasing</span>
-                    <Badge variant="outline">Low</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Pembelian bahan W dalam jumlah besar memberikan diskon 8%. Potensi penghematan: Rp 1.2 juta per bulan.
-                  </p>
-                </div>
-              </div>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <Lightbulb className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Belum Ada Rekomendasi</h3>
+              <p className="text-sm text-muted-foreground text-center max-w-md">
+                Sistem akan menganalisis data HPP, supplier, dan resep Anda untuk memberikan rekomendasi optimasi biaya.
+                Pastikan Anda sudah memiliki data yang cukup.
+              </p>
             </CardContent>
           </Card>
         )}

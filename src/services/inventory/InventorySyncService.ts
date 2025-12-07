@@ -501,6 +501,119 @@ export class InventorySyncService extends BaseService {
   }
 
   /**
+   * Deduct stock for order fulfillment
+   * Called when order status changes to DELIVERED
+   */
+  async deductStockForOrder(
+    recipeId: string,
+    orderId: string,
+    quantity: number
+  ): Promise<StockUpdateResult[]> {
+    // Get recipe ingredients
+    const { data: recipeIngredients, error } = await this.context.supabase
+      .from('recipe_ingredients')
+      .select(`
+        ingredient_id,
+        quantity,
+        ingredients:ingredient_id (name)
+      `)
+      .eq('recipe_id', recipeId)
+      .eq('user_id', this.context.userId)
+
+    if (error || !recipeIngredients) {
+      throw new Error(`Failed to fetch recipe ingredients: ${error?.message}`)
+    }
+
+    // Get recipe name
+    const { data: recipe } = await this.context.supabase
+      .from('recipes')
+      .select('name')
+      .eq('id', recipeId)
+      .single()
+
+    const results: StockUpdateResult[] = []
+
+    for (const ri of recipeIngredients) {
+      try {
+        const ingredientData = ri.ingredients as { name: string } | null
+        const result = await this.deductStockForProduction(
+          ri.ingredient_id,
+          Number(ri.quantity) * quantity,
+          orderId,
+          `Order - ${recipe?.name ?? ingredientData?.name}`
+        )
+        results.push(result)
+      } catch (err) {
+        this.logger.error({ error: err, ingredientId: ri.ingredient_id }, 'Failed to deduct stock for order')
+        // Continue with other ingredients
+      }
+    }
+
+    return results
+  }
+
+  /**
+   * Restore stock when order is cancelled after being delivered
+   */
+  async restoreStockForCancelledOrder(
+    recipeId: string,
+    orderId: string,
+    quantity: number
+  ): Promise<StockUpdateResult[]> {
+    // Get recipe ingredients
+    const { data: recipeIngredients, error } = await this.context.supabase
+      .from('recipe_ingredients')
+      .select(`
+        ingredient_id,
+        quantity,
+        ingredients:ingredient_id (name)
+      `)
+      .eq('recipe_id', recipeId)
+      .eq('user_id', this.context.userId)
+
+    if (error || !recipeIngredients) {
+      throw new Error(`Failed to fetch recipe ingredients: ${error?.message}`)
+    }
+
+    // Get recipe name
+    const { data: recipe } = await this.context.supabase
+      .from('recipes')
+      .select('name')
+      .eq('id', recipeId)
+      .single()
+
+    const results: StockUpdateResult[] = []
+
+    for (const ri of recipeIngredients) {
+      try {
+        const ingredientData = ri.ingredients as { name: string } | null
+        const quantityToRestore = Number(ri.quantity) * quantity
+        
+        // Use adjustStock to add back the quantity
+        const result = await this.adjustStock(
+          ri.ingredient_id,
+          quantityToRestore, // Positive = add back
+          `Order cancelled: ${recipe?.name ?? orderId} (restored ${quantityToRestore} units)`,
+          'ADJUSTMENT'
+        )
+        results.push(result)
+        
+        this.logger.info({
+          ingredientId: ri.ingredient_id,
+          ingredientName: ingredientData?.name,
+          quantityRestored: quantityToRestore,
+          orderId
+        }, 'Stock restored for cancelled order')
+      } catch (err) {
+        this.logger.error({ error: err, ingredientId: ri.ingredient_id }, 'Failed to restore stock for cancelled order')
+        // Continue with other ingredients
+      }
+    }
+
+    return results
+  }
+
+  /**
    * Restore stock when a completed production batch is cancelled
    * This reverses the deductions made during production completion
    */

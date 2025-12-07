@@ -279,6 +279,27 @@ export const POST = createApiRoute(
       }
     }
 
+    // Deduct inventory if order is DELIVERED
+    if (orderStatus === 'DELIVERED' && body.items && body.items.length > 0) {
+      try {
+        const { InventorySyncService } = await import('@/services/inventory/InventorySyncService')
+        const inventoryService = new InventorySyncService({ userId: user.id, supabase: typedSupabase })
+        
+        for (const item of body.items) {
+          await inventoryService.deductStockForOrder(
+            item.recipe_id,
+            createdOrder.id,
+            item.quantity
+          )
+        }
+        
+        apiLogger.info({ orderId: createdOrder.id, itemsCount: body.items.length }, 'Inventory deducted for DELIVERED order')
+      } catch (inventoryError) {
+        // Log but don't fail the order creation
+        apiLogger.error({ error: inventoryError, orderId: createdOrder.id }, 'Failed to deduct inventory for order')
+      }
+    }
+
     // Update customer preferences for demand forecasting
     if (body.customer_id && body.items && body.items.length > 0) {
       try {
@@ -348,6 +369,18 @@ export const PUT = createApiRoute(
     const newStatus = body?.status as OrderStatus | undefined
     const statusChanged = newStatus && newStatus !== currentOrder.status
 
+    // Validate status transition if status is changing
+    if (statusChanged && currentOrder.status) {
+      const { VALID_ORDER_STATUS_TRANSITIONS } = await import('@/lib/shared/constants')
+      const validTransitions = VALID_ORDER_STATUS_TRANSITIONS[currentOrder.status] || []
+      if (!validTransitions.includes(newStatus)) {
+        return handleAPIError(
+          new Error(`Invalid status transition from ${currentOrder.status} to ${newStatus}. Allowed transitions: ${validTransitions.join(', ') || 'none'}`),
+          'PUT /api/orders'
+        )
+      }
+    }
+
     // Handle financial record sync based on status change
     if (statusChanged) {
       // Import FinancialSyncService dynamically to avoid circular deps
@@ -383,6 +416,60 @@ export const PUT = createApiRoute(
           apiLogger.info({ orderId }, 'Income record reversed on order cancellation')
         } catch (err) {
           apiLogger.error({ error: err, orderId }, 'Failed to reverse income record on cancellation')
+        }
+      }
+
+      // Deduct inventory if changing TO DELIVERED
+      if (newStatus === 'DELIVERED' && currentOrder.status !== 'DELIVERED') {
+        try {
+          const { InventorySyncService } = await import('@/services/inventory/InventorySyncService')
+          const inventoryService = new InventorySyncService({ userId: user.id, supabase: typedSupabase })
+          
+          // Get order items to deduct
+          const { data: orderItems } = await typedSupabase
+            .from('order_items')
+            .select('recipe_id, quantity')
+            .eq('order_id', orderId)
+          
+          if (orderItems && orderItems.length > 0) {
+            for (const item of orderItems) {
+              await inventoryService.deductStockForOrder(
+                item.recipe_id,
+                orderId,
+                item.quantity
+              )
+            }
+            apiLogger.info({ orderId, itemsCount: orderItems.length }, 'Inventory deducted on status change to DELIVERED')
+          }
+        } catch (inventoryError) {
+          apiLogger.error({ error: inventoryError, orderId }, 'Failed to deduct inventory on DELIVERED')
+        }
+      }
+
+      // Restore inventory if changing FROM DELIVERED to CANCELLED
+      if (newStatus === 'CANCELLED' && currentOrder.status === 'DELIVERED') {
+        try {
+          const { InventorySyncService } = await import('@/services/inventory/InventorySyncService')
+          const inventoryService = new InventorySyncService({ userId: user.id, supabase: typedSupabase })
+          
+          // Get order items to restore
+          const { data: orderItems } = await typedSupabase
+            .from('order_items')
+            .select('recipe_id, quantity')
+            .eq('order_id', orderId)
+          
+          if (orderItems && orderItems.length > 0) {
+            for (const item of orderItems) {
+              await inventoryService.restoreStockForCancelledOrder(
+                item.recipe_id,
+                orderId,
+                item.quantity
+              )
+            }
+            apiLogger.info({ orderId, itemsCount: orderItems.length }, 'Inventory restored on cancellation')
+          }
+        } catch (inventoryError) {
+          apiLogger.error({ error: inventoryError, orderId }, 'Failed to restore inventory on cancellation')
         }
       }
 

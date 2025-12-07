@@ -44,6 +44,8 @@ export interface ProductionBatchWithDetails extends ProductionBatch {
   overhead_cost?: number
   total_cost?: number
   efficiency?: number
+  yield_percentage?: number
+  waste_quantity?: number
 }
 
 export interface ProductionBatchCreateData {
@@ -159,6 +161,19 @@ export class ProductionService extends BaseService {
       }
 
       const batch = data as ProductionBatchWithRecipe
+      
+      // Calculate yield percentage if we have actual quantity
+      let yieldPercentage: number | undefined
+      let wasteQuantity: number | undefined
+      
+      // Note: actual_quantity would need to be added to the schema
+      // For now, we'll use planned quantity as a placeholder
+      const actualQuantity = batch.quantity // TODO: Add actual_quantity field
+      if (actualQuantity && batch.quantity > 0) {
+        yieldPercentage = (actualQuantity / batch.quantity) * 100
+        wasteQuantity = Math.max(0, batch.quantity - actualQuantity)
+      }
+      
       return {
         id: batch.id,
         recipe_id: batch.recipe_id,
@@ -170,6 +185,8 @@ export class ProductionService extends BaseService {
         ...(batch.completed_at && { actual_end_time: batch.completed_at }),
         ...(batch.notes && { notes: batch.notes }),
         ...(batch.actual_cost && { labor_cost: batch.actual_cost as number, total_cost: batch.actual_cost as number }),
+        ...(yieldPercentage !== undefined && { yield_percentage: yieldPercentage }),
+        ...(wasteQuantity !== undefined && { waste_quantity: wasteQuantity }),
         created_at: batch.created_at || '',
         updated_at: batch.updated_at || ''
       }

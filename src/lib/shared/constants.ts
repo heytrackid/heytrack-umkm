@@ -27,6 +27,19 @@ export const ORDER_STATUSES = [
 ] as const
 
 /**
+ * Valid order status transitions
+ * Defines which status changes are allowed
+ */
+export const VALID_ORDER_STATUS_TRANSITIONS: Record<string, string[]> = {
+  'PENDING': ['CONFIRMED', 'CANCELLED'],
+  'CONFIRMED': ['IN_PROGRESS', 'CANCELLED'],
+  'IN_PROGRESS': ['READY', 'CANCELLED'],
+  'READY': ['DELIVERED', 'CANCELLED'],
+  'DELIVERED': [], // Terminal state - no transitions allowed
+  'CANCELLED': [], // Terminal state - no transitions allowed
+} as const
+
+/**
  * Payment status options
  */
 export const PAYMENT_STATUSES = [
