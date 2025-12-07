@@ -1,15 +1,14 @@
 import { createSuccessResponse } from '@/lib/api-core'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { z } from 'zod'
+import { DateRangeQuerySchema } from '@/lib/validations/common'
 import type { Row } from '@/types/database'
+import { z } from 'zod'
 
 export const runtime = 'nodejs'
 
-const StatsQuerySchema = z.object({
-  start_date: z.string().optional(),
-  end_date: z.string().optional(),
-})
+// Use centralized DateRangeQuerySchema
+const StatsQuerySchema = DateRangeQuerySchema
 
 // GET - Get purchase statistics
 async function getStatsHandler(context: RouteContext, query?: z.infer<typeof StatsQuerySchema>) {

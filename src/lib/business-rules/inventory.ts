@@ -33,7 +33,7 @@ export function isOutOfStock(currentStock: number): boolean {
 }
 
 /**
- * Calculate stock value using FIFO method
+  * Calculate stock value using WAC method
  */
 export function calculateStockValue(
   currentStock: number,

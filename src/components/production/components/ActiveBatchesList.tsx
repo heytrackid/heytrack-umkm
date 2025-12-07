@@ -10,7 +10,6 @@ import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 
-
 import type { ProductionBatch } from '@/types/production'
 
 import type { BatchExecutionState } from '@/components/production/components/types'
@@ -66,10 +65,20 @@ export const ActiveBatchesList = ({
     return step?.name ?? 'Unknown Step'
   }
 
+  // Production status constants (different from order status)
+  const PRODUCTION_STATUS = {
+    PLANNED: 'PLANNED',
+    IN_PROGRESS: 'IN_PROGRESS',
+    COMPLETED: 'COMPLETED',
+    CANCELLED: 'CANCELLED'
+  } as const
+  
   // Filter batches to show relevant ones
   const activeBatches = batches.filter(b =>
-    (b['status'] === 'PLANNED' || b['status'] === 'IN_PROGRESS')
+    (b['status'] === PRODUCTION_STATUS.PLANNED || b['status'] === PRODUCTION_STATUS.IN_PROGRESS)
   )
+  const plannedStatus = PRODUCTION_STATUS.PLANNED
+  const inProgressStatus = PRODUCTION_STATUS.IN_PROGRESS
 
   return (
     <Card>
@@ -121,7 +130,7 @@ export const ActiveBatchesList = ({
                       </Badge>
                     </div>
 
-                    {state && batch['status'] && batch['status'] === 'IN_PROGRESS' && (
+                    {state && batch['status'] && batch['status'] === inProgressStatus && (
                       <>
                         <div className="space-y-2">
                           <div className="flex justify-between text-xs">
@@ -162,7 +171,7 @@ export const ActiveBatchesList = ({
                       </>
                     )}
 
-                    {batch['status'] && batch['status'] === 'PLANNED' && (
+                    {batch['status'] && batch['status'] === plannedStatus && (
                       <div className="flex gap-2 mt-3">
                         <Button
                           variant="default"

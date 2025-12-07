@@ -34,6 +34,7 @@ export class InventorySyncService extends BaseService {
   async reverseStockFromPurchase(
     ingredientId: string,
     quantity: number,
+    unitPrice: number,
     reference?: string
   ): Promise<StockUpdateResult> {
     return this.executeWithAudit(
@@ -56,9 +57,14 @@ export class InventorySyncService extends BaseService {
         // Deduct the quantity that was added by the purchase
         const newStock = Math.max(0, previousStock - quantity)
 
-        // WAC stays the same when reversing (simplified approach)
-        // A more accurate approach would require tracking all purchase history
-        const newWac = previousWac
+        // Recalculate WAC by removing the contribution of the reversed purchase
+        // Reverse the weighted average formula: remove the purchase's contribution
+        const totalOldValue = previousStock * previousWac
+        const purchaseValueToRemove = quantity * unitPrice
+        const newTotalValue = Math.max(0, totalOldValue - purchaseValueToRemove)
+        const newWac = newStock > 0
+          ? newTotalValue / newStock
+          : (previousWac || unitPrice) // Fallback to previous WAC or purchase price
 
         // Update ingredient stock
         const { error: updateError } = await this.context.supabase

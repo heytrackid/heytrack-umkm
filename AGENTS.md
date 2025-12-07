@@ -157,7 +157,7 @@ HeyTrack is a comprehensive culinary business management system designed to help
 **Logic**:
 - Uses Web Workers for complex calculations to avoid blocking UI
 - Implements cost allocation algorithms (direct vs indirect costs)
-- Supports multiple pricing scenarios with profit margin calculations
+- Uses WAC (Weighted Average Cost) for accurate inventory valuation
 - Real-time cost updates when ingredient prices change
 
 ### 3. Order Management (Pesanan)
@@ -188,7 +188,7 @@ HeyTrack is a comprehensive culinary business management system designed to help
 
 **Logic**:
 - AI integration for recipe generation using Openrouter API
-- Ingredient-based cost calculation with waste factor consideration
+- Ingredient-based cost calculation using WAC with waste factor consideration
 - Recipe versioning system for iterative improvements
 - Cross-referencing with inventory for availability checking
 
@@ -251,7 +251,7 @@ HeyTrack is a comprehensive culinary business management system designed to help
 - **Export Functionality**: PDF/Excel export for external reporting
 
 **Logic**:
-- Multi-dimensional data aggregation
+- Multi-dimensional data aggregation using WAC-based inventory costs
 - Time-series analysis with growth calculations
 - Comparative period analysis (YoY, MoM)
 - Automated report generation with scheduled delivery
@@ -271,6 +271,7 @@ HeyTrack is a comprehensive culinary business management system designed to help
 - RFM (Recency, Frequency, Monetary) analysis
 - Automated VIP status based on purchase thresholds
 - Integration with order management for seamless data flow
+- Email fields are optional (WhatsApp/Phone prioritized for communication)
 
 ### 10. Supplier Management (Pemasok)
 **Purpose**: Supplier relationship management for procurement optimization.
@@ -281,12 +282,15 @@ HeyTrack is a comprehensive culinary business management system designed to help
 - **Performance Tracking**: Delivery time, quality ratings, and cost analysis
 - **Procurement Analytics**: Supplier comparison and optimization metrics
 - **Contract Management**: Payment terms, credit limits, and lead time tracking
+- **Communication Tools**: One-click followup via WhatsApp/email/phone
 
 **Logic**:
 - Supplier classification algorithms based on performance metrics
 - Automated supplier scoring (quality, timeliness, cost)
 - Preferred supplier prioritization for procurement
 - Integration with inventory management for seamless supply chain
+- Communication templates for inquiry, reminder, and followup
+- One-click communication via WhatsApp, email, or phone
 
 ### 11. Settings & Configuration
 **Purpose**: System configuration and user preferences.
@@ -340,13 +344,13 @@ HeyTrack is a comprehensive culinary business management system designed to help
 ### Business Rules & Validation
 
 **Pricing Logic**:
-- HPP calculation: (Ingredient Cost + Overhead) / (1 - Profit Margin)
+- HPP calculation: (WAC Ingredient Cost + Overhead) / (1 - Profit Margin)
 - Minimum markup validation (typically 30-50%)
-- Competitive pricing analysis
+- Competitive pricing analysis using WAC-based costs
 
 **Inventory Logic**:
 - Reorder point: (Average Daily Usage × Lead Time) + Safety Stock
-- Stock valuation: FIFO method
+- Stock valuation: Weighted Average Cost (WAC) method only
 - Low stock alerts: Current Stock ≤ Reorder Point
 
 **Order Logic**:

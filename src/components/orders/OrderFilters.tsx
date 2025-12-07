@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ORDER_STATUSES, PAYMENT_STATUSES } from '@/lib/shared/constants'
 import { cn } from '@/lib/utils'
 
 import type { OrderFilters as OrderFiltersType } from '@/components/orders/types'
@@ -60,12 +61,11 @@ export const OrderFilters = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Semua Status</SelectItem>
-                  <SelectItem value="PENDING">Pending</SelectItem>
-                  <SelectItem value="CONFIRMED">Dikonfirmasi</SelectItem>
-                  <SelectItem value="IN_PROGRESS">Sedang Diproses</SelectItem>
-                  <SelectItem value="READY">Siap Diantar</SelectItem>
-                  <SelectItem value="DELIVERED">Dikirim</SelectItem>
-                  <SelectItem value="CANCELLED">Dibatalkan</SelectItem>
+                  {ORDER_STATUSES.map((status) => (
+                    <SelectItem key={status.value} value={status.value}>
+                      {status.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -78,9 +78,11 @@ export const OrderFilters = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Semua Pembayaran</SelectItem>
-                  <SelectItem value="UNPAID">Belum Dibayar</SelectItem>
-                  <SelectItem value="PARTIAL">Dibayar Sebagian</SelectItem>
-                  <SelectItem value="PAID">Lunas</SelectItem>
+                  {PAYMENT_STATUSES.map((status) => (
+                    <SelectItem key={status.value} value={status.value}>
+                      {status.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -105,33 +107,22 @@ export const OrderFilters = ({
 
           {/* Quick Filter Buttons */}
           <div className="flex flex-wrap gap-2">
+            {ORDER_STATUSES.slice(0, 3).map((status) => (
+              <Button
+                key={status.value}
+                variant={filters['status'] === status.value ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleFilterChange('status', filters['status'] === status.value ? 'all' : status.value)}
+              >
+                {status.label}
+              </Button>
+            ))}
             <Button
-              variant={filters['status'] === 'PENDING' ? 'default' : 'outline'}
+              variant={filters.paymentStatus === PAYMENT_STATUSES[0].value ? 'default' : 'outline'}
               size="sm"
-              onClick={() => handleFilterChange('status', filters['status'] === 'PENDING' ? 'all' : 'PENDING')}
+              onClick={() => handleFilterChange('paymentStatus', filters.paymentStatus === PAYMENT_STATUSES[0].value ? 'all' : PAYMENT_STATUSES[0].value)}
             >
-              Pending
-            </Button>
-            <Button
-              variant={filters['status'] === 'IN_PROGRESS' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleFilterChange('status', filters['status'] === 'IN_PROGRESS' ? 'all' : 'IN_PROGRESS')}
-            >
-              Diproses
-            </Button>
-            <Button
-              variant={filters['status'] === 'READY' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleFilterChange('status', filters['status'] === 'READY' ? 'all' : 'READY')}
-            >
-              Siap Kirim
-            </Button>
-            <Button
-              variant={filters.paymentStatus === 'UNPAID' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleFilterChange('paymentStatus', filters.paymentStatus === 'UNPAID' ? 'all' : 'UNPAID')}
-            >
-              Belum Bayar
+              {PAYMENT_STATUSES[0].label}
             </Button>
             <Button
               variant={filters.priority === 'high' ? 'default' : 'outline'}

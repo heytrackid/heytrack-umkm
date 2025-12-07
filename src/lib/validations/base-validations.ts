@@ -29,13 +29,25 @@ export const PhoneSchema = z.string().regex(/^(\+62|62|0)[8-9][0-9]{7,11}$/, 'In
 export const DateStringSchema = z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid date string')
 export const PositiveNumberSchema = z.number().positive()
 export const NonNegativeNumberSchema = z.number().nonnegative()
+export const RequiredString = z.string().min(1, 'Field ini wajib diisi')
+export const OptionalString = z.string().optional()
+export const URLSchema = z.string().url({ message: 'Invalid URL format' })
+export const SlugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Invalid slug format')
+export const ColorHexSchema = z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Invalid hex color format')
+export const PercentageSchema = z.number().min(0).max(100)
+export const CurrencyAmountSchema = z.number().min(0).transform(val => Math.round(val))
 
-// Enums
+// Enums - Aligned with @/lib/shared/constants
 export const OrderStatusEnum = z.enum(['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELLED'])
+export const PaymentStatusEnum = z.enum(['PENDING', 'PAID', 'PARTIAL', 'REFUNDED'])
 export const PaymentMethodEnum = z.enum(['CASH', 'BANK_TRANSFER', 'CREDIT_CARD', 'DIGITAL_WALLET', 'OTHER'])
+export const CustomerTypeEnum = z.enum(['regular', 'retail', 'vip', 'wholesale'])
+export const RecipeDifficultyEnum = z.enum(['EASY', 'MEDIUM', 'HARD'])
+export const IngredientUnitEnum = z.enum(['kg', 'g', 'l', 'ml', 'pcs', 'dozen'])
+export const PriorityLevelEnum = z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT'])
 export const UserRoleEnum = z.enum(['super_admin', 'admin', 'manager', 'staff', 'viewer'])
 export const ProductionStatusEnum = z.enum(['PLANNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])
-export const BusinessUnitEnum = z.enum(['RESTAURANT', 'CAFE', 'UMKM', 'CATERING', 'OTHER'])
+export const BusinessUnitEnum = z.enum(['kitchen', 'sales', 'inventory', 'finance', 'all'])
 export const RecordTypeEnum = z.enum(['INCOME', 'EXPENSE'])
 export const TransactionTypeEnum = z.enum(['SALES', 'PURCHASE', 'SALARY', 'RENT', 'UTILITIES', 'OTHER'])
 

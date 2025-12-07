@@ -5,17 +5,18 @@ export const runtime = 'nodejs'
 import { z } from 'zod'
 
 import { createSuccessResponse } from '@/lib/api-core'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { apiLogger } from '@/lib/logger'
-import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { EmailSchema, PhoneSchema } from '@/lib/validations/common'
 import { SecurityPresets } from '@/utils/security/api-middleware'
 import type { NextResponse } from 'next/server'
 
 const SupplierImportSchema = z.object({
   name: z.string().min(1),
   contact_person: z.string().optional(),
-  phone: z.string().optional(),
-  email: z.string().email().optional(),
+  phone: PhoneSchema.optional(),
+  email: EmailSchema.optional(),
   address: z.string().optional(),
   supplier_type: z.enum(['preferred', 'standard', 'trial', 'blacklisted']).optional(),
   payment_terms: z.string().optional(),

@@ -32,16 +32,18 @@ export class CustomerService extends BaseService {
         // Validate business rules
         await this.validateCustomerData(sanitizedData)
 
-        // Check for duplicate email
-        const existingCustomer = await this.context.supabase
-          .from('customers')
-          .select('id')
-          .eq('email', sanitizedData['email'] as string)
-          .eq('user_id', this.context.userId)
-          .single()
+        // Check for duplicate email (only if email is provided)
+        if (sanitizedData['email'] && sanitizedData['email'] !== '') {
+          const existingCustomer = await this.context.supabase
+            .from('customers')
+            .select('id')
+            .eq('email', sanitizedData['email'] as string)
+            .eq('user_id', this.context.userId)
+            .single()
 
-        if (existingCustomer.data) {
-          return this.createError('Customer with this email already exists', 'DUPLICATE_EMAIL')
+          if (existingCustomer.data) {
+            return this.createError('Customer with this email already exists', 'DUPLICATE_EMAIL')
+          }
         }
 
         // Create customer
@@ -228,9 +230,7 @@ export class CustomerService extends BaseService {
       if (!data.name?.trim()) {
         throw new Error('Customer name is required')
       }
-      if (!data.email?.trim()) {
-        throw new Error('Customer email is required')
-      }
+      // Email is now optional
     }
 
     // Email format validation

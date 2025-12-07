@@ -61,10 +61,11 @@ export interface PricingRecommendation {
 }
 
 // Advanced HPP helper types
-export type PricingMethod = 'fifo' | 'latest' | 'list_price' | 'moving' | 'weighted'
+export const PRICING_METHOD = 'wac' as const
+export type PricingMethod = typeof PRICING_METHOD
 
 export interface RecipePricingAlternative {
-  method: PricingMethod
+  method: typeof PRICING_METHOD
   methodDescription: string
   costPerUnit: number
 }

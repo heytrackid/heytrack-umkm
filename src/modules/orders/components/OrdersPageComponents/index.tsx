@@ -7,6 +7,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { memo, useCallback, useMemo, useState } from 'react'
 
+import { ORDER_STATUSES, PAYMENT_STATUSES } from '@/lib/shared/constants'
 import type { Order, OrderStatus } from '@/types/database'
 
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -99,17 +100,25 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
     const stats = useMemo<OrderStats>(() => {
         // Guard against non-array
         const safeOrders = Array.isArray(orders) ? orders : []
+        
+        // Use centralized constants
+        const PENDING = ORDER_STATUSES.find(s => s.value === 'PENDING')?.value
+        const CONFIRMED = ORDER_STATUSES.find(s => s.value === 'CONFIRMED')?.value
+        const IN_PROGRESS = ORDER_STATUSES.find(s => s.value === 'IN_PROGRESS')?.value
+        const DELIVERED = ORDER_STATUSES.find(s => s.value === 'DELIVERED')?.value
+        const CANCELLED = ORDER_STATUSES.find(s => s.value === 'CANCELLED')?.value
+        const UNPAID = PAYMENT_STATUSES.find(s => s.value === 'PENDING')?.value
 
         return {
             total_orders: safeOrders.length,
-            pending_orders: safeOrders.filter(o => o['status'] === 'PENDING').length,
-            confirmed_orders: safeOrders.filter(o => o['status'] === 'CONFIRMED').length,
-            in_production_orders: safeOrders.filter(o => o['status'] === 'IN_PROGRESS').length,
-            completed_orders: safeOrders.filter(o => o['status'] === 'DELIVERED').length,
-            cancelled_orders: safeOrders.filter(o => o['status'] === 'CANCELLED').length,
+            pending_orders: safeOrders.filter(o => o['status'] === PENDING).length,
+            confirmed_orders: safeOrders.filter(o => o['status'] === CONFIRMED).length,
+            in_production_orders: safeOrders.filter(o => o['status'] === IN_PROGRESS).length,
+            completed_orders: safeOrders.filter(o => o['status'] === DELIVERED).length,
+            cancelled_orders: safeOrders.filter(o => o['status'] === CANCELLED).length,
             total_revenue: arrayCalculations.sum(safeOrders, 'total_amount'),
             pending_revenue: arrayCalculations.sum(
-                safeOrders.filter(o => o.payment_status === 'UNPAID'),
+                safeOrders.filter(o => o.payment_status === UNPAID),
                 'total_amount'
             ),
             paid_revenue: safeOrders.reduce((sum) => sum + 0, 0), // paid_amount not available in OrderListItem

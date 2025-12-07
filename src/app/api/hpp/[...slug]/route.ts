@@ -304,7 +304,7 @@ export const GET = createApiRoute(
             ? recipe.recipe_ingredients.filter(ri => ri.ingredients)
             : []
 
-          const ingredientCost = ingredients.reduce((sum: number, ri) => {
+          const ingredientCost = ingredients.reduce((sum: number, ri: { quantity?: number; ingredients?: { weighted_average_cost?: number; price_per_unit?: number } | null }) => {
             const quantity = ri.quantity ?? 0
             const unitPrice = ri.ingredients?.weighted_average_cost ??
                              ri.ingredients?.price_per_unit ?? 0
@@ -321,7 +321,7 @@ export const GET = createApiRoute(
         // Transform ingredients for frontend
         const transformedIngredients = Array.isArray(recipe.recipe_ingredients)
           ? recipe.recipe_ingredients
-              .filter(ri => ri.ingredients)
+              .filter((ri) => ri.ingredients)
               .map((ri) => ({
                 id: ri.ingredient_id,
                 name: ri.ingredients?.name ?? 'Unknown',

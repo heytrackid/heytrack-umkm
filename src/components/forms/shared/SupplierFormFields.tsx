@@ -73,12 +73,12 @@ export const SupplierFormFields = ({
           </FormField>
 
           <FormField
-            label="Email"
+            label="Email (Opsional)"
             error={errors.email?.message}
           >
             <Input
               type="email"
-              placeholder="Alamat email untuk komunikasi"
+              placeholder="Masukkan email jika ada (opsional)"
               {...register('email')}
             />
           </FormField>

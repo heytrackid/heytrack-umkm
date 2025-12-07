@@ -3,12 +3,13 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 
 import { createSuccessResponse } from '@/lib/api-core'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { PositiveNumberSchema } from '@/lib/validations/common'
 import { SecurityPresets } from '@/utils/security/api-middleware'
 import { z } from 'zod'
 
 const generateRecipeSchema = z.object({
   prompt: z.string().min(10, 'Prompt harus minimal 10 karakter'),
-  servings: z.number().min(1).max(100).optional(),
+  servings: PositiveNumberSchema.min(1).max(100).optional(),
   cuisine: z.string().optional(),
   dietary: z.array(z.string()).optional(),
 })

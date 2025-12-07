@@ -3,23 +3,24 @@ export const runtime = 'nodejs'
 
 import { z } from 'zod'
 
-import { apiLogger } from '@/lib/logger'
-import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
-import { SecurityPresets } from '@/utils/security/api-middleware'
 import { createSuccessResponse } from '@/lib/api-core'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
+import { apiLogger } from '@/lib/logger'
+import { NonNegativeNumberSchema, PositiveNumberSchema, UUIDSchema } from '@/lib/validations/common'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
 const OrderItemSchema = z.object({
-  unit_price: z.number().finite().min(0, { message: 'unit_price must be >= 0' }),
-  quantity: z.number().int().positive({ message: 'quantity must be > 0' })
+  unit_price: NonNegativeNumberSchema,
+  quantity: PositiveNumberSchema.int()
 })
 
 const CalculatePriceSchema = z.object({
-  customer_id: z.string().uuid().optional(),
+  customer_id: UUIDSchema.optional(),
   items: z.array(OrderItemSchema).min(1, { message: 'At least one item is required' }),
-  delivery_fee: z.number().finite().min(0).optional(),
+  delivery_fee: NonNegativeNumberSchema.optional(),
   tax_rate: z.number().finite().min(0).max(1).optional(),
-  use_loyalty_points: z.number().int().min(0).optional()
+  use_loyalty_points: NonNegativeNumberSchema.int().optional()
 }).strict()
 
 export const POST = createApiRoute(

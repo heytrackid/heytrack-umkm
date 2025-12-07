@@ -11,7 +11,7 @@ export { SmartPricingAssistant } from './components/SmartPricingAssistant'
 // Extracted HPP calculator components
 export { EducationalFooter } from './components/EducationalFooter'
 export { MainResultsCard } from './components/MainResultsCard'
-export { MethodComparisonCard } from './components/MethodComparisonCard'
+export { WACInfoCard as MethodComparisonCard } from './components/MethodComparisonCard'
 export { RecommendationsCard } from './components/RecommendationsCard'
 export { SettingsPanel } from './components/SettingsPanel'
 export { UMKMTooltip } from './components/UMKMTooltip'

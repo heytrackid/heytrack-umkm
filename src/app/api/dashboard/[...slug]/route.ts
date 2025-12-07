@@ -7,6 +7,7 @@ import { createSuccessResponse } from '@/lib/api-core'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import { ORDER_STATUSES } from '@/lib/shared/constants'
 import { typed } from '@/types/type-utilities'
 import { SecurityPresets } from '@/utils/security/api-middleware'
 
@@ -15,12 +16,12 @@ import type { Database, OrderStatus } from '@/types/database'
 
 export const runtime = 'nodejs'
 
+import { DateRangeQuerySchema } from '@/lib/validations/common'
+
 type TypedSupabaseClient = SupabaseClient<Database>
 
-const DashboardQuerySchema = z.object({
-  start_date: z.string().optional(),
-  end_date: z.string().optional(),
-})
+// Use centralized DateRangeQuerySchema
+const DashboardQuerySchema = DateRangeQuerySchema
 
 const RecentOrdersQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(50).optional().default(5),
@@ -156,7 +157,10 @@ async function getDashboardStatsHandler(context: RouteContext, query: z.infer<ty
     const totalRevenue = orders.reduce((sum, o) => sum + (o.total_amount || 0), 0)
     const currentPeriodRevenue = currentPeriodOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0)
     const comparisonRevenue = comparisonOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0)
-    const activeOrders = orders.filter(o => o.status === 'PENDING' || o.status === 'IN_PROGRESS').length
+    const { ORDER_STATUSES } = await import('@/lib/shared/constants')
+    const pendingStatus = ORDER_STATUSES.find(s => s.value === 'PENDING')?.value
+    const inProgressStatus = ORDER_STATUSES.find(s => s.value === 'IN_PROGRESS')?.value
+    const activeOrders = orders.filter(o => o.status === pendingStatus || o.status === inProgressStatus).length
     const vipCustomers = customers.filter(c => c.customer_type === 'vip').length
     const lowStockItems = ingredients.filter(i => (i.current_stock || 0) <= (i.min_stock || 0)).length
     const expensesTotal = expenses.reduce((sum, e) => sum + (e.amount || 0), 0)
@@ -311,7 +315,10 @@ async function getProductionScheduleHandler(context: RouteContext) {
       supabase.from('orders').select(`
         id, order_no, customer_name, delivery_date, priority, status,
         order_items (recipe:recipes (name))
-      `).eq('user_id', user.id).in('status', ['CONFIRMED', 'IN_PROGRESS']).is('production_batch_id', null).order('delivery_date', { nullsFirst: false }).limit(100),
+      `).eq('user_id', user.id).in('status', [
+        ORDER_STATUSES.find(s => s.value === 'CONFIRMED')?.value ?? 'CONFIRMED',
+        ORDER_STATUSES.find(s => s.value === 'IN_PROGRESS')?.value ?? 'IN_PROGRESS'
+      ]).is('production_batch_id', null).order('delivery_date', { nullsFirst: false }).limit(100),
       supabase.from('ingredients').select('id, name, current_stock, min_stock').eq('user_id', user.id).order('current_stock').limit(100)
     ])
 
@@ -324,6 +331,7 @@ async function getProductionScheduleHandler(context: RouteContext) {
       stock_status: (item.current_stock ?? 0) <= (item.min_stock ?? 0) ? 'LOW_STOCK' : 'IN_STOCK'
     }))
 
+    // Note: Production batches use different status values than orders
     const summary = {
       total_batches_today: batchesData.length,
       planned_batches: batchesData.filter(batch => batch.status === 'PLANNED').length,

@@ -28,15 +28,15 @@ export const priorities: Record<Priority, StatusInfo> = {
 
 // Helper functions
 export function getStatusInfo(status: OrderStatus): StatusInfo {
-  return orderStatuses[status] || orderStatuses.PENDING
+  return orderStatuses[status] || orderStatuses['PENDING']
 }
 
 export function getPaymentInfo(status: PaymentStatus): StatusInfo {
-  return paymentStatuses[status] || paymentStatuses.UNPAID
+  return paymentStatuses[status] || paymentStatuses['UNPAID']
 }
 
 export function getPriorityInfo(priority: Priority): StatusInfo {
-  return priorities[priority] || priorities.normal
+  return priorities[priority] || priorities['normal']
 }
 
 // Generate order number

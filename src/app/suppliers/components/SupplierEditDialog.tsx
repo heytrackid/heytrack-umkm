@@ -154,11 +154,11 @@ export function SupplierEditDialog({
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="edit-email">Email</Label>
+                                <Label htmlFor="edit-email">Email (Opsional)</Label>
                                 <Input
                                     id="edit-email"
                                     type="email"
-                                    placeholder="supplier@email.com"
+                                    placeholder="Masukkan email jika ada"
                                     {...form.register('email')}
                                 />
                                 {form.formState.errors.email && (

@@ -3,11 +3,12 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 
 import { createSuccessResponse } from '@/lib/api-core'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { PositiveNumberSchema } from '@/lib/validations/common'
 import { SecurityPresets } from '@/utils/security/api-middleware'
 import { z } from 'zod'
 
 const UpdateOnboardingSchema = z.object({
-  current_step: z.number().optional(),
+  current_step: PositiveNumberSchema.optional(),
   steps_completed: z.array(z.string()).optional(),
   completed: z.boolean().optional(),
   skipped: z.boolean().optional(),

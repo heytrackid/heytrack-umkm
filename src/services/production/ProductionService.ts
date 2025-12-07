@@ -166,9 +166,8 @@ export class ProductionService extends BaseService {
       let yieldPercentage: number | undefined
       let wasteQuantity: number | undefined
       
-      // Note: actual_quantity would need to be added to the schema
-      // For now, we'll use planned quantity as a placeholder
-      const actualQuantity = batch.quantity // TODO: Add actual_quantity field
+      // Calculate yield using actual_quantity from the new schema field
+      const actualQuantity = (batch as unknown as { actual_quantity?: number }).actual_quantity
       if (actualQuantity && batch.quantity > 0) {
         yieldPercentage = (actualQuantity / batch.quantity) * 100
         wasteQuantity = Math.max(0, batch.quantity - actualQuantity)

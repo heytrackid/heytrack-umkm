@@ -65,8 +65,17 @@ const AIRecipeGeneratorPage = () => {
     handleSaveRecipe,
     saveDraft,
 
+    // Enhanced features
+    handleGenerateVariation,
+    handleBatchGenerate,
+    handleRestoreRecipe,
+
+    // Progress tracking
+    generationProgress,
+
     // Mutation state
-    isGenerating
+    isGenerating,
+    isWorkerProcessing
   } = useAIRecipeGenerator()
 
   // Handle template selection
@@ -284,6 +293,14 @@ const AIRecipeGeneratorPage = () => {
 
             {/* Preview Panel */}
             <div className="space-y-6 lg:col-span-5 w-full">
+              {/* Generation Progress */}
+              {(isGenerating || generationProgress) && (
+                <GenerationProgress 
+                  progress={generationProgress} 
+                  className="mb-4"
+                />
+              )}
+
               <AIGeneratorPreview
                 isGenerating={isGenerating}
                 generatedRecipe={generatedRecipe}
@@ -291,6 +308,30 @@ const AIRecipeGeneratorPage = () => {
                 availableIngredients={availableIngredients}
                 onSave={handleSaveRecipe}
                 onGenerateAgain={resetForm}
+              />
+
+              {/* Recipe Variations - show when recipe is generated */}
+              {generatedRecipe && !isGenerating && (
+                <RecipeVariations
+                  baseRecipe={generatedRecipe}
+                  onGenerateVariation={async (type: VariationType) => {
+                    await handleGenerateVariation(type)
+                  }}
+                  isGenerating={isWorkerProcessing}
+                />
+              )}
+
+              {/* Recipe History */}
+              <RecipeHistory
+                onSelectRecipe={(recipe) => handleRestoreRecipe(recipe)}
+                onRestoreRecipe={(recipe) => handleRestoreRecipe(recipe)}
+              />
+
+              {/* Batch Generator - collapsible */}
+              <BatchGenerator
+                availableIngredients={availableIngredients.map(ing => ing.name)}
+                onGenerateBatch={handleBatchGenerate}
+                isGenerating={isGenerating}
               />
             </div>
           </div>

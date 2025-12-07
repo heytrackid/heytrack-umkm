@@ -1,23 +1,24 @@
  
 'use client'
 
-import { Check, Copy, MessageCircle, Send } from '@/components/icons';
-import { useEffect, useState } from 'react';
+import { Check, Copy, MessageCircle, Send } from '@/components/icons'
+import { useEffect, useState } from 'react'
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs';
-import { Textarea } from '@/components/ui/textarea';
-import { useSettings } from '@/contexts/settings-context';
-import { useToast } from '@/hooks/use-toast';
-import type { OrderData } from '@/lib/communications/types';
-import { WhatsAppService } from '@/lib/communications/whatsapp';
-import { handleError } from '@/lib/error-handling';
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
+import { Textarea } from '@/components/ui/textarea'
+import { useSettings } from '@/contexts/settings-context'
+import { useToast } from '@/hooks/use-toast'
+import type { OrderData } from '@/lib/communications/types'
+import { WhatsAppService } from '@/lib/communications/whatsapp'
+import { handleError } from '@/lib/error-handling'
+import { ORDER_STATUSES } from '@/lib/shared/constants'
 
 
 
@@ -295,8 +296,8 @@ export const WhatsAppFollowUp = ({
                   <div><strong>Total:</strong> {formatCurrency(order.total_amount)}</div>
                   <div><strong>Status:</strong>
                     <Badge className="ml-2" variant={
-                      order['status'] === 'COMPLETED' ? 'default' :
-                        order['status'] === 'PENDING' ? 'secondary' : 'outline'
+                      order['status'] === ORDER_STATUSES.find((s) => s.value === 'DELIVERED')?.value ? 'default' :
+                        order['status'] === ORDER_STATUSES.find((s) => s.value === 'PENDING')?.value ? 'secondary' : 'outline'
                     }>
                       {order['status']}
                     </Badge>

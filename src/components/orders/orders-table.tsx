@@ -1,27 +1,28 @@
 'use client'
 
 import {
-    CheckCircle,
-    Package,
-    RefreshCw,
-    Truck
+  CheckCircle,
+  Package,
+  RefreshCw,
+  Truck
 } from '@/components/icons'
 import { useMemo, useState } from 'react'
 
 import { SharedDataTable, type Column, type CustomAction } from '@/components/shared/SharedDataTable'
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useCurrency } from '@/hooks/useCurrency'
+import { ORDER_STATUSES, PAYMENT_STATUSES } from '@/lib/shared/constants'
 
 import type { Order, OrderItem } from '@/components/orders/types'
 
@@ -41,21 +42,15 @@ interface OrderProps {
   onRefresh?: () => void
 }
 
-// Status configurations
-const STATUS_CONFIG = {
-  'PENDING': { label: 'Pending', color: 'bg-muted text-muted-foreground' },
-  'CONFIRMED': { label: 'Dikonfirmasi', color: 'bg-blue-50 text-blue-700' },
-  'IN_PROGRESS': { label: 'Sedang Diproses', color: 'bg-yellow-50 text-yellow-700' },
-  'READY': { label: 'Siap Diantar', color: 'bg-green-50 text-green-700' },
-  'DELIVERED': { label: 'Dikirim', color: 'bg-green-50 text-green-700' },
-  'CANCELLED': { label: 'Dibatalkan', color: 'bg-destructive/10 text-destructive' }
-} as const
+// Status configurations - using centralized constants
+// Legacy STATUS_CONFIG kept for backward compatibility
+const STATUS_CONFIG = Object.fromEntries(
+  ORDER_STATUSES.map((s) => [s.value, { label: s.label, color: s.color }])
+) as Record<string, { label: string; color: string }>
 
-const PAYMENT_STATUS_CONFIG = {
-  'UNPAID': { label: 'Belum Dibayar', color: 'bg-red-50 text-red-700' },
-  'PARTIAL': { label: 'Dibayar Sebagian', color: 'bg-yellow-50 text-yellow-700' },
-  'PAID': { label: 'Lunas', color: 'bg-green-50 text-green-700' }
-} as const
+const PAYMENT_STATUS_CONFIG = Object.fromEntries(
+  PAYMENT_STATUSES.map((s) => [s.value, { label: s.label, color: s.color }])
+) as Record<string, { label: string; color: string }>
 
 const PRIORITY_CONFIG = {
   'low': { label: 'Rendah', color: 'bg-secondary text-secondary-foreground' },
@@ -113,7 +108,7 @@ export const OrderComponent = ({
       sortable: true,
       render: (_, item) => (
         <div className="space-y-1">
-          <div className="font-medium">{item.order_no}</div>
+          <div className="font-medium">{item['order_no'] as string}</div>
           <div className="text-sm text-muted-foreground">
             {item.order_items?.length ?? 0} item • {item.order_items?.reduce((sum, i) => sum + i.quantity, 0) ?? 0} produk
           </div>
@@ -126,9 +121,9 @@ export const OrderComponent = ({
       sortable: true,
       render: (_, item) => (
         <div className="space-y-1">
-          <div className="font-medium">{item.customer_name}</div>
-          {item.customer_phone && (
-            <div className="text-sm text-muted-foreground">{item.customer_phone}</div>
+          <div className="font-medium">{item['customer_name'] as string}</div>
+          {item['customer_phone'] && (
+            <div className="text-sm text-muted-foreground">{item['customer_phone'] as string}</div>
           )}
         </div>
       )
@@ -143,42 +138,47 @@ export const OrderComponent = ({
         label: config.label
       })),
       render: (value, item) => {
-        const status = (value as string) ?? 'PENDING'
-        const config = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.PENDING
+        const PENDING = ORDER_STATUSES.find((s) => s.value === 'PENDING')?.value ?? 'PENDING'
+        const CONFIRMED = ORDER_STATUSES.find((s) => s.value === 'CONFIRMED')?.value ?? 'CONFIRMED'
+        const READY = ORDER_STATUSES.find((s) => s.value === 'READY')?.value ?? 'READY'
+        const DELIVERED = ORDER_STATUSES.find((s) => s.value === 'DELIVERED')?.value ?? 'DELIVERED'
+        
+        const status = (value as string) ?? PENDING
+        const config = STATUS_CONFIG[status] ?? STATUS_CONFIG[PENDING]
         return (
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Badge className={config.color}>{config.label}</Badge>
+              <Badge className={config?.color}>{config?.label}</Badge>
               {onUpdateStatus && (
                 <div className="flex gap-1">
-                  {status === 'PENDING' && (
+                  {status === PENDING && (
                     <Button
                       variant="ghost"
                       size="sm"
                       className="h-6 w-6 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                      onClick={(e) => { e.stopPropagation(); onUpdateStatus(item.id, 'CONFIRMED') }}
+                      onClick={(e) => { e.stopPropagation(); onUpdateStatus(item['id'] as string, CONFIRMED) }}
                       title="Konfirmasi pesanan"
                     >
                       <CheckCircle className="h-3 w-3" />
                     </Button>
                   )}
-                  {status === 'CONFIRMED' && (
+                  {status === CONFIRMED && (
                     <Button
                       variant="ghost"
                       size="sm"
                       className="h-6 w-6 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                      onClick={(e) => { e.stopPropagation(); onUpdateStatus(item.id, 'READY') }}
+                      onClick={(e) => { e.stopPropagation(); onUpdateStatus(item['id'] as string, READY) }}
                       title="Tandai siap kirim"
                     >
                       <Package className="h-3 w-3" />
                     </Button>
                   )}
-                  {status === 'READY' && (
+                  {status === READY && (
                     <Button
                       variant="ghost"
                       size="sm"
                       className="h-6 w-6 p-0 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
-                      onClick={(e) => { e.stopPropagation(); onUpdateStatus(item.id, 'DELIVERED') }}
+                      onClick={(e) => { e.stopPropagation(); onUpdateStatus(item['id'] as string, DELIVERED) }}
                       title="Tandai dikirim"
                     >
                       <Truck className="h-3 w-3" />
@@ -187,9 +187,9 @@ export const OrderComponent = ({
                 </div>
               )}
             </div>
-            {item.priority !== 'normal' && item.priority && (
-              <Badge variant="secondary" className={PRIORITY_CONFIG[item.priority as keyof typeof PRIORITY_CONFIG]?.color}>
-                {PRIORITY_CONFIG[item.priority as keyof typeof PRIORITY_CONFIG]?.label}
+            {item['priority'] !== 'normal' && item['priority'] && (
+              <Badge variant="secondary" className={PRIORITY_CONFIG[item['priority'] as keyof typeof PRIORITY_CONFIG]?.color}>
+                {PRIORITY_CONFIG[item['priority'] as keyof typeof PRIORITY_CONFIG]?.label}
               </Badge>
             )}
           </div>
@@ -203,10 +203,10 @@ export const OrderComponent = ({
       hideOnMobile: true,
       render: (_, item) => (
         <div className="space-y-1 text-sm">
-          <div>Pesan: {formatDate(item.order_date)}</div>
-          {item.delivery_date && (
+          <div>Pesan: {formatDate(item['order_date'] as string | null)}</div>
+          {item['delivery_date'] && (
             <div className="text-muted-foreground">
-              Kirim: {formatDate(item.delivery_date)}
+              Kirim: {formatDate(item['delivery_date'] as string)}
             </div>
           )}
         </div>
@@ -217,17 +217,17 @@ export const OrderComponent = ({
       header: 'Pembayaran',
       sortable: true,
       render: (_, item) => {
-        const paymentStatus = (item.payment_status ?? 'UNPAID') as keyof typeof PAYMENT_STATUS_CONFIG
-        const paymentConfig = PAYMENT_STATUS_CONFIG[paymentStatus] ?? PAYMENT_STATUS_CONFIG.UNPAID
+        const paymentStatus = (item['payment_status'] ?? 'UNPAID') as string
+        const paymentConfig = PAYMENT_STATUS_CONFIG[paymentStatus] ?? PAYMENT_STATUS_CONFIG['UNPAID']
         return (
           <div className="space-y-2">
-            <div className="font-medium">{formatCurrency(item.total_amount ?? 0)}</div>
-            <Badge variant="outline" className={paymentConfig.color}>
-              {paymentConfig.label}
+            <div className="font-medium">{formatCurrency((item['total_amount'] as number) ?? 0)}</div>
+            <Badge variant="outline" className={paymentConfig?.color}>
+              {paymentConfig?.label}
             </Badge>
-            {(item.paid_amount ?? 0) > 0 && item.payment_status !== 'PAID' && (
+            {((item['paid_amount'] as number) ?? 0) > 0 && item['payment_status'] !== 'PAID' && (
               <div className="text-xs text-muted-foreground">
-                Dibayar: {formatCurrency(item.paid_amount ?? 0)}
+                Dibayar: {formatCurrency((item['paid_amount'] as number) ?? 0)}
               </div>
             )}
           </div>
@@ -239,30 +239,36 @@ export const OrderComponent = ({
   // Custom actions for status updates
   const customActions = useMemo((): CustomAction<OrderWithItems & Record<string, unknown>>[] => {
     if (!onUpdateStatus) return []
+    const PENDING = ORDER_STATUSES.find((s) => s.value === 'PENDING')?.value ?? 'PENDING'
+    const CONFIRMED = ORDER_STATUSES.find((s) => s.value === 'CONFIRMED')?.value ?? 'CONFIRMED'
+    const IN_PROGRESS = ORDER_STATUSES.find((s) => s.value === 'IN_PROGRESS')?.value ?? 'IN_PROGRESS'
+    const READY = ORDER_STATUSES.find((s) => s.value === 'READY')?.value ?? 'READY'
+    const DELIVERED = ORDER_STATUSES.find((s) => s.value === 'DELIVERED')?.value ?? 'DELIVERED'
+    
     return [
       {
         label: 'Konfirmasi Pesanan',
         icon: CheckCircle,
-        onClick: (item) => onUpdateStatus(item.id, 'CONFIRMED'),
-        show: (item) => item.status === 'PENDING'
+        onClick: (item) => onUpdateStatus(item['id'] as string, CONFIRMED),
+        show: (item) => item['status'] === PENDING
       },
       {
         label: 'Mulai Proses',
         icon: RefreshCw,
-        onClick: (item) => onUpdateStatus(item.id, 'IN_PROGRESS'),
-        show: (item) => item.status === 'CONFIRMED'
+        onClick: (item) => onUpdateStatus(item['id'] as string, IN_PROGRESS),
+        show: (item) => item['status'] === CONFIRMED
       },
       {
         label: 'Siap Antar',
         icon: Package,
-        onClick: (item) => onUpdateStatus(item.id, 'READY'),
-        show: (item) => item.status === 'IN_PROGRESS'
+        onClick: (item) => onUpdateStatus(item['id'] as string, READY),
+        show: (item) => item['status'] === IN_PROGRESS
       },
       {
         label: 'Kirim Pesanan',
         icon: Truck,
-        onClick: (item) => onUpdateStatus(item.id, 'DELIVERED'),
-        show: (item) => item.status === 'READY'
+        onClick: (item) => onUpdateStatus(item['id'] as string, DELIVERED),
+        show: (item) => item['status'] === READY
       }
     ]
   }, [onUpdateStatus])
@@ -296,7 +302,7 @@ export const OrderComponent = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Hapus Pesanan</AlertDialogTitle>
             <AlertDialogDescription>
-              Apakah Anda yakin ingin menghapus pesanan &quot;{orderToDelete?.order_no}&quot;? Tindakan ini tidak dapat dibatalkan.
+              Apakah Anda yakin ingin menghapus pesanan &quot;{orderToDelete?.['order_no']}&quot;? Tindakan ini tidak dapat dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

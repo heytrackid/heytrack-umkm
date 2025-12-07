@@ -20,7 +20,7 @@ export const ProfitInfoCard = () => (
             <p className="text-foreground dark:text-gray-200">
               Laporan ini menggunakan metode WAC untuk menghitung Harga Pokok Penjualan (HPP).
               WAC menghitung rata-rata tertimbang dari semua pembelian bahan baku, memberikan
-              gambaran biaya produksi yang lebih akurat dibanding FIFO atau LIFO.
+              gambaran biaya produksi yang akurat menggunakan metode WAC.
             </p>
             <p className="text-foreground dark:text-gray-200">
               <strong>Formula:</strong> Laba Bersih = Pendapatan - HPP (WAC) - Biaya Operasional

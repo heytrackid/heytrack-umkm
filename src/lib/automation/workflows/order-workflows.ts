@@ -1,8 +1,8 @@
 import { automationLogger } from '@/lib/logger'
+import { ORDER_STATUSES } from '@/lib/shared/constants'
 import { getErrorMessage } from '@/lib/type-guards'
 
-
-import type { Row, Insert, Update, Database } from '@/types/database'
+import type { Database, Insert, Row, Update } from '@/types/database'
 import type { WorkflowContext, WorkflowResult } from '@/types/features/automation'
 
 import { triggerWorkflow } from '@/lib/automation/workflows/index'
@@ -129,7 +129,8 @@ export class OrderWorkflowHandlers {
 
     try {
       // Auto-create production batch when order is CONFIRMED
-      if (newStatus === 'CONFIRMED' && supabase) {
+      const confirmedStatus = ORDER_STATUSES.find(s => s.value === 'CONFIRMED')?.value
+      if (newStatus === confirmedStatus && supabase) {
         await this.createProductionBatchForOrder(event.entityId, supabase, logger)
       }
 

@@ -8,6 +8,7 @@ import { createApiRoute, type RouteContext, type RouteHandler } from '@/lib/api/
 import { cacheInvalidation } from '@/lib/cache'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import { DateStringSchema, NonNegativeNumberSchema, PositiveNumberSchema, UUIDSchema } from '@/lib/validations/common'
 import { FinancialSyncService } from '@/services/financial/FinancialSyncService'
 import { HppTriggerService } from '@/services/hpp/HppTriggerService'
 import { InventorySyncService } from '@/services/inventory/InventorySyncService'
@@ -19,22 +20,23 @@ import type { IngredientPurchaseInsert, IngredientPurchaseUpdate } from '@/types
 // Constants and config
 export const runtime = 'nodejs'
 
+// Use centralized validation schemas
 const CreatePurchaseSchema = z.object({
-  ingredient_id: z.string().uuid('ID bahan baku tidak valid'),
-  quantity: z.number().positive('Jumlah harus lebih dari 0'),
-  unit_price: z.number().min(0, 'Harga tidak boleh negatif'),
-  total_price: z.number().min(0, 'Total tidak boleh negatif'),
+  ingredient_id: UUIDSchema.describe('ID bahan baku tidak valid'),
+  quantity: PositiveNumberSchema.describe('Jumlah harus lebih dari 0'),
+  unit_price: NonNegativeNumberSchema.describe('Harga tidak boleh negatif'),
+  total_price: NonNegativeNumberSchema.describe('Total tidak boleh negatif'),
   supplier: z.string().nullable().optional(),
-  purchase_date: z.string().optional(),
+  purchase_date: DateStringSchema.optional(),
   notes: z.string().nullable().optional(),
 })
 
 const UpdatePurchaseSchema = z.object({
-  quantity: z.number().positive().optional(),
-  unit_price: z.number().positive().optional(),
-  total_price: z.number().positive().optional(),
+  quantity: PositiveNumberSchema.optional(),
+  unit_price: PositiveNumberSchema.optional(),
+  total_price: PositiveNumberSchema.optional(),
   supplier: z.string().min(1).optional(),
-  purchase_date: z.string().optional(),
+  purchase_date: DateStringSchema.optional(),
   status: z.enum(['pending', 'ordered', 'received', 'cancelled']).optional(),
   notes: z.string().optional(),
 })
@@ -248,6 +250,7 @@ async function updatePurchaseHandler(
         await inventoryService.reverseStockFromPurchase(
           currentPurchase.ingredient_id,
           Math.abs(quantityDiff),
+          currentPurchase.unit_price ?? 0,
           `${id}-adjustment`
         )
         apiLogger.info({ purchaseId: id, quantityRemoved: Math.abs(quantityDiff) }, 'Stock decreased from purchase update')
@@ -315,6 +318,7 @@ export const DELETE = createApiRoute(
       await inventoryService.reverseStockFromPurchase(
         purchaseToDelete.ingredient_id,
         purchaseToDelete.quantity,
+        purchaseToDelete.unit_price ?? 0,
         purchaseId
       )
       apiLogger.info({ purchaseId, ingredientId: purchaseToDelete.ingredient_id, quantity: purchaseToDelete.quantity }, 'Stock reversed from purchase deletion')

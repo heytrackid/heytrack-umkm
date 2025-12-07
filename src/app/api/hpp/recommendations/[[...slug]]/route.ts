@@ -5,23 +5,23 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
-import { SecurityPresets } from '@/utils/security/api-middleware'
 import { cacheInvalidation } from '@/lib/cache'
 import { apiLogger } from '@/lib/logger'
+import { SecurityPresets } from '@/utils/security/api-middleware'
 
-import { PaginationQuerySchema } from '@/lib/validations'
+import { NonNegativeNumberSchema, PaginationQuerySchema, PriorityLevelEnum, UUIDSchema } from '@/lib/validations/common'
 import { hppRecommendationUpdateSchema } from '@/lib/validations/domains/hpp'
 import { InputSanitizer } from '@/utils/security/index'
 
 import { createSuccessResponse } from '@/lib/api-core'
 
 const CreateHppRecommendationSchema = z.object({
-  recipeId: z.string().uuid('Recipe ID harus valid'),
+  recipeId: UUIDSchema,
   recommendationType: z.string().min(1, 'Tipe rekomendasi wajib diisi').max(50),
   title: z.string().min(1, 'Judul wajib diisi').max(200),
   description: z.string().min(1, 'Deskripsi wajib diisi').max(1000),
-  potentialSavings: z.number().min(0, 'Potensi penghematan harus >= 0').optional(),
-  priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).optional().default('MEDIUM'),
+  potentialSavings: NonNegativeNumberSchema.optional(),
+  priority: PriorityLevelEnum.optional().default('MEDIUM'),
 }).strict()
 
 // GET /api/hpp/recommendations or /api/hpp/recommendations/[id]

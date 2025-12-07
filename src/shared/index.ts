@@ -262,32 +262,19 @@ export const calculateTrend = (current: number, previous: number): { value: numb
 // CONSTANTS
 // ==========================================================
 
-// DEPRECATED: Import from @/lib/shared/constants for ORDER_STATUSES, PAYMENT_METHODS, etc.
-// These constants are kept for backward compatibility but should be migrated
+// ⚠️ DEPRECATED: All constants have been moved to @/lib/shared/constants
+// Import from there instead:
+// import { ORDER_STATUSES, PAYMENT_METHODS, CUSTOMER_TYPES } from '@/lib/shared/constants'
+
+// Re-export centralized constants for backward compatibility
+export {
+    BUSINESS_UNITS, CUSTOMER_TYPES, getCustomerTypeLabel, getOrderStatusColor, getOrderStatusLabel, getPaymentMethodLabel, getPaymentStatusColor, getPaymentStatusLabel, getPriorityLevelColor, getPriorityLevelLabel, getRecipeDifficultyLabel, INGREDIENT_UNITS, ORDER_STATUSES, PAYMENT_METHODS, PAYMENT_STATUSES, PRIORITY_LEVELS, RECIPE_DIFFICULTIES, USER_ROLES, type CustomerType, type OrderStatus, type PaymentMethod, type PaymentStatus, type PriorityLevel, type RecipeDifficulty
+} from '@/lib/shared/constants'
 
 export const BUSINESS_TYPES = {
   FOOD: 'food',
   RETAIL: 'retail',
   SERVICE: 'service'
-} as const
-
-// DEPRECATED: Use @/lib/shared/constants instead
-// Kept for backward compatibility - these use lowercase values (non-standard)
-export const ORDER_STATUSES = {
-  PENDING: 'pending',
-  CONFIRMED: 'confirmed',
-  IN_PROGRESS: 'in_progress',
-  READY: 'ready',
-  DELIVERED: 'delivered',
-  CANCELLED: 'cancelled'
-} as const
-
-// DEPRECATED: Use @/lib/shared/constants instead
-export const PAYMENT_METHODS = {
-  CASH: 'cash',
-  TRANSFER: 'transfer',
-  DIGITAL_WALLET: 'digital_wallet',
-  CARD: 'card'
 } as const
 
 export const CATEGORIES = {
@@ -312,8 +299,6 @@ export const UNITS = {
 // ==========================================================
 
 export type BusinessType = typeof BUSINESS_TYPES[keyof typeof BUSINESS_TYPES]
-export type OrderStatus = typeof ORDER_STATUSES[keyof typeof ORDER_STATUSES]
-export type PaymentMethod = typeof PAYMENT_METHODS[keyof typeof PAYMENT_METHODS]
 export type Category = typeof CATEGORIES[keyof typeof CATEGORIES]
 export type Unit = typeof UNITS[keyof typeof UNITS]
 

@@ -7,6 +7,7 @@ import { createApiRoute } from '@/lib/api/route-factory'
 import { buildRecipeCostPreview } from '@/lib/costs/cost-calculations'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import { UUIDSchema } from '@/lib/validations/common'
 import { SecurityPresets } from '@/utils/security/api-middleware'
 
 // Types and schemas
@@ -17,7 +18,7 @@ import { isRecipeCostRecord } from '@/types/recipes/cost'
 export const runtime = 'nodejs'
 
 const CostPreviewsRequestSchema = z.object({
-  recipeIds: z.array(z.string()),
+  recipeIds: z.array(UUIDSchema),
 })
 
 type CostPreviewsRequest = z.infer<typeof CostPreviewsRequestSchema>

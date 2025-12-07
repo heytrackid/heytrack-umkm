@@ -1,103 +1,64 @@
 'use client'
 
-import { BarChart3 } from '@/components/icons'
+import { Calculator } from '@/components/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-import type { HPPCalculationResult, PricingMethod } from '@/modules/recipes/types/index'
+import type { HPPCalculationResult } from '@/modules/recipes/types/index'
 
-
-
-
-
-// Method descriptions for UMKM
-const getPricingMethodDescription = (method: PricingMethod) => {
-  const descriptions = {
-    'list_price': {
-      name: 'Harga List Tetap',
-      description: 'Pakai harga yang sudah ditulis di daftar, tidak berubah',
-      icon: '📋'
-    },
-    'weighted': {
-      name: 'Rata-rata Tertimbang',
-      description: 'Hitung rata-rata dari semua pembelian, yang banyak lebih berpengaruh',
-      icon: '⚖️'
-    },
-    'fifo': {
-      name: 'FIFO (Masuk Pertama Keluar Pertama)',
-      description: 'Bahan yang dibeli duluan dipakai duluan, seperti di warung',
-      icon: '📦'
-    },
-    'moving': {
-      name: 'Rata-rata Bergerak',
-      description: 'Harga rata-rata yang selalu update setiap beli bahan baru',
-      icon: '📈'
-    },
-    'latest': {
-      name: 'Harga Terakhir',
-      description: 'Pakai harga dari pembelian paling baru',
-      icon: '🆕'
-    }
-  }
-  return descriptions[method] || descriptions['list_price']
-}
-
-interface MethodComparisonCardProps {
+interface WACInfoCardProps {
   calculationResult: HPPCalculationResult
   formatCurrency: (amount: number) => string
-  selectedPricingMethod: PricingMethod
 }
 
 /**
- * Pricing method comparison card component
+ * WAC calculation info card component
  */
-export const MethodComparisonCard = ({ calculationResult, formatCurrency, selectedPricingMethod }: MethodComparisonCardProps) => (
+export const WACInfoCard = ({ calculationResult, formatCurrency }: WACInfoCardProps) => (
   <Card>
     <CardHeader>
       <CardTitle className="flex items-center gap-2">
-        <BarChart3 className="h-5 w-5" />
-        Perbandingan Metode Harga
+        <Calculator className="h-5 w-5" />
+        Perhitungan HPP (WAC)
       </CardTitle>
     </CardHeader>
     <CardContent>
-      <div className="space-y-3">
-        {calculationResult.pricingAlternatives.map((alternative) => {
-          const methodDesc = getPricingMethodDescription(alternative.method)
-          return (
-            <div
-              key={alternative.method}
-              className={`flex items-center justify-between p-3 rounded-lg border ${alternative.method === selectedPricingMethod
-                ? 'border-border/20 bg-muted'
-                : 'border-border/20'
-                }`}
-            >
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span>{methodDesc.icon}</span>
-                  <span className="font-medium">
-                    {methodDesc.name}
-                  </span>
-                  {alternative.method === selectedPricingMethod && (
-                    <Badge variant="default" className="text-xs">Dipilih</Badge>
-                  )}
-                  {alternative.method === 'moving' && alternative.method !== selectedPricingMethod && (
-                    <Badge variant="secondary" className="text-xs">Rekomendasi</Badge>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {alternative.methodDescription}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="font-semibold">
-                  {formatCurrency(alternative.costPerUnit)}
-                </p>
-                <p className="text-xs text-muted">per porsi</p>
-              </div>
+      <div className="space-y-4">
+        {/* WAC Method Info */}
+        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center gap-2 mb-2">
+            <span>📦</span>
+            <span className="font-medium text-blue-800">WAC (Weighted Average Cost)</span>
+            <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">Aktif</Badge>
+          </div>
+          <p className="text-sm text-blue-700">
+            Sistem menggunakan metode WAC untuk menghitung biaya bahan baku yang paling akurat
+          </p>
+        </div>
+
+        {/* Current Calculation */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="text-center p-3 bg-muted rounded-lg">
+            <div className="text-2xl font-bold text-primary">
+              {formatCurrency(calculationResult.calculations.hppPerUnit)}
             </div>
-          )
-        })}
+            <div className="text-xs text-muted-foreground">HPP per Unit</div>
+          </div>
+          <div className="text-center p-3 bg-muted rounded-lg">
+            <div className="text-2xl font-bold text-green-600">
+              {formatCurrency(calculationResult.calculations.suggestedSellingPrice)}
+            </div>
+            <div className="text-xs text-muted-foreground">Harga Jual Rekomendasi</div>
+          </div>
+        </div>
+
+        {/* Margin Info */}
+        <div className="text-center p-2 bg-green-50 rounded-lg">
+          <div className="text-sm font-medium text-green-800">
+            Margin Keuntungan: {calculationResult.calculations.profitMarginPercent}%
+          </div>
+        </div>
       </div>
     </CardContent>
   </Card>

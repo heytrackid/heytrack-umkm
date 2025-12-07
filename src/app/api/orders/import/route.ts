@@ -10,20 +10,21 @@ import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { cacheInvalidation } from '@/lib/cache'
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 import { apiLogger } from '@/lib/logger'
+import { DateStringSchema, EmailSchema, NonNegativeNumberSchema, PhoneSchema, PositiveNumberSchema, RequiredString } from '@/lib/validations/common'
 import { OrderImportService } from '@/services/orders/OrderImportService'
 import type { NextResponse } from 'next/server'
 
 const ImportedOrderSchema = z.object({
-  order_no: z.string().min(1),
-  customer_name: z.string().min(1),
-  recipe_name: z.string().min(1),
-  quantity: z.number().positive(),
-  unit_price: z.number().min(0),
-  customer_phone: z.string().optional(),
-  customer_email: z.string().email().optional(),
+  order_no: RequiredString,
+  customer_name: RequiredString,
+  recipe_name: RequiredString,
+  quantity: PositiveNumberSchema,
+  unit_price: NonNegativeNumberSchema,
+  customer_phone: PhoneSchema.optional(),
+  customer_email: EmailSchema.optional(),
   customer_address: z.string().optional(),
   status: z.string(),
-  delivery_date: z.string().optional(),
+  delivery_date: DateStringSchema.optional(),
   notes: z.string().optional()
 }).strict()
 

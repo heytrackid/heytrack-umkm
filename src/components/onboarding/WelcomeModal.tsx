@@ -70,17 +70,25 @@ export function WelcomeModal({ onComplete }: WelcomeModalProps) {
 
   // Check if user has seen welcome modal
   useEffect(() => {
+    // Check all possible onboarding keys to prevent showing again
     const hasSeenWelcome = localStorage.getItem('heytrack_welcome_completed')
-    if (!hasSeenWelcome) {
-      // Delay showing modal for better UX
-      const timer = setTimeout(() => setOpen(true), 1000)
-      return () => clearTimeout(timer)
+    const hasSkippedOnboarding = localStorage.getItem('heytrack_onboarding_skipped')
+    const hasCompletedOnboarding = localStorage.getItem('heytrack_onboarding_completed')
+    
+    // If any of these are set, don't show the modal
+    if (hasSeenWelcome || hasSkippedOnboarding || hasCompletedOnboarding) {
+      return undefined
     }
-    return undefined
+    
+    // Delay showing modal for better UX
+    const timer = setTimeout(() => setOpen(true), 1000)
+    return () => clearTimeout(timer)
   }, [])
 
   const handleComplete = () => {
+    // Set all onboarding keys to prevent any modal from showing again
     localStorage.setItem('heytrack_welcome_completed', 'true')
+    localStorage.setItem('heytrack_onboarding_completed', 'true')
     setOpen(false)
     onComplete?.()
   }

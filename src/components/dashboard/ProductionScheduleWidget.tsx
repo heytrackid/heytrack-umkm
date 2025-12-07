@@ -8,6 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ListSkeleton } from '@/components/ui/skeleton-loader'
 import { useDashboardSchedule } from '@/hooks/useDashboardSchedule'
 
+// Helper function for status colors
+const getOrderStatusColor = (status: string): string => {
+  if (status === 'COMPLETED') return 'green'
+  if (status === 'IN_PROGRESS') return 'blue'
+  if (status === 'CANCELLED') return 'red'
+  return 'gray'
+}
+
 const ProductionScheduleWidgetComponent = (): JSX.Element => {
     const { data, isLoading, error } = useDashboardSchedule()
 
@@ -110,9 +118,11 @@ const ProductionScheduleWidgetComponent = (): JSX.Element => {
                     {production_schedule && production_schedule.length > 0 ? (
                         <div className="space-y-4">
                             {production_schedule.map((batch) => {
-                                const getBadgeVariant = (): "default" | "secondary" | "outline" => {
-                                    if (batch.batch_status === 'COMPLETED') {return 'default'}
-                                    if (batch.batch_status === 'IN_PROGRESS') {return 'secondary'}
+                                const getBadgeVariant = (): "default" | "secondary" | "outline" | "destructive" => {
+                                    const statusColor = getOrderStatusColor(batch.batch_status || '')
+                                    if (statusColor === 'green') {return 'default'}
+                                    if (statusColor === 'blue') {return 'secondary'}
+                                    if (statusColor === 'red') {return 'destructive'}
                                     return 'outline'
                                 }
                                 

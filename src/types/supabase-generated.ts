@@ -704,6 +704,7 @@ export type Database = {
           updated_by: string | null
           usage_rate: number | null
           user_id: string
+          waste_factor: number | null
           weighted_average_cost: number
         }
         Insert: {
@@ -735,6 +736,7 @@ export type Database = {
           updated_by?: string | null
           usage_rate?: number | null
           user_id: string
+          waste_factor?: number | null
           weighted_average_cost?: number
         }
         Update: {
@@ -766,6 +768,7 @@ export type Database = {
           updated_by?: string | null
           usage_rate?: number | null
           user_id?: string
+          waste_factor?: number | null
           weighted_average_cost?: number
         }
         Relationships: []

@@ -1,22 +1,23 @@
 // Import customers from CSV
 // Similar to supplier import functionality
 
-import { createApiRoute } from '@/lib/api/route-factory'
 import { createSuccessResponse } from '@/lib/api-core'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { createApiRoute } from '@/lib/api/route-factory'
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import { CustomerTypeEnum, EmailSchema, PercentageSchema, PhoneSchema } from '@/lib/validations/common'
 import { SecurityPresets } from '@/utils/security/api-middleware'
 import { z } from 'zod'
 
-
+// Use centralized validation schemas
 const CustomerImportSchema = z.object({
   name: z.string().min(1, 'Nama wajib diisi'),
-  email: z.string().email().optional().or(z.literal('')),
-  phone: z.string().optional(),
+  email: EmailSchema.optional().or(z.literal('')),
+  phone: PhoneSchema.optional(),
   address: z.string().optional(),
-  customer_type: z.enum(['regular', 'retail', 'wholesale', 'vip']).optional(),
-  discount_percentage: z.number().min(0).max(100).optional(),
+  customer_type: CustomerTypeEnum.optional(),
+  discount_percentage: PercentageSchema.optional(),
   notes: z.string().optional(),
 })
 

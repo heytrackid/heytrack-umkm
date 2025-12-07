@@ -249,7 +249,7 @@ export class AIFallbackService {
    - Training tim untuk konsistensi
 
 3. **Manajemen Stok**
-   - Gunakan metode FIFO (First In First Out)
+    - Gunakan metode WAC (Weighted Average Cost)
    - Hindari overstocking yang menyebabkan expired
    - Monitor stok secara real-time
 

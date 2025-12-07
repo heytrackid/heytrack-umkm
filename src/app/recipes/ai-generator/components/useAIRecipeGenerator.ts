@@ -1,15 +1,29 @@
 /**
  * Custom hook for AI Recipe Generator logic
  * Extracted from AIRecipeGeneratorLayout for better maintainability
+ * 
+ * Enhanced with:
+ * - Web Worker for heavy processing
+ * - Caching layer for results
+ * - Progress tracking with streaming updates
+ * - Recipe variations support
+ * - Batch generation
+ * - Recipe history
  */
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { useGenerateRecipe, type GenerateRecipeParams } from '@/hooks/api/useAIRecipe'
+import {
+    useGenerateRecipeEnhanced,
+    type GenerateRecipeParams,
+    type VariationType
+} from '@/hooks/api/useAIRecipeEnhanced'
 import { useAuth, useAuthMe } from '@/hooks/index'
 import { useIngredientsList } from '@/hooks/useIngredients'
 import { useCreateRecipeWithIngredients } from '@/hooks/useRecipes'
+import { useRecipeWorker } from '@/hooks/useRecipeWorker'
 import { handleError } from '@/lib/error-handling'
+import { saveToHistory } from './RecipeHistory'
 
 import type { Insert } from '@/types/database'
 import type { AvailableIngredient, GeneratedRecipe } from './types'
@@ -52,10 +66,29 @@ export function useAIRecipeGenerator() {
   // Form state
   const [formState, setFormState] = useState<AIRecipeFormState>(initialFormState)
 
-  // Mutations
-  const generateRecipeMutation = useGenerateRecipe((data: GeneratedRecipe) => {
+  // Enhanced mutations with progress tracking
+  const {
+    generate: generateRecipe,
+    isPending: isGeneratingRecipe,
+    progress: generationProgress,
+    resetProgress,
+    generateVariation,
+    generateBatch,
+    cancelGeneration,
+    isWorkerProcessing
+  } = useGenerateRecipeEnhanced((data: GeneratedRecipe) => {
     setGeneratedRecipe(data)
+    // Save to history
+    saveToHistory(data, {
+      productName: formState.productName,
+      productType: formState.productType,
+      servings: formState.servings
+    })
   })
+
+  // Web Worker for heavy calculations
+  const worker = useRecipeWorker()
+
   const createRecipeWithIngredients = useCreateRecipeWithIngredients()
 
   // Transform ingredients to AvailableIngredient format
@@ -123,6 +156,7 @@ export function useAIRecipeGenerator() {
 
     setGeneratedRecipe(null)
     setActiveTab('preview')
+    resetProgress()
 
     const params: GenerateRecipeParams = {
       name: formState.productName,
@@ -134,8 +168,8 @@ export function useAIRecipeGenerator() {
       customIngredients: formState.customIngredients,
       specialInstructions: formState.specialInstructions.trim() || ''
     }
-    generateRecipeMutation.mutate(params)
-  }, [formState, isProductNameValid, isIngredientsValid, isServingsValid, isTargetPriceValid, generateRecipeMutation])
+    generateRecipe(params)
+  }, [formState, isProductNameValid, isIngredientsValid, isServingsValid, isTargetPriceValid, generateRecipe, resetProgress])
 
   // Save recipe
   const handleSaveRecipe = useCallback(async () => {
@@ -267,6 +301,33 @@ export function useAIRecipeGenerator() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Generate recipe variation
+  const handleGenerateVariation = useCallback(async (variationType: VariationType) => {
+    if (!generatedRecipe) return null
+
+    const result = await generateVariation(
+      generatedRecipe,
+      variationType,
+      availableIngredients.map(ing => ({
+        name: ing.name,
+        price_per_unit: ing.price_per_unit
+      }))
+    )
+
+    return result
+  }, [generatedRecipe, generateVariation, availableIngredients])
+
+  // Batch generation
+  const handleBatchGenerate = useCallback(async (paramsList: GenerateRecipeParams[]) => {
+    return generateBatch(paramsList)
+  }, [generateBatch])
+
+  // Restore recipe from history
+  const handleRestoreRecipe = useCallback((recipe: GeneratedRecipe) => {
+    setGeneratedRecipe(recipe)
+    setActiveTab('preview')
+  }, [])
+
   return {
     // Auth state
     isAuthLoading,
@@ -301,8 +362,23 @@ export function useAIRecipeGenerator() {
     handleSaveRecipe,
     saveDraft,
 
+    // Enhanced features
+    handleGenerateVariation,
+    handleBatchGenerate,
+    handleRestoreRecipe,
+    cancelGeneration,
+
+    // Progress tracking
+    generationProgress,
+    resetProgress,
+
     // Mutation state
-    isGenerating: generateRecipeMutation.isPending,
-    isSaving: createRecipeWithIngredients.isPending
+    isGenerating: isGeneratingRecipe,
+    isSaving: createRecipeWithIngredients.isPending,
+    isWorkerProcessing,
+
+    // Worker utilities
+    matchIngredients: worker.matchIngredients,
+    calculateCosts: worker.calculateCosts
   }
 }

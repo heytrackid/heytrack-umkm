@@ -96,3 +96,103 @@ Pre-commit hook automatically runs `pnpm run validate` (lint + type-check) via H
 - **Node.js Runtime**: API routes use `export const runtime = 'nodejs'`
 - **Edge Runtime**: Available for specific routes requiring edge deployment
 - **Environment Variables**: Managed via `.env.local` (see `.env.example`)
+
+
+## Code Organization - Single Source of Truth ✅
+
+### Constants & Enums
+**Import from:** `@/lib/shared/constants`
+```typescript
+import { 
+  ORDER_STATUSES,
+  PAYMENT_METHODS,
+  CUSTOMER_TYPES,
+  getOrderStatusLabel,
+  getOrderStatusColor,
+  type OrderStatus,
+  type PaymentMethod
+} from '@/lib/shared/constants'
+```
+
+**Available:**
+- ORDER_STATUSES, PAYMENT_STATUSES, PAYMENT_METHODS
+- CUSTOMER_TYPES, RECIPE_DIFFICULTIES, INGREDIENT_UNITS
+- PRIORITY_LEVELS, BUSINESS_UNITS, USER_ROLES
+- Helper functions: `getOrderStatusLabel()`, `getOrderStatusColor()`, etc.
+- TypeScript types for all enums
+
+**⚠️ NEVER hardcode status values or create duplicate constants!**
+
+### Validation Schemas
+**Import from:** `@/lib/validations/common`
+```typescript
+import { 
+  PaginationQuerySchema,
+  UUIDSchema,
+  DateRangeSchema,
+  EmailSchema,
+  OrderStatusEnum
+} from '@/lib/validations/common'
+```
+
+**Available:**
+- Pagination: PaginationQuerySchema, PaginationSchema
+- Date/Time: DateRangeSchema, DateStringSchema
+- Files: FileUploadSchema, ImageUploadSchema
+- IDs: UUIDSchema, IdParamSchema, IdsParamSchema
+- Bulk: BulkDeleteSchema, BulkUpdateSchema
+- Reports: ReportQuerySchema, SalesQuerySchema
+- Base: EmailSchema, PhoneSchema, PositiveNumberSchema
+- Enums: OrderStatusEnum, PaymentMethodEnum, UserRoleEnum
+- Forms: CustomerSchema, OrderSchema, RecipeSchema
+- API: HPPCalculationInputSchema, SalesCalculationSchema
+
+**⚠️ NEVER create inline Zod schemas in API routes!**
+
+### Currency Formatting
+**Import from:** `@/lib/currency`
+```typescript
+import { 
+  formatCurrentCurrency,
+  getCurrentCurrency,
+  type Currency
+} from '@/lib/currency'
+```
+
+### API Routes
+**Import from:** `@/lib/api/route-factory`
+```typescript
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+
+export const runtime = 'nodejs'
+
+export const GET = createApiRoute(
+  {
+    method: 'GET',
+    path: '/api/resource',
+    querySchema: MyQuerySchema,
+    requireAuth: true,
+  },
+  async (context, validatedQuery) => {
+    // Handler logic
+  }
+)
+```
+
+**Pattern:** All API routes use `createApiRoute()` for consistency
+- Built-in auth, validation, error handling, logging
+- Always add `export const runtime = 'nodejs'` at top
+- Use security presets from `@/utils/security/api-middleware`
+
+### Standardization Documentation
+- **Complete Guide:** `STANDARDIZATION_GUIDE.md` - Full migration instructions
+- **Quick Reference:** `STANDARDIZATION_QUICK_REF.md` - Quick reference card
+- **Summary:** `STANDARDIZATION_SUMMARY.md` - Current status and progress
+- **Migration Tool:** `scripts/migrate-constants.sh` - Scan for issues
+
+### Best Practices
+1. **Always** import from centralized locations
+2. **Never** hardcode status values or labels
+3. **Never** create inline Zod schemas
+4. **Use** helper functions for labels and colors
+5. **Follow** TypeScript strict mode guidelines

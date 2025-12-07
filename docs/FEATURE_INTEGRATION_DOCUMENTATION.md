@@ -95,7 +95,7 @@ Sistem ini terdiri dari 11 fitur utama yang saling terhubung melalui data dan pr
 **Logika Bisnis**:
 - Weighted Average Cost (WAC) untuk inventory valuation
 - Reorder point calculation: (Average Daily Usage × Lead Time) + Safety Stock
-- FIFO (First In, First Out) untuk stock rotation
+- WAC (Weighted Average Cost) untuk stock valuation
 
 ### 6. Production Management ↔ Recipes, Inventory, Orders
 **Integrasi Masuk**:
@@ -224,7 +224,7 @@ Sistem ini terdiri dari 11 fitur utama yang saling terhubung melalui data dan pr
 #### 4. AI Chatbot ↔ Business Rules Integration
 **Status**: ✅ **COMPLETED**
 **Implementasi**: Context-aware AI dengan business rules
-- AI memiliki akses ke HPP formula, margin minimum 30-50%, FIFO inventory rules
+- AI memiliki akses ke HPP formula, margin minimum 30-50%, WAC inventory valuation
 - Response berdasarkan aturan bisnis HeyTrack
 - Contoh kalkulasi HPP langsung dalam response
 **Dampak**: Smarter operational recommendations, context-aware assistance
@@ -308,7 +308,7 @@ private static buildBusinessRulesContext() {
   • HPP Formula: (Biaya Bahan + Overhead) / (1 - Margin Keuntungan)
   • Margin Minimum: 30-50% untuk produk makanan
   • Reorder Point: (Penggunaan Harian × Lead Time) + Safety Stock
-  • FIFO Inventory: First In, First Out untuk rotasi stok
+  • WAC Inventory: Weighted Average Cost untuk valuasi stok
   `
 }
 ```

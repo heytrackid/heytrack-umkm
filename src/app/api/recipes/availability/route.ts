@@ -2,19 +2,20 @@
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 export const runtime = 'nodejs'
 
-import { z } from 'zod'
 import { SecurityPresets } from '@/utils/security/api-middleware'
+import { z } from 'zod'
 
-import { apiLogger, logError } from '@/lib/logger'
-import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
 import { createSuccessResponse } from '@/lib/api-core'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
+import { apiLogger, logError } from '@/lib/logger'
+import { PositiveNumberSchema, UUIDSchema } from '@/lib/validations/common'
+import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
 import type { NextResponse } from 'next/server'
 
 const CheckMultipleRecipesSchema = z.object({
   recipes: z.array(z.object({
-    recipe_id: z.string().uuid('Recipe ID harus valid'),
-    quantity: z.number().positive('Jumlah harus > 0'),
+    recipe_id: UUIDSchema,
+    quantity: PositiveNumberSchema,
   })).min(1, 'Minimal satu resep untuk dicek'),
 }).strict()
 

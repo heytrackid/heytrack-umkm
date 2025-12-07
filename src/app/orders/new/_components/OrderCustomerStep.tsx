@@ -69,10 +69,11 @@ export const OrderCustomerStep = ({
         />
       </div>
       <div>
-        <Label htmlFor="customer_email">Email</Label>
+        <Label htmlFor="customer_email">Email (Opsional)</Label>
         <Input
           id="customer_email"
           type="email"
+          placeholder="Masukkan email jika ada"
           value={formData.customer_email}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange('customer_email', e.target.value)}
         />

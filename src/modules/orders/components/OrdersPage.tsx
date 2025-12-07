@@ -21,6 +21,7 @@ import type { OrderListItem, OrderStatus } from '@/types/database'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useCurrency } from '@/hooks/useCurrency'
+import { ORDER_STATUSES, PAYMENT_STATUSES } from '@/lib/shared/constants'
 import { getErrorMessage } from '@/lib/type-guards'
 import { cn } from '@/lib/utils'
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
@@ -164,29 +165,38 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
   const error = queryError ? getErrorMessage(queryError) : null
 
   // ✅ Calculate stats with useMemo for performance (use all orders, not filtered)
-  const stats = useMemo<OrderStats>(() => ({
-    total_orders: orders.length,
-    pending_orders: orders.filter((o) => o.status === 'PENDING').length,
-    confirmed_orders: orders.filter((o) => o.status === 'CONFIRMED').length,
-    in_production_orders: orders.filter((o) => o.status === 'IN_PROGRESS').length,
-    completed_orders: orders.filter((o) => o.status === 'DELIVERED').length,
-    cancelled_orders: orders.filter((o) => o.status === 'CANCELLED').length,
-    total_revenue: orders.reduce((sum, o) => sum + Number(o.total_amount ?? 0), 0),
-    pending_revenue: arrayCalculations.sum(
-      orders.filter((o) => o.payment_status === 'UNPAID') as unknown as Record<string, unknown>[],
-      'total_amount'
-    ),
-    paid_revenue: arrayCalculations.sum(
-      orders.filter((o) => o.payment_status !== 'UNPAID') as unknown as Record<string, unknown>[],
-      'total_amount'
-    ),
-    average_order_value: arrayCalculations.average(orders as unknown as Record<string, unknown>[], 'total_amount'),
-    total_customers: new Set(orders.filter((o) => o.customer_name).map((o) => o.customer_name)).size,
-    repeat_customers: 0,
-    period_growth: 0,
-    revenue_growth: 0,
-    order_growth: 0
-  }), [orders])
+  const stats = useMemo<OrderStats>(() => {
+    const PENDING = ORDER_STATUSES.find(s => s.value === 'PENDING')?.value
+    const CONFIRMED = ORDER_STATUSES.find(s => s.value === 'CONFIRMED')?.value
+    const IN_PROGRESS = ORDER_STATUSES.find(s => s.value === 'IN_PROGRESS')?.value
+    const DELIVERED = ORDER_STATUSES.find(s => s.value === 'DELIVERED')?.value
+    const CANCELLED = ORDER_STATUSES.find(s => s.value === 'CANCELLED')?.value
+    const UNPAID = PAYMENT_STATUSES.find(s => s.value === 'PENDING')?.value
+    
+    return {
+      total_orders: orders.length,
+      pending_orders: orders.filter((o) => o.status === PENDING).length,
+      confirmed_orders: orders.filter((o) => o.status === CONFIRMED).length,
+      in_production_orders: orders.filter((o) => o.status === IN_PROGRESS).length,
+      completed_orders: orders.filter((o) => o.status === DELIVERED).length,
+      cancelled_orders: orders.filter((o) => o.status === CANCELLED).length,
+      total_revenue: orders.reduce((sum, o) => sum + Number(o.total_amount ?? 0), 0),
+      pending_revenue: arrayCalculations.sum(
+        orders.filter((o) => o.payment_status === UNPAID) as unknown as Record<string, unknown>[],
+        'total_amount'
+      ),
+      paid_revenue: arrayCalculations.sum(
+        orders.filter((o) => o.payment_status !== UNPAID) as unknown as Record<string, unknown>[],
+        'total_amount'
+      ),
+      average_order_value: arrayCalculations.average(orders as unknown as Record<string, unknown>[], 'total_amount'),
+      total_customers: new Set(orders.filter((o) => o.customer_name).map((o) => o.customer_name)).size,
+      repeat_customers: 0,
+      period_growth: 0,
+      revenue_growth: 0,
+      order_growth: 0
+    }
+  }, [orders])
 
   const getStatusColor = (status: OrderStatus | null) => {
     if (!status) { return 'bg-gray-100 text-gray-800' }

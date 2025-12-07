@@ -96,10 +96,10 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
             </FormField>
 
             <FormField
-              label="Email"
+              label="Email (Opsional)"
               error={form.formState.errors['email']?.message as string}
             >
-              <Input type="email" {...form.register('email')} />
+              <Input type="email" {...form.register('email')} placeholder="Masukkan email jika ada" />
             </FormField>
 
             <FormField

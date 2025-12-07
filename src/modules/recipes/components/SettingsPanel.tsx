@@ -6,10 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useSettings } from '@/contexts/settings-context'
-
-import type { PricingMethod } from '@/modules/recipes/types/index'
 
 import { UMKMTooltip } from '@/modules/recipes/components/UMKMTooltip'
 
@@ -18,53 +15,18 @@ import { UMKMTooltip } from '@/modules/recipes/components/UMKMTooltip'
 
 
 
-// Method descriptions for UMKM
-const getPricingMethodDescription = (method: PricingMethod) => {
-  const descriptions = {
-    'list_price': {
-      name: 'Harga List Tetap',
-      description: 'Pakai harga yang sudah ditulis di daftar, tidak berubah',
-      icon: '📋',
-      pros: 'Gampang, tidak ribet',
-      cons: 'Bisa kurang akurat jika harga bahan sudah beda'
-    },
-    'weighted': {
-      name: 'Rata-rata Tertimbang',
-      description: 'Hitung rata-rata dari semua pembelian, yang banyak lebih berpengaruh',
-      icon: '⚖️',
-      pros: 'Akurat untuk pembelian besar',
-      cons: 'Agak susah dipahami'
-    },
-    'fifo': {
-      name: 'FIFO (Masuk Pertama Keluar Pertama)',
-      description: 'Bahan yang dibeli duluan dipakai duluan, seperti di warung',
-      icon: '📦',
-      pros: 'Sesuai cara kerja gudang',
-      cons: 'Ribet track bahan mana yang duluan'
-    },
-    'moving': {
-      name: 'Rata-rata Bergerak',
-      description: 'Harga rata-rata yang selalu update setiap beli bahan baru',
-      icon: '📈',
-      pros: 'Paling akurat untuk HPP, otomatis update',
-      cons: 'Perlu sistem yang bagus'
-    },
-    'latest': {
-      name: 'Harga Terakhir',
-      description: 'Pakai harga dari pembelian paling baru',
-      icon: '🆕',
-      pros: 'Sederhana, harga terkini',
-      cons: 'Bisa fluktuatif, tidak stabil'
-    }
-  }
-  return descriptions[method] || descriptions['list_price']
+// WAC method info - constant for display (exported for potential future use)
+export const WAC_METHOD_INFO = {
+  name: 'WAC (Weighted Average Cost)',
+  description: 'Metode perhitungan biaya bahan baku yang paling akurat untuk bisnis kuliner',
+  icon: '📦',
+  pros: 'Akurat, sesuai standar akuntansi, otomatis update',
+  cons: 'Tidak ada - ini metode terbaik'
 }
 
 interface SettingsPanelProps {
-  selectedPricingMethod: PricingMethod
   profitMarginPercent: number
   includeOperationalCosts: boolean
-  onPricingMethodChange: (method: PricingMethod) => void
   onProfitMarginChange: (margin: number) => void
   onIncludeOperationalCostsChange: (include: boolean) => void
 }
@@ -73,14 +35,11 @@ interface SettingsPanelProps {
  * Settings panel component for HPP calculation parameters
  */
 export const SettingsPanel = ({
-  selectedPricingMethod,
   profitMarginPercent,
   includeOperationalCosts,
-  onPricingMethodChange,
   onProfitMarginChange,
   onIncludeOperationalCostsChange
 }: SettingsPanelProps) => {
-  const methodInfo = getPricingMethodDescription(selectedPricingMethod)
   const { formatCurrency } = useSettings()
 
   return (
@@ -93,44 +52,20 @@ export const SettingsPanel = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Pricing Method Selection */}
+          {/* Pricing Method Info - WAC Only */}
           <div>
-            <UMKMTooltip
-              title="Metode Harga Bahan"
-              content="Cara sistem menghitung harga bahan baku. Pilih 'Rata-rata Bergerak' untuk hasil paling akurat!"
-            >
-              <Label className="text-sm font-medium">Metode Harga Bahan</Label>
-            </UMKMTooltip>
-            <Select value={selectedPricingMethod} onValueChange={onPricingMethodChange}>
-              <SelectTrigger className="mt-2">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {(['list_price', 'weighted', 'fifo', 'moving', 'latest'] as PricingMethod[]).map(method => {
-                  const methodDesc = getPricingMethodDescription(method)
-                  return (
-                    <SelectItem key={method} value={method}>
-                      <div className="flex items-center gap-2">
-                        <span>{methodDesc.icon}</span>
-                        <span>{methodDesc.name}</span>
-                        {method === 'moving' && <Badge variant="secondary" className="text-xs">Rekomendasi</Badge>}
-                      </div>
-                    </SelectItem>
-                  )
-                })}
-              </SelectContent>
-            </Select>
-
-            {/* Method explanation */}
-            <div className="mt-2 p-3 bg-muted rounded-lg text-xs">
+            <Label className="text-sm font-medium">Metode Perhitungan Harga</Label>
+            <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg text-xs">
               <div className="flex items-center gap-2 mb-1">
-                <span>{methodInfo.icon}</span>
-                <span className="font-medium">{methodInfo.name}</span>
+                <span>📦</span>
+                <span className="font-medium text-green-800">WAC (Weighted Average Cost)</span>
+                <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">Aktif</Badge>
               </div>
-              <p className="text-muted-foreground mb-2">{methodInfo.description}</p>
+              <p className="text-green-700 mb-2">Metode perhitungan biaya bahan baku yang paling akurat dan sesuai standar akuntansi</p>
               <div className="grid grid-cols-1 gap-1">
-                <p className="text-muted-foreground">✅ {methodInfo.pros}</p>
-                <p className="text-orange-600">⚠️ {methodInfo.cons}</p>
+                <p className="text-green-700">✅ Akurat untuk bisnis kuliner</p>
+                <p className="text-green-700">✅ Otomatis update dengan pembelian baru</p>
+                <p className="text-green-700">✅ Sesuai standar akuntansi</p>
               </div>
             </div>
           </div>

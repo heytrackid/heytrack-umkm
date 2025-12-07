@@ -1,6 +1,6 @@
 'use client'
 
-import { DollarSign, TrendingUp, Truck, Upload, Users } from '@/components/icons'
+import { DollarSign, MessageSquare, TrendingUp, Truck, Upload, Users } from '@/components/icons'
 import { useCallback, useState } from 'react'
 
 import { generateSuppliersTemplate, parseSuppliersCSV } from '@/components/import/csv-helpers'
@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { BreadcrumbPatterns, PageBreadcrumb, StatsCards } from '@/components/ui/index'
+import { errorToast, successToast } from '@/hooks/use-toast'
 import {
     useBulkDeleteSuppliers,
     useCreateSupplier,
@@ -28,9 +29,9 @@ import {
     useSuppliers,
     useUpdateSupplier
 } from '@/hooks/useSuppliers'
-import { successToast, errorToast } from '@/hooks/use-toast'
 
 import { SupplierEditDialog } from '@/app/suppliers/components/SupplierEditDialog'
+import { SupplierFollowup } from '@/app/suppliers/components/SupplierFollowup'
 import { SupplierForm } from '@/app/suppliers/components/SupplierForm'
 import type { Supplier } from './components/types'
 
@@ -54,6 +55,12 @@ const SuppliersPage = (): JSX.Element => {
 
     // Edit dialog state
     const [editDialog, setEditDialog] = useState<{
+        open: boolean
+        supplier: Supplier | null
+    }>({ open: false, supplier: null })
+
+    // Followup dialog state
+    const [followupDialog, setFollowupDialog] = useState<{
         open: boolean
         supplier: Supplier | null
     }>({ open: false, supplier: null })
@@ -184,6 +191,21 @@ const SuppliersPage = (): JSX.Element => {
         setEditDialog({ open: true, supplier })
     }, [])
 
+    const handleFollowup = useCallback((supplier: Supplier) => {
+        setFollowupDialog({ open: true, supplier })
+    }, [])
+
+    // Custom actions for table
+    const customActions = [
+        {
+            label: 'Follow Up',
+            icon: MessageSquare,
+            onClick: handleFollowup,
+            variant: 'default' as const,
+            show: (supplier: Supplier) => Boolean(supplier.is_active && (supplier.phone || supplier.email))
+        }
+    ]
+
     const handleEditSubmit = useCallback(async (data: Partial<Supplier>) => {
         if (!editDialog.supplier) return
         
@@ -266,6 +288,7 @@ const SuppliersPage = (): JSX.Element => {
                 <SharedDataTable
                     data={suppliers || []}
                     columns={columns}
+                    customActions={customActions}
                     title="Daftar Supplier"
                     searchPlaceholder="Cari supplier..."
                     emptyMessage="Belum ada data supplier"
@@ -278,6 +301,7 @@ const SuppliersPage = (): JSX.Element => {
                     enableBulkActions={true}
                     enablePagination={true}
                     pageSizeOptions={[10, 25, 50, 100]}
+
                     exportable={true}
                     refreshable={true}
                 />
@@ -321,6 +345,13 @@ const SuppliersPage = (): JSX.Element => {
                     onOpenChange={(open) => !open && setEditDialog({ open: false, supplier: null })}
                     onSubmit={handleEditSubmit}
                     isLoading={updateSupplierMutation.isPending}
+                />
+
+                {/* Followup Dialog */}
+                <SupplierFollowup
+                    supplier={followupDialog.supplier}
+                    open={followupDialog.open}
+                    onOpenChange={(open) => !open && setFollowupDialog({ open: false, supplier: null })}
                 />
 
                 {/* Import Dialog */}

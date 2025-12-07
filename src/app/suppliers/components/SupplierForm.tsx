@@ -111,11 +111,11 @@ const SupplierForm = ({ onSubmit }: SupplierFormProps): JSX.Element => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Email (Opsional)</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="supplier@email.com"
+                  placeholder="Masukkan email jika ada"
                   {...form.register('email')}
                 />
                 {form.formState.errors.email && (

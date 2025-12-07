@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { queryConfig } from '@/lib/query/query-config'
 import { buildApiUrl, fetchApi } from '@/lib/query/query-helpers'
+import { ORDER_STATUSES } from '@/lib/shared/constants'
 import type { Row } from '@/types/database'
 
 type Order = Row<'orders'>
@@ -157,8 +158,8 @@ export function useSalesStats(options?: { dateRange?: { start?: string; end?: st
       
       const totalOrders = orders.length
       const totalRevenue = orders.reduce((sum: number, order: Order) => sum + (order.total_amount || 0), 0)
-      const completedOrders = orders.filter((order: Order) => order.status === 'READY').length
-      const pendingOrders = orders.filter((order: Order) => order.status === 'PENDING').length
+      const completedOrders = orders.filter((order: Order) => order.status === ORDER_STATUSES.find((s) => s.value === 'READY')?.value).length
+      const pendingOrders = orders.filter((order: Order) => order.status === ORDER_STATUSES.find((s) => s.value === 'PENDING')?.value).length
 
       return {
         totalOrders,

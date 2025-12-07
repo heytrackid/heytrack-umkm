@@ -120,8 +120,8 @@ export class HppCalculatorService extends BaseService {
         }
 
         const quantity = Number(ri.quantity ?? 0)
-        // ALWAYS use current price for material cost (not WAC)
-        // WAC adjustment is calculated separately
+        // Use current price for material cost, then adjust to WAC for accurate costing
+        // WAC adjustment accounts for historical cost averaging
         const unit_price = Number(validIngredient.price_per_unit ?? 0)
         
         // Apply waste factor (default 1.0 = no waste, 1.05 = 5% waste)
@@ -396,16 +396,15 @@ export class HppCalculatorService extends BaseService {
 
       // Case 1: Recipe has production history - allocate based on volume ratio
       if (totalVolume > 0 && recipeVolume > 0) {
-        const allocationRatio = recipeVolume / totalVolume
-        const allocatedOverhead = totalOverhead * allocationRatio
-        const overheadPerUnit = allocatedOverhead / recipeVolume
+        // Volume-based allocation: each unit gets equal share of total overhead
+        // overheadPerUnit = totalOverhead / totalVolume (fair allocation per unit)
+        const overheadPerUnit = totalOverhead / totalVolume
         
         this.logger.debug({
           recipeId,
           totalOverhead,
           recipeVolume,
           totalVolume,
-          allocationRatio,
           overheadPerUnit,
           source: 'volume_based'
         }, 'Overhead calculated based on production volume')

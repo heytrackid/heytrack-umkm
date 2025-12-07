@@ -7,6 +7,7 @@ import { ListQuerySchema, createDeleteHandler, createGetHandler, createListHandl
 import { createApiRoute } from '@/lib/api/route-factory'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { SecurityPresets } from '@/utils/security/api-middleware'
+import { RequiredString, PositiveNumberSchema, DateStringSchema } from '@/lib/validations/common'
 
 // Types and schemas
 // Constants and config
@@ -15,18 +16,18 @@ import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 export const runtime = 'nodejs'
 
 const FinancialRecordSchema = z.object({
-  description: z.string().min(1),
-  category: z.string().min(1),
-  amount: z.number().positive(),
-  date: z.string(),
+  description: RequiredString,
+  category: RequiredString,
+  amount: PositiveNumberSchema,
+  date: DateStringSchema,
   type: z.enum(['INCOME', 'EXPENSE']),
 })
 
 const UpdateFinancialRecordSchema = z.object({
-  description: z.string().min(1).optional(),
-  category: z.string().min(1).optional(),
-  amount: z.number().positive().optional(),
-  date: z.string().optional(),
+  description: RequiredString.optional(),
+  category: RequiredString.optional(),
+  amount: PositiveNumberSchema.optional(),
+  date: DateStringSchema.optional(),
 })
 
 // GET /api/financial/records or /api/financial/records/[id]

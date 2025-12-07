@@ -334,6 +334,11 @@ export class AiService extends BaseService {
     const ingredientCount = businessContext.business_data.ingredients_count || 0
     const calculatedRecipes = businessContext.business_data.calculated_recipes_count || 0
     const recentOrders = businessContext.recent_activities || []
+    
+    // Import ORDER_STATUSES for status comparisons
+    const { ORDER_STATUSES } = await import('@/lib/shared/constants')
+    const deliveredStatus = ORDER_STATUSES.find(s => s.value === 'DELIVERED')?.value
+    const pendingStatus = ORDER_STATUSES.find(s => s.value === 'PENDING')?.value
 
     // ===== GREETING & GENERAL =====
     if (lowerMessage.match(/^(hai|halo|hi|hello|hey|selamat|pagi|siang|sore|malam)/)) {
@@ -350,8 +355,8 @@ export class AiService extends BaseService {
     // ===== BUSINESS HEALTH / KONDISI =====
     if (lowerMessage.match(/(kondisi|kesehatan|gimana|bagaimana).*(bisnis|usaha|toko)/i) || 
         lowerMessage.includes('ringkasan') || lowerMessage.includes('summary')) {
-      const completedOrders = recentOrders.filter(o => o.status === 'DELIVERED').length
-      const pendingOrders = recentOrders.filter(o => o.status === 'PENDING').length
+      const completedOrders = recentOrders.filter(o => o.status === deliveredStatus).length
+      const pendingOrders = recentOrders.filter(o => o.status === pendingStatus).length
       const totalRevenue = recentOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0)
       
       let healthStatus = '🟢 Excellent'
@@ -417,9 +422,10 @@ export class AiService extends BaseService {
         return `🛒 **Pesanan**\n\nBelum ada data pesanan. Fitur pesanan membantu:\n• Catat order dari customer\n• Track status pengerjaan\n• Kirim notifikasi WhatsApp\n• Analisis penjualan\n\n**Cara buat pesanan:**\n1. Buka menu **Pesanan**\n2. Klik **Pesanan Baru**\n3. Pilih customer & produk\n\nMau coba buat pesanan pertama?`
       }
 
-      const completedOrders = recentOrders.filter(o => o.status === 'DELIVERED').length
-      const pendingOrders = recentOrders.filter(o => o.status === 'PENDING').length
-      const inProgressOrders = recentOrders.filter(o => o.status === 'IN_PROGRESS').length
+      const inProgressStatus = ORDER_STATUSES.find(s => s.value === 'IN_PROGRESS')?.value
+      const completedOrders = recentOrders.filter(o => o.status === deliveredStatus).length
+      const pendingOrders = recentOrders.filter(o => o.status === pendingStatus).length
+      const inProgressOrders = recentOrders.filter(o => o.status === inProgressStatus).length
 
       return `🛒 **Pesanan Terbaru**\n\n📊 **Status:**\n• ✅ Selesai: ${completedOrders}\n• 🔄 Diproses: ${inProgressOrders}\n• ⏳ Pending: ${pendingOrders}\n\n${pendingOrders > 0 ? `⚠️ Ada ${pendingOrders} pesanan pending yang perlu diproses!\n\n` : ''}Buka menu **Pesanan** untuk detail lengkap.`
     }
@@ -558,7 +564,9 @@ export class AiService extends BaseService {
       return 'needs_attention'
     }
 
-    const completedOrders = orders.filter(o => o.status === 'DELIVERED').length
+    const { ORDER_STATUSES } = await import('@/lib/shared/constants')
+    const deliveredStatus = ORDER_STATUSES.find(s => s.value === 'DELIVERED')?.value
+    const completedOrders = orders.filter(o => o.status === deliveredStatus).length
     const completionRate = completedOrders / orders.length
 
     if (completionRate >= 0.9) return 'excellent'

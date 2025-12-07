@@ -105,7 +105,7 @@ ATURAN BISNIS HEYTRACK:
 • Reorder Point: (Penggunaan Harian Rata-rata × Lead Time) + Safety Stock
 • Status Pesanan: Draft → Confirmed → Processing → Ready → Delivered
 • Validasi Stok: Pesanan harus dicek ketersediaan bahan sebelum konfirmasi
-• FIFO Inventory: First In, First Out untuk rotasi stok
+• WAC Inventory: Weighted Average Cost untuk valuasi stok
 • Break-even Analysis: Fixed Costs / (Selling Price - Variable Cost per Unit)
 • Supplier Lead Time: Pertimbangkan waktu pengiriman dalam perencanaan produksi`
   }

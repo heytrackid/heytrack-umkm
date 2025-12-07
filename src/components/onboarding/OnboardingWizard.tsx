@@ -1,13 +1,13 @@
 'use client'
 
-import { 
-  Package, 
-  ChefHat, 
-  ShoppingCart, 
-  Calculator,
-  CheckCircle2,
-  ArrowRight,
-  X
+import {
+    ArrowRight,
+    Calculator,
+    CheckCircle2,
+    ChefHat,
+    Package,
+    ShoppingCart,
+    X
 } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -15,11 +15,11 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
 } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
@@ -110,8 +110,9 @@ export const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) 
 
   const handleSkip = () => {
     onOpenChange(false)
-    // Store in localStorage that user skipped onboarding
+    // Store in localStorage that user skipped onboarding (set all keys for consistency)
     localStorage.setItem('heytrack_onboarding_skipped', 'true')
+    localStorage.setItem('heytrack_welcome_completed', 'true')
   }
 
   const currentStepData = ONBOARDING_STEPS[currentStep]

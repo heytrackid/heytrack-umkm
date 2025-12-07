@@ -1,11 +1,16 @@
 // External libraries
 // Internal modules
-import { NextResponse } from 'next/server'
-import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
-import { SecurityPresets } from '@/utils/security/api-middleware'
 import { createSuccessResponse } from '@/lib/api-core'
+import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import {
+    BusinessInfoSettingsSchema,
+    RegionalSettingsSchema,
+    UserProfileSettingsSchema
+} from '@/lib/validations/common'
+import { SecurityPresets } from '@/utils/security/api-middleware'
+import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
 // Types and schemas
@@ -14,45 +19,22 @@ import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
 
 export const runtime = 'nodejs'
 
-const BusinessSchema = z.object({
-  businessName: z.string().optional().or(z.literal('')),
-  businessType: z.string().optional(),
-  address: z.string().optional(),
-  business_phone: z.string().optional().or(z.literal('')),
-  phone: z.string().optional(),
-  tax_id: z.string().optional().or(z.literal('')),
-  taxNumber: z.string().optional(),
-  email: z.string().optional(),
-  website: z.string().optional(),
-  description: z.string().optional(),
-  currency: z.string().optional(),
-  timezone: z.string().optional(),
-})
+// Use centralized settings schemas
+const BusinessSchema = BusinessInfoSettingsSchema
 
 const PreferencesSchema = z.object({
   system: z.object({
     defaultTax: z.number().min(0).max(100),
     lowStockThreshold: z.number().min(0),
   }),
-  ui: z.object({
-    theme: z.enum(['dark', 'light', 'system']),
-    language: z.enum(['en', 'id']),
+  ui: RegionalSettingsSchema.extend({
     dateFormat: z.enum(['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD']),
     timeFormat: z.enum(['12h', '24h']),
-    currency: z.string(),
     numberFormat: z.string(),
   })
 })
 
-const ProfileSchema = z.object({
-  fullName: z.string().min(1).max(100),
-  full_name: z.string().optional(),
-  email: z.string().email().optional(),
-  phone: z.string().optional(),
-  role: z.string().optional(),
-  avatar: z.string().nullable().optional(),
-  bio: z.string().optional(),
-})
+const ProfileSchema = UserProfileSettingsSchema
 
 interface AppSettingsRow {
   id: string;
@@ -490,8 +472,8 @@ async function updateProfileHandler(context: RouteContext, request: Request): Pr
     return handleAPIError(new Error('Failed to update settings storage'), 'API Route')
   }
 
-  if (body.fullName || body.full_name) {
-    const newName = body.fullName || body.full_name
+  if (body.fullName) {
+    const newName = body.fullName
     await supabase
       .from('user_profiles' as never)
       .update({ full_name: newName } as never)

@@ -15,6 +15,7 @@ import { apiLogger } from '@/lib/logger'
 import { SecurityPresets } from '@/utils/security/api-middleware'
 
 // Types and schemas
+import { PaginationQuerySchema, RecipeIngredientSchema } from '@/lib/validations/common'
 import { RecipeInsertSchema } from '@/lib/validations/domains/recipe'
 import type { Database, RecipeIngredientInsert, RecipeInsert } from '@/types/database'
 
@@ -25,21 +26,12 @@ export const runtime = 'nodejs'
 
 type TypedSupabaseClient = SupabaseClient<Database>
 
-const RecipeListQuerySchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().positive().optional().default(999999),
-  search: z.string().optional(),
-  sort_by: z.string().optional().default('name'),
-  sort_order: z.enum(['asc', 'desc']).optional().default('asc'),
+// Use centralized PaginationQuerySchema with recipe-specific extensions
+const RecipeListQuerySchema = PaginationQuerySchema.extend({
   status: z.string().optional(),
 })
 
-const RecipeIngredientSchema = z.object({
-  ingredient_id: z.string().uuid(),
-  quantity: z.number().positive(),
-  unit: z.string().min(1),
-  notes: z.string().optional(),
-})
+// RecipeIngredientSchema now imported from centralized location
 
 const RecipeUpdateSchema = z.object({
   name: z.string().min(1).optional(),
