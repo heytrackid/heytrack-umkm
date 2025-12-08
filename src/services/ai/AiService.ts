@@ -143,8 +143,7 @@ export class AiService extends BaseService {
           .from('chat_sessions')
           .insert({
             user_id: userId,
-            title: 'AI Assistant Chat',
-            is_active: true
+            title: 'AI Assistant Chat'
           })
           .select('id')
           .single()
@@ -458,19 +457,17 @@ export class AiService extends BaseService {
     return 'Selamat malam'
   }
 
-  private async saveMessage(sessionId: string, userId: string, role: 'user' | 'assistant', content: string): Promise<void> {
+  private async saveMessage(sessionId: string, _userId: string, role: 'user' | 'assistant', content: string): Promise<void> {
     const { error } = await this.context.supabase
       .from('chat_messages')
       .insert({
         session_id: sessionId,
-        user_id: userId,
         role,
-        content,
-        is_active: true
+        content
       })
 
     if (error) {
-      apiLogger.error({ error, sessionId, userId }, 'Failed to save chat message')
+      apiLogger.error({ error, sessionId }, 'Failed to save chat message')
     }
   }
 

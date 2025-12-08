@@ -209,16 +209,21 @@ export class ProductionServices {
         const ing = ingredient as { ingredient_id: string; quantity: number; ingredients: { name: string; current_stock: number; unit: string } }
         const requiredAmount = ing.quantity * quantity
 
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          throw new Error('User not authenticated')
+        }
+
         // Create reservation record
         const { error: reservationError } = await supabase
           .from('stock_reservations')
           .insert({
+            user_id: user.id,
             ingredient_id: ing.ingredient_id,
-            recipe_id: recipeId,
             quantity: requiredAmount,
-            status: 'reserved',
-            created_at: new Date().toISOString()
-          } as never)
+            status: 'ACTIVE'
+          })
 
         if (reservationError) {
           productionLogger.error({ reservationError, ingredient: ing.ingredient_id }, 'Failed to reserve ingredient')
@@ -296,17 +301,10 @@ export class ProductionServices {
         return
       }
 
-      // Release reserved ingredients
-      const { error: releaseError } = await supabase
-        .from('stock_reservations')
-        .update({ status: 'released', updated_at: new Date().toISOString() } as never)
-        .eq('recipe_id', (batch as { recipe_id: string }).recipe_id)
-        .eq('status', 'reserved')
-
-      if (releaseError) {
-        productionLogger.error({ releaseError, batchId }, 'Failed to release ingredient reservations')
-        // Don't throw here - continue with batch cancellation
-      }
+      // Note: Stock reservations are not tracked per batch in current schema
+      // Reservations would need production_id to be properly released
+      // For now, we skip this step as stock_reservations doesn't have recipe_id column
+      productionLogger.info({ batchId }, 'Skipping reservation release (not tracked per batch)')
 
       const { error: updateError } = await supabase
         .from('production_batches')

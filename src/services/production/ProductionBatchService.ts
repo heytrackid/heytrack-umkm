@@ -455,8 +455,7 @@ export class ProductionBatchService extends BaseService {
               reference: `${batchReference}-MATERIAL`,
               date: completionDate,
               user_id: this.context.userId,
-              created_by: this.context.userId,
-              updated_by: this.context.userId
+              created_by: this.context.userId
             })
           }
 
@@ -470,8 +469,7 @@ export class ProductionBatchService extends BaseService {
               reference: `${batchReference}-LABOR`,
               date: completionDate,
               user_id: this.context.userId,
-              created_by: this.context.userId,
-              updated_by: this.context.userId
+              created_by: this.context.userId
             })
           }
 
@@ -485,8 +483,7 @@ export class ProductionBatchService extends BaseService {
               reference: `${batchReference}-OVERHEAD`,
               date: completionDate,
               user_id: this.context.userId,
-              created_by: this.context.userId,
-              updated_by: this.context.userId
+              created_by: this.context.userId
             })
           }
 
