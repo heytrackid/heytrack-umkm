@@ -1,4 +1,4 @@
-export function sanitizeInput(input: string): string {
+export function sanitizeInput(input: string, maxLength = 500): string {
   return input
     .replace(/[<>]/g, '')
     .replace(/\{|\}/g, '')
@@ -8,7 +8,7 @@ export function sanitizeInput(input: string): string {
     .replace(/system|assistant|user:/gi, '')
     .replace(/ignore|forget|disregard|override|reveal/gi, '')
     .trim()
-    .substring(0, 200)
+    .substring(0, maxLength)
 }
 
 export function validateNoInjection(input: string): boolean {

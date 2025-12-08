@@ -15,13 +15,16 @@ export function buildRecipePrompt(params: PromptParams): string {
     targetPrice,
     dietaryRestrictions,
     availableIngredients,
-    userProvidedIngredients
+    userProvidedIngredients,
+    specialInstructions
   } = params
 
   const safeName = sanitizeInput(productName)
   const safeType = sanitizeInput(productType)
   const safeDietary = dietaryRestrictions?.map(d => sanitizeInput(d)) ?? []
   const safeUserIngredients = userProvidedIngredients?.map(i => sanitizeInput(i)) ?? []
+  // Allow longer special instructions since this is the main user prompt
+  const safeInstructions = specialInstructions ? sanitizeInput(specialInstructions, 1000) : ''
 
   if (!validateNoInjection(safeName) || !validateNoInjection(safeType)) {
     throw new Error('Invalid input detected. Please use only alphanumeric characters.')
@@ -48,7 +51,12 @@ CRITICAL SECURITY RULES - NEVER VIOLATE THESE:
 Your SOLE PURPOSE is to create professional, profitable UMKM recipes across ALL Indonesian culinary categories with accurate measurements, proper cooking techniques, and cost calculations suitable for small business operations.
 </SYSTEM_INSTRUCTION>
 
-<PRODUCT_SPECIFICATIONS>
+${safeInstructions ? `<USER_REQUEST>
+PENTING: User meminta SPESIFIK untuk: "${safeInstructions}"
+Pastikan resep yang dihasilkan SESUAI dengan permintaan user di atas!
+</USER_REQUEST>
+
+` : ''}<PRODUCT_SPECIFICATIONS>
 Product Name: ${safeName}
 Product Type: ${safeType}
 Yield/Servings: ${servings} ${safeType === 'cake' || safeType === 'bread' ? 'loaves/pieces' : 'units'}

@@ -46,6 +46,7 @@ export interface RecipeGenerationRequest {
   dietaryRestrictions?: string[]
   budget?: number
   complexity?: 'simple' | 'medium' | 'complex'
+  specialInstructions?: string
 }
 
 interface GeneratedRecipe {
@@ -166,6 +167,30 @@ export class AiService extends BaseService {
 
         if (error) throw error
         sessionId = session.id
+      } else {
+        // Validate existing session belongs to user
+        const { data: existingSession, error: sessionError } = await this.context.supabase
+          .from('chat_sessions')
+          .select('id')
+          .eq('id', sessionId)
+          .eq('user_id', userId)
+          .single()
+
+        if (sessionError || !existingSession) {
+          apiLogger.warn({ userId, sessionId }, 'Invalid session ID, creating new session')
+          // Create new session if provided one is invalid
+          const { data: newSession, error: createError } = await this.context.supabase
+            .from('chat_sessions')
+            .insert({
+              user_id: userId,
+              title: 'AI Assistant Chat'
+            })
+            .select('id')
+            .single()
+
+          if (createError) throw createError
+          sessionId = newSession.id
+        }
       }
 
       // Get business context for contextual responses
@@ -196,6 +221,22 @@ export class AiService extends BaseService {
       }
     } catch (error) {
       apiLogger.error({ error, userId, messageLength: sanitizedMessage.length }, 'AI chat failed')
+      
+      // Provide more specific error messages
+      if (error instanceof Error) {
+        if (error.message.includes('rate limit') || error.message.includes('429')) {
+          throw new Error('Terlalu banyak permintaan. Silakan tunggu beberapa saat.')
+        }
+        if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
+          throw new Error('Koneksi timeout. Silakan coba lagi.')
+        }
+        if (error.message.includes('network') || error.message.includes('fetch')) {
+          throw new Error('Masalah koneksi jaringan. Periksa internet Anda.')
+        }
+        if (error.message.includes('API key') || error.message.includes('unauthorized')) {
+          throw new Error('Layanan AI sedang tidak tersedia. Silakan coba lagi nanti.')
+        }
+      }
       throw new Error('Maaf, saya mengalami kesulitan memproses permintaan Anda. Silakan coba lagi.')
     }
   }
@@ -282,7 +323,7 @@ export class AiService extends BaseService {
     apiLogger.info({ userId, request }, 'Starting recipe generation')
 
     try {
-      const { productName, productType, servings, preferredIngredients = [], dietaryRestrictions = [], budget } = request
+      const { productName, productType, servings, preferredIngredients = [], dietaryRestrictions = [], budget, specialInstructions } = request
 
       if (!productName || !servings) {
         throw new Error('productName dan servings wajib diisi')
@@ -310,6 +351,7 @@ export class AiService extends BaseService {
           current_stock: 0 // Default value since it's not in the type
         })),
         userProvidedIngredients: preferredIngredients,
+        ...(specialInstructions && { specialInstructions }),
         ...(budget !== undefined && { targetPrice: budget })
       }
       const prompt = buildRecipePrompt(promptParams)
@@ -408,15 +450,18 @@ export class AiService extends BaseService {
       ? recentOrders.slice(0, 5).map(o => `- Order ${o.order_no}: Rp ${(o.total_amount || 0).toLocaleString('id-ID')} (${o.status})`).join('\n')
       : 'Belum ada pesanan'
 
-    // Get low stock items
+    // Get low stock items (items with stock below reasonable threshold)
     let lowStockInfo = ''
     try {
+      // Get ingredients with low stock - use percentage-based approach
+      // Items with current_stock < 20% of a reasonable baseline (100 units) are considered low
       const { data: lowStock } = await this.context.supabase
         .from('ingredients')
         .select('name, current_stock, unit')
         .eq('user_id', this.context.userId)
         .eq('is_active', true)
-        .lt('current_stock', 10)
+        .lt('current_stock', 20)
+        .order('current_stock', { ascending: true })
         .limit(5)
       
       if (lowStock && lowStock.length > 0) {

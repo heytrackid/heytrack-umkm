@@ -1,17 +1,19 @@
 'use client'
 
+import { handleClientError } from '@/lib/error-handling'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { handleClientError } from '@/lib/error-handling'
 
 // Create a client
 function makeQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        gcTime: 10 * 60 * 1000, // 10 minutes
-        refetchOnWindowFocus: false,
+        staleTime: 30 * 1000, // 30 seconds - data considered fresh for 30s
+        gcTime: 10 * 60 * 1000, // 10 minutes - garbage collect after 10min
+        refetchOnWindowFocus: true, // Refetch when user returns to tab
+        refetchOnMount: true, // Refetch when component mounts
+        refetchOnReconnect: true, // Refetch when network reconnects
         retry: (failureCount, error) => {
           // Don't retry on auth errors
           if (error && typeof error === 'object' && 'message' in error) {

@@ -148,8 +148,9 @@ export function useSyncBatchWithInventory() {
   return useMutation({
     mutationFn: (batchId: string) => postApi(`/api/production/batches/${batchId}/sync-inventory`),
     onSuccess: (_, batchId) => {
-      queryClient.invalidateQueries({ queryKey: ['production-batch', batchId] })
-      queryClient.invalidateQueries({ queryKey: ['ingredients'] })
+      void queryClient.invalidateQueries({ queryKey: ['production-batch', batchId] })
+      void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
+      void queryClient.invalidateQueries({ queryKey: ['ingredients-list'] })
       successToast('Berhasil', 'Inventori berhasil disinkronkan')
     },
     onError: (error) => handleError(error, 'Sync batch with inventory', true, 'Gagal sinkronisasi inventori'),
@@ -165,7 +166,9 @@ export function useLinkBatchToOrder() {
   return useMutation({
     mutationFn: ({ batchId, orderId }: { batchId: string; orderId: string }) => postApi(`/api/production/batches/${batchId}/link-order`, { orderId }),
     onSuccess: (_, { batchId }) => {
-      queryClient.invalidateQueries({ queryKey: ['production-batch', batchId] })
+      void queryClient.invalidateQueries({ queryKey: ['production-batch', batchId] })
+      void queryClient.invalidateQueries({ queryKey: ['orders'] })
+      void queryClient.invalidateQueries({ queryKey: ['orders-list'] })
       successToast('Berhasil', 'Batch berhasil dihubungkan dengan pesanan')
     },
     onError: (error) => handleError(error, 'Link batch to order', true, 'Gagal menghubungkan dengan pesanan'),
@@ -191,7 +194,8 @@ export function useUpdateProductionConstraints() {
   return useMutation({
     mutationFn: (constraints: ProductionConstraints) => putApi('/api/production/capacity', constraints),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['production-capacity'] })
+      void queryClient.invalidateQueries({ queryKey: ['production-capacity'] })
+      void queryClient.invalidateQueries({ queryKey: ['production-batches'] })
       successToast('Berhasil', 'Kapasitas produksi berhasil diperbarui')
     },
     onError: (error) => handleError(error, 'Update production constraints', true, 'Gagal memperbarui kapasitas produksi'),

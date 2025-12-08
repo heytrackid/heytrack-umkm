@@ -1,7 +1,7 @@
 'use client'
 
 import { useVirtualizer } from '@tanstack/react-virtual'
-import React, { useEffect, useRef, type RefObject } from 'react'
+import React, { useCallback, useEffect, useRef, type RefObject } from 'react'
 
 import type { Message } from '@/app/ai-chatbot/types/index'
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
@@ -30,13 +30,39 @@ export const MessageList = ({
   const virtualizerRef = useRef<HTMLDivElement>(null)
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
+  // Dynamic size estimation based on message content
+  const estimateMessageSize = useCallback((index: number): number => {
+    const message = messages[index]
+    if (!message) return 120
+    
+    // Base height for message bubble
+    let height = 80
+    
+    // Add height based on content length (roughly 20px per 100 chars)
+    const contentLength = message.content?.length || 0
+    height += Math.ceil(contentLength / 60) * 24 // ~60 chars per line, 24px per line
+    
+    // Add height for suggestions if present
+    if (message.suggestions && message.suggestions.length > 0) {
+      height += 48 + (Math.ceil(message.suggestions.length / 2) * 40)
+    }
+    
+    // Add height for data/metadata if present
+    if (message.data && Object.keys(message.data).length > 0) {
+      height += 60
+    }
+    
+    // Minimum and maximum bounds
+    return Math.max(100, Math.min(height, 600))
+  }, [messages])
+
   // Always call useVirtualizer (hooks must be called unconditionally)
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: messages.length,
     getScrollElement: () => virtualizerRef.current,
-    estimateSize: () => 120, // Estimated height per message
-    overscan: 3,
+    estimateSize: estimateMessageSize,
+    overscan: 5, // Increased overscan for smoother scrolling
   })
 
   // Use virtual scrolling for long conversations (>20 messages)

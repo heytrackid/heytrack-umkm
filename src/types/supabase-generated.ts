@@ -2598,6 +2598,10 @@ export type Database = {
           updated_at: string
         }[]
       }
+      deduct_stock_from_reservations: {
+        Args: { p_order_items: Json; p_user_id: string }
+        Returns: undefined
+      }
       get_active_connections: { Args: never; Returns: number }
       get_available_stock: {
         Args: { p_ingredient_id: string; p_user_id: string }
@@ -2672,6 +2676,10 @@ export type Database = {
         Args: { p_notification_id: string; p_user_id: string }
         Returns: boolean
       }
+      release_reserved_stock: {
+        Args: { p_order_items: Json; p_user_id: string }
+        Returns: undefined
+      }
       release_stock: {
         Args: { p_order_id: string; p_user_id: string }
         Returns: number
@@ -2684,6 +2692,10 @@ export type Database = {
           p_user_id: string
         }
         Returns: string
+      }
+      reserve_stock_for_order: {
+        Args: { p_order_items: Json; p_user_id: string }
+        Returns: boolean
       }
       user_has_business_unit_access: {
         Args: {

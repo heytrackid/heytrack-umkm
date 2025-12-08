@@ -14,6 +14,7 @@ interface UseChatMessagesResult {
   setLoading: (loading: boolean) => void
   currentSessionId: string | null
   setSessionId: (id: string) => void
+  submitFeedback: (messageId: string, rating: number, comment?: string) => void
 }
 
 export function useChatMessages(): UseChatMessagesResult {
@@ -23,6 +24,7 @@ export function useChatMessages(): UseChatMessagesResult {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const logger = createLogger('useChatMessages')
+  const initializationRef = useRef(false)
 
   const fetchBusinessStats = useCallback(async (): Promise<BusinessStats> => {
     try {
@@ -160,21 +162,37 @@ export function useChatMessages(): UseChatMessagesResult {
     return welcomeMessage
   }, [])
 
-  // Initialize session and show welcome message on mount
+  // Initialize session and show welcome message on mount (run only once)
   useEffect(() => {
-    if (hasShownWelcome) return
+    // Prevent multiple initializations using ref
+    if (initializationRef.current || hasShownWelcome) return
+    initializationRef.current = true
 
     const initializeChat = async (): Promise<void> => {
       try {
         // Initialize session first
         await initializeSession()
 
-        // Only show welcome if no existing messages
-        if (messages.length === 0) {
-          const stats = await fetchBusinessStats()
-          const welcomeMessage = createWelcomeMessage(stats)
-          setMessages([welcomeMessage])
-        }
+        // Check messages state after initialization (use callback to get latest)
+        setMessages(currentMessages => {
+          if (currentMessages.length === 0) {
+            // Need to fetch stats and create welcome - do it async
+            fetchBusinessStats().then(stats => {
+              const welcomeMessage = createWelcomeMessage(stats)
+              setMessages([welcomeMessage])
+            }).catch(() => {
+              // Fallback welcome on error
+              setMessages([{
+                id: 'welcome',
+                role: 'assistant',
+                content: '👋 **Halo!** Selamat datang di HeyTrack! 😊\n\nSaya AI assistant yang siap bantu bisnis kuliner kamu makin sukses. Mau nanya apa hari ini? Bisa tentang resep, stok, harga, atau strategi jualan! 🚀',
+                timestamp: new Date(),
+                suggestions: SUGGESTIONS.slice(0, 3).map(s => s.text)
+              }])
+            })
+          }
+          return currentMessages
+        })
 
         setHasShownWelcome(true)
       } catch (error) {
@@ -192,7 +210,8 @@ export function useChatMessages(): UseChatMessagesResult {
     }
 
     void initializeChat()
-  }, [hasShownWelcome, createWelcomeMessage, fetchBusinessStats, initializeSession, messages.length, logger])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Run only once on mount
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -214,6 +233,30 @@ export function useChatMessages(): UseChatMessagesResult {
     setIsLoading(loading)
   }
 
+  // Submit feedback for a message
+  const submitFeedback = useCallback(async (messageId: string, rating: number, comment?: string): Promise<void> => {
+    if (!currentSessionId) {
+      logger.warn('Cannot submit feedback without session')
+      return
+    }
+
+    try {
+      await fetchApi('/api/ai/feedback', {
+        method: 'POST',
+        body: JSON.stringify({
+          session_id: currentSessionId,
+          message_id: messageId,
+          rating,
+          comment
+        })
+      })
+      logger.info({ messageId, rating }, 'Feedback submitted successfully')
+    } catch (error) {
+      logger.error({ error, messageId }, 'Failed to submit feedback')
+      // Don't throw - feedback failure shouldn't break UX
+    }
+  }, [currentSessionId, logger])
+
   return {
     messages,
     isLoading,
@@ -221,6 +264,7 @@ export function useChatMessages(): UseChatMessagesResult {
     addMessage,
     setLoading,
     currentSessionId,
-    setSessionId: (id: string) => setCurrentSessionId(id)
+    setSessionId: (id: string) => setCurrentSessionId(id),
+    submitFeedback
   }
 }

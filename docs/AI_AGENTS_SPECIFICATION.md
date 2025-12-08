@@ -2,7 +2,7 @@
 
 ## Overview
 
-HeyTrack's AI Agents system provides intelligent, proactive assistance to culinary micro, small, and medium enterprises (UMKM) in Indonesia. The system consists of 3 specialized AI agents - ContentWise (social media content creation), StrategyWise (business strategy consulting), and SOPWise (standard operating procedures) - that work together to optimize business operations, increase profitability, and provide actionable insights.
+HeyTrack's AI Agents system provides intelligent, proactive assistance to culinary micro, small, and medium enterprises (UMKM) in Indonesia. The system consists of 6 specialized AI agents - ChatWise (business assistant chatbot), ChefWise (AI recipe generator), ContentWise (social media content creation), StrategyWise (business strategy consulting), SOPWise (standard operating procedures), and FinanceWise (cash flow intelligence) - that work together to optimize business operations, increase profitability, and provide actionable insights.
 
 ## Core Philosophy
 
@@ -16,9 +16,116 @@ HeyTrack's AI Agents system provides intelligent, proactive assistance to culina
 
 ## Agent Directory
 
-### 1. 📸 ContentWise AI
+### 1. 🤖 ChatWise AI
+**Full Name:** Business Assistant Chatbot Agent
+**Tagline:** "Tanya Apa Saja, Dapat Jawaban Cerdas"
+**Status:** ✅ Implemented
+
+#### Core Capabilities
+- **Conversational AI**: Natural language chat interface for business queries
+- **Business Context Awareness**: Understands user's recipes, ingredients, orders, and financial data
+- **Proactive Insights**: Provides alerts for low stock, pending orders, and business health
+- **Multi-topic Support**: Answers questions about recipes, inventory, HPP, orders, and strategy
+
+#### Key Features
+- Real-time business data integration
+- Session-based conversation history
+- Smart suggestions based on context
+- Rate limiting and security protection
+- Feedback collection for improvement
+
+#### Output Examples
+```
+User: "Gimana kondisi bisnis aku?"
+
+AI: "📊 **Kondisi Bisnis**
+
+**Data:**
+• Resep: 15 (12 dengan HPP)
+• Bahan: 45 jenis
+• Pesanan: 8 selesai, 3 pending
+• Revenue: Rp 2.500.000
+
+🟢 Status: Good - Overall baik!
+
+💡 **Saran:** Ada 3 bahan yang stoknya rendah. Yuk cek menu Bahan Baku!"
+```
+
+#### Business Impact
+- 24/7 business assistant availability
+- Faster access to business insights
+- Reduced time searching for information
+- Improved decision-making with contextual data
+
+#### Technical Integration
+- OpenRouter API for AI responses
+- Supabase for session and message storage
+- Real-time business data from all modules
+- Security patterns for prompt injection protection
+
+---
+
+### 2. 👨‍🍳 ChefWise AI
+**Full Name:** AI Recipe Creator Agent
+**Tagline:** "Racik Resep Profesional, Otomatis & Akurat"
+**Status:** ✅ Implemented
+
+#### Core Capabilities
+- **AI Recipe Generation**: Create professional recipes from natural language prompts
+- **HPP Calculation**: Automatic cost calculation based on available ingredients
+- **Multi-cuisine Support**: Indonesian traditional, fusion, baked goods, beverages
+- **Ingredient Matching**: Smart matching with user's inventory
+
+#### Key Features
+- Natural language recipe requests
+- Automatic ingredient quantity calculation
+- Professional cooking instructions
+- Cost breakdown and suggested pricing
+- Recipe history and caching
+
+#### Output Examples
+```
+User: "Buatkan resep nasi goreng seafood untuk 10 porsi"
+
+AI generates:
+📋 **Nasi Goreng Seafood Premium**
+Category: Nasi | Servings: 10 | Difficulty: Medium
+
+🥘 **Bahan:**
+- Nasi putih: 1.5 kg
+- Udang: 300g
+- Cumi: 200g
+- Telur: 5 butir
+- Kecap manis: 100ml
+- Bawang putih: 8 siung
+...
+
+📝 **Langkah:**
+1. Tumis bawang putih hingga harum (2 menit)
+2. Masukkan udang dan cumi, masak hingga matang (5 menit)
+...
+
+💰 **HPP:** Rp 85.000 | **Harga Jual:** Rp 150.000/porsi
+```
+
+#### Business Impact
+- 70% faster recipe development
+- Accurate cost calculations
+- Consistent recipe quality
+- Menu innovation support
+
+#### Technical Integration
+- OpenRouter API with fallback models
+- Ingredient database integration
+- HPP calculation engine
+- Recipe validation and quality checks
+
+---
+
+### 3. 📸 ContentWise AI
 **Full Name:** Social Media Content Creator Agent
 **Tagline:** "Create Stunning Content, Grow Your Brand"
+**Status:** 🔜 Planned
 
 #### Core Capabilities
 - **Product Photo Enhancement**: AI-powered photo editing for better lighting, backgrounds, and product styling
@@ -64,9 +171,10 @@ Week 4: Special promotions (Tue, Thu, Sat)
 
 ---
 
-### 2. 🧠 StrategyWise AI
+### 4. 🧠 StrategyWise AI
 **Full Name:** Business Strategy Consultant Agent
 **Tagline:** "Ask Any Strategy Question, Get Expert Answers"
+**Status:** 🔜 Planned
 
 #### Core Capabilities
 - **Strategy Q&A**: Natural language consultation for any business strategy questions
@@ -123,9 +231,10 @@ AI: "Berdasarkan data penjualan Anda tahun lalu, saya rekomendasikan 3 strategi 
 
 ---
 
-### 3. 📋 SOPWise AI
+### 5. 📋 SOPWise AI
 **Full Name:** Standard Operating Procedures Agent
 **Tagline:** "Create SOPs, Ensure Consistency"
+**Status:** 🔜 Planned
 
 #### Core Capabilities
 - **SOP Generator**: Automated creation of standard operating procedures from business processes
@@ -216,6 +325,115 @@ AI: "Berdasarkan data penjualan Anda tahun lalu, saya rekomendasikan 3 strategi 
 - Integration with training management systems
 - Real-time compliance monitoring
 - Automated updates based on process changes
+
+---
+
+### 6. 💰 FinanceWise AI
+**Full Name:** Cash Flow Intelligence Agent
+**Tagline:** "Kelola Keuangan, Wujudkan Pertumbuhan"
+**Status:** 🚧 In Development
+
+#### Core Capabilities
+- **Cash Flow Forecasting**: Predict cash flow 3-6 months ahead based on historical data
+- **Financial Health Analysis**: Real-time assessment of business financial status
+- **Budget Planning**: AI-powered budget recommendations and tracking
+- **Expense Optimization**: Identify cost-saving opportunities and inefficiencies
+- **Revenue Insights**: Analyze revenue patterns and growth opportunities
+
+#### Key Features
+- Real-time cash flow dashboard
+- Automated financial alerts and notifications
+- Break-even analysis per product/recipe
+- Tax estimation and planning (PPN, PPh)
+- Profit margin optimization suggestions
+- Investment timing recommendations
+
+#### Output Examples
+```
+User: "Gimana kondisi keuangan bisnis aku bulan ini?"
+
+AI: "💰 **Laporan Keuangan - Desember 2024**
+
+📊 **Ringkasan:**
+• Revenue: Rp 15.500.000 (+12% dari bulan lalu)
+• Biaya Operasional: Rp 8.200.000
+• Biaya Bahan: Rp 4.100.000
+• Profit Bersih: Rp 3.200.000 (margin 20.6%)
+
+📈 **Trend:**
+• Revenue naik 12% MoM
+• Biaya bahan turun 5% (efisiensi HPP)
+• Profit margin meningkat dari 18% ke 20.6%
+
+⚠️ **Perhatian:**
+• Cash flow akan ketat di minggu ke-3 (pembayaran supplier)
+• Estimasi kebutuhan: Rp 5.000.000
+
+💡 **Rekomendasi:**
+1. Tunda pembelian bahan non-urgent sampai minggu ke-4
+2. Fokus menu dengan margin tinggi: Nasi Gudeg (35%), Ayam Bakar (32%)
+3. Pertimbangkan promo untuk meningkatkan volume
+
+📅 **Forecast 3 Bulan:**
+• Jan: Rp 16.500.000 (proyeksi +6%)
+• Feb: Rp 14.000.000 (low season)
+• Mar: Rp 18.000.000 (Ramadan boost)"
+```
+
+#### Dashboard Features
+```
+┌─ FinanceWise AI Dashboard ──────────────────┐
+│ 💰 Cash Flow Intelligence                    │
+│ "Kelola keuangan, wujudkan pertumbuhan"     │
+│                                             │
+│ ┌─ Financial Health ────────────────────────┐│
+│ │ 🟢 Status: Sehat                          ││
+│ │ Cash Balance: Rp 8.500.000                ││
+│ │ Monthly Burn: Rp 12.300.000               ││
+│ │ Runway: 2.1 bulan                         ││
+│ └───────────────────────────────────────────┘│
+│                                             │
+│ ┌─ Quick Actions ───────────────────────────┐│
+│ │ [📊 Lihat Forecast] [💵 Catat Transaksi] ││
+│ │ [📈 Analisis Profit] [⚠️ Cek Alerts]     ││
+│ └───────────────────────────────────────────┘│
+│                                             │
+│ ┌─ Cash Flow Chart ─────────────────────────┐│
+│ │ [===========|====|====] Revenue           ││
+│ │ [=======|====|===] Expenses               ││
+│ │ [====|==|===] Profit                      ││
+│ │      Nov  Dec  Jan (forecast)             ││
+│ └───────────────────────────────────────────┘│
+│                                             │
+│ ┌─ Alerts ──────────────────────────────────┐│
+│ │ ⚠️ Cash flow ketat minggu depan          ││
+│ │ 💡 3 menu dengan margin rendah (<15%)    ││
+│ │ ✅ Target revenue bulan ini tercapai     ││
+│ └───────────────────────────────────────────┘│
+└───────────────────────────────────────────────┘
+```
+
+#### Business Impact
+- 40% better cash flow visibility
+- 25% reduction in cash flow emergencies
+- Improved financial decision-making
+- Better budget adherence
+- Tax compliance optimization
+
+#### Technical Integration
+- Integration with cash flow (arus kas) module
+- Order and sales data analysis
+- Ingredient purchase cost tracking
+- HPP data for margin calculations
+- Time-series forecasting algorithms
+- Alert system for financial thresholds
+
+#### API Endpoints
+- `GET /api/ai/finance/summary` - Financial summary
+- `GET /api/ai/finance/forecast` - Cash flow forecast
+- `GET /api/ai/finance/alerts` - Financial alerts
+- `POST /api/ai/finance/analyze` - Custom analysis query
+- `GET /api/ai/finance/recommendations` - AI recommendations
 
 ---
 
@@ -565,31 +783,39 @@ AI: "Berdasarkan data penjualan Anda tahun lalu, saya rekomendasikan 3 strategi 
 
 ## Implementation Roadmap
 
-### Phase 1: Foundation (Weeks 1-2)
-- [ ] Agent orchestration framework setup
-- [ ] Shared context management system
-- [ ] Basic agent communication protocols
-- [ ] UI/UX component library for agents
+### Phase 0: Core Agents (Completed) ✅
+- [x] ChatWise AI - Business Assistant Chatbot
+- [x] ChefWise AI - AI Recipe Generator
+- [x] Agent orchestration framework setup
+- [x] Shared context management system
+- [x] Basic agent communication protocols
 
-### Phase 2: ContentWise AI (Weeks 3-5)
+### Phase 1: FinanceWise AI (Current - Weeks 1-3) 🚧
+- [ ] Cash flow forecasting engine
+- [ ] Financial health analysis dashboard
+- [ ] Budget planning and tracking
+- [ ] Expense optimization algorithms
+- [ ] Revenue insights and alerts
+
+### Phase 2: ContentWise AI (Weeks 4-6)
 - [ ] Photo enhancement AI integration
 - [ ] Caption generation system
 - [ ] Social media scheduling interface
 - [ ] Content calendar automation
 
-### Phase 3: StrategyWise AI (Weeks 6-8)
+### Phase 3: StrategyWise AI (Weeks 7-9)
 - [ ] Conversational AI interface
 - [ ] Business strategy knowledge base
 - [ ] Scenario planning engine
 - [ ] Implementation roadmap generator
 
-### Phase 4: SOPWise AI (Weeks 9-11)
+### Phase 4: SOPWise AI (Weeks 10-12)
 - [ ] Process mining and analysis
 - [ ] SOP generation algorithms
 - [ ] Compliance tracking system
 - [ ] Training material automation
 
-### Phase 5: Integration & Production (Weeks 12-14)
+### Phase 5: Integration & Production (Weeks 13-15)
 - [ ] Cross-agent data sharing
 - [ ] Multi-channel output implementation
 - [ ] Performance optimization
@@ -601,14 +827,20 @@ AI: "Berdasarkan data penjualan Anda tahun lalu, saya rekomendasikan 3 strategi 
 ## Success Metrics
 
 ### Quantitative KPIs
+- **ChatWise Usage**: 70% of users interact with chatbot weekly
+- **ChefWise Adoption**: 50% of recipes created using AI generator
+- **FinanceWise Engagement**: 60% of users check financial insights weekly
 - **ContentWise Adoption**: 60% of users create content weekly using the agent
 - **StrategyWise Engagement**: 40% of users consult strategy questions monthly
 - **SOPWise Implementation**: 80% of businesses have documented SOPs within 3 months
 - **Overall Impact**: 20-30% improvement in operational efficiency and growth metrics
-- **Response Time**: <3 seconds for content generation, <5 seconds for strategy queries
+- **Response Time**: <3 seconds for chat/recipe, <5 seconds for financial analysis
 - **User Retention**: >85% of trial users continue using agents after 30 days
 
 ### Qualitative KPIs
+- **ChatWise Value**: >4.6/5 star rating for chatbot helpfulness
+- **ChefWise Quality**: 80% of generated recipes saved/used by users
+- **FinanceWise Accuracy**: 85% accuracy in cash flow predictions
 - **Content Quality**: Users report 40% improvement in social media engagement
 - **Strategy Value**: >4.5/5 star rating for strategy consultation usefulness
 - **SOP Effectiveness**: 70% reduction in operational inconsistencies
@@ -620,6 +852,9 @@ AI: "Berdasarkan data penjualan Anda tahun lalu, saya rekomendasikan 3 strategi 
 ## Risk Mitigation
 
 ### Technical Risks
+- **ChatWise**: Rate limiting, prompt injection attacks, context window limits
+- **ChefWise**: Recipe quality validation, ingredient matching accuracy
+- **FinanceWise**: Data accuracy, forecasting model reliability, real-time sync
 - **ContentWise**: Image processing quality and platform API limitations
 - **StrategyWise**: AI reasoning accuracy for complex business scenarios
 - **SOPWise**: Process mining accuracy and compliance tracking reliability
@@ -658,4 +893,4 @@ AI: "Berdasarkan data penjualan Anda tahun lalu, saya rekomendasikan 3 strategi 
 
 ---
 
-*This document serves as the comprehensive specification for HeyTrack's AI Agents system. The 3 agents (ContentWise, StrategyWise, SOPWise) are designed specifically for Indonesian UMKM needs with local market understanding, cultural adaptation, and mobile-first UX. Each agent addresses critical pain points while maintaining simplicity and actionable outputs.*
+*This document serves as the comprehensive specification for HeyTrack's AI Agents system. The 6 agents (ChatWise, ChefWise, FinanceWise, ContentWise, StrategyWise, SOPWise) are designed specifically for Indonesian UMKM needs with local market understanding, cultural adaptation, and mobile-first UX. Each agent addresses critical pain points while maintaining simplicity and actionable outputs.*

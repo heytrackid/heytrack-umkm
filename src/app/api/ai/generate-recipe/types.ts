@@ -103,4 +103,5 @@ export interface PromptParams {
   dietaryRestrictions?: string[]
   availableIngredients: IngredientSubset[]
   userProvidedIngredients?: string[]
+  specialInstructions?: string
 }

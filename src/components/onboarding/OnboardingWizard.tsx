@@ -109,10 +109,21 @@ export const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) 
   }
 
   const handleSkip = () => {
-    onOpenChange(false)
     // Store in localStorage that user skipped onboarding (set all keys for consistency)
     localStorage.setItem('heytrack_onboarding_skipped', 'true')
     localStorage.setItem('heytrack_welcome_completed', 'true')
+    localStorage.setItem('heytrack_onboarding_completed', 'true')
+    onOpenChange(false)
+  }
+
+  // Handle dialog close (including X button or clicking outside)
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      // Mark as skipped so it doesn't show again
+      handleSkip()
+    } else {
+      onOpenChange(isOpen)
+    }
   }
 
   const currentStepData = ONBOARDING_STEPS[currentStep]
@@ -120,7 +131,7 @@ export const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) 
   if (!currentStepData) {return null}
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="w-[calc(100%-2rem)] max-w-2xl">
         <DialogHeader>
           <div className="flex items-center justify-between">

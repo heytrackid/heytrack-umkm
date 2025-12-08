@@ -1,6 +1,6 @@
 'use client'
 
-import { DollarSign, LayoutDashboard, MessageSquare, MoreHorizontal, Package, Plus, Receipt, Search, Settings, ShoppingCart, TrendingUp, Truck, Users, Utensils } from '@/components/icons'
+import { DollarSign, LayoutDashboard, MoreHorizontal, Package, Plus, Receipt, Search, Settings, ShoppingCart, Sparkles, TrendingUp, Truck, Users, Utensils } from '@/components/icons'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Fragment, type ReactNode, useState } from 'react'
@@ -171,6 +171,13 @@ const navigationItems = [
     preloadTargets: ['/orders', '/cash-flow', '/ingredients']
   },
   {
+    title: 'Super Agent',
+    href: '/super-agent',
+    icon: Sparkles,
+    badge: '✨',
+    preloadTargets: ['/ai-chatbot', '/recipes/ai-generator']
+  },
+  {
     title: 'Pesanan',
     href: '/orders',
     icon: ShoppingCart,
@@ -231,13 +238,6 @@ const navigationItems = [
     title: 'Pengaturan',
     href: '/settings',
     icon: Settings,
-    preloadTargets: ['/dashboard']
-  },
-  {
-    title: 'Chatbot AI',
-    href: '/ai-chatbot',
-    icon: MessageSquare,
-    badge: '✨',
     preloadTargets: ['/dashboard']
   }
 ]

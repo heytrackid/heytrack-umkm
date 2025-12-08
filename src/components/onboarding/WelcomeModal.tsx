@@ -105,8 +105,18 @@ export function WelcomeModal({ onComplete }: WelcomeModalProps) {
     handleComplete()
   }
 
+  // Handle dialog close (including X button)
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      // User closed the dialog (via X button or clicking outside)
+      // Mark as completed so it doesn't show again
+      handleComplete()
+    }
+    setOpen(isOpen)
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-lg p-0 overflow-hidden">
         {/* Step 0: Welcome */}
         {step === 0 && (

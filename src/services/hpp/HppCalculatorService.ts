@@ -140,7 +140,8 @@ export class HppCalculatorService extends BaseService {
         total_material_cost += total_cost
       }
 
-          const material_cost_per_unit = total_material_cost / servings
+          // FIXED: Add division by zero protection
+          const material_cost_per_unit = servings > 0 ? total_material_cost / servings : 0
 
           // Calculate labor cost (per unit) from recent productions
           const labor_cost_per_unit = await this.calculateLaborCost(recipeId)
@@ -156,8 +157,10 @@ export class HppCalculatorService extends BaseService {
           )
 
       // Final per-unit and per-batch totals
+      // FIXED: WAC adjustment is for TRACKING ONLY, not added to actual cost
+      // HPP = Material Cost + Labor Cost + Overhead Cost
       const cost_per_unit =
-        material_cost_per_unit + labor_cost_per_unit + overhead_cost_per_unit + wac_adjustment_per_unit
+        material_cost_per_unit + labor_cost_per_unit + overhead_cost_per_unit
       
       // Validate cost_per_unit
       if (cost_per_unit < 0) {
@@ -172,6 +175,7 @@ export class HppCalculatorService extends BaseService {
       // Convert per-unit components back to per-batch totals for persistence
       const labor_cost = labor_cost_per_unit * servings
       const overhead_cost = overhead_cost_per_unit * servings
+      // WAC adjustment is stored separately for reporting/tracking purposes only
       const wac_adjustment = wac_adjustment_per_unit * servings
 
       const result: HppCalculationResult = {

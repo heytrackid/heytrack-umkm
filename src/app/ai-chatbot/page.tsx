@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { LoadingState } from '@/components/ui/loading-state'
@@ -18,9 +18,12 @@ import { MessageList } from './components/MessageList'
 const AIChatbotPage = (): JSX.Element => {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const router = useRouter()
-  const { messages, isLoading, scrollAreaRef, addMessage, setLoading, currentSessionId, setSessionId } = useChatMessages()
+  const { messages, isLoading, scrollAreaRef, addMessage, setLoading, currentSessionId, setSessionId, submitFeedback } = useChatMessages()
   const { processAIQuery } = useAIService(currentSessionId)
   const [input, setInput] = useState('')
+  
+  // Ref to track pending session update to prevent race condition
+  const pendingSessionRef = useRef<string | null>(null)
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -47,10 +50,21 @@ const AIChatbotPage = (): JSX.Element => {
     try {
       const response = await processAIQuery(textToSend)
 
-      // Update session ID if API returned a new one
+      // Update session ID if API returned a new one (with race condition protection)
       const responseData = response['data'] as Record<string, unknown> | undefined
-      if (responseData?.['sessionId'] && typeof responseData['sessionId'] === 'string') {
-        setSessionId(responseData['sessionId'])
+      const newSessionId = responseData?.['sessionId']
+      if (newSessionId && typeof newSessionId === 'string') {
+        // Only update if no pending update or this is the pending one
+        if (!pendingSessionRef.current || pendingSessionRef.current === newSessionId) {
+          pendingSessionRef.current = newSessionId
+          setSessionId(newSessionId)
+          // Clear pending after a short delay to allow state to settle
+          setTimeout(() => {
+            if (pendingSessionRef.current === newSessionId) {
+              pendingSessionRef.current = null
+            }
+          }, 100)
+        }
       }
 
       const assistantMessage = {
@@ -116,7 +130,7 @@ const AIChatbotPage = (): JSX.Element => {
             isLoading={isLoading}
             scrollAreaRef={scrollAreaRef}
             onSuggestionClick={handleSuggestionClick}
-            onFeedbackSubmit={() => {}}
+            onFeedbackSubmit={submitFeedback}
           />
         </div>
 

@@ -141,8 +141,8 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
     const priceMatch = promptText.match(/(?:rp|idr)[\s.]*([\d.,]+)/i)
     const targetPrice = priceMatch?.[1] ? parseInt(priceMatch[1].replace(/[.,]/g, ''), 10) : 0
 
-    // Extract product name (first few words or before "untuk")
-    const nameMatch = promptText.match(/resep\s+([^,untuk]+)/i)
+    // Extract product name (first few words or before "untuk" or comma)
+    const nameMatch = promptText.match(/resep\s+(.+?)(?:\s+untuk|\s+dengan|\s*,|$)/i)
     const productName = nameMatch?.[1]?.trim() || promptText.slice(0, 50).trim()
 
     return {

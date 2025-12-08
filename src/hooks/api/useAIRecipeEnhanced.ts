@@ -7,7 +7,7 @@
  * - Recipe variations
  * - Batch generation support
  */
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { GeneratedRecipe } from '@/app/recipes/ai-generator/components/types'
 import { errorToast, successToast } from '@/hooks/use-toast'
@@ -51,6 +51,16 @@ export function useGenerateRecipeEnhanced(onSuccess?: (data: GeneratedRecipe) =>
   const [progress, setProgress] = useState<GenerationProgress | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
 
+  // Cleanup abort controller on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+        abortControllerRef.current = null
+      }
+    }
+  }, [])
+
   // Main generation mutation with caching and progress
   const generateMutation = useMutation({
     mutationFn: async (params: GenerateRecipeParams): Promise<GeneratedRecipe> => {
@@ -60,7 +70,9 @@ export function useGenerateRecipeEnhanced(onSuccess?: (data: GeneratedRecipe) =>
         productType: params.type,
         servings: params.servings,
         ingredients: params.preferredIngredients,
-        customIngredients: params.customIngredients
+        customIngredients: params.customIngredients,
+        targetPrice: params.targetPrice,
+        specialInstructions: params.specialInstructions,
       }
 
       const cached = getCachedRecipe(cacheKey)
@@ -76,9 +88,18 @@ export function useGenerateRecipeEnhanced(onSuccess?: (data: GeneratedRecipe) =>
       }
 
       // Create abort controller for cancellation
+      // Abort any previous request first
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
       abortControllerRef.current = new AbortController()
+      const signal = abortControllerRef.current.signal
 
       try {
+        // Check if already aborted
+        if (signal.aborted) {
+          throw new Error('Request was cancelled')
+        }
         // Stage 1: Validating
         setProgress({ stage: 'validating', progress: 10, message: 'Memvalidasi input...' })
         await new Promise(resolve => setTimeout(resolve, 200))

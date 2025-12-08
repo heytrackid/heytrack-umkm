@@ -18,8 +18,6 @@ import { OrderInsertSchema, OrderListQuerySchema, type OrderListQuery } from '@/
 import type { Database, FinancialRecordInsert, FinancialRecordUpdate, OrderInsert, OrderStatus } from '@/types/database'
 
 // Services
-import { CustomerPreferencesService } from '@/services/orders/CustomerPreferencesService'
-import { PricingAssistantService } from '@/services/orders/PricingAssistantService'
 
 // Constants and config
 import { SUCCESS_MESSAGES } from '@/lib/constants/messages'
@@ -164,30 +162,36 @@ export const POST = createApiRoute(
       return handleAPIError(new Error('Request body is required'), 'POST /api/orders')
     }
 
-    // Validate inventory availability for order items
+    // FIXED: Atomic stock reservation to prevent race conditions
     if (body.items && body.items.length > 0) {
       try {
-        const inventoryValidation = await PricingAssistantService.validateOrderInventory(
-          body.items.map((item) => ({ recipe_id: item.recipe_id, quantity: item.quantity })),
-          user.id
-        )
+        // Reserve stock atomically - this checks availability AND reserves in one transaction
+        const { data: stockReserved, error: reservationError } = await typedSupabase
+          .rpc('reserve_stock_for_order', {
+            p_user_id: user.id,
+            p_order_items: JSON.stringify(body.items.map(item => ({
+              recipe_id: item.recipe_id,
+              quantity: item.quantity
+            })))
+          })
 
-        if (!inventoryValidation.valid) {
-          // Return detailed inventory validation error
-          return handleAPIError(new Error('Insufficient inventory for order'), 'API Route')
+        if (reservationError) {
+          apiLogger.error({ error: reservationError }, 'Stock reservation failed')
+          return handleAPIError(new Error('Failed to reserve stock'), 'POST /api/orders')
         }
 
-        // Log low stock warnings
-        if (inventoryValidation.lowStockWarnings.length > 0) {
-          apiLogger.warn({
-            orderItems: body.items.length,
-            lowStockWarnings: inventoryValidation.lowStockWarnings.length,
-            warnings: inventoryValidation.lowStockWarnings
-          }, 'Order created with low stock warnings')
+        if (!stockReserved) {
+          return handleAPIError(new Error('Insufficient inventory for order'), 'POST /api/orders')
         }
-      } catch (validationError) {
-        apiLogger.error({ error: validationError }, 'Inventory validation failed')
-        return handleAPIError(validationError as Error, 'POST /api/orders')
+
+        apiLogger.info({
+          orderItems: body.items.length,
+          userId: user.id
+        }, 'Stock reserved successfully for order')
+
+      } catch (reservationError) {
+        apiLogger.error({ error: reservationError }, 'Stock reservation error')
+        return handleAPIError(reservationError as Error, 'POST /api/orders')
       }
     }
 
@@ -222,117 +226,108 @@ export const POST = createApiRoute(
     }
 
     // Create order
-    const orderInsertData: OrderInsert = {
-      ...Object.fromEntries(Object.entries(body).map(([key, value]) => [key, value ?? null])),
-      user_id: user.id,
-      status: orderStatus,
-      order_date: body.order_date ?? new Date().toISOString().split('T')[0],
-      tax_amount: body.tax_amount ?? 0,
-      payment_status: body.payment_status ?? 'UNPAID',
-      financial_record_id: incomeRecordId
-    } as OrderInsert
+    // FIXED: Wrap entire order creation in try-catch with stock rollback
+    let createdOrder: { id: string; order_no: string; customer_name: string | null } | null = null
+    
+    try {
+      const orderInsertData: OrderInsert = {
+        ...Object.fromEntries(Object.entries(body).map(([key, value]) => [key, value ?? null])),
+        user_id: user.id,
+        status: orderStatus,
+        order_date: body.order_date ?? new Date().toISOString().split('T')[0],
+        tax_amount: body.tax_amount ?? 0,
+        payment_status: body.payment_status ?? 'UNPAID',
+        financial_record_id: incomeRecordId
+      } as OrderInsert
 
-    const { data: orderData, error: orderError } = await typedSupabase
-      .from('orders')
-      .insert(orderInsertData)
-      .select('id, order_no, customer_name, status, total_amount, created_at')
-      .single()
+      const { data: orderData, error: orderError } = await typedSupabase
+        .from('orders')
+        .insert(orderInsertData)
+        .select('id, order_no, customer_name, status, total_amount, created_at')
+        .single()
 
-    if (orderError) {
-      apiLogger.error({ error: orderError }, 'Failed to create order')
+      if (orderError) {
+        apiLogger.error({ error: orderError }, 'Failed to create order')
+        throw orderError
+      }
+
+      createdOrder = orderData as { id: string; order_no: string; customer_name: string | null }
+
+      // Update income record reference
       if (incomeRecordId) {
-          await typedSupabase.from('financial_records').delete().eq('id', incomeRecordId).eq('user_id', user.id)
+        const updateData: FinancialRecordUpdate = { reference: `Order ${createdOrder.id} - ${body.customer_name || 'Customer'}` }
+        await typedSupabase.from('financial_records').update(updateData).eq('id', incomeRecordId).eq('user_id', user.id)
       }
-      return handleAPIError(orderError, 'POST /api/orders')
-    }
 
-    const createdOrder = orderData as { id: string; order_no: string; customer_name: string | null }
+      // Create order items
+      if (body.items && body.items.length > 0) {
+        const orderItems = body.items.map((item) => ({
+          recipe_id: item.recipe_id,
+          product_name: item.product_name ?? null,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          total_price: item.total_price || (item.quantity * item.unit_price),
+          special_requests: item.special_requests ?? null,
+          order_id: createdOrder!.id,
+          user_id: user.id
+        }))
 
-    // Update income record reference
-    if (incomeRecordId) {
-      const updateData: FinancialRecordUpdate = { reference: `Order ${createdOrder.id} - ${body.customer_name || 'Customer'}` }
-      await typedSupabase.from('financial_records').update(updateData).eq('id', incomeRecordId).eq('user_id', user.id)
-    }
+        const { error: itemsError } = await typedSupabase.from('order_items').insert(orderItems)
 
-    // Create order items
-    if (body.items && body.items.length > 0) {
-      const orderItems = body.items.map((item) => ({
-        recipe_id: item.recipe_id,
-        product_name: item.product_name ?? null,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-        total_price: item.total_price || (item.quantity * item.unit_price),
-        special_requests: item.special_requests ?? null,
-        order_id: createdOrder.id,
-        user_id: user.id
-      }))
+        if (itemsError) {
+          apiLogger.error({ error: itemsError }, 'Failed to create order items')
+          throw itemsError
+        }
+      }
 
-      const { error: itemsError } = await typedSupabase.from('order_items').insert(orderItems)
+      apiLogger.info({ 
+        orderId: createdOrder.id, 
+        orderNo: createdOrder.order_no,
+        userId: user.id 
+      }, 'Order created successfully with stock reservation')
 
-      if (itemsError) {
-        apiLogger.error({ error: itemsError }, 'Failed to create order items')
-        await typedSupabase.from('orders').delete().eq('id', createdOrder.id).eq('user_id', user.id)
-        if (incomeRecordId) {
+      return createSuccessResponse({
+        ...createdOrder,
+        items: body.items || []
+      }, 'Order created successfully')
+
+    } catch (creationError: unknown) {
+      // CRITICAL: Release reserved stock if order creation fails
+      apiLogger.error({ error: creationError, userId: user.id }, 'Order creation failed, releasing reserved stock')
+      
+      if (body.items && body.items.length > 0) {
+        try {
+          const { error: releaseError } = await typedSupabase
+            .rpc('release_reserved_stock', {
+              p_user_id: user.id,
+              p_order_items: JSON.stringify(body.items.map(item => ({
+                recipe_id: item.recipe_id,
+                quantity: item.quantity
+              })))
+            })
+
+          if (releaseError) {
+            apiLogger.error({ error: releaseError }, 'CRITICAL: Failed to release reserved stock after order creation failure')
+          } else {
+            apiLogger.warn({ userId: user.id, itemsCount: body.items.length }, 'Reserved stock released due to order creation failure')
+          }
+        } catch (rollbackError) {
+          apiLogger.error({ error: rollbackError }, 'CRITICAL: Stock rollback failed - manual intervention may be needed')
+        }
+      }
+
+      // Clean up financial record if it was created
+      if (incomeRecordId) {
         await typedSupabase.from('financial_records').delete().eq('id', incomeRecordId).eq('user_id', user.id)
-        }
-        return handleAPIError(itemsError, 'POST /api/orders')
       }
-    }
 
-    // Deduct inventory if order is DELIVERED
-    if (orderStatus === 'DELIVERED' && body.items && body.items.length > 0) {
-      try {
-        const { InventorySyncService } = await import('@/services/inventory/InventorySyncService')
-        const inventoryService = new InventorySyncService({ userId: user.id, supabase: typedSupabase })
-        
-        for (const item of body.items) {
-          await inventoryService.deductStockForOrder(
-            item.recipe_id,
-            createdOrder.id,
-            item.quantity
-          )
-        }
-        
-        apiLogger.info({ orderId: createdOrder.id, itemsCount: body.items.length }, 'Inventory deducted for DELIVERED order')
-      } catch (inventoryError) {
-        // Log but don't fail the order creation
-        apiLogger.error({ error: inventoryError, orderId: createdOrder.id }, 'Failed to deduct inventory for order')
+      // Clean up order if it was partially created
+      if (createdOrder) {
+        await typedSupabase.from('orders').delete().eq('id', createdOrder.id).eq('user_id', user.id)
       }
-    }
 
-    // Update customer preferences for demand forecasting
-    if (body.customer_id && body.items && body.items.length > 0) {
-      try {
-        await CustomerPreferencesService.updateCustomerPreferences(
-          body.customer_id,
-          body.items.map((item) => ({ recipe_id: item.recipe_id, quantity: item.quantity })),
-          user.id
-        )
-      } catch (prefError) {
-        // Don't fail the order creation for preference update failure
-        apiLogger.warn({ error: prefError, customerId: body.customer_id }, 'Failed to update customer preferences')
-      }
+      return handleAPIError(creationError, 'POST /api/orders')
     }
-
-    // Update customer stats if order is DELIVERED
-    if (orderStatus === 'DELIVERED' && body.customer_id && body.total_amount) {
-      try {
-        const { CustomerStatsService } = await import('@/services/stats/CustomerStatsService')
-        const statsService = new CustomerStatsService({ userId: user.id, supabase: typedSupabase })
-        await statsService.updateStatsFromOrder(body.customer_id, body.total_amount)
-      } catch (statsError) {
-        apiLogger.warn({ error: statsError, customerId: body.customer_id }, 'Failed to update customer stats')
-      }
-    }
-
-    cacheInvalidation.orders()
-    if (incomeRecordId) {
-      // Invalidate financial records cache when income is recorded
-      cacheInvalidation.all() // Using all() as there's no specific financialRecords invalidation
-    }
-    apiLogger.info({ userId: user.id, orderId: createdOrder.id, incomeRecorded: Boolean(incomeRecordId) }, 'POST /api/orders - Success')
-
-    return createSuccessResponse({ ...createdOrder, income_recorded: Boolean(incomeRecordId) }, SUCCESS_MESSAGES.ORDER_CREATED, undefined, 201)
   }
 )
 
@@ -409,37 +404,66 @@ export const PUT = createApiRoute(
         }
       }
 
-      // If changing TO CANCELLED - reverse income record
-      if (newStatus === 'CANCELLED' && currentOrder.financial_record_id) {
+      // If changing TO CANCELLED - reverse income record and release reserved stock
+      if (newStatus === 'CANCELLED' && currentOrder.status !== 'CANCELLED') {
         try {
-          await financialService.reverseOrderIncome(orderId)
-          apiLogger.info({ orderId }, 'Income record reversed on order cancellation')
-        } catch (err) {
-          apiLogger.error({ error: err, orderId }, 'Failed to reverse income record on cancellation')
-        }
-      }
+          // Reverse income record if exists
+          if (currentOrder.financial_record_id) {
+            await financialService.reverseOrderIncome(orderId)
+            apiLogger.info({ orderId }, 'Income record reversed on order cancellation')
+          }
 
-      // Deduct inventory if changing TO DELIVERED
-      if (newStatus === 'DELIVERED' && currentOrder.status !== 'DELIVERED') {
-        try {
-          const { InventorySyncService } = await import('@/services/inventory/InventorySyncService')
-          const inventoryService = new InventorySyncService({ userId: user.id, supabase: typedSupabase })
-          
-          // Get order items to deduct
+          // FIXED: Release reserved stock back to available inventory
           const { data: orderItems } = await typedSupabase
             .from('order_items')
             .select('recipe_id, quantity')
             .eq('order_id', orderId)
           
           if (orderItems && orderItems.length > 0) {
-            for (const item of orderItems) {
-              await inventoryService.deductStockForOrder(
-                item.recipe_id,
-                orderId,
-                item.quantity
-              )
+            const { error: releaseError } = await typedSupabase
+              .rpc('release_reserved_stock', {
+                p_user_id: user.id,
+                p_order_items: JSON.stringify(orderItems.map(item => ({
+                  recipe_id: item.recipe_id,
+                  quantity: item.quantity
+                })))
+              })
+
+            if (releaseError) {
+              apiLogger.error({ error: releaseError, orderId }, 'Failed to release reserved stock on cancellation')
+            } else {
+              apiLogger.info({ orderId, itemsCount: orderItems.length }, 'Reserved stock released on order cancellation')
             }
-            apiLogger.info({ orderId, itemsCount: orderItems.length }, 'Inventory deducted on status change to DELIVERED')
+          }
+        } catch (err) {
+          apiLogger.error({ error: err, orderId }, 'Failed to handle order cancellation')
+        }
+      }
+
+      // Deduct inventory if changing TO DELIVERED
+      if (newStatus === 'DELIVERED' && currentOrder.status !== 'DELIVERED') {
+        try {
+          // FIXED: Use atomic stock deduction from reservations
+          const { data: orderItems } = await typedSupabase
+            .from('order_items')
+            .select('recipe_id, quantity')
+            .eq('order_id', orderId)
+          
+          if (orderItems && orderItems.length > 0) {
+            const { error: deductionError } = await typedSupabase
+              .rpc('deduct_stock_from_reservations', {
+                p_user_id: user.id,
+                p_order_items: JSON.stringify(orderItems.map(item => ({
+                  recipe_id: item.recipe_id,
+                  quantity: item.quantity
+                })))
+              })
+
+            if (deductionError) {
+              apiLogger.error({ error: deductionError, orderId }, 'Failed to deduct stock from reservations')
+            } else {
+              apiLogger.info({ orderId, itemsCount: orderItems.length }, 'Stock deducted from reservations on delivery')
+            }
           }
         } catch (inventoryError) {
           apiLogger.error({ error: inventoryError, orderId }, 'Failed to deduct inventory on DELIVERED')

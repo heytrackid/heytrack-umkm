@@ -1,20 +1,21 @@
 'use client'
 
 import {
-  Bot,
-  ChefHat,
-  ChevronDown,
-  Factory,
-  FileText,
-  Home,
-  Package,
-  Receipt,
-  Settings,
-  ShoppingCart,
-  TrendingUp,
-  Truck,
-  Users,
-  Wallet
+    Bot,
+    ChefHat,
+    ChevronDown,
+    Factory,
+    FileText,
+    Home,
+    Package,
+    Receipt,
+    Settings,
+    ShoppingCart,
+    Sparkles,
+    TrendingUp,
+    Truck,
+    Users,
+    Wallet
 } from '@/components/icons'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -22,10 +23,10 @@ import { useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
@@ -39,11 +40,6 @@ const navigationGroups = [
         icon: Home
       },
       {
-        title: 'AI Chatbot',
-        url: '/ai-chatbot',
-        icon: Bot
-      },
-      {
         title: 'Pesanan',
         url: '/orders',
         icon: ShoppingCart
@@ -52,6 +48,26 @@ const navigationGroups = [
         title: 'Pelanggan',
         url: '/customers',
         icon: Users
+      }
+    ]
+  },
+  {
+    label: 'Super Agent',
+    items: [
+      {
+        title: 'Super Agent',
+        url: '/super-agent',
+        icon: Sparkles
+      },
+      {
+        title: 'AI Chatbot',
+        url: '/ai-chatbot',
+        icon: Bot
+      },
+      {
+        title: 'AI Recipe Generator',
+        url: '/recipes/ai-generator',
+        icon: ChefHat
       }
     ]
   },
@@ -142,6 +158,7 @@ export function TabNavigation() {
 
   // State for controlling dropdown open/close on hover
   const [utamaOpen, setUtamaOpen] = useState(false)
+  const [superAgentOpen, setSuperAgentOpen] = useState(false)
   const [hitungHppOpen, setHitungHppOpen] = useState(false)
   const [produksiOpen, setProduksiOpen] = useState(false)
   const [pengadaanOpen, setPengadaanOpen] = useState(false)
@@ -151,6 +168,7 @@ export function TabNavigation() {
 
   // Refs for close timeouts to allow moving from trigger to content
   const utamaTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const superAgentTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const hitungHppTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const produksiTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const pengadaanTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -187,6 +205,7 @@ export function TabNavigation() {
             const getOpenState = () => {
               switch (group.label) {
                 case 'Utama': return utamaOpen
+                case 'Super Agent': return superAgentOpen
                 case 'Hitung HPP': return hitungHppOpen
                 case 'Produksi': return produksiOpen
                 case 'Pengadaan': return pengadaanOpen
@@ -199,6 +218,7 @@ export function TabNavigation() {
             const getSetOpenState = () => {
               switch (group.label) {
                 case 'Utama': return setUtamaOpen
+                case 'Super Agent': return setSuperAgentOpen
                 case 'Hitung HPP': return setHitungHppOpen
                 case 'Produksi': return setProduksiOpen
                 case 'Pengadaan': return setPengadaanOpen
@@ -211,6 +231,7 @@ export function TabNavigation() {
             const getTimeoutRef = () => {
               switch (group.label) {
                 case 'Utama': return utamaTimeoutRef
+                case 'Super Agent': return superAgentTimeoutRef
                 case 'Hitung HPP': return hitungHppTimeoutRef
                 case 'Produksi': return produksiTimeoutRef
                 case 'Pengadaan': return pengadaanTimeoutRef
