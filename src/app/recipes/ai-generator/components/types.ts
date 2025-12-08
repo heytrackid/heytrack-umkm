@@ -79,3 +79,5 @@ export const DIETARY_RESTRICTIONS = [
   'Dairy-Free',
   'Nut-Free'
 ]
+
+export type VariationType = 'spicier' | 'sweeter' | 'healthier' | 'budget' | 'premium'

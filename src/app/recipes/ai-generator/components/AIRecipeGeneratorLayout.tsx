@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import { ChefHat } from '@/components/icons'
@@ -10,13 +9,18 @@ import { Button } from '@/components/ui/button'
 // Split components
 import { AIGeneratorActions } from './AIGeneratorActions'
 import { AIGeneratorPreview } from './AIGeneratorPreview'
+import { BatchGenerator } from './BatchGenerator'
+import { GenerationProgress } from './GenerationProgress'
 import { LivePreview } from './LivePreview'
 import { ProductDetailsForm } from './ProductDetailsForm'
+import { RecipeHistory } from './RecipeHistory'
 import { RecipeTemplates } from './RecipeTemplates'
+import { RecipeVariations } from './RecipeVariations'
 import { UnifiedIngredientInput } from './UnifiedIngredientInput'
 import { useAIRecipeGenerator } from './useAIRecipeGenerator'
 
 import type { RecipeTemplate } from './RecipeTemplates'
+import type { VariationType } from './types'
 
 /**
  * AI Recipe Generator Page

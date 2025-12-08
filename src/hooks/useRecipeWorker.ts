@@ -41,10 +41,18 @@ export function useRecipeWorker(): UseRecipeWorkerReturn {
     resolve: (value: unknown) => void
     reject: (reason: unknown) => void
   }>>(new Map())
+  const setErrorRef = useRef(setError)
+
+  // Update ref when setError changes
+  useEffect(() => {
+    setErrorRef.current = setError
+  }, [])
 
   // Initialize worker
   useEffect(() => {
     if (typeof window === 'undefined') return
+
+    let mounted = true
 
     try {
       workerRef.current = new Worker(
@@ -65,23 +73,32 @@ export function useRecipeWorker(): UseRecipeWorkerReturn {
           pendingResolvers.current.delete(type)
         }
 
-        setIsProcessing(pendingResolvers.current.size > 0)
+        if (mounted) {
+          setIsProcessing(pendingResolvers.current.size > 0)
+        }
       }
 
       workerRef.current.onerror = (e) => {
-        setError(e.message)
-        setIsProcessing(false)
+        const errorMessage = e.message
         // Reject all pending tasks
         for (const [, resolver] of pendingResolvers.current) {
-          resolver.reject(new Error('Worker error: ' + e.message))
+          resolver.reject(new Error('Worker error: ' + errorMessage))
         }
         pendingResolvers.current.clear()
+        if (mounted) {
+          setIsProcessing(false)
+          setErrorRef.current(errorMessage)
+        }
       }
-    } catch {
-      setError('Web Worker not supported in this browser')
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Web Worker not supported in this browser'
+      if (mounted) {
+        setErrorRef.current(errorMsg)
+      }
     }
 
     return () => {
+      mounted = false
       workerRef.current?.terminate()
       workerRef.current = null
     }

@@ -116,7 +116,10 @@ export function RecipeHistory({
 
   // Load history on mount
   useEffect(() => {
-    setHistory(getHistory())
+    const loadHistory = async () => {
+      setHistory(getHistory())
+    }
+    loadHistory()
   }, [])
 
   const handleDelete = (id: string) => {
