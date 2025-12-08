@@ -47,9 +47,10 @@ export function useIngredients(options?: UseIngredientsOptions) {
     queryKey: ['ingredients', apiOptions],
     queryFn: () => fetchApi<{ data: Ingredient[]; pagination: PaginationMeta }>(buildApiUrl('/api/ingredients', apiOptions as Record<string, string | number | boolean | null | undefined>)),
     ...queryConfig.queries.moderate,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 
@@ -68,9 +69,10 @@ export function useIngredientsList(search?: string) {
       return response.data
     },
     ...queryConfig.queries.moderate,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 
@@ -82,8 +84,8 @@ export function useIngredient(id: string | null) {
     queryKey: ['ingredient', id],
     queryFn: () => fetchApi<Ingredient>(`/api/ingredients/${id}`),
     enabled: Boolean(id),
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    staleTime: 2 * 60 * 1000,
+    refetchOnWindowFocus: true,
   })
 }
 
@@ -98,6 +100,9 @@ export function useCreateIngredient() {
     mutationFn: (data: IngredientInsert) => postApi('/api/ingredients', data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
+      void queryClient.invalidateQueries({ queryKey: ['ingredients-list'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['reports', 'inventory'] })
       
       toast({
         title: 'Berhasil ✓',
@@ -129,6 +134,10 @@ export function useUpdateIngredient() {
     onSuccess: (_: unknown, variables: { id: string; data: IngredientUpdate }) => {
       void queryClient.invalidateQueries({ queryKey: ['ingredient', variables['id']] })
       void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
+      void queryClient.invalidateQueries({ queryKey: ['ingredients-list'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['recipes'] }) // Recipe costs may change
+      void queryClient.invalidateQueries({ queryKey: ['reports', 'inventory'] })
       
       toast({
         title: 'Berhasil ✓',
@@ -159,6 +168,9 @@ export function useDeleteIngredient() {
     mutationFn: (id: string) => deleteApi(`/api/ingredients/${id}`),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
+      void queryClient.invalidateQueries({ queryKey: ['ingredients-list'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['reports', 'inventory'] })
       
       toast({
         title: 'Berhasil ✓',
@@ -190,6 +202,9 @@ export function useImportIngredients() {
     mutationFn: (ingredients: unknown[]) => postApi('/api/ingredients/import', { ingredients }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
+      void queryClient.invalidateQueries({ queryKey: ['ingredients-list'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['reports', 'inventory'] })
 
       toast({
         title: 'Berhasil ✓',

@@ -349,6 +349,63 @@ export type Database = {
         }
         Relationships: []
       }
+      generated_recipes: {
+        Row: {
+          created_at: string | null
+          cuisine: string | null
+          id: string
+          is_saved: boolean | null
+          prompt: string
+          recipe_data: Json
+          saved_recipe_id: string | null
+          servings: number | null
+          total_estimated_cost: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          cuisine?: string | null
+          id?: string
+          is_saved?: boolean | null
+          prompt: string
+          recipe_data: Json
+          saved_recipe_id?: string | null
+          servings?: number | null
+          total_estimated_cost?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          cuisine?: string | null
+          id?: string
+          is_saved?: boolean | null
+          prompt?: string
+          recipe_data?: Json
+          saved_recipe_id?: string | null
+          servings?: number | null
+          total_estimated_cost?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_recipes_saved_recipe_id_fkey"
+            columns: ["saved_recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipe_availability"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generated_recipes_saved_recipe_id_fkey"
+            columns: ["saved_recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hpp_alerts: {
         Row: {
           affected_components: Json | null

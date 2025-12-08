@@ -32,7 +32,9 @@ export function useOrders(options?: { page?: number; limit?: number; offset?: nu
 
       return fetchApi<{ data: Order[]; pagination: PaginationMeta }>(`/api/orders?${params}`)
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 
@@ -62,7 +64,9 @@ export function useOrdersList(search?: string) {
       
       return []
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 
@@ -74,7 +78,8 @@ export function useOrder(id: string | null) {
       return fetchApi<Order>(`/api/orders/${id}`)
     },
     enabled: Boolean(id),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 2 * 60 * 1000,
+    refetchOnWindowFocus: true,
   })
 }
 
@@ -85,6 +90,10 @@ export function useCreateOrder() {
     mutationFn: (order: OrderInsert): Promise<Order> => postApi<Order>('/api/orders', order),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['orders'] })
+      void queryClient.invalidateQueries({ queryKey: ['orders-list'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['sales-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['customers'] }) // Customer order count may change
       successToast('Berhasil', 'Pesanan berhasil dibuat')
     },
     onError: (error) => handleError(error, 'Create order', true, 'Gagal membuat pesanan'),
@@ -96,8 +105,12 @@ export function useUpdateOrder() {
 
   return useMutation({
     mutationFn: ({ id, order }: { id: string; order: OrderUpdate }): Promise<Order> => putApi<Order>(`/api/orders/${id}`, order),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      void queryClient.invalidateQueries({ queryKey: ['order', variables.id] })
       void queryClient.invalidateQueries({ queryKey: ['orders'] })
+      void queryClient.invalidateQueries({ queryKey: ['orders-list'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['sales-stats'] })
       successToast('Berhasil', 'Pesanan berhasil diperbarui')
     },
     onError: (error) => handleError(error, 'Update order', true, 'Gagal memperbarui pesanan'),
@@ -109,8 +122,12 @@ export function useUpdateOrderStatus() {
 
   return useMutation({
     mutationFn: ({ orderId, newStatus }: { orderId: string; newStatus: string }): Promise<Order> => putApi<Order>(`/api/orders/${orderId}`, { status: newStatus }),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      void queryClient.invalidateQueries({ queryKey: ['order', variables.orderId] })
       void queryClient.invalidateQueries({ queryKey: ['orders'] })
+      void queryClient.invalidateQueries({ queryKey: ['orders-list'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['sales-stats'] })
     },
     onError: (error) => handleError(error, 'Update order status', false),
   })
@@ -126,6 +143,9 @@ export function useDeleteOrder() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['orders'] })
+      void queryClient.invalidateQueries({ queryKey: ['orders-list'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['sales-stats'] })
       successToast('Berhasil', 'Pesanan berhasil dihapus')
     },
     onError: (error) => handleError(error, 'Delete order', false),

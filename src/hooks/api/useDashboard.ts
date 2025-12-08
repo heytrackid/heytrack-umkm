@@ -268,6 +268,9 @@ export const useDashboardStats = (): UseQueryResult<DashboardStats> => useQuery<
     queryKey: ['dashboard', 'stats'],
     queryFn: fetchDashboardStats,
     ...queryConfig.queries.dashboard,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchInterval: 60000, // Auto-refresh every 1 minute for real-time dashboard
   })
 
 export const useWeeklySales = (): UseQueryResult<WeeklySalesData[]> => useQuery<WeeklySalesData[], Error>({
@@ -313,4 +316,6 @@ export const useHppDashboardSummary = (): UseQueryResult<HppDashboardData> => us
   queryKey: ['dashboard', 'hpp-summary'],
   queryFn: fetchHppDashboardSummary,
   ...queryConfig.queries.dashboard,
+  refetchOnWindowFocus: true,
+  refetchOnMount: true,
 })

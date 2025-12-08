@@ -57,6 +57,9 @@ export function useIngredientPurchases(params?: {
       // Extract data array if response has pagination structure
       return Array.isArray(response) ? response : response.data
     },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 
@@ -80,9 +83,12 @@ export function useCreateIngredientPurchase() {
   return useMutation({
     mutationFn: (data: Omit<IngredientPurchaseInsert, 'user_id'>) => postApi<IngredientPurchase>('/api/ingredient-purchases', data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ingredient-purchases'] })
-      queryClient.invalidateQueries({ queryKey: ['ingredients'] })
-      queryClient.invalidateQueries({ queryKey: ['purchase-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['ingredient-purchases'] })
+      void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
+      void queryClient.invalidateQueries({ queryKey: ['ingredients-list'] })
+      void queryClient.invalidateQueries({ queryKey: ['purchase-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['reports', 'inventory'] })
       successToast('Berhasil', 'Pembelian bahan berhasil dicatat')
     },
     onError: (error) => handleError(error, 'Create ingredient purchase', true, 'Gagal mencatat pembelian bahan'),
@@ -98,9 +104,11 @@ export function useUpdateIngredientPurchase() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<IngredientPurchaseUpdate> }) => putApi<IngredientPurchase>(`/api/ingredient-purchases/${id}`, data),
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ['ingredient-purchases'] })
-      queryClient.invalidateQueries({ queryKey: ['ingredient-purchase', id] })
-      queryClient.invalidateQueries({ queryKey: ['purchase-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['ingredient-purchases'] })
+      void queryClient.invalidateQueries({ queryKey: ['ingredient-purchase', id] })
+      void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
+      void queryClient.invalidateQueries({ queryKey: ['purchase-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       successToast('Berhasil', 'Pembelian bahan berhasil diperbarui')
     },
     onError: (error) => handleError(error, 'Update ingredient purchase', true, 'Gagal memperbarui pembelian bahan'),
@@ -116,8 +124,10 @@ export function useDeleteIngredientPurchase() {
   return useMutation({
     mutationFn: (id: string) => deleteApi(`/api/ingredient-purchases/${id}`),
      onSuccess: () => {
-       queryClient.invalidateQueries({ queryKey: ['ingredient-purchases'] })
-       queryClient.invalidateQueries({ queryKey: ['purchase-stats'] })
+       void queryClient.invalidateQueries({ queryKey: ['ingredient-purchases'] })
+       void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
+       void queryClient.invalidateQueries({ queryKey: ['purchase-stats'] })
+       void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
        successToast('Berhasil', 'Pembelian bahan berhasil dihapus')
      },
      onError: (error) => handleError(error, 'Delete ingredient purchase', true, 'Gagal menghapus pembelian bahan'),

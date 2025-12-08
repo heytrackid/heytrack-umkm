@@ -18,7 +18,7 @@ import { MessageList } from './components/MessageList'
 const AIChatbotPage = (): JSX.Element => {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const router = useRouter()
-  const { messages, isLoading, scrollAreaRef, addMessage, setLoading, currentSessionId } = useChatMessages()
+  const { messages, isLoading, scrollAreaRef, addMessage, setLoading, currentSessionId, setSessionId } = useChatMessages()
   const { processAIQuery } = useAIService(currentSessionId)
   const [input, setInput] = useState('')
 
@@ -47,6 +47,12 @@ const AIChatbotPage = (): JSX.Element => {
     try {
       const response = await processAIQuery(textToSend)
 
+      // Update session ID if API returned a new one
+      const responseData = response['data'] as Record<string, unknown> | undefined
+      if (responseData?.['sessionId'] && typeof responseData['sessionId'] === 'string') {
+        setSessionId(responseData['sessionId'])
+      }
+
       const assistantMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant' as const,
@@ -68,7 +74,7 @@ const AIChatbotPage = (): JSX.Element => {
     } finally {
       setLoading(false)
     }
-  }, [input, isLoading, addMessage, setInput, setLoading, processAIQuery])
+  }, [input, isLoading, addMessage, setInput, setLoading, processAIQuery, setSessionId])
 
   const handleSuggestionClick = useCallback((suggestion: string) => {
     void handleSendMessage(suggestion)

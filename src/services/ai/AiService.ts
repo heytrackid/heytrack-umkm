@@ -50,15 +50,31 @@ export interface RecipeGenerationRequest {
 
 interface GeneratedRecipe {
   name: string
-  description: string
-  servings: number
+  description?: string
+  category?: string
+  servings?: number
+  prep_time_minutes?: number
+  cook_time_minutes?: number
+  total_time_minutes?: number
+  difficulty?: string
+  cooking_method?: string
   ingredients: Array<{
     name: string
     quantity: number
     unit: string
+    notes?: string
   }>
-  instructions: string[]
-  nutritional_info: Record<string, unknown>
+  instructions: Array<{
+    step: number
+    title: string
+    description: string
+    duration_minutes?: number
+    temperature?: string
+  }> | string[]
+  tips?: string[]
+  storage?: string
+  shelf_life?: string
+  serving_suggestion?: string
 }
 
 export interface RecipeGenerationResponse {
@@ -263,25 +279,57 @@ export class AiService extends BaseService {
     const userId = this.context.userId
     const startTime = Date.now()
 
+    apiLogger.info({ userId, request }, 'Starting recipe generation')
+
     try {
-      const { productName, servings } = request
+      const { productName, productType, servings, preferredIngredients = [], dietaryRestrictions = [], budget } = request
 
-      // Get available ingredients for the user
-      const availableIngredients = await this.getAvailableIngredients(userId)
-
-      if (availableIngredients.length === 0) {
-        throw new Error('Tidak ada bahan baku tersedia. Silakan tambahkan bahan baku terlebih dahulu.')
+      if (!productName || !servings) {
+        throw new Error('productName dan servings wajib diisi')
       }
 
-      // Generate recipe based on available ingredients and preferences
-      const recipe = await this.generateRecipeFromIngredients(
-        productName,
-        servings,
-        availableIngredients
-      )
+      // Get available ingredients for the user (optional - for cost calculation)
+      const availableIngredients = await this.getAvailableIngredients(userId)
+      apiLogger.info({ userId, ingredientCount: availableIngredients.length }, 'Fetched available ingredients')
 
-      // Validate and save recipe
-      const validatedRecipe = await this.validateAndSaveRecipe(recipe, userId)
+      // Import prompt builder and AI service
+      const { buildRecipePrompt } = await import('@/app/api/ai/generate-recipe/services/prompt-builder')
+      const { callAIServiceWithRetry } = await import('@/app/api/ai/generate-recipe/services/ai-service')
+
+      // Build the prompt
+      const promptParams = {
+        productName,
+        productType: productType || 'other',
+        servings,
+        dietaryRestrictions,
+        availableIngredients: availableIngredients.map(ing => ({
+          id: ing.id,
+          name: ing.name,
+          price_per_unit: ing.price_per_unit,
+          unit: ing.unit,
+          current_stock: 0 // Default value since it's not in the type
+        })),
+        userProvidedIngredients: preferredIngredients,
+        ...(budget !== undefined && { targetPrice: budget })
+      }
+      const prompt = buildRecipePrompt(promptParams)
+
+      // Call AI service
+      const aiResponse = await callAIServiceWithRetry(prompt, 3)
+
+      // Parse the response
+      let recipe: GeneratedRecipe
+      try {
+        recipe = JSON.parse(aiResponse) as GeneratedRecipe
+      } catch {
+        apiLogger.error({ aiResponse }, 'Failed to parse AI response as JSON')
+        throw new Error('AI menghasilkan format yang tidak valid. Silakan coba lagi.')
+      }
+
+      // Validate required fields
+      if (!recipe.name || !recipe.ingredients || !recipe.instructions) {
+        throw new Error('Resep yang dihasilkan tidak lengkap. Silakan coba lagi.')
+      }
 
       const processingTime = Date.now() - startTime
 
@@ -294,7 +342,7 @@ export class AiService extends BaseService {
       }, 'Recipe generated successfully')
 
       return {
-        recipe: validatedRecipe,
+        recipe,
         confidence: 0.85,
         processing_time: processingTime
       }
@@ -327,126 +375,169 @@ export class AiService extends BaseService {
   }
 
   private async generateContextualResponse(message: string, businessContext: ContextInfo): Promise<string> {
-    // Analyze business context and provide contextual responses
+    const userId = this.context.userId
+    
+    // Try to use real AI first, fallback to templates
+    try {
+      const aiResponse = await this.callChatAI(message, businessContext)
+      if (aiResponse) {
+        return aiResponse
+      }
+    } catch (error) {
+      apiLogger.warn({ error, userId }, 'AI call failed, using template response')
+    }
+    
+    // Fallback to template responses
+    return this.getTemplateResponse(message, businessContext)
+  }
+
+  private async callChatAI(message: string, businessContext: ContextInfo): Promise<string | null> {
+    const apiKey = process.env['OPENROUTER_API_KEY']
+    if (!apiKey) {
+      apiLogger.warn('OpenRouter API key not configured for chat')
+      return null
+    }
+
+    const recipeCount = businessContext.business_data.recipes_count || 0
+    const ingredientCount = businessContext.business_data.ingredients_count || 0
+    const calculatedRecipes = businessContext.business_data.calculated_recipes_count || 0
+    const recentOrders = businessContext.recent_activities || []
+
+    // Build context summary for AI
+    const ordersSummary = recentOrders.length > 0
+      ? recentOrders.slice(0, 5).map(o => `- Order ${o.order_no}: Rp ${(o.total_amount || 0).toLocaleString('id-ID')} (${o.status})`).join('\n')
+      : 'Belum ada pesanan'
+
+    // Get low stock items
+    let lowStockInfo = ''
+    try {
+      const { data: lowStock } = await this.context.supabase
+        .from('ingredients')
+        .select('name, current_stock, unit')
+        .eq('user_id', this.context.userId)
+        .eq('is_active', true)
+        .lt('current_stock', 10)
+        .limit(5)
+      
+      if (lowStock && lowStock.length > 0) {
+        lowStockInfo = '\n\nSTOK RENDAH (perlu diperhatikan):\n' + 
+          lowStock.map(i => `- ${i.name}: ${i.current_stock ?? 0} ${i.unit}`).join('\n')
+      }
+    } catch {
+      // Ignore stock fetch errors
+    }
+
+    const systemPrompt = `Kamu adalah Cookinian AI Assistant, asisten bisnis kuliner yang ramah, pintar, dan helpful untuk UMKM Indonesia.
+
+KEPRIBADIAN:
+- Gunakan bahasa Indonesia casual tapi profesional
+- Gunakan emoji yang relevan tapi tidak berlebihan
+- Berikan jawaban yang actionable dan spesifik
+- Jika user bertanya tentang data bisnis, berikan insight berdasarkan context yang diberikan
+
+DATA BISNIS USER SAAT INI:
+- Total Resep: ${recipeCount} (${calculatedRecipes} sudah dihitung HPP)
+- Total Bahan Baku: ${ingredientCount} jenis
+- Pesanan Terbaru (5 terakhir):
+${ordersSummary}${lowStockInfo}
+
+FITUR YANG TERSEDIA DI APLIKASI:
+- Bahan Baku: kelola stok, catat pembelian, set minimum stok
+- Resep: buat resep manual atau generate dengan AI
+- HPP Calculator: hitung harga pokok produksi
+- Pesanan: catat order customer, kirim notifikasi WhatsApp
+- Laporan: analisis profit, penjualan, dan inventory
+- AI Recipe Generator: generate resep otomatis dengan AI
+
+ATURAN:
+1. Jawab dalam Bahasa Indonesia
+2. Berikan saran yang konkret berdasarkan data user
+3. Jika data user kosong, bantu user untuk setup aplikasi
+4. Jika tidak yakin, arahkan user ke menu yang relevan
+5. JANGAN bahas hal di luar konteks bisnis kuliner/UMKM
+6. Format response dengan markdown untuk keterbacaan (bold, list, etc)
+7. Response harus CONCISE, maksimal 300 kata`
+
+    try {
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+          'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
+          'X-Title': 'Cookinian AI Chat'
+        },
+        body: JSON.stringify({
+          model: 'x-ai/grok-4.1-fast',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: message }
+          ],
+          temperature: 0.7,
+          max_tokens: 1000
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        apiLogger.error({ error }, 'OpenRouter chat API error')
+        return null
+      }
+
+      const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> }
+      const content = data.choices?.[0]?.message?.content
+      
+      if (!content) {
+        return null
+      }
+
+      apiLogger.info({ userId: this.context.userId, messageLength: message.length, responseLength: content.length }, 'AI chat response generated')
+      return content
+    } catch (error) {
+      apiLogger.error({ error }, 'Failed to call chat AI')
+      return null
+    }
+  }
+
+  private async getTemplateResponse(message: string, businessContext: ContextInfo): Promise<string> {
+    // Original template-based response logic
     const lowerMessage = message.toLowerCase()
     const recipeCount = businessContext.business_data.recipes_count || 0
     const ingredientCount = businessContext.business_data.ingredients_count || 0
     const calculatedRecipes = businessContext.business_data.calculated_recipes_count || 0
     const recentOrders = businessContext.recent_activities || []
     
-    // Import ORDER_STATUSES for status comparisons
     const { ORDER_STATUSES } = await import('@/lib/shared/constants')
     const deliveredStatus = ORDER_STATUSES.find(s => s.value === 'DELIVERED')?.value
     const pendingStatus = ORDER_STATUSES.find(s => s.value === 'PENDING')?.value
 
-    // ===== GREETING & GENERAL =====
+    // Greeting
     if (lowerMessage.match(/^(hai|halo|hi|hello|hey|selamat|pagi|siang|sore|malam)/)) {
       const greeting = this.getTimeBasedGreeting()
-      const hasData = recipeCount > 0 || ingredientCount > 0 || recentOrders.length > 0
-      
-      if (!hasData) {
-        return `${greeting} 👋\n\nSelamat datang di HeyTrack! Saya asisten AI yang siap bantu bisnis kuliner kamu.\n\n🚀 **Yuk mulai setup:**\n1. Tambah bahan baku di menu **Bahan Baku**\n2. Buat resep produk di menu **Resep**\n3. Hitung HPP untuk tentukan harga jual\n\nMau mulai dari mana?`
-      }
-      
       return `${greeting} 👋\n\n📊 **Ringkasan bisnis kamu:**\n• ${recipeCount} resep terdaftar\n• ${ingredientCount} jenis bahan baku\n• ${recentOrders.length} pesanan terbaru\n\nAda yang bisa saya bantu hari ini? 😊`
     }
 
-    // ===== BUSINESS HEALTH / KONDISI =====
-    if (lowerMessage.match(/(kondisi|kesehatan|gimana|bagaimana).*(bisnis|usaha|toko)/i) || 
-        lowerMessage.includes('ringkasan') || lowerMessage.includes('summary')) {
+    // Business/Orders
+    if (lowerMessage.match(/(pesanan|order|kondisi|bisnis|ringkasan)/i)) {
       const completedOrders = recentOrders.filter(o => o.status === deliveredStatus).length
       const pendingOrders = recentOrders.filter(o => o.status === pendingStatus).length
       const totalRevenue = recentOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0)
       
-      let healthStatus = '🟢 Excellent'
-      let advice = 'Bisnis kamu berjalan dengan baik!'
-      
-      if (recipeCount === 0 || ingredientCount === 0) {
-        healthStatus = '🟡 Perlu Setup'
-        advice = 'Lengkapi dulu data resep dan bahan baku untuk tracking yang lebih akurat.'
-      } else if (pendingOrders > 5) {
-        healthStatus = '🟠 Perlu Perhatian'
-        advice = `Ada ${pendingOrders} pesanan pending yang perlu diproses.`
-      }
-      
-      return `📊 **Kondisi Bisnis Kamu**\n\nStatus: ${healthStatus}\n\n**Data Terkini:**\n• Resep: ${recipeCount} (${calculatedRecipes} sudah ada HPP)\n• Bahan Baku: ${ingredientCount} jenis\n• Pesanan Terbaru: ${recentOrders.length}\n• Selesai: ${completedOrders} | Pending: ${pendingOrders}\n• Revenue: Rp ${totalRevenue.toLocaleString('id-ID')}\n\n💡 **Saran:** ${advice}`
+      return `� **Kondisi Bisnis**\n\n**Data:**\n• Resep: ${recipeCount} (${calculatedRecipes} dengan HPP)\n• Bahan: ${ingredientCount} jenis\n• Pesanan: ${completedOrders} selesai, ${pendingOrders} pending\n• Revenue: Rp ${totalRevenue.toLocaleString('id-ID')}\n\nBuka menu **Laporan** untuk detail lengkap!`
     }
 
-    // ===== HPP & PRICING =====
-    if (lowerMessage.match(/(harga|price|hpp|biaya|cost|margin|untung|profit)/i)) {
-      if (calculatedRecipes === 0) {
-        return `💰 **Tentang HPP (Harga Pokok Produksi)**\n\nKamu belum punya perhitungan HPP. HPP penting untuk:\n• Menentukan harga jual yang tepat\n• Menghitung margin keuntungan\n• Analisis profitabilitas produk\n\n**Langkah selanjutnya:**\n1. Pastikan sudah ada resep (kamu punya ${recipeCount} resep)\n2. Buka menu **HPP Calculator**\n3. Pilih resep dan hitung HPP\n\nMau saya bantu jelaskan cara hitung HPP?`
-      }
-
-      const uncalculated = recipeCount - calculatedRecipes
-      return `💰 **Status HPP Kamu**\n\n✅ ${calculatedRecipes} resep sudah ada HPP\n${uncalculated > 0 ? `⚠️ ${uncalculated} resep belum dihitung HPP` : '🎉 Semua resep sudah ada HPP!'}\n\n**Tips Pricing:**\n• Margin ideal UMKM: 30-50%\n• Jangan lupa hitung biaya operasional\n• Review HPP berkala saat harga bahan berubah\n\nBuka **HPP Calculator** untuk detail lengkap atau **Laporan > Profit** untuk analisis.`
+    // Ingredients/Stock
+    if (lowerMessage.match(/(bahan|stok|stock|ingredient)/i)) {
+      return `� **Bahan Baku**\n\nTotal: ${ingredientCount} jenis\n\nBuka menu **Bahan Baku** untuk:\n• Lihat semua stok\n• Catat pembelian\n• Set minimum stok`
     }
 
-    // ===== RECIPES =====
-    if (lowerMessage.match(/(resep|recipe|menu|produk|masak)/i)) {
-      if (recipeCount === 0) {
-        return `👨‍🍳 **Resep Produk**\n\nKamu belum punya resep. Resep penting untuk:\n• Standarisasi produksi\n• Perhitungan HPP akurat\n• Konsistensi rasa\n\n**Cara buat resep:**\n1. Buka menu **Resep** > **Tambah Resep**\n2. Atau gunakan **AI Recipe Generator** untuk generate otomatis!\n\n✨ Mau coba generate resep dengan AI?`
-      }
-
-      return `👨‍🍳 **Resep Kamu**\n\nTotal: ${recipeCount} resep terdaftar\nDengan HPP: ${calculatedRecipes} resep\n\n**Yang bisa kamu lakukan:**\n• Buat resep baru di menu **Resep**\n• Generate resep dengan **AI Recipe Generator**\n• Hitung HPP di **HPP Calculator**\n\nMau saya bantu apa?`
+    // Recipes
+    if (lowerMessage.match(/(resep|recipe|menu)/i)) {
+      return `👨‍🍳 **Resep**\n\nTotal: ${recipeCount} resep (${calculatedRecipes} dengan HPP)\n\n**Opsi:**\n• Buat resep manual\n• Generate dengan **AI Recipe Generator**\n• Hitung HPP di **HPP Calculator**`
     }
 
-    // ===== INGREDIENTS / STOCK =====
-    if (lowerMessage.match(/(bahan|ingredient|stok|stock|inventory|persediaan|habis|restock)/i)) {
-      if (ingredientCount === 0) {
-        return `📦 **Bahan Baku**\n\nKamu belum punya data bahan baku. Data ini penting untuk:\n• Tracking stok real-time\n• Perhitungan HPP akurat\n• Alert stok rendah otomatis\n\n**Cara menambah:**\n1. Buka menu **Bahan Baku**\n2. Klik **Tambah Bahan**\n3. Atau **Import** dari file CSV\n\nMulai dengan 5-10 bahan utama dulu ya!`
-      }
-
-      // Check for low stock
-      const { data: lowStock } = await this.context.supabase
-        .from('ingredients')
-        .select('name, current_stock, min_stock')
-        .eq('user_id', this.context.userId)
-        .eq('is_active', true)
-        .lt('current_stock', 10)
-        .limit(5)
-
-      let stockAlert = ''
-      if (lowStock && lowStock.length > 0) {
-        const items = lowStock.map(i => `• ${i.name}: ${i.current_stock ?? 0} ${(i.current_stock ?? 0) <= 0 ? '❌' : '⚠️'}`).join('\n')
-        stockAlert = `\n\n🚨 **Stok Rendah:**\n${items}\n\nSegera restock ya!`
-      }
-
-      return `📦 **Bahan Baku Kamu**\n\nTotal: ${ingredientCount} jenis bahan${stockAlert}\n\n**Menu Bahan Baku:**\n• Lihat semua stok\n• Catat pembelian baru\n• Set minimum stok untuk alert\n\nAda yang mau ditanyakan tentang stok?`
-    }
-
-    // ===== ORDERS =====
-    if (lowerMessage.match(/(pesanan|order|penjualan|transaksi|customer|pelanggan)/i)) {
-      if (recentOrders.length === 0) {
-        return `🛒 **Pesanan**\n\nBelum ada data pesanan. Fitur pesanan membantu:\n• Catat order dari customer\n• Track status pengerjaan\n• Kirim notifikasi WhatsApp\n• Analisis penjualan\n\n**Cara buat pesanan:**\n1. Buka menu **Pesanan**\n2. Klik **Pesanan Baru**\n3. Pilih customer & produk\n\nMau coba buat pesanan pertama?`
-      }
-
-      const inProgressStatus = ORDER_STATUSES.find(s => s.value === 'IN_PROGRESS')?.value
-      const completedOrders = recentOrders.filter(o => o.status === deliveredStatus).length
-      const pendingOrders = recentOrders.filter(o => o.status === pendingStatus).length
-      const inProgressOrders = recentOrders.filter(o => o.status === inProgressStatus).length
-
-      return `🛒 **Pesanan Terbaru**\n\n📊 **Status:**\n• ✅ Selesai: ${completedOrders}\n• 🔄 Diproses: ${inProgressOrders}\n• ⏳ Pending: ${pendingOrders}\n\n${pendingOrders > 0 ? `⚠️ Ada ${pendingOrders} pesanan pending yang perlu diproses!\n\n` : ''}Buka menu **Pesanan** untuk detail lengkap.`
-    }
-
-    // ===== PROFIT / LAPORAN =====
-    if (lowerMessage.match(/(laporan|report|analisis|analysis|profit|laba|rugi|revenue|pendapatan)/i)) {
-      return `📈 **Laporan & Analisis**\n\nHeyTrack menyediakan berbagai laporan:\n\n**📊 Laporan Tersedia:**\n• **Profit/Loss** - Analisis laba rugi\n• **Sales Report** - Tren penjualan\n• **Inventory Report** - Pergerakan stok\n\n**Tips:**\n• Review laporan mingguan untuk insight\n• Bandingkan periode untuk lihat tren\n• Export ke Excel untuk analisis lanjutan\n\nBuka menu **Laporan** untuk mulai analisis!`
-    }
-
-    // ===== HELP / BANTUAN =====
-    if (lowerMessage.match(/(bantu|help|cara|gimana|bagaimana|tutorial|panduan)/i)) {
-      return `🤝 **Saya Bisa Bantu Apa?**\n\n**Topik yang bisa ditanyakan:**\n\n📦 **Bahan Baku**\n"Gimana cara tambah bahan?"\n"Stok apa yang rendah?"\n\n👨‍🍳 **Resep**\n"Cara buat resep baru"\n"Generate resep dengan AI"\n\n💰 **HPP & Harga**\n"Cara hitung HPP"\n"Berapa margin ideal?"\n\n🛒 **Pesanan**\n"Status pesanan terbaru"\n"Cara buat pesanan"\n\n📈 **Laporan**\n"Analisis profit bulan ini"\n"Kondisi bisnis saya"\n\nTanyakan apa saja! 😊`
-    }
-
-    // ===== DEFAULT RESPONSE =====
-    const hasData = recipeCount > 0 || ingredientCount > 0 || recentOrders.length > 0
-
-    if (hasData) {
-      return `Hmm, saya kurang paham maksudnya 🤔\n\nCoba tanyakan tentang:\n• **Kondisi bisnis** - "Gimana kondisi bisnis saya?"\n• **Stok bahan** - "Bahan apa yang perlu restock?"\n• **HPP & Harga** - "Berapa HPP resep saya?"\n• **Pesanan** - "Ada berapa pesanan pending?"\n\nAtau ketik **"bantuan"** untuk lihat semua topik!`
-    }
-
-    return `👋 Halo! Selamat datang di HeyTrack!\n\nSaya asisten AI yang siap bantu bisnis kuliner kamu. Sepertinya kamu baru mulai ya?\n\n🚀 **Langkah awal:**\n1. Tambah **Bahan Baku** yang kamu pakai\n2. Buat **Resep** produk\n3. Hitung **HPP** untuk tentukan harga\n4. Mulai catat **Pesanan**\n\nMau mulai dari mana? Atau ketik **"bantuan"** untuk lihat semua yang bisa saya bantu! 😊`
+    // Default
+    return `Saya kurang paham 🤔\n\nCoba tanyakan tentang:\n• Kondisi bisnis\n• Stok bahan\n• Resep dan HPP\n• Pesanan\n\nAtau ketik **"bantuan"** untuk semua topik!`
   }
 
   private getTimeBasedGreeting(): string {
@@ -585,63 +676,15 @@ export class AiService extends BaseService {
       .eq('is_active', true)
       .order('name')
 
-    return ingredients || []
+    // Filter out ingredients with null price_per_unit and ensure proper types
+    return (ingredients || [])
+      .filter(ing => ing.price_per_unit !== null && ing.price_per_unit !== undefined)
+      .map(ing => ({
+        id: ing.id,
+        name: ing.name,
+        price_per_unit: ing.price_per_unit ?? 0,
+        unit: ing.unit
+      }))
   }
 
-  private async generateRecipeFromIngredients(
-    productName: string,
-    servings: number,
-    availableIngredients: Array<{
-      id: string
-      name: string
-      price_per_unit: number
-      unit: string
-    }>
-  ): Promise<GeneratedRecipe> {
-    // Simple recipe generation based on available ingredients
-    const selectedIngredients = availableIngredients.slice(0, 5) // Use first 5 ingredients
-
-    const ingredients = selectedIngredients.map((ing, index) => ({
-      name: ing.name,
-      quantity: servings * (index + 1) * 50, // Simple quantity calculation
-      unit: ing.unit
-    }))
-
-    const instructions = [
-      'Langkah 1: Persiapkan semua bahan-bahan',
-      'Langkah 2: Potong dan cuci bahan sesuai kebutuhan',
-      'Langkah 3: Masak dengan api sedang hingga matang',
-      'Langkah 4: Sajikan selagi hangat'
-    ]
-
-    return {
-      name: productName,
-      description: `Resep ${productName} yang lezat untuk ${servings} porsi`,
-      servings: servings,
-      ingredients,
-      instructions,
-      nutritional_info: {}
-    }
-  }
-
-  private async validateAndSaveRecipe(recipe: GeneratedRecipe, userId: string): Promise<unknown> {
-    // Validate recipe and save to database
-    const { data, error } = await this.context.supabase
-      .from('recipes')
-      .insert({
-        name: recipe.name,
-        description: recipe.description,
-        servings: recipe.servings,
-        user_id: userId,
-        is_active: true
-      })
-      .select()
-      .single()
-
-    if (error) {
-      throw error
-    }
-
-    return data
-  }
 }

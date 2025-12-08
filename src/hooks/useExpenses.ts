@@ -41,6 +41,9 @@ export function useExpenses(params?: {
       // Extract data array if response has pagination structure
       return Array.isArray(response) ? response : response.data
     },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 
@@ -64,8 +67,10 @@ export function useCreateExpense() {
   return useMutation({
     mutationFn: (data: Omit<ExpenseInsert, 'user_id'>) => postApi('/api/expenses', data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expenses'] })
-      queryClient.invalidateQueries({ queryKey: ['expense-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['expenses'] })
+      void queryClient.invalidateQueries({ queryKey: ['expense-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['reports', 'profit'] })
       successToast('Berhasil', 'Pengeluaran berhasil dicatat')
     },
     onError: (error) => handleError(error, 'Create expense', true, 'Gagal mencatat pengeluaran'),
@@ -81,9 +86,11 @@ export function useUpdateExpense() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<ExpenseUpdate> }) => putApi(`/api/expenses/${id}`, data),
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ['expenses'] })
-      queryClient.invalidateQueries({ queryKey: ['expense', id] })
-      queryClient.invalidateQueries({ queryKey: ['expense-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['expenses'] })
+      void queryClient.invalidateQueries({ queryKey: ['expense', id] })
+      void queryClient.invalidateQueries({ queryKey: ['expense-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['reports', 'profit'] })
       successToast('Berhasil', 'Pengeluaran berhasil diperbarui')
     },
     onError: (error) => handleError(error, 'Update expense', true, 'Gagal memperbarui pengeluaran'),
@@ -99,8 +106,10 @@ export function useDeleteExpense() {
   return useMutation({
     mutationFn: (id: string) => deleteApi(`/api/expenses/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expenses'] })
-      queryClient.invalidateQueries({ queryKey: ['expense-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['expenses'] })
+      void queryClient.invalidateQueries({ queryKey: ['expense-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['reports', 'profit'] })
       successToast('Berhasil', 'Pengeluaran berhasil dihapus')
     },
     onError: (error) => handleError(error, 'Delete expense', true, 'Gagal menghapus pengeluaran'),

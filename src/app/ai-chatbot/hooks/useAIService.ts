@@ -1,5 +1,5 @@
-import { apiLogger } from '@/lib/logger'
 import { useAuth } from '@/hooks/useAuth'
+import { apiLogger } from '@/lib/logger'
 
 export function useAIService(sessionId?: string | null): {
   processAIQuery: (query: string) => Promise<{
@@ -61,16 +61,19 @@ export function useAIService(sessionId?: string | null): {
       }
 
       const data = await response.json()
+      
+      // API returns { success: true, data: { response, session_id, ... } }
+      const apiData = data.data || data // Handle both wrapped and unwrapped responses
 
       return {
-        message: data.message,
-        suggestions: (data.suggestions || []).map((s: string | { text: string }) =>
+        message: apiData.response || apiData.message || '',
+        suggestions: (apiData.suggestions || []).map((s: string | { text: string }) =>
           typeof s === 'string' ? s : s.text
         ),
         data: {
-          businessContext: data.metadata,
+          businessContext: apiData.metadata,
           responseTimeMs: responseTime,
-          sessionId: data.session_id,
+          sessionId: apiData.session_id,
         },
       }
     } catch (error) {

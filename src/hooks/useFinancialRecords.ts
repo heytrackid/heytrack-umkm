@@ -37,6 +37,8 @@ export function useFinancialRecords(params?: {
       return Array.isArray(response) ? response : []
     },
     staleTime: 30000,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 
@@ -49,7 +51,9 @@ export function useCreateFinancialRecord() {
   return useMutation({
     mutationFn: (data: { type: 'INCOME' | 'EXPENSE'; description: string; category: string; amount: number; date: string; }) => postApi('/api/financial/records', data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['financial-records'] })
+      void queryClient.invalidateQueries({ queryKey: ['financial-records'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['reports', 'profit'] })
       successToast('Berhasil', 'Catatan keuangan berhasil dibuat')
       logger.info('Financial record created')
     },
@@ -66,7 +70,9 @@ export function useUpdateFinancialRecord() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<FinancialRecord> }) => patchApi(`/api/financial/records/${id}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['financial-records'] })
+      void queryClient.invalidateQueries({ queryKey: ['financial-records'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['reports', 'profit'] })
       successToast('Berhasil', 'Catatan keuangan berhasil diperbarui')
       logger.info('Financial record updated')
     },
@@ -83,7 +89,9 @@ export function useDeleteFinancialRecord() {
   return useMutation({
     mutationFn: (id: string) => deleteApi(`/api/financial/records/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['financial-records'] })
+      void queryClient.invalidateQueries({ queryKey: ['financial-records'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['reports', 'profit'] })
       successToast('Berhasil', 'Catatan keuangan berhasil dihapus')
       logger.info('Financial record deleted')
     },

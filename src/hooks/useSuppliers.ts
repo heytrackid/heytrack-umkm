@@ -40,6 +40,8 @@ export function useSuppliers(options?: UseSuppliersOptions) {
       return Array.isArray(response) ? response : response.data
     },
     ...queryConfig.queries.moderate,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 
@@ -51,8 +53,8 @@ export function useSupplier(id: string | null) {
     queryKey: ['supplier', id],
     queryFn: () => fetchApi(`/api/suppliers/${id}`),
     enabled: Boolean(id),
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    staleTime: 2 * 60 * 1000,
+    refetchOnWindowFocus: true,
   })
 }
 
@@ -67,6 +69,7 @@ export function useCreateSupplier() {
     mutationFn: (data: Omit<SupplierInsert, 'user_id'>) => postApi<Supplier>('/api/suppliers', data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['suppliers'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       logger.info({}, 'Supplier created successfully')
     },
     onError: (error: unknown) => {
@@ -88,6 +91,7 @@ export function useUpdateSupplier() {
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({ queryKey: ['supplier', variables.id] })
       void queryClient.invalidateQueries({ queryKey: ['suppliers'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
 
       logger.info({ supplierId: variables.id }, 'Supplier updated successfully')
     },
@@ -109,6 +113,7 @@ export function useDeleteSupplier() {
     mutationFn: (id: string) => deleteApi(`/api/suppliers/${id}`),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['suppliers'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
 
       logger.info({}, 'Supplier deleted successfully')
     },
@@ -130,6 +135,7 @@ export function useImportSuppliers() {
     mutationFn: (suppliers: unknown[]) => postApi('/api/suppliers/import', { suppliers }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['suppliers'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
 
       logger.info({}, 'Suppliers imported successfully')
     },
@@ -163,6 +169,7 @@ export function useBulkDeleteSuppliers() {
     },
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({ queryKey: ['suppliers'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       logger.info({ count: variables.length }, 'Suppliers bulk deleted successfully')
     },
     onError: (error: unknown) => {

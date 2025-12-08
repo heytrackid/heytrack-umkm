@@ -105,6 +105,8 @@ export function useHppOverview() {
       return response.data
     },
     ...queryConfig.queries.moderate,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 
@@ -117,6 +119,8 @@ export function useHppRecommendations(recipeId?: string) {
       return response.data
     },
     ...queryConfig.queries.moderate,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 
@@ -128,7 +132,9 @@ export function useCreateHppRecommendation() {
       return postApi<HppRecommendation>('/api/hpp/recommendations', input)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['hpp', 'recommendations'] })
+      void queryClient.invalidateQueries({ queryKey: ['hpp', 'recommendations'] })
+      void queryClient.invalidateQueries({ queryKey: ['hpp', 'overview'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard', 'hpp-summary'] })
       successToast('Berhasil', 'Rekomendasi berhasil dibuat')
     },
     onError: (error) => handleError(error, 'Create HPP recommendation', true, 'Gagal membuat rekomendasi'),
@@ -144,7 +150,9 @@ export function useUpdateHppRecommendation() {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['hpp', 'recommendations'] })
+      void queryClient.invalidateQueries({ queryKey: ['hpp', 'recommendations'] })
+      void queryClient.invalidateQueries({ queryKey: ['hpp', 'overview'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard', 'hpp-summary'] })
       successToast('Berhasil', 'Rekomendasi berhasil diperbarui')
     },
     onError: (error) => handleError(error, 'Update HPP recommendation', true, 'Gagal memperbarui rekomendasi'),
@@ -159,7 +167,9 @@ export function useDeleteHppRecommendation() {
       await deleteApi(`/api/hpp/recommendations/${id}`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['hpp', 'recommendations'] })
+      void queryClient.invalidateQueries({ queryKey: ['hpp', 'recommendations'] })
+      void queryClient.invalidateQueries({ queryKey: ['hpp', 'overview'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard', 'hpp-summary'] })
       successToast('Berhasil', 'Rekomendasi berhasil dihapus')
     },
     onError: (error) => handleError(error, 'Delete HPP recommendation', true, 'Gagal menghapus rekomendasi'),
@@ -232,7 +242,9 @@ export function useHppComparison(options?: { days?: number }) {
 
       return fetchApi(`/api/hpp/comparison?${params}`)
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 
@@ -277,7 +289,9 @@ export function useRecipeComparison(options?: { category?: string }) {
 
       return fetchApi(`/api/hpp/comparison?${params}`)
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 

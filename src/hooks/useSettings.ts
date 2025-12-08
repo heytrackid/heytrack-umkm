@@ -45,6 +45,8 @@ export function useUserProfile() {
   return useQuery<UserProfile>({
     queryKey: ['user-profile'],
     queryFn: () => fetchApi<UserProfile>('/api/settings/profile'),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: true,
   })
 }
 
@@ -71,6 +73,8 @@ export function useBusinessSettings() {
   return useQuery<BusinessSettings>({
     queryKey: ['business-settings'],
     queryFn: () => fetchApi<BusinessSettings>('/api/settings/business'),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: true,
   })
 }
 
@@ -97,6 +101,8 @@ export function useNotificationPreferences() {
   return useQuery<NotificationPreferences>({
     queryKey: ['notification-preferences'],
     queryFn: () => fetchApi<NotificationPreferences>('/api/settings/preferences'),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: true,
   })
 }
 

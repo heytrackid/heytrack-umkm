@@ -79,9 +79,12 @@ const formatMessageContent = (
   copiedStates: Record<number, boolean>,
   setCopiedStates: React.Dispatch<React.SetStateAction<Record<number, boolean>>>
 ): React.ReactNode => {
+  // Guard against undefined/null content - use empty string as fallback
+  const safeContent = content || ''
+  if (!safeContent) return <span className="text-muted-foreground italic">Tidak ada respons</span>
 
   // Split by code blocks (```language\ncode```)
-  const parts = content.split(/(```[\s\S]*?```)/g)
+  const parts = safeContent.split(/(```[\s\S]*?```)/g)
 
   return parts.map((part, index) => {
     if (part.startsWith('```') && part.endsWith('```')) {

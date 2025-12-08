@@ -8,14 +8,17 @@ export interface GeneratedRecipe {
   category: string
   servings: number
   prep_time_minutes: number
-  bake_time_minutes: number
+  cook_time_minutes?: number
+  bake_time_minutes?: number // Alias for cook_time_minutes
   total_time_minutes: number
-  difficulty: 'easy' | 'hard' | 'medium'
+  difficulty: 'easy' | 'hard' | 'medium' | string
+  cooking_method?: string
   ingredients: RecipeIngredient[]
   instructions: RecipeInstruction[]
   tips: string[]
   storage: string
   shelf_life: string
+  serving_suggestion?: string
   hpp?: HPPData
 }
 

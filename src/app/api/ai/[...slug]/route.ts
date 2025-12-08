@@ -44,7 +44,7 @@ export const POST = createApiRoute(
     path: '/api/ai',
     securityPreset: SecurityPresets.enhanced(),
   },
-  async (context) => {
+  async (context, _query, body) => {
     const { params } = context
     const slug = params?.['slug'] as string[] | undefined
 
@@ -56,9 +56,9 @@ export const POST = createApiRoute(
 
     switch (subRoute) {
       case 'chat':
-        return chatHandler(context)
+        return chatHandler(context, body as ChatRequest)
       case 'generate-recipe':
-        return generateRecipeHandler(context)
+        return generateRecipeHandler(context, body as RecipeGenerationRequest)
       default:
         return handleAPIError(new Error('Invalid AI route'), 'API Route')
     }
@@ -85,12 +85,11 @@ export const DELETE = createApiRoute(
 )
 
 // Chat handler
-async function chatHandler(context: RouteContext): Promise<NextResponse> {
+async function chatHandler(context: RouteContext, body: ChatRequest): Promise<NextResponse> {
   const { user } = context
 
   try {
     const aiService = new AiService({ userId: user.id, supabase: context.supabase })
-    const body = await context.request.json() as ChatRequest
     const result = await aiService.chat(body)
 
     return createSuccessResponse(result)
@@ -131,12 +130,11 @@ async function deleteContextHandler(context: RouteContext): Promise<NextResponse
 }
 
 // Generate recipe handler
-async function generateRecipeHandler(context: RouteContext): Promise<NextResponse> {
+async function generateRecipeHandler(context: RouteContext, body: RecipeGenerationRequest): Promise<NextResponse> {
   const { user } = context
 
   try {
     const aiService = new AiService({ userId: user.id, supabase: context.supabase })
-    const body = await context.request.json() as RecipeGenerationRequest
     const result = await aiService.generateRecipe(body)
 
     return createSuccessResponse(result)

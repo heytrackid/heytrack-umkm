@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
 import { fetchApi } from '@/lib/query/query-helpers'
+import { useQuery } from '@tanstack/react-query'
 
 interface SalesReportData {
   total_sales: number
@@ -81,6 +81,9 @@ export function useSalesReport(params?: { startDate?: string; endDate?: string }
   return useQuery<SalesReportData>({
     queryKey: ['reports', 'sales', params],
     queryFn: () => fetchApi<SalesReportData>(`/api/reports/sales?${searchParams}`),
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 
@@ -95,6 +98,9 @@ export function useProfitReport(params?: { startDate?: string; endDate?: string 
   return useQuery<ProfitReportData>({
     queryKey: ['reports', 'profit', params],
     queryFn: () => fetchApi<ProfitReportData>(`/api/reports/profit?${searchParams}`),
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 
@@ -108,6 +114,9 @@ export function useInventoryReport(params?: { category?: string }) {
   return useQuery<InventoryReportData>({
     queryKey: ['reports', 'inventory', params],
     queryFn: () => fetchApi<InventoryReportData>(`/api/reports/inventory?${searchParams}`),
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 
@@ -122,6 +131,9 @@ export function useFinancialReport(params?: { startDate?: string; endDate?: stri
   return useQuery<FinancialReportData>({
     queryKey: ['reports', 'financial', params],
     queryFn: () => fetchApi<FinancialReportData>(`/api/financial/records?${searchParams}`),
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 

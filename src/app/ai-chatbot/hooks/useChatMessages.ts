@@ -13,6 +13,7 @@ interface UseChatMessagesResult {
   addMessage: (message: Message) => void
   setLoading: (loading: boolean) => void
   currentSessionId: string | null
+  setSessionId: (id: string) => void
 }
 
 export function useChatMessages(): UseChatMessagesResult {
@@ -54,8 +55,41 @@ export function useChatMessages(): UseChatMessagesResult {
       const sessions = data.data || []
 
       if (sessions.length > 0 && sessions[0]) {
-        setCurrentSessionId(sessions[0].id)
-        setHasShownWelcome(true)
+        const sessionId = sessions[0].id
+        setCurrentSessionId(sessionId)
+        
+        // Fetch messages for this session
+        try {
+          const sessionData = await fetchApi<{
+            session?: { id: string }
+            messages?: Array<{
+              id: string
+              role: 'user' | 'assistant'
+              content: string
+              created_at: string
+            }>
+          }>(`/api/ai/sessions/${sessionId}`)
+          
+          // fetchApi already extracts apiResponse.data, so messages is at sessionData.messages
+          const dbMessages = sessionData?.messages || []
+          
+          if (dbMessages.length > 0) {
+            // Convert DB messages to Message format
+            const loadedMessages: Message[] = dbMessages.map(msg => ({
+              id: msg.id,
+              role: msg.role,
+              content: msg.content,
+              timestamp: new Date(msg.created_at)
+            }))
+            
+            setMessages(loadedMessages)
+            setHasShownWelcome(true)
+            logger.info({ messageCount: loadedMessages.length }, 'Loaded chat history')
+            return // Don't show welcome message if we have history
+          }
+        } catch (error) {
+          logger.error({ error }, 'Failed to fetch session messages')
+        }
       }
     } catch (error) {
       logger.error({ error }, 'Failed to initialize session')
@@ -186,6 +220,7 @@ export function useChatMessages(): UseChatMessagesResult {
     scrollAreaRef,
     addMessage,
     setLoading,
-    currentSessionId
+    currentSessionId,
+    setSessionId: (id: string) => setCurrentSessionId(id)
   }
 }

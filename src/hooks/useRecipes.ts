@@ -55,7 +55,9 @@ export function useRecipes(options?: UseRecipesOptions) {
       return payload
     },
     ...queryConfig.queries.moderate,
-    refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
     select: (result: RecipesResponse) => result.data ?? [],
   })
 
@@ -89,6 +91,8 @@ export function useRecipe(id: string | null) {
     },
     enabled: Boolean(id),
     ...queryConfig.queries.moderate,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true,
   })
 }
 
@@ -106,6 +110,8 @@ export function useCreateRecipe() {
     onSuccess: () => {
       // Invalidate and refetch recipes list
       void queryClient.invalidateQueries({ queryKey: ['recipes'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard', 'hpp-summary'] })
       
       toast({
         title: 'Berhasil ✓',
@@ -140,6 +146,8 @@ export function useUpdateRecipe() {
       // Invalidate specific recipe and list
       void queryClient.invalidateQueries({ queryKey: ['recipe', variables['id']] })
       void queryClient.invalidateQueries({ queryKey: ['recipes'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard', 'hpp-summary'] })
       
       toast({
         title: 'Berhasil ✓',
@@ -182,6 +190,8 @@ export function useDeleteRecipe() {
     onSuccess: () => {
       // Invalidate recipes list
       void queryClient.invalidateQueries({ queryKey: ['recipes'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard', 'hpp-summary'] })
       
       toast({
         title: 'Berhasil ✓',
@@ -231,6 +241,8 @@ export function useCreateRecipeWithIngredients() {
     onSuccess: (data) => {
       // Invalidate recipes list
       void queryClient.invalidateQueries({ queryKey: ['recipes'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard', 'hpp-summary'] })
 
       toast({
         title: 'Berhasil ✓',
@@ -283,6 +295,8 @@ export function useUpdateRecipeWithIngredients() {
       // Invalidate recipes list and specific recipe
       void queryClient.invalidateQueries({ queryKey: ['recipes'] })
       void queryClient.invalidateQueries({ queryKey: ['recipe', variables.id] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard', 'hpp-summary'] })
 
       toast({
         title: 'Berhasil ✓',

@@ -13,7 +13,7 @@ export class AIClient {
   static callAI(
     prompt: string,
     systemPrompt: string,
-    model = 'x-ai/grok-4-fast'
+    model = 'x-ai/grok-4.1-fast'
   ): Promise<string> {
     return this.callOpenRouter(prompt, systemPrompt, model)
   }
@@ -24,7 +24,7 @@ export class AIClient {
   static async callOpenRouter(
     prompt: string,
     systemPrompt: string,
-    model = 'x-ai/grok-4-fast'
+    model = 'x-ai/grok-4.1-fast'
   ): Promise<string> {
     const apiKey = process['env']['OPENROUTER_API_KEY']
 
@@ -98,7 +98,7 @@ export class AIClient {
   static async callOpenRouterAlt(
     prompt: string,
     systemPrompt: string,
-    model = 'x-ai/grok-4-fast'
+    model = 'x-ai/grok-4.1-fast'
   ): Promise<string> {
     const apiKey = process['env']['OPENROUTER_API_KEY']
 

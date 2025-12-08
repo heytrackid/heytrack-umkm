@@ -89,10 +89,20 @@ export function useGenerateRecipeEnhanced(onSuccess?: (data: GeneratedRecipe) =>
         // Stage 3: Generating recipe
         setProgress({ stage: 'generating', progress: 40, message: 'AI sedang meracik resep...' })
         
-        const data = await postApi<{ recipe: GeneratedRecipe }>('/api/ai/generate-recipe', {
-          ...params,
+        // Transform params to match API expected format
+        const apiPayload = {
+          productName: params.name,
+          productType: params.type,
+          servings: params.servings,
+          preferredIngredients: [...params.preferredIngredients, ...params.customIngredients],
+          dietaryRestrictions: params.dietaryRestrictions,
+          budget: params.targetPrice,
+          specialInstructions: params.specialInstructions,
           userId: session.user.id
-        })
+        }
+        
+        // AI calls can take longer, use 60 second timeout
+        const data = await postApi<{ recipe: GeneratedRecipe }>('/api/ai/generate-recipe', apiPayload, undefined, 60000)
 
         // Stage 4: Calculating costs (using worker if available)
         setProgress({ stage: 'calculating', progress: 80, message: 'Menghitung HPP...' })

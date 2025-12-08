@@ -43,6 +43,8 @@ export function useCustomers(options?: UseCustomersOptions) {
     queryKey: ['customers', apiOptions],
     queryFn: () => fetchApi<{ data: Customer[]; pagination: PaginationMeta }>(buildApiUrl('/api/customers', apiOptions as Record<string, string | number | boolean | null | undefined>)),
     ...queryConfig.queries.moderate,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 
@@ -59,6 +61,8 @@ export function useCustomersList(search?: string) {
       return Array.isArray(response) ? response : response.data
     },
     ...queryConfig.queries.moderate,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 
@@ -72,8 +76,8 @@ export function useCustomer(id: string | null) {
     queryKey: ['customer', id],
     queryFn: () => fetchApi(`/api/customers/${id}`),
     enabled: Boolean(id),
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    staleTime: 2 * 60 * 1000,
+    refetchOnWindowFocus: true,
   })
 }
 
@@ -88,6 +92,8 @@ export function useCreateCustomer() {
     mutationFn: (data: Omit<CustomerInsert, 'user_id'>) => postApi<Customer>('/api/customers', data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['customers'] })
+      void queryClient.invalidateQueries({ queryKey: ['customers-list'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
 
       logger.info({}, 'Customer created successfully')
     },
@@ -110,6 +116,8 @@ export function useUpdateCustomer() {
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({ queryKey: ['customer', variables.id] })
       void queryClient.invalidateQueries({ queryKey: ['customers'] })
+      void queryClient.invalidateQueries({ queryKey: ['customers-list'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
 
       logger.info({ customerId: variables.id }, 'Customer updated successfully')
     },
@@ -131,6 +139,8 @@ export function useDeleteCustomer() {
     mutationFn: (id: string) => deleteApi(`/api/customers/${id}`),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['customers'] })
+      void queryClient.invalidateQueries({ queryKey: ['customers-list'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
 
       logger.info({}, 'Customer deleted successfully')
     },
@@ -152,6 +162,8 @@ export function useImportCustomers() {
     mutationFn: (customers: unknown[]) => postApi('/api/customers/import', { customers }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['customers'] })
+      void queryClient.invalidateQueries({ queryKey: ['customers-list'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
 
       logger.info({}, 'Customers imported successfully')
     },

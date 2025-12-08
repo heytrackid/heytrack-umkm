@@ -92,10 +92,11 @@ export const queryConfig = {
 
 /**
  * Common query options
+ * Note: refetchOnWindowFocus is TRUE by default to ensure data freshness
  */
 export const commonQueryOptions = {
-  refetchOnWindowFocus: false,
-  refetchOnMount: false,
+  refetchOnWindowFocus: true,
+  refetchOnMount: true,
   refetchOnReconnect: true,
   retry: 2,
   retryDelay: (attemptIndex: number): number => Math.min(1000 * 2 ** attemptIndex, 20000),

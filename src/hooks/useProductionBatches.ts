@@ -53,6 +53,9 @@ export function useProductionBatches() {
     queryKey: ['production-batches'],
     queryFn: () => fetchApi<ProductionBatchesResponse>('/api/production/batches'),
     select: (result) => result.data ?? [],
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 
@@ -76,7 +79,9 @@ export function useCreateProductionBatch() {
   return useMutation({
     mutationFn: (data: Partial<ProductionBatchInsert>) => postApi('/api/production/batches', data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['production-batches'] })
+      void queryClient.invalidateQueries({ queryKey: ['production-batches'] })
+      void queryClient.invalidateQueries({ queryKey: ['production-metrics'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       successToast('Berhasil', 'Batch produksi berhasil dibuat')
     },
     onError: (error) => handleError(error, 'Create production batch', true, 'Gagal membuat batch produksi'),
@@ -92,8 +97,10 @@ export function useUpdateProductionBatch() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<ProductionBatchUpdate> }) => putApi(`/api/production/batches/${id}`, data),
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ['production-batches'] })
-      queryClient.invalidateQueries({ queryKey: ['production-batch', id] })
+      void queryClient.invalidateQueries({ queryKey: ['production-batches'] })
+      void queryClient.invalidateQueries({ queryKey: ['production-batch', id] })
+      void queryClient.invalidateQueries({ queryKey: ['production-metrics'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       successToast('Berhasil', 'Batch produksi berhasil diperbarui')
     },
     onError: (error) => handleError(error, 'Update production batch', true, 'Gagal memperbarui batch produksi'),
@@ -109,7 +116,9 @@ export function useDeleteProductionBatch() {
   return useMutation({
     mutationFn: (id: string) => deleteApi(`/api/production/batches/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['production-batches'] })
+      void queryClient.invalidateQueries({ queryKey: ['production-batches'] })
+      void queryClient.invalidateQueries({ queryKey: ['production-metrics'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       successToast('Berhasil', 'Batch produksi berhasil dihapus')
     },
     onError: (error) => handleError(error, 'Delete production batch', true, 'Gagal menghapus batch produksi'),

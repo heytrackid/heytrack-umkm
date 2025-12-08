@@ -33,6 +33,9 @@ export function useOperationalCosts(params?: { category?: string; active?: boole
       // Extract data array if response has pagination structure
       return Array.isArray(response) ? response : response.data
     },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 
@@ -56,8 +59,10 @@ export function useCreateOperationalCost() {
   return useMutation({
     mutationFn: (data: Omit<OperationalCostInsert, 'user_id'>) => postApi('/api/operational-costs', data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['operational-costs'] })
-      queryClient.invalidateQueries({ queryKey: ['operational-cost-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['operational-costs'] })
+      void queryClient.invalidateQueries({ queryKey: ['operational-cost-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard', 'hpp-summary'] })
       successToast('Berhasil', 'Biaya operasional berhasil ditambahkan')
     },
     onError: (error) => handleError(error, 'Create operational cost', true, 'Gagal menambahkan biaya operasional'),
@@ -73,9 +78,11 @@ export function useUpdateOperationalCost() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<OperationalCostUpdate> }) => putApi(`/api/operational-costs/${id}`, data),
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ['operational-costs'] })
-      queryClient.invalidateQueries({ queryKey: ['operational-cost', id] })
-      queryClient.invalidateQueries({ queryKey: ['operational-cost-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['operational-costs'] })
+      void queryClient.invalidateQueries({ queryKey: ['operational-cost', id] })
+      void queryClient.invalidateQueries({ queryKey: ['operational-cost-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard', 'hpp-summary'] })
       successToast('Berhasil', 'Biaya operasional berhasil diperbarui')
     },
     onError: (error) => handleError(error, 'Update operational cost', true, 'Gagal memperbarui biaya operasional'),
@@ -91,8 +98,10 @@ export function useDeleteOperationalCost() {
   return useMutation({
     mutationFn: (id: string) => deleteApi(`/api/operational-costs/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['operational-costs'] })
-      queryClient.invalidateQueries({ queryKey: ['operational-cost-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['operational-costs'] })
+      void queryClient.invalidateQueries({ queryKey: ['operational-cost-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard', 'hpp-summary'] })
       successToast('Berhasil', 'Biaya operasional berhasil dihapus')
     },
     onError: (error) => handleError(error, 'Delete operational cost', true, 'Gagal menghapus biaya operasional'),
@@ -118,7 +127,9 @@ export function useQuickSetupOperationalCosts() {
   return useMutation({
     mutationFn: () => postApi('/api/operational-costs/quick-setup'),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['operational-costs'] })
+      void queryClient.invalidateQueries({ queryKey: ['operational-costs'] })
+      void queryClient.invalidateQueries({ queryKey: ['operational-cost-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       successToast('Berhasil', 'Biaya operasional default berhasil dibuat')
     },
     onError: (error) => handleError(error, 'Quick setup operational costs', true, 'Gagal membuat biaya operasional default'),

@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
 
-import { createClientLogger } from '@/lib/client-logger'
 import { useToast } from '@/hooks/use-toast'
+import { createClientLogger } from '@/lib/client-logger'
 import { fetchApi } from '@/lib/query/query-helpers'
 import type { CostChangeAlert, RecipeCostImpact } from '@/types/recipes/cost'
 
@@ -31,9 +31,10 @@ export function useCostChangeAlerts() {
         return []
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchInterval: 10 * 60 * 1000, // Check every 10 minutes
-    refetchOnWindowFocus: false,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchInterval: 5 * 60 * 1000, // Check every 5 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 
   // Show toast notifications for significant price changes

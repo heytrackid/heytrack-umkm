@@ -87,7 +87,9 @@ export function createApiRoute<TQuery = unknown, TBody = unknown>(
       let validatedBody: TBody | undefined
       if (['POST', 'PUT', 'PATCH'].includes(method)) {
         try {
-          const rawBody = await request.json()
+          // Clone the request before reading to prevent "Body has already been read" error
+          const clonedRequest = request.clone()
+          const rawBody = await clonedRequest.json()
           
           if (bodySchema) {
             const validation = bodySchema.safeParse(rawBody)

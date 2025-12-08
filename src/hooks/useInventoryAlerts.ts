@@ -1,9 +1,9 @@
+import { successToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
 import { handleError } from '@/lib/error-handling'
 import { deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import type { RestockSuggestion, RestockSuggestionsSummary } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { successToast } from '@/hooks/use-toast'
 
 const logger = createClientLogger('useInventoryAlerts')
 
@@ -29,6 +29,10 @@ export function useInventoryAlerts() {
       // Extract data array if response has pagination structure
       return Array.isArray(response) ? response : response.data
     },
+    staleTime: 60 * 1000, // 1 minute - alerts should be fresh
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes
   })
 }
 
@@ -41,7 +45,8 @@ export function useCheckLowStockAlerts() {
   return useMutation({
     mutationFn: () => postApi('/api/inventory/alerts/check'),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['inventory-alerts'] })
+      void queryClient.invalidateQueries({ queryKey: ['inventory-alerts'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
     },
     onError: (error) => {
       logger.error({ error }, 'Failed to check low stock alerts')
@@ -58,7 +63,8 @@ export function useAcknowledgeAlert() {
   return useMutation({
     mutationFn: (alertId: string) => putApi(`/api/inventory/alerts/${alertId}/acknowledge`, {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['inventory-alerts'] })
+      void queryClient.invalidateQueries({ queryKey: ['inventory-alerts'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       successToast('Berhasil', 'Alert berhasil ditandai')
     },
     onError: (error) => handleError(error, 'Acknowledge alert', true, 'Gagal menandai alert'),
@@ -74,7 +80,8 @@ export function useDismissAlert() {
   return useMutation({
     mutationFn: (alertId: string) => deleteApi(`/api/inventory/alerts/${alertId}/dismiss`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['inventory-alerts'] })
+      void queryClient.invalidateQueries({ queryKey: ['inventory-alerts'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       successToast('Berhasil', 'Alert berhasil dihapus')
     },
     onError: (error) => handleError(error, 'Dismiss alert', true, 'Gagal menghapus alert'),
@@ -94,6 +101,9 @@ export function useRestockSuggestions() {
       suggestions: RestockSuggestion[]
       summary: RestockSuggestionsSummary
     }>('/api/inventory/restock-suggestions'),
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 }
 
