@@ -198,8 +198,10 @@ export const POST = createApiRoute(
     const orderStatus = body.status || 'PENDING'
     let incomeRecordId: string | null = null
 
-    // Create income record if DELIVERED
-    if (orderStatus === 'DELIVERED' && body.total_amount && body.total_amount > 0) {
+    // Create income record if IN_PROGRESS (produksi) or DELIVERED
+    // Penjualan tercatat saat mulai produksi, bukan saat delivered
+    const shouldCreateIncome = (orderStatus === 'IN_PROGRESS' || orderStatus === 'DELIVERED') && body.total_amount && body.total_amount > 0
+    if (shouldCreateIncome) {
       const incomeDate = normalizeDateValue(body.delivery_date) ?? normalizeDateValue(body.order_date) ?? new Date().toISOString().split('T')[0]
       const incomeData: FinancialRecordInsert = {
         user_id: user.id,
@@ -382,8 +384,9 @@ export const PUT = createApiRoute(
       const { FinancialSyncService } = await import('@/services/financial/FinancialSyncService')
       const financialService = new FinancialSyncService({ userId: user.id, supabase: typedSupabase })
 
-      // If changing TO DELIVERED - create income record
-      if (newStatus === 'DELIVERED' && !currentOrder.financial_record_id) {
+      // If changing TO IN_PROGRESS (produksi) - create income record
+      // Penjualan tercatat saat mulai produksi, bukan saat delivered
+      if (newStatus === 'IN_PROGRESS' && !currentOrder.financial_record_id) {
         try {
           await financialService.createIncomeFromOrder(
             orderId,
@@ -392,7 +395,7 @@ export const PUT = createApiRoute(
             body?.customer_name ?? currentOrder.customer_name ?? undefined,
             body?.delivery_date ?? currentOrder.delivery_date ?? currentOrder.order_date ?? undefined
           )
-          apiLogger.info({ orderId }, 'Income record created on status change to DELIVERED')
+          apiLogger.info({ orderId }, 'Income record created on status change to IN_PROGRESS (produksi)')
         } catch (err) {
           apiLogger.error({ error: err, orderId }, 'Failed to create income record on status change')
           // Mark order as needing financial sync retry
@@ -440,8 +443,9 @@ export const PUT = createApiRoute(
         }
       }
 
-      // Deduct inventory if changing TO DELIVERED
-      if (newStatus === 'DELIVERED' && currentOrder.status !== 'DELIVERED') {
+      // Deduct inventory if changing TO IN_PROGRESS (produksi)
+      // Stock berkurang saat mulai produksi, bukan saat delivered
+      if (newStatus === 'IN_PROGRESS' && currentOrder.status !== 'IN_PROGRESS') {
         try {
           // FIXED: Use atomic stock deduction from reservations
           const { data: orderItems } = await typedSupabase
@@ -462,16 +466,17 @@ export const PUT = createApiRoute(
             if (deductionError) {
               apiLogger.error({ error: deductionError, orderId }, 'Failed to deduct stock from reservations')
             } else {
-              apiLogger.info({ orderId, itemsCount: orderItems.length }, 'Stock deducted from reservations on delivery')
+              apiLogger.info({ orderId, itemsCount: orderItems.length }, 'Stock deducted from reservations on production start')
             }
           }
         } catch (inventoryError) {
-          apiLogger.error({ error: inventoryError, orderId }, 'Failed to deduct inventory on DELIVERED')
+          apiLogger.error({ error: inventoryError, orderId }, 'Failed to deduct inventory on IN_PROGRESS')
         }
       }
 
-      // Restore inventory if changing FROM DELIVERED to CANCELLED
-      if (newStatus === 'CANCELLED' && currentOrder.status === 'DELIVERED') {
+      // Restore inventory if changing FROM IN_PROGRESS/READY/DELIVERED to CANCELLED
+      const stockAlreadyDeducted = ['IN_PROGRESS', 'READY', 'DELIVERED'].includes(currentOrder.status ?? '')
+      if (newStatus === 'CANCELLED' && stockAlreadyDeducted) {
         try {
           const { InventorySyncService } = await import('@/services/inventory/InventorySyncService')
           const inventoryService = new InventorySyncService({ userId: user.id, supabase: typedSupabase })

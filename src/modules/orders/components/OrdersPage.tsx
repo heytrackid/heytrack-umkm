@@ -28,6 +28,7 @@ import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@/modules/orders/types'
 import { OrderDetailView } from './OrderDetailView'
 import { OrderForm } from './OrderForm'
+import { StatusUpdateDialog } from './StatusUpdateDialog'
 
 
 
@@ -227,6 +228,8 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
   const [showOrderForm, setShowOrderForm] = useState(false)
   const [showOrderDetail, setShowOrderDetail] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState<OrderWithItems | null>(null)
+  const [showStatusDialog, setShowStatusDialog] = useState(false)
+  const [statusUpdateOrder, setStatusUpdateOrder] = useState<{ id: string; status: OrderStatus; orderNo: string } | null>(null)
 
   const handleCreateOrder = useCallback(() => {
     setSelectedOrder(null)
@@ -242,6 +245,45 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
     setSelectedOrder(order)
     setShowOrderDetail(true)
   }, [])
+
+  // ✅ Open status update dialog
+  const handleOpenStatusDialog = useCallback((order: OrderListItem) => {
+    if (!order.status) return
+    setStatusUpdateOrder({
+      id: order.id,
+      status: order.status,
+      orderNo: order.order_no
+    })
+    setShowStatusDialog(true)
+  }, [])
+
+  // ✅ Handle status update
+  const handleUpdateStatus = useCallback(async (newStatus: OrderStatus) => {
+    if (!statusUpdateOrder) return
+
+    try {
+      const response = await fetch(`/api/orders/${statusUpdateOrder.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json() as { message?: string }
+        throw new Error(errorData.message || 'Gagal mengubah status')
+      }
+
+      // Refresh orders list
+      await queryClient.invalidateQueries({ queryKey: ['orders'] })
+      
+      // Show success notification (optional - you can add toast here)
+      console.log(`Status pesanan berhasil diubah ke ${newStatus}`)
+    } catch (err) {
+      console.error('Error updating order status:', err)
+      alert(getErrorMessage(err))
+      throw err
+    }
+  }, [queryClient, statusUpdateOrder])
 
   // Only show loading skeleton on initial load (when no data yet)
   if (loading && orders.length === 0) {
@@ -505,6 +547,22 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
             addButtonText="Pesanan Baru"
             onView={(item: OrderListItem & Record<string, unknown>) => handleViewOrder(item as unknown as OrderWithItems)}
             onEdit={(item: OrderListItem & Record<string, unknown>) => handleEditOrder(item as unknown as OrderWithItems)}
+            customActions={[
+              {
+                label: 'Ubah Status',
+                icon: Clock,
+                onClick: (item: OrderListItem & Record<string, unknown>) => {
+                  handleOpenStatusDialog(item as unknown as OrderListItem)
+                },
+                show: (item: OrderListItem & Record<string, unknown>) => {
+                  const order = item as unknown as OrderListItem
+                  const currentStatus = order.status
+                  if (!currentStatus) return false
+                  const config = ORDER_STATUS_CONFIG[currentStatus]
+                  return (config?.nextStatuses || []).length > 0
+                }
+              }
+            ]}
             searchPlaceholder="Cari nomor pesanan atau nama pelanggan..."
             emptyMessage="Belum Ada Pesanan"
             emptyDescription="Klik tombol 'Pesanan Baru' untuk membuat pesanan pertama"
@@ -671,6 +729,17 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
           {selectedOrder && <OrderDetailView order={selectedOrder} />}
         </DialogContent>
       </Dialog>
+
+      {/* Status Update Dialog */}
+      {statusUpdateOrder && (
+        <StatusUpdateDialog
+          open={showStatusDialog}
+          onOpenChange={setShowStatusDialog}
+          currentStatus={statusUpdateOrder.status}
+          orderNo={statusUpdateOrder.orderNo}
+          onConfirm={handleUpdateStatus}
+        />
+      )}
     </div >
   )
 }
