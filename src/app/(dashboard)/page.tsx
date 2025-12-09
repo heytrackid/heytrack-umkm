@@ -11,17 +11,17 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { Separator } from '@/components/ui/separator'
-import { useDashboardStats } from '@/hooks/api/useDashboard'
+import { useDashboardStats, useWeeklySales } from '@/hooks/api/useDashboard'
 
 import { ProductionScheduleWidget } from '@/components/dashboard/ProductionScheduleWidget'
 import {
-    AlertTriangle,
-    DollarSign,
-    Package,
-    Plus,
-    ShoppingCart,
-    TrendingUp,
-    Users,
+  AlertTriangle,
+  DollarSign,
+  Package,
+  Plus,
+  ShoppingCart,
+  TrendingUp,
+  Users,
 } from '@/components/icons'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -29,6 +29,7 @@ import { useState } from 'react'
 export default function DashboardPage(): JSX.Element {
   const [onboardingOpen, setOnboardingOpen] = useState(false)
   const { data: stats, isLoading: statsLoading } = useDashboardStats()
+  const { data: weeklySales } = useWeeklySales()
 
   const formatCurrency = (value: number): string => {
     return new Intl.NumberFormat('id-ID', {
@@ -138,7 +139,14 @@ export default function DashboardPage(): JSX.Element {
         </div>
 
         {/* Revenue Chart */}
-        <RevenueChart />
+        <RevenueChart 
+          data={weeklySales?.map((item) => ({
+            date: item.day,
+            revenue: item.revenue,
+            orders: item.orders,
+            expenses: item.expenses ?? 0,
+          }))} 
+        />
 
         {/* Production Schedule Widget */}
         <ProductionScheduleWidget />

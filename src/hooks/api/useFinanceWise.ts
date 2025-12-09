@@ -138,24 +138,26 @@ export function useRefreshFinanceWise() {
  * Combined hook for FinanceWise dashboard
  * Returns all financial data needed for a dashboard view
  */
-export function useFinanceWiseDashboard() {
+export function useFinanceWiseDashboard(dateRange?: { startDate?: string; endDate?: string }) {
   const analysisQuery = useFinanceWiseAnalysis()
+  const summaryQuery = useFinancialSummary(dateRange?.startDate, dateRange?.endDate)
+  const profitQuery = useProfitAnalysis(dateRange?.startDate, dateRange?.endDate)
   const refreshMutation = useRefreshFinanceWise()
 
   return {
     // Data
     data: analysisQuery.data,
-    summary: analysisQuery.data?.summary,
+    summary: dateRange ? summaryQuery.data : analysisQuery.data?.summary,
     health: analysisQuery.data?.health,
     forecast: analysisQuery.data?.forecast,
-    profitAnalysis: analysisQuery.data?.profitAnalysis,
+    profitAnalysis: dateRange ? profitQuery.data : analysisQuery.data?.profitAnalysis,
     aiInsights: analysisQuery.data?.aiInsights,
 
     // Status
-    isLoading: analysisQuery.isLoading,
-    isError: analysisQuery.isError,
-    error: analysisQuery.error,
-    isFetching: analysisQuery.isFetching,
+    isLoading: dateRange ? (summaryQuery.isLoading || profitQuery.isLoading || analysisQuery.isLoading) : analysisQuery.isLoading,
+    isError: dateRange ? (summaryQuery.isError || profitQuery.isError || analysisQuery.isError) : analysisQuery.isError,
+    error: dateRange ? (summaryQuery.error || profitQuery.error || analysisQuery.error) : analysisQuery.error,
+    isFetching: dateRange ? (summaryQuery.isFetching || profitQuery.isFetching || analysisQuery.isFetching) : analysisQuery.isFetching,
 
     // Actions
     refresh: () => refreshMutation.mutate('all'),

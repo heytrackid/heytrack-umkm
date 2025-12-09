@@ -35,12 +35,13 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DateRangePicker, type DateRange } from '@/components/ui/date-range-picker';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useFinanceWiseDashboard } from '@/hooks/api/useFinanceWise';
 import { formatCurrentCurrency } from '@/lib/currency';
 import type { FinancialHealth } from '@/services/ai';
 import { useMemo, useState } from 'react';
+import type { DateRange } from 'react-day-picker';
 
 export default function FinanceWisePage() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>()
@@ -48,14 +49,19 @@ export default function FinanceWisePage() {
     summary, 
     health, 
     forecast, 
-    profitAnalysis, 
+    profitAnalysis,
     aiInsights,
-    isLoading, 
-    isError, 
+    isLoading,
+    isError,
     error,
-    refresh,
-    isRefreshing 
-  } = useFinanceWiseDashboard()
+    refresh: refreshMutation,
+    isRefreshing
+  } = useFinanceWiseDashboard(
+    dateRange?.from && dateRange?.to ? { 
+      startDate: dateRange.from.toISOString().split('T')[0]!, 
+      endDate: dateRange.to.toISOString().split('T')[0]!
+    } : undefined
+  )
 
   // Prepare chart data
   const forecastChartData = useMemo(() => {
@@ -137,7 +143,7 @@ export default function FinanceWisePage() {
                 Export
               </Button>
               <Button 
-                onClick={refresh} 
+                onClick={refreshMutation} 
                 disabled={isRefreshing}
                 variant="outline"
                 size="sm"

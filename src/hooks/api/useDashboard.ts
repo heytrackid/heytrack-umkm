@@ -124,7 +124,10 @@ export interface DashboardStats {
 // Weekly sales data type
 export interface WeeklySalesData {
   day: string
+  date: string
   revenue: number
+  orders: number
+  expenses?: number
   isToday: boolean
 }
 

@@ -21,8 +21,8 @@ interface RevenueData {
 }
 
 interface RevenueChartProps {
-  data?: RevenueData[]
-  className?: string
+  data?: RevenueData[] | undefined
+  className?: string | undefined
 }
 
 export function RevenueChart({ data, className }: RevenueChartProps) {

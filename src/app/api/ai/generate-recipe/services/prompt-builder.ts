@@ -31,7 +31,11 @@ export function buildRecipePrompt(params: PromptParams): string {
   }
 
   const ingredientsList = availableIngredients
-    .map(ing => `- ${ing.name}: Rp ${ing.price_per_unit.toLocaleString('id-ID')}/${ing.unit}`)
+    .map(ing => {
+      const wasteFactor = ing.unit === 'gram' || ing.unit === 'kg' ? 1.05 : 1.02 // 5% waste for solids, 2% for liquids
+      const adjustedPrice = Math.round(ing.price_per_unit * wasteFactor)
+      return `- ${ing.name}: Rp ${ing.price_per_unit.toLocaleString('id-ID')}/${ing.unit} (actual cost: Rp ${adjustedPrice.toLocaleString('id-ID')}/${ing.unit} termasuk waste factor)`
+    })
     .join('\n')
 
   const recommendedFlour = getFlourGuidelines(safeType, servings)
@@ -247,13 +251,15 @@ Return ONLY this exact JSON structure, no additional text:
  - SERVICE SPEED optimization for busy UMKM operations (pre-prep, batch cooking, ready-to-heat)
 
  6. PROFITABILITY FOCUS - ADAPTED BY PRODUCT TYPE:
- ${targetPrice ? ` - Production cost target: 40-60% of selling price (Rp ${(targetPrice * 0.4).toLocaleString('id-ID')} - Rp ${(targetPrice * 0.6).toLocaleString('id-ID')}) depending on product complexity and market position (warteg vs restoran)` : '- Optimize for cost-effectiveness while maintaining quality'}
- - Use affordable local ingredients when possible, considering regional availability and seasonality (tempe tahu murah di Jawa, seafood di pesisir, durian di musimnya, mangga di saat panen, dll)
- - Suggest premium ingredient alternatives for higher price points (daging sapi wagyu vs ayam kampung, seafood lobster vs tongkol, buah import vs lokal, dll)
- - Calculate realistic portion sizes for commercial viability (Indonesian eating habits - porsi besar untuk nasi + lauk, market segments - warteg murah vs restoran premium vs kafe modern)
- - Consider waste minimization in instructions (leftover utilization seperti sisa bumbu untuk stock kari, kulit ayam untuk kaldu sop, dll)
- - Adapt pricing strategy based on cooking method complexity and preparation time (rendang 4 jam ungkep vs nasi goreng 15 menit stir-fry, harga sesuai effort dan skill level required)
- - Include packaging costs for takeaway/delivery considerations (thermal bags, leak-proof containers)
+${targetPrice ? ` - Production cost target: 40-60% of selling price (Rp ${(targetPrice * 0.4).toLocaleString('id-ID')} - Rp ${(targetPrice * 0.6).toLocaleString('id-ID')}) depending on product complexity and market position (warteg vs restoran)` : '- Optimize for cost-effectiveness while maintaining quality'}
+- CRITICAL: Calculate REAL costs including waste factors (5% for solid ingredients like flour, sugar, spices; 2% for liquids like oil, milk, water)
+- Use affordable local ingredients when possible, considering regional availability and seasonality (tempe tahu murah di Jawa, seafood di pesisir, durian di musimnya, mangga di saat panen, dll)
+- Suggest premium ingredient alternatives for higher price points (daging sapi wagyu vs ayam kampung, seafood lobster vs tongkol, buah import vs lokal, dll)
+- Calculate realistic portion sizes for commercial viability (Indonesian eating habits - porsi besar untuk nasi + lauk, market segments - warteg murah vs restoran premium vs kafe modern)
+- Consider waste minimization in instructions (leftover utilization seperti sisa bumbu untuk stock kari, kulit ayam untuk kaldu sop, dll)
+- Adapt pricing strategy based on cooking method complexity and preparation time (rendang 4 jam ungkep vs nasi goreng 15 menit stir-fry, harga sesuai effort dan skill level required)
+- Include packaging costs for takeaway/delivery considerations (thermal bags, leak-proof containers)
+- BUDGET OPTIMIZATION: If target price specified, ensure total ingredient cost per serving stays within 40-60% of target price
 
  7. INDONESIAN UMKM CONTEXT - COMPREHENSIVE:
  - Adjust flavors for Indonesian taste preferences (lebih pedas untuk Jawa Timur, lebih manis untuk Betawi, lebih aromatik untuk Bali, balance gurih-manis-pedas-asam yang pas)

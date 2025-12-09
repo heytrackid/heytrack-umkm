@@ -7,7 +7,6 @@
  * - Financial health analysis
  * - Budget planning and tracking
  * - Expense optimization
- * - Revenue insights and alerts
  */
 
 import { apiLogger } from '@/lib/logger'

@@ -8,7 +8,9 @@
         "https://mcp.supabase.com/mcp?project_ref=vrrjoswzmlhkmmcfhicw"
       ],
       "autoApprove": [
-        "execute_sql"
+        "execute_sql",
+        "apply_migration",
+        "apply_migration"
       ]
     }
   }

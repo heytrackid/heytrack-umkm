@@ -1500,6 +1500,7 @@ export type Database = {
       production_batches: {
         Row: {
           actual_cost: number | null
+          actual_quantity: number | null
           batch_number: string
           completed_at: string | null
           created_at: string | null
@@ -1516,6 +1517,7 @@ export type Database = {
         }
         Insert: {
           actual_cost?: number | null
+          actual_quantity?: number | null
           batch_number: string
           completed_at?: string | null
           created_at?: string | null
@@ -1532,6 +1534,7 @@ export type Database = {
         }
         Update: {
           actual_cost?: number | null
+          actual_quantity?: number | null
           batch_number?: string
           completed_at?: string | null
           created_at?: string | null
@@ -2185,6 +2188,30 @@ export type Database = {
           total_spent?: number | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      system_broadcasts: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          message: string
+          query_keys: Json
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          message: string
+          query_keys?: Json
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          message?: string
+          query_keys?: Json
         }
         Relationships: []
       }

@@ -304,8 +304,12 @@ async function getProductionScheduleHandler(context: RouteContext) {
     const supabase = typed(typedSupabase)
     const today = new Date()
     const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000)
-    const start = today.toISOString().split('T')[0] ?? ''
-    const end = tomorrow.toISOString().split('T')[0] ?? ''
+    const start = today.toISOString().split('T')[0]
+    const end = tomorrow.toISOString().split('T')[0]
+    
+    if (!start || !end) {
+      return handleAPIError(new Error('Invalid date format'), 'GET /api/dashboard/production-schedule')
+    }
 
     const [batches, pendingOrders, lowStockAlerts] = await Promise.all([
       supabase.from('productions').select(`
@@ -473,40 +477,61 @@ function getProductColor(productName: string): string {
   return colors[Math.abs(hash) % colors.length]!
 }
 
-// Weekly sales handler
+// Weekly sales handler - returns last 30 days of data
 async function getWeeklySalesHandler(context: RouteContext) {
-  const { supabase } = context
+  const { user, supabase } = context
 
   try {
     const today = new Date()
-    const weekData = []
+    const daysToShow = 30 // Show last 30 days
+    const salesData = []
 
-    for (let i = 6; i >= 0; i--) {
+    for (let i = daysToShow - 1; i >= 0; i--) {
       const date = new Date(today.getTime() - i * 24 * 60 * 60 * 1000)
-      const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
-      const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000)
+      const dateStr = date.toISOString().split('T')[0] ?? ''
 
-      const { data: orders, error } = await supabase
-        .from('orders')
-        .select('total_amount')
-        .gte('created_at', dayStart.toISOString())
-        .lt('created_at', dayEnd.toISOString())
+      // Fetch orders and expenses for this day
+      const [ordersResult, expensesResult] = await Promise.all([
+        supabase
+          .from('orders')
+          .select('total_amount')
+          .eq('user_id', user.id)
+          .eq('order_date', dateStr),
+        supabase
+          .from('financial_records')
+          .select('amount')
+          .eq('user_id', user.id)
+          .eq('type', 'EXPENSE')
+          .eq('date', dateStr)
+      ])
 
-      if (error) {
-        apiLogger.error({ error }, 'Error fetching orders for weekly sales')
-        return handleAPIError(error, 'GET /api/dashboard/weekly-sales')
+      if (ordersResult.error) {
+        apiLogger.error({ error: ordersResult.error }, 'Error fetching orders for weekly sales')
+        return handleAPIError(ordersResult.error, 'GET /api/dashboard/weekly-sales')
       }
 
-      const revenue = orders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
+      const orders = ordersResult.data || []
+      const expenses = expensesResult.data || []
+      
+      const revenue = orders.reduce((sum, order) => sum + (order.total_amount || 0), 0)
+      const totalExpenses = expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0)
 
-      weekData.push({
-        day: date.toLocaleDateString('id-ID', { weekday: 'short' }),
+      // Format date for display (e.g., "9 Des" or "Mon" for recent days)
+      const dayLabel = i < 7 
+        ? date.toLocaleDateString('id-ID', { weekday: 'short' })
+        : date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+
+      salesData.push({
+        day: dayLabel,
+        date: dateStr,
         revenue,
+        orders: orders.length,
+        expenses: totalExpenses,
         isToday: i === 0
       })
     }
 
-    return createSuccessResponse(weekData)
+    return createSuccessResponse(salesData)
   } catch (error) {
     apiLogger.error({ error }, 'Error in weekly sales API')
     return handleAPIError(error, 'GET /api/dashboard/weekly-sales')

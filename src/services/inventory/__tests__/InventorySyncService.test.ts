@@ -1,32 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { InventorySyncService } from '../InventorySyncService'
 
-// Mock Supabase client
+// Mock Supabase client with proper chaining
+const createMockChain = () => {
+  const chain: Record<string, ReturnType<typeof vi.fn>> = {}
+  chain.select = vi.fn(() => chain)
+  chain.insert = vi.fn(() => chain)
+  chain.update = vi.fn(() => chain)
+  chain.eq = vi.fn(() => chain)
+  chain.single = vi.fn(() => Promise.resolve({ data: null, error: null }))
+  return chain
+}
+
 const mockSupabase = {
-  from: vi.fn(() => ({
-    select: vi.fn(() => ({
-      eq: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          single: vi.fn(),
-          insert: vi.fn(() => ({
-            select: vi.fn(() => ({
-              single: vi.fn()
-            }))
-          }))
-        }))
-      }))
-    })),
-    insert: vi.fn(() => ({
-      select: vi.fn(() => ({
-        single: vi.fn()
-      }))
-    })),
-    update: vi.fn(() => ({
-      eq: vi.fn(() => ({
-        eq: vi.fn()
-      }))
-    }))
-  }))
+  from: vi.fn(() => createMockChain())
 }
 
 describe('InventorySyncService - WAC Calculations', () => {
