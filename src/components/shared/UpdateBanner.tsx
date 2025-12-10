@@ -1,44 +1,59 @@
 'use client'
 
+import { RefreshCw, X } from '@/components/icons'
 import { Button } from '@/components/ui/button'
-import { useUpdates } from '@/contexts/UpdateContext'
-import { AlertCircle, RefreshCw, X } from 'lucide-react'
+import { useUpdateChecker } from '@/hooks/useUpdateChecker'
+import { cn } from '@/lib/utils'
+import { memo } from 'react'
 
-export function UpdateBanner() {
-  const { updates, refreshData, dismissUpdate } = useUpdates()
+interface UpdateBannerProps {
+  /** Custom class name */
+  className?: string
+  /** Polling interval in ms (default: 60000 = 1 minute) */
+  pollInterval?: number
+}
 
-  if (updates.length === 0) return null
+export const UpdateBanner = memo(function UpdateBanner({ 
+  className,
+  pollInterval = 60000 
+}: UpdateBannerProps) {
+  const { hasUpdate, applyUpdate, dismissUpdate, isChecking } = useUpdateChecker({
+    pollInterval,
+    enabled: true
+  })
+
+  if (!hasUpdate) return null
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 space-y-2 p-4 pointer-events-none">
-      {updates.map(update => (
-        <div
-          key={update.id}
-          className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-md animate-in slide-in-from-top pointer-events-auto"
-        >
-          <div className="flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
-            <span className="text-sm text-blue-900">{update.message}</span>
-          </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <Button
-              size="sm"
-              variant="default"
-              onClick={() => refreshData(update.id, update.queryKeys)}
-              className="gap-2"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Refresh
-            </Button>
-            <button
-              onClick={() => dismissUpdate(update.id)}
-              className="text-blue-600 hover:text-blue-800 p-1"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      ))}
+    <div 
+      className={cn(
+        "fixed top-14 left-0 right-0 z-40 bg-primary text-primary-foreground px-4 py-2",
+        "flex items-center justify-center gap-3 text-sm",
+        "animate-slide-in-top",
+        className
+      )}
+    >
+      <span className="flex items-center gap-2">
+        <RefreshCw className={cn("h-4 w-4", isChecking && "animate-spin")} />
+        Versi baru tersedia!
+      </span>
+      <Button
+        size="sm"
+        variant="secondary"
+        onClick={applyUpdate}
+        className="h-7 px-3 text-xs font-medium"
+      >
+        Refresh Sekarang
+      </Button>
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={dismissUpdate}
+        className="h-7 w-7 p-0 hover:bg-primary-foreground/20"
+        aria-label="Tutup"
+      >
+        <X className="h-4 w-4" />
+      </Button>
     </div>
   )
-}
+})

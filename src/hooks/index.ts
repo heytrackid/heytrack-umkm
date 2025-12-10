@@ -57,6 +57,7 @@ export * from './useGlobalExport'
 // Shared utilities
 export * from './use-toast'
 export * from './usePreloading'
+export * from './useUpdateChecker'
 
 // Re-export from other locations for backward compatibility
 export * from './api/useDashboard'
