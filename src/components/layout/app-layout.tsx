@@ -7,6 +7,7 @@ import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBo
 import { SmartBottomNav } from '@/components/navigation/SmartNavigation'
 import { TabNavigation } from '@/components/navigation/TabNavigation'
 import { OnboardingChatbot, WelcomeModal } from '@/components/onboarding'
+import { UpdateBanner } from '@/components/shared/UpdateBanner'
 import { Button } from '@/components/ui/button'
 import {
     DropdownMenu,
@@ -166,6 +167,9 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
     <GlobalErrorBoundary>
       <NotificationProvider>
         <div className="min-h-screen bg-background">
+          {/* Update Banner - shows when new version available */}
+          <UpdateBanner />
+          
           {/* Top Header */}
           <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6">
              <div className="flex-1">
