@@ -79,9 +79,9 @@ const IngredientsPage = (): JSX.Element => {
                   . Segera lakukan pemesanan untuk menjaga ketersediaan stok.
                 </p>
               </div>
-              <Button size="sm" variant="outline" className="bg-white/50 border-orange-200 hover:bg-white text-orange-700" onClick={() => router.push('/ingredients/purchases/new')}>
-                Buat Pesanan
-              </Button>
+               <Button size="sm" variant="outline" className="bg-white/50 border-orange-200 hover:bg-white text-orange-700" onClick={() => router.push('/ingredients/purchases')}>
+                 Buat Pesanan
+               </Button>
             </div>
           </div>
         )}

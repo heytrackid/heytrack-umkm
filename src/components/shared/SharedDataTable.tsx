@@ -28,10 +28,8 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SkeletonText } from '@/components/ui/skeleton'
-import { VirtualizedTable } from '@/components/ui/virtualized-table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export interface Column<T> {
   key: keyof T | string
@@ -337,27 +335,96 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
                 })}
               </div>
             ) : (
-              <VirtualizedTable
-                data={paginatedData}
-                columns={[
-                  ...(enableBulkActions ? [{ header: '☑', accessor: 'select' as keyof T, cell: (item: T) => <input type="checkbox" checked={selectedItems.has(String(getValue(item, idKey)))} onChange={() => handleSelectItem(String(getValue(item, idKey)))} className="cursor-pointer w-4 h-4" onClick={(e: React.MouseEvent) => e.stopPropagation()} /> }] : []),
-                  ...columns.map(col => ({ header: col.header, accessor: col.key, ...(col.render && { cell: (item: T) => col.render!(getValue(item, col.key), item) }) })),
-                  ...((onView || onEdit || onDelete || customActions?.length) ? [{ header: 'Aksi', accessor: 'actions' as keyof T, cell: (item: T) => (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild><Button variant="ghost" size="sm"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {onView && <DropdownMenuItem onClick={() => onView(item)}><Eye className="h-4 w-4 mr-2" />Lihat</DropdownMenuItem>}
-                        {onEdit && <DropdownMenuItem onClick={() => onEdit(item)}><Edit className="h-4 w-4 mr-2" />Edit</DropdownMenuItem>}
-                        {customActions?.map((action, idx) => { if (action.show && !action.show(item)) return null; const Icon = action.icon; return <DropdownMenuItem key={idx} onClick={() => action.onClick(item)} className={action.variant === 'destructive' ? 'text-red-600' : ''}>{Icon && <Icon className="h-4 w-4 mr-2" />}{action.label}</DropdownMenuItem> })}
-                        {onDelete && <><DropdownMenuSeparator /><DropdownMenuItem onClick={() => onDelete(item)} className="text-red-600"><Trash2 className="h-4 w-4 mr-2" />Hapus</DropdownMenuItem></>}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}] : [])
-                ] as any}
-                className="border rounded-lg"
-              />
+              <div className="border rounded-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/50">
+                        {enableBulkActions && (
+                          <TableHead className="w-[50px]">☑</TableHead>
+                        )}
+                        {columns.map((col) => (
+                          <TableHead key={String(col.key)} className={cn(col.hideOnMobile && "hidden md:table-cell", col.className)}>
+                            {col.header}
+                          </TableHead>
+                        ))}
+                        {(onView || onEdit || onDelete || customActions?.length) && (
+                          <TableHead className="w-[80px]">Aksi</TableHead>
+                        )}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {paginatedData.map((item, index) => (
+                        <TableRow key={String(getValue(item, idKey))} className={cn(index % 2 === 0 ? 'bg-background' : 'bg-muted/30')}>
+                          {enableBulkActions && (
+                            <TableCell>
+                              <input
+                                type="checkbox"
+                                checked={selectedItems.has(String(getValue(item, idKey)))}
+                                onChange={() => handleSelectItem(String(getValue(item, idKey)))}
+                                className="cursor-pointer w-4 h-4"
+                                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                              />
+                            </TableCell>
+                          )}
+                          {columns.map((col) => (
+                            <TableCell key={String(col.key)} className={cn(col.hideOnMobile && "hidden md:table-cell", col.className)}>
+                              {col.render ? col.render(getValue(item, col.key), item) : String(getValue(item, col.key) ?? '')}
+                            </TableCell>
+                          ))}
+                          {(onView || onEdit || onDelete || customActions?.length) && (
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  {onView && (
+                                    <DropdownMenuItem onClick={() => onView(item)}>
+                                      <Eye className="h-4 w-4 mr-2" />Lihat
+                                    </DropdownMenuItem>
+                                  )}
+                                  {onEdit && (
+                                    <DropdownMenuItem onClick={() => onEdit(item)}>
+                                      <Edit className="h-4 w-4 mr-2" />Edit
+                                    </DropdownMenuItem>
+                                  )}
+                                  {customActions?.map((action, idx) => {
+                                    if (action.show && !action.show(item)) return null
+                                    const Icon = action.icon
+                                    return (
+                                      <DropdownMenuItem
+                                        key={idx}
+                                        onClick={() => action.onClick(item)}
+                                        className={action.variant === 'destructive' ? 'text-red-600' : ''}
+                                      >
+                                        {Icon && <Icon className="h-4 w-4 mr-2" />}
+                                        {action.label}
+                                      </DropdownMenuItem>
+                                    )
+                                  })}
+                                  {onDelete && (
+                                    <>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem onClick={() => onDelete(item)} className="text-red-600">
+                                        <Trash2 className="h-4 w-4 mr-2" />Hapus
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          )}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
             )}
             {(enablePagination || isServerPagination) && totalItems > 0 && (
               <UnifiedPagination currentPage={isServerPagination ? serverPagination.page : currentPage} totalPages={totalPages} totalItems={totalItems} pageSize={isServerPagination ? serverPagination.limit : rowsPerPage} pageStart={Math.min(pageStart, totalItems)} pageEnd={Math.min(pageEnd, totalItems)} onPageChange={handlePageChange} onPageSizeChange={handlePageSizeChange} pageSizeOptions={sanitizedPageSizeOptions} />

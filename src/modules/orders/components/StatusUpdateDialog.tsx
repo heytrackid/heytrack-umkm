@@ -44,8 +44,8 @@ export function StatusUpdateDialog({
       await onConfirm(selectedStatus)
       onOpenChange(false)
       setSelectedStatus(null)
-    } catch (error) {
-      console.error('Failed to update status:', error)
+    } catch {
+      // Error is handled by the parent component
     } finally {
       setIsUpdating(false)
     }

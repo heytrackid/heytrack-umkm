@@ -484,37 +484,64 @@ async function getWeeklySalesHandler(context: RouteContext) {
   try {
     const today = new Date()
     const daysToShow = 30 // Show last 30 days
-    const salesData = []
+    
+    // Calculate date range
+    const startDate = new Date(today.getTime() - (daysToShow - 1) * 24 * 60 * 60 * 1000)
+    const startDateStr = startDate.toISOString().split('T')[0] ?? ''
+    const endDateStr = today.toISOString().split('T')[0] ?? ''
 
+    // Fetch all orders and expenses in date range with single queries
+    const [ordersResult, expensesResult] = await Promise.all([
+      supabase
+        .from('orders')
+        .select('total_amount, order_date')
+        .eq('user_id', user.id)
+        .gte('order_date', startDateStr)
+        .lte('order_date', endDateStr),
+      supabase
+        .from('financial_records')
+        .select('amount, date')
+        .eq('user_id', user.id)
+        .eq('type', 'EXPENSE')
+        .gte('date', startDateStr)
+        .lte('date', endDateStr)
+    ])
+
+    if (ordersResult.error) {
+      apiLogger.error({ error: ordersResult.error }, 'Error fetching orders for weekly sales')
+      return handleAPIError(ordersResult.error, 'GET /api/dashboard/weekly-sales')
+    }
+
+    const orders = ordersResult.data || []
+    const expenses = expensesResult.data || []
+
+    // Group orders by date
+    const ordersByDate = new Map<string, { revenue: number; count: number }>()
+    orders.forEach(order => {
+      const dateKey = order.order_date || ''
+      const existing = ordersByDate.get(dateKey) || { revenue: 0, count: 0 }
+      ordersByDate.set(dateKey, {
+        revenue: existing.revenue + (order.total_amount || 0),
+        count: existing.count + 1
+      })
+    })
+
+    // Group expenses by date
+    const expensesByDate = new Map<string, number>()
+    expenses.forEach(expense => {
+      const dateKey = expense.date || ''
+      const existing = expensesByDate.get(dateKey) || 0
+      expensesByDate.set(dateKey, existing + (expense.amount || 0))
+    })
+
+    // Build sales data for each day
+    const salesData = []
     for (let i = daysToShow - 1; i >= 0; i--) {
       const date = new Date(today.getTime() - i * 24 * 60 * 60 * 1000)
       const dateStr = date.toISOString().split('T')[0] ?? ''
-
-      // Fetch orders and expenses for this day
-      const [ordersResult, expensesResult] = await Promise.all([
-        supabase
-          .from('orders')
-          .select('total_amount')
-          .eq('user_id', user.id)
-          .eq('order_date', dateStr),
-        supabase
-          .from('financial_records')
-          .select('amount')
-          .eq('user_id', user.id)
-          .eq('type', 'EXPENSE')
-          .eq('date', dateStr)
-      ])
-
-      if (ordersResult.error) {
-        apiLogger.error({ error: ordersResult.error }, 'Error fetching orders for weekly sales')
-        return handleAPIError(ordersResult.error, 'GET /api/dashboard/weekly-sales')
-      }
-
-      const orders = ordersResult.data || []
-      const expenses = expensesResult.data || []
       
-      const revenue = orders.reduce((sum, order) => sum + (order.total_amount || 0), 0)
-      const totalExpenses = expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0)
+      const orderData = ordersByDate.get(dateStr) || { revenue: 0, count: 0 }
+      const totalExpenses = expensesByDate.get(dateStr) || 0
 
       // Format date for display (e.g., "9 Des" or "Mon" for recent days)
       const dayLabel = i < 7 
@@ -524,8 +551,8 @@ async function getWeeklySalesHandler(context: RouteContext) {
       salesData.push({
         day: dayLabel,
         date: dateStr,
-        revenue,
-        orders: orders.length,
+        revenue: orderData.revenue,
+        orders: orderData.count,
         expenses: totalExpenses,
         isToday: i === 0
       })

@@ -23,9 +23,10 @@ interface RevenueData {
 interface RevenueChartProps {
   data?: RevenueData[] | undefined
   className?: string | undefined
+  isLoading?: boolean
 }
 
-export function RevenueChart({ data, className }: RevenueChartProps) {
+export function RevenueChart({ data, className, isLoading = false }: RevenueChartProps) {
   const { formatCurrency } = useCurrency()
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: subDays(new Date(), 30),
@@ -70,7 +71,9 @@ export function RevenueChart({ data, className }: RevenueChartProps) {
         <div>
           <CardTitle className="text-base sm:text-lg">Tren Pendapatan</CardTitle>
           <CardDescription className="text-xs sm:text-sm">
-            {hasData ? (
+            {isLoading ? (
+              <>Memuat data...</>
+            ) : hasData ? (
               <>Total: {formatCurrency(totals.totalRevenue)} dari {totals.totalOrders} pesanan</>
             ) : (
               <>Belum ada data pendapatan</>
@@ -84,7 +87,14 @@ export function RevenueChart({ data, className }: RevenueChartProps) {
         />
       </CardHeader>
       <CardContent className="p-2 sm:p-6">
-        {!hasData ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+              <p className="text-sm">Memuat data chart...</p>
+            </div>
+          </div>
+        ) : !hasData ? (
           <div className="flex items-center justify-center h-[300px] text-muted-foreground">
             <div className="text-center">
               <p className="text-sm">Belum ada data untuk ditampilkan</p>

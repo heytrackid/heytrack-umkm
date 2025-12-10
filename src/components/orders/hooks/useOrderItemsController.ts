@@ -120,13 +120,17 @@ export const useOrderItemsController = <TItem extends OrderItemBase>(
   const [loadingRecipes, setLoadingRecipes] = useState(false)
   const [recipeError, setRecipeError] = useState<string | null>(null)
 
-  const normalizedRecipes = useMemo(() => {
-    return availableRecipes ? (filterRecipe ? availableRecipes.filter(filterRecipe) : availableRecipes) : []
-  }, [availableRecipes, filterRecipe])
-
+  // Sync recipes from availableRecipes prop when it changes
+  // Use JSON.stringify to create stable dependency for deep comparison
+  const availableRecipesKey = availableRecipes ? JSON.stringify(availableRecipes.map(r => r.id)) : ''
+  
   useEffect(() => {
-    setRecipes(normalizedRecipes)
-  }, [normalizedRecipes])
+    if (availableRecipes) {
+      const filtered = filterRecipe ? availableRecipes.filter(filterRecipe) : availableRecipes
+      setRecipes(filtered)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableRecipesKey])
 
   const fetchRecipes = useCallback(async () => {
     if (!autoFetchRecipes) {

@@ -275,12 +275,8 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
 
       // Refresh orders list
       await queryClient.invalidateQueries({ queryKey: ['orders'] })
-      
-      // Show success notification (optional - you can add toast here)
-      console.log(`Status pesanan berhasil diubah ke ${newStatus}`)
     } catch (err) {
-      console.error('Error updating order status:', err)
-      alert(getErrorMessage(err))
+      // Re-throw to let StatusUpdateDialog handle the error
       throw err
     }
   }, [queryClient, statusUpdateOrder])

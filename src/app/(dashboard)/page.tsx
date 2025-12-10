@@ -15,13 +15,13 @@ import { useDashboardStats, useWeeklySales } from '@/hooks/api/useDashboard'
 
 import { ProductionScheduleWidget } from '@/components/dashboard/ProductionScheduleWidget'
 import {
-  AlertTriangle,
-  DollarSign,
-  Package,
-  Plus,
-  ShoppingCart,
-  TrendingUp,
-  Users,
+    AlertTriangle,
+    DollarSign,
+    Package,
+    Plus,
+    ShoppingCart,
+    TrendingUp,
+    Users,
 } from '@/components/icons'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -29,7 +29,7 @@ import { useState } from 'react'
 export default function DashboardPage(): JSX.Element {
   const [onboardingOpen, setOnboardingOpen] = useState(false)
   const { data: stats, isLoading: statsLoading } = useDashboardStats()
-  const { data: weeklySales } = useWeeklySales()
+  const { data: weeklySales, isLoading: salesLoading } = useWeeklySales()
 
   const formatCurrency = (value: number): string => {
     return new Intl.NumberFormat('id-ID', {
@@ -145,7 +145,8 @@ export default function DashboardPage(): JSX.Element {
             revenue: item.revenue,
             orders: item.orders,
             expenses: item.expenses ?? 0,
-          }))} 
+          }))}
+          isLoading={salesLoading}
         />
 
         {/* Production Schedule Widget */}
