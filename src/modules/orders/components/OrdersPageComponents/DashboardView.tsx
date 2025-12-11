@@ -1,6 +1,7 @@
 'use client'
 
 import { BarChart3, Clock, Plus, ShoppingCart } from '@/components/icons'
+import { m, type Variants } from 'framer-motion'
 
 import type { Order } from '@/app/orders/types/orders.types'
 import { Badge } from '@/components/ui/badge'
@@ -24,6 +25,26 @@ import { ORDER_STATUS_LABELS } from '@/modules/orders/types'
 interface DashboardViewProps {
     orders: Order[]
     onCreateOrder?: () => void
+}
+
+const listVariants: Variants = {
+    hidden: { opacity: 1 },
+    show: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.05,
+            delayChildren: 0.02
+        }
+    }
+}
+
+const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 6 },
+    show: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.16, ease: [0.16, 1, 0.3, 1] }
+    }
 }
 
 export const DashboardView = ({ orders, onCreateOrder }: DashboardViewProps) => {
@@ -71,9 +92,18 @@ export const DashboardView = ({ orders, onCreateOrder }: DashboardViewProps) => 
                             )}
                         </div>
                     ) : (
-                        <div className="space-y-3">
+                        <m.div
+                            className="space-y-3"
+                            variants={listVariants}
+                            initial="hidden"
+                            animate="show"
+                        >
                             {orders.slice(0, 5).map((order) => (
-                                <div key={order['id']} className="flex items-center justify-between p-3 border rounded-lg">
+                                <m.div
+                                    key={order['id']}
+                                    className="flex items-center justify-between p-3 border rounded-lg"
+                                    variants={itemVariants}
+                                >
                                     <div className="flex-1">
                                         <div className="font-medium">{order['order_no']}</div>
                                         <div className="text-sm text-muted-foreground">{order['customer_name'] ?? 'N/A'}</div>
@@ -85,9 +115,9 @@ export const DashboardView = ({ orders, onCreateOrder }: DashboardViewProps) => 
                                             {order['status'] ? ORDER_STATUS_LABELS[order['status']] : 'N/A'}
                                         </Badge>
                                     </div>
-                                </div>
+                                </m.div>
                             ))}
-                        </div>
+                        </m.div>
                     )}
                 </CardContent>
             </Card>
