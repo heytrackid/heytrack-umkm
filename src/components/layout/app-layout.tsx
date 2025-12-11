@@ -17,7 +17,6 @@ import {
 import { LoadingState } from '@/components/ui/loading-state'
 
 import { NotificationBell } from '@/components/layout/NotificationBell'
-import { MotionProvider } from '@/components/providers/MotionProvider'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { NotificationProvider } from '@/contexts/notification-context'
 import { useAuth } from '@/hooks/useAuth'
@@ -148,79 +147,77 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
   return (
     <GlobalErrorBoundary>
       <NotificationProvider>
-        <MotionProvider>
-          <div className="min-h-screen bg-background flex">
-            {/* Update Banner */}
-            <UpdateBanner />
+        <div className="min-h-screen bg-background flex">
+          {/* Update Banner */}
+          <UpdateBanner />
 
-            {/* Sidebar - Fixed position, desktop only */}
-            {!isMobile && (
-              <Sidebar
-                collapsed={sidebarCollapsed}
-                onCollapsedChange={setSidebarCollapsed}
-              />
+          {/* Sidebar - Fixed position, desktop only */}
+          {!isMobile && (
+            <Sidebar
+              collapsed={sidebarCollapsed}
+              onCollapsedChange={setSidebarCollapsed}
+            />
+          )}
+
+          {/* Main wrapper - takes remaining space */}
+          <div
+            className={cn(
+              'flex-1 flex flex-col min-h-screen transition-all duration-300',
+              !isMobile && (sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64')
             )}
+          >
+            {/* Top Header */}
+            <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6">
+              <div className="flex-1">
+                {isMobile && (
+                  <h1 className="text-sm font-semibold text-foreground/80">HeyTrack</h1>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <ThemeToggle />
+                {!loading && user && <NotificationBell />}
 
-            {/* Main wrapper - takes remaining space */}
-            <div
+                {!loading && user && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-xs">
+                          {user.email?.charAt(0).toUpperCase()}
+                        </div>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <div className="px-2 py-1.5 text-sm font-medium truncate">{user.email}</div>
+                      <DropdownMenuItem onClick={() => router.push('/settings')}>
+                        Pengaturan
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => router.push('/handler/sign-out')}
+                        className="text-red-600 focus:text-red-600"
+                      >
+                        Keluar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+            </header>
+
+            {/* Main Content */}
+            <main
+              ref={mainContentRef}
               className={cn(
-                'flex-1 flex flex-col min-h-screen transition-all duration-300',
-                !isMobile && (sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64')
+                'flex-1 bg-background p-4 md:p-6',
+                isMobile && 'pb-[calc(56px+env(safe-area-inset-bottom))]'
               )}
             >
-              {/* Top Header */}
-              <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6">
-                <div className="flex-1">
-                  {isMobile && (
-                    <h1 className="text-sm font-semibold text-foreground/80">HeyTrack</h1>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <ThemeToggle />
-                  {!loading && user && <NotificationBell />}
-
-                  {!loading && user && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-xs">
-                            {user.email?.charAt(0).toUpperCase()}
-                          </div>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56">
-                        <div className="px-2 py-1.5 text-sm font-medium truncate">{user.email}</div>
-                        <DropdownMenuItem onClick={() => router.push('/settings')}>
-                          Pengaturan
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => router.push('/handler/sign-out')}
-                          className="text-red-600 focus:text-red-600"
-                        >
-                          Keluar
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                </div>
-              </header>
-
-              {/* Main Content */}
-              <main
-                ref={mainContentRef}
-                className={cn(
-                  'flex-1 bg-background p-4 md:p-6',
-                  isMobile && 'pb-[calc(56px+env(safe-area-inset-bottom))]'
-                )}
-              >
-                <div className="mx-auto max-w-7xl space-y-4">{children}</div>
-              </main>
-            </div>
-
-            {/* Bottom Navigation for Mobile */}
-            {isMobile && <SmartBottomNav />}
+              <div className="mx-auto max-w-7xl space-y-4">{children}</div>
+            </main>
           </div>
-        </MotionProvider>
+
+          {/* Bottom Navigation for Mobile */}
+          {isMobile && <SmartBottomNav />}
+        </div>
       </NotificationProvider>
     </GlobalErrorBoundary>
   )
