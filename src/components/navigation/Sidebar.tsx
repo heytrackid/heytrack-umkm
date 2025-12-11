@@ -129,22 +129,25 @@ export function Sidebar({ collapsed = false, onCollapsedChange }: SidebarProps) 
     <TooltipProvider delayDuration={0}>
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 h-screen border-r bg-background transition-all duration-300 flex-col",
+          "fixed left-0 top-0 z-50 h-screen bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-r border-border/50 shadow-lg transition-all duration-300 ease-in-out flex-col",
           collapsed ? "w-16" : "w-64"
         )}
       >
         <div className="flex h-full w-full flex-col">
           {/* Header with Logo and Collapse Toggle */}
-          <div className="flex h-14 items-center justify-between px-4 border-b">
+          <div className="flex h-14 items-center justify-between px-3 border-b border-border/50">
             {!collapsed && (
               <Link href="/dashboard" className="flex items-center gap-2">
-                <span className="text-lg font-bold text-primary">HeyTrack</span>
+                <span className="text-base font-semibold text-foreground">HeyTrack</span>
               </Link>
             )}
             <Button
               variant="ghost"
-              size="icon"
-              className={cn("h-8 w-8", collapsed && "mx-auto")}
+              size="sm"
+              className={cn(
+                "h-8 w-8 rounded-md hover:bg-accent transition-colors duration-150",
+                collapsed && "mx-auto"
+              )}
               onClick={() => onCollapsedChange?.(!collapsed)}
             >
               {collapsed ? (
@@ -156,8 +159,8 @@ export function Sidebar({ collapsed = false, onCollapsedChange }: SidebarProps) 
           </div>
 
           {/* Navigation */}
-          <ScrollArea className="flex-1 px-2 py-4">
-            <nav className="space-y-2">
+          <ScrollArea className="flex-1 px-3 py-6">
+            <nav className="space-y-6">
               {navigationGroups.map((group) => {
                 const groupHasActiveItem = hasActiveItem(group.items)
                 const isOpen = openGroups[group.label] ?? true
@@ -165,7 +168,7 @@ export function Sidebar({ collapsed = false, onCollapsedChange }: SidebarProps) 
                 if (collapsed) {
                   // Collapsed mode - show only icons with tooltips
                   return (
-                    <div key={group.label} className="space-y-1">
+                    <div key={group.label} className="space-y-2">
                       {group.items.map((item) => {
                         const isActive = checkIsActive(item.url)
                         return (
@@ -174,16 +177,16 @@ export function Sidebar({ collapsed = false, onCollapsedChange }: SidebarProps) 
                               <Link
                                 href={item.url}
                                 className={cn(
-                                  "flex h-10 w-10 items-center justify-center rounded-lg mx-auto transition-colors",
+                                  "flex h-10 w-10 items-center justify-center rounded-xl mx-auto transition-all duration-200 group",
                                   isActive
-                                    ? "bg-primary/10 text-primary"
-                                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                    ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
+                                    : "text-muted-foreground hover:bg-accent/80 hover:text-foreground hover:shadow-sm hover:scale-105"
                                 )}
                               >
                                 <item.icon className="h-5 w-5" />
                               </Link>
                             </TooltipTrigger>
-                            <TooltipContent side="right">
+                            <TooltipContent side="right" className="font-medium">
                               {item.title}
                             </TooltipContent>
                           </Tooltip>
@@ -204,11 +207,11 @@ export function Sidebar({ collapsed = false, onCollapsedChange }: SidebarProps) 
                       <Button
                         variant="ghost"
                         className={cn(
-                          "w-full justify-between px-3 py-2 text-sm font-medium",
-                          groupHasActiveItem && "text-primary"
+                          "w-full justify-between px-3 py-2.5 text-sm font-semibold rounded-lg hover:bg-accent/50 transition-all duration-200",
+                          groupHasActiveItem && "text-primary bg-primary/5 hover:bg-primary/10"
                         )}
                       >
-                        <span>{group.label}</span>
+                        <span className="tracking-wide">{group.label}</span>
                         <ChevronDown
                           className={cn(
                             "h-4 w-4 transition-transform duration-200",
@@ -217,7 +220,7 @@ export function Sidebar({ collapsed = false, onCollapsedChange }: SidebarProps) 
                         />
                       </Button>
                     </CollapsibleTrigger>
-                    <CollapsibleContent className="space-y-1 pt-1">
+                    <CollapsibleContent className="space-y-1 pt-2">
                       {group.items.map((item) => {
                         const isActive = checkIsActive(item.url)
                         return (
@@ -225,17 +228,24 @@ export function Sidebar({ collapsed = false, onCollapsedChange }: SidebarProps) 
                             key={item.title}
                             href={item.url}
                             className={cn(
-                              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group relative",
                               isActive
-                                ? "bg-primary/10 text-primary font-medium"
-                                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
+                                : "text-muted-foreground hover:bg-accent/80 hover:text-foreground hover:translate-x-1"
                             )}
                           >
-                            <item.icon className={cn(
-                              "h-4 w-4",
-                              isActive ? "text-primary" : "text-muted-foreground"
-                            )} />
-                            <span>{item.title}</span>
+                            <div className={cn(
+                              "flex items-center justify-center w-8 h-8 rounded-md transition-all duration-200",
+                              isActive 
+                                ? "bg-primary-foreground/20 text-primary-foreground" 
+                                : "bg-muted/50 group-hover:bg-accent/60"
+                            )}>
+                              <item.icon className="h-4 w-4" />
+                            </div>
+                            <span className="font-medium">{item.title}</span>
+                            {isActive && (
+                              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
+                            )}
                           </Link>
                         )
                       })}
@@ -245,7 +255,7 @@ export function Sidebar({ collapsed = false, onCollapsedChange }: SidebarProps) 
               })}
 
               {/* Settings */}
-              <div className="pt-4 border-t mt-4">
+              <div className="pt-6 border-t border-border/50 mt-6">
                 {settingsItems.map((item) => {
                   const isActive = checkIsActive(item.url)
                   
@@ -256,16 +266,16 @@ export function Sidebar({ collapsed = false, onCollapsedChange }: SidebarProps) 
                           <Link
                             href={item.url}
                             className={cn(
-                              "flex h-10 w-10 items-center justify-center rounded-lg mx-auto transition-colors",
+                              "flex h-10 w-10 items-center justify-center rounded-xl mx-auto transition-all duration-200 group",
                               isActive
-                                ? "bg-primary/10 text-primary"
-                                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
+                                : "text-muted-foreground hover:bg-accent/80 hover:text-foreground hover:shadow-sm hover:scale-105"
                             )}
                           >
                             <item.icon className="h-5 w-5" />
                           </Link>
                         </TooltipTrigger>
-                        <TooltipContent side="right">
+                        <TooltipContent side="right" className="font-medium">
                           {item.title}
                         </TooltipContent>
                       </Tooltip>
@@ -277,17 +287,24 @@ export function Sidebar({ collapsed = false, onCollapsedChange }: SidebarProps) 
                       key={item.title}
                       href={item.url}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group relative",
                         isActive
-                          ? "bg-primary/10 text-primary font-medium"
-                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                          ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
+                          : "text-muted-foreground hover:bg-accent/80 hover:text-foreground hover:translate-x-1"
                       )}
                     >
-                      <item.icon className={cn(
-                        "h-4 w-4",
-                        isActive ? "text-primary" : "text-muted-foreground"
-                      )} />
-                      <span>{item.title}</span>
+                      <div className={cn(
+                        "flex items-center justify-center w-8 h-8 rounded-md transition-all duration-200",
+                        isActive 
+                          ? "bg-primary-foreground/20 text-primary-foreground" 
+                          : "bg-muted/50 group-hover:bg-accent/60"
+                      )}>
+                        <item.icon className="h-4 w-4" />
+                      </div>
+                      <span className="font-medium">{item.title}</span>
+                      {isActive && (
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
+                      )}
                     </Link>
                   )
                 })}

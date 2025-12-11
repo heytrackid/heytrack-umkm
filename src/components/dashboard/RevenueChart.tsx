@@ -1,6 +1,7 @@
 'use client'
 
-import { subDays } from 'date-fns'
+import { useQuery } from '@tanstack/react-query'
+import { format, subDays } from 'date-fns'
 import { useMemo, useState } from 'react'
 import type { DateRange } from 'react-day-picker'
 
@@ -11,19 +12,31 @@ import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartToo
 import { DateRangePicker } from '@/components/ui/date-range-picker'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCurrency } from '@/hooks/useCurrency'
+import { fetchApi } from '@/lib/query/query-helpers'
 
 interface RevenueData {
+  day: string
   date: string
   revenue: number
   orders: number
   expenses?: number
-  [key: string]: string | number | undefined
+  isToday?: boolean
+  [key: string]: string | number | boolean | undefined
 }
 
 interface RevenueChartProps {
   data?: RevenueData[] | undefined
   className?: string | undefined
   isLoading?: boolean
+}
+
+const fetchRevenueData = async (startDate?: string, endDate?: string): Promise<RevenueData[]> => {
+  const params = new URLSearchParams()
+  if (startDate) params.append('start_date', startDate)
+  if (endDate) params.append('end_date', endDate)
+  
+  const url = `/api/dashboard/weekly-sales${params.toString() ? `?${params.toString()}` : ''}`
+  return fetchApi<RevenueData[]>(url)
 }
 
 export function RevenueChart({ data, className, isLoading = false }: RevenueChartProps) {
@@ -33,10 +46,28 @@ export function RevenueChart({ data, className, isLoading = false }: RevenueChar
     to: new Date(),
   })
 
-  // Use provided data only - no mock data
+  // Fetch chart data based on date range
+  const { data: fetchedData, isLoading: isDataLoading, error } = useQuery({
+    queryKey: ['dashboard', 'revenue-chart', dateRange],
+    queryFn: () => fetchRevenueData(
+      dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : undefined,
+      dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : undefined
+    ),
+    staleTime: 30000,
+    gcTime: 300000,
+    retry: 2,
+    refetchOnWindowFocus: false,
+  })
+
+  // Use fetched data if available, otherwise fall back to provided data
   const chartData = useMemo(() => {
+    if (fetchedData && fetchedData.length > 0) {
+      return fetchedData
+    }
     return data && data.length > 0 ? data : []
-  }, [data])
+  }, [fetchedData, data])
+
+  const loading = isLoading || isDataLoading
 
 
 
@@ -87,11 +118,18 @@ export function RevenueChart({ data, className, isLoading = false }: RevenueChar
         />
       </CardHeader>
       <CardContent className="p-2 sm:p-6">
-        {isLoading ? (
+        {loading ? (
           <div className="flex items-center justify-center h-[300px] text-muted-foreground">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
               <p className="text-sm">Memuat data chart...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+            <div className="text-center">
+              <p className="text-sm">Gagal memuat data</p>
+              <p className="text-xs mt-1">Silakan coba lagi</p>
             </div>
           </div>
         ) : !hasData ? (
@@ -119,7 +157,7 @@ export function RevenueChart({ data, className, isLoading = false }: RevenueChar
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+                <XAxis dataKey="day" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
                 <YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={12} tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : v} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Area type="monotone" dataKey="revenue" stroke={chartConfig.revenue.color} fill="url(#fillRevenue)" />
@@ -131,7 +169,7 @@ export function RevenueChart({ data, className, isLoading = false }: RevenueChar
             <ChartContainer config={chartConfig} className="w-full" style={{ height: 300 }}>
               <BarChart data={chartData} margin={{ left: 0, right: 0, top: 10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+                <XAxis dataKey="day" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
                 <YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={12} tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : v} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <ChartLegend content={<ChartLegendContent />} />
@@ -151,7 +189,7 @@ export function RevenueChart({ data, className, isLoading = false }: RevenueChar
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+                <XAxis dataKey="day" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
                 <YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Area type="monotone" dataKey="orders" stroke={chartConfig.orders.color} fill="url(#fillOrders)" />

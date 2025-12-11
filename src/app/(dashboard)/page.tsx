@@ -141,7 +141,8 @@ export default function DashboardPage(): JSX.Element {
         {/* Revenue Chart */}
         <RevenueChart 
           data={weeklySales?.map((item) => ({
-            date: item.day,
+            day: item.day,
+            date: item.date,
             revenue: item.revenue,
             orders: item.orders,
             expenses: item.expenses ?? 0,

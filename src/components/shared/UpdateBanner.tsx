@@ -1,9 +1,16 @@
 'use client'
 
-import { RefreshCw, X } from '@/components/icons'
+import { AlertCircle, Download, RefreshCw } from '@/components/icons'
 import { Button } from '@/components/ui/button'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
 import { useUpdateChecker } from '@/hooks/useUpdateChecker'
-import { cn } from '@/lib/utils'
 import { memo } from 'react'
 
 interface UpdateBannerProps {
@@ -14,7 +21,6 @@ interface UpdateBannerProps {
 }
 
 export const UpdateBanner = memo(function UpdateBanner({ 
-  className,
   pollInterval = 60000 
 }: UpdateBannerProps) {
   const { hasUpdate, applyUpdate, dismissUpdate, isChecking } = useUpdateChecker({
@@ -22,39 +28,56 @@ export const UpdateBanner = memo(function UpdateBanner({
     enabled: true
   })
 
-  if (!hasUpdate) return null
-
   return (
-    <div 
-      className={cn(
-        "fixed top-0 left-0 right-0 z-40 bg-primary text-primary-foreground px-4 py-2",
-        "flex items-center justify-center gap-3 text-sm",
-        "animate-slide-in-top",
-        "safe-area-inset-top",
-        className
-      )}
-    >
-      <span className="flex items-center gap-2">
-        <RefreshCw className={cn("h-4 w-4", isChecking && "animate-spin")} />
-        Versi baru tersedia!
-      </span>
-      <Button
-        size="sm"
-        variant="secondary"
-        onClick={applyUpdate}
-        className="h-7 px-3 text-xs font-medium"
-      >
-        Refresh Sekarang
-      </Button>
-      <Button
-        size="sm"
-        variant="ghost"
-        onClick={dismissUpdate}
-        className="h-7 w-7 p-0 hover:bg-primary-foreground/20"
-        aria-label="Tutup"
-      >
-        <X className="h-4 w-4" />
-      </Button>
-    </div>
+    <Dialog open={hasUpdate} onOpenChange={(open) => !open && dismissUpdate()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Download className="h-5 w-5 text-primary" />
+            Update Tersedia!
+          </DialogTitle>
+          <DialogDescription>
+            Versi baru HeyTrack telah tersedia dengan fitur dan perbaikan terbaru.
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="flex items-center gap-3 py-4">
+          <AlertCircle className="h-8 w-8 text-amber-500 flex-shrink-0" />
+          <div className="text-sm">
+            <p className="font-medium">Rekomendasi: Update sekarang untuk pengalaman terbaik</p>
+            <p className="text-muted-foreground mt-1">
+              Aplikasi akan refresh otomatis untuk menginstall update.
+            </p>
+          </div>
+        </div>
+
+        <DialogFooter className="flex-col sm:flex-row gap-2">
+          <Button
+            variant="outline"
+            onClick={dismissUpdate}
+            className="w-full sm:w-auto"
+          >
+            Nanti Saja
+          </Button>
+          <Button
+            onClick={applyUpdate}
+            disabled={isChecking}
+            className="w-full sm:w-auto"
+          >
+            {isChecking ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Memperbarui...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 mr-2" />
+                Update Sekarang
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 })

@@ -57,9 +57,10 @@ export const GET = createApiRoute(
   {
     method: 'GET',
     path: '/api/dashboard',
+    querySchema: DashboardQuerySchema,
     securityPreset: SecurityPresets.enhanced(),
   },
-  async (context) => {
+  async (context, validatedQuery) => {
     const { params } = context
     const slug = params?.['slug'] as string[] | undefined
 
@@ -72,8 +73,8 @@ export const GET = createApiRoute(
     switch (subRoute) {
       case 'stats': {
         // Dashboard stats uses custom query handling
-        const validatedQuery = { start_date: undefined, end_date: undefined }
-        return getDashboardStatsHandler(context, validatedQuery)
+        const query = { start_date: undefined, end_date: undefined }
+        return getDashboardStatsHandler(context, query)
       }
       case 'hpp-summary':
         return getHppSummaryHandler(context)
@@ -81,11 +82,12 @@ export const GET = createApiRoute(
         return getProductionScheduleHandler(context)
       case 'recent-orders': {
         // Recent orders uses custom query handling
-        const validatedQuery = { limit: 5 }
-        return getRecentOrdersHandler(context, validatedQuery)
+        const query = { limit: 5 }
+        return getRecentOrdersHandler(context, query)
       }
-      case 'weekly-sales':
-        return getWeeklySalesHandler(context)
+      case 'weekly-sales': {
+        return getWeeklySalesHandler(context, validatedQuery || {})
+      }
       case 'top-products':
         return getTopProductsHandler(context)
       default:
@@ -477,18 +479,32 @@ function getProductColor(productName: string): string {
   return colors[Math.abs(hash) % colors.length]!
 }
 
-// Weekly sales handler - returns last 30 days of data
-async function getWeeklySalesHandler(context: RouteContext) {
+// Weekly sales handler - returns data for specified date range
+async function getWeeklySalesHandler(context: RouteContext, query: z.infer<typeof DashboardQuerySchema>) {
   const { user, supabase } = context
+  
+  // Use validated query parameters
+  const startParam = normalizeDate(query.start_date)
+  const endParam = normalizeDate(query.end_date)
 
   try {
     const today = new Date()
-    const daysToShow = 30 // Show last 30 days
     
-    // Calculate date range
-    const startDate = new Date(today.getTime() - (daysToShow - 1) * 24 * 60 * 60 * 1000)
+    // If no date range provided, default to last 30 days
+    let startDate: Date
+    let endDate: Date
+    
+    if (startParam && endParam) {
+      startDate = new Date(startParam)
+      endDate = new Date(endParam)
+    } else {
+      // Default to last 30 days
+      startDate = new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000) // 30 days including today
+      endDate = today
+    }
+    
     const startDateStr = startDate.toISOString().split('T')[0] ?? ''
-    const endDateStr = today.toISOString().split('T')[0] ?? ''
+    const endDateStr = endDate.toISOString().split('T')[0] ?? ''
 
     // Fetch all orders and expenses in date range with single queries
     const [ordersResult, expensesResult] = await Promise.all([
@@ -534,10 +550,12 @@ async function getWeeklySalesHandler(context: RouteContext) {
       expensesByDate.set(dateKey, existing + (expense.amount || 0))
     })
 
-    // Build sales data for each day
+    // Build sales data for each day in the range
     const salesData = []
-    for (let i = daysToShow - 1; i >= 0; i--) {
-      const date = new Date(today.getTime() - i * 24 * 60 * 60 * 1000)
+    const daysToShow = Math.ceil((endDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000)) + 1
+    
+    for (let i = 0; i < daysToShow; i++) {
+      const date = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000)
       const dateStr = date.toISOString().split('T')[0] ?? ''
       
       const orderData = ordersByDate.get(dateStr) || { revenue: 0, count: 0 }
@@ -554,7 +572,7 @@ async function getWeeklySalesHandler(context: RouteContext) {
         revenue: orderData.revenue,
         orders: orderData.count,
         expenses: totalExpenses,
-        isToday: i === 0
+        isToday: i === daysToShow - 1
       })
     }
 
