@@ -77,10 +77,48 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
 
   const [activeTab, setActiveTab] = useState('create')
   const [prompt, setPrompt] = useState('')
+  const [promptError, setPromptError] = useState('')
   const [generatedRecipe, setGeneratedRecipe] = useState<GeneratedRecipe | null>(null)
   const [selectedHistoryRecipe, setSelectedHistoryRecipe] = useState<GeneratedRecipe | null>(null)
   const [savedRecipeId, setSavedRecipeId] = useState<string | null>(null)
   const router = useRouter()
+
+  // Enhanced validation for recipe prompt
+  const validatePrompt = useCallback((promptText: string): string => {
+    if (!promptText.trim()) {
+      return 'Prompt tidak boleh kosong'
+    }
+    
+    if (promptText.length < 10) {
+      return 'Prompt terlalu singkat, minimal 10 karakter'
+    }
+    
+    if (promptText.length > 500) {
+      return 'Prompt terlalu panjang, maksimal 500 karakter'
+    }
+    
+    // Check for potentially harmful content patterns
+    const harmfulPatterns = [
+      /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+      /javascript:/gi,
+      /on\w+\s*=/gi,
+      /data:text\/html/gi,
+    ]
+    
+    for (const pattern of harmfulPatterns) {
+      if (pattern.test(promptText)) {
+        return 'Prompt mengandung konten yang tidak diizinkan'
+      }
+    }
+    
+    // Check for excessive special characters that might indicate injection attempts
+    const specialCharCount = (promptText.match(/[<>'"&]/g) || []).length
+    if (specialCharCount > promptText.length * 0.3) {
+      return 'Prompt mengandung terlalu banyak karakter khusus'
+    }
+    
+    return ''
+  }, [])
 
   // Fetch history
   const { data: historyData, isLoading: historyLoading } = useQuery({
@@ -158,20 +196,16 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
   }, [])
 
   const handleGenerate = useCallback(() => {
-    if (!prompt.trim()) {
-      handleError(new Error('Prompt kosong'), 'Simple Recipe Generator', true, 'Tulis dulu apa yang ingin kamu buat!')
-      return
-    }
-
-    if (prompt.trim().length < 10) {
-      handleError(new Error('Prompt terlalu pendek'), 'Simple Recipe Generator', true, 'Deskripsikan lebih detail resep yang kamu inginkan')
+    const error = validatePrompt(prompt)
+    if (error) {
+      handleError(new Error(error), 'Simple Recipe Generator', true, error)
       return
     }
 
     const params = parsePromptToParams(prompt)
     setGeneratedRecipe(null)
     generateRecipe(params)
-  }, [prompt, parsePromptToParams, generateRecipe])
+  }, [prompt, validatePrompt, parsePromptToParams, generateRecipe])
 
   const handleSaveRecipe = useCallback(async () => {
     // Use either the newly generated recipe OR the selected history recipe
@@ -319,18 +353,30 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
             <Textarea
               placeholder="Contoh: Buatkan resep brownies coklat untuk 16 potong. Bahan: dark chocolate, mentega, telur, gula, tepung. Target harga jual Rp 80.000"
               value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              className="min-h-[120px] resize-none"
+              onChange={(e) => {
+                setPrompt(e.target.value)
+                setPromptError('') // Clear error on input change
+              }}
+              className={`min-h-[120px] resize-none ${promptError ? 'border-red-500 focus:border-red-500' : ''}`}
               disabled={isGenerating}
+              maxLength={500}
             />
-
+            
             <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">
-                💡 Tip: Sebutkan nama produk, jumlah porsi, bahan-bahan, dan target harga
-              </p>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">
+                  💡 Tip: Sebutkan nama produk, jumlah porsi, bahan-bahan, dan target harga
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Karakter: {prompt.length}/500
+                </p>
+                {promptError && (
+                  <p className="text-xs text-red-500">{promptError}</p>
+                )}
+              </div>
               <Button
                 onClick={handleGenerate}
-                disabled={isGenerating || !prompt.trim()}
+                disabled={isGenerating || !prompt.trim() || !!promptError}
                 className="gap-2"
               >
                 {isGenerating ? (

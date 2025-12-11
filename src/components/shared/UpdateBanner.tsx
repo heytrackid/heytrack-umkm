@@ -27,9 +27,10 @@ export const UpdateBanner = memo(function UpdateBanner({
   return (
     <div 
       className={cn(
-        "fixed top-14 left-0 right-0 z-40 bg-primary text-primary-foreground px-4 py-2",
+        "fixed top-0 left-0 right-0 z-40 bg-primary text-primary-foreground px-4 py-2",
         "flex items-center justify-center gap-3 text-sm",
         "animate-slide-in-top",
+        "safe-area-inset-top",
         className
       )}
     >
