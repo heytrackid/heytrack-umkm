@@ -10,7 +10,8 @@
       "autoApprove": [
         "execute_sql",
         "apply_migration",
-        "apply_migration"
+        "apply_migration",
+        "list_tables"
       ]
     }
   }

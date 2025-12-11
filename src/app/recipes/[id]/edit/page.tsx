@@ -14,9 +14,7 @@ interface EditRecipePageProps {
 
 const EditRecipePage = ({ params }: EditRecipePageProps) => (
     <AppLayout pageTitle="Edit Resep">
-        <div className="p-6">
-            <RecipeFormPage mode="edit" recipeId={params['id']} />
-        </div>
+        <RecipeFormPage mode="edit" recipeId={params['id']} />
     </AppLayout>
 )
 

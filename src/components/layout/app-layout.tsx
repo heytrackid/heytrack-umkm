@@ -4,8 +4,8 @@ import { useRouter } from 'next/navigation'
 import { memo, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 
 import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary'
+import { Sidebar } from '@/components/navigation/Sidebar'
 import { SmartBottomNav } from '@/components/navigation/SmartNavigation'
-import { TabNavigation } from '@/components/navigation/TabNavigation'
 import { OnboardingChatbot, WelcomeModal } from '@/components/onboarding'
 import { UpdateBanner } from '@/components/shared/UpdateBanner'
 import { Button } from '@/components/ui/button'
@@ -13,7 +13,7 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuTrigger
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { LoadingState } from '@/components/ui/loading-state'
 
@@ -38,17 +38,15 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
   const router = useRouter()
   const mainContentRef = useRef<HTMLDivElement>(null)
   const [mounted, setMounted] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
-  // Set mounted state to prevent hydration mismatch
   useLayoutEffect(() => {
     const timer = setTimeout(() => {
       setMounted(true)
     }, 0)
-
     return () => clearTimeout(timer)
   }, [])
 
-  // Prefetch critical routes on mount for faster navigation
   useEffect(() => {
     if (user) {
       const criticalRoutes = ['/dashboard', '/orders', '/customers', '/ingredients']
@@ -58,24 +56,16 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
     }
   }, [user, prefetchRoute])
 
-  // Responsive detection
   const { isMobile } = useResponsive()
-
-
-
-  // Supabase client
   const { supabase: _supabase } = useSupabase()
+
 
   // Swipe gesture support for mobile navigation
   useEffect(() => {
-    if (!isMobile || !mounted) {
-      return
-    }
+    if (!isMobile || !mounted) return
 
     const mainContent = mainContentRef.current
-    if (!mainContent) {
-      return
-    }
+    if (!mainContent) return
 
     let startX = 0
     let startY = 0
@@ -90,9 +80,7 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
     }
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!startX || !startY || !e.touches[0]) {
-        return
-      }
+      if (!startX || !startY || !e.touches[0]) return
 
       const deltaX = e.touches[0].clientX - startX
       const deltaY = e.touches[0].clientY - startY
@@ -104,16 +92,12 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
     }
 
     const handleTouchEnd = (e: TouchEvent) => {
-      if (!isHorizontalSwipe || !startX || !e.changedTouches[0]) {
-        return
-      }
+      if (!isHorizontalSwipe || !startX || !e.changedTouches[0]) return
 
       const endX = e.changedTouches[0].clientX
       const deltaX = endX - startX
 
-      if (Math.abs(deltaX) < 100) {
-        return
-      }
+      if (Math.abs(deltaX) < 100) return
 
       const currentPath = window.location.pathname
       const navOrder = ['/dashboard', '/orders', '/customers', '/ingredients']
@@ -122,9 +106,7 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
         (path) => currentPath === path || (path !== '/' && currentPath.startsWith(path))
       )
 
-      if (currentIndex === -1) {
-        return
-      }
+      if (currentIndex === -1) return
 
       let nextIndex
       if (deltaX > 0) {
@@ -154,7 +136,6 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
     }
   }, [isMobile, router, mounted])
 
-  // Prevent hydration mismatch by not rendering until mounted
   if (!mounted) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
@@ -163,77 +144,88 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
     )
   }
 
+
   return (
     <GlobalErrorBoundary>
       <NotificationProvider>
-        <div className="min-h-screen bg-background">
-          {/* Update Banner - shows when new version available */}
+        <div className="min-h-screen bg-background flex">
+          {/* Update Banner */}
           <UpdateBanner />
-          
-          {/* Top Header */}
-          <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6">
-             <div className="flex-1">
-               <h1 className="text-sm font-semibold text-foreground/80">
-                 HeyTrack
-               </h1>
-             </div>
-             <div className="flex items-center gap-2">
-              <ThemeToggle />
-              {!loading && user && <NotificationBell />}
-              
-              {/* User Profile Dropdown */}
-              {!loading && user && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full">
-                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-xs">
-                          {user.email?.charAt(0).toUpperCase()}
-                        </div>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <div className="px-2 py-1.5 text-sm font-medium truncate">{user.email}</div>
-                    <DropdownMenuItem onClick={() => router.push('/settings')}>
-                      Pengaturan
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => router.push('/handler/sign-out')}
-                      className="text-red-600 focus:text-red-600"
-                    >
-                      Keluar
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-             </div>
-          </header>
 
-          {/* Tab Navigation - Desktop Only */}
-          {!isMobile && <TabNavigation />}
+          {/* Sidebar - Fixed position, desktop only */}
+          {!isMobile && (
+            <Sidebar
+              collapsed={sidebarCollapsed}
+              onCollapsedChange={setSidebarCollapsed}
+            />
+          )}
 
-          {/* Main Content */}
-          <main
-            ref={mainContentRef}
+          {/* Main wrapper - takes remaining space */}
+          <div
             className={cn(
-              "flex-1 overflow-auto bg-background p-4 md:p-6",
-              isMobile && "pb-[calc(56px+env(safe-area-inset-bottom))]"
+              'flex-1 flex flex-col min-h-screen transition-all duration-300',
+              !isMobile && (sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64')
             )}
           >
-            <div className="container mx-auto max-w-7xl space-y-4">
-              {children}
-            </div>
-          </main>
+            {/* Top Header */}
+            <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6">
+              <div className="flex-1">
+                {isMobile && (
+                  <h1 className="text-sm font-semibold text-foreground/80">HeyTrack</h1>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <ThemeToggle />
+                {!loading && user && <NotificationBell />}
 
-        {/* Bottom Navigation for Mobile */}
-        {isMobile && <SmartBottomNav />}
+                {!loading && user && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-xs">
+                          {user.email?.charAt(0).toUpperCase()}
+                        </div>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <div className="px-2 py-1.5 text-sm font-medium truncate">{user.email}</div>
+                      <DropdownMenuItem onClick={() => router.push('/settings')}>
+                        Pengaturan
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => router.push('/handler/sign-out')}
+                        className="text-red-600 focus:text-red-600"
+                      >
+                        Keluar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+            </header>
 
-        {/* Welcome Modal & Onboarding Chatbot */}
-        {!loading && user && (
-          <>
-            <WelcomeModal />
-            <OnboardingChatbot />
-          </>
-        )}
+            {/* Main Content */}
+            <main
+              ref={mainContentRef}
+              className={cn(
+                'flex-1 bg-background p-4 md:p-6',
+                isMobile && 'pb-[calc(56px+env(safe-area-inset-bottom))]'
+              )}
+            >
+              <div className="mx-auto max-w-7xl space-y-4">{children}</div>
+            </main>
+          </div>
+
+          {/* Bottom Navigation for Mobile */}
+          {isMobile && <SmartBottomNav />}
+
+          {/* Welcome Modal & Onboarding Chatbot */}
+          {!loading && user && (
+            <>
+              <WelcomeModal />
+              <OnboardingChatbot />
+            </>
+          )}
         </div>
       </NotificationProvider>
     </GlobalErrorBoundary>

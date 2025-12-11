@@ -5,9 +5,7 @@ import { RecipeFormPage } from '@/components/recipes/RecipeFormPage'
 
 const NewRecipePage = () => (
     <AppLayout pageTitle="Tambah Resep Baru">
-        <div className="p-6">
-            <RecipeFormPage mode="create" />
-        </div>
+        <RecipeFormPage mode="create" />
     </AppLayout>
 )
 

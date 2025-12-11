@@ -5,9 +5,7 @@ import { RecipesList } from '@/components/recipes/RecipesList'
 
 const RecipesPage = () => (
     <AppLayout pageTitle="Resep Produk">
-        <div className="p-6">
-            <RecipesList />
-        </div>
+        <RecipesList />
     </AppLayout>
 )
 
