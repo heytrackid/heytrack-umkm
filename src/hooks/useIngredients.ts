@@ -199,7 +199,7 @@ export function useImportIngredients() {
   const logger = createClientLogger('useImportIngredients')
 
   return useMutation({
-    mutationFn: (ingredients: unknown[]) => postApi('/api/ingredients/import', { ingredients }),
+    mutationFn: (ingredients: unknown[]) => postApi('/api/import/ingredients', { ingredients }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
       void queryClient.invalidateQueries({ queryKey: ['ingredients-list'] })

@@ -1,13 +1,11 @@
-// next.config.ts
-import type { NextConfig } from 'next'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 const isProd = process.env.NODE_ENV === 'production'
 const appDomain = process.env['NEXT_PUBLIC_APP_DOMAIN'] || ''
 
-const withBundleAnalyzer =
-  process.env['ANALYZE'] === 'true'
-    ? require('@next/bundle-analyzer')({ enabled: true })
-    : (config: NextConfig) => config
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const buildIdTimestamp = Date.now()
 const resolvedBuildId =
@@ -15,12 +13,15 @@ const resolvedBuildId =
   process.env['NEXT_BUILD_ID'] ??
   `build-${buildIdTimestamp}`
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   typescript: {
     ignoreBuildErrors: true, // Ignore Supabase type issues in build
   },
   typedRoutes: true,
   reactCompiler: true,
+  turbopack: {
+    root: __dirname,
+  },
   compiler: {
     removeConsole: isProd ? { exclude: ['error'] } : false,
   },
@@ -142,4 +143,12 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default withBundleAnalyzer(nextConfig)
+const getConfig = async () => {
+  if (process.env['ANALYZE'] === 'true') {
+    const { default: bundleAnalyzer } = await import('@next/bundle-analyzer')
+    return bundleAnalyzer({ enabled: true })(nextConfig)
+  }
+  return nextConfig
+}
+
+export default getConfig
