@@ -1,8 +1,9 @@
 'use client'
 
-import { AlertCircle } from '@/components/icons'
+import { AlertCircle, CheckCircle, Clock } from '@/components/icons'
 
 import type { PaymentMethod } from '@/app/orders/types/orders-db.types'
+import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCurrency } from '@/hooks/useCurrency'
@@ -120,7 +121,25 @@ export const PaymentSection = ({
             </div>
 
             <div className="bg-muted p-4 rounded-lg">
-                <h4 className="font-medium mb-2">Ringkasan Pembayaran</h4>
+                <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium">Ringkasan Pembayaran</h4>
+                    {formData.paid_amount >= totalAmount ? (
+                        <Badge variant="default" className="bg-green-600 hover:bg-green-700">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Lunas
+                        </Badge>
+                    ) : formData.paid_amount > 0 ? (
+                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                            <Clock className="h-3 w-3 mr-1" />
+                            DP
+                        </Badge>
+                    ) : (
+                        <Badge variant="outline">
+                            <Clock className="h-3 w-3 mr-1" />
+                            Belum Bayar
+                        </Badge>
+                    )}
+                </div>
                 <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                         <span>Subtotal:</span>

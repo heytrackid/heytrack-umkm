@@ -420,7 +420,7 @@ async function getTopProductsHandler(context: RouteContext) {
         )
       `)
       .eq('orders.user_id', user.id)
-      .eq('orders.status', 'DELIVERED')
+      .in('orders.status', ['READY', 'DELIVERED'])
       .order('total_price', { ascending: false })
       .limit(100) // Get more data to aggregate properly
 

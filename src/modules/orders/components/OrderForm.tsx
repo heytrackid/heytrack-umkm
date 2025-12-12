@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertCircle } from '@/components/icons'
+import { AlertCircle, Check } from '@/components/icons'
 import { useCustomersList } from '@/hooks/useCustomers'
 import { useRecipes } from '@/hooks/useRecipes'
 import { memo, useCallback, useMemo, useState, type FormEvent } from 'react'
@@ -243,10 +243,25 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     <form onSubmit={handleSubmit}>
       <SwipeableTabs defaultValue="customer" className="w-full">
         <SwipeableTabsList>
-          <SwipeableTabsTrigger value="customer" className="text-xs sm:text-sm">Pelanggan</SwipeableTabsTrigger>
-          <SwipeableTabsTrigger value="items" className="text-xs sm:text-sm">Item ({orderItems.length})</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="customer" className="text-xs sm:text-sm">
+            <span className="flex items-center gap-1">
+              {formData.customer_name.trim() && <Check className="h-3 w-3 text-green-600" />}
+              Pelanggan
+            </span>
+          </SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="items" className="text-xs sm:text-sm">
+            <span className="flex items-center gap-1">
+              {orderItems.length > 0 && <Check className="h-3 w-3 text-green-600" />}
+              Item ({orderItems.length})
+            </span>
+          </SwipeableTabsTrigger>
           <SwipeableTabsTrigger value="delivery" className="text-xs sm:text-sm">Pengiriman</SwipeableTabsTrigger>
-          <SwipeableTabsTrigger value="payment" className="text-xs sm:text-sm">Pembayaran</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="payment" className="text-xs sm:text-sm">
+            <span className="flex items-center gap-1">
+              {formData.paid_amount > 0 && <Check className="h-3 w-3 text-green-600" />}
+              Pembayaran
+            </span>
+          </SwipeableTabsTrigger>
         </SwipeableTabsList>
 
         {error && (

@@ -431,7 +431,7 @@ export const SmartPricingAssistant = ({ recipe, onPriceUpdate }: SmartPricingAss
                   <span>{formatCurrency(analysis.breakdown.totalCost)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
-                  <span>HPP per Porsi</span>
+                  <span>HPP per Unit</span>
                   <span className="font-medium">{formatCurrency(analysis.breakdown.costPerServing)}</span>
                 </div>
               </div>

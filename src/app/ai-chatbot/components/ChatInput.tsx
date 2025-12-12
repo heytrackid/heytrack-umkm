@@ -3,7 +3,7 @@ import type { ChangeEvent, KeyboardEvent } from 'react'
 import { type FormEvent } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 import { QuickActionTemplates } from '@/app/ai-chatbot/components/QuickActionTemplates'
@@ -14,9 +14,18 @@ interface ChatInputProps {
   setInput: (value: string) => void
   onSendMessage: (message?: string) => void
   isLoading: boolean
+  showQuickActions?: boolean
+  showSuggestionChips?: boolean
 }
 
-export const ChatInput = ({ input, setInput, onSendMessage, isLoading }: ChatInputProps): JSX.Element => {
+export const ChatInput = ({
+  input,
+  setInput,
+  onSendMessage,
+  isLoading,
+  showQuickActions = true,
+  showSuggestionChips = true,
+}: ChatInputProps): JSX.Element => {
   const handleSubmit = (e: FormEvent): void => {
     e.preventDefault()
     if (input.trim() && !isLoading) {
@@ -32,30 +41,34 @@ export const ChatInput = ({ input, setInput, onSendMessage, isLoading }: ChatInp
     <div className="border-t border-border/20 bg-background px-4 py-4 safe-bottom">
       <div className="space-y-3 max-w-4xl mx-auto">
         {/* Quick Action Templates */}
-        <QuickActionTemplates
-          onSelectTemplate={handleSuggestionClick}
-          disabled={isLoading}
-        />
+        {showQuickActions && (
+          <QuickActionTemplates
+            onSelectTemplate={handleSuggestionClick}
+            disabled={isLoading}
+          />
+        )}
 
         {/* Quick Suggestions */}
-        <SuggestionChips
-          onSuggestionClick={handleSuggestionClick}
-          disabled={isLoading}
-        />
+        {showSuggestionChips && (
+          <SuggestionChips
+            onSuggestionClick={handleSuggestionClick}
+            disabled={isLoading}
+          />
+        )}
 
         {/* Input Form */}
         <form onSubmit={handleSubmit} className="flex gap-2" role="search" aria-label="Kirim pesan chatbot">
           <TooltipProvider disableHoverableContent>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Input
+                <Textarea
                   value={input}
-                   onChange={(e: ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
                   placeholder="Tanyakan apa saja tentang bisnis UMKM kuliner Anda..."
-                  className="flex-1 input-mobile focus-mobile"
+                  className="flex-1 min-h-[44px] max-h-[140px] resize-none input-mobile focus-mobile"
                   disabled={isLoading}
                   aria-label="Kolom input pesan"
-                   onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
+                  onKeyDown={(e: KeyboardEvent<HTMLTextAreaElement>) => {
                     if (e.key === 'Enter' && !e.shiftKey && input.trim()) {
                       e.preventDefault()
                       onSendMessage()

@@ -166,6 +166,7 @@ export const EnhancedIngredientForm = ({
                             min={0}
                             step={0.01}
                             placeholder="0"
+                            hint="Harga beli terakhir per satuan. Akan digunakan untuk kalkulasi HPP."
                             value={watch('price_per_unit') || 0}
                             onChange={(_, value) => setValue('price_per_unit', value as number)}
                         />
@@ -179,6 +180,7 @@ export const EnhancedIngredientForm = ({
                             min={0}
                             step={0.01}
                             placeholder="0"
+                            hint="Jumlah stok yang tersedia saat ini."
                             value={watch('current_stock') || 0}
                             onChange={(_, value) => setValue('current_stock', value as number)}
                         />
@@ -237,7 +239,27 @@ export const EnhancedIngredientForm = ({
                                     <li>• Set stok minimum 20-30% dari stok normal Anda</li>
                                     <li>• Gunakan satuan yang konsisten untuk kemudahan tracking</li>
                                     <li>• Update harga secara berkala untuk kalkulasi HPP yang akurat</li>
+                                    <li>• Waste factor bisa diatur per resep untuk bahan yang sering terbuang</li>
                                 </ul>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* WAC Info for Edit Mode */}
+            {mode === 'edit' && initialData && (
+                <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
+                    <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                            <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+                            <div className="text-sm">
+                                <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">Tentang Harga & WAC</p>
+                                <p className="text-blue-800 dark:text-blue-200 text-xs">
+                                    <strong>Harga per Unit</strong> adalah harga beli terakhir yang Anda input. 
+                                    Saat Anda mencatat pembelian, sistem akan menghitung <strong>WAC (Weighted Average Cost)</strong> 
+                                    secara otomatis untuk kalkulasi HPP yang lebih akurat berdasarkan rata-rata tertimbang harga beli.
+                                </p>
                             </div>
                         </div>
                     </CardContent>

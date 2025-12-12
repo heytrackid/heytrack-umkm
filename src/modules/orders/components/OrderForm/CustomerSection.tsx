@@ -138,7 +138,7 @@ export const CustomerSection = ({
                     )}
                 </div>
                 <div>
-                    <Label htmlFor="customerPhone" className="text-sm font-medium">No. Telepon</Label>
+                    <Label htmlFor="customerPhone" className="text-sm font-medium">No. Telepon (WhatsApp)</Label>
                     <Input
                         id="customerPhone"
                         placeholder="Contoh: 08123456789"
@@ -146,6 +146,7 @@ export const CustomerSection = ({
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange('customer_phone', e.target.value)}
                         className="mt-1"
                     />
+                    <p className="text-xs text-muted-foreground mt-1">Untuk notifikasi status pesanan via WhatsApp</p>
                 </div>
             </div>
 

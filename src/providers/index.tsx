@@ -3,9 +3,12 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { ThemeProvider } from 'next-themes'
+import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { Toaster } from 'sonner'
 
+import { OnboardingChatbot } from '@/components/onboarding'
+import { useAuth } from '@/hooks/useAuth'
 import { commonQueryOptions } from '@/lib/query/query-config'
 
 /**
@@ -30,6 +33,15 @@ const createQueryClient = (): QueryClient => new QueryClient({
   },
 })
 
+function GlobalOnboardingChatbot(): JSX.Element | null {
+  const { user, isLoading } = useAuth()
+  const pathname = usePathname()
+  if (isLoading || !user) return null
+  const excludedPrefixes = ['/auth', '/settings', '/ai-chatbot']
+  if (excludedPrefixes.some((prefix) => pathname.startsWith(prefix))) return null
+  return <OnboardingChatbot />
+}
+
 export function Providers({ children }: { children: React.ReactNode }): JSX.Element {
   const [queryClient] = useState(() => createQueryClient())
 
@@ -42,6 +54,7 @@ export function Providers({ children }: { children: React.ReactNode }): JSX.Elem
         disableTransitionOnChange
       >
         {children}
+        <GlobalOnboardingChatbot />
         <Toaster position="top-right" richColors />
       </ThemeProvider>
       <ReactQueryDevtools initialIsOpen={false} />

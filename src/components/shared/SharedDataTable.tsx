@@ -1,15 +1,15 @@
 'use client'
 
 import {
-  Download,
-  Edit,
-  Eye,
-  MoreVertical,
-  Plus,
-  RefreshCw,
-  Search,
-  Trash2,
-  X
+    Download,
+    Edit,
+    Eye,
+    MoreVertical,
+    Plus,
+    RefreshCw,
+    Search,
+    Trash2,
+    X
 } from '@/components/icons'
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -17,12 +17,12 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Input } from '@/components/ui/input'
@@ -33,7 +33,7 @@ import { cn } from '@/lib/utils'
 
 export interface Column<T> {
   key: keyof T | string
-  header: string
+  header: string | ReactNode
   render?: (value: unknown, item: T) => ReactNode
   sortable?: boolean
   filterable?: boolean

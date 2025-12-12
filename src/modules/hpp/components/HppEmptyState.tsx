@@ -1,6 +1,6 @@
 'use client'
 
-import { Calculator, TrendingUp, BarChart3, Bell, Plus, ArrowRight, Lightbulb } from '@/components/icons'
+import { ArrowRight, BarChart3, Bell, Calculator, Lightbulb, Plus, TrendingUp } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
@@ -119,7 +119,7 @@ export const HppEmptyState = (): JSX.Element => {
                                 <ul className="text-muted-foreground text-sm space-y-1 ml-4">
                                     <li>• Semua bahan sudah memiliki harga jual</li>
                                     <li>• Resep sudah lengkap dengan jumlah bahan</li>
-                                    <li>• Jumlah porsi per resep sudah ditentukan</li>
+                                    <li>• Jumlah hasil per resep sudah ditentukan</li>
                                 </ul>
                                 <div className="mt-3 flex gap-2">
                                     <button onClick={() => router.push('/ingredients')} className="text-primary underline font-medium text-sm">

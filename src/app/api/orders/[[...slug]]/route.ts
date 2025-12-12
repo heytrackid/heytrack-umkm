@@ -198,9 +198,9 @@ export const POST = createApiRoute(
     const orderStatus = body.status || 'PENDING'
     let incomeRecordId: string | null = null
 
-    // Create income record if IN_PROGRESS (produksi) or DELIVERED
-    // Penjualan tercatat saat mulai produksi, bukan saat delivered
-    const shouldCreateIncome = (orderStatus === 'IN_PROGRESS' || orderStatus === 'DELIVERED') && body.total_amount && body.total_amount > 0
+    // Create income record if READY/IN_PROGRESS (produksi) or DELIVERED
+    // Many users mark orders as READY directly, so we also record income at READY.
+    const shouldCreateIncome = (orderStatus === 'READY' || orderStatus === 'IN_PROGRESS' || orderStatus === 'DELIVERED') && body.total_amount && body.total_amount > 0
     if (shouldCreateIncome) {
       const incomeDate = normalizeDateValue(body.delivery_date) ?? normalizeDateValue(body.order_date) ?? new Date().toISOString().split('T')[0]
       const incomeData: FinancialRecordInsert = {
@@ -384,9 +384,8 @@ export const PUT = createApiRoute(
       const { FinancialSyncService } = await import('@/services/financial/FinancialSyncService')
       const financialService = new FinancialSyncService({ userId: user.id, supabase: typedSupabase })
 
-      // If changing TO IN_PROGRESS (produksi) - create income record
-      // Penjualan tercatat saat mulai produksi, bukan saat delivered
-      if (newStatus === 'IN_PROGRESS' && !currentOrder.financial_record_id) {
+      // If changing TO READY/IN_PROGRESS - create income record (so sales are readable)
+      if ((newStatus === 'IN_PROGRESS' || newStatus === 'READY') && !currentOrder.financial_record_id) {
         try {
           await financialService.createIncomeFromOrder(
             orderId,
@@ -395,7 +394,7 @@ export const PUT = createApiRoute(
             body?.customer_name ?? currentOrder.customer_name ?? undefined,
             body?.delivery_date ?? currentOrder.delivery_date ?? currentOrder.order_date ?? undefined
           )
-          apiLogger.info({ orderId }, 'Income record created on status change to IN_PROGRESS (produksi)')
+          apiLogger.info({ orderId, newStatus }, 'Income record created on status change')
         } catch (err) {
           apiLogger.error({ error: err, orderId }, 'Failed to create income record on status change')
           // Mark order as needing financial sync retry

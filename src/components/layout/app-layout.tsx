@@ -6,6 +6,7 @@ import { memo, useEffect, useLayoutEffect, useRef, useState, type ReactNode } fr
 import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary'
 import { Sidebar } from '@/components/navigation/Sidebar'
 import { SmartBottomNav } from '@/components/navigation/SmartNavigation'
+import { WelcomeModal } from '@/components/onboarding'
 import { UpdateBanner } from '@/components/shared/UpdateBanner'
 import { Button } from '@/components/ui/button'
 import {
@@ -217,6 +218,12 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
 
           {/* Bottom Navigation for Mobile */}
           {isMobile && <SmartBottomNav />}
+          {/* Welcome Modal & Onboarding Chatbot */}
+          {!loading && user && (
+            <>
+              <WelcomeModal />
+            </>
+          )}
         </div>
       </NotificationProvider>
     </GlobalErrorBoundary>

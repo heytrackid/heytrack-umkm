@@ -24,7 +24,13 @@ export const CostCalculationCard = ({ recipe, onRecalculate, isCalculating }: Co
     const { formatCurrency } = useCurrency()
     const [isExpanded, setIsExpanded] = useState(false)
     const hasIngredientsWithoutPrice = recipe.ingredients.some((ingredient) => ingredient.unit_price === 0)
-    const ingredientsCost = recipe.ingredients.reduce((sum, ingredient) => sum + (ingredient.quantity * ingredient.unit_price), 0)
+    const ingredientsCost = recipe.ingredients.reduce((sum, ingredient) => {
+        const wasteFactor = Number(ingredient.waste_factor ?? 1)
+        return sum + (ingredient.quantity * ingredient.unit_price * wasteFactor)
+    }, 0)
+    const yieldUnit = recipe.yield_unit || 'porsi'
+    const yieldQuantity = Number(recipe.servings ?? 1)
+    const totalBatchCost = recipe.total_cost * yieldQuantity
 
     // Calculate HPP change
     const hppChange = recipe.previous_cost ? recipe.total_cost - recipe.previous_cost : 0
@@ -83,7 +89,10 @@ export const CostCalculationCard = ({ recipe, onRecalculate, isCalculating }: Co
                                     <div className="text-4xl font-bold text-foreground">
                                         {formatCurrency(recipe.total_cost)}
                                     </div>
-                                    <p className="text-xs text-muted-foreground mt-1">Per 1 porsi/unit</p>
+                                    <p className="text-xs text-muted-foreground mt-1">Per 1 {yieldUnit}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        Total batch ({yieldQuantity} {yieldUnit}): {formatCurrency(totalBatchCost)}
+                                    </p>
                                 </div>
                                 {hasSignificantChange && (
                                     <Badge
@@ -152,6 +161,8 @@ export const CostCalculationCard = ({ recipe, onRecalculate, isCalculating }: Co
                                 <div className="space-y-2 pl-6">
                                     {recipe.ingredients.map((ingredient) => {
                                         const ingredientKey = ingredient['id'] || `${ingredient.name}-${ingredient.unit}-${ingredient.quantity}`
+                                        const wasteFactor = Number(ingredient.waste_factor ?? 1)
+                                        const ingredientTotal = ingredient.quantity * ingredient.unit_price * wasteFactor
 
                                         return (
                                             <div key={ingredientKey} className="flex justify-between items-center text-sm">
@@ -160,15 +171,18 @@ export const CostCalculationCard = ({ recipe, onRecalculate, isCalculating }: Co
                                                     {ingredient.unit_price === 0 && (
                                                         <span className="ml-2 text-xs text-destructive">⚠️ Belum ada harga</span>
                                                     )}
+                                                    {wasteFactor !== 1 && (
+                                                        <span className="ml-2 text-xs text-muted-foreground">× waste</span>
+                                                    )}
                                                 </span>
                                                 <span className="font-medium">
-                                                    {formatCurrency(ingredient.quantity * ingredient.unit_price)}
+                                                    {formatCurrency(ingredientTotal)}
                                                 </span>
                                             </div>
                                         )
                                     })}
                                     <div className="flex justify-between items-center text-sm pt-2 border-t">
-                                        <span className="font-medium">Subtotal Bahan</span>
+                                        <span className="font-medium">Subtotal Bahan (termasuk waste)</span>
                                         <span className="font-semibold">{formatCurrency(ingredientsCost)}</span>
                                     </div>
                                 </div>
@@ -212,7 +226,7 @@ export const CostCalculationCard = ({ recipe, onRecalculate, isCalculating }: Co
                             <div className="flex justify-between items-center">
                                 <div>
                                     <span className="text-base font-semibold">Total Biaya Produksi</span>
-                                    <p className="text-xs text-muted-foreground mt-0.5">Per 1 porsi/unit</p>
+                                    <p className="text-xs text-muted-foreground mt-0.5">Per 1 {yieldUnit}</p>
                                     {recipe.previous_cost && recipe.previous_cost > 0 && (
                                         <p className="text-xs text-muted-foreground mt-1">
                                             Sebelumnya: {formatCurrency(recipe.previous_cost)}

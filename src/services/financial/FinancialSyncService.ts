@@ -214,12 +214,12 @@ export class FinancialSyncService extends BaseService {
   async autoSyncAll(): Promise<SyncResult> {
     const result: SyncResult = { orders: 0, expenses: 0, purchases: 0 }
 
-    // Sync delivered orders without financial records
+    // Sync completed orders without financial records
     const { data: unsyncedOrders } = await this.context.supabase
       .from('orders')
       .select('id, order_no, total_amount, customer_name, delivery_date, order_date')
       .eq('user_id', this.context.userId)
-      .eq('status', 'DELIVERED')
+      .in('status', ['READY', 'DELIVERED'])
       .is('financial_record_id', null)
       .gt('total_amount', 0)
 

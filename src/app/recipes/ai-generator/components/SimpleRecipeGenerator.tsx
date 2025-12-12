@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
+import type { GenerateRecipeParams } from '@/hooks/api/useAIRecipeEnhanced'
 import { useGenerateRecipeEnhanced } from '@/hooks/api/useAIRecipeEnhanced'
 import { useAuth, useAuthMe } from '@/hooks/index'
 import { successToast } from '@/hooks/use-toast'
@@ -80,6 +81,7 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
   const [promptError, setPromptError] = useState('')
   const [generatedRecipe, setGeneratedRecipe] = useState<GeneratedRecipe | null>(null)
   const [selectedHistoryRecipe, setSelectedHistoryRecipe] = useState<GeneratedRecipe | null>(null)
+  const [inferredYieldUnit, setInferredYieldUnit] = useState<string>('porsi')
   const [savedRecipeId, setSavedRecipeId] = useState<string | null>(null)
   const router = useRouter()
 
@@ -171,9 +173,11 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
       }
     }
 
-    // Extract servings
+    // Extract yield quantity + unit
     const servingsMatch = promptText.match(/(\d+)\s*(porsi|gelas|potong|buah|pcs)/i)
     const servings = servingsMatch?.[1] ? parseInt(servingsMatch[1], 10) : 12
+    const rawUnit = servingsMatch?.[2]?.toLowerCase() ?? 'porsi'
+    const yieldUnit = rawUnit === 'gelas' ? 'cup' : (rawUnit === 'porsi' ? 'porsi' : 'pcs')
 
     // Extract target price
     const priceMatch = promptText.match(/(?:rp|idr)[\s.]*([\d.,]+)/i)
@@ -192,19 +196,47 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
       preferredIngredients: [],
       customIngredients: extractedIngredients.length > 0 ? extractedIngredients : ['bahan utama'],
       specialInstructions: promptText,
+      yieldUnit,
     }
   }, [])
 
   const handleGenerate = useCallback(() => {
     const error = validatePrompt(prompt)
     if (error) {
+      setPromptError(error)
       handleError(new Error(error), 'Simple Recipe Generator', true, error)
       return
     }
 
+    setPromptError('')
+
     const params = parsePromptToParams(prompt)
+    const parsed = params as {
+      name: string
+      type: string
+      servings: number
+      targetPrice?: number
+      dietaryRestrictions: string[]
+      preferredIngredients: string[]
+      customIngredients: string[]
+      specialInstructions?: string
+      yieldUnit?: string
+    }
+
+    setInferredYieldUnit(parsed.yieldUnit ?? 'porsi')
+
+    const generateParams: GenerateRecipeParams = {
+      name: parsed.name,
+      type: parsed.type,
+      servings: parsed.servings,
+      dietaryRestrictions: parsed.dietaryRestrictions,
+      preferredIngredients: parsed.preferredIngredients,
+      customIngredients: parsed.customIngredients,
+      ...(parsed.targetPrice !== undefined ? { targetPrice: parsed.targetPrice } : {}),
+      ...(parsed.specialInstructions !== undefined ? { specialInstructions: parsed.specialInstructions } : {}),
+    }
     setGeneratedRecipe(null)
-    generateRecipe(params)
+    generateRecipe(generateParams)
   }, [prompt, validatePrompt, parsePromptToParams, generateRecipe])
 
   const handleSaveRecipe = useCallback(async () => {
@@ -224,6 +256,7 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
         name: recipeToSave.name,
         category: recipeToSave.category,
         servings: recipeToSave.servings,
+        yield_unit: inferredYieldUnit,
         prep_time: recipeToSave.prep_time_minutes,
         cook_time: recipeToSave.cook_time_minutes ?? recipeToSave.bake_time_minutes ?? 0,
         description: recipeToSave.description,
@@ -261,7 +294,7 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
     } catch (error) {
       handleError(error as Error, 'Save Recipe', true, 'Gagal menyimpan resep')
     }
-  }, [generatedRecipe, selectedHistoryRecipe, ingredients, createRecipeWithIngredients, authData])
+  }, [generatedRecipe, selectedHistoryRecipe, ingredients, createRecipeWithIngredients, authData, inferredYieldUnit])
 
   const handleSelectTemplate = (template: typeof PROMPT_TEMPLATES[0]) => {
     setPrompt(template.prompt)
@@ -354,8 +387,9 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
               placeholder="Contoh: Buatkan resep brownies coklat untuk 16 potong. Bahan: dark chocolate, mentega, telur, gula, tepung. Target harga jual Rp 80.000"
               value={prompt}
               onChange={(e) => {
-                setPrompt(e.target.value)
-                setPromptError('') // Clear error on input change
+                const nextValue = e.target.value
+                setPrompt(nextValue)
+                setPromptError(validatePrompt(nextValue))
               }}
               className={`min-h-[120px] resize-none ${promptError ? 'border-red-500 focus:border-red-500' : ''}`}
               disabled={isGenerating}
@@ -365,7 +399,7 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">
-                  💡 Tip: Sebutkan nama produk, jumlah porsi, bahan-bahan, dan target harga
+                  💡 Tip: Sebutkan nama produk, jumlah hasil (porsi/pcs/cup), bahan-bahan, dan target harga
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Karakter: {prompt.length}/500
@@ -376,7 +410,7 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
               </div>
               <Button
                 onClick={handleGenerate}
-                disabled={isGenerating || !prompt.trim() || !!promptError}
+                disabled={isGenerating || !prompt.trim() || Boolean(promptError)}
                 className="gap-2"
               >
                 {isGenerating ? (
@@ -467,8 +501,8 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
               {/* Quick Info */}
               <div className="flex flex-wrap gap-4 text-sm">
                 <div className="flex items-center gap-1">
-                  <span className="text-muted-foreground">Porsi:</span>
-                  <span className="font-medium">{generatedRecipe.servings}</span>
+                  <span className="text-muted-foreground">Jumlah hasil:</span>
+                  <span className="font-medium">{generatedRecipe.servings} {inferredYieldUnit}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <span className="text-muted-foreground">Prep:</span>
@@ -572,8 +606,8 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
               {/* Quick Info */}
               <div className="flex flex-wrap gap-4 text-sm">
                 <div className="flex items-center gap-1">
-                  <span className="text-muted-foreground">Porsi:</span>
-                  <span className="font-medium">{selectedHistoryRecipe.servings}</span>
+                  <span className="text-muted-foreground">Jumlah hasil:</span>
+                  <span className="font-medium">{selectedHistoryRecipe.servings} {inferredYieldUnit}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <span className="text-muted-foreground">Prep:</span>
@@ -661,7 +695,13 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
                       <div className="flex items-start justify-between gap-3">
                         <div 
                           className="flex-1 cursor-pointer"
-                          onClick={() => setSelectedHistoryRecipe(item.recipe_data)}
+                          onClick={() => {
+                            const match = item.prompt.match(/(\d+)\s*(porsi|gelas|potong|buah|pcs)/i)
+                            const rawUnit = match?.[2]?.toLowerCase() ?? 'porsi'
+                            const unit = rawUnit === 'gelas' ? 'cup' : (rawUnit === 'porsi' ? 'porsi' : 'pcs')
+                            setInferredYieldUnit(unit)
+                            setSelectedHistoryRecipe(item.recipe_data)
+                          }}
                         >
                           <h4 className="font-medium">{item.recipe_data.name}</h4>
                           <p className="text-sm text-muted-foreground line-clamp-1">
@@ -683,7 +723,13 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => setSelectedHistoryRecipe(item.recipe_data)}
+                            onClick={() => {
+                              const match = item.prompt.match(/(\d+)\s*(porsi|gelas|potong|buah|pcs)/i)
+                              const rawUnit = match?.[2]?.toLowerCase() ?? 'porsi'
+                              const unit = rawUnit === 'gelas' ? 'cup' : (rawUnit === 'porsi' ? 'porsi' : 'pcs')
+                              setInferredYieldUnit(unit)
+                              setSelectedHistoryRecipe(item.recipe_data)
+                            }}
                           >
                             Lihat
                           </Button>

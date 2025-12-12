@@ -253,6 +253,7 @@ export const GET = createApiRoute(
                 price_per_unit,
                 weighted_average_cost,
                 unit,
+                waste_factor,
                 category
               )
             )
@@ -299,16 +300,27 @@ export const GET = createApiRoute(
           laborCost = (hppCalculation.labor_cost || 0) / servings
           overheadCost = (hppCalculation.overhead_cost || 0) / servings
         } else {
-          // Fallback calculation
+          // Fallback calculation (when no saved HPP calculation exists)
           const ingredients = Array.isArray(recipe.recipe_ingredients)
             ? recipe.recipe_ingredients.filter(ri => ri.ingredients)
             : []
 
-          const ingredientCost = ingredients.reduce((sum: number, ri: { quantity?: number; ingredients?: { weighted_average_cost?: number; price_per_unit?: number } | null }) => {
-            const quantity = ri.quantity ?? 0
-            const unitPrice = ri.ingredients?.weighted_average_cost ??
-                             ri.ingredients?.price_per_unit ?? 0
-            return sum + quantity * unitPrice
+          const typedIngredients = ingredients as Array<{
+            quantity: number | null
+            ingredients: {
+              weighted_average_cost: number | null
+              price_per_unit: number | null
+              waste_factor: number | null
+            } | null
+          }>
+
+          const ingredientCost = typedIngredients.reduce((sum, ri) => {
+            const quantity = Number(ri.quantity ?? 0)
+            const unitPrice = Number(
+              ri.ingredients?.weighted_average_cost ?? ri.ingredients?.price_per_unit ?? 0
+            )
+            const wasteFactor = Number(ri.ingredients?.waste_factor ?? 1)
+            return sum + quantity * unitPrice * wasteFactor
           }, 0)
 
           operationalCost = Math.max(
@@ -329,6 +341,7 @@ export const GET = createApiRoute(
                 unit: ri.unit ?? 'unit',
                 unit_price: ri.ingredients?.weighted_average_cost ??
                            ri.ingredients?.price_per_unit ?? 0,
+                waste_factor: ri.ingredients?.waste_factor ?? 1,
                 category: ri.ingredients?.category ?? 'Unknown'
               }))
           : []

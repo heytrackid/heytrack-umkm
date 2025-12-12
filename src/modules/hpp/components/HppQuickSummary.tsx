@@ -13,6 +13,9 @@ interface HppQuickSummaryProps {
 
 export const HppQuickSummary = ({ recipe }: HppQuickSummaryProps): JSX.Element => {
   const { formatCurrency } = useCurrency()
+  const yieldUnit = recipe.yield_unit || 'porsi'
+  const yieldQuantity = Number(recipe.servings ?? 1)
+  const totalBatchCost = recipe.total_cost * yieldQuantity
 
   const profit = (recipe.selling_price ?? 0) - recipe.total_cost
   const marginPercent = recipe.selling_price && recipe.selling_price > 0
@@ -29,7 +32,7 @@ export const HppQuickSummary = ({ recipe }: HppQuickSummaryProps): JSX.Element =
             <div className="text-2xl font-bold text-foreground">
               {formatCurrency(recipe.total_cost)}
             </div>
-            <div className="text-xs text-muted-foreground mt-1">Total HPP</div>
+            <div className="text-xs text-muted-foreground mt-1">HPP / {yieldUnit}</div>
           </div>
 
           {/* Harga Jual */}
@@ -62,7 +65,7 @@ export const HppQuickSummary = ({ recipe }: HppQuickSummaryProps): JSX.Element =
 
         {/* Quick Info */}
         <div className="mt-4 text-center text-sm text-muted-foreground">
-          <span className="font-medium">{recipe.name}</span> • Per 1 porsi/unit
+          <span className="font-medium">{recipe.name}</span> • Per 1 {yieldUnit} • Total batch ({yieldQuantity} {yieldUnit}): {formatCurrency(totalBatchCost)}
         </div>
       </CardContent>
     </Card>

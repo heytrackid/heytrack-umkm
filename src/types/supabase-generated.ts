@@ -1837,6 +1837,7 @@ export type Database = {
           updated_at: string | null
           updated_by: string | null
           user_id: string
+          yield_unit: string
         }
         Insert: {
           batch_size?: number | null
@@ -1865,6 +1866,7 @@ export type Database = {
           updated_at?: string | null
           updated_by?: string | null
           user_id: string
+          yield_unit?: string
         }
         Update: {
           batch_size?: number | null
@@ -1893,6 +1895,7 @@ export type Database = {
           updated_at?: string | null
           updated_by?: string | null
           user_id?: string
+          yield_unit?: string
         }
         Relationships: []
       }

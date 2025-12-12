@@ -1,6 +1,6 @@
 'use client'
 
-import { Scale, TrendingUp, Package, DollarSign, Download, Calculator } from '@/components/icons'
+import { Calculator, DollarSign, Download, Package, Scale, TrendingUp } from '@/components/icons'
 import { useMemo, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -145,7 +145,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                                         <div className="text-center">
                                             <div className="text-lg font-bold">{scale.label}</div>
                                             <div className="text-xs opacity-70">
-                                                {baseServings * scale.multiplier} porsi
+                                                {baseServings * scale.multiplier} unit
                                             </div>
                                         </div>
                                     </Button>
@@ -157,7 +157,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                     {/* Custom Scale */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <Label htmlFor="servings">Porsi per Batch</Label>
+                            <Label htmlFor="servings">Hasil per Batch</Label>
                             <Input
                                 id="servings"
                                 type="number"
@@ -169,7 +169,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                                 min={1}
                             />
                             <p className="text-xs text-muted-foreground mt-1">
-                                Resep asli: {baseServings} porsi
+                                Resep asli: {baseServings} unit
                             </p>
                         </div>
 
@@ -186,7 +186,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                                 min={1}
                             />
                             <p className="text-xs text-muted-foreground mt-1">
-                                Total: {totalServings} porsi
+                                Total: {totalServings} unit
                             </p>
                         </div>
                     </div>
@@ -202,7 +202,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                         </div>
                         <div className="grid grid-cols-2 gap-4 text-sm">
                             <div>
-                                <div className="text-muted-foreground">Total Porsi</div>
+                                <div className="text-muted-foreground">Total Hasil</div>
                                 <div className="font-bold text-lg">{totalServings}</div>
                             </div>
                             <div>
@@ -210,7 +210,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                                  <div className="font-bold text-lg text-foreground">{formatCurrency(scaledCost)}</div>
                             </div>
                             <div>
-                                <div className="text-muted-foreground">Biaya per Porsi</div>
+                                <div className="text-muted-foreground">Biaya per Unit</div>
                                 <div className="font-medium">{formatCurrency(costPerServing)}</div>
                             </div>
                             <div>
