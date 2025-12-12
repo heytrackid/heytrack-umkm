@@ -2,6 +2,19 @@
 
 import { RecipeIngredientSelector } from '@/components/recipes/RecipeIngredientSelector'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { recipeSchema, type RecipeFormData, type RecipeFormInput } from '@/lib/validations/recipes'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Controller, useForm } from 'react-hook-form'
 
 type RecipeIngredient = {
   ingredient_id: string
@@ -9,12 +22,6 @@ type RecipeIngredient = {
   unit?: string
   notes?: string | null
 }
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { recipeSchema, type RecipeFormData } from '@/lib/validations/recipes'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Controller, useForm } from 'react-hook-form'
 
 interface RecipeFormProps {
   defaultValues?: Partial<RecipeFormData>
@@ -29,20 +36,30 @@ export function RecipeForm({
   onCancel,
   isLoading,
 }: RecipeFormProps): JSX.Element {
+  const mergedDefaultValues: Partial<RecipeFormInput> = {
+    ...defaultValues,
+    servings: defaultValues?.servings ?? 1,
+    yield_unit: defaultValues?.yield_unit ?? 'porsi',
+    ingredients: defaultValues?.ingredients ?? [],
+  }
+
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<RecipeFormData>({
+  } = useForm<RecipeFormInput>({
     resolver: zodResolver(recipeSchema),
-    defaultValues: defaultValues || {
-      ingredients: [],
-    },
+    defaultValues: mergedDefaultValues,
   })
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form
+      onSubmit={handleSubmit((values) => {
+        onSubmit(recipeSchema.parse(values))
+      })}
+      className="space-y-6"
+    >
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="name">Nama Resep *</Label>
@@ -60,7 +77,7 @@ export function RecipeForm({
           </div>
 
            <div className="space-y-2">
-             <Label htmlFor="servings">Porsi</Label>
+             <Label htmlFor="servings">Jumlah Hasil</Label>
              <Input
                id="servings"
                type="number"
@@ -72,6 +89,32 @@ export function RecipeForm({
                <p id="servings-error" className="text-sm text-destructive">{errors.servings.message}</p>
              )}
            </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Unit Hasil</Label>
+          <Controller
+            name="yield_unit"
+            control={control}
+            defaultValue={defaultValues?.yield_unit ?? 'porsi'}
+            render={({ field }) => (
+              <Select value={field.value ?? 'porsi'} onValueChange={field.onChange}>
+                <SelectTrigger aria-describedby={errors.yield_unit ? 'yield-unit-error' : undefined}>
+                  <SelectValue placeholder="Pilih unit" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="porsi">porsi</SelectItem>
+                  <SelectItem value="pcs">pcs</SelectItem>
+                  <SelectItem value="cup">cup</SelectItem>
+                  <SelectItem value="botol">botol</SelectItem>
+                  <SelectItem value="pack">pack</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {errors.yield_unit && (
+            <p id="yield-unit-error" className="text-sm text-destructive">{errors.yield_unit.message}</p>
+          )}
         </div>
 
         <div className="space-y-2">

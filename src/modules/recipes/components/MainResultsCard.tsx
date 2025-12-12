@@ -34,10 +34,10 @@ export const MainResultsCard = ({ calculationResult, formatCurrency }: MainResul
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center p-4 bg-muted/20 rounded-lg border border-border/20 ">
             <UMKMTooltip
-              title="HPP Per Porsi"
-              content="Berapa biaya untuk membuat 1 porsi produk. Ini adalah cost minimum sebelum profit."
+              title="HPP Per Unit"
+              content="Berapa biaya untuk membuat 1 unit produk (hasil). Ini adalah cost minimum sebelum profit."
             >
-              <p className="text-sm text-muted-foreground">HPP Per Porsi</p>
+              <p className="text-sm text-muted-foreground">HPP Per Unit</p>
             </UMKMTooltip>
             <p className="text-2xl font-bold text-foreground">
               {formatCurrency(calculationResult.calculations.hppPerUnit)}
@@ -70,16 +70,16 @@ export const MainResultsCard = ({ calculationResult, formatCurrency }: MainResul
               {formatCurrency(calculationResult.calculations.totalHPP)}
             </p>
             <p className="text-xs text-muted mt-1">
-              {calculationResult.servings} porsi
+              {calculationResult.servings} unit
             </p>
           </div>
 
           <div className="text-center p-4 bg-muted/20 rounded-lg border border-border/20 ">
             <UMKMTooltip
-              title="Profit Per Porsi"
-              content="Keuntungan bersih yang Anda dapat dari setiap porsi yang terjual."
+              title="Profit Per Unit"
+              content="Keuntungan bersih yang Anda dapat dari setiap unit (hasil) yang terjual."
             >
-              <p className="text-sm text-muted-foreground">Profit Per Porsi</p>
+              <p className="text-sm text-muted-foreground">Profit Per Unit</p>
             </UMKMTooltip>
             <p className="text-xl font-bold text-foreground">
               {formatCurrency(

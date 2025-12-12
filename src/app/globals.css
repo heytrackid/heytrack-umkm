@@ -79,37 +79,37 @@
 }
 
 .dark {
-  /* Lighter dark mode - easier on the eyes */
-  --background: oklch(0.14 0 0);         /* #242424 - lebih terang */
-  --foreground: oklch(0.93 0 0);         /* #EDEDED - text terang */
-  --card: oklch(0.18 0 0);               /* #2E2E2E - card lebih terang */
-  --card-foreground: oklch(0.93 0 0);    /* #EDEDED */
-  --popover: oklch(0.18 0 0);            /* #2E2E2E */
-  --popover-foreground: oklch(0.93 0 0);
-  --primary: oklch(0.85 0 0);            /* Brighter primary */
-  --primary-foreground: oklch(0.14 0 0);
-  --secondary: oklch(0.22 0 0);          /* #383838 - lebih terang */
-  --secondary-foreground: oklch(0.93 0 0);
-  --muted: oklch(0.22 0 0);              /* #383838 - lebih terang untuk table rows */
-  --muted-foreground: oklch(0.68 0 0);   /* #ADADAD - lebih terang */
-  --accent: oklch(0.26 0 0);             /* #424242 */
-  --accent-foreground: oklch(0.93 0 0);
-  --destructive: oklch(0.55 0.2 25);     /* Red destructive */
-  --border: oklch(0.32 0 0);             /* #525252 - more visible borders */
-  --input: oklch(0.20 0 0);              /* #333333 */
-  --ring: oklch(0.6 0 0);                /* Brighter ring */
+  /* Electric Blue Dark Mode - HeyTrack Brand */
+  --background: hsl(220 30% 6%);         /* #0A0E27 - Very dark blue-black */
+  --foreground: hsl(0 0% 97%);           /* #F7F7F7 - Bright white text */
+  --card: hsl(220 25% 14%);              /* #1A2540 - Dark blue surface */
+  --card-foreground: hsl(0 0% 97%);      /* #F7F7F7 - Bright text */
+  --popover: hsl(220 25% 14%);           /* #1A2540 - Dark blue */
+  --popover-foreground: hsl(0 0% 97%);
+  --primary: hsl(220 100% 50%);          /* #0066FF - Electric blue primary */
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(220 25% 20%);         /* #2A3A5A - Slightly lighter blue */
+  --secondary-foreground: hsl(0 0% 97%);
+  --muted: hsl(220 25% 20%);             /* #2A3A5A - For table rows */
+  --muted-foreground: hsl(0 0% 72%);     /* #B8B8B8 - Muted text */
+  --accent: hsl(220 100% 55%);           /* #1A7FFF - Brighter electric blue accent */
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(0 84% 60%);         /* Red destructive */
+  --border: hsl(220 25% 25%);            /* #3A4A6A - Blue-tinted borders */
+  --input: hsl(220 25% 12%);             /* #0F1A2E - Dark input background */
+  --ring: hsl(220 100% 50%);             /* #0066FF - Electric blue ring */
 
   /* Syntax highlighting colors for dark mode */
-  --syntax-line-number: oklch(0.55 0 0);
-  --syntax-border: oklch(0.28 0 0);
-  --sidebar: hsl(0 0% 14%);
-  --sidebar-foreground: hsl(0 0% 93%);
-  --sidebar-primary: hsl(224.3 76.3% 48%);
+  --syntax-line-number: hsl(0 0% 55%);
+  --syntax-border: hsl(220 25% 25%);
+  --sidebar: hsl(220 30% 8%);            /* Dark blue sidebar */
+  --sidebar-foreground: hsl(0 0% 95%);
+  --sidebar-primary: hsl(220 100% 50%);  /* Electric blue */
   --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(0 0% 20%);
-  --sidebar-accent-foreground: hsl(0 0% 93%);
-  --sidebar-border: hsl(0 0% 22%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --sidebar-accent: hsl(220 25% 20%);    /* Slightly lighter blue */
+  --sidebar-accent-foreground: hsl(0 0% 95%);
+  --sidebar-border: hsl(220 25% 25%);    /* Blue-tinted border */
+  --sidebar-ring: hsl(220 100% 50%);     /* Electric blue ring */
 
 }
 

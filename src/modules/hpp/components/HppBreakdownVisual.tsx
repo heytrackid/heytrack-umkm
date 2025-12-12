@@ -90,14 +90,26 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
     }, [recipe])
 
     // Calculate costs
-    const ingredientCost = ingredients.reduce((sum, item) => sum + item.unit_price * item.quantity, 0)
+    const ingredientCost = ingredients.reduce((sum, item) => {
+        const wasteFactor = Number(item.waste_factor ?? 1)
+        return sum + (item.unit_price * item.quantity * wasteFactor)
+    }, 0)
 
-    const opCosts = operationalCosts ?? {
+    const recipeLabor = Number(recipe.labor_costs ?? 0)
+    const recipeOverhead = Number(recipe.overhead_costs ?? 0)
+    const hasRecipeOperational = recipeLabor > 0 || recipeOverhead > 0
+
+    const opCosts = operationalCosts ?? (hasRecipeOperational ? {
+        labor: recipeLabor,
+        utilities: 0,
+        packaging: 0,
+        overhead: recipeOverhead,
+    } : {
         labor: ingredientCost * 0.10,
         utilities: ingredientCost * 0.03,
         packaging: ingredientCost * 0.05,
         overhead: ingredientCost * 0.07
-    }
+    })
 
     const totalOperational = Object.values(opCosts).reduce((a, b) => a + b, 0)
     const totalCost = ingredientCost + totalOperational
@@ -229,7 +241,10 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                 {expandedSections.has('ingredients') && (
                     <CardContent className="space-y-4">
                         {Object.entries(ingredientsByCategory).map(([category, items]) => {
-                            const categoryCost = items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0)
+                            const categoryCost = items.reduce((sum, item) => {
+                                const wasteFactor = Number(item.waste_factor ?? 1)
+                                return sum + (item.unit_price * item.quantity * wasteFactor)
+                            }, 0)
                             const categoryPercent = ingredientCost > 0 ? (categoryCost / ingredientCost) * 100 : 0
 
                             return (
@@ -247,7 +262,8 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
 
                                     <div className="ml-4 space-y-2">
                                         {items.map((item) => {
-                                            const itemCost = item.unit_price * item.quantity
+                                            const wasteFactor = Number(item.waste_factor ?? 1)
+                                            const itemCost = item.unit_price * item.quantity * wasteFactor
                                             const itemPercent = ingredientCost > 0 ? (itemCost / ingredientCost) * 100 : 0
 
                                             return (
@@ -263,6 +279,11 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                                                                     <p className="text-xs">
                                                                         {item.quantity} {item.unit} × {formatCurrency(item.unit_price)}/{item.unit}
                                                                     </p>
+                                                                    {wasteFactor !== 1 && (
+                                                                        <p className="text-xs">
+                                                                            Waste factor: ×{wasteFactor}
+                                                                        </p>
+                                                                    )}
                                                                 </TooltipContent>
                                                             </Tooltip>
                                                         </div>

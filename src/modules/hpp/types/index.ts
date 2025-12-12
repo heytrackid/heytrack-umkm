@@ -82,6 +82,7 @@ export interface RecipeIngredientWithPrice {
   quantity: number
   unit: string
   unit_price: number
+  waste_factor?: number
   category?: string
 }
 

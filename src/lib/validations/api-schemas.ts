@@ -79,6 +79,7 @@ export const CreateRecipeSchema = z.object({
   description: z.string().max(2000).optional(),
   instructions: z.string().max(5000).optional(),
   servings: z.number().int().positive().default(1),
+  yield_unit: z.string().min(1).max(50).default('porsi'),
   prep_time: z.number().int().nonnegative().optional(),
   cook_time: z.number().int().nonnegative().optional(),
   selling_price: PositiveNumberSchema.optional(),

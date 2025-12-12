@@ -12,12 +12,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { successToast } from '@/hooks/use-toast'
 import { handleError } from '@/lib/error-handling'
 import {
-  RecipeFormSchema,
-  type RecipeForm as RecipeFormData
+    RecipeFormSchema,
+    type RecipeForm as RecipeFormData
 } from '@/lib/validations/domains/recipe'
-import { successToast } from '@/hooks/use-toast'
 
 import type { Row } from '@/types/database'
 
@@ -42,6 +42,7 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
       name: initialData?.name ?? '',
       description: initialData?.description ?? '',
       servings: initialData?.servings ?? 1,
+      yield_unit: initialData?.yield_unit ?? 'porsi',
       prep_time: initialData?.prep_time ?? 30,
       cook_time: initialData?.cook_time ?? 0,
       instructions: typeof initialData?.instructions === 'string' ? [] : initialData?.instructions ?? [],
@@ -68,6 +69,7 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
   // Extract watch values to avoid React Hook Form linting warnings
   const watchedDifficulty = useWatch({ control: form.control, name: 'difficulty' })
   const watchedIsActive = useWatch({ control: form.control, name: 'is_active' })
+  const watchedYieldUnit = useWatch({ control: form.control, name: 'yield_unit' })
 
   return (
     <Card>
@@ -90,7 +92,7 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
 
 
             <FormField
-              label="Jumlah Porsi"
+              label="Jumlah Hasil"
               required
               error={form.formState.errors.servings?.message}
             >
@@ -100,6 +102,30 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
                 max="1000"
                 {...form.register('servings', { valueAsNumber: true })}
               />
+            </FormField>
+
+            <FormField
+              label="Unit Hasil"
+              required
+              error={form.formState.errors.yield_unit?.message}
+            >
+              <Select
+                onValueChange={(value) => {
+                  form.setValue('yield_unit', value)
+                }}
+                {...(watchedYieldUnit ? { value: watchedYieldUnit as string } : {})}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="porsi">porsi</SelectItem>
+                  <SelectItem value="pcs">pcs</SelectItem>
+                  <SelectItem value="cup">cup</SelectItem>
+                  <SelectItem value="botol">botol</SelectItem>
+                  <SelectItem value="pack">pack</SelectItem>
+                </SelectContent>
+              </Select>
             </FormField>
 
             <FormField

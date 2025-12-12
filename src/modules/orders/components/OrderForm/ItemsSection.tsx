@@ -68,16 +68,21 @@ export const ItemsSection = ({
             </div>
 
             {orderItems.length === 0 ? (
-                <div className="text-center py-12">
+                <div className="text-center py-12 border-2 border-dashed border-muted-foreground/20 rounded-lg">
                     <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
                     <h3 className="text-lg font-semibold mb-2">Belum Ada Item Pesanan</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                        Tambahkan produk yang dipesan oleh pelanggan
+                    <p className="text-sm text-muted-foreground mb-4 max-w-sm mx-auto">
+                        Pilih produk dari daftar resep yang tersedia. Harga dan HPP akan otomatis terisi.
                     </p>
                     <Button type="button" onClick={onAddItem} size="lg">
                         <Plus className="h-4 w-4 mr-2" />
                         Tambah Item Pertama
                     </Button>
+                    {availableRecipes.length === 0 && (
+                        <p className="text-xs text-amber-600 dark:text-amber-400 mt-3">
+                            ⚠️ Belum ada resep. Buat resep terlebih dahulu di menu Resep.
+                        </p>
+                    )}
                 </div>
             ) : (
                 <div className="space-y-3">

@@ -225,6 +225,7 @@ export class ReportService extends BaseService {
         .select(`
           id,
           total_amount,
+          order_date,
           created_at,
           order_items (
             quantity,
@@ -238,9 +239,9 @@ export class ReportService extends BaseService {
           )
         `)
         .eq('user_id', this.context.userId)
-        .gte('created_at', start.toISOString())
-        .lte('created_at', end.toISOString())
-        .eq('status', 'DELIVERED')
+        .gte('order_date', start.toISOString().split('T')[0] as string)
+        .lte('order_date', end.toISOString().split('T')[0] as string)
+        .in('status', ['READY', 'DELIVERED'])
 
       if (ordersError) {
         apiLogger.error({ error: ordersError, userId: this.context.userId }, 'Failed to fetch orders for profit report')
@@ -704,6 +705,7 @@ export class ReportService extends BaseService {
         .select(`
           id,
           total_amount,
+          order_date,
           created_at,
           order_items (
             quantity,
@@ -717,17 +719,27 @@ export class ReportService extends BaseService {
           )
         `)
         .eq('user_id', this.context.userId)
-        .gte('created_at', start.toISOString())
-        .lte('created_at', end.toISOString())
-        .eq('status', 'DELIVERED')
+        .gte('order_date', start.toISOString().split('T')[0] as string)
+        .lte('order_date', end.toISOString().split('T')[0] as string)
+        .in('status', ['READY', 'DELIVERED'])
 
       if (ordersError) {
         apiLogger.error({ error: ordersError, userId: this.context.userId }, 'Failed to fetch orders for sales report')
         throw ordersError
       }
 
-      const totalOrders = orders?.length || 0
-      const totalRevenue = orders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
+      type SalesReportOrderRow = {
+        id: string
+        total_amount: number | null
+        order_date: string | null
+        created_at: string | null
+        order_items: unknown
+      }
+
+      const ordersData = (orders ?? []) as SalesReportOrderRow[]
+
+      const totalOrders = ordersData.length
+      const totalRevenue = ordersData.reduce((sum: number, order: SalesReportOrderRow) => sum + (order.total_amount || 0), 0)
       const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0
 
       // Daily sales aggregation
@@ -741,8 +753,8 @@ export class ReportService extends BaseService {
         profit: number
       }>()
 
-      for (const order of orders || []) {
-        const date = new Date(order.created_at || '').toISOString().split('T')[0] as string
+      for (const order of ordersData) {
+        const date = (order.order_date || (order.created_at ? new Date(order.created_at).toISOString().split('T')[0] : '')) as string
 
         if (!dailySalesMap.has(date)) {
           dailySalesMap.set(date, { orders: 0, revenue: 0 })

@@ -12,6 +12,7 @@ export const recipeSchema = z.object({
   description: z.string().optional().nullable(),
   category: z.string().optional().nullable(),
   servings: z.number().min(1, 'Porsi minimal 1').optional().nullable(),
+  yield_unit: z.string().min(1, 'Unit hasil wajib diisi').max(50).default('porsi'),
   prep_time: z.number().min(0, 'Waktu tidak boleh negatif').optional().nullable(),
   cook_time: z.number().min(0, 'Waktu tidak boleh negatif').optional().nullable(),
   instructions: z.string().optional().nullable(),
@@ -22,4 +23,5 @@ export const recipeSchema = z.object({
 export const recipeUpdateSchema = recipeSchema.partial()
 
 export type RecipeFormData = z.infer<typeof recipeSchema>
+export type RecipeFormInput = z.input<typeof recipeSchema>
 export type RecipeIngredientFormData = z.infer<typeof recipeIngredientSchema>

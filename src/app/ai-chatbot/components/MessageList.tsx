@@ -108,6 +108,19 @@ export const MessageList = ({
     >
       <div className="absolute inset-0 overflow-hidden">
         <ScrollArea className="h-full w-full mobile-scroll" aria-label="Daftar percakapan">
+          {messages.length === 0 && !isLoading ? (
+            <div className="px-4 py-10 max-w-3xl mx-auto">
+              <div className="text-center space-y-3">
+                <div className="text-sm font-semibold">Mulai konsultasi dengan AI</div>
+                <div className="text-sm text-muted-foreground">
+                  Tanyakan tentang penjualan, stok, HPP, strategi menu, atau operasional harian.
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Tips: gunakan template di bawah untuk mulai lebih cepat.
+                </div>
+              </div>
+            </div>
+          ) : null}
           {useVirtualScrolling ? (
             // Virtual scrolling for long conversations
             <div

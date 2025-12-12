@@ -141,6 +141,8 @@ const AIChatbotPage = (): JSX.Element => {
             setInput={setInput}
             onSendMessage={handleSendMessage}
             isLoading={isLoading}
+            showQuickActions={messages.length === 0}
+            showSuggestionChips={messages.length === 0}
           />
         </div>
       </div>

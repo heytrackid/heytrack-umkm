@@ -40,6 +40,7 @@ const RecipeUpdateSchema = z.object({
   prep_time: z.number().int().positive().optional(),
   cook_time: z.number().int().positive().optional(),
   servings: z.number().int().positive().optional(),
+  yield_unit: z.string().min(1).max(50).optional(),
   selling_price: z.number().positive().optional(),
   is_active: z.boolean().optional(),
   ingredients: z.array(RecipeIngredientSchema).optional(),
@@ -255,6 +256,7 @@ export const PUT = createApiRoute(
     if (recipeData['prep_time'] !== undefined) updateData['prep_time'] = recipeData['prep_time'] ?? null
     if (recipeData['cook_time'] !== undefined) updateData['cook_time'] = recipeData['cook_time'] ?? null
     if (recipeData['servings'] !== undefined) updateData['servings'] = recipeData['servings'] ?? null
+    if (recipeData['yield_unit'] !== undefined) updateData['yield_unit'] = recipeData['yield_unit']
     if (recipeData['selling_price'] !== undefined) updateData['selling_price'] = recipeData['selling_price'] ?? null
     if (recipeData['is_active'] !== undefined) updateData['is_active'] = recipeData['is_active']
 

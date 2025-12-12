@@ -2,10 +2,12 @@
 
 import { memo, useCallback, useMemo, useState } from 'react'
 
+import { Info } from '@/components/icons'
 import { SharedDataTable, type Column, type ServerPaginationMeta } from '@/components/shared/SharedDataTable'
 import { Badge } from '@/components/ui/badge'
 import { DeleteModal } from '@/components/ui/index'
 import { undoableToast } from '@/components/ui/toast'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useSettings } from '@/contexts/settings-context'
 import { infoToast } from '@/hooks/use-toast'
 import { useDeleteIngredient, useIngredients } from '@/hooks/useIngredients'
@@ -126,10 +128,33 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}): JSX.Ele
     },
     {
       key: 'price_per_unit',
-      header: 'Harga/Unit',
+      header: (
+        <div className="flex items-center gap-1">
+          <span>Harga/Unit</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-[220px]">
+              <p className="text-xs">
+                <strong>Harga per Unit</strong> adalah harga beli terakhir. <br />
+                Jika ada pembelian, sistem akan menghitung <strong>WAC (Weighted Average Cost)</strong> untuk HPP yang lebih akurat.
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      ),
       render: (_, item) => {
-        const unitPrice = item.price_per_unit ?? item.weighted_average_cost
-        return <span className="font-medium tabular-nums">{unitPrice ? formatCurrency(unitPrice) : '-'}</span>
+        const hasWAC = item.weighted_average_cost && item.weighted_average_cost > 0
+        const unitPrice = hasWAC ? item.weighted_average_cost : item.price_per_unit
+        return (
+          <div className="flex flex-col">
+            <span className="font-medium tabular-nums">{unitPrice ? formatCurrency(unitPrice) : '-'}</span>
+            {hasWAC && item.price_per_unit !== item.weighted_average_cost && (
+              <span className="text-[10px] text-muted-foreground">WAC</span>
+            )}
+          </div>
+        )
       }
     },
     {
