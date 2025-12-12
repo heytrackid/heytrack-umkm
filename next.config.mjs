@@ -143,10 +143,12 @@ const nextConfig = {
   },
 }
 
-export default async () => {
+const getConfig = async () => {
   if (process.env['ANALYZE'] === 'true') {
     const { default: bundleAnalyzer } = await import('@next/bundle-analyzer')
     return bundleAnalyzer({ enabled: true })(nextConfig)
   }
   return nextConfig
 }
+
+export default getConfig
