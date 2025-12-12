@@ -1,20 +1,15 @@
 'use client'
 
-
 import { BarChart3, Clock, DollarSign, ShoppingCart } from '@/components/icons'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
 import { cn } from '@/lib/utils'
 
-
-
 /**
  * Stats Cards Component
  * Displays order statistics overview
  */
-
-
 
 interface OrderStats {
     total_orders: number

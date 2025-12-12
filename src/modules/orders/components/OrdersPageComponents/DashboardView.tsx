@@ -12,8 +12,6 @@ import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
 import { ORDER_STATUS_LABELS } from '@/modules/orders/types'
 
 
-
-
 /**
  * Dashboard View Component
  * Overview dashboard with recent orders and charts
@@ -73,7 +71,10 @@ export const DashboardView = ({ orders, onCreateOrder }: DashboardViewProps) => 
                     ) : (
                         <div className="space-y-3">
                             {orders.slice(0, 5).map((order) => (
-                                <div key={order['id']} className="flex items-center justify-between p-3 border rounded-lg">
+                                <div
+                                    key={order['id']}
+                                    className="flex items-center justify-between p-3 border rounded-lg"
+                                >
                                     <div className="flex-1">
                                         <div className="font-medium">{order['order_no']}</div>
                                         <div className="text-sm text-muted-foreground">{order['customer_name'] ?? 'N/A'}</div>

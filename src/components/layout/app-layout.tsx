@@ -218,7 +218,6 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
 
           {/* Bottom Navigation for Mobile */}
           {isMobile && <SmartBottomNav />}
-
           {/* Welcome Modal & Onboarding Chatbot */}
           {!loading && user && (
             <>
