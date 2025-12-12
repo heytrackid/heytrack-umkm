@@ -2,7 +2,7 @@
   "name": "heytrack-umkm",
   "version": "1.0.0",
   "private": true,
-  "type": "commonjs",
+  "type": "module",
   "description": "HeyTrack - Comprehensive UMKM Culinary Business Management System with AI Assistant",
   "scripts": {
     "dev": "NODE_OPTIONS='--max-old-space-size=6144' next dev --turbo",
