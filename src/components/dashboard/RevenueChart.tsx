@@ -10,6 +10,7 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'rec
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { DateRangePicker } from '@/components/ui/date-range-picker'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCurrency } from '@/hooks/useCurrency'
 import { fetchApi } from '@/lib/query/query-helpers'
@@ -119,11 +120,13 @@ export function RevenueChart({ data, className, isLoading = false }: RevenueChar
       </CardHeader>
       <CardContent className="p-2 sm:p-6">
         {loading ? (
-          <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-              <p className="text-sm">Memuat data chart...</p>
+          <div className="space-y-4">
+            <div className="grid w-full grid-cols-3 gap-2 mb-4">
+              <Skeleton className="h-9" />
+              <Skeleton className="h-9" />
+              <Skeleton className="h-9" />
             </div>
+            <Skeleton className="h-[300px] w-full" />
           </div>
         ) : error ? (
           <div className="flex items-center justify-center h-[300px] text-muted-foreground">

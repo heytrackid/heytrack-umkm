@@ -1,9 +1,9 @@
 'use client'
 
 import { Loader2 } from '@/components/icons'
+import { successToast, } from '@/hooks/use-toast'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
-import { successToast, } from '@/hooks/use-toast'
 
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
@@ -11,6 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { FormSkeleton } from '@/components/ui/skeleton-loader'
+import { SelectFieldSkeleton } from '@/components/ui/skeletons/form-skeletons'
 import { Textarea } from '@/components/ui/textarea'
 import { useRecipes } from '@/hooks/useRecipes'
 import { handleError } from '@/lib/error-handling'
@@ -105,9 +107,7 @@ const CreateProductionBatchContent = () => {
                                 Resep <span className="text-muted-foreground">*</span>
                             </Label>
                             {loadingRecipes ? (
-                                <div className="flex items-center justify-center py-4">
-                                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                                </div>
+                                <SelectFieldSkeleton />
                             ) : (
                                 <Select
                                     value={formData.recipe_id}
@@ -201,7 +201,20 @@ const CreateProductionBatchContent = () => {
 
 export default function CreateProductionBatchPage() {
     return (
-        <Suspense fallback={<div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
+        <Suspense
+            fallback={(
+                <div className="space-y-6 p-6">
+                    <Card className="max-w-2xl mx-auto">
+                        <CardHeader>
+                            <CardTitle>Form Produksi</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <FormSkeleton fields={4} hasSubmit={true} />
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
+        >
             <CreateProductionBatchContent />
         </Suspense>
     )

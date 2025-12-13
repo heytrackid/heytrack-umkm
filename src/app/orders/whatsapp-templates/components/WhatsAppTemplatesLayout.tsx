@@ -1,6 +1,6 @@
 'use client'
 
-import { MessageCircle, Plus } from '@/components/icons'
+import { Loader2, MessageCircle, Plus } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -11,6 +11,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useDeleteWhatsAppTemplate, useGenerateDefaultTemplates, useUpdateWhatsAppTemplate, useWhatsAppTemplates } from '@/hooks/api/useWhatsAppTemplates'
 import { useAuth } from '@/hooks/index'
 import { successToast, } from '@/hooks/use-toast'
@@ -141,7 +142,7 @@ const WhatsAppTemplatesLayout = () => {
                             WhatsApp Templates
                         </h1>
                     </div>
-                    <div className="h-96 bg-muted rounded animate-pulse" />
+                    <Skeleton className="h-96 w-full" />
                 </div>
             </AppLayout>
         )
@@ -204,7 +205,7 @@ const WhatsAppTemplatesLayout = () => {
                                     >
                                         {generateDefaultsMutation.isPending ? (
                                             <>
-                                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-background mr-2" />
+                                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                                                 Membuat Template...
                                             </>
                                         ) : (

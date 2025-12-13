@@ -1,10 +1,11 @@
 'use client'
 
 import { Loader2 } from '@/components/icons'
-import { useState } from 'react'
 import { successToast, } from '@/hooks/use-toast'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { SelectFieldSkeleton } from '@/components/ui/skeletons/form-skeletons'
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -111,9 +112,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
                             Resep <span className="text-muted-foreground">*</span>
                         </Label>
                         {loadingRecipes ? (
-                            <div className="flex items-center justify-center py-4">
-                                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                            </div>
+                            <SelectFieldSkeleton />
                         ) : (
                             <Select
                                 value={formData.recipe_id}

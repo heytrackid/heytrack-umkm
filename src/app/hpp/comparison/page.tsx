@@ -4,17 +4,18 @@ import { BarChart3, Package, Target, TrendingDown, TrendingUp, Users } from '@/c
 import { useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
-import { SharedStatsCards } from '@/components/shared/index'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { SharedStatsCards } from '@/components/shared/index'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
-import { useCurrency } from '@/hooks/useCurrency'
 import { useRecipeComparison } from '@/hooks/api/useHpp'
+import { useCurrency } from '@/hooks/useCurrency'
 
 // No imports needed for now
 
@@ -198,8 +199,8 @@ const ComparisonAnalyticsPage = (): JSX.Element => {
             {(() => {
               if (loading) {
                 return (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                  <div className="py-2">
+                    <TableSkeleton columns={8} rows={6} />
                   </div>
                 )
               }

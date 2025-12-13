@@ -1,9 +1,10 @@
 'use client'
 
-import { Loader2, Package } from '@/components/icons'
+import { Package } from '@/components/icons'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
 
 import type { Row } from '@/types/database'
 
@@ -42,9 +43,9 @@ export const RecipeSelector = ({ recipes, selectedRecipeId, onRecipeSelect, isLo
             </Select>
 
             {isLoading && (
-                <div className="flex items-center justify-center py-4 mt-4">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                    <span className="ml-2 text-sm text-muted-foreground">Memuat...</span>
+                <div className="mt-4 space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-40" />
                 </div>
             )}
         </CardContent>

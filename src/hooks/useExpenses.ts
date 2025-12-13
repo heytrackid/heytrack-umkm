@@ -1,7 +1,7 @@
 
 import { successToast } from '@/hooks/use-toast'
 import { handleError } from '@/lib/error-handling'
-import { deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
+import { deleteApi, extractDataArray, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import type { Insert, Row, Update } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
@@ -37,9 +37,8 @@ export function useExpenses(params?: {
   return useQuery<Expense[]>({
     queryKey: ['expenses', params],
     queryFn: async () => {
-      const response = await fetchApi<{ data: Expense[] }>(`/api/expenses?${searchParams}`)
-      // Extract data array if response has pagination structure
-      return Array.isArray(response) ? response : response.data
+      const response = await fetchApi<unknown>(`/api/expenses?${searchParams}`)
+      return extractDataArray<Expense>(response)
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnWindowFocus: true,

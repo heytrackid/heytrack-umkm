@@ -1,5 +1,6 @@
 import { Loader2 } from '@/components/icons'
 
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
 interface LoadingStateProps {
@@ -18,10 +19,10 @@ export const LoadingState = ({ message, size = 'md', className }: LoadingStatePr
   const currentSizeClass = sizeClasses[size]
 
   return (
-    <div className={cn('flex items-center justify-center py-8', className)}>
-      <Loader2 className={cn('animate-spin text-primary', currentSizeClass || 'h-8 w-8')} />
+    <div className={cn('flex flex-col items-center justify-center py-8', className)}>
+      <Skeleton className={cn('rounded-full', currentSizeClass || 'h-8 w-8')} />
       {message && (
-        <p className="mt-2 text-sm text-muted-foreground text-center">
+        <p className="mt-3 text-sm text-muted-foreground text-center">
           {message}
         </p>
       )}

@@ -2,6 +2,7 @@ import { ArrowLeft, Plus } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 
 import type { ComponentType, ReactNode } from 'react'
 
@@ -161,7 +162,7 @@ export const LoadingState = ({
 }: LoadingStateProps) => (
   <div className={`flex items-center justify-center p-8 ${className ?? ''}`}>
     <div className="flex items-center gap-3">
-      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-foreground" />
+      <Skeleton className="h-6 w-6 rounded-full" />
       <span className="text-muted-foreground">{message}</span>
     </div>
   </div>

@@ -1,8 +1,8 @@
 
-import { handleError } from '@/lib/error-handling'
-import { deleteApi, fetchApi, postApi } from '@/lib/query/query-helpers'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { successToast } from '@/hooks/use-toast'
+import { handleError } from '@/lib/error-handling'
+import { deleteApi, extractDataArray, fetchApi, postApi } from '@/lib/query/query-helpers'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 
 
@@ -46,9 +46,8 @@ export function useChatSessions(limit: number = 10) {
   return useQuery<ChatSession[]>({
     queryKey: ['chat-sessions', limit],
     queryFn: async () => {
-      const response = await fetchApi<{ data: ChatSession[] }>(`/api/ai/sessions?limit=${limit}`)
-      // Extract data array if response has pagination structure
-      return Array.isArray(response) ? response : response.data
+      const response = await fetchApi<unknown>(`/api/ai/sessions?limit=${limit}`)
+      return extractDataArray<ChatSession>(response)
     },
   })
 }
