@@ -560,7 +560,7 @@ ATURAN:
           'X-Title': 'Heytrack AI Chat'
         },
         body: JSON.stringify({
-          model: 'x-ai/grok-4.1-fast',
+          model: 'google/gemini-2.5-flash-lite',
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: message }

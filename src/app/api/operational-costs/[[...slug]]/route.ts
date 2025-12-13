@@ -70,17 +70,20 @@ export const POST = createApiRoute(
       SUCCESS_MESSAGES.OPERATIONAL_COST_CREATED
     )(context, undefined, body)
 
-    // Trigger HPP recalculation for all recipes when operational costs change
+    // Trigger HPP recalculation asynchronously (non-blocking) for better UX
     if (result.status === 201) {
-      try {
-        const { HppTriggerService } = await import('@/services/hpp/HppTriggerService')
-        const { user, supabase } = context
-        const hppTrigger = new HppTriggerService({ userId: user.id, supabase })
-        await hppTrigger.onOperationalCostsChange()
-      } catch (hppError) {
-        const { apiLogger } = await import('@/lib/logger')
-        apiLogger.error({ error: hppError }, 'Failed to trigger HPP recalculation on operational cost create')
-      }
+      // Fire and forget - don't await
+      void (async () => {
+        try {
+          const { HppTriggerService } = await import('@/services/hpp/HppTriggerService')
+          const { user, supabase } = context
+          const hppTrigger = new HppTriggerService({ userId: user.id, supabase })
+          await hppTrigger.onOperationalCostsChange()
+        } catch (hppError) {
+          const { apiLogger } = await import('@/lib/logger')
+          apiLogger.error({ error: hppError }, 'Failed to trigger HPP recalculation on operational cost create')
+        }
+      })()
     }
 
     return result
@@ -113,17 +116,19 @@ export const PUT = createApiRoute(
       SUCCESS_MESSAGES.OPERATIONAL_COST_UPDATED
     )(contextWithId, undefined, body)
 
-    // Trigger HPP recalculation when operational costs change
+    // Trigger HPP recalculation asynchronously (non-blocking) for better UX
     if (result.status === 200 && body && 'amount' in body) {
-      try {
-        const { HppTriggerService } = await import('@/services/hpp/HppTriggerService')
-        const { user, supabase } = context
-        const hppTrigger = new HppTriggerService({ userId: user.id, supabase })
-        await hppTrigger.onOperationalCostsChange()
-      } catch (hppError) {
-        const { apiLogger } = await import('@/lib/logger')
-        apiLogger.error({ error: hppError }, 'Failed to trigger HPP recalculation on operational cost update')
-      }
+      void (async () => {
+        try {
+          const { HppTriggerService } = await import('@/services/hpp/HppTriggerService')
+          const { user, supabase } = context
+          const hppTrigger = new HppTriggerService({ userId: user.id, supabase })
+          await hppTrigger.onOperationalCostsChange()
+        } catch (hppError) {
+          const { apiLogger } = await import('@/lib/logger')
+          apiLogger.error({ error: hppError }, 'Failed to trigger HPP recalculation on operational cost update')
+        }
+      })()
     }
 
     return result
@@ -153,17 +158,19 @@ export const DELETE = createApiRoute(
       SUCCESS_MESSAGES.OPERATIONAL_COST_DELETED
     )(contextWithId)
 
-    // Trigger HPP recalculation when operational costs change
+    // Trigger HPP recalculation asynchronously (non-blocking) for better UX
     if (result.status === 200) {
-      try {
-        const { HppTriggerService } = await import('@/services/hpp/HppTriggerService')
-        const { user, supabase } = context
-        const hppTrigger = new HppTriggerService({ userId: user.id, supabase })
-        await hppTrigger.onOperationalCostsChange()
-      } catch (hppError) {
-        const { apiLogger } = await import('@/lib/logger')
-        apiLogger.error({ error: hppError }, 'Failed to trigger HPP recalculation on operational cost delete')
-      }
+      void (async () => {
+        try {
+          const { HppTriggerService } = await import('@/services/hpp/HppTriggerService')
+          const { user, supabase } = context
+          const hppTrigger = new HppTriggerService({ userId: user.id, supabase })
+          await hppTrigger.onOperationalCostsChange()
+        } catch (hppError) {
+          const { apiLogger } = await import('@/lib/logger')
+          apiLogger.error({ error: hppError }, 'Failed to trigger HPP recalculation on operational cost delete')
+        }
+      })()
     }
 
     return result

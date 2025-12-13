@@ -1,9 +1,13 @@
 'use client'
 
 import {
+    ArrowDownAZ,
+    ArrowUpAZ,
     Download,
     Edit,
     Eye,
+    Grid3X3,
+    List,
     MoreVertical,
     Plus,
     RefreshCw,
@@ -82,9 +86,13 @@ interface SharedDataTableProps<T> {
   enableBulkActions?: boolean
   idKey?: keyof T | string
   displayMode?: 'table' | 'cards'
+  allowViewToggle?: boolean
   cardRenderer?: (item: T, actions: { onView?: () => void; onEdit?: () => void; onDelete?: () => void }) => ReactNode
   cardsPerRow?: 2 | 3 | 4
   enablePagination?: boolean
+  sortOptions?: Array<{ label: string; value: string; direction: 'asc' | 'desc' }>
+  defaultSort?: string
+  onSortChange?: (sort: string, direction: 'asc' | 'desc') => void
   pageSizeOptions?: number[]
   initialPageSize?: number
   serverPagination?: ServerPaginationMeta | undefined
@@ -158,11 +166,16 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
   title, description, addButtonText = "Tambah Data", searchPlaceholder = "Cari...",
   emptyMessage = "Tidak ada data", emptyDescription = "Belum ada data yang tersedia",
   loading = false, exportable = false, refreshable = true, enableBulkActions = false, idKey = 'id',
-  displayMode = 'table', cardRenderer, cardsPerRow = 3, enablePagination = true, pageSizeOptions,
+  displayMode = 'table', allowViewToggle = false, cardRenderer, cardsPerRow = 3, enablePagination = true, pageSizeOptions,
   initialPageSize, serverPagination, onPageChange, onPageSizeChange, onSearchChange,
+  sortOptions, defaultSort, onSortChange,
   headerActions, className = "", compact = false, showResultCount = true,
 }: SharedDataTableProps<T>): JSX.Element => {
   const [isMounted, setIsMounted] = useState(false)
+  const [currentDisplayMode, setCurrentDisplayMode] = useState<'table' | 'cards'>(displayMode)
+  const [currentSort, setCurrentSort] = useState<string>(defaultSort || '')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+  
   useEffect(() => {
     // Hydration sync - intentional immediate setState
     const timer = requestAnimationFrame(() => setIsMounted(true))
@@ -197,7 +210,7 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
   const processedData = useMemo(() => {
     const safeData = Array.isArray(data) ? data : []
     if (isServerPagination) return safeData
-    return safeData.filter(item => {
+    let filtered = safeData.filter(item => {
       const matchesSearch = !searchTerm || columns.some(col => {
         const value = getValue(item, col.key)
         return value !== null && String(value).toLowerCase().includes(searchTerm.toLowerCase())
@@ -208,7 +221,39 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
       })
       return matchesSearch && matchesFilters
     })
-  }, [data, searchTerm, filters, columns, isServerPagination])
+    
+    // Apply client-side sorting
+    if (currentSort && !isServerPagination) {
+      filtered = [...filtered].sort((a, b) => {
+        const aVal = getValue(a, currentSort)
+        const bVal = getValue(b, currentSort)
+        
+        // Handle dates
+        if (aVal instanceof Date && bVal instanceof Date) {
+          return sortDirection === 'asc' ? aVal.getTime() - bVal.getTime() : bVal.getTime() - aVal.getTime()
+        }
+        
+        // Handle strings that look like dates
+        const aDate = typeof aVal === 'string' ? Date.parse(aVal) : NaN
+        const bDate = typeof bVal === 'string' ? Date.parse(bVal) : NaN
+        if (!isNaN(aDate) && !isNaN(bDate)) {
+          return sortDirection === 'asc' ? aDate - bDate : bDate - aDate
+        }
+        
+        // Handle numbers
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+          return sortDirection === 'asc' ? aVal - bVal : bVal - aVal
+        }
+        
+        // Handle strings
+        const aStr = String(aVal || '')
+        const bStr = String(bVal || '')
+        return sortDirection === 'asc' ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr)
+      })
+    }
+    
+    return filtered
+  }, [data, searchTerm, filters, columns, isServerPagination, currentSort, sortDirection])
 
   const totalItems = isServerPagination ? serverPagination.total : processedData.length
   const totalPages = isServerPagination ? serverPagination.pages : (enablePagination ? Math.max(1, Math.ceil(totalItems / rowsPerPage)) : 1)
@@ -218,6 +263,20 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
 
   const handleSearchChange = useCallback((value: string) => { setSearchTerm(value); onSearchChange?.(value) }, [onSearchChange])
   const handleFilterChange = useCallback((columnKey: string, value: string) => { setFilters(prev => ({ ...prev, [columnKey]: value })) }, [])
+  const handleSortChange = useCallback((sortKey: string) => {
+    if (currentSort === sortKey) {
+      const newDirection = sortDirection === 'asc' ? 'desc' : 'asc'
+      setSortDirection(newDirection)
+      onSortChange?.(sortKey, newDirection)
+    } else {
+      setCurrentSort(sortKey)
+      setSortDirection('desc')
+      onSortChange?.(sortKey, 'desc')
+    }
+  }, [currentSort, sortDirection, onSortChange])
+  const handleViewToggle = useCallback(() => {
+    setCurrentDisplayMode(prev => prev === 'table' ? 'cards' : 'table')
+  }, [])
   const handlePageChange = useCallback((page: number) => { onPageChange ? onPageChange(page) : setCurrentPage(page) }, [onPageChange])
   const handlePageSizeChange = useCallback((size: number) => { if (onPageSizeChange) { onPageSizeChange(size) } else { setRowsPerPage(size); setCurrentPage(1) } }, [onPageSizeChange])
   const handleSelectAll = useCallback(() => { selectedItems.size === paginatedData.length ? setSelectedItems(new Set()) : setSelectedItems(new Set(paginatedData.map(item => String(getValue(item, idKey))))) }, [paginatedData, selectedItems.size, idKey])
@@ -271,6 +330,11 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
             <div className="flex flex-wrap gap-2">
               {enableBulkActions && selectedItems.size > 0 && <Button variant="destructive" size="sm" onClick={handleBulkDelete}><Trash2 className="h-4 w-4 mr-2" />Hapus {selectedItems.size}</Button>}
               {headerActions}
+              {allowViewToggle && cardRenderer && (
+                <Button variant="outline" size="sm" onClick={handleViewToggle} title={currentDisplayMode === 'cards' ? 'Tampilan List' : 'Tampilan Grid'}>
+                  {currentDisplayMode === 'cards' ? <List className="h-4 w-4" /> : <Grid3X3 className="h-4 w-4" />}
+                </Button>
+              )}
               {refreshable && onRefresh && <Button variant="outline" size="sm" onClick={onRefresh}><RefreshCw className="h-4 w-4" /></Button>}
               {exportable && <Button variant="outline" size="sm" onClick={handleExport}><Download className="h-4 w-4 mr-2" />Export</Button>}
               {onAdd && <Button onClick={onAdd} size="sm"><Plus className="h-4 w-4 mr-2" />{addButtonText}</Button>}
@@ -294,6 +358,20 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
                 </SelectContent>
               </Select>
             ))}
+            {sortOptions && sortOptions.length > 0 && (
+              <Select value={currentSort || 'default'} onValueChange={(v: string) => v !== 'default' && handleSortChange(v)}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <div className="flex items-center gap-2">
+                    {sortDirection === 'asc' ? <ArrowUpAZ className="h-4 w-4" /> : <ArrowDownAZ className="h-4 w-4" />}
+                    <SelectValue placeholder="Urutkan" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">Urutkan</SelectItem>
+                  {sortOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            )}
             {hasActiveFilters && <Button variant="ghost" size="sm" onClick={clearFilters} className="shrink-0"><X className="h-4 w-4 mr-1" />Clear</Button>}
           </div>
           {showResultCount && (
@@ -324,7 +402,7 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
                 )}
               </div>
             )}
-            {displayMode === 'cards' && cardRenderer ? (
+            {currentDisplayMode === 'cards' && cardRenderer ? (
               <div className={cn("grid gap-4", cardGridClass)}>
                 {paginatedData.map((item) => {
                   const actions: { onView?: () => void; onEdit?: () => void; onDelete?: () => void } = {}

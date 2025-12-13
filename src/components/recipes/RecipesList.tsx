@@ -213,6 +213,7 @@ const RecipesListComponent = (): JSX.Element => {
         columns={columns}
         loading={isLoading}
         displayMode="cards"
+        allowViewToggle={true}
         cardRenderer={cardRenderer}
         cardsPerRow={3}
         onView={handleView}
@@ -225,6 +226,15 @@ const RecipesListComponent = (): JSX.Element => {
         emptyMessage="Belum Ada Resep"
         emptyDescription="Buat resep produk Anda untuk mulai menghitung HPP dan mengelola produksi."
         pageSizeOptions={[12, 24, 48, 96]}
+        sortOptions={[
+          { label: 'Terbaru', value: 'created_at', direction: 'desc' },
+          { label: 'Terlama', value: 'created_at', direction: 'asc' },
+          { label: 'Nama A-Z', value: 'name', direction: 'asc' },
+          { label: 'Nama Z-A', value: 'name', direction: 'desc' },
+          { label: 'Porsi Terbanyak', value: 'servings', direction: 'desc' },
+          { label: 'Porsi Tersedikit', value: 'servings', direction: 'asc' },
+        ]}
+        defaultSort="created_at"
         customActions={[
           { label: 'Hitung HPP', icon: Calculator, onClick: handleCalculateHPP }
         ]}

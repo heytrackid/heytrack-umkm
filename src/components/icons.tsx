@@ -180,3 +180,6 @@ export const TriangleAlertIcon = createIcon("ph:warning");
 export const Building2 = createIcon("ph:buildings");
 export const Circle = createIcon("ph:circle");
 export const SkipForward = createIcon("ph:skip-forward");
+export const Grid3X3 = createIcon("ph:grid-nine");
+export const ArrowDownAZ = createIcon("ph:sort-ascending");
+export const ArrowUpAZ = createIcon("ph:sort-descending");

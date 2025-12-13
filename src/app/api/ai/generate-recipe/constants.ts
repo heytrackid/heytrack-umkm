@@ -1,6 +1,6 @@
 export const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
-export const PRIMARY_MODEL = 'x-ai/grok-4.1-fast'
-export const FALLBACK_MODEL = 'x-ai/grok-4.1-fast'
+export const PRIMARY_MODEL = 'google/gemini-2.5-flash-lite'
+export const FALLBACK_MODEL = 'google/gemini-2.0-flash-001'
 export const MAX_RETRIES = 3
 export const ESTIMATED_DAILY_PRODUCTION = 50
 export const DEFAULT_OPERATIONAL_COST_PERCENTAGE = 0.3
