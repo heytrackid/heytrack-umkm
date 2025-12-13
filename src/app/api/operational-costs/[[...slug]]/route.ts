@@ -1,4 +1,5 @@
 // External libraries
+import { NextResponse } from 'next/server'
 // Internal modules
 import { createCreateHandler, createDeleteHandler, createGetHandler, createListHandler, createUpdateHandler } from '@/lib/api/crud-helpers'
 import { createApiRoute, type RouteContext } from '@/lib/api/route-factory'
@@ -49,15 +50,89 @@ export const GET = createApiRoute(
   }
 )
 
-// POST /api/operational-costs - Create operational cost with HPP trigger
+// Default templates for quick setup
+const QUICK_SETUP_TEMPLATES = [
+  { category: 'utilities', description: 'Listrik', amount: 0, frequency: 'monthly', recurring: true },
+  { category: 'utilities', description: 'Air', amount: 0, frequency: 'monthly', recurring: true },
+  { category: 'rent', description: 'Sewa Tempat', amount: 0, frequency: 'monthly', recurring: true },
+  { category: 'staff', description: 'Gaji Karyawan', amount: 0, frequency: 'monthly', recurring: true },
+  { category: 'transport', description: 'BBM & Transport', amount: 0, frequency: 'monthly', recurring: false },
+  { category: 'communication', description: 'Internet & Telepon', amount: 0, frequency: 'monthly', recurring: true },
+  { category: 'maintenance', description: 'Perawatan Peralatan', amount: 0, frequency: 'monthly', recurring: false },
+  { category: 'other', description: 'Biaya Lainnya', amount: 0, frequency: 'monthly', recurring: false },
+]
+
+// POST /api/operational-costs or /api/operational-costs/quick-setup
 export const POST = createApiRoute(
   {
     method: 'POST',
     path: '/api/operational-costs',
-    bodySchema: OperationalCostInsertSchema,
+    bodySchema: OperationalCostInsertSchema.optional(),
   },
   async (context, _query, body) => {
     const slug = context.params?.['slug'] as string[] | undefined
+    
+    // Handle quick-setup endpoint
+    if (slug && slug.length === 1 && slug[0] === 'quick-setup') {
+      const { supabase, user } = context
+      
+      // Get existing categories to avoid duplicates
+      const { data: existingCosts } = await supabase
+        .from('operational_costs')
+        .select('category, description')
+        .eq('user_id', user.id)
+      
+      const existingKeys = new Set(
+        (existingCosts || []).map(c => `${c.category}-${c.description}`)
+      )
+      
+      // Filter out templates that already exist
+      const templatesToAdd = QUICK_SETUP_TEMPLATES.filter(
+        t => !existingKeys.has(`${t.category}-${t.description}`)
+      )
+      
+      if (templatesToAdd.length === 0) {
+        return NextResponse.json(
+          { success: true, count: 0, message: 'Semua template sudah ada' },
+          { status: 200 }
+        )
+      }
+      
+      // Add user_id and date to each template
+      const today = new Date().toISOString().split('T')[0] ?? null
+      const templatesWithUser = templatesToAdd.map(t => ({
+        ...t,
+        user_id: user.id,
+        date: today,
+      }))
+      
+      const { error } = await supabase
+        .from('operational_costs')
+        .insert(templatesWithUser)
+      
+      if (error) {
+        return handleAPIError(error, 'POST /api/operational-costs/quick-setup')
+      }
+      
+      // Trigger HPP recalculation
+      void (async () => {
+        try {
+          const { HppTriggerService } = await import('@/services/hpp/HppTriggerService')
+          const hppTrigger = new HppTriggerService({ userId: user.id, supabase })
+          await hppTrigger.onOperationalCostsChange()
+        } catch (hppError) {
+          const { apiLogger } = await import('@/lib/logger')
+          apiLogger.error({ error: hppError }, 'Failed to trigger HPP recalculation on quick setup')
+        }
+      })()
+      
+      return NextResponse.json(
+        { success: true, count: templatesToAdd.length },
+        { status: 201 }
+      )
+    }
+    
+    // Regular create - reject if slug is present (except quick-setup handled above)
     if (slug && slug.length > 0) {
       return handleAPIError(new Error('Method not allowed'), 'POST /api/operational-costs')
     }
