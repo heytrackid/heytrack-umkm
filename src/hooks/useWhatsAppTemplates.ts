@@ -1,9 +1,9 @@
 
+import { successToast } from '@/hooks/use-toast'
 import { handleError } from '@/lib/error-handling'
-import { deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
+import { deleteApi, extractDataArray, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import type { Insert, Row, Update } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { successToast } from '@/hooks/use-toast'
 
 
 
@@ -22,9 +22,8 @@ export function useWhatsAppTemplates(params?: { category?: string; isActive?: bo
   return useQuery<WhatsAppTemplate[]>({
     queryKey: ['whatsapp-templates', params],
     queryFn: async () => {
-      const response = await fetchApi<{ data: WhatsAppTemplate[] }>(`/api/whatsapp-templates?${searchParams}`)
-      // Extract data array if response has pagination structure
-      return Array.isArray(response) ? response : response.data
+      const response = await fetchApi<unknown>(`/api/whatsapp-templates?${searchParams}`)
+      return extractDataArray<WhatsAppTemplate>(response)
     },
   })
 }

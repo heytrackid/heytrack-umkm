@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ListSkeleton } from '@/components/ui/skeleton-loader'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { successToast } from '@/hooks/use-toast'
@@ -373,8 +374,8 @@ export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps)
             ) : (
               <>
                 {historyLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  <div className="py-2">
+                    <ListSkeleton items={5} />
                   </div>
                 ) : historyData?.items && historyData.items.length > 0 ? (
                   <div className="space-y-3">

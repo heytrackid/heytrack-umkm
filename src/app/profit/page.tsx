@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertCircle, Download, Loader2 } from '@/components/icons'
+import { AlertCircle, Download } from '@/components/icons'
 
 import { PageHeader } from '@/components/layout'
 import { AppLayout } from '@/components/layout/app-layout'
@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { BarChartComponent } from '@/components/ui/charts'
 import { StatsSkeleton } from '@/components/ui/index'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useResponsive } from '@/hooks/useResponsive'
 
 
@@ -172,7 +173,7 @@ const ProfitReportPage = () => {
               <Card>
                 <CardContent className="p-6">
                   <div className="h-[350px] bg-muted animate-pulse rounded flex items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    <Skeleton className="h-8 w-8 rounded-full" />
                   </div>
                 </CardContent>
               </Card>

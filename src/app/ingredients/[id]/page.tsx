@@ -1,22 +1,22 @@
 'use client'
 
+import { ArrowLeft } from '@/components/icons'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, Loader2 } from '@/components/icons'
-import { useRouter, useParams } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { EnhancedIngredientForm } from '@/components/ingredients/index'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { PageBreadcrumb } from '@/components/ui/page-breadcrumb'
-import { PageHeader } from '@/components/layout/PageHeader'
-import { useUpdateIngredient } from '@/hooks/useIngredients'
+import { FormSkeleton } from '@/components/ui/skeleton-loader'
 import { successToast, } from '@/hooks/use-toast'
+import { useIngredient, useUpdateIngredient } from '@/hooks/useIngredients'
 import { handleError } from '@/lib/error-handling'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
-import { useIngredient } from '@/hooks/useIngredients'
 
 import type { Update } from '@/types/database'
 
@@ -108,16 +108,31 @@ const EditIngredientPage = (): JSX.Element | null => {
             <AppLayout>
                 <div className="space-y-6 p-6">
                     <PageBreadcrumb items={breadcrumbItems} />
-                    <div className="flex items-center justify-center py-12">
-                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                    </div>
+                    <Card>
+                        <CardContent className="p-6">
+                            <FormSkeleton fields={6} hasSubmit={true} />
+                        </CardContent>
+                    </Card>
                 </div>
             </AppLayout>
         )
     }
 
     if (!ingredient) {
-        return null
+        return (
+            <AppLayout>
+                <div className="space-y-6 p-6">
+                    <PageBreadcrumb items={breadcrumbItems} />
+                    <Card>
+                        <CardContent className="pt-6">
+                            <div className="text-center py-8 text-muted-foreground">
+                                Data bahan baku tidak ditemukan
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </AppLayout>
+        )
     }
 
     return (

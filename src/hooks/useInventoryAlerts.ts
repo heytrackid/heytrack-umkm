@@ -1,7 +1,7 @@
 import { successToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
 import { handleError } from '@/lib/error-handling'
-import { deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
+import { deleteApi, extractDataArray, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import type { RestockSuggestion, RestockSuggestionsSummary } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
@@ -25,9 +25,8 @@ export function useInventoryAlerts() {
   return useQuery<ActiveInventoryAlert[]>({
     queryKey: ['inventory-alerts'],
     queryFn: async () => {
-      const response = await fetchApi<{ data: ActiveInventoryAlert[] }>('/api/inventory/alerts')
-      // Extract data array if response has pagination structure
-      return Array.isArray(response) ? response : response.data
+      const response = await fetchApi<unknown>('/api/inventory/alerts')
+      return extractDataArray<ActiveInventoryAlert>(response)
     },
     staleTime: 60 * 1000, // 1 minute - alerts should be fresh
     refetchOnWindowFocus: true,

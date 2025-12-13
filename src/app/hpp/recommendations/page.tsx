@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ListSkeleton } from '@/components/ui/skeleton-loader'
 import { useHppRecommendations } from '@/hooks/api/useHpp'
 import { infoToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
@@ -178,9 +179,13 @@ const HppRecommendationsPage = (): JSX.Element => {
           {(() => {
             if (loading) {
               return (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-                </div>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="space-y-4">
+                      <ListSkeleton items={5} />
+                    </div>
+                  </CardContent>
+                </Card>
               )
             }
             

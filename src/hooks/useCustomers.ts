@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { createClientLogger } from '@/lib/client-logger'
 import { queryConfig } from '@/lib/query/query-config'
-import { buildApiUrl, deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
+import { buildApiUrl, deleteApi, extractDataArray, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import { getErrorMessage } from '@/lib/type-guards'
 import type { Insert, Row, Update } from '@/types/database'
 import type { PaginationMeta } from '@/types/pagination'
@@ -56,9 +56,10 @@ export function useCustomersList(search?: string) {
   return useQuery({
     queryKey: ['customers-list', search],
     queryFn: async () => {
-      const response = await fetchApi<{ data: Customer[] }>(buildApiUrl('/api/customers', { search: search || undefined, limit: 1000 } as Record<string, string | number | boolean | null | undefined>))
-      // Extract data array for backward compatibility
-      return Array.isArray(response) ? response : response.data
+      const response = await fetchApi<unknown>(
+        buildApiUrl('/api/customers', { search: search || undefined, limit: 1000 } as Record<string, string | number | boolean | null | undefined>)
+      )
+      return extractDataArray<Customer>(response)
     },
     ...queryConfig.queries.moderate,
     refetchOnWindowFocus: true,

@@ -6,6 +6,7 @@ import { useCallback, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ListSkeleton } from '@/components/ui/skeleton-loader'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import type { GenerateRecipeParams } from '@/hooks/api/useAIRecipeEnhanced'
@@ -682,8 +683,8 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
             </CardHeader>
             <CardContent>
               {historyLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <div className="py-2">
+                  <ListSkeleton items={5} />
                 </div>
               ) : historyData?.items && historyData.items.length > 0 ? (
                 <div className="space-y-3">

@@ -3,15 +3,14 @@ import { z } from 'zod'
 import type { OrderFormData as OrderFormValues } from '@/components/orders/types'
 
 import {
-
-  UUIDSchema,
-  EmailSchema,
-  PhoneSchema,
-  indonesianName,
-  optionalString,
-  positiveNumber,
-  rupiah,
-  percentage
+    EmailSchema,
+    PhoneSchema,
+    UUIDSchema,
+    indonesianName,
+    optionalString,
+    percentage,
+    positiveNumber,
+    rupiah
 } from '@/lib/validations/base-validations'
 
 
@@ -303,24 +302,26 @@ export type OperationalCostForm = z.infer<typeof OperationalCostFormSchema>
 
 // Order validation helper function (moved from components/orders/utils.ts)
 export function validateOrderData(data: OrderFormValues): string[] {
-  const errors: string[] = []
+  const OrderFormValidationSchema = z.object({
+    customer_name: z.preprocess(
+      (value) => (typeof value === 'string' ? value : ''),
+      z.string().trim().min(1, 'Nama pelanggan harus diisi')
+    ),
+    customer_phone: z.preprocess(
+      (value) => (typeof value === 'string' ? value : ''),
+      z.string().trim().min(1, 'Nomor telepon harus diisi')
+    ),
+    order_items: z.preprocess(
+      (value) => (Array.isArray(value) ? value : []),
+      z.array(z.unknown()).min(1, 'Minimal harus ada 1 item pesanan')
+    ),
+  }).passthrough()
 
-  if (!data['customer_name'].trim()) {
-    errors.push('Nama pelanggan harus diisi')
+  const result = OrderFormValidationSchema.safeParse(data)
+  if (result.success) {
+    return []
   }
 
-  if (!data.customer_phone.trim()) {
-    errors.push('Nomor telepon harus diisi')
-  }
-
-  // delivery_date is optional according to database schema
-  // if (!data.delivery_date?.trim()) {
-  //   errors.push('Tanggal pengiriman harus diisi')
-  // }
-
-  if (data.order_items.length === 0) {
-    errors.push('Minimal harus ada 1 item pesanan')
-  }
-
-  return errors
+  const messages = result.error.issues.map((issue) => issue.message)
+  return Array.from(new Set(messages))
 }

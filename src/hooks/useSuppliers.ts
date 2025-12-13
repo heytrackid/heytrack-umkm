@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { createClientLogger } from '@/lib/client-logger'
 import { queryConfig } from '@/lib/query/query-config'
-import { buildApiUrl, deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
+import { buildApiUrl, deleteApi, extractDataArray, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import { getErrorMessage } from '@/lib/type-guards'
 import type { Insert, Row, Update } from '@/types/database'
 
@@ -21,12 +21,6 @@ type Supplier = Row<'suppliers'>
 type SupplierInsert = Insert<'suppliers'>
 type SupplierUpdate = Update<'suppliers'>
 
-interface UseSuppliersOptions {
-  limit?: number
-  offset?: number
-  search?: string
-}
-
 /**
  * Fetch all suppliers with caching
  * ✅ Refactored to use fetchApi helper for consistency
@@ -35,9 +29,10 @@ export function useSuppliers(options?: UseSuppliersOptions) {
   return useQuery({
     queryKey: ['suppliers', options],
     queryFn: async () => {
-      const response = await fetchApi<{ data: unknown[] }>(buildApiUrl('/api/suppliers', { ...options, limit: options?.limit || 1000 } as Record<string, string | number | boolean | null | undefined>))
-      // Extract data array if response has pagination structure
-      return Array.isArray(response) ? response : response.data
+      const response = await fetchApi<unknown>(
+        buildApiUrl('/api/suppliers', { ...options, limit: options?.limit || 1000 } as Record<string, string | number | boolean | null | undefined>)
+      )
+      return extractDataArray<Supplier>(response)
     },
     ...queryConfig.queries.moderate,
     refetchOnWindowFocus: true,
