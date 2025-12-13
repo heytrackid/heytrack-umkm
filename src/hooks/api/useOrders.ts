@@ -164,3 +164,22 @@ export function useExportOrders() {
     },
   })
 }
+
+export function useImportOrders() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (orders: unknown[]): Promise<{ count: number; data: Order[] }> =>
+      postApi<{ count: number; data: Order[] }>('/api/orders/import', { orders }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['orders'] })
+      void queryClient.invalidateQueries({ queryKey: ['orders-list'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      void queryClient.invalidateQueries({ queryKey: ['sales-stats'] })
+      void queryClient.invalidateQueries({ queryKey: ['customers'] })
+
+      successToast('Berhasil', 'Pesanan berhasil diimport')
+    },
+    onError: (error) => handleError(error, 'Import orders', true, 'Gagal mengimport pesanan'),
+  })
+}

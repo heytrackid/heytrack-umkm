@@ -1,7 +1,9 @@
 'use client'
 
 // Using Pino logger for all logging
-import { BarChart3, Calendar, Clock, DollarSign, MessageCircle, Plus, ShoppingCart, XCircle } from '@/components/icons'
+import { BarChart3, Calendar, Clock, DollarSign, MessageCircle, Plus, ShoppingCart, Upload, XCircle } from '@/components/icons'
+import { generateOrdersTemplate, parseOrdersCSV } from '@/components/import/csv-helpers'
+import { ImportDialog } from '@/components/import/ImportDialog'
 import { SharedDataTable, type Column } from '@/components/shared/SharedDataTable'
 import { useOrdersList } from '@/hooks/api/useOrders'
 import { useQueryClient } from '@tanstack/react-query'
@@ -20,6 +22,7 @@ import type { OrderListItem, OrderStatus } from '@/types/database'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
+import { useImportOrders } from '@/hooks/api/useOrders'
 import { useCurrency } from '@/hooks/useCurrency'
 import { ORDER_STATUSES, PAYMENT_STATUSES } from '@/lib/shared/constants'
 import { getErrorMessage } from '@/lib/type-guards'
@@ -146,6 +149,15 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
   const router = useRouter()
   const { formatCurrency } = useCurrency()
   const queryClient = useQueryClient()
+
+  const [importDialogOpen, setImportDialogOpen] = useState(false)
+  const importOrdersMutation = useImportOrders()
+
+  const templateUrl = useMemo(() => {
+    const template = generateOrdersTemplate()
+    const blob = new Blob([template], { type: 'text/csv' })
+    return URL.createObjectURL(blob)
+  }, [])
 
   type ActiveView = 'analytics' | 'calendar' | 'dashboard' | 'list'
   const [activeView, setActiveView] = useState<ActiveView>('dashboard')
@@ -323,10 +335,16 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
         description="Kelola pesanan dan penjualan dengan sistem terintegrasi"
         icon={<ShoppingCart className="h-8 w-8 text-muted-foreground" />}
         action={
-          <Button onClick={handleCreateOrder}>
-            <Plus className="h-4 w-4 mr-2" />
-            Pesanan Baru
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+              <Upload className="h-4 w-4 mr-2" />
+              Import
+            </Button>
+            <Button onClick={handleCreateOrder}>
+              <Plus className="h-4 w-4 mr-2" />
+              Pesanan Baru
+            </Button>
+          </div>
         }
       />
 
@@ -736,6 +754,27 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
           onConfirm={handleUpdateStatus}
         />
       )}
+
+      <ImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        title="Import Pesanan"
+        description="Upload file CSV untuk import data pesanan secara massal"
+        templateUrl={templateUrl}
+        templateFilename="template-pesanan.csv"
+        parseCSV={parseOrdersCSV}
+        onImport={async (data: unknown) => {
+          try {
+            await importOrdersMutation.mutateAsync(data as unknown[])
+            return { success: true, count: Array.isArray(data) ? data.length : 0 }
+          } catch (error: unknown) {
+            return {
+              success: false,
+              error: error instanceof Error ? error.message : 'Terjadi kesalahan saat import',
+            }
+          }
+        }}
+      />
     </div >
   )
 }
