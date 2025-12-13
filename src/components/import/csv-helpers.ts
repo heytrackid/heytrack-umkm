@@ -135,14 +135,14 @@ function countDelimiterOutsideQuotes(line: string, delimiter: string): number {
  */
 export function generateIngredientsTemplate(): string {
   const headers = [
-    'name',
-    'unit',
-    'price_per_unit',
-    'current_stock',
-    'reorder_point',
-    'category',
+    'nama',
+    'satuan',
+    'harga_per_satuan',
+    'stok_saat_ini',
+    'stok_minimum',
+    'kategori',
     'supplier',
-    'description'
+    'deskripsi'
   ]
   
   const examples = [
@@ -239,14 +239,14 @@ export function parseIngredientsCSV(text: string) {
   const data = parseCSV(text)
   
   return data.map(row => ({
-    name: (row['name'] ?? row['Name'] ?? row['NAMA']) ?? '',
-    unit: (row['unit'] ?? row['Unit'] ?? row['SATUAN']) ?? '',
-    price_per_unit: (row['price_per_unit'] ?? row['Price Per Unit'] ?? row['HARGA']) ?? '',
-    current_stock: (row['current_stock'] ?? row['Current Stock'] ?? row['STOK']) ?? '0',
-    reorder_point: (row['reorder_point'] ?? row['Reorder Point'] ?? row['REORDER_POINT'] ?? row['min_stock'] ?? row['Min Stock'] ?? row['MIN_STOK']) ?? '0',
-    category: (row['category'] ?? row['Category'] ?? row['KATEGORI']) ?? 'General',
+    name: (row['nama'] ?? row['Nama'] ?? row['NAMA'] ?? row['name'] ?? row['Name']) ?? '',
+    unit: (row['satuan'] ?? row['Satuan'] ?? row['SATUAN'] ?? row['unit'] ?? row['Unit']) ?? '',
+    price_per_unit: (row['harga_per_satuan'] ?? row['Harga Per Satuan'] ?? row['HARGA_PER_SATUAN'] ?? row['harga'] ?? row['HARGA'] ?? row['price_per_unit'] ?? row['Price Per Unit']) ?? '',
+    current_stock: (row['stok_saat_ini'] ?? row['Stok Saat Ini'] ?? row['STOK_SAAT_INI'] ?? row['stok'] ?? row['STOK'] ?? row['current_stock'] ?? row['Current Stock']) ?? '0',
+    reorder_point: (row['stok_minimum'] ?? row['Stok Minimum'] ?? row['STOK_MINIMUM'] ?? row['titik_pesan_ulang'] ?? row['Titik Pesan Ulang'] ?? row['TITIK_PESAN_ULANG'] ?? row['reorder_point'] ?? row['Reorder Point'] ?? row['REORDER_POINT'] ?? row['min_stock'] ?? row['Min Stock'] ?? row['MIN_STOK']) ?? '0',
+    category: (row['kategori'] ?? row['Kategori'] ?? row['KATEGORI'] ?? row['category'] ?? row['Category']) ?? 'General',
     supplier: (row['supplier'] ?? row['Supplier'] ?? row['SUPPLIER']) ?? '',
-    description: (row['description'] ?? row['Description'] ?? row['DESKRIPSI']) ?? ''
+    description: (row['deskripsi'] ?? row['Deskripsi'] ?? row['DESKRIPSI'] ?? row['description'] ?? row['Description']) ?? ''
   }))
 }
 
