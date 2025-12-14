@@ -1,16 +1,13 @@
 'use client'
 
 // Using Pino logger for all logging
-import { BarChart3, Calendar, Clock, DollarSign, MessageCircle, Plus, ShoppingCart, Upload, XCircle } from '@/components/icons'
-import { generateOrdersTemplate, parseOrdersCSV } from '@/components/import/csv-helpers'
-import { ImportDialog } from '@/components/import/ImportDialog'
+import { BarChart3, Calendar, CheckCircle, Clock, DollarSign, MessageCircle, Plus, ShoppingCart, XCircle } from '@/components/icons'
 import { SharedDataTable, type Column } from '@/components/shared/SharedDataTable'
 import { useCreateOrder, useOrdersList, useUpdateOrder } from '@/hooks/api/useOrders'
 import { useQueryClient } from '@tanstack/react-query'
 import { format, subDays } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
-import { useRouter } from 'next/navigation'
-import { memo, useCallback, useMemo, useState } from 'react'
+import { memo, useCallback, useMemo, useState, type ChangeEvent } from 'react'
 
 import type { OrderItemWithRecipe, OrderWithItems } from '@/app/orders/types/orders-db.types'
 import { PageHeader } from '@/components/layout'
@@ -20,11 +17,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AreaChartComponent, BarChartComponent, PieChartComponent } from '@/components/ui/charts'
 import type { OrderListItem, OrderStatus } from '@/types/database'
 
+import { WhatsAppFollowUp } from '@/components/orders/WhatsAppFollowUp'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import { useImportOrders } from '@/hooks/api/useOrders'
 import { useCurrency } from '@/hooks/useCurrency'
-import { ORDER_STATUSES, PAYMENT_STATUSES } from '@/lib/shared/constants'
+import { ORDER_STATUSES, PAYMENT_METHODS, PAYMENT_STATUSES } from '@/lib/shared/constants'
 import { getErrorMessage } from '@/lib/type-guards'
 import { cn } from '@/lib/utils'
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
@@ -142,22 +142,20 @@ const createOrderColumns = (
 ]
 
 const OrdersPageComponent = (_props: OrdersPageProps) => {
-  const router = useRouter()
   const { formatCurrency } = useCurrency()
   const queryClient = useQueryClient()
 
   const createOrderMutation = useCreateOrder()
   const updateOrderMutation = useUpdateOrder()
   const [orderSubmitError, setOrderSubmitError] = useState<string | null>(null)
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
+  const [paymentOrder, setPaymentOrder] = useState<OrderListItem | null>(null)
+  const [paymentAmount, setPaymentAmount] = useState<string>('')
+  const [paymentMethod, setPaymentMethod] = useState<string>('CASH')
+  const [paymentError, setPaymentError] = useState<string | null>(null)
 
-  const [importDialogOpen, setImportDialogOpen] = useState(false)
-  const importOrdersMutation = useImportOrders()
-
-  const templateUrl = useMemo(() => {
-    const template = generateOrdersTemplate()
-    const blob = new Blob([template], { type: 'text/csv' })
-    return URL.createObjectURL(blob)
-  }, [])
+  const [followUpDialogOpen, setFollowUpDialogOpen] = useState(false)
+  const [followUpOrderId, setFollowUpOrderId] = useState<string>('')
 
   type ActiveView = 'analytics' | 'calendar' | 'dashboard' | 'list'
   const [activeView, setActiveView] = useState<ActiveView>('dashboard')
@@ -174,6 +172,11 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
     }
     return []
   }, [ordersData])
+
+  const selectedFollowUpOrder = useMemo(() => {
+    if (!followUpOrderId) return null
+    return orders.find((o) => o.id === followUpOrderId) ?? null
+  }, [followUpOrderId, orders])
 
   const error = queryError ? getErrorMessage(queryError) : null
 
@@ -258,6 +261,14 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
     setShowOrderDetail(true)
   }, [])
 
+  const handleClosePaymentModal = useCallback(() => {
+    setPaymentDialogOpen(false)
+    setPaymentOrder(null)
+    setPaymentAmount('')
+    setPaymentMethod('CASH')
+    setPaymentError(null)
+  }, [])
+
   // ✅ Open status update dialog
   const handleOpenStatusDialog = useCallback((order: OrderListItem) => {
     if (!order.status) return
@@ -268,6 +279,84 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
     })
     setShowStatusDialog(true)
   }, [])
+
+  // Payment helpers
+  const handleMarkPaid = useCallback(async (order: OrderListItem) => {
+    const totalAmount = Number(order.total_amount ?? 0)
+    const paymentMethod = (order as Record<string, unknown>)['payment_method'] as string | undefined
+    await updateOrderMutation.mutateAsync({
+      id: order.id,
+      order: {
+        paid_amount: totalAmount,
+        payment_status: 'PAID',
+        payment_method: paymentMethod ?? 'CASH'
+      } as never
+    })
+    void queryClient.invalidateQueries({ queryKey: ['orders'] })
+    void queryClient.invalidateQueries({ queryKey: ['orders-list'] })
+  }, [queryClient, updateOrderMutation])
+
+  const handleOpenPaymentModal = useCallback((order: OrderListItem) => {
+    const outstanding = Math.max(Number(order.total_amount ?? 0) - Number((order as Record<string, unknown>)['paid_amount'] ?? 0), 0)
+    setPaymentOrder(order)
+    setPaymentAmount(outstanding > 0 ? String(outstanding) : '')
+    const paymentMethodValue = (order as Record<string, unknown>)['payment_method'] as string | undefined
+    setPaymentMethod(paymentMethodValue ?? 'CASH')
+    setPaymentError(null)
+    setPaymentDialogOpen(true)
+  }, [])
+
+  const handleSubmitPayment = useCallback(async () => {
+    if (!paymentOrder) return
+    const amount = Number(paymentAmount)
+    if (Number.isNaN(amount) || amount <= 0) {
+      setPaymentError('Nominal harus lebih dari 0')
+      return
+    }
+
+    const currentPaid = Number((paymentOrder as Record<string, unknown>)['paid_amount'] ?? 0)
+    const totalAmount = Number(paymentOrder.total_amount ?? 0)
+    const newPaid = currentPaid + amount
+    const derivedStatus = newPaid >= totalAmount ? 'PAID' : 'PARTIAL'
+
+    try {
+      await updateOrderMutation.mutateAsync({
+        id: paymentOrder.id,
+        order: {
+          paid_amount: newPaid,
+          payment_status: derivedStatus,
+          payment_method: paymentMethod
+        } as never
+      })
+      void queryClient.invalidateQueries({ queryKey: ['orders'] })
+      void queryClient.invalidateQueries({ queryKey: ['orders-list'] })
+      handleClosePaymentModal()
+    } catch (err: unknown) {
+      setPaymentError(getErrorMessage(err) || 'Gagal mencatat pembayaran')
+    }
+  }, [handleClosePaymentModal, paymentAmount, paymentMethod, paymentOrder, queryClient, updateOrderMutation])
+
+  const handleMarkPaidFromModal = useCallback(async () => {
+    if (!paymentOrder) return
+    const totalAmount = Number(paymentOrder.total_amount ?? 0)
+    if (totalAmount <= 0) return
+
+    try {
+      await updateOrderMutation.mutateAsync({
+        id: paymentOrder.id,
+        order: {
+          paid_amount: totalAmount,
+          payment_status: 'PAID',
+          payment_method: paymentMethod
+        } as never
+      })
+      void queryClient.invalidateQueries({ queryKey: ['orders'] })
+      void queryClient.invalidateQueries({ queryKey: ['orders-list'] })
+      handleClosePaymentModal()
+    } catch (err: unknown) {
+      setPaymentError(getErrorMessage(err) || 'Gagal menandai lunas')
+    }
+  }, [handleClosePaymentModal, paymentMethod, paymentOrder, queryClient, updateOrderMutation])
 
   // ✅ Handle status update
   const handleUpdateStatus = useCallback(async (newStatus: OrderStatus) => {
@@ -287,6 +376,7 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
 
       // Refresh orders list
       await queryClient.invalidateQueries({ queryKey: ['orders'] })
+      await queryClient.invalidateQueries({ queryKey: ['orders-list'] })
     } catch (err) {
       // Re-throw to let StatusUpdateDialog handle the error
       throw err
@@ -336,9 +426,17 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
         icon={<ShoppingCart className="h-8 w-8 text-muted-foreground" />}
         action={
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
-              <Upload className="h-4 w-4 mr-2" />
-              Import
+            <Button
+              variant="outline"
+              onClick={() => {
+                const firstWithPhone = orders.find((o) => Boolean(o.customer_phone))
+                setFollowUpOrderId(firstWithPhone?.id ?? '')
+                setFollowUpDialogOpen(true)
+              }}
+              className="flex items-center gap-2"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Follow Up
             </Button>
             <Button onClick={handleCreateOrder}>
               <Plus className="h-4 w-4 mr-2" />
@@ -410,17 +508,7 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
       {/* Quick Actions */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push('/orders/whatsapp-templates')}
-              className="flex items-center gap-2"
-            >
-              <MessageCircle className="h-4 w-4" />
-              Kelola Template WhatsApp
-            </Button>
-          </div>
+          <div className="flex flex-wrap gap-2" />
         </CardContent>
       </Card>
 
@@ -575,6 +663,32 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
                   const config = ORDER_STATUS_CONFIG[currentStatus]
                   return (config?.nextStatuses || []).length > 0
                 }
+              },
+              {
+                label: 'Catat Pembayaran',
+                icon: DollarSign,
+                onClick: (item: OrderListItem & Record<string, unknown>) => {
+                  handleOpenPaymentModal(item as unknown as OrderListItem)
+                },
+                show: (item: OrderListItem & Record<string, unknown>) => {
+                  const order = item as unknown as OrderListItem
+                  const paid = Number((order as Record<string, unknown>)['paid_amount'] ?? 0)
+                  const total = Number(order.total_amount ?? 0)
+                  return total > paid
+                }
+              },
+              {
+                label: 'Tandai Lunas',
+                icon: CheckCircle,
+                onClick: (item: OrderListItem & Record<string, unknown>) => {
+                  handleMarkPaid(item as unknown as OrderListItem)
+                },
+                show: (item: OrderListItem & Record<string, unknown>) => {
+                  const order = item as unknown as OrderListItem
+                  const paid = Number((order as Record<string, unknown>)['paid_amount'] ?? 0)
+                  const total = Number(order.total_amount ?? 0)
+                  return total > 0 && paid < total
+                }
               }
             ]}
             searchPlaceholder="Cari nomor pesanan atau nama pelanggan..."
@@ -724,10 +838,6 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
             onSubmit={async (data) => {
               setOrderSubmitError(null)
 
-              const subtotal = Array.isArray(data.items)
-                ? data.items.reduce((sum, item) => sum + Number(item.total_price ?? 0), 0)
-                : 0
-
               const paymentStatus = data.paid_amount >= data.total_amount
                 ? 'PAID'
                 : data.paid_amount > 0
@@ -736,7 +846,6 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
 
               const payload = {
                 ...data,
-                subtotal,
                 payment_status: paymentStatus,
               }
 
@@ -801,26 +910,151 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
         />
       )}
 
-      <ImportDialog
-        open={importDialogOpen}
-        onOpenChange={setImportDialogOpen}
-        title="Import Pesanan"
-        description="Upload file CSV untuk import data pesanan secara massal"
-        templateUrl={templateUrl}
-        templateFilename="template-pesanan.csv"
-        parseCSV={parseOrdersCSV}
-        onImport={async (data: unknown) => {
-          try {
-            await importOrdersMutation.mutateAsync(data as unknown[])
-            return { success: true, count: Array.isArray(data) ? data.length : 0 }
-          } catch (error: unknown) {
-            return {
-              success: false,
-              error: error instanceof Error ? error.message : 'Terjadi kesalahan saat import',
-            }
+      <Dialog
+        open={paymentDialogOpen}
+        onOpenChange={(open) => {
+          if (open) {
+            setPaymentDialogOpen(true)
+          } else {
+            handleClosePaymentModal()
           }
         }}
-      />
+      >
+        <DialogContent className="w-full max-w-[95vw] sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-lg sm:text-xl">
+              Catat Pembayaran{paymentOrder?.order_no ? ` - ${paymentOrder.order_no}` : ''}
+            </DialogTitle>
+          </DialogHeader>
+
+          {paymentOrder && (
+            <div className="space-y-4">
+              <div className="rounded-lg border p-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total</span>
+                  <span className="font-medium">{formatCurrency(Number(paymentOrder.total_amount ?? 0))}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Sudah dibayar</span>
+                  <span className="font-medium">{formatCurrency(Number((paymentOrder as Record<string, unknown>)['paid_amount'] ?? 0))}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Sisa</span>
+                  <span className="font-medium">
+                    {formatCurrency(
+                      Math.max(
+                        Number(paymentOrder.total_amount ?? 0) - Number((paymentOrder as Record<string, unknown>)['paid_amount'] ?? 0),
+                        0
+                      )
+                    )}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="payment_amount">Nominal diterima</Label>
+                <Input
+                  id="payment_amount"
+                  type="number"
+                  min={0}
+                  value={paymentAmount}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setPaymentAmount(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Metode pembayaran</Label>
+                <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih metode" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAYMENT_METHODS.map((m: (typeof PAYMENT_METHODS)[number]) => (
+                      <SelectItem key={m.value} value={m.value}>
+                        {m.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {paymentError && (
+                <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                  {paymentError}
+                </div>
+              )}
+
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <Button variant="outline" onClick={handleClosePaymentModal}>
+                  Batal
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={handleMarkPaidFromModal}
+                  disabled={updateOrderMutation.isPending}
+                >
+                  Tandai Lunas
+                </Button>
+
+                <Button onClick={handleSubmitPayment} disabled={updateOrderMutation.isPending}>
+                  Simpan
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={followUpDialogOpen} onOpenChange={setFollowUpDialogOpen}>
+        <DialogContent className="w-full max-w-[95vw] sm:max-w-3xl max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-lg sm:text-xl">Follow Up WhatsApp</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Pilih Pesanan</Label>
+              <Select value={followUpOrderId} onValueChange={setFollowUpOrderId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih pesanan..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {orders
+                    .filter((o) => Boolean(o.customer_phone))
+                    .slice(0, 100)
+                    .map((o) => (
+                      <SelectItem key={o.id} value={o.id}>
+                        {o.order_no} - {o.customer_name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {selectedFollowUpOrder?.customer_phone ? (
+              <WhatsAppFollowUp
+                order={{
+                  id: selectedFollowUpOrder.id,
+                  customer_name: selectedFollowUpOrder.customer_name ?? 'Pelanggan',
+                  customer_phone: String(selectedFollowUpOrder.customer_phone),
+                  total_amount: Number(selectedFollowUpOrder.total_amount ?? 0),
+                  status: String(selectedFollowUpOrder.status ?? 'PENDING'),
+                  ...(((selectedFollowUpOrder as Record<string, unknown>)['notes'] as string | undefined)
+                    ? { notes: (selectedFollowUpOrder as Record<string, unknown>)['notes'] as string }
+                    : {}),
+                  ...(selectedFollowUpOrder.delivery_date
+                    ? { delivery_date: selectedFollowUpOrder.delivery_date }
+                    : {}),
+                }}
+              />
+            ) : (
+              <div className="rounded-lg border p-4 text-sm text-muted-foreground">
+                Pilih pesanan yang punya nomor WhatsApp pelanggan.
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div >
   )
 }

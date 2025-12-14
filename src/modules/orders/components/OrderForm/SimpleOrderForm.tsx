@@ -262,6 +262,12 @@ export const SimpleOrderForm = memo(({ order, onSubmit, onCancel, loading = fals
 
         if (orderItems.length === 0) {
             errors['items'] = 'Minimal harus ada 1 item pesanan'
+        } else {
+            // Validate all items have valid recipe_id
+            const invalidItems = orderItems.filter(item => !item.recipe_id || item.recipe_id.trim() === '')
+            if (invalidItems.length > 0) {
+                errors['items'] = 'Semua item harus memiliki produk yang valid'
+            }
         }
 
         if (formData.paid_amount > totalAmount) {
@@ -286,6 +292,7 @@ export const SimpleOrderForm = memo(({ order, onSubmit, onCancel, loading = fals
             delivery_date: formData.delivery_date,
             delivery_time: formData.delivery_time,
             delivery_fee: formData.delivery_fee,
+            discount: formData.discount,
             discount_amount: formData.discount,
             tax_rate: formData.tax_amount,
             tax_amount: taxAmount,

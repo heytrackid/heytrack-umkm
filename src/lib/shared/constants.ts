@@ -31,12 +31,12 @@ export const ORDER_STATUSES = [
  * Defines which status changes are allowed
  */
 export const VALID_ORDER_STATUS_TRANSITIONS: Record<string, string[]> = {
-  'PENDING': ['CONFIRMED', 'CANCELLED'],
-  'CONFIRMED': ['IN_PROGRESS', 'CANCELLED'],
-  'IN_PROGRESS': ['READY', 'CANCELLED'],
-  'READY': ['DELIVERED', 'CANCELLED'],
-  'DELIVERED': [], // Terminal state - no transitions allowed
-  'CANCELLED': [], // Terminal state - no transitions allowed
+  PENDING: ['CONFIRMED', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELLED'],
+  CONFIRMED: ['PENDING', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELLED'],
+  IN_PROGRESS: ['READY', 'DELIVERED', 'CANCELLED'],
+  READY: ['DELIVERED', 'CANCELLED'],
+  DELIVERED: [], // Terminal state - no transitions allowed
+  CANCELLED: [], // Terminal state - no transitions allowed
 } as const
 
 /**

@@ -72,6 +72,11 @@ export async function fetchApi<T>(
       try {
         const errorData = await response.json()
         errorMessage = errorData.error || errorData.message || errorMessage
+        
+        // Include validation errors if present
+        if (errorData.errors && Array.isArray(errorData.errors) && errorData.errors.length > 0) {
+          errorMessage = `${errorMessage}: ${errorData.errors.join(', ')}`
+        }
       } catch {
         // If JSON parsing fails, use status text
         errorMessage = response.statusText || errorMessage

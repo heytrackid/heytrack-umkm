@@ -14,8 +14,8 @@ import { apiLogger } from '@/lib/logger'
 import { SecurityPresets } from '@/utils/security/api-middleware'
 
 // Types and schemas
-import { OrderInsertSchema, OrderListQuerySchema, type OrderListQuery } from '@/lib/validations/domains/order'
-import type { Database, FinancialRecordInsert, FinancialRecordUpdate, OrderInsert, OrderStatus } from '@/types/database'
+import { OrderListQuerySchema, OrderUpdateSchema, OrderWithItemsInsertSchema, type OrderListQuery } from '@/lib/validations/domains/order'
+import type { Database, FinancialRecordInsert, FinancialRecordUpdate, OrderInsert, OrderStatus, OrderUpdate } from '@/types/database'
 
 // Services
 
@@ -147,7 +147,7 @@ export const POST = createApiRoute(
   {
     method: 'POST',
     path: '/api/orders',
-    bodySchema: OrderInsertSchema,
+    bodySchema: OrderWithItemsInsertSchema,
   },
   async (context: RouteContext, _query, body) => {
     const slug = context.params?.['slug'] as string[] | undefined
@@ -162,17 +162,22 @@ export const POST = createApiRoute(
       return handleAPIError(new Error('Request body is required'), 'POST /api/orders')
     }
 
+    const items = body.items ?? []
+
     // FIXED: Atomic stock reservation to prevent race conditions
-    if (body.items && body.items.length > 0) {
+    if (items.length > 0) {
       try {
         // Reserve stock atomically - this checks availability AND reserves in one transaction
+        // Pass array directly - Supabase client handles JSONB conversion
+        const orderItemsForReservation = items.map(item => ({
+          recipe_id: item.recipe_id,
+          quantity: item.quantity
+        }))
+        
         const { data: stockReserved, error: reservationError } = await typedSupabase
           .rpc('reserve_stock_for_order', {
             p_user_id: user.id,
-            p_order_items: JSON.stringify(body.items.map(item => ({
-              recipe_id: item.recipe_id,
-              quantity: item.quantity
-            })))
+            p_order_items: orderItemsForReservation
           })
 
         if (reservationError) {
@@ -185,7 +190,7 @@ export const POST = createApiRoute(
         }
 
         apiLogger.info({
-          orderItems: body.items.length,
+          orderItems: items.length,
           userId: user.id
         }, 'Stock reserved successfully for order')
 
@@ -232,15 +237,49 @@ export const POST = createApiRoute(
     let createdOrder: { id: string; order_no: string; customer_name: string | null } | null = null
     
     try {
+      const {
+        order_no,
+        customer_id,
+        customer_name,
+        customer_phone,
+        customer_address,
+        order_date,
+        delivery_date,
+        delivery_time,
+        payment_method,
+        tax_amount,
+        discount,
+        delivery_fee,
+        total_amount,
+        paid_amount,
+        priority,
+        notes,
+        special_instructions,
+      } = body
+
       const orderInsertData: OrderInsert = {
-        ...Object.fromEntries(Object.entries(body).map(([key, value]) => [key, value ?? null])),
-        user_id: user.id,
+        order_no,
+        customer_id: customer_id ?? null,
+        customer_name,
+        customer_phone: customer_phone ?? null,
+        customer_address: customer_address ?? null,
+        order_date: order_date ?? new Date().toISOString().split('T')[0] ?? null,
+        delivery_date: delivery_date ?? null,
+        delivery_time: delivery_time ?? null,
         status: orderStatus,
-        order_date: body.order_date ?? new Date().toISOString().split('T')[0],
-        tax_amount: body.tax_amount ?? 0,
         payment_status: body.payment_status ?? 'UNPAID',
-        financial_record_id: incomeRecordId
-      } as OrderInsert
+        payment_method: payment_method ?? null,
+        tax_amount: tax_amount ?? 0,
+        discount: discount ?? 0,
+        delivery_fee: delivery_fee ?? 0,
+        total_amount,
+        paid_amount: paid_amount ?? 0,
+        priority: priority ?? null,
+        notes: notes ?? null,
+        special_instructions: special_instructions ?? null,
+        user_id: user.id,
+        financial_record_id: incomeRecordId,
+      }
 
       const { data: orderData, error: orderError } = await typedSupabase
         .from('orders')
@@ -262,8 +301,8 @@ export const POST = createApiRoute(
       }
 
       // Create order items
-      if (body.items && body.items.length > 0) {
-        const orderItems = body.items.map((item) => ({
+      if (items.length > 0) {
+        const orderItems = items.map((item) => ({
           recipe_id: item.recipe_id,
           product_name: item.product_name ?? null,
           quantity: item.quantity,
@@ -288,30 +327,35 @@ export const POST = createApiRoute(
         userId: user.id 
       }, 'Order created successfully with stock reservation')
 
+      // Invalidate order caches so new data appears immediately in UI
+      cacheInvalidation.orders()
+      cacheInvalidation.all()
+
       return createSuccessResponse({
         ...createdOrder,
-        items: body.items || []
+        items
       }, 'Order created successfully')
 
     } catch (creationError: unknown) {
       // CRITICAL: Release reserved stock if order creation fails
       apiLogger.error({ error: creationError, userId: user.id }, 'Order creation failed, releasing reserved stock')
       
-      if (body.items && body.items.length > 0) {
+      if (items.length > 0) {
         try {
+          const releaseItems = items.map(item => ({
+            recipe_id: item.recipe_id,
+            quantity: item.quantity
+          }))
           const { error: releaseError } = await typedSupabase
             .rpc('release_reserved_stock', {
               p_user_id: user.id,
-              p_order_items: JSON.stringify(body.items.map(item => ({
-                recipe_id: item.recipe_id,
-                quantity: item.quantity
-              })))
+              p_order_items: releaseItems
             })
 
           if (releaseError) {
             apiLogger.error({ error: releaseError }, 'CRITICAL: Failed to release reserved stock after order creation failure')
           } else {
-            apiLogger.warn({ userId: user.id, itemsCount: body.items.length }, 'Reserved stock released due to order creation failure')
+            apiLogger.warn({ userId: user.id, itemsCount: items.length }, 'Reserved stock released due to order creation failure')
           }
         } catch (rollbackError) {
           apiLogger.error({ error: rollbackError }, 'CRITICAL: Stock rollback failed - manual intervention may be needed')
@@ -333,12 +377,12 @@ export const POST = createApiRoute(
   }
 )
 
-// PUT /api/orders/[id] - Update order with financial sync
+// PUT /api/orders/[id] - Update order with financial/payment sync
 export const PUT = createApiRoute(
   {
     method: 'PUT',
     path: '/api/orders/[id]',
-    bodySchema: OrderInsertSchema, // Using insert schema for updates (partial)
+    bodySchema: OrderUpdateSchema, // Partial update allowed; additional validation below
     securityPreset: SecurityPresets.basic(),
   },
   async (context: RouteContext, _query, body) => {
@@ -350,11 +394,12 @@ export const PUT = createApiRoute(
     const { user, supabase } = context
     const orderId = slug[0]
     const typedSupabase = supabase as TypedSupabaseClient
+    const updatePayload: OrderUpdate = (body ?? {}) as OrderUpdate
 
     // Get current order state
     const { data: currentOrder } = await typedSupabase
       .from('orders')
-      .select('status, total_amount, order_no, customer_name, customer_id, delivery_date, order_date, financial_record_id, notes')
+      .select('status, total_amount, order_no, customer_name, customer_id, delivery_date, order_date, financial_record_id, notes, payment_status, paid_amount, payment_method')
       .eq('id', orderId)
       .eq('user_id', user.id)
       .single()
@@ -363,7 +408,7 @@ export const PUT = createApiRoute(
       return handleAPIError(new Error('Order not found'), 'PUT /api/orders')
     }
 
-    const newStatus = body?.status as OrderStatus | undefined
+    const newStatus = updatePayload.status as OrderStatus | undefined
     const statusChanged = newStatus && newStatus !== currentOrder.status
 
     // Validate status transition if status is changing
@@ -387,22 +432,29 @@ export const PUT = createApiRoute(
       // If changing TO READY/IN_PROGRESS - create income record (so sales are readable)
       if ((newStatus === 'IN_PROGRESS' || newStatus === 'READY') && !currentOrder.financial_record_id) {
         try {
+          const incomeAmount = currentOrder.total_amount ?? 0
+          const incomeCustomerName = currentOrder.customer_name ?? undefined
+          const incomeDate =
+            currentOrder.delivery_date ??
+            currentOrder.order_date ??
+            undefined
+
           await financialService.createIncomeFromOrder(
             orderId,
             currentOrder.order_no,
-            body?.total_amount ?? currentOrder.total_amount ?? 0,
-            body?.customer_name ?? currentOrder.customer_name ?? undefined,
-            body?.delivery_date ?? currentOrder.delivery_date ?? currentOrder.order_date ?? undefined
+            incomeAmount,
+            incomeCustomerName,
+            incomeDate
           )
           apiLogger.info({ orderId, newStatus }, 'Income record created on status change')
         } catch (err) {
           apiLogger.error({ error: err, orderId }, 'Failed to create income record on status change')
           // Mark order as needing financial sync retry
-          await typedSupabase
-            .from('orders')
-            .update({ notes: `[SYNC_NEEDED] ${body?.notes ?? currentOrder.notes ?? ''}`.trim() })
-            .eq('id', orderId)
-            .eq('user_id', user.id)
+            await typedSupabase
+              .from('orders')
+              .update({ notes: `[SYNC_NEEDED] ${updatePayload?.notes ?? currentOrder.notes ?? ''}`.trim() })
+              .eq('id', orderId)
+              .eq('user_id', user.id)
         }
       }
 
@@ -422,13 +474,14 @@ export const PUT = createApiRoute(
             .eq('order_id', orderId)
           
           if (orderItems && orderItems.length > 0) {
+            const releaseItems = orderItems.map(item => ({
+              recipe_id: item.recipe_id,
+              quantity: item.quantity
+            }))
             const { error: releaseError } = await typedSupabase
               .rpc('release_reserved_stock', {
                 p_user_id: user.id,
-                p_order_items: JSON.stringify(orderItems.map(item => ({
-                  recipe_id: item.recipe_id,
-                  quantity: item.quantity
-                })))
+                p_order_items: releaseItems
               })
 
             if (releaseError) {
@@ -453,13 +506,14 @@ export const PUT = createApiRoute(
             .eq('order_id', orderId)
           
           if (orderItems && orderItems.length > 0) {
+            const deductItems = orderItems.map(item => ({
+              recipe_id: item.recipe_id,
+              quantity: item.quantity
+            }))
             const { error: deductionError } = await typedSupabase
               .rpc('deduct_stock_from_reservations', {
                 p_user_id: user.id,
-                p_order_items: JSON.stringify(orderItems.map(item => ({
-                  recipe_id: item.recipe_id,
-                  quantity: item.quantity
-                })))
+                p_order_items: deductItems
               })
 
             if (deductionError) {
@@ -502,8 +556,8 @@ export const PUT = createApiRoute(
       }
 
       // Update customer stats based on status change
-      const customerId = body?.customer_id ?? currentOrder.customer_id
-      const orderAmount = body?.total_amount ?? currentOrder.total_amount ?? 0
+      const customerId = currentOrder.customer_id
+      const orderAmount = currentOrder.total_amount ?? 0
       
       if (customerId && orderAmount > 0) {
         try {
@@ -527,6 +581,26 @@ export const PUT = createApiRoute(
       }
     }
 
+    // Derive payment_status from paid_amount vs total_amount when payment fields are present
+    const nextPaidAmount = updatePayload.paid_amount ?? currentOrder.paid_amount ?? 0
+    const nextTotalAmount = updatePayload.total_amount ?? currentOrder.total_amount ?? 0
+    const nextPaymentStatus =
+      nextPaidAmount >= nextTotalAmount
+        ? 'PAID'
+        : nextPaidAmount > 0
+          ? 'PARTIAL'
+          : 'UNPAID'
+
+    // If caller sends payment fields or payment_status, enforce derived status for consistency
+    if ('paid_amount' in updatePayload || 'payment_status' in updatePayload || 'total_amount' in updatePayload) {
+      updatePayload.payment_status = nextPaymentStatus
+      updatePayload.paid_amount = nextPaidAmount
+      // Keep existing payment_method if none provided
+      if (!updatePayload.payment_method && currentOrder.payment_method) {
+        updatePayload.payment_method = currentOrder.payment_method
+      }
+    }
+
     // Proceed with standard update
     const contextWithId = {
       ...context,
@@ -545,7 +619,7 @@ export const PUT = createApiRoute(
           total_price
         )
       `,
-    }, SUCCESS_MESSAGES.ORDER_UPDATED)(contextWithId, undefined, body)
+    }, SUCCESS_MESSAGES.ORDER_UPDATED)(contextWithId, undefined, updatePayload)
   }
 )
 

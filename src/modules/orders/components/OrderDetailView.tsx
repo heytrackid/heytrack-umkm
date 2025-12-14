@@ -1,13 +1,20 @@
 'use client'
 
-import { MapPin, Phone, Users } from '@/components/icons'
-import { memo, useMemo } from 'react'
+import { CheckCircle, DollarSign, MapPin, Phone, Users } from '@/components/icons'
+import { useUpdateOrder } from '@/hooks/api/useOrders'
+import { useQueryClient } from '@tanstack/react-query'
+import { memo, useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useCurrency } from '@/hooks/useCurrency'
+import { PAYMENT_METHODS } from '@/lib/shared/constants'
 import { getPriorityInfo, getStatusInfo } from '@/modules/orders/utils/helpers'
 
 import type { Row } from '@/types/database'
@@ -27,18 +34,30 @@ interface OrderDetailViewProps {
 
 const OrderDetailViewComponent = ({ order }: OrderDetailViewProps) => {
   const { formatCurrency } = useCurrency()
+  const queryClient = useQueryClient()
+  const updateOrderMutation = useUpdateOrder()
+
+  const [currentOrder, setCurrentOrder] = useState<OrderWithItems>(order)
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
+  const [paymentAmount, setPaymentAmount] = useState<string>('')
+  const [paymentMethod, setPaymentMethod] = useState<string>('CASH')
+  const [paymentError, setPaymentError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setCurrentOrder(order)
+  }, [order])
   
   // Memoize expensive calculations
-  const statusInfo = useMemo(() => getStatusInfo(order['status'] ?? 'PENDING'), [order])
-  const priorityInfo = useMemo(() => getPriorityInfo(order.priority ?? 'MEDIUM'), [order.priority])
-  const orderItems: OrderItem[] = useMemo(() => order.order_items ?? [], [order.order_items])
+  const statusInfo = useMemo(() => getStatusInfo(currentOrder['status'] ?? 'PENDING'), [currentOrder])
+  const priorityInfo = useMemo(() => getPriorityInfo(currentOrder.priority ?? 'MEDIUM'), [currentOrder.priority])
+  const orderItems: OrderItem[] = useMemo(() => currentOrder.order_items ?? [], [currentOrder.order_items])
   
   const financialData = useMemo(() => {
-    const totalAmount = order.total_amount ?? 0
-    const taxAmount = order.tax_amount ?? 0
-    const discountAmount = order.discount ?? 0
-    const deliveryFee = order.delivery_fee ?? 0
-    const paidAmount = order.paid_amount ?? 0
+    const totalAmount = currentOrder.total_amount ?? 0
+    const taxAmount = currentOrder.tax_amount ?? 0
+    const discountAmount = currentOrder.discount ?? 0
+    const deliveryFee = currentOrder.delivery_fee ?? 0
+    const paidAmount = currentOrder.paid_amount ?? 0
     const subtotal = totalAmount - taxAmount + discountAmount - deliveryFee
     const outstandingAmount = totalAmount > paidAmount ? totalAmount - paidAmount : 0
     const totalItemCount = orderItems.reduce((sum, item) => sum + (item.quantity || 0), 0)
@@ -61,20 +80,89 @@ const OrderDetailViewComponent = ({ order }: OrderDetailViewProps) => {
       totalItemCount,
       paymentStatus
     }
-  }, [order.total_amount, order.tax_amount, order.discount, order.delivery_fee, order.paid_amount, orderItems])
+  }, [currentOrder.total_amount, currentOrder.tax_amount, currentOrder.discount, currentOrder.delivery_fee, currentOrder.paid_amount, orderItems])
   
   const { totalAmount, taxAmount, discountAmount, deliveryFee, paidAmount, subtotal, outstandingAmount, totalItemCount, paymentStatus } = financialData
 
-  return (
-    <SwipeableTabs defaultValue="overview" className="w-full">
-      <SwipeableTabsList>
-        <SwipeableTabsTrigger value="overview" className="text-xs sm:text-sm">Overview</SwipeableTabsTrigger>
-        <SwipeableTabsTrigger value="items" className="text-xs sm:text-sm">Item</SwipeableTabsTrigger>
-        <SwipeableTabsTrigger value="customer" className="text-xs sm:text-sm">Pelanggan</SwipeableTabsTrigger>
-        <SwipeableTabsTrigger value="payment" className="text-xs sm:text-sm">Bayar</SwipeableTabsTrigger>
-      </SwipeableTabsList>
+  const handleClosePaymentModal = useCallback(() => {
+    setPaymentDialogOpen(false)
+    setPaymentAmount('')
+    setPaymentMethod('CASH')
+    setPaymentError(null)
+  }, [])
 
-      <SwipeableTabsContent value="overview" className="space-y-4">
+  const handleOpenPaymentModal = useCallback(() => {
+    setPaymentAmount(outstandingAmount > 0 ? String(outstandingAmount) : '')
+    setPaymentMethod((currentOrder.payment_method ?? 'CASH') as string)
+    setPaymentError(null)
+    setPaymentDialogOpen(true)
+  }, [currentOrder.payment_method, outstandingAmount])
+
+  const handleSubmitPayment = useCallback(async () => {
+    const amount = Number(paymentAmount)
+    if (Number.isNaN(amount) || amount <= 0) {
+      setPaymentError('Nominal harus lebih dari 0')
+      return
+    }
+
+    const currentPaid = Number(currentOrder.paid_amount ?? 0)
+    const total = Number(currentOrder.total_amount ?? 0)
+    const nextPaid = currentPaid + amount
+    const nextStatus = nextPaid >= total ? 'PAID' : 'PARTIAL'
+
+    try {
+      const updated = await updateOrderMutation.mutateAsync({
+        id: currentOrder.id,
+        order: {
+          paid_amount: nextPaid,
+          payment_status: nextStatus,
+          payment_method: paymentMethod
+        } as never
+      })
+      setCurrentOrder((prev) => ({ ...prev, ...updated }))
+      void queryClient.invalidateQueries({ queryKey: ['orders'] })
+      void queryClient.invalidateQueries({ queryKey: ['orders-list'] })
+      void queryClient.invalidateQueries({ queryKey: ['order', currentOrder.id] })
+      handleClosePaymentModal()
+    } catch (err: unknown) {
+      setPaymentError(err instanceof Error ? err.message : 'Gagal mencatat pembayaran')
+    }
+  }, [currentOrder.id, currentOrder.paid_amount, currentOrder.total_amount, handleClosePaymentModal, paymentAmount, paymentMethod, queryClient, updateOrderMutation])
+
+  const handleMarkPaid = useCallback(async () => {
+    const total = Number(currentOrder.total_amount ?? 0)
+    if (total <= 0) return
+
+    try {
+      const updated = await updateOrderMutation.mutateAsync({
+        id: currentOrder.id,
+        order: {
+          paid_amount: total,
+          payment_status: 'PAID',
+          payment_method: paymentMethod
+        } as never
+      })
+      setCurrentOrder((prev) => ({ ...prev, ...updated }))
+      void queryClient.invalidateQueries({ queryKey: ['orders'] })
+      void queryClient.invalidateQueries({ queryKey: ['orders-list'] })
+      void queryClient.invalidateQueries({ queryKey: ['order', currentOrder.id] })
+      handleClosePaymentModal()
+    } catch (err: unknown) {
+      setPaymentError(err instanceof Error ? err.message : 'Gagal menandai lunas')
+    }
+  }, [currentOrder.id, currentOrder.total_amount, handleClosePaymentModal, paymentMethod, queryClient, updateOrderMutation])
+
+  return (
+    <>
+      <SwipeableTabs defaultValue="overview" className="w-full">
+        <SwipeableTabsList>
+          <SwipeableTabsTrigger value="overview" className="text-xs sm:text-sm">Overview</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="items" className="text-xs sm:text-sm">Item</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="customer" className="text-xs sm:text-sm">Pelanggan</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="payment" className="text-xs sm:text-sm">Bayar</SwipeableTabsTrigger>
+        </SwipeableTabsList>
+
+        <SwipeableTabsContent value="overview" className="space-y-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           <div className="space-y-4">
             <div>
@@ -82,7 +170,7 @@ const OrderDetailViewComponent = ({ order }: OrderDetailViewProps) => {
               <div className="mt-2 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">No. Pesanan:</span>
-                  <span className="font-mono">{order['order_no']}</span>
+                  <span className="font-mono">{currentOrder['order_no']}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Status:</span>
@@ -94,11 +182,11 @@ const OrderDetailViewComponent = ({ order }: OrderDetailViewProps) => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Tanggal Pesan:</span>
-                  <span>{order.order_date}</span>
+                  <span>{currentOrder.order_date}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Tanggal Kirim:</span>
-                  <span>{order.delivery_date} {order.delivery_time ?? ''}</span>
+                  <span>{currentOrder.delivery_date} {currentOrder.delivery_time ?? ''}</span>
                 </div>
               </div>
             </div>
@@ -142,10 +230,10 @@ const OrderDetailViewComponent = ({ order }: OrderDetailViewProps) => {
             </div>
           </div>
         </div>
-        {order.notes && (
+        {currentOrder.notes && (
           <div>
             <h3 className="font-medium">Catatan</h3>
-            <p className="mt-2 text-sm text-muted-foreground p-3 bg-muted rounded-lg">{order.notes}</p>
+            <p className="mt-2 text-sm text-muted-foreground p-3 bg-muted rounded-lg">{currentOrder.notes}</p>
           </div>
         )}
       </SwipeableTabsContent>
@@ -190,18 +278,18 @@ const OrderDetailViewComponent = ({ order }: OrderDetailViewProps) => {
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{order['customer_name']}</span>
+              <span className="font-medium">{currentOrder['customer_name']}</span>
             </div>
-            {order.customer_phone && (
+            {currentOrder.customer_phone && (
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-muted-foreground" />
-                <span>{order.customer_phone}</span>
+                <span>{currentOrder.customer_phone}</span>
               </div>
             )}
-            {order.customer_address && (
+            {currentOrder.customer_address && (
               <div className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                <span>{order.customer_address}</span>
+                <span>{currentOrder.customer_address}</span>
               </div>
             )}
           </div>
@@ -218,13 +306,32 @@ const OrderDetailViewComponent = ({ order }: OrderDetailViewProps) => {
       </SwipeableTabsContent>
 
       <SwipeableTabsContent value="payment" className="space-y-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleOpenPaymentModal}
+            disabled={updateOrderMutation.isPending || outstandingAmount <= 0}
+          >
+            <DollarSign className="h-4 w-4 mr-1" />
+            Catat Pembayaran
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleMarkPaid}
+            disabled={updateOrderMutation.isPending || outstandingAmount <= 0}
+          >
+            <CheckCircle className="h-4 w-4 mr-1" />
+            Tandai Lunas
+          </Button>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">Metode Pembayaran</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-lg font-bold">{order.payment_method}</p>
+              <p className="text-lg font-bold">{currentOrder.payment_method}</p>
             </CardContent>
           </Card>
           <Card>
@@ -248,8 +355,92 @@ const OrderDetailViewComponent = ({ order }: OrderDetailViewProps) => {
             </p>
           </CardContent>
         </Card>
-      </SwipeableTabsContent>
-    </SwipeableTabs>
+        </SwipeableTabsContent>
+      </SwipeableTabs>
+
+      <Dialog
+        open={paymentDialogOpen}
+        onOpenChange={(open) => {
+          if (open) {
+            setPaymentDialogOpen(true)
+          } else {
+            handleClosePaymentModal()
+          }
+        }}
+      >
+        <DialogContent className="w-full max-w-[95vw] sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-lg sm:text-xl">Catat Pembayaran</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="rounded-lg border p-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Total</span>
+                <span className="font-medium">{formatCurrency(totalAmount)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Sudah dibayar</span>
+                <span className="font-medium">{formatCurrency(paidAmount)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Sisa</span>
+                <span className="font-medium">{formatCurrency(outstandingAmount)}</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="payment_amount">Nominal diterima</Label>
+              <Input
+                id="payment_amount"
+                type="number"
+                min={0}
+                value={paymentAmount}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setPaymentAmount(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Metode pembayaran</Label>
+              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih metode" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAYMENT_METHODS.map((m: (typeof PAYMENT_METHODS)[number]) => (
+                    <SelectItem key={m.value} value={m.value}>
+                      {m.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {paymentError && (
+              <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                {paymentError}
+              </div>
+            )}
+
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <Button variant="outline" onClick={handleClosePaymentModal}>
+                Batal
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={handleMarkPaid}
+                disabled={updateOrderMutation.isPending || outstandingAmount <= 0}
+              >
+                Tandai Lunas
+              </Button>
+              <Button onClick={handleSubmitPayment} disabled={updateOrderMutation.isPending}>
+                Simpan
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 

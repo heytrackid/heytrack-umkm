@@ -21,12 +21,13 @@ export const OrderItemInsertSchema = z.object({
 
 export const OrderItemUpdateSchema = OrderItemInsertSchema.partial()
 
-// Order database schemas
+// Order database schemas - matches actual database columns
+// Note: 'items' is handled separately as it's a relation, not a column
 export const OrderInsertSchema = z.object({
   order_no: z.string().min(1, 'Order number is required').max(50),
   customer_id: UUIDSchema.optional().nullable(),
   customer_name: z.string().min(1, 'Customer name is required').max(255),
-  customer_phone: z.string().regex(/^(\+62|62|0)[8-9][0-9]{7,11}$/, 'Invalid Indonesian phone number').optional().nullable().or(z.literal('')),
+  customer_phone: z.string().max(20).optional().nullable().or(z.literal('')),
   customer_address: z.string().max(500).optional().nullable().or(z.literal('')),
   order_date: DateStringSchema.optional().nullable(),
   delivery_date: DateStringSchema.optional().nullable(),
@@ -34,17 +35,22 @@ export const OrderInsertSchema = z.object({
   status: z.enum(['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELLED']).default('PENDING'),
   payment_status: z.enum(['UNPAID', 'PARTIAL', 'PAID', 'REFUNDED']).default('UNPAID'),
   payment_method: z.enum(['CASH', 'BANK_TRANSFER', 'CREDIT_CARD', 'DIGITAL_WALLET', 'OTHER']).optional().nullable(),
-  subtotal: NonNegativeNumberSchema,
   tax_amount: NonNegativeNumberSchema.default(0),
-  discount_amount: NonNegativeNumberSchema.default(0),
+  discount: NonNegativeNumberSchema.default(0),
   delivery_fee: NonNegativeNumberSchema.default(0),
   total_amount: NonNegativeNumberSchema,
+  paid_amount: NonNegativeNumberSchema.default(0),
+  priority: z.string().optional().nullable(),
   notes: z.string().max(1000).optional().nullable().or(z.literal('')),
   special_instructions: z.string().max(1000).optional().nullable().or(z.literal('')),
+})
+
+// Extended schema for API that includes items (not a DB column, but needed for order creation)
+export const OrderWithItemsInsertSchema = OrderInsertSchema.extend({
   items: z.array(OrderItemInsertSchema).optional(),
 })
 
-export const OrderUpdateSchema = OrderInsertSchema.partial().omit({ items: true })
+export const OrderUpdateSchema = OrderInsertSchema.partial()
 
 // Order form schemas
 export const OrderFormSchema = z.object({
@@ -102,6 +108,7 @@ export const OrderListQuerySchema = z.object({
 export type OrderItemInsert = z.infer<typeof OrderItemInsertSchema>
 export type OrderItemUpdate = z.infer<typeof OrderItemUpdateSchema>
 export type OrderInsert = z.infer<typeof OrderInsertSchema>
+export type OrderWithItemsInsert = z.infer<typeof OrderWithItemsInsertSchema>
 export type OrderUpdate = z.infer<typeof OrderUpdateSchema>
 export type OrderForm = z.infer<typeof OrderFormSchema>
 export type OrderQuery = z.infer<typeof OrderQuerySchema>
