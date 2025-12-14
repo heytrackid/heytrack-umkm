@@ -238,12 +238,30 @@ export function generateOrdersTemplate(): string {
 export function parseIngredientsCSV(text: string) {
   const data = parseCSV(text)
   
+  const parseNumber = (value: string | undefined): number => {
+    if (!value) return 0
+    const trimmed = value.trim()
+    if (!trimmed) return 0
+    const cleaned = trimmed.replace(/[^0-9.,-]/g, '')
+    if (cleaned.includes('.') && cleaned.includes(',')) {
+      const normalized = cleaned.replace(/\./g, '').replace(',', '.')
+      const num = Number(normalized)
+      return Number.isFinite(num) ? num : 0
+    }
+    if (cleaned.includes(',') && !cleaned.includes('.')) {
+      const num = Number(cleaned.replace(',', '.'))
+      return Number.isFinite(num) ? num : 0
+    }
+    const num = Number(cleaned)
+    return Number.isFinite(num) ? num : 0
+  }
+  
   return data.map(row => ({
     name: (row['nama'] ?? row['Nama'] ?? row['NAMA'] ?? row['name'] ?? row['Name']) ?? '',
     unit: (row['satuan'] ?? row['Satuan'] ?? row['SATUAN'] ?? row['unit'] ?? row['Unit']) ?? '',
-    price_per_unit: (row['harga_per_satuan'] ?? row['Harga Per Satuan'] ?? row['HARGA_PER_SATUAN'] ?? row['harga'] ?? row['HARGA'] ?? row['price_per_unit'] ?? row['Price Per Unit']) ?? '',
-    current_stock: (row['stok_saat_ini'] ?? row['Stok Saat Ini'] ?? row['STOK_SAAT_INI'] ?? row['stok'] ?? row['STOK'] ?? row['current_stock'] ?? row['Current Stock']) ?? '0',
-    reorder_point: (row['stok_minimum'] ?? row['Stok Minimum'] ?? row['STOK_MINIMUM'] ?? row['titik_pesan_ulang'] ?? row['Titik Pesan Ulang'] ?? row['TITIK_PESAN_ULANG'] ?? row['reorder_point'] ?? row['Reorder Point'] ?? row['REORDER_POINT'] ?? row['min_stock'] ?? row['Min Stock'] ?? row['MIN_STOK']) ?? '0',
+    price_per_unit: parseNumber(row['harga_per_satuan'] ?? row['Harga Per Satuan'] ?? row['HARGA_PER_SATUAN'] ?? row['harga'] ?? row['HARGA'] ?? row['price_per_unit'] ?? row['Price Per Unit']),
+    current_stock: parseNumber(row['stok_saat_ini'] ?? row['Stok Saat Ini'] ?? row['STOK_SAAT_INI'] ?? row['stok'] ?? row['STOK'] ?? row['current_stock'] ?? row['Current Stock']),
+    reorder_point: parseNumber(row['stok_minimum'] ?? row['Stok Minimum'] ?? row['STOK_MINIMUM'] ?? row['titik_pesan_ulang'] ?? row['Titik Pesan Ulang'] ?? row['TITIK_PESAN_ULANG'] ?? row['reorder_point'] ?? row['Reorder Point'] ?? row['REORDER_POINT'] ?? row['min_stock'] ?? row['Min Stock'] ?? row['MIN_STOK']),
     category: (row['kategori'] ?? row['Kategori'] ?? row['KATEGORI'] ?? row['category'] ?? row['Category']) ?? 'General',
     supplier: (row['supplier'] ?? row['Supplier'] ?? row['SUPPLIER']) ?? '',
     description: (row['deskripsi'] ?? row['Deskripsi'] ?? row['DESKRIPSI'] ?? row['description'] ?? row['Description']) ?? ''

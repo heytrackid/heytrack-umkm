@@ -5,7 +5,7 @@ import { BarChart3, Calendar, Clock, DollarSign, MessageCircle, Plus, ShoppingCa
 import { generateOrdersTemplate, parseOrdersCSV } from '@/components/import/csv-helpers'
 import { ImportDialog } from '@/components/import/ImportDialog'
 import { SharedDataTable, type Column } from '@/components/shared/SharedDataTable'
-import { useOrdersList } from '@/hooks/api/useOrders'
+import { useCreateOrder, useOrdersList, useUpdateOrder } from '@/hooks/api/useOrders'
 import { useQueryClient } from '@tanstack/react-query'
 import { format, subDays } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
@@ -30,20 +30,17 @@ import { cn } from '@/lib/utils'
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@/modules/orders/types'
 import { OrderDetailView } from './OrderDetailView'
-import { OrderForm } from './OrderForm'
+import { SimpleOrderForm } from './OrderForm/SimpleOrderForm'
 import { StatusUpdateDialog } from './StatusUpdateDialog'
-
-
-
 
 const arrayCalculations = {
   sum: (arr: Record<string, unknown>[], key: string): number => arr.reduce((sum: number, item) => sum + Number(item[key] ?? 0), 0),
   average: (arr: Record<string, unknown>[], key: string): number => {
-    if (arr.length === 0) return 0;
-    const sum = arr.reduce((s: number, item) => s + Number(item[key] ?? 0), 0);
-    return sum / arr.length;
+    if (arr.length === 0) return 0
+    const sum = arr.reduce((s: number, item) => s + Number(item[key] ?? 0), 0)
+    return sum / arr.length
   }
-} as const;
+} as const
 
 // Local types
 interface OrderStats {
@@ -63,7 +60,6 @@ interface OrderStats {
   revenue_growth: number
   order_growth: number
 }
-
 
 interface OrdersPageProps {
   userRole?: 'admin' | 'manager' | 'staff'
@@ -149,6 +145,10 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
   const router = useRouter()
   const { formatCurrency } = useCurrency()
   const queryClient = useQueryClient()
+
+  const createOrderMutation = useCreateOrder()
+  const updateOrderMutation = useUpdateOrder()
+  const [orderSubmitError, setOrderSubmitError] = useState<string | null>(null)
 
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const importOrdersMutation = useImportOrders()
@@ -717,16 +717,62 @@ const OrdersPageComponent = (_props: OrdersPageProps) => {
               {selectedOrder ? `Edit Pesanan ${selectedOrder['order_no']}` : 'Buat Pesanan Baru'}
             </DialogTitle>
           </DialogHeader>
-          <OrderForm
+          <SimpleOrderForm
             {...(selectedOrder && { order: { ...selectedOrder, items: [] as OrderItemWithRecipe[] } as OrderWithItems })}
-            onSubmit={async () => {
-              await queryClient.invalidateQueries({ queryKey: ['orders'] })
-              setShowOrderForm(false)
-              setSelectedOrder(null)
+            loading={createOrderMutation.isPending || updateOrderMutation.isPending}
+            {...(orderSubmitError ? { error: orderSubmitError } : {})}
+            onSubmit={async (data) => {
+              setOrderSubmitError(null)
+
+              const subtotal = Array.isArray(data.items)
+                ? data.items.reduce((sum, item) => sum + Number(item.total_price ?? 0), 0)
+                : 0
+
+              const paymentStatus = data.paid_amount >= data.total_amount
+                ? 'PAID'
+                : data.paid_amount > 0
+                  ? 'PARTIAL'
+                  : 'UNPAID'
+
+              const payload = {
+                ...data,
+                subtotal,
+                payment_status: paymentStatus,
+              }
+
+              const normalizeOptionalString = (value: string | undefined): string | null => {
+                const trimmed = value?.trim()
+                return trimmed && trimmed.length > 0 ? trimmed : null
+              }
+
+              const normalizedPayload = {
+                ...payload,
+                customer_phone: normalizeOptionalString(payload.customer_phone),
+                customer_address: normalizeOptionalString(payload.customer_address),
+                delivery_date: normalizeOptionalString(payload.delivery_date),
+                delivery_time: normalizeOptionalString(payload.delivery_time),
+                payment_method: payload.payment_method ?? null,
+                items: payload.items,
+              }
+
+              try {
+                if (selectedOrder?.id) {
+                  await updateOrderMutation.mutateAsync({ id: selectedOrder.id, order: normalizedPayload as never })
+                } else {
+                  await createOrderMutation.mutateAsync(normalizedPayload as never)
+                }
+
+                await queryClient.invalidateQueries({ queryKey: ['orders'] })
+                setShowOrderForm(false)
+                setSelectedOrder(null)
+              } catch (err: unknown) {
+                setOrderSubmitError(getErrorMessage(err) || 'Gagal menyimpan pesanan')
+              }
             }}
             onCancel={() => {
               setShowOrderForm(false)
               setSelectedOrder(null)
+              setOrderSubmitError(null)
             }}
           />
         </DialogContent>
