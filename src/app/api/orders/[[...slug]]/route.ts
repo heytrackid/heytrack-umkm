@@ -9,7 +9,7 @@ import { parseRouteParams } from '@/lib/api/route-helpers'
 import { cacheInvalidation, withCache } from '@/lib/cache'
 import { generateCacheKey } from '@/lib/cache/cache-manager'
 import { ORDER_FIELDS } from '@/lib/database/query-fields'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { createValidationError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { SecurityPresets } from '@/utils/security/api-middleware'
 
@@ -177,11 +177,11 @@ export const POST = createApiRoute(
 
         if (reservationError) {
           apiLogger.error({ error: reservationError }, 'Stock reservation failed')
-          return handleAPIError(new Error('Failed to reserve stock'), 'POST /api/orders')
+          return handleAPIError(reservationError, 'POST /api/orders')
         }
 
         if (!stockReserved) {
-          return handleAPIError(new Error('Insufficient inventory for order'), 'POST /api/orders')
+          return createValidationError('Insufficient inventory for order', undefined, 'POST /api/orders')
         }
 
         apiLogger.info({
