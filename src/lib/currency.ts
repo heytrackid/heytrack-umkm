@@ -153,12 +153,53 @@ export function formatCurrency(amount: number, currency: Currency): string {
     return `${currency.symbol} 0`
   }
   
-  const { symbol, decimals } = currency
-  const formattedAmount = amount.toLocaleString('en-US', {
+  const { symbol, decimals, code } = currency
+  // Use id-ID locale for IDR (titik as thousands separator)
+  const locale = code === 'IDR' ? 'id-ID' : 'en-US'
+  const formattedAmount = amount.toLocaleString(locale, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals
   })
   return `${symbol} ${formattedAmount}`
+}
+
+/**
+ * Format compact currency for mobile/small spaces
+ * Indonesian: rb (ribu), jt (juta), M (miliar)
+ * Others: K, M, B
+ */
+export function formatCompactCurrency(amount: number, currency: Currency): string {
+  if (typeof amount !== 'number' || isNaN(amount)) {
+    return `${currency.symbol} 0`
+  }
+  
+  const { symbol, code } = currency
+  
+  if (code === 'IDR') {
+    // Indonesian format: rb (ribu), jt (juta), M (miliar)
+    if (amount >= 1_000_000_000) {
+      return `${symbol} ${(amount / 1_000_000_000).toFixed(1).replace('.', ',')}M`
+    }
+    if (amount >= 1_000_000) {
+      return `${symbol} ${(amount / 1_000_000).toFixed(1).replace('.', ',')}jt`
+    }
+    if (amount >= 1_000) {
+      return `${symbol} ${Math.round(amount / 1_000)}rb`
+    }
+    return `${symbol} ${amount.toLocaleString('id-ID')}`
+  }
+  
+  // Other currencies: K, M, B
+  if (amount >= 1_000_000_000) {
+    return `${symbol}${(amount / 1_000_000_000).toFixed(1)}B`
+  }
+  if (amount >= 1_000_000) {
+    return `${symbol}${(amount / 1_000_000).toFixed(1)}M`
+  }
+  if (amount >= 1_000) {
+    return `${symbol}${(amount / 1_000).toFixed(1)}K`
+  }
+  return `${symbol}${amount}`
 }
 
 /**
@@ -336,6 +377,49 @@ export function getCurrencyName(currencyCode: string): string {
  */
 export function isSupportedCurrency(currencyCode: string): boolean {
   return currencyCode in currencyConfigs
+}
+
+/**
+ * Format number with Indonesian locale (titik as thousands separator)
+ * Use this for simple number formatting without currency symbol
+ */
+export function formatNumberID(amount: number): string {
+  if (typeof amount !== 'number' || isNaN(amount)) {
+    return '0'
+  }
+  return amount.toLocaleString('id-ID')
+}
+
+/**
+ * Format Rupiah with Indonesian locale
+ * Shorthand for common IDR formatting
+ */
+export function formatRupiah(amount: number): string {
+  if (typeof amount !== 'number' || isNaN(amount)) {
+    return 'Rp 0'
+  }
+  return `Rp ${amount.toLocaleString('id-ID')}`
+}
+
+/**
+ * Format compact Rupiah for mobile/small spaces
+ * Uses rb (ribu), jt (juta), M (miliar)
+ */
+export function formatRupiahCompact(amount: number): string {
+  if (typeof amount !== 'number' || isNaN(amount)) {
+    return 'Rp 0'
+  }
+  
+  if (amount >= 1_000_000_000) {
+    return `Rp ${(amount / 1_000_000_000).toFixed(1).replace('.', ',')}M`
+  }
+  if (amount >= 1_000_000) {
+    return `Rp ${(amount / 1_000_000).toFixed(1).replace('.', ',')}jt`
+  }
+  if (amount >= 1_000) {
+    return `Rp ${Math.round(amount / 1_000)}rb`
+  }
+  return `Rp ${amount.toLocaleString('id-ID')}`
 }
 
 /**

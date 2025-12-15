@@ -3,6 +3,7 @@
 import { Calculator, DollarSign } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { formatRupiah } from '@/lib/currency'
 
 import type { OverheadCosts } from './types'
 
@@ -63,7 +64,7 @@ export function ReviewStep({
                     </div>
                     <div>
                       <h4 className="font-medium mb-2">Biaya Bahan Baku</h4>
-                      <p className="text-sm font-medium">Rp {recipe.total_cost?.toLocaleString() || '0'}</p>
+                      <p className="text-sm font-medium">{formatRupiah(recipe.total_cost ?? 0)}</p>
                     </div>
                   </div>
 
@@ -72,23 +73,23 @@ export function ReviewStep({
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span>Tenaga Kerja:</span>
-                        <span>Rp {overheadCosts.labor.toLocaleString()}</span>
+                        <span>{formatRupiah(overheadCosts.labor)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Operasional:</span>
-                        <span>Rp {overheadCosts.operational.toLocaleString()}</span>
+                        <span>{formatRupiah(overheadCosts.operational)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Packaging:</span>
-                        <span>Rp {overheadCosts.packaging.toLocaleString()}</span>
+                        <span>{formatRupiah(overheadCosts.packaging)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Lainnya:</span>
-                        <span>Rp {overheadCosts.other.toLocaleString()}</span>
+                        <span>{formatRupiah(overheadCosts.other)}</span>
                       </div>
                       <div className="flex justify-between font-medium border-t pt-2">
                         <span>Total Overhead:</span>
-                        <span>Rp {totalOverhead.toLocaleString()}</span>
+                        <span>{formatRupiah(totalOverhead)}</span>
                       </div>
                     </div>
                   </div>
@@ -98,15 +99,15 @@ export function ReviewStep({
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span>Total HPP:</span>
-                        <span className="font-bold">Rp {finalHpp.toLocaleString()}</span>
+                        <span className="font-bold">{formatRupiah(finalHpp)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Margin ({marginPercentage}%):</span>
-                        <span>Rp {(finalPrice - finalHpp).toLocaleString()}</span>
+                        <span>{formatRupiah(finalPrice - finalHpp)}</span>
                       </div>
                       <div className="flex justify-between bg-primary/10 p-3 rounded-lg">
                         <span className="font-bold">Harga Jual:</span>
-                        <span className="font-bold text-primary text-lg">Rp {calculatedPrice.toLocaleString()}</span>
+                        <span className="font-bold text-primary text-lg">{formatRupiah(calculatedPrice)}</span>
                       </div>
                     </div>
                   </div>

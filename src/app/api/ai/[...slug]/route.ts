@@ -10,46 +10,78 @@ import { SecurityPresets } from '@/utils/security/api-middleware'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
-// Enhanced validation schema for recipe generation
+// Flexible validation schema for recipe generation - allows free-form input
 const RecipeGenerationSchema = z.object({
+  // Product name - very flexible, just needs some text
   productName: z.string()
-    .min(3, 'Nama produk minimal 3 karakter')
-    .max(100, 'Nama produk maksimal 100 karakter')
-    .regex(/^[a-zA-Z0-9\s\u00C0-\u017F]+$/, 'Nama produk hanya boleh mengandung huruf, angka, dan spasi'),
+    .min(1, 'Nama produk tidak boleh kosong')
+    .max(200, 'Nama produk terlalu panjang')
+    .transform(val => val.trim()),
+  
+  // Product type - optional with default
   productType: z.string()
-    .min(3, 'Tipe produk minimal 3 karakter')
-    .max(50, 'Tipe produk maksimal 50 karakter'),
-  servings: z.number()
-    .int('Jumlah porsi harus bilangan bulat')
-    .min(1, 'Jumlah porsi minimal 1')
-    .max(100, 'Jumlah porsi maksimal 100'),
-  preferredIngredients: z.array(z.string().max(50, 'Nama bahan maksimal 50 karakter'))
+    .max(100, 'Tipe produk terlalu panjang')
+    .optional()
+    .default('main-dish'),
+  
+  // Servings - flexible, defaults to 1 if not provided or invalid
+  servings: z.union([
+    z.number().int().min(1).max(1000),
+    z.string().transform(val => {
+      const num = parseInt(val, 10)
+      return Number.isNaN(num) || num < 1 ? 1 : Math.min(num, 1000)
+    })
+  ]).optional().default(1),
+  
+  // Ingredients - optional arrays
+  preferredIngredients: z.array(z.string().max(100))
     .optional()
     .default([]),
-  dietaryRestrictions: z.array(z.string().max(30, 'Restriksi diet maksimal 30 karakter'))
+  customIngredients: z.array(z.string().max(100))
     .optional()
     .default([]),
-  budget: z.number()
-    .positive('Budget harus positif')
-    .max(1000000, 'Budget maksimal Rp 1.000.000')
-    .optional(),
-  complexity: z.enum(['simple', 'medium', 'complex'])
-    .optional(),
+  dietaryRestrictions: z.array(z.string().max(50))
+    .optional()
+    .default([]),
+  
+  // Budget - optional, accepts 0 or positive numbers, null, undefined
+  budget: z.union([
+    z.number().min(0).max(100000000),
+    z.string().transform(val => {
+      const num = parseFloat(val.replace(/[^\d.]/g, ''))
+      return Number.isNaN(num) ? undefined : num
+    }),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+  
+  // Target price - optional alias for budget
+  targetPrice: z.union([
+    z.number().min(0).max(100000000),
+    z.string().transform(val => {
+      const num = parseFloat(val.replace(/[^\d.]/g, ''))
+      return Number.isNaN(num) ? undefined : num
+    }),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+  
+  // Complexity - optional
+  complexity: z.enum(['simple', 'medium', 'complex']).optional(),
+  
+  // Special instructions - very flexible, just sanitize harmful content
   specialInstructions: z.string()
-    .min(10, 'Instruksi khusus minimal 10 karakter')
-    .max(500, 'Instruksi khusus maksimal 500 karakter')
-    .refine((val) => {
-      // Check for potentially harmful content
-      const harmfulPatterns = [
-        /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-        /javascript:/gi,
-        /on\w+\s*=/gi,
-        /data:text\/html/gi,
-      ]
-      return !harmfulPatterns.some(pattern => pattern.test(val))
-    }, 'Instruksi mengandung konten yang tidak diizinkan')
+    .max(2000, 'Instruksi terlalu panjang')
+    .transform(val => {
+      // Remove potentially harmful content
+      return val
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/javascript:/gi, '')
+        .replace(/on\w+\s*=/gi, '')
+        .trim()
+    })
     .optional()
-})
+}).passthrough() // Allow additional fields to pass through
 
 // In-memory rate limiting for recipe generation (5 requests per minute per user)
 const recipeRateLimitMap = new Map<string, { tokens: number; lastRefill: number }>()
@@ -210,7 +242,7 @@ async function deleteContextHandler(context: RouteContext): Promise<NextResponse
   }
 }
 
-// Generate recipe handler with enhanced security
+// Generate recipe handler with flexible validation
 async function generateRecipeHandler(context: RouteContext, body: RecipeGenerationRequest): Promise<NextResponse> {
   const { user } = context
 
@@ -223,36 +255,53 @@ async function generateRecipeHandler(context: RouteContext, body: RecipeGenerati
       )
     }
 
-    // Enhanced server-side validation
+    // Flexible server-side validation - be lenient with user input
     const validationResult = RecipeGenerationSchema.safeParse(body)
     if (!validationResult.success) {
-      const errorMessages = validationResult.error.issues.map(err => err.message).join(', ')
-      return NextResponse.json(
-        { error: `Validasi gagal: ${errorMessages}` },
-        { status: 400 }
+      // Validation warnings - proceed with defaults for non-critical issues
+      
+      // Only fail on critical errors (empty product name)
+      const criticalErrors = validationResult.error.issues.filter(
+        issue => issue.path.includes('productName') && issue.code === 'too_small'
       )
+      
+      if (criticalErrors.length > 0) {
+        return NextResponse.json(
+          { error: 'Mohon masukkan nama atau deskripsi resep yang ingin dibuat' },
+          { status: 400 }
+        )
+      }
     }
 
-    // Sanitize special instructions to prevent XSS
-    const sanitizedInstructions = validationResult.data.specialInstructions 
-      ? validationResult.data.specialInstructions
-          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-          .replace(/javascript:/gi, '')
-          .replace(/on\w+\s*=/gi, '')
-          .trim()
-      : undefined
-
+    // Build sanitized body with flexible defaults
+    const data = validationResult.success ? validationResult.data : body
+    const dataRecord = data as Record<string, unknown>
+    
+    // Extract customIngredients and targetPrice safely
+    const customIngredientsRaw = dataRecord['customIngredients']
+    const targetPriceRaw = dataRecord['targetPrice']
+    
     const sanitizedBody = {
-      productName: validationResult.data.productName,
-      productType: validationResult.data.productType,
-      servings: validationResult.data.servings,
-      preferredIngredients: validationResult.data.preferredIngredients,
-      dietaryRestrictions: validationResult.data.dietaryRestrictions,
-      // Only include specialInstructions if it's defined to satisfy exactOptionalPropertyTypes
-      ...(sanitizedInstructions && { specialInstructions: sanitizedInstructions }),
-      // Only include budget if it's defined to satisfy exactOptionalPropertyTypes
-      ...(validationResult.data.budget !== undefined && { budget: validationResult.data.budget }),
-      ...(validationResult.data.complexity && { complexity: validationResult.data.complexity })
+      productName: String(data.productName || 'Resep Baru').trim().slice(0, 200),
+      productType: String(data.productType || 'main-dish').slice(0, 100),
+      servings: typeof data.servings === 'number' && data.servings > 0 
+        ? Math.min(data.servings, 1000) 
+        : 1,
+      preferredIngredients: Array.isArray(data.preferredIngredients) 
+        ? data.preferredIngredients.filter(Boolean).slice(0, 20) 
+        : [],
+      customIngredients: Array.isArray(customIngredientsRaw) 
+        ? (customIngredientsRaw as string[]).filter(Boolean).slice(0, 20) 
+        : [],
+      dietaryRestrictions: Array.isArray(data.dietaryRestrictions) 
+        ? data.dietaryRestrictions.filter(Boolean).slice(0, 10) 
+        : [],
+      // Include budget/targetPrice only if valid positive number
+      ...(typeof data.budget === 'number' && data.budget > 0 && { budget: data.budget }),
+      ...(typeof targetPriceRaw === 'number' && targetPriceRaw > 0 && { targetPrice: targetPriceRaw }),
+      // Include special instructions if provided (already sanitized by schema)
+      ...(data.specialInstructions && { specialInstructions: String(data.specialInstructions).slice(0, 2000) }),
+      ...(data.complexity && { complexity: data.complexity })
     } as RecipeGenerationRequest
 
     const aiService = new AiService({ userId: user.id, supabase: context.supabase })

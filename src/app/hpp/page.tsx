@@ -4,8 +4,9 @@ import { Calculator } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 
 import { AppLayout } from '@/components/layout/app-layout'
-import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { Button } from '@/components/ui/button'
+import { BreadcrumbPatterns, PageBreadcrumb } from '@/components/ui/index'
 import { TooltipHelper, UMKM_TOOLTIPS } from '@/components/ui/tooltip-helper'
 import { UnifiedHppPage } from '@/modules/hpp/index'
 
@@ -19,7 +20,8 @@ const HppPage = (): JSX.Element => {
   return (
     <AppLayout>
       <div className="space-y-6 p-6">
-        {/* Header */}
+        <PageBreadcrumb items={BreadcrumbPatterns.hpp} />
+
         <PageHeader
           title="Biaya Produksi (HPP)"
           description="Hitung biaya produksi dan tentukan harga jual yang menguntungkan. HPP = Biaya Bahan Baku + Tenaga Kerja + Operasional"

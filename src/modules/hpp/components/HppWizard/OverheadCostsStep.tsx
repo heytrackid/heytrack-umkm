@@ -4,6 +4,7 @@ import { Factory } from '@/components/icons'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { formatRupiah } from '@/lib/currency'
 
 import type { OverheadCosts } from './types'
 
@@ -102,7 +103,7 @@ export function OverheadCostsStep({
           <div className="bg-muted/50 p-4 rounded-lg">
             <div className="flex justify-between items-center">
               <span className="font-medium">Total Biaya Overhead:</span>
-              <span className="font-bold text-primary">Rp {totalOverhead.toLocaleString()}</span>
+              <span className="font-bold text-primary">{formatRupiah(totalOverhead)}</span>
             </div>
           </div>
         </div>

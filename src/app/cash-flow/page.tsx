@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowDownIcon, ArrowUpIcon, DollarSign, Filter, Plus, TrendingDown, TrendingUp } from '@/components/icons'
+import { Filter, Plus } from '@/components/icons'
 import { endOfMonth, format, isWithinInterval, parseISO, startOfMonth } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 import { useCallback, useMemo, useState } from 'react'
@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AreaChartComponent, PieChartComponent } from '@/components/ui/charts'
 import { DateRangePicker } from '@/components/ui/date-range-picker'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { BreadcrumbPatterns, PageBreadcrumb, StatCardPatterns, StatsCards } from '@/components/ui/index'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useAuth } from '@/hooks/useAuth'
@@ -209,6 +210,8 @@ const CashFlowPage = () => {
   return (
     <AppLayout pageTitle="Arus Kas">
       <div className="space-y-6">
+        <PageBreadcrumb items={BreadcrumbPatterns.cashFlow} />
+
         <PageHeader
           title="Arus Kas"
           description="Kelola pemasukan dan pengeluaran bisnis Anda"
@@ -285,73 +288,13 @@ const CashFlowPage = () => {
         </Dialog>
 
         {/* Summary Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex flex-col space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-muted-foreground">Total Pemasukan</span>
-                  <div className="p-2 bg-emerald-100/50 dark:bg-emerald-900/20 rounded-lg">
-                    <ArrowUpIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                </div>
-                <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-500">
-                  {formatCurrency(summary.totalIncome)}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex flex-col space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-muted-foreground">Total Pengeluaran</span>
-                  <div className="p-2 bg-rose-100/50 dark:bg-rose-900/20 rounded-lg">
-                    <ArrowDownIcon className="h-4 w-4 text-rose-600 dark:text-rose-400" />
-                  </div>
-                </div>
-                <div className="text-2xl font-bold text-rose-600 dark:text-rose-500">
-                  {formatCurrency(summary.totalExpenses)}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex flex-col space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-muted-foreground">Arus Kas Bersih</span>
-                  <div className={`p-2 rounded-lg ${summary.netCashFlow >= 0 ? 'bg-emerald-100/50 dark:bg-emerald-900/20' : 'bg-rose-100/50 dark:bg-rose-900/20'}`}>
-                    {summary.netCashFlow >= 0 ? (
-                      <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                    ) : (
-                      <TrendingDown className="h-4 w-4 text-rose-600 dark:text-rose-400" />
-                    )}
-                  </div>
-                </div>
-                <div className={`text-2xl font-bold ${summary.netCashFlow >= 0 ? 'text-emerald-600 dark:text-emerald-500' : 'text-rose-600 dark:text-rose-500'}`}>
-                  {formatCurrency(summary.netCashFlow)}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex flex-col space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-muted-foreground">Total Transaksi</span>
-                  <div className="p-2 bg-blue-100/50 dark:bg-blue-900/20 rounded-lg">
-                    <DollarSign className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  </div>
-                </div>
-                <div className="text-2xl font-bold">{summary.transactionCount}</div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <StatsCards stats={StatCardPatterns.cashFlow({
+          totalIncome: summary.totalIncome,
+          totalExpenses: summary.totalExpenses,
+          netCashFlow: summary.netCashFlow,
+          transactionCount: summary.transactionCount,
+          formatCurrency
+        })} />
 
         {/* Filters */}
         <Card>

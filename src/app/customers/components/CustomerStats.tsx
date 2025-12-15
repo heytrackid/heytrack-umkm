@@ -29,7 +29,7 @@ const CustomerStats = ({
   isLoading,
   isMobile
 }: CustomerStatsProps): JSX.Element => {
-  const { formatCurrency, settings } = useSettings()
+  const { formatCurrency, formatCompactCurrency, settings } = useSettings()
 
   // Ensure customers is always an array
   const customerArray = Array.isArray(customers) ? customers : []
@@ -50,20 +50,20 @@ const CustomerStats = ({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
       <Card className="border-border/50 shadow-sm hover:shadow-md transition-all duration-200">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex items-center justify-between space-y-0 pb-2">
-            <p className="text-sm font-medium text-muted-foreground">Total Pelanggan</p>
-            <div className="p-2 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-200/20">
-              <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total</p>
+            <div className="p-1.5 sm:p-2 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-200/20">
+              <Users className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
-          <div className="space-y-1">
-            <div className={`font-bold tracking-tight ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
+          <div className="space-y-0.5 sm:space-y-1">
+            <div className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
               {stats.total}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">
               Terdaftar di sistem
             </p>
           </div>
@@ -71,39 +71,39 @@ const CustomerStats = ({
       </Card>
 
       <Card className="border-border/50 shadow-sm hover:shadow-md transition-all duration-200">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex items-center justify-between space-y-0 pb-2">
-            <p className="text-sm font-medium text-muted-foreground">Pelanggan Aktif</p>
-            <div className="p-2 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-lg border border-emerald-200/20">
-              <UserPlus className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground">Aktif</p>
+            <div className="p-1.5 sm:p-2 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-lg border border-emerald-200/20">
+              <UserPlus className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-600 dark:text-emerald-400" />
             </div>
           </div>
-          <div className="space-y-1">
-            <div className={`font-bold tracking-tight ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
+          <div className="space-y-0.5 sm:space-y-1">
+            <div className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
               {stats.active}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Status aktif saat ini
+            <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">
+              Status aktif
             </p>
           </div>
         </CardContent>
       </Card>
 
       <Card className="border-border/50 shadow-sm hover:shadow-md transition-all duration-200">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex items-center justify-between space-y-0 pb-2">
-            <p className="text-sm font-medium text-muted-foreground">Rata-rata Belanja</p>
-            <div className="p-2 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-lg border border-violet-200/20">
-              <span className="h-4 w-4 flex items-center justify-center font-bold text-violet-600 dark:text-violet-400">
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Avg Belanja</p>
+            <div className="p-1.5 sm:p-2 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-lg border border-violet-200/20">
+              <span className="h-3 w-3 sm:h-4 sm:w-4 flex items-center justify-center text-xs sm:text-sm font-bold text-violet-600 dark:text-violet-400">
                 {settings.currency.symbol}
               </span>
             </div>
           </div>
-          <div className="space-y-1">
-            <div className={`font-bold tracking-tight ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
-              {formatCurrency(stats.averageSpent)}
+          <div className="space-y-0.5 sm:space-y-1">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight truncate">
+              {isMobile ? formatCompactCurrency(stats.averageSpent) : formatCurrency(stats.averageSpent)}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">
               Per pelanggan
             </p>
           </div>
@@ -111,19 +111,19 @@ const CustomerStats = ({
       </Card>
 
       <Card className="border-border/50 shadow-sm hover:shadow-md transition-all duration-200">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex items-center justify-between space-y-0 pb-2">
-            <p className="text-sm font-medium text-muted-foreground">Rata-rata Order</p>
-            <div className="p-2 bg-gradient-to-br from-orange-500/10 to-amber-500/10 rounded-lg border border-orange-200/20">
-              <span className="h-4 w-4 flex items-center justify-center font-bold text-orange-600 dark:text-orange-400">#</span>
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground">Avg Order</p>
+            <div className="p-1.5 sm:p-2 bg-gradient-to-br from-orange-500/10 to-amber-500/10 rounded-lg border border-orange-200/20">
+              <span className="h-3 w-3 sm:h-4 sm:w-4 flex items-center justify-center text-xs sm:text-sm font-bold text-orange-600 dark:text-orange-400">#</span>
             </div>
           </div>
-          <div className="space-y-1">
-            <div className={`font-bold tracking-tight ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
+          <div className="space-y-0.5 sm:space-y-1">
+            <div className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
               {Math.round(stats.averageOrders)}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Transaksi per pelanggan
+            <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">
+              Per pelanggan
             </p>
           </div>
         </CardContent>

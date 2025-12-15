@@ -1,6 +1,7 @@
 import { DollarSign, Package, ShoppingCart, TrendingUp, type LucideIcon } from '@/components/icons'
 
 import { Card, CardContent } from '@/components/ui/card'
+import { formatRupiah } from '@/lib/currency'
 
 import type { IngredientPurchase, StatsItem } from '@/app/ingredients/purchases/components/types'
 
@@ -35,7 +36,7 @@ const PurchaseStatsCard = ({ purchases }: PurchaseStatsProps): JSX.Element => {
     },
     {
       title: 'Pengeluaran (Bulan Ini)',
-      value: `Rp ${thisMonth.reduce((sum, p) => sum + (p.total_price || 0), 0).toLocaleString()}`,
+      value: formatRupiah(thisMonth.reduce((sum, p) => sum + (p.total_price || 0), 0)),
       icon: DollarSign,
       color: 'text-muted-foreground',
       bgColor: 'bg-muted',
@@ -52,7 +53,7 @@ const PurchaseStatsCard = ({ purchases }: PurchaseStatsProps): JSX.Element => {
     {
       title: 'Rata-rata Pembelian',
       value: purchases.length > 0
-        ? `Rp ${Math.round(purchases.reduce((sum, p) => sum + (p.total_price || 0), 0) / purchases.length).toLocaleString()}`
+        ? formatRupiah(Math.round(purchases.reduce((sum, p) => sum + (p.total_price || 0), 0) / purchases.length))
         : 'Rp 0',
       icon: TrendingUp,
       color: 'text-orange-600',

@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
 
 
 
@@ -29,6 +29,7 @@ interface SettingsContextType {
   updateCurrency: (currency: Currency) => void
   updateLanguage: (language: Language) => void
   formatCurrency: (amount: number) => string
+  formatCompactCurrency: (amount: number) => string
   resetToDefault: () => void
 }
 
@@ -100,13 +101,47 @@ const SettingsProvider = ({ children }: { children: ReactNode }): JSX.Element =>
   }, [persistSettings])
 
   const formatCurrency = (amount: number | null | undefined): string => {
-    const { symbol, decimals } = settings.currency
+    const { symbol, decimals, code } = settings.currency
     const validAmount = amount ?? 0
-    const formattedAmount = validAmount.toLocaleString('en-US', {
+    // Use id-ID locale for IDR (titik as thousands separator)
+    const locale = code === 'IDR' ? 'id-ID' : 'en-US'
+    const formattedAmount = validAmount.toLocaleString(locale, {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals
     })
     return `${symbol} ${formattedAmount}`
+  }
+
+  // Format compact currency for mobile/small spaces (rb, jt, M for IDR)
+  const formatCompactCurrency = (amount: number | null | undefined): string => {
+    const { symbol, code } = settings.currency
+    const validAmount = amount ?? 0
+    
+    if (code === 'IDR') {
+      // Indonesian format: rb (ribu), jt (juta), M (miliar)
+      if (validAmount >= 1_000_000_000) {
+        return `${symbol} ${(validAmount / 1_000_000_000).toFixed(1).replace('.', ',')}M`
+      }
+      if (validAmount >= 1_000_000) {
+        return `${symbol} ${(validAmount / 1_000_000).toFixed(1).replace('.', ',')}jt`
+      }
+      if (validAmount >= 1_000) {
+        return `${symbol} ${Math.round(validAmount / 1_000)}rb`
+      }
+      return `${symbol} ${validAmount.toLocaleString('id-ID')}`
+    }
+    
+    // Other currencies: K, M, B
+    if (validAmount >= 1_000_000_000) {
+      return `${symbol}${(validAmount / 1_000_000_000).toFixed(1)}B`
+    }
+    if (validAmount >= 1_000_000) {
+      return `${symbol}${(validAmount / 1_000_000).toFixed(1)}M`
+    }
+    if (validAmount >= 1_000) {
+      return `${symbol}${(validAmount / 1_000).toFixed(1)}K`
+    }
+    return `${symbol}${validAmount}`
   }
 
   const resetToDefault = useCallback((): void => {
@@ -121,6 +156,7 @@ const SettingsProvider = ({ children }: { children: ReactNode }): JSX.Element =>
       updateCurrency,
       updateLanguage,
       formatCurrency,
+      formatCompactCurrency,
       resetToDefault
     }}>
       {children}
@@ -136,5 +172,5 @@ function useSettings(): SettingsContextType {
   return context
 }
 
-export { SettingsProvider }
-export { useSettings }
+export { SettingsProvider, useSettings }
+

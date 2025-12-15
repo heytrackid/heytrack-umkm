@@ -1,4 +1,5 @@
 import { SharedDataTable } from '@/components/shared/SharedDataTable'
+import { formatRupiah } from '@/lib/currency'
 
 import type { IngredientPurchase } from '@/app/ingredients/purchases/components/types'
 
@@ -79,7 +80,7 @@ const PurchasesTable = ({
           header: 'Harga Satuan',
           render: (value: unknown) => (
             <div className="text-right">
-              Rp {(value as number)?.toLocaleString() ?? '0'}
+              {formatRupiah((value as number) ?? 0)}
             </div>
           ),
           sortable: true,
@@ -90,7 +91,7 @@ const PurchasesTable = ({
           header: 'Total',
           render: (value: unknown) => (
             <div className="text-right font-medium">
-              Rp {(value as number)?.toLocaleString() ?? '0'}
+              {formatRupiah((value as number) ?? 0)}
             </div>
           ),
           sortable: true,

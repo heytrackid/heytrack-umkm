@@ -10,7 +10,7 @@ import { IngredientsList } from '@/components/ingredients/IngredientsList'
 import { PageHeader } from '@/components/layout'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
-import { StatCardPatterns, StatsCards } from '@/components/ui/index'
+import { BreadcrumbPatterns, PageBreadcrumb, StatCardPatterns, StatsCards } from '@/components/ui/index'
 
 import { useCostChangeAlerts } from '@/hooks/useCostAlerts'
 import { useImportIngredients, useIngredientsList } from '@/hooks/useIngredients'
@@ -42,6 +42,8 @@ const IngredientsPage = (): JSX.Element => {
   return (
     <AppLayout>
       <div className="space-y-6 p-6">
+        <PageBreadcrumb items={BreadcrumbPatterns.ingredients} />
+
         <PageHeader
           title="Bahan Baku"
           description="Kelola stok dan harga bahan baku"

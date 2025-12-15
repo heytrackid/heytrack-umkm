@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
+import { formatRupiah } from '@/lib/currency'
 
 interface MarginStepProps {
   marginPercentage: number
@@ -72,15 +73,15 @@ export function MarginStep({
             <div className="bg-muted/50 p-4 rounded-lg space-y-3">
               <div className="flex justify-between">
                 <span>Total HPP:</span>
-                <span className="font-medium">Rp {finalHpp.toLocaleString()}</span>
+                <span className="font-medium">{formatRupiah(finalHpp)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Margin ({marginPercentage}%):</span>
-                <span className="font-medium">Rp {(finalPrice - finalHpp).toLocaleString()}</span>
+                <span className="font-medium">{formatRupiah(finalPrice - finalHpp)}</span>
               </div>
               <div className="border-t pt-2 flex justify-between">
                 <span className="font-bold">Harga Jual Rekomendasi:</span>
-                <span className="font-bold text-primary">Rp {calculatedPrice.toLocaleString()}</span>
+                <span className="font-bold text-primary">{formatRupiah(calculatedPrice)}</span>
               </div>
             </div>
 

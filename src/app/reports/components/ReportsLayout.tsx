@@ -5,16 +5,8 @@ import { type ReactNode } from 'react'
 
 import { PageHeader } from '@/components/layout'
 import { AppLayout } from '@/components/layout/app-layout'
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator
-} from '@/components/ui/breadcrumb'
 import { Card, CardContent } from '@/components/ui/card'
-import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { BreadcrumbPatterns, PageBreadcrumb } from '@/components/ui/index'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useDashboardStats } from '@/hooks/api/useDashboard'
@@ -49,20 +41,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Breadcrumb */}
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <PrefetchLink href="/">
-                  Dashboard
-                </PrefetchLink>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbPage>Laporan</BreadcrumbPage>
-          </BreadcrumbList>
-        </Breadcrumb>
+        <PageBreadcrumb items={BreadcrumbPatterns.reports} />
 
         <PageHeader
           title="Laporan"

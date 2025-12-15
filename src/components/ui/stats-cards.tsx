@@ -111,7 +111,7 @@ export const StatCardPatterns = {
       },
       {
         title: "Nilai Total",
-        value: `Rp ${stats.totalValue.toLocaleString()}`,
+        value: `Rp ${stats.totalValue.toLocaleString('id-ID')}`,
         description: "Total nilai inventori"
       }
     ],
@@ -145,8 +145,105 @@ export const StatCardPatterns = {
       },
       {
         title: "Total Pendapatan",
-        value: `Rp ${stats.revenue.toLocaleString()}`,
+        value: `Rp ${stats.revenue.toLocaleString('id-ID')}`,
         description: "Dari semua pesanan"
+      }
+    ],
+
+  production: (stats: {
+    total: number
+    planned: number
+    inProgress: number
+    completed: number
+    totalCost: number
+    formatCurrency?: (amount: number) => string
+  }) => [
+      {
+        title: "Total Batch",
+        value: stats.total,
+        description: "Semua batch produksi"
+      },
+      {
+        title: "Direncanakan",
+        value: stats.planned,
+        description: "Batch direncanakan"
+      },
+      {
+        title: "Sedang Produksi",
+        value: stats.inProgress,
+        description: "Batch aktif",
+        variant: stats.inProgress > 0 ? 'secondary' : 'default' as 'default' | 'secondary'
+      },
+      {
+        title: "Selesai",
+        value: stats.completed,
+        description: "Batch selesai"
+      },
+      {
+        title: "Total Cost",
+        value: stats.formatCurrency ? stats.formatCurrency(stats.totalCost) : `Rp ${stats.totalCost.toLocaleString('id-ID')}`,
+        description: "Biaya produksi"
+      }
+    ],
+
+  cashFlow: (stats: {
+    totalIncome: number
+    totalExpenses: number
+    netCashFlow: number
+    transactionCount: number
+    formatCurrency?: (amount: number) => string
+  }) => [
+      {
+        title: "Total Pemasukan",
+        value: stats.formatCurrency ? stats.formatCurrency(stats.totalIncome) : `Rp ${stats.totalIncome.toLocaleString('id-ID')}`,
+        description: "Semua pemasukan",
+        variant: 'default' as const
+      },
+      {
+        title: "Total Pengeluaran",
+        value: stats.formatCurrency ? stats.formatCurrency(stats.totalExpenses) : `Rp ${stats.totalExpenses.toLocaleString('id-ID')}`,
+        description: "Semua pengeluaran",
+        variant: 'destructive' as const
+      },
+      {
+        title: "Arus Kas Bersih",
+        value: stats.formatCurrency ? stats.formatCurrency(stats.netCashFlow) : `Rp ${stats.netCashFlow.toLocaleString('id-ID')}`,
+        description: stats.netCashFlow >= 0 ? "Positif" : "Negatif",
+        variant: stats.netCashFlow >= 0 ? 'default' : 'destructive' as 'default' | 'destructive'
+      },
+      {
+        title: "Total Transaksi",
+        value: stats.transactionCount,
+        description: "Jumlah transaksi"
+      }
+    ],
+
+  suppliers: (stats: {
+    total: number
+    active: number
+    preferred: number
+    totalSpent: number
+    formatCurrency?: (amount: number) => string
+  }) => [
+      {
+        title: "Total Supplier",
+        value: stats.total,
+        description: `${stats.active} aktif, ${stats.preferred} preferred`
+      },
+      {
+        title: "Total Pembelian",
+        value: stats.formatCurrency ? stats.formatCurrency(stats.totalSpent) : `Rp ${stats.totalSpent.toLocaleString('id-ID')}`,
+        description: "Total nilai pembelian"
+      },
+      {
+        title: "Supplier Aktif",
+        value: stats.active,
+        description: "Supplier aktif"
+      },
+      {
+        title: "Preferred",
+        value: stats.preferred,
+        description: "Supplier preferred"
       }
     ]
 }

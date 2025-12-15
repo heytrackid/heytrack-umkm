@@ -1,6 +1,6 @@
 'use client'
 
-import { BarChart3, Calendar, CheckCircle, Clock, Download, Factory, Filter, Package, Play, Plus, Search, TrendingUp, XCircle } from '@/components/icons'
+import { BarChart3, Calendar, CheckCircle, Clock, Download, Factory, Filter, Play, Plus, Search, XCircle } from '@/components/icons'
 import { useProductionBatches, useUpdateProductionBatch } from '@/hooks/useProductionBatches'
 import { useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
+import { BreadcrumbPatterns, PageBreadcrumb, StatCardPatterns, StatsCards } from '@/components/ui/index'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
@@ -227,83 +228,32 @@ const EnhancedProductionPage = () => {
 
     return (
         <div className="space-y-6 p-6">
+            <PageBreadcrumb items={BreadcrumbPatterns.production} />
+
             <PageHeader
                 title="Production Tracking"
                 description="Kelola dan monitor produksi batch"
                 icon={<Factory className="h-7 w-7 sm:h-8 sm:w-8" />}
                 actions={
-                    <>
-
-                        <Button onClick={() => setIsFormOpen(true)}>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Produksi Baru
-                        </Button>
-                    </>
+                    <Button onClick={() => setIsFormOpen(true)}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Produksi Baru
+                    </Button>
                 }
             />
 
             {/* Stats Cards */}
-            <div className={`grid gap-4 ${isMobile ? 'grid-cols-2' : 'md:grid-cols-5'}`}>
-                <Card>
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">Total Batch</p>
-                                <p className="text-2xl font-bold">{stats.total}</p>
-                            </div>
-                            <Package className="h-8 w-8 text-muted-foreground" />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">Direncanakan</p>
-                                <p className="text-2xl font-bold">{stats.planned}</p>
-                            </div>
-                            <Calendar className="h-8 w-8 text-muted-foreground" />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">Sedang Produksi</p>
-                                <p className="text-2xl font-bold">{stats.inProgress}</p>
-                            </div>
-                            <Clock className="h-8 w-8 text-yellow-600" />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">Selesai</p>
-                                <p className="text-2xl font-bold">{stats.completed}</p>
-                            </div>
-                            <CheckCircle className="h-8 w-8 text-muted-foreground" />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">Total Cost</p>
-                                <p className="text-lg font-bold">{formatCurrency(stats.totalCost)}</p>
-                            </div>
-                            <TrendingUp className="h-8 w-8 text-muted-foreground" />
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+            <StatsCards 
+                stats={StatCardPatterns.production({
+                    total: stats.total,
+                    planned: stats.planned,
+                    inProgress: stats.inProgress,
+                    completed: stats.completed,
+                    totalCost: stats.totalCost,
+                    formatCurrency
+                })}
+                gridClassName={isMobile ? 'grid gap-4 grid-cols-2' : 'grid gap-4 md:grid-cols-5'}
+            />
 
             {/* Filters */}
             <Card>

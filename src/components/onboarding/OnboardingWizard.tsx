@@ -162,7 +162,7 @@ export const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) 
         </div>
 
         {/* Steps Overview - Mini Cards */}
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {ONBOARDING_STEPS.map((step, index) => (
             <button
               key={step['id']}

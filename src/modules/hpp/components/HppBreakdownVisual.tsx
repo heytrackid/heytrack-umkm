@@ -370,7 +370,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div className="text-center p-4 bg-muted/20 rounded-lg">
                                 <div className="text-xl font-bold text-foreground">
                                     {formatCurrency(sellingPrice)}

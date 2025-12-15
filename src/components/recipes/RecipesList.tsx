@@ -19,7 +19,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { DeleteModal } from '@/components/ui/index'
+import { BreadcrumbPatterns, DeleteModal, PageBreadcrumb } from '@/components/ui/index'
 import { toast } from '@/components/ui/toast'
 import { useDeleteRecipe, useRecipes } from '@/hooks/useRecipes'
 import { handleError } from '@/lib/error-handling'
@@ -189,9 +189,7 @@ const RecipesListComponent = (): JSX.Element => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <span>Dashboard</span><span>/</span><span className="text-foreground font-medium">Resep Produk</span>
-      </div>
+      <PageBreadcrumb items={BreadcrumbPatterns.recipes} />
 
       <PageHeader
         title="Resep Produk"

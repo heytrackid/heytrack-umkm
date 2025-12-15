@@ -180,9 +180,9 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
     const rawUnit = servingsMatch?.[2]?.toLowerCase() ?? 'porsi'
     const yieldUnit = rawUnit === 'gelas' ? 'cup' : (rawUnit === 'porsi' ? 'porsi' : 'pcs')
 
-    // Extract target price
+    // Extract target price - only set if found, otherwise undefined
     const priceMatch = promptText.match(/(?:rp|idr)[\s.]*([\d.,]+)/i)
-    const targetPrice = priceMatch?.[1] ? parseInt(priceMatch[1].replace(/[.,]/g, ''), 10) : 0
+    const targetPrice = priceMatch?.[1] ? parseInt(priceMatch[1].replace(/[.,]/g, ''), 10) : undefined
 
     // Extract product name (first few words or before "untuk" or comma)
     const nameMatch = promptText.match(/resep\s+(.+?)(?:\s+untuk|\s+dengan|\s*,|$)/i)
@@ -192,10 +192,11 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
       name: productName,
       type: 'main-dish',
       servings,
-      targetPrice,
+      // Only include targetPrice if it's a valid positive number
+      ...(targetPrice && targetPrice > 0 ? { targetPrice } : {}),
       dietaryRestrictions: [],
       preferredIngredients: [],
-      customIngredients: extractedIngredients.length > 0 ? extractedIngredients : ['bahan utama'],
+      customIngredients: extractedIngredients.length > 0 ? extractedIngredients : [],
       specialInstructions: promptText,
       yieldUnit,
     }
@@ -233,8 +234,10 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
       dietaryRestrictions: parsed.dietaryRestrictions,
       preferredIngredients: parsed.preferredIngredients,
       customIngredients: parsed.customIngredients,
-      ...(parsed.targetPrice !== undefined ? { targetPrice: parsed.targetPrice } : {}),
-      ...(parsed.specialInstructions !== undefined ? { specialInstructions: parsed.specialInstructions } : {}),
+      // Only include targetPrice if it exists and is positive
+      ...(parsed.targetPrice && parsed.targetPrice > 0 ? { targetPrice: parsed.targetPrice } : {}),
+      // Always include specialInstructions (the full prompt)
+      specialInstructions: parsed.specialInstructions || prompt,
     }
     setGeneratedRecipe(null)
     generateRecipe(generateParams)

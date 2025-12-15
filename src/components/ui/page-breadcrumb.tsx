@@ -1,14 +1,14 @@
 
-import { Fragment } from 'react'
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { Fragment } from 'react'
 
 /**
  * Shared Page Breadcrumb Component
@@ -111,5 +111,26 @@ export const BreadcrumbPatterns = {
     { label: 'Dashboard', href: '/' },
     { label: 'Supplier', href: '/suppliers' },
     { label: 'Tambah Supplier' }
+  ],
+
+  production: [
+    { label: 'Dashboard', href: '/' },
+    { label: 'Produksi', href: '/production' }
+  ],
+
+  cashFlow: [
+    { label: 'Dashboard', href: '/' },
+    { label: 'Arus Kas', href: '/cash-flow' }
+  ],
+
+  reports: [
+    { label: 'Dashboard', href: '/' },
+    { label: 'Laporan', href: '/reports' }
+  ],
+
+  recipeAiGenerator: [
+    { label: 'Dashboard', href: '/' },
+    { label: 'Resep', href: '/recipes' },
+    { label: 'AI Generator' }
   ],
 }

@@ -132,7 +132,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                     {/* Quick Scale Buttons */}
                     <div>
                         <Label className="mb-2 block">Quick Scale</Label>
-                        <div className="grid grid-cols-4 gap-2">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                             {quickScales.map((scale) => {
                                 const isActive = safeBatches === scale.multiplier && safeServings === baseServings
                                 return (

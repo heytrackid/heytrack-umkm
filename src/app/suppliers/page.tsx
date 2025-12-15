@@ -1,6 +1,6 @@
 'use client'
 
-import { DollarSign, MessageSquare, TrendingUp, Truck, Upload, Users } from '@/components/icons'
+import { MessageSquare, Upload } from '@/components/icons'
 import { useCallback, useState } from 'react'
 
 import { generateSuppliersTemplate, parseSuppliersCSV } from '@/components/import/csv-helpers'
@@ -8,19 +8,10 @@ import { ImportDialog } from '@/components/import/ImportDialog'
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { SharedDataTable } from '@/components/shared/SharedDataTable'
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { BreadcrumbPatterns, PageBreadcrumb, StatsCards } from '@/components/ui/index'
+import { BreadcrumbPatterns, DeleteModal, PageBreadcrumb, StatCardPatterns, StatsCards } from '@/components/ui/index'
 import { errorToast, successToast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/useCurrency'
 import {
     useBulkDeleteSuppliers,
     useCreateSupplier,
@@ -36,6 +27,7 @@ import { SupplierForm } from '@/app/suppliers/components/SupplierForm'
 import type { Supplier } from './components/types'
 
 const SuppliersPage = (): JSX.Element => {
+    const { formatCurrency } = useCurrency()
     const { data: suppliersData, refetch, isLoading } = useSuppliers()
     const suppliers = suppliersData as Supplier[] | undefined
     const [importDialogOpen, setImportDialogOpen] = useState(false)
@@ -72,16 +64,6 @@ const SuppliersPage = (): JSX.Element => {
     const totalSpent = suppliers?.reduce((sum: number, s) =>
         sum + (Number(s.total_spent) || 0), 0
     ) ?? 0
-    const avgRating = suppliers && suppliers.length > 0
-        ? suppliers.reduce((sum: number, s) =>
-            sum + (Number(s.rating) || 0), 0
-        ) / suppliers.length
-        : 0
-    const avgLeadTime = suppliers && suppliers.length > 0
-        ? suppliers.reduce((sum: number, s) =>
-            sum + (Number(s.lead_time_days) || 0), 0
-        ) / suppliers.length
-        : 0
 
     // Table columns
     const columns = [
@@ -253,36 +235,13 @@ const SuppliersPage = (): JSX.Element => {
                 />
 
                 {/* Stats Cards */}
-                 <StatsCards stats={[
-                     {
-                         title: 'Total Supplier',
-                         value: totalSuppliers.toString(),
-                         icon: Users,
-                         description: `${activeSuppliers} aktif, ${preferredSuppliers} preferred`,
-                         trend: { value: activeSuppliers, isPositive: true }
-                     },
-                     {
-                         title: 'Total Pembelian',
-                         value: `Rp ${totalSpent.toLocaleString('id-ID')}`,
-                         icon: DollarSign,
-                         description: 'Total nilai pembelian',
-                         trend: { value: totalSpent, isPositive: true }
-                     },
-                     {
-                         title: 'Rating Rata-rata',
-                         value: avgRating.toFixed(1),
-                         icon: TrendingUp,
-                         description: 'Dari 5.0',
-                         trend: { value: avgRating, isPositive: avgRating >= 4 }
-                     },
-                     {
-                         title: 'Lead Time Rata-rata',
-                         value: avgLeadTime > 0 ? `${avgLeadTime.toFixed(1)} hari` : '-',
-                         icon: Truck,
-                         description: 'Waktu pengiriman',
-                         trend: { value: avgLeadTime, isPositive: avgLeadTime <= 7 }
-                     }
-                 ]} />
+                <StatsCards stats={StatCardPatterns.suppliers({
+                    total: totalSuppliers,
+                    active: activeSuppliers,
+                    preferred: preferredSuppliers,
+                    totalSpent,
+                    formatCurrency
+                })} />
 
                 {/* Data Table */}
                 <SharedDataTable
@@ -307,36 +266,14 @@ const SuppliersPage = (): JSX.Element => {
                 />
 
                 {/* Delete Confirmation Dialog */}
-                <AlertDialog 
-                    open={deleteConfirm.show} 
-                    onOpenChange={(open) => !open && setDeleteConfirm({ show: false, supplier: null, bulk: false, suppliers: [] })}
-                >
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>
-                                {deleteConfirm.bulk 
-                                    ? `Hapus ${deleteConfirm.suppliers.length} Supplier?`
-                                    : 'Hapus Supplier?'
-                                }
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                                {deleteConfirm.bulk 
-                                    ? `Anda akan menghapus ${deleteConfirm.suppliers.length} supplier. Tindakan ini tidak dapat dibatalkan.`
-                                    : `Anda akan menghapus supplier "${deleteConfirm.supplier?.name}". Tindakan ini tidak dapat dibatalkan.`
-                                }
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Batal</AlertDialogCancel>
-                            <AlertDialogAction
-                                onClick={confirmDelete}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            >
-                                Hapus
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                <DeleteModal
+                    isOpen={deleteConfirm.show}
+                    onClose={() => setDeleteConfirm({ show: false, supplier: null, bulk: false, suppliers: [] })}
+                    onConfirm={confirmDelete}
+                    entityName={deleteConfirm.bulk ? `${deleteConfirm.suppliers.length} Supplier` : 'Supplier'}
+                    itemName={deleteConfirm.bulk ? `${deleteConfirm.suppliers.length} supplier terpilih` : deleteConfirm.supplier?.name ?? ''}
+                    isLoading={deleteSupplierMutation.isPending || bulkDeleteMutation.isPending}
+                />
 
                 {/* Edit Dialog */}
                 <SupplierEditDialog

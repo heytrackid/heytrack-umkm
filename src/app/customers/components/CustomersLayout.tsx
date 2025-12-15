@@ -2,6 +2,7 @@
 
 import { Eye, Mail, Phone, Plus, Upload } from '@/components/icons'
 import { useCustomers, useDeleteCustomer, useImportCustomers } from '@/hooks/useCustomers'
+import { useResponsive } from '@/hooks/useResponsive'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'
@@ -12,7 +13,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { SharedDataTable, type Column, type ServerPaginationMeta } from '@/components/shared/SharedDataTable'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { DeleteModal } from '@/components/ui/index'
+import { BreadcrumbPatterns, DeleteModal, PageBreadcrumb } from '@/components/ui/index'
 import { useSettings } from '@/contexts/settings-context'
 import { successToast } from '@/hooks/use-toast'
 import { handleError } from '@/lib/error-handling'
@@ -25,6 +26,7 @@ export const CustomersLayout = (): JSX.Element => {
   const router = useRouter()
   const { formatCurrency } = useSettings()
   const queryClient = useQueryClient()
+  const { isMobile } = useResponsive()
 
   // State
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -108,14 +110,19 @@ export const CustomersLayout = (): JSX.Element => {
     void queryClient.invalidateQueries({ queryKey: ['customers'] })
   }, [queryClient])
 
-  // Column definitions
+  // Column definitions - optimized for mobile
   const columns: Array<Column<Customer>> = useMemo(() => [
     {
       key: 'name',
       header: 'Nama',
+      sortable: true,
       render: (_, customer) => (
-        <div className="flex flex-col">
-          <span className="font-semibold">{customer.name}</span>
+        <div className="flex flex-col min-w-0">
+          <span className="font-semibold truncate">{customer.name}</span>
+          {/* Show phone on mobile inline with name */}
+          <span className="text-xs text-muted-foreground sm:hidden truncate">
+            {customer.phone || customer.email || '-'}
+          </span>
           <Badge variant={customer.is_active ? "default" : "secondary"} className="w-fit mt-1 text-xs">
             {customer.is_active ? 'Aktif' : 'Tidak Aktif'}
           </Badge>
@@ -125,11 +132,12 @@ export const CustomersLayout = (): JSX.Element => {
     {
       key: 'email',
       header: 'Kontak',
+      hideOnMobile: true, // Hide on mobile - info shown in name column
       render: (_, customer) => (
         <div className="space-y-1">
           <div className="flex items-center gap-1 text-sm">
             <Mail className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-            <span className="truncate">{customer.email || '-'}</span>
+            <span className="truncate max-w-[150px]">{customer.email || '-'}</span>
           </div>
           <div className="flex items-center gap-1 text-sm">
             <Phone className="h-3 w-3 text-muted-foreground flex-shrink-0" />
@@ -140,25 +148,29 @@ export const CustomersLayout = (): JSX.Element => {
     },
     {
       key: 'total_spent',
-      header: 'Total Belanja',
+      header: 'Belanja',
+      sortable: true,
       render: (_, customer) => (
-        <span className="font-medium text-muted-foreground">
+        <span className="font-medium text-muted-foreground whitespace-nowrap">
           {formatCurrency(customer.total_spent ?? 0)}
         </span>
       )
     },
     {
       key: 'total_orders',
-      header: 'Total Order',
+      header: 'Order',
+      hideOnMobile: true, // Hide on mobile
+      sortable: true,
       render: (_, customer) => (
         <span className="font-medium">{customer.total_orders ?? 0}</span>
       )
     },
     {
       key: 'last_order_date',
-      header: 'Order Terakhir',
+      header: 'Terakhir',
+      hideOnMobile: true, // Hide on mobile
       render: (_, customer) => (
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm text-muted-foreground whitespace-nowrap">
           {customer.last_order_date || '-'}
         </span>
       )
@@ -166,25 +178,27 @@ export const CustomersLayout = (): JSX.Element => {
   ], [formatCurrency])
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+      <PageBreadcrumb items={BreadcrumbPatterns.customers} />
+
       <PageHeader
         title="Pelanggan"
         description="Kelola data pelanggan Anda"
         actions={
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => setImportDialogOpen(true)} className="flex-1 sm:flex-none">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            <Button variant="outline" onClick={() => setImportDialogOpen(true)} className="w-full sm:w-auto">
               <Upload className="h-4 w-4 mr-2" />
-              Import CSV
+              <span className="sm:inline">Import</span>
             </Button>
-            <Button onClick={handleAddNew}>
+            <Button onClick={handleAddNew} className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
-              Tambah Pelanggan
+              <span>Tambah</span>
             </Button>
           </div>
         }
       />
 
-      <CustomerStats customers={customers} isLoading={isLoading} isMobile={false} />
+      <CustomerStats customers={customers} isLoading={isLoading} isMobile={isMobile} />
 
       <SharedDataTable
         data={customers}

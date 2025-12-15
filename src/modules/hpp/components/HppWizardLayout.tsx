@@ -13,8 +13,9 @@ import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { Slider } from '@/components/ui/slider'
 import { useAuth } from '@/hooks/index'
-import { handleError } from '@/lib/error-handling'
 import { successToast, } from '@/hooks/use-toast'
+import { formatRupiah } from '@/lib/currency'
+import { handleError } from '@/lib/error-handling'
 
 import { RecipeSelector } from '@/modules/hpp/components/RecipeSelector'
 import { useUnifiedHpp } from '@/modules/hpp/hooks/useUnifiedHpp'
@@ -468,7 +469,7 @@ export const HppWizardLayout = () => {
                     <div className="bg-muted/50 p-4 rounded-lg">
                       <div className="flex justify-between items-center">
                         <span className="font-medium">Total Biaya Overhead:</span>
-                        <span className="font-bold text-primary">Rp {totalOverhead.toLocaleString()}</span>
+                        <span className="font-bold text-primary">{formatRupiah(totalOverhead)}</span>
                       </div>
                     </div>
                   </div>
@@ -524,15 +525,15 @@ export const HppWizardLayout = () => {
                       <div className="bg-muted/50 p-4 rounded-lg space-y-3">
                         <div className="flex justify-between">
                           <span>Total HPP:</span>
-                          <span className="font-medium">Rp {finalHpp.toLocaleString()}</span>
+                          <span className="font-medium">{formatRupiah(finalHpp)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Margin ({marginPercentage}%):</span>
-                          <span className="font-medium">Rp {(finalPrice - finalHpp).toLocaleString()}</span>
+                          <span className="font-medium">{formatRupiah(finalPrice - finalHpp)}</span>
                         </div>
                         <div className="border-t pt-2 flex justify-between">
                           <span className="font-bold">Harga Jual Rekomendasi:</span>
-                          <span className="font-bold text-primary">Rp {calculatedPrice.toLocaleString()}</span>
+                          <span className="font-bold text-primary">{formatRupiah(calculatedPrice)}</span>
                         </div>
                       </div>
 
@@ -573,7 +574,7 @@ export const HppWizardLayout = () => {
                               </div>
                               <div>
                                 <h4 className="font-medium mb-2">Biaya Bahan Baku</h4>
-                                <p className="text-sm font-medium">Rp {recipe.total_cost?.toLocaleString() || '0'}</p>
+                                <p className="text-sm font-medium">{formatRupiah(recipe.total_cost ?? 0)}</p>
                               </div>
                             </div>
 
@@ -582,23 +583,23 @@ export const HppWizardLayout = () => {
                               <div className="space-y-2 text-sm">
                                 <div className="flex justify-between">
                                   <span>Tenaga Kerja:</span>
-                                  <span>Rp {overheadCosts.labor.toLocaleString()}</span>
+                                  <span>{formatRupiah(overheadCosts.labor)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span>Operasional:</span>
-                                  <span>Rp {overheadCosts.operational.toLocaleString()}</span>
+                                  <span>{formatRupiah(overheadCosts.operational)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span>Packaging:</span>
-                                  <span>Rp {overheadCosts.packaging.toLocaleString()}</span>
+                                  <span>{formatRupiah(overheadCosts.packaging)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span>Lainnya:</span>
-                                  <span>Rp {overheadCosts.other.toLocaleString()}</span>
+                                  <span>{formatRupiah(overheadCosts.other)}</span>
                                 </div>
                                 <div className="flex justify-between font-medium border-t pt-2">
                                   <span>Total Overhead:</span>
-                                  <span>Rp {totalOverhead.toLocaleString()}</span>
+                                  <span>{formatRupiah(totalOverhead)}</span>
                                 </div>
                               </div>
                             </div>
@@ -608,15 +609,15 @@ export const HppWizardLayout = () => {
                               <div className="space-y-2 text-sm">
                                 <div className="flex justify-between">
                                   <span>Total HPP:</span>
-                                  <span className="font-bold">Rp {finalHpp.toLocaleString()}</span>
+                                  <span className="font-bold">{formatRupiah(finalHpp)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span>Margin ({marginPercentage}%):</span>
-                                  <span>Rp {(finalPrice - finalHpp).toLocaleString()}</span>
+                                  <span>{formatRupiah(finalPrice - finalHpp)}</span>
                                 </div>
                                 <div className="flex justify-between bg-primary/10 p-3 rounded-lg">
                                   <span className="font-bold">Harga Jual:</span>
-                                  <span className="font-bold text-primary text-lg">Rp {calculatedPrice.toLocaleString()}</span>
+                                  <span className="font-bold text-primary text-lg">{formatRupiah(calculatedPrice)}</span>
                                 </div>
                               </div>
                             </div>
@@ -648,26 +649,26 @@ export const HppWizardLayout = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Biaya Bahan Baku:</span>
-                    <span className="text-sm font-medium">Rp {recipe?.total_cost?.toLocaleString() || '0'}</span>
+                    <span className="text-sm font-medium">{formatRupiah(recipe?.total_cost ?? 0)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Biaya Overhead:</span>
-                    <span className="text-sm font-medium">Rp {totalOverhead.toLocaleString()}</span>
+                    <span className="text-sm font-medium">{formatRupiah(totalOverhead)}</span>
                   </div>
                   <div className="border-t pt-2">
                     <div className="flex justify-between">
                       <span className="text-sm font-medium">Total HPP:</span>
-                      <span className="text-sm font-bold">Rp {finalHpp.toLocaleString()}</span>
+                      <span className="text-sm font-bold">{formatRupiah(finalHpp)}</span>
                     </div>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Margin ({marginPercentage}%):</span>
-                    <span className="text-sm font-medium">Rp {(finalPrice - finalHpp).toLocaleString()}</span>
+                    <span className="text-sm font-medium">{formatRupiah(finalPrice - finalHpp)}</span>
                   </div>
                   <div className="border-t pt-2">
                     <div className="flex justify-between">
                       <span className="text-sm font-medium">Harga Jual:</span>
-                      <span className="text-sm font-bold text-primary">Rp {calculatedPrice.toLocaleString()}</span>
+                      <span className="text-sm font-bold text-primary">{formatRupiah(calculatedPrice)}</span>
                     </div>
                   </div>
                 </div>
