@@ -29,7 +29,6 @@ import { useAuth } from '@/hooks/index'
 import { useDeleteRecipe, useRecipe } from '@/hooks/useRecipes'
 import { handleError } from '@/lib/error-handling'
 
-import type { RecipeInstruction } from '@/app/recipes/ai-generator/components/types'
 import { PageHeader } from '@/components/layout/PageHeader'
 import type { Ingredient } from '@/types/database'
 import type { RecipeIngredientWithDetails } from '@/types/query-results'
@@ -37,6 +36,15 @@ import { isNonNull } from '@/types/shared/guards'
 
 // Type for ingredient with only required fields for display
 type IngredientDisplay = Pick<Ingredient, 'id' | 'name' | 'price_per_unit' | 'unit' | 'weighted_average_cost'>
+
+// Local type definition for recipe instruction
+interface RecipeInstruction {
+  step?: number
+  title?: string
+  description: string
+  duration_minutes?: number
+  temperature?: string
+}
 
 
 

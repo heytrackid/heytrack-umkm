@@ -103,14 +103,14 @@ const NewOrderPage = () => {
                   <SwipeableTabsList className="grid w-full grid-cols-4">
                     <SwipeableTabsTrigger
                       value="customer"
-                      className="flex items-center gap-2"
+                      className="flex flex-col sm:flex-row sm:items-center gap-2"
                     >
                       <User className="h-4 w-4" />
                       <span className="hidden sm:inline">Pelanggan</span>
                     </SwipeableTabsTrigger>
                     <SwipeableTabsTrigger
                       value="items"
-                      className="flex items-center gap-2"
+                      className="flex flex-col sm:flex-row sm:items-center gap-2"
                     >
                       <Package className="h-4 w-4" />
                       <span className="hidden sm:inline">Items</span>
@@ -122,14 +122,14 @@ const NewOrderPage = () => {
                     </SwipeableTabsTrigger>
                     <SwipeableTabsTrigger
                       value="delivery"
-                      className="flex items-center gap-2"
+                      className="flex flex-col sm:flex-row sm:items-center gap-2"
                     >
                       <Truck className="h-4 w-4" />
                       <span className="hidden sm:inline">Pengiriman</span>
                     </SwipeableTabsTrigger>
                     <SwipeableTabsTrigger
                       value="payment"
-                      className="flex items-center gap-2"
+                      className="flex flex-col sm:flex-row sm:items-center gap-2"
                     >
                       <CreditCard className="h-4 w-4" />
                       <span className="hidden sm:inline">Pembayaran</span>

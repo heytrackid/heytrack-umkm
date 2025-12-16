@@ -299,7 +299,7 @@ const CashFlowPage = () => {
         {/* Filters */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
               <Filter className="h-5 w-5" />
               Filter
             </CardTitle>
@@ -328,7 +328,7 @@ const CashFlowPage = () => {
 
         {/* Charts */}
         {filteredRecords.length > 0 && (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2">
             <AreaChartComponent
               data={chartData}
               title="Tren Arus Kas"

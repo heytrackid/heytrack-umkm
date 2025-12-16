@@ -23,7 +23,7 @@ interface DateTimeSettingsProps {
 export const DateTimeSettings = ({ settings, onSettingChange }: DateTimeSettingsProps) => (
   <Card>
     <CardHeader>
-      <CardTitle className="flex items-center gap-2">
+      <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
         <Calendar className="h-5 w-5" />
         Format Tanggal & Waktu
       </CardTitle>

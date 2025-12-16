@@ -155,7 +155,7 @@ const ProfitReportPage = () => {
               <CardContent className="p-6">
                 <div className="animate-pulse space-y-4">
                   <div className="h-4 bg-muted rounded w-1/4" />
-                  <div className="grid gap-4 md:grid-cols-4">
+                  <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-4">
                     <div className="h-10 bg-muted rounded" />
                     <div className="h-10 bg-muted rounded" />
                     <div className="h-10 bg-muted rounded" />
@@ -169,7 +169,7 @@ const ProfitReportPage = () => {
             <StatsSkeleton count={4} />
 
             {/* Charts Loading */}
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2">
               <Card>
                 <CardContent className="p-6">
                   <div className="h-[350px] bg-muted animate-pulse rounded flex items-center justify-center">
@@ -221,7 +221,7 @@ const ProfitReportPage = () => {
             )}
 
             {/* Product Profitability Charts */}
-            <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
+            <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 grid-cols-1 lg:grid-cols-2'}`}>
               <BarChartComponent
                 data={products.slice(0, 10).map(p => ({ 
                   name: p.product_name.length > 15 ? p.product_name.substring(0, 15) + '...' : p.product_name, 

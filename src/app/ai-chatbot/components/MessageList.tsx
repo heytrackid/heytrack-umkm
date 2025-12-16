@@ -96,7 +96,7 @@ export const MessageList = ({
   return (
     <ErrorBoundary
       fallback={
-        <div className="flex items-center justify-center h-full p-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-center h-full p-4">
           <div className="text-center">
             <div className="text-red-500 mb-2">⚠️ Terjadi kesalahan saat memuat pesan</div>
             <div className="text-sm text-muted-foreground">

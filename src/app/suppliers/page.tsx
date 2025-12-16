@@ -209,7 +209,7 @@ const SuppliersPage = (): JSX.Element => {
                     title="Supplier"
                     description="Kelola data supplier dan vendor bahan baku"
                     actions={
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                             <Button
                                 variant="outline"
                                 onClick={() => setImportDialogOpen(true)}

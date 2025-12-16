@@ -39,7 +39,7 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
   };
 
   return (
-    <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-4'}`}>
+    <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 grid-cols-1 lg:grid-cols-4'}`}>
       {/* Total Revenue */}
       <Card className="border-border/50 shadow-sm hover:shadow-md transition-all duration-200">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -54,7 +54,7 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
           <div className="space-y-2">
             <p className="text-2xl font-bold tracking-tight text-foreground">{formatCurrency(summary.total_revenue)}</p>
             {revenueGrowth !== 0 && (
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getTrendBadge(revenueGrowth)}`}>
                   {getTrendElement(revenueGrowth)}
                   {Math.abs(revenueGrowth).toFixed(1)}%
@@ -79,7 +79,7 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
         <CardContent>
           <div className="space-y-2">
             <p className="text-2xl font-bold tracking-tight text-foreground">{formatCurrency(summary.gross_profit)}</p>
-             <div className="flex items-center justify-between">
+             <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                <p className="text-xs text-muted-foreground">
                  Margin: <span className="font-medium text-foreground">{((summary?.gross_profit_margin ?? 0) || 0).toFixed(1)}%</span>
                </p>
@@ -113,7 +113,7 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
              <p className="text-2xl font-bold tracking-tight text-foreground">
                {formatCurrency(summary.net_profit)}
             </p>
-             <div className="flex items-center justify-between">
+             <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                <p className="text-xs text-muted-foreground">
                  Margin: <span className="font-medium text-foreground">{((summary?.net_profit_margin ?? 0) || 0).toFixed(1)}%</span>
                </p>
@@ -141,7 +141,7 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
         <CardContent>
           <div className="space-y-2">
             <p className="text-2xl font-bold tracking-tight text-foreground">{formatCurrency(summary.total_cogs)}</p>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between">
               <p className="text-xs text-muted-foreground">
                 Metode: <span className="font-medium text-foreground">WAC</span>
               </p>

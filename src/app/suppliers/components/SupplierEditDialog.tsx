@@ -119,7 +119,7 @@ export function SupplierEditDialog({
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-1 gap-4 py-4">
                         <div className="space-y-2">
                             <Label htmlFor="edit-name">Nama Supplier *</Label>
                             <Input
@@ -230,7 +230,7 @@ export function SupplierEditDialog({
                             />
                         </div>
 
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                             <Label htmlFor="edit-is_active">Status Aktif</Label>
                             <Switch
                                 id="edit-is_active"

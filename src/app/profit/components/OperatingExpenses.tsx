@@ -26,8 +26,8 @@ export const OperatingExpenses = ({
     <CardContent>
       <div className="space-y-3">
         {(operating_expenses || []).map((expense, index) => (
-          <div key={index} className="flex items-center justify-between py-2 border-b last:border-0">
-            <div className="flex items-center gap-3">
+          <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between py-2 border-b last:border-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
                 <Receipt className="h-5 w-5 text-red-600 dark:text-red-400" />
               </div>
@@ -38,7 +38,7 @@ export const OperatingExpenses = ({
             </span>
           </div>
         ))}
-        <div className="flex items-center justify-between py-3 border-t-2 font-bold">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between py-3 border-t-2 font-bold">
           <span>Total Biaya Operasional</span>
           <span className="text-lg text-red-600">
             {formatCurrency(summary.total_operating_expenses)}

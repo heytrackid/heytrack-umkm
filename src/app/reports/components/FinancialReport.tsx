@@ -156,7 +156,7 @@ const FinancialReportComponent = ({ dateRange: externalDateRange, onDateRangeCha
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
         <Card className="hover: ">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -217,7 +217,7 @@ const FinancialReportComponent = ({ dateRange: externalDateRange, onDateRangeCha
 
       {/* Charts Section */}
       {trendChartData.length > 0 && (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2">
           <AreaChartComponent
             data={trendChartData}
             title="Tren Keuangan"
@@ -247,7 +247,7 @@ const FinancialReportComponent = ({ dateRange: externalDateRange, onDateRangeCha
       )}
 
       {/* Financial Breakdown */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Ringkasan Keuangan</CardTitle>
@@ -255,7 +255,7 @@ const FinancialReportComponent = ({ dateRange: externalDateRange, onDateRangeCha
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center p-4 bg-green-50 dark:bg-green-950 rounded-lg border">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-green-500" />
                   <span className="font-medium">Pemasukan</span>
                 </div>
@@ -264,7 +264,7 @@ const FinancialReportComponent = ({ dateRange: externalDateRange, onDateRangeCha
                 </span>
               </div>
               <div className="flex justify-between items-center p-4 bg-red-50 dark:bg-red-950 rounded-lg border">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                   <TrendingDown className="h-5 w-5 text-red-500" />
                   <span className="font-medium">Pengeluaran</span>
                 </div>
@@ -273,7 +273,7 @@ const FinancialReportComponent = ({ dateRange: externalDateRange, onDateRangeCha
                 </span>
               </div>
               <div className="flex justify-between items-center p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border-2 border-blue-200">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                   <PiggyBank className="h-5 w-5 text-blue-500" />
                   <span className="font-bold">Laba Bersih</span>
                 </div>

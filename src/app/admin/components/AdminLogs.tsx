@@ -55,7 +55,7 @@ export function AdminLogs() {
               </span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900">{log.message}</p>
-                <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 mt-1 text-xs text-gray-500">
                   <span>{new Date(log.timestamp).toLocaleString()}</span>
                   <span>•</span>
                   <span>{log.user}</span>

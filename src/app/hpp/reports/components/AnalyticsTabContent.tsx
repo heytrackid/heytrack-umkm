@@ -48,7 +48,7 @@ const AnalyticsTabContent = ({ analytics, loading, formatCurrency }: AnalyticsTa
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Key Metrics */}
       <Card>
         <CardHeader>
@@ -113,7 +113,7 @@ const AnalyticsTabContent = ({ analytics, loading, formatCurrency }: AnalyticsTa
       {/* Cost Trends Chart */}
       <Card className="lg:col-span-2">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
             <LineChart className="h-5 w-5" />
             HPP Trends (Last 30 Days)
           </CardTitle>
@@ -134,7 +134,7 @@ const AnalyticsTabContent = ({ analytics, loading, formatCurrency }: AnalyticsTa
           <div className="space-y-3">
             {analytics.topCostDrivers?.map((driver, index) => (
               <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                   <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-sm font-semibold">
                     {index + 1}
                   </div>

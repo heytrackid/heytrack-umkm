@@ -77,7 +77,7 @@ const SalesReportComponent = ({ dateRange: externalDateRange, onDateRangeChange 
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
           {Array.from({ length: 4 }, (_, i) => (
             <Card key={i} className="animate-pulse">
               <CardHeader className="pb-2">
@@ -123,7 +123,7 @@ const SalesReportComponent = ({ dateRange: externalDateRange, onDateRangeChange 
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -176,7 +176,7 @@ const SalesReportComponent = ({ dateRange: externalDateRange, onDateRangeChange 
 
       {/* Charts */}
       {safeSalesStats.totalOrders > 0 && (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2">
           <PieChartComponent
             data={orderStatusData}
             title="Status Pesanan"

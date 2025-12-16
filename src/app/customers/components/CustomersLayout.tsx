@@ -135,11 +135,11 @@ export const CustomersLayout = (): JSX.Element => {
       hideOnMobile: true, // Hide on mobile - info shown in name column
       render: (_, customer) => (
         <div className="space-y-1">
-          <div className="flex items-center gap-1 text-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm">
             <Mail className="h-3 w-3 text-muted-foreground flex-shrink-0" />
             <span className="truncate max-w-[150px]">{customer.email || '-'}</span>
           </div>
-          <div className="flex items-center gap-1 text-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm">
             <Phone className="h-3 w-3 text-muted-foreground flex-shrink-0" />
             <span>{customer.phone || '-'}</span>
           </div>

@@ -1,23 +1,23 @@
 'use client'
 
 import {
-  Bot,
-  ChefHat,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Factory,
-  FileText,
-  Home,
-  Package,
-  Receipt,
-  Settings,
-  ShoppingCart,
-  Sparkles,
-  TrendingUp,
-  Truck,
-  Users,
-  Wallet
+    Bot,
+    ChefHat,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    Factory,
+    FileText,
+    Home,
+    Package,
+    Receipt,
+    Settings,
+    ShoppingCart,
+    Sparkles,
+    TrendingUp,
+    Truck,
+    Users,
+    Wallet
 } from '@/components/icons'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -25,16 +25,16 @@ import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
 } from '@/components/ui/collapsible'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
@@ -52,7 +52,7 @@ const navigationGroups = [
     items: [
       { title: 'Super Agent', url: '/super-agent', icon: Sparkles },
       { title: 'AI Chatbot', url: '/ai-chatbot', icon: Bot },
-      { title: 'AI Recipe Generator', url: '/recipes/ai-generator', icon: ChefHat }
+      { title: 'ChefWise', url: '/chef-wise', icon: ChefHat }
     ]
   },
   {

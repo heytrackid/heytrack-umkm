@@ -25,7 +25,7 @@ export const UnsavedChangesPrompt = ({ isUnsavedChanges, onReset, onSave, isSavi
     <Card className="border-orange-200 bg-orange-50 dark:bg-orange-900/20 sticky bottom-4 z-20 ">
       <CardContent className="pt-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-orange-600 flex-shrink-0" />
             <p className="font-medium text-orange-600 text-sm sm:text-base">
               Ada perubahan yang belum disimpan

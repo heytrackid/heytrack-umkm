@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, ChefHat, Package, BarChart3, Users, Calculator, Zap } from '@/components/icons'
+import { BarChart3, Calculator, ChefHat, Package, Plus, Users, Zap } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
@@ -21,7 +21,7 @@ const QuickActionsSection = (): JSX.Element => {
       title: 'Generate Resep',
       description: 'Buat resep dengan AI',
       icon: ChefHat,
-      action: (): void => router.push('/recipes/ai-generator')
+      action: (): void => router.push('/chef-wise')
     },
     {
       title: 'Tambah Bahan',
@@ -52,13 +52,13 @@ const QuickActionsSection = (): JSX.Element => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
           <Zap className="h-5 w-5 text-primary" />
           Aksi Cepat
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 grid-cols-1 md:grid-cols-3 grid-cols-1 lg:grid-cols-6 gap-3">
           {quickActions.map((action, index) => (
             <Button
               key={index}

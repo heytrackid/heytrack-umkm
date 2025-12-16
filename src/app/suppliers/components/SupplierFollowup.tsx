@@ -107,7 +107,7 @@ export const SupplierFollowup = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
             <MessageSquare className="h-5 w-5" />
             Follow Up Supplier
           </DialogTitle>
@@ -181,7 +181,7 @@ export const SupplierFollowup = ({
                         variant="outline"
                         size="sm"
                         onClick={() => handleSend('phone', key as keyof typeof SUPPLIER_TEMPLATES)}
-                        className="flex items-center gap-2"
+                        className="flex flex-col sm:flex-row sm:items-center gap-2"
                       >
                         <Phone className="h-4 w-4" />
                         Telepon
@@ -193,7 +193,7 @@ export const SupplierFollowup = ({
                         variant="outline"
                         size="sm"
                         onClick={() => handleSend('email', key as keyof typeof SUPPLIER_TEMPLATES)}
-                        className="flex items-center gap-2"
+                        className="flex flex-col sm:flex-row sm:items-center gap-2"
                       >
                         <Mail className="h-4 w-4" />
                         Email
@@ -205,7 +205,7 @@ export const SupplierFollowup = ({
                         variant="default"
                         size="sm"
                         onClick={() => handleSend('whatsapp', key as keyof typeof SUPPLIER_TEMPLATES)}
-                        className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                        className="flex flex-col sm:flex-row sm:items-center gap-2 bg-green-600 hover:bg-green-700"
                       >
                         📱 WhatsApp
                       </Button>

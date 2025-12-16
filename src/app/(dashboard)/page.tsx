@@ -91,9 +91,9 @@ export default function DashboardPage(): JSX.Element {
         />
 
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
           <Card className="p-6">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <div className="p-2 bg-green-100 rounded-lg">
                 <ShoppingCart className="h-6 w-6 text-green-600" />
               </div>
@@ -104,7 +104,7 @@ export default function DashboardPage(): JSX.Element {
             </div>
           </Card>
           <Card className="p-6">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <div className="p-2 bg-blue-100 rounded-lg">
                 <DollarSign className="h-6 w-6 text-blue-600" />
               </div>
@@ -115,7 +115,7 @@ export default function DashboardPage(): JSX.Element {
             </div>
           </Card>
           <Card className="p-6">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <div className="p-2 bg-orange-100 rounded-lg">
                 <Package className="h-6 w-6 text-orange-600" />
               </div>
@@ -126,7 +126,7 @@ export default function DashboardPage(): JSX.Element {
             </div>
           </Card>
           <Card className="p-6">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <div className="p-2 bg-purple-100 rounded-lg">
                 <Users className="h-6 w-6 text-purple-600" />
               </div>
@@ -161,7 +161,7 @@ export default function DashboardPage(): JSX.Element {
         {/* Quick Actions */}
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-4 text-foreground">Aksi Cepat</h2>
-          <div className="grid gap-3 md:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 grid-cols-1 md:grid-cols-4">
             <Link href="/orders/new">
               <Button variant="outline" className="w-full justify-start">
                 <ShoppingCart className="h-4 w-4 mr-2" />
@@ -205,10 +205,10 @@ export default function DashboardPage(): JSX.Element {
               {stats.orders.recent?.map((order, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-4 bg-muted rounded-lg"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-muted rounded-lg"
                 >
                   <div className="flex-1">
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                       <p className="font-semibold text-foreground">Order #{index + 1}</p>
                       <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
                         Completed

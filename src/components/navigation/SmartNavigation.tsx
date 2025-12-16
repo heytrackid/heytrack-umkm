@@ -175,7 +175,7 @@ const navigationItems = [
     href: '/super-agent',
     icon: Sparkles,
     badge: '✨',
-    preloadTargets: ['/ai-chatbot', '/recipes/ai-generator']
+    preloadTargets: ['/ai-chatbot']
   },
   {
     title: 'Pesanan',

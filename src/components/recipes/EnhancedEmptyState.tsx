@@ -1,7 +1,7 @@
  
 'use client'
 
-import { ChefHat, Plus, Sparkles, BookOpen } from '@/components/icons'
+import { BookOpen, ChefHat, Plus, Sparkles } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
@@ -53,7 +53,7 @@ export const EnhancedEmptyState = ({ onAdd }: EnhancedEmptyStateProps) => {
                                 <Plus className="h-5 w-5 mr-2" />
                                 Tambah Resep Pertama
                             </Button>
-                            <Button variant="outline" size="lg" onClick={() => router.push('/recipes/ai-generator')}>
+                            <Button variant="outline" size="lg" onClick={() => router.push('/chef-wise')}>
                                 <Sparkles className="h-5 w-5 mr-2" />
                                 Coba AI Generator
                             </Button>

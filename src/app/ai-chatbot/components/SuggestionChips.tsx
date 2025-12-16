@@ -120,7 +120,7 @@ export const SuggestionChips = ({
           disabled={disabled}
           role="listitem"
         >
-          <div className="flex items-center gap-2 w-full">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
             <span className="text-sm">{getCategoryIcon(suggestion.category)}</span>
             <span className="flex-1 truncate">{suggestion.text}</span>
             <Badge

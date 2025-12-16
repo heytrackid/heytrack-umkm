@@ -31,7 +31,7 @@ export const RegionalSettings = ({ settings, onSettingChange }: RegionalSettings
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
             <Settings className="h-5 w-5" />
             Pengaturan Regional
           </CardTitle>
@@ -54,8 +54,8 @@ export const RegionalSettings = ({ settings, onSettingChange }: RegionalSettings
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 justify-between">
-          <div className="flex items-center gap-2">
+        <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
             <Settings className="h-5 w-5" />
             Pengaturan Regional
           </div>

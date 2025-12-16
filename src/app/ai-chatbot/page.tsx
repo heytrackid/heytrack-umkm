@@ -107,7 +107,7 @@ const AIChatbotPage = (): JSX.Element => {
   if (!isAuthenticated || !user) {
     return (
       <AppLayout pageTitle="AI Chatbot">
-        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-center h-[calc(100vh-4rem)]">
           <div className="text-muted-foreground">Redirecting to login...</div>
         </div>
       </AppLayout>

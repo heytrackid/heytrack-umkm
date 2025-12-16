@@ -13,7 +13,7 @@ interface ProfitBreakdownProps {
 export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProps) => (
   <Card className="border-0 ">
     <CardHeader>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
         <TrendingUp className="h-5 w-5 text-blue-600" />
         <CardTitle>Ringkasan Laba Rugi</CardTitle>
       </div>
@@ -24,7 +24,7 @@ export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProp
     <CardContent>
       <div className="space-y-4">
         <div className="flex justify-between items-center p-4 bg-green-50 dark:bg-green-950 rounded-lg border">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
             <DollarSign className="h-5 w-5 text-green-600" />
             <span className="font-medium">Total Pendapatan</span>
           </div>
@@ -34,7 +34,7 @@ export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProp
         </div>
         
         <div className="flex justify-between items-center p-4 bg-orange-50 dark:bg-orange-950 rounded-lg border">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
             <Package className="h-5 w-5 text-orange-600" />
             <span className="font-medium">Harga Pokok Penjualan (WAC)</span>
           </div>
@@ -44,7 +44,7 @@ export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProp
         </div>
         
         <div className="flex justify-between items-center p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border-2 border-blue-200">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
             <TrendingUp className="h-5 w-5 text-blue-600" />
             <span className="font-semibold">Laba Kotor</span>
           </div>
@@ -54,7 +54,7 @@ export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProp
         </div>
         
         <div className="flex justify-between items-center p-4 bg-red-50 dark:bg-red-950 rounded-lg border">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
             <TrendingDown className="h-5 w-5 text-red-600" />
             <span className="font-medium">Biaya Operasional</span>
           </div>
@@ -64,7 +64,7 @@ export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProp
         </div>
         
         <div className="flex justify-between items-center p-4 bg-muted rounded-lg border-2 border-border/20">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
             <TrendingUp className={`h-5 w-5 ${summary.net_profit >= 0 ? 'text-green-600' : 'text-red-600'}`} />
             <span className="text-lg font-bold">Laba Bersih</span>
           </div>

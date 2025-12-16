@@ -44,12 +44,10 @@ export * from './useReports'
 export * from './useSettings'
 
 // AI & Chatbot
-export * from './api/useAIRecipeEnhanced'
 export * from './useAIChat'
 export * from './useChatHistory'
 export * from './useContextAwareChat'
 export * from './useDashboardSchedule'
-export * from './useRecipeWorker'
 
 // Export utilities
 export * from './useGlobalExport'

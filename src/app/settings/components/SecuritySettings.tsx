@@ -19,7 +19,7 @@ export const SecuritySettings = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
           <Lock className="h-5 w-5" />
           Keamanan
         </CardTitle>

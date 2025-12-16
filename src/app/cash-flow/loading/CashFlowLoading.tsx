@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 export const CashFlowLoading = () => (
   <div className="space-y-6">
     {/* Header */}
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between">
       <div>
         <h1 className="text-3xl font-bold flex items-center gap-2">
           <DollarSign className="h-8 w-8" />
@@ -19,7 +19,7 @@ export const CashFlowLoading = () => (
     </div>
 
     {/* Summary Cards */}
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
       {[1, 2, 3, 4].map((i) => (
         <Card key={i}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

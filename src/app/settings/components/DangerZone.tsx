@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 export const DangerZone = () => (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-muted-foreground">
+        <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-muted-foreground">
           <AlertTriangle className="h-5 w-5" />
           Zona Bahaya
         </CardTitle>

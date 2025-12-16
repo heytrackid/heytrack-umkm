@@ -32,7 +32,7 @@ const HppDashboardWidget = (): JSX.Element | null => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
             <Calculator className="h-5 w-5" />
             HPP & Costing Overview
           </CardTitle>
@@ -54,7 +54,7 @@ const HppDashboardWidget = (): JSX.Element | null => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
           <Calculator className="h-5 w-5" />
           HPP & Costing Overview
           {data.unreadAlerts > 0 && (
@@ -67,7 +67,7 @@ const HppDashboardWidget = (): JSX.Element | null => {
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Key Metrics */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 grid-cols-1 lg:grid-cols-4 gap-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-foreground flex items-center justify-center">
               <Target className="h-4 w-4 mr-1" />
@@ -102,7 +102,7 @@ const HppDashboardWidget = (): JSX.Element | null => {
         {/* Top Recipes */}
         {data.topRecipes && data.topRecipes.length > 0 && (
           <div>
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3">
               <h4 className="font-semibold">Top Recipes by Margin</h4>
               <Button variant="ghost" size="sm" onClick={() => router.push('/hpp/calculator')}>
                 View All
@@ -129,7 +129,7 @@ const HppDashboardWidget = (): JSX.Element | null => {
         {/* Recent Changes */}
         {data.recentChanges && data.recentChanges.length > 0 && (
           <div>
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3">
               <h4 className="font-semibold">Recent HPP Changes</h4>
               <Button variant="ghost" size="sm" onClick={() => router.push('/hpp/alerts')}>
                 View Alerts
@@ -141,7 +141,7 @@ const HppDashboardWidget = (): JSX.Element | null => {
                   <div>
                     <div className="font-medium">{change['recipe_name']}</div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     {change.direction === 'increase' ? (
                       <TrendingUp className="h-4 w-4 text-destructive" />
                     ) : (

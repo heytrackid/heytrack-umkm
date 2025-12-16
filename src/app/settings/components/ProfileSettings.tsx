@@ -24,13 +24,13 @@ interface ProfileSettingsProps {
 export const ProfileSettings = ({ settings, onSettingChange }: ProfileSettingsProps) => (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
           <User className="h-5 w-5" />
           Profil Pengguna
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center">
             <User className="h-8 w-8 text-muted-foreground" />
           </div>

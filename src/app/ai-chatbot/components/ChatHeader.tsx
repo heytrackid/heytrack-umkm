@@ -37,9 +37,9 @@ export const ChatHeader = (): JSX.Element => {
         </div>
       </div>
       <div className="flex flex-col flex-1">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           <h1 className="text-sm font-semibold text-foreground leading-tight">HeyTrack AI Assistant</h1>
-          <div className="flex items-center gap-1">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1">
             <Sparkles className="h-3 w-3 text-primary animate-pulse" />
             <span className="text-xs text-primary font-medium">Pro</span>
           </div>

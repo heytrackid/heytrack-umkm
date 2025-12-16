@@ -42,7 +42,7 @@ const TemplatesTable = ({
                     header: 'Nama Template',
                     render: (_, item) => (
                         <div className="space-y-1">
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                                 <span className="font-medium">{item.name}</span>
                                 {item.is_default && (
                                     <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 flex-shrink-0" />

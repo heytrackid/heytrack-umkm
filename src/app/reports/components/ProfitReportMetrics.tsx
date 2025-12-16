@@ -39,7 +39,7 @@ export const ProfitMetrics = ({ summary, isMobile = false }: ProfitMetricsProps)
     // Early return if summary is undefined
     if (!summary) {
         return (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
                 {Array.from({ length: 4 }, (_, i) => (
                     <Card key={i} className="animate-pulse">
                         <CardHeader className="pb-2">
@@ -55,7 +55,7 @@ export const ProfitMetrics = ({ summary, isMobile = false }: ProfitMetricsProps)
         )
     }
 
-    const gridClass = isMobile ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-4'
+    const gridClass = isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4'
 
     return (
         <div className={`grid gap-4 ${gridClass}`}>
@@ -71,7 +71,7 @@ export const ProfitMetrics = ({ summary, isMobile = false }: ProfitMetricsProps)
                     <div className="text-2xl font-bold">
                         {formatCurrency(summary.totalRevenue)}
                     </div>
-                    <div className="flex items-center gap-1 text-sm">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm">
                         {getTrendIcon(summary.totalRevenue)}
                         <span className={getTrendColor(summary.totalRevenue)}>
                             {/* Orders count not available in new summary */}
@@ -93,7 +93,7 @@ export const ProfitMetrics = ({ summary, isMobile = false }: ProfitMetricsProps)
                     <div className="text-2xl font-bold text-orange-600">
                         {formatCurrency(summary.totalCOGS)}
                     </div>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm text-muted-foreground">
                         <span>
                             {summary.totalRevenue > 0
                                 ? ((summary.totalCOGS / summary.totalRevenue) * 100).toFixed(1)
@@ -115,7 +115,7 @@ export const ProfitMetrics = ({ summary, isMobile = false }: ProfitMetricsProps)
                     <div className={`text-2xl font-bold ${summary.grossProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {formatCurrency(summary.grossProfit)}
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1">
                         <Badge variant={((summary.grossProfit / summary.totalRevenue) * 100) >= 30 ? 'default' : 'secondary'}>
                             Margin: {((summary.grossProfit / summary.totalRevenue) * 100).toFixed(1)}%
                         </Badge>
@@ -135,7 +135,7 @@ export const ProfitMetrics = ({ summary, isMobile = false }: ProfitMetricsProps)
                     <div className={`text-2xl font-bold ${summary.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {formatCurrency(summary.netProfit)}
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1">
                         <Badge variant={summary.netProfit >= 0 ? 'default' : 'destructive'}>
                             Margin: {summary.profitMargin.toFixed(1)}%
                         </Badge>
@@ -180,7 +180,7 @@ export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProp
     return (
         <Card className="border-0 ">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <TrendingUp className="h-5 w-5" />
                     Rincian Laba
                 </CardTitle>

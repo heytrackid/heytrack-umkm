@@ -1,18 +1,30 @@
 'use client'
 
-import { X } from '@/components/icons';
-import { useEffect, useRef, type MouseEvent, type ReactNode } from 'react';
-
+import { X } from '@/components/icons'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+} from '@/components/ui/sheet'
+import { cn } from '@/lib/utils'
+import { type ReactNode } from 'react'
 
 interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  children: ReactNode;
-  size?: 'full' | 'lg' | 'md' | 'sm' | 'xl';
-  showCloseButton?: boolean;
-  closeOnBackdropClick?: boolean;
-  fullScreenOnMobile?: boolean;
+  isOpen: boolean
+  onClose: () => void
+  title: string
+  children: ReactNode
+  size?: 'full' | 'lg' | 'md' | 'sm' | 'xl'
+  showCloseButton?: boolean
+  closeOnBackdropClick?: boolean
+  fullScreenOnMobile?: boolean
 }
 
 export const Modal = ({
@@ -25,140 +37,61 @@ export const Modal = ({
   closeOnBackdropClick = true,
   fullScreenOnMobile = false,
 }: ModalProps) => {
-  const modalRef = useRef<HTMLDivElement>(null);
-  const previousFocus = useRef<HTMLElement | null>(null);
-
-  // Handle escape key
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      previousFocus.current = document.activeElement as HTMLElement;
-      document.addEventListener('keydown', handleEscape);
-      document['body'].style.overflow = 'hidden';
-
-      // Focus management
-      setTimeout(() => {
-        modalRef.current?.focus();
-      }, 100);
-    } else {
-      document['body'].style.overflow = 'unset';
-      if (previousFocus.current) {
-        previousFocus.current.focus();
-      }
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document['body'].style.overflow = 'unset';
-    };
-  }, [isOpen, onClose]);
-
-  if (!isOpen) { return null; }
-
   const sizeClasses = {
     sm: 'max-w-sm',
     md: 'max-w-md sm:max-w-lg',
     lg: 'max-w-lg sm:max-w-xl lg:max-w-2xl',
     xl: 'max-w-xl sm:max-w-2xl lg:max-w-4xl',
     full: 'max-w-full',
-  };
-
-  const handleBackdropClick = (e: MouseEvent) => {
-    if (closeOnBackdropClick && e.target === e.currentTarget) {
-      onClose();
-    }
-  };
+  }
 
   return (
-    <div
-      className="fixed inset-0 z-50 overflow-y-auto"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-    >
-      {/* Backdrop */}
-      <div
-        className="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0"
-        onClick={handleBackdropClick}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            handleBackdropClick(e as unknown as MouseEvent)
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        className={cn(
+          'max-h-[90vh] sm:max-h-[85vh]',
+          sizeClasses[size],
+          fullScreenOnMobile && 'h-full sm:h-auto'
+        )}
+        onPointerDownOutside={(e) => {
+          if (!closeOnBackdropClick) {
+            e.preventDefault()
           }
         }}
-        role="button"
-        tabIndex={0}
+        onEscapeKeyDown={(e) => {
+          if (!closeOnBackdropClick) {
+            e.preventDefault()
+          }
+        }}
       >
+        <DialogHeader>
+          <DialogTitle className="text-base sm:text-lg pr-8">
+            {title}
+          </DialogTitle>
+          {showCloseButton && (
+            <button
+              onClick={onClose}
+              className="absolute right-3 top-3 sm:right-4 sm:top-4 text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full p-1 transition-colors"
+              aria-label="Close modal"
+            >
+              <X className="h-5 w-5 sm:h-6 sm:w-6" />
+            </button>
+          )}
+        </DialogHeader>
         <div
-          className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm transition-opacity"
-          aria-hidden="true"
-        />
-
-        {/* Center positioning trick for desktop */}
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
-          &#8203;
-        </span>
-
-        {/* Modal Panel */}
-        <div
-          ref={modalRef}
-          className={`
-            relative inline-block w-full transform overflow-hidden rounded-lg bg-background text-left align-bottom transition-all sm:my-8 sm:align-middle
-            ${fullScreenOnMobile
-              ? 'h-full sm:h-auto sm:max-h-[90vh]'
-              : 'max-h-[90vh] sm:max-h-[85vh]'
-            }
-            ${sizeClasses[size]}
-          `}
-          onClick={(e) => e.stopPropagation()}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.stopPropagation()
-            }
-          }}
-          role="button"
-          tabIndex={0}
+          className={cn(
+            'overflow-y-auto px-4 py-4 sm:px-6 sm:py-5',
+            fullScreenOnMobile
+              ? 'flex-1 h-full'
+              : 'max-h-[calc(90vh-8rem)] sm:max-h-[calc(85vh-8rem)]'
+          )}
         >
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-border/20 bg-muted">
-              <h2
-                id="modal-title"
-                className="text-base sm:text-lg font-semibold text-foreground pr-8 text-wrap-mobile"
-              >
-                {title}
-              </h2>
-            {showCloseButton && (
-              <button
-                onClick={onClose}
-                className="absolute right-3 top-3 sm:right-4 sm:top-4 text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full p-1 transition-colors"
-                aria-label=""
-              >
-                <X className="h-5 w-5 sm:h-6 sm:w-6" />
-              </button>
-            )}
-          </div>
-
-          {/* Content */}
-          <div
-            className={`
-              px-4 py-4 sm:px-6 sm:py-5 overflow-y-auto
-              ${fullScreenOnMobile
-                ? 'flex-1 h-full'
-                : 'max-h-[calc(90vh-8rem)] sm:max-h-[calc(85vh-8rem)]'
-              }
-            `}
-          >
-            {children}
-          </div>
+          {children}
         </div>
-      </div>
-    </div>
-  );
-};
+      </DialogContent>
+    </Dialog>
+  )
+}
 
 // Drawer variant for mobile-first design
 export const Drawer = ({
@@ -169,112 +102,46 @@ export const Drawer = ({
   showCloseButton = true,
   closeOnBackdropClick = true,
   position = 'bottom',
-}: ModalProps & { position?: 'bottom' | 'right' }) => {
-  const drawerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document['body'].style.overflow = 'hidden';
-    } else {
-      document['body'].style.overflow = 'unset';
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document['body'].style.overflow = 'unset';
-    };
-  }, [isOpen, onClose]);
-
-  if (!isOpen) { return null; }
-
+}: ModalProps & { position?: 'bottom' | 'right' | 'top' | 'left' }) => {
   const positionClasses = {
-    bottom: {
-      container: 'items-end',
-      panel: 'w-full max-h-[85vh] rounded-t-xl sm:max-w-lg sm:mx-auto sm:rounded-xl sm:max-h-[90vh]',
-      animation: 'translate-y-full sm:translate-y-0 sm:opacity-0',
-      animationOpen: 'translate-y-0 sm:translate-y-0 sm:opacity-100'
-    },
-    right: {
-      container: 'items-center justify-end',
-      panel: 'h-full max-w-md w-full sm:max-w-lg sm:h-auto sm:max-h-[90vh] sm:rounded-xl',
-      animation: 'translate-x-full sm:translate-x-0 sm:opacity-0',
-      animationOpen: 'translate-x-0 sm:translate-x-0 sm:opacity-100'
-    }
-  };
-
-  const handleBackdropClick = (e: MouseEvent) => {
-    if (closeOnBackdropClick && e.target === e.currentTarget) {
-      onClose();
-    }
-  };
+    bottom: 'bottom' as const,
+    right: 'right' as const,
+    top: 'top' as const,
+    left: 'left' as const,
+  }
 
   return (
-    <div
-      className="fixed inset-0 z-50 overflow-hidden"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="drawer-title"
-    >
-      <div
-        className={`flex min-h-screen ${positionClasses[position].container} sm:items-center sm:justify-center sm:p-4`}
-        onClick={handleBackdropClick}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            handleBackdropClick(e as unknown as MouseEvent)
+    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent
+        side={positionClasses[position]}
+        className="w-full max-w-[85vh] rounded-t-xl sm:max-w-lg sm:mx-auto sm:rounded-xl sm:max-h-[90vh] data-[state=open]:slide-in-from-bottom-full sm:data-[state=open]:slide-in-from-bottom-0"
+        onPointerDownOutside={(e) => {
+          if (!closeOnBackdropClick) {
+            e.preventDefault()
           }
         }}
-        role="button"
-        tabIndex={0}
+        onEscapeKeyDown={(e) => {
+          if (!closeOnBackdropClick) {
+            e.preventDefault()
+          }
+        }}
       >
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm transition-opacity" aria-hidden="true" />
-
-        <div
-          ref={drawerRef}
-          className={`
-            relative bg-background transform transition-all
-            ${positionClasses[position].panel}
-          `}
-          onClick={(e) => e.stopPropagation()}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.stopPropagation()
-            }
-          }}
-          role="button"
-          tabIndex={0}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-border/20">
-              <h2
-                id="drawer-title"
-                className="text-lg font-semibold text-foreground text-wrap-mobile pr-8"
-              >
-                {title}
-              </h2>
-            {showCloseButton && (
-              <button
-                onClick={onClose}
-                className="text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full p-1 transition-colors"
-                aria-label=""
-              >
-                <X className="h-6 w-6" />
-              </button>
-            )}
-          </div>
-
-          {/* Content */}
-          <div className="px-4 py-4 sm:px-6 sm:py-5 overflow-y-auto flex-1">
-            {children}
-          </div>
+        <SheetHeader>
+          <SheetTitle className="text-lg pr-8">{title}</SheetTitle>
+          {showCloseButton && (
+            <button
+              onClick={onClose}
+              className="absolute right-3 top-3 sm:right-4 sm:top-4 text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full p-1 transition-colors"
+              aria-label="Close drawer"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          )}
+        </SheetHeader>
+        <div className="px-4 py-4 sm:px-6 sm:py-5 overflow-y-auto flex-1">
+          {children}
         </div>
-      </div>
-    </div>
-  );
-};
+      </SheetContent>
+    </Sheet>
+  )
+}

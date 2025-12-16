@@ -26,12 +26,12 @@ const HppPage = (): JSX.Element => {
           title="Biaya Produksi (HPP)"
           description="Hitung biaya produksi dan tentukan harga jual yang menguntungkan. HPP = Biaya Bahan Baku + Tenaga Kerja + Operasional"
           action={
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleWizardClick}
-                className="flex items-center gap-2"
+                className="flex flex-col sm:flex-row sm:items-center gap-2"
               >
                 <Calculator className="h-4 w-4" />
                 Hitung HPP

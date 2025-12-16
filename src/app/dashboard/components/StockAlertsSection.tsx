@@ -22,7 +22,7 @@ const StockAlertsSection = ({ lowStockItems }: StockAlertsSectionProps): JSX.Ele
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
             <AlertCircle className="h-5 w-5" />
             Peringatan Stok
           </CardTitle>
@@ -41,7 +41,7 @@ const StockAlertsSection = ({ lowStockItems }: StockAlertsSectionProps): JSX.Ele
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
           <AlertCircle className="h-5 w-5" />
           Peringatan Stok
         </CardTitle>
@@ -52,7 +52,7 @@ const StockAlertsSection = ({ lowStockItems }: StockAlertsSectionProps): JSX.Ele
             {lowStockItems.map((item) => (
               <div
                 key={item['id']}
-                className="flex items-center justify-between p-3 bg-destructive/10 rounded-lg border border-destructive/20"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-destructive/10 rounded-lg border border-destructive/20"
               >
                 <div className="flex-1 min-w-0">
                   <div className="font-medium truncate-desktop-only">{item.name}</div>

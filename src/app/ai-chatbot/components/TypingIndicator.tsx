@@ -32,7 +32,7 @@ export const TypingIndicator = (): React.JSX.Element => {
         </AvatarFallback>
       </Avatar>
       <div className="bg-muted rounded-lg p-3 " role="status" aria-live="polite" aria-label="Asisten sedang mengetik">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           <div className="flex space-x-1">
             <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
             <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />

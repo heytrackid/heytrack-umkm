@@ -72,7 +72,7 @@ const ComparisonAnalyticsPage = (): JSX.Element => {
   return (
     <AppLayout pageTitle="Comparison Analytics">
       <div className="container mx-auto p-6 space-y-6">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
          <PageHeader
            title="Recipe Comparison"
            description="Benchmarking dan analisis komparatif antar resep"
@@ -151,7 +151,7 @@ const ComparisonAnalyticsPage = (): JSX.Element => {
 
         {/* Benchmark Overview */}
         {benchmark && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
               <CardContent className="pt-6">
                 <div className="text-2xl font-bold text-muted-foreground">
@@ -272,11 +272,11 @@ const ComparisonAnalyticsPage = (): JSX.Element => {
 
         {/* Top Performers */}
         {benchmark && (benchmark.topPerformer ?? benchmark.worstPerformer) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-2 gap-6">
             {benchmark.topPerformer && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-muted-foreground">
+                  <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-muted-foreground">
                     <TrendingUp className="h-5 w-5" />
                     Top Performer
                   </CardTitle>
@@ -313,7 +313,7 @@ const ComparisonAnalyticsPage = (): JSX.Element => {
             {benchmark.worstPerformer && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-red-600">
+                  <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-red-600">
                     <TrendingDown className="h-5 w-5" />
                     Needs Improvement
                   </CardTitle>
@@ -360,7 +360,7 @@ const ComparisonAnalyticsPage = (): JSX.Element => {
             <CardTitle>Comparison Insights</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center">
                 <BarChart3 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                 <h4 className="font-semibold mb-2">Margin Distribution</h4>

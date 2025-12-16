@@ -50,10 +50,10 @@ const CustomerStats = ({
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-4">
       <Card className="border-border/50 shadow-sm hover:shadow-md transition-all duration-200">
         <CardContent className="p-4 sm:p-6">
-          <div className="flex items-center justify-between space-y-0 pb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-0 pb-2">
             <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total</p>
             <div className="p-1.5 sm:p-2 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-200/20">
               <Users className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 dark:text-blue-400" />
@@ -72,7 +72,7 @@ const CustomerStats = ({
 
       <Card className="border-border/50 shadow-sm hover:shadow-md transition-all duration-200">
         <CardContent className="p-4 sm:p-6">
-          <div className="flex items-center justify-between space-y-0 pb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-0 pb-2">
             <p className="text-xs sm:text-sm font-medium text-muted-foreground">Aktif</p>
             <div className="p-1.5 sm:p-2 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-lg border border-emerald-200/20">
               <UserPlus className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-600 dark:text-emerald-400" />
@@ -91,7 +91,7 @@ const CustomerStats = ({
 
       <Card className="border-border/50 shadow-sm hover:shadow-md transition-all duration-200">
         <CardContent className="p-4 sm:p-6">
-          <div className="flex items-center justify-between space-y-0 pb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-0 pb-2">
             <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Avg Belanja</p>
             <div className="p-1.5 sm:p-2 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-lg border border-violet-200/20">
               <span className="h-3 w-3 sm:h-4 sm:w-4 flex items-center justify-center text-xs sm:text-sm font-bold text-violet-600 dark:text-violet-400">
@@ -112,7 +112,7 @@ const CustomerStats = ({
 
       <Card className="border-border/50 shadow-sm hover:shadow-md transition-all duration-200">
         <CardContent className="p-4 sm:p-6">
-          <div className="flex items-center justify-between space-y-0 pb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-0 pb-2">
             <p className="text-xs sm:text-sm font-medium text-muted-foreground">Avg Order</p>
             <div className="p-1.5 sm:p-2 bg-gradient-to-br from-orange-500/10 to-amber-500/10 rounded-lg border border-orange-200/20">
               <span className="h-3 w-3 sm:h-4 sm:w-4 flex items-center justify-center text-xs sm:text-sm font-bold text-orange-600 dark:text-orange-400">#</span>

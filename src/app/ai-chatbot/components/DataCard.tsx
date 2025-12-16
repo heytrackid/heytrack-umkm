@@ -19,7 +19,7 @@ const renderOrdersCard = (title: string, data: Record<string, unknown>, isExpand
   return (
     <Card className="mt-3 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800 hover: transition-all duration-200 group">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2">
             <ShoppingCart className="h-4 w-4 text-blue-600" />
             <span>{title}</span>
@@ -105,7 +105,7 @@ const renderInventoryCard = (title: string, data: Record<string, unknown>, isExp
   return (
     <Card className="mt-3 bg-gradient-to-br from-orange-50 to-red-100 dark:from-orange-950 dark:to-red-900 border-orange-200 dark:border-orange-800 hover: transition-all duration-200 group">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2">
             <AlertCircle className="h-4 w-4 text-orange-600" />
             <span>{title}</span>
@@ -187,7 +187,7 @@ const renderProfitCard = (title: string, data: Record<string, unknown>, isExpand
   return (
     <Card className="mt-3 bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-950 dark:to-green-900 border-emerald-200 dark:border-emerald-800 hover: transition-all duration-200 group">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2">
             <DollarSign className="h-4 w-4 text-emerald-600" />
             <span>{title}</span>
@@ -267,7 +267,7 @@ const renderRecipesCard = (title: string, data: Record<string, unknown>, isExpan
   return (
     <Card className="mt-3 bg-gradient-to-br from-pink-50 to-purple-100 dark:from-pink-950 dark:to-purple-900 border-pink-200 dark:border-pink-800 hover: transition-all duration-200 group">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2">
             <Package className="h-4 w-4 text-pink-600" />
             <span>{title}</span>

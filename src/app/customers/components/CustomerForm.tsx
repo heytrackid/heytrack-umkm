@@ -126,7 +126,7 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps): JSX
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <User className="h-5 w-5" />
                     {isEditMode ? 'Edit Pelanggan' : 'Tambah Pelanggan Baru'}
                 </CardTitle>
@@ -144,7 +144,7 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps): JSX
 
                         {/* Name */}
                         <div className="space-y-2">
-                            <Label htmlFor="name" className="flex items-center gap-2">
+                            <Label htmlFor="name" className="flex flex-col sm:flex-row sm:items-center gap-2">
                                 <User className="h-4 w-4" />
                                 Nama Pelanggan <span className="text-destructive">*</span>
                             </Label>
@@ -161,7 +161,7 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps): JSX
 
                         {/* Phone */}
                         <div className="space-y-2">
-                            <Label htmlFor="phone" className="flex items-center gap-2">
+                            <Label htmlFor="phone" className="flex flex-col sm:flex-row sm:items-center gap-2">
                                 <Phone className="h-4 w-4" />
                                 Nomor Telepon
                             </Label>
@@ -179,7 +179,7 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps): JSX
 
                         {/* Email */}
                         <div className="space-y-2">
-                            <Label htmlFor="email" className="flex items-center gap-2">
+                            <Label htmlFor="email" className="flex flex-col sm:flex-row sm:items-center gap-2">
                                 <Mail className="h-4 w-4" />
                                 Email
                             </Label>
@@ -197,7 +197,7 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps): JSX
 
                         {/* Address */}
                         <div className="space-y-2">
-                            <Label htmlFor="address" className="flex items-center gap-2">
+                            <Label htmlFor="address" className="flex flex-col sm:flex-row sm:items-center gap-2">
                                 <MapPin className="h-4 w-4" />
                                 Alamat
                             </Label>
@@ -218,10 +218,10 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps): JSX
                     <div className="space-y-4">
                         <h3 className="text-sm font-medium text-muted-foreground">Tipe & Diskon</h3>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Customer Type */}
                             <div className="space-y-2">
-                                <Label htmlFor="customer_type" className="flex items-center gap-2">
+                                <Label htmlFor="customer_type" className="flex flex-col sm:flex-row sm:items-center gap-2">
                                     <Tag className="h-4 w-4" />
                                     Tipe Pelanggan
                                 </Label>
@@ -243,7 +243,7 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps): JSX
 
                             {/* Discount Percentage */}
                             <div className="space-y-2">
-                                <Label htmlFor="discount_percentage" className="flex items-center gap-2">
+                                <Label htmlFor="discount_percentage" className="flex flex-col sm:flex-row sm:items-center gap-2">
                                     <Percent className="h-4 w-4" />
                                     Diskon (%)
                                 </Label>
@@ -269,7 +269,7 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps): JSX
                         <h3 className="text-sm font-medium text-muted-foreground">Catatan Tambahan</h3>
 
                         <div className="space-y-2">
-                            <Label htmlFor="notes" className="flex items-center gap-2">
+                            <Label htmlFor="notes" className="flex flex-col sm:flex-row sm:items-center gap-2">
                                 <FileText className="h-4 w-4" />
                                 Catatan
                             </Label>
@@ -290,7 +290,7 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps): JSX
                     <div className="space-y-4">
                         <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
 
-                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg">
                             <div className="space-y-0.5">
                                 <Label htmlFor="is_active" className="text-base">
                                     Status Aktif

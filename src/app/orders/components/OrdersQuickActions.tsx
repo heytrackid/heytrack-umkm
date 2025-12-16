@@ -53,7 +53,7 @@ const OrdersQuickActions = ({ _t: _ }: OrdersQuickActionsProps) => {
             variant="outline"
             size="sm"
             onClick={handleNavigateToTemplates}
-            className="flex items-center gap-2"
+            className="flex flex-col sm:flex-row sm:items-center gap-2"
             hapticFeedback
             hapticType="light"
           >
@@ -64,7 +64,7 @@ const OrdersQuickActions = ({ _t: _ }: OrdersQuickActionsProps) => {
             variant="outline"
             size="sm"
             onClick={handleExportOrders}
-            className="flex items-center gap-2"
+            className="flex flex-col sm:flex-row sm:items-center gap-2"
             hapticFeedback
             hapticType="light"
             loading={exportOrdersMutation.isPending}

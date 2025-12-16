@@ -32,12 +32,12 @@ interface StatsCardsSectionProps {
 const StatsCardsSection = ({ stats, formatCurrency }: StatsCardsSectionProps): JSX.Element => {
    if (!stats) {
      return (
-       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+       <div className="grid grid-cols-2 grid-cols-1 lg:grid-cols-4 gap-4">
          {Array.from({ length: 4 }).map((_, i) => (
            <Card key={i} className="overflow-hidden border-border/50">
              <CardContent className="p-6">
                <div className="flex flex-col space-y-4">
-                 <div className="flex items-center justify-between">
+                 <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                    <div className="h-4 w-24 bg-muted animate-pulse rounded" />
                    <div className="h-10 w-10 bg-muted animate-pulse rounded-xl" />
                  </div>
@@ -55,13 +55,13 @@ const StatsCardsSection = ({ stats, formatCurrency }: StatsCardsSectionProps): J
 
    return (
      <TooltipProvider>
-       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+       <div className="grid grid-cols-2 grid-cols-1 lg:grid-cols-4 gap-4">
          {/* Total Penjualan */}
          <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-border/50 hover:border-emerald-500/20">
            <CardContent className="p-6">
              <div className="flex flex-col space-y-4">
-               <div className="flex items-center justify-between">
-                 <div className="flex items-center gap-2">
+               <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+                 <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                    <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                      Total Penjualan
                    </span>
@@ -104,8 +104,8 @@ const StatsCardsSection = ({ stats, formatCurrency }: StatsCardsSectionProps): J
          <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-border/50 hover:border-blue-500/20">
            <CardContent className="p-6">
              <div className="flex flex-col space-y-4">
-               <div className="flex items-center justify-between">
-                 <div className="flex items-center gap-2">
+               <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+                 <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                    <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                      Total Pesanan
                    </span>
@@ -126,7 +126,7 @@ const StatsCardsSection = ({ stats, formatCurrency }: StatsCardsSectionProps): J
                  <div className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
                    {stats.orders.total}
                  </div>
-                 <div className="flex items-center text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-full w-fit">
+                 <div className="flex flex-col sm:flex-row sm:items-center text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-full w-fit">
                    <span className="truncate">
                      {stats.orders.active} pesanan aktif
                    </span>
@@ -140,8 +140,8 @@ const StatsCardsSection = ({ stats, formatCurrency }: StatsCardsSectionProps): J
          <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-border/50 hover:border-violet-500/20">
            <CardContent className="p-6">
              <div className="flex flex-col space-y-4">
-               <div className="flex items-center justify-between">
-                 <div className="flex items-center gap-2">
+               <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+                 <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                    <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                      Total Pelanggan
                    </span>
@@ -162,7 +162,7 @@ const StatsCardsSection = ({ stats, formatCurrency }: StatsCardsSectionProps): J
                  <div className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
                    {stats.customers.total}
                  </div>
-                 <div className="flex items-center text-xs font-medium text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/20 px-2 py-1 rounded-full w-fit">
+                 <div className="flex flex-col sm:flex-row sm:items-center text-xs font-medium text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/20 px-2 py-1 rounded-full w-fit">
                    <span className="truncate">
                      {stats.customers.vip} pelanggan VIP
                    </span>
@@ -176,8 +176,8 @@ const StatsCardsSection = ({ stats, formatCurrency }: StatsCardsSectionProps): J
          <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-border/50 hover:border-amber-500/20">
            <CardContent className="p-6">
              <div className="flex flex-col space-y-4">
-               <div className="flex items-center justify-between">
-                 <div className="flex items-center gap-2">
+               <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+                 <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                    <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                      Bahan Baku
                    </span>

@@ -24,7 +24,7 @@ export const OrderCustomerStep = ({
   onSelectCustomer
 }: OrderCustomerStepProps) => (
   <div className="space-y-4">
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between">
       <h3 className="text-lg font-medium">Informasi Pelanggan Pelanggan</h3>
       {customers.length > 0 && (
         <Select
@@ -49,7 +49,7 @@ export const OrderCustomerStep = ({
       )}
     </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <Label htmlFor="customer_name">Nama Pelanggan *</Label>
         <Input
@@ -100,7 +100,7 @@ export const OrderCustomerStep = ({
       />
     </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <Label htmlFor="priority">Prioritas</Label>
         <Select

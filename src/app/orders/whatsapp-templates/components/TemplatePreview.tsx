@@ -51,7 +51,7 @@ const TemplatePreview = ({
         <Dialog open={showPreview} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
                 <DialogHeader className="flex-shrink-0">
-                    <DialogTitle className="flex items-center gap-2">
+                    <DialogTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
                         <MessageCircle className="h-5 w-5" />
                         Preview Template
                     </DialogTitle>
@@ -63,7 +63,7 @@ const TemplatePreview = ({
                 {template && (
                     <div className="space-y-4 overflow-y-auto pr-2 -mr-2">
                         {/* Toggle Example Data */}
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                             <Label className="text-sm">Mode Preview:</Label>
                             <Button
                                 variant="outline"
@@ -80,7 +80,7 @@ const TemplatePreview = ({
                         <div className="bg-gradient-to-b from-gray-50 to-green-100 border-2 border-border/20 rounded-xl p-3 ">
                             <div className="bg-white rounded-lg ">
                                 {/* WhatsApp Header */}
-                                <div className="flex items-center gap-2 p-2 border-b bg-green-600 text-white rounded-t-lg">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 p-2 border-b bg-green-600 text-white rounded-t-lg">
                                     <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center flex-shrink-0">
                                         <MessageCircle className="h-4 w-4 text-muted-foreground" />
                                     </div>
@@ -98,7 +98,7 @@ const TemplatePreview = ({
                                         <pre className="whitespace-pre-wrap text-xs text-foreground font-sans leading-relaxed">
                                             {renderPreview(template.template_content)}
                                         </pre>
-                                        <div className="flex items-center justify-end gap-1 mt-1.5 text-xs text-muted-foreground">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-1 mt-1.5 text-xs text-muted-foreground">
                                             <span>{new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
                                             <svg className="h-3 w-3 text-muted-foreground" fill="currentColor" viewBox="0 0 16 16">
                                                 <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />

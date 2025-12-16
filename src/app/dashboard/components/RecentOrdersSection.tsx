@@ -89,7 +89,7 @@ const RecentOrdersSection = ({
     return (
       <Card className="border-border/50">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
             <div className="p-2 bg-primary/10 rounded-lg">
               <ShoppingCart className="h-5 w-5 text-primary" />
             </div>
@@ -99,7 +99,7 @@ const RecentOrdersSection = ({
         <CardContent>
           <div className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={`skeleton-${i}`} className="flex items-center gap-4">
+              <div key={`skeleton-${i}`} className="flex flex-col sm:flex-row sm:items-center gap-4">
                 <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
                 <div className="space-y-2 flex-1">
                   <div className="h-4 w-1/3 bg-muted animate-pulse rounded" />
@@ -117,8 +117,8 @@ const RecentOrdersSection = ({
   return (
     <Card className="border-border/50 h-full flex flex-col">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2.5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2.5">
             <div className="p-2 bg-primary/10 rounded-lg">
               <ShoppingCart className="h-5 w-5 text-primary" />
             </div>
@@ -169,7 +169,7 @@ const RecentOrdersSection = ({
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-0.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-0.5">
                     <span className="font-semibold text-sm truncate group-hover:text-primary transition-colors">
                       {order.customer}
                     </span>
@@ -177,7 +177,7 @@ const RecentOrdersSection = ({
                       {formatCurrency(order.amount ?? 0)}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                     <div className="text-xs text-muted-foreground truncate flex items-center gap-1.5">
                       {order.created_at && (
                         <span>

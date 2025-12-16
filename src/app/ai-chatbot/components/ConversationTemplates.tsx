@@ -50,7 +50,7 @@ export const ConversationTemplates = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
         {CONVERSATION_TEMPLATES.map((template) => (
           <Card
             key={template.id}
@@ -59,7 +59,7 @@ export const ConversationTemplates = ({
           >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                   <div className="text-2xl">{template.icon}</div>
                   <div className="flex-1 min-w-0">
                     <CardTitle className="text-sm font-semibold leading-tight">
@@ -89,7 +89,7 @@ export const ConversationTemplates = ({
             </CardHeader>
 
             <CardContent className="pt-0">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3">
                 <Badge
                   variant="secondary"
                   className={`text-xs ${getCategoryColor(template.category)}`}

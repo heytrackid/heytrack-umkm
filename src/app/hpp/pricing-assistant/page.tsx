@@ -108,13 +108,13 @@ const PricingAssistantPage = (): JSX.Element => {
         {/* Pricing Calculator */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
               <Lightbulb className="h-5 w-5" />
               Generate Pricing Recommendation
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label htmlFor="pricing-recipe-select" className="text-sm font-medium">Pilih Resep</label>
                 <Select
@@ -169,7 +169,7 @@ const PricingAssistantPage = (): JSX.Element => {
 
         {/* Recommendation Results */}
         {recommendation && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Price Comparison */}
             <Card>
               <CardHeader>
@@ -351,7 +351,7 @@ const PricingAssistantPage = (): JSX.Element => {
                 </AlertDescription>
               </Alert>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center p-4 border rounded-lg">
                   <DollarSign className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                   <h4 className="font-semibold">Cost-Based</h4>

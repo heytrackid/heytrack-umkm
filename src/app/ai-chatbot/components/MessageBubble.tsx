@@ -110,7 +110,7 @@ const formatMessageContent = (
         <div key={index} className="relative group my-3">
           {/* Language label */}
           {language !== 'text' && (
-            <div className="flex items-center justify-between mb-1">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1">
               <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
                 {language}
               </span>
@@ -253,7 +253,7 @@ export const MessageBubble = ({ message, onSuggestionClick, onFeedbackSubmit }: 
                  <p className="text-sm leading-relaxed">{message.content}</p>
                  {/* Message status indicator */}
                  <div className="flex justify-end mt-1">
-                   <div className="flex items-center gap-1 text-xs opacity-70">
+                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 text-xs opacity-70">
                      <div className="w-1 h-1 bg-primary-foreground/70 rounded-full" />
                      <span className="text-primary-foreground/70">
                        {message.timestamp.toLocaleTimeString('id-ID', {

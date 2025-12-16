@@ -196,4 +196,9 @@ export const RATE_LIMITS = {
     maxRequests: 10,
     windowMs: 60 * 60 * 1000, // 1 hour
   },
+  // Recipe Generation - 10 per minute per user
+  RECIPE_GENERATION: {
+    maxRequests: 10,
+    windowMs: 60 * 1000, // 1 minute
+  },
 } as const

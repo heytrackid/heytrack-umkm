@@ -1,10 +1,11 @@
 'use client'
 
-import { Bot, ChefHat, DollarSign, Sparkles } from '@/components/icons'
+import { Bot, DollarSign, Sparkles } from '@/components/icons'
 import { PageHeader } from '@/components/layout'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ChefHat } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 const agents = [
@@ -23,20 +24,6 @@ const agents = [
     ]
   },
   {
-    id: 'ai-recipe-generator',
-    title: 'ChefWise AI',
-    description: 'Buat resep produk dengan AI berdasarkan bahan yang tersedia dan target harga',
-    icon: ChefHat,
-    href: '/recipes/ai-generator',
-    color: 'bg-green-500/10 text-green-600 dark:text-green-400',
-    features: [
-      'Generasi resep otomatis',
-      'Kalkulasi HPP real-time',
-      'Optimasi bahan baku',
-      'Variasi resep cerdas'
-    ]
-  },
-  {
     id: 'finance-wise',
     title: 'FinanceWise AI',
     description: 'Analisis keuangan cerdas dengan forecasting cash flow dan insights bisnis',
@@ -48,6 +35,20 @@ const agents = [
       'Analisis kesehatan keuangan',
       'Budget planning & tracking',
       'AI insights & rekomendasi'
+    ]
+  },
+  {
+    id: 'chef-wise',
+    title: 'ChefWise AI',
+    description: 'Generator resep kuliner dengan AI yang disesuaikan dengan inventory dan preferensi Anda',
+    icon: ChefHat,
+    href: '/chef-wise',
+    color: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
+    features: [
+      'Generate resep otomatis',
+      'Optimasi biaya bahan',
+      'Substitusi ingredient pintar',
+      'Integrasi inventory real-time'
     ]
   }
 ]
@@ -62,7 +63,7 @@ export default function SuperAgentPage() {
           title="Super Agent"
           description="Koleksi AI Agent untuk membantu optimasi bisnis kuliner Anda"
           actions={
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
               <span className="text-sm font-medium text-muted-foreground">
                 Powered by Advanced AI
@@ -72,7 +73,7 @@ export default function SuperAgentPage() {
         />
 
         {/* Agents Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
           {agents.map((agent) => (
             <Card key={agent.id} className="group hover:shadow-lg transition-all duration-200 border-2 hover:border-primary/20">
               <CardHeader className="pb-4">
@@ -104,7 +105,7 @@ export default function SuperAgentPage() {
                   </h4>
                   <ul className="space-y-1.5">
                     {agent.features.map((feature, index) => (
-                      <li key={index} className="flex items-center gap-2 text-sm">
+                      <li key={index} className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm">
                         <div className="h-1.5 w-1.5 rounded-full bg-primary/60" />
                         <span className="text-muted-foreground">{feature}</span>
                       </li>
@@ -128,7 +129,7 @@ export default function SuperAgentPage() {
 
         {/* Coming Soon Section */}
         <Card className="border-dashed border-2 border-muted-foreground/25">
-          <CardContent className="flex items-center justify-center py-12">
+          <CardContent className="flex flex-col sm:flex-row sm:items-center justify-center py-12">
             <div className="text-center space-y-4">
               <div className="mx-auto h-12 w-12 rounded-full bg-muted flex items-center justify-center">
                 <Sparkles className="h-6 w-6 text-muted-foreground" />

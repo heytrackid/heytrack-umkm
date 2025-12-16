@@ -226,7 +226,7 @@ const HppReportsPage = (): JSX.Element => {
               }
               
               return (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Key Metrics */}
                 <Card>
                   <CardHeader>
@@ -291,7 +291,7 @@ const HppReportsPage = (): JSX.Element => {
                 {/* Cost Trends Chart */}
                 <Card className="lg:col-span-2">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
                       <LineChart className="h-5 w-5" />
                       HPP Trends (Last 30 Days)
                     </CardTitle>
@@ -312,7 +312,7 @@ const HppReportsPage = (): JSX.Element => {
                     <div className="space-y-3">
                       {analytics.topCostDrivers.map((driver, index) => (
                         <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
-                          <div className="flex items-center gap-3">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                             <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-sm font-semibold">
                               {index + 1}
                             </div>
@@ -367,7 +367,7 @@ const HppReportsPage = (): JSX.Element => {
                     <SelectContent>
                       {formatOptions.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                             <option.icon className="h-4 w-4" />
                             {option.label}
                           </div>
@@ -380,9 +380,9 @@ const HppReportsPage = (): JSX.Element => {
                 {/* Metrics */}
                 <div className="space-y-2">
                   <Label>Metrics to Include</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 grid-cols-1 md:grid-cols-3 gap-2">
                     {metricOptions.map((metric) => (
-                      <div key={metric.value} className="flex items-center space-x-2">
+                      <div key={metric.value} className="flex flex-col sm:flex-row sm:items-center space-x-2">
                         <input
                           type="checkbox"
                           id={metric.value}
@@ -427,7 +427,7 @@ const HppReportsPage = (): JSX.Element => {
 
           {/* Export Tab */}
           <SwipeableTabsContent value="export" className="space-y-6">
-            <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-4'}`}>
+            <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 grid-cols-1 lg:grid-cols-4'}`}>
               {formatOptions.map((option) => (
                 <Card key={option.value} className="cursor-pointer hover: ">
                   <CardContent className="p-6 text-center space-y-4">
@@ -461,7 +461,7 @@ const HppReportsPage = (): JSX.Element => {
                 </CardHeader>
                  <CardContent className="space-y-4">
                    <div className="p-4 bg-muted/20 rounded-lg">
-                     <div className="flex items-center gap-2 mb-2">
+                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
                        <TrendingUp className="h-5 w-5 text-muted-foreground" />
                        <span className="font-semibold">HPP Coverage</span>
                      </div>
@@ -471,7 +471,7 @@ const HppReportsPage = (): JSX.Element => {
                    </div>
 
                    <div className="p-4 bg-muted/20 rounded-lg">
-                     <div className="flex items-center gap-2 mb-2">
+                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
                        <TrendingUp className="h-5 w-5 text-muted-foreground" />
                        <span className="font-semibold">Cost Monitoring</span>
                      </div>
@@ -481,7 +481,7 @@ const HppReportsPage = (): JSX.Element => {
                    </div>
 
                    <div className="p-4 bg-muted/20 rounded-lg">
-                     <div className="flex items-center gap-2 mb-2">
+                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
                        <TrendingUp className="h-5 w-5 text-muted-foreground" />
                        <span className="font-semibold">Average HPP</span>
                      </div>

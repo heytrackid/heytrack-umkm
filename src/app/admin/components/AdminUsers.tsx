@@ -48,7 +48,7 @@ export function AdminUsers() {
           {data?.users.map((user) => (
             <div
               key={user.id}
-              className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+              className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
             >
               <div>
                 <p className="font-medium text-gray-900">{user.email}</p>

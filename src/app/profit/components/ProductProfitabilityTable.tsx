@@ -41,7 +41,7 @@ export const ProductProfitabilityTable = ({
       header: 'Produk',
       sortable: true,
       render: (_, item) => (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           {getProfitTrend(item.profit_margin)}
           <span className="font-medium">{item.product_name}</span>
         </div>

@@ -163,7 +163,7 @@ export class AIFallbackService {
     if (normalized.includes('resep') || normalized.includes('recipe')) {
       parts.push(
         '📖 **Resep**: Kelola resep di halaman [Resep](/recipes)',
-        '🤖 **AI Generator**: Buat resep baru dengan [AI Generator](/recipes/ai-generator)'
+        '🤖 **AI Generator**: Buat resep baru dengan [AI Generator](/chef-wise)'
       );
     }
 

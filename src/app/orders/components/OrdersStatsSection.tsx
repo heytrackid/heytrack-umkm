@@ -21,10 +21,10 @@ const OrdersStatsSection = ({
   pendingRevenue,
   formatCurrency,
 }: OrdersStatsSectionProps): JSX.Element => (
-  <div className="grid gap-4 md:grid-cols-4">
+  <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-4">
     <Card>
       <CardContent className="p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
           <div>
             <p className="text-sm font-medium text-muted-foreground">Total Pesanan</p>
             <p className="text-2xl font-bold">{totalOrders}</p>
@@ -37,7 +37,7 @@ const OrdersStatsSection = ({
 
     <Card>
       <CardContent className="p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
           <div>
             <p className="text-sm font-medium text-muted-foreground">Total Pendapatan</p>
             <p className="text-2xl font-bold">{formatCurrency(totalRevenue)}</p>
@@ -50,7 +50,7 @@ const OrdersStatsSection = ({
 
     <Card>
       <CardContent className="p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
           <div>
             <p className="text-sm font-medium text-muted-foreground">Rata-rata Nilai</p>
             <p className="text-2xl font-bold">{formatCurrency(averageOrderValue)}</p>
@@ -63,7 +63,7 @@ const OrdersStatsSection = ({
 
     <Card>
       <CardContent className="p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
           <div>
             <p className="text-sm font-medium text-muted-foreground">Pendapatan Pending</p>
             <p className="text-2xl font-bold">{formatCurrency(pendingRevenue)}</p>

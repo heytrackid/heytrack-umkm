@@ -57,7 +57,7 @@ export const OrderItemsStep = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between">
         <h3 className="text-lg font-medium">Item Pesanan</h3>
         <Button type="button" onClick={onAddItem}>
           <Plus className="h-4 w-4 mr-2" />
@@ -89,7 +89,7 @@ export const OrderItemsStep = ({
                 onDragEnd={handleDragEnd}
               >
                 {onReorderItems && (
-                  <div className="flex items-center gap-3 mb-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
                     <div className="cursor-move text-muted-foreground hover:text-foreground">
                       <GripVertical className="h-5 w-5" />
                     </div>
@@ -148,7 +148,7 @@ export const OrderItemsStep = ({
                   {/* Total Price */}
                   <div>
                     <Label>Total</Label>
-                    <div className="flex items-center justify-between h-10 px-3 border rounded-md bg-muted">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between h-10 px-3 border rounded-md bg-muted">
                       <span className="font-medium">
                         Rp {(item.quantity * item.unit_price).toLocaleString('id-ID')}
                       </span>

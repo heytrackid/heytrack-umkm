@@ -45,7 +45,7 @@ export const FeedbackWidget = ({
   if (isSubmitted) {
     return (
       <div className={cn("flex items-center gap-2 text-xs text-muted-foreground", className)}>
-        <div className="flex items-center gap-1">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1">
           {rating === 1 ? (
             <ThumbsDown className="h-3 w-3 text-red-500" />
           ) : (
@@ -60,7 +60,7 @@ export const FeedbackWidget = ({
   return (
     <div className={cn("space-y-2", className)}>
       {!showCommentInput ? (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           <span className="text-xs text-muted-foreground">Bagaimana respons ini?</span>
           <div className="flex gap-1">
             <Button
@@ -85,8 +85,8 @@ export const FeedbackWidget = ({
         </div>
       ) : (
         <div className="space-y-2 p-3 bg-muted/30 rounded-lg border">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1">
               {rating === 1 ? (
                 <ThumbsUp className="h-3 w-3 text-green-500" />
               ) : (

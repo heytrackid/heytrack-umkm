@@ -39,7 +39,7 @@ const VariableGroup = ({ title, icon, variables, copiedVariable, onCopy }: Varia
       <div className="space-y-2">
         {variables.map((variable) => (
           <div key={variable.name} className="text-xs space-y-1 pb-2 border-b last:border-0">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between">
               <code className="bg-white px-2 py-1 rounded border font-mono">
                 {`{${variable.name}}`}
               </code>
@@ -234,7 +234,7 @@ const TemplateForm = ({
                     {/* Template Defaults */}
                     {!editingTemplate && (
                         <div className="bg-muted border border-border/20 rounded-lg p-4">
-                            <Label className="flex items-center gap-2 mb-2">
+                            <Label className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
                                 <Info className="h-4 w-4" />
                                 Mulai dengan Template Default
                             </Label>
@@ -383,8 +383,8 @@ const TemplateForm = ({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <label className="flex items-center space-x-2 cursor-pointer">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                        <label className="flex flex-col sm:flex-row sm:items-center space-x-2 cursor-pointer">
                             <input
                                 type="checkbox"
                                 checked={formData.is_active}
@@ -394,7 +394,7 @@ const TemplateForm = ({
                             <span className="text-sm">Template Aktif</span>
                         </label>
 
-                        <label className="flex items-center space-x-2 cursor-pointer">
+                        <label className="flex flex-col sm:flex-row sm:items-center space-x-2 cursor-pointer">
                             <input
                                 type="checkbox"
                                 checked={formData.is_default}

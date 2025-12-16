@@ -2,7 +2,7 @@
 
 ## Overview
 
-HeyTrack's AI Agents system provides intelligent, proactive assistance to culinary micro, small, and medium enterprises (UMKM) in Indonesia. The system consists of 6 specialized AI agents - ChatWise (business assistant chatbot), ChefWise (AI recipe generator), ContentWise (social media content creation), StrategyWise (business strategy consulting), SOPWise (standard operating procedures), and FinanceWise (cash flow intelligence) - that work together to optimize business operations, increase profitability, and provide actionable insights.
+HeyTrack's AI Agents system provides intelligent, proactive assistance to culinary micro, small, and medium enterprises (UMKM) in Indonesia. The system consists of specialized AI agents - ChatWise (business assistant chatbot), AI Recipe Generator (recipe creation), FinanceWise (cash flow intelligence), and more - that work together to optimize business operations, increase profitability, and provide actionable insights.
 
 ## Core Philosophy
 
@@ -65,7 +65,7 @@ AI: "📊 **Kondisi Bisnis**
 
 ---
 
-### 2. 👨‍🍳 ChefWise AI
+### 2. 👨‍🍳 AI Recipe Generator
 **Full Name:** AI Recipe Creator Agent
 **Tagline:** "Racik Resep Profesional, Otomatis & Akurat"
 **Status:** ✅ Implemented
@@ -785,7 +785,7 @@ AI: "💰 **Laporan Keuangan - Desember 2024**
 
 ### Phase 0: Core Agents (Completed) ✅
 - [x] ChatWise AI - Business Assistant Chatbot
-- [x] ChefWise AI - AI Recipe Generator
+- [x] AI Recipe Generator - AI Recipe Generator
 - [x] Agent orchestration framework setup
 - [x] Shared context management system
 - [x] Basic agent communication protocols
@@ -828,7 +828,7 @@ AI: "💰 **Laporan Keuangan - Desember 2024**
 
 ### Quantitative KPIs
 - **ChatWise Usage**: 70% of users interact with chatbot weekly
-- **ChefWise Adoption**: 50% of recipes created using AI generator
+- **AI Recipe Generator Adoption**: 50% of recipes created using AI generator
 - **FinanceWise Engagement**: 60% of users check financial insights weekly
 - **ContentWise Adoption**: 60% of users create content weekly using the agent
 - **StrategyWise Engagement**: 40% of users consult strategy questions monthly
@@ -839,7 +839,7 @@ AI: "💰 **Laporan Keuangan - Desember 2024**
 
 ### Qualitative KPIs
 - **ChatWise Value**: >4.6/5 star rating for chatbot helpfulness
-- **ChefWise Quality**: 80% of generated recipes saved/used by users
+- **AI Recipe Generator Quality**: 80% of generated recipes saved/used by users
 - **FinanceWise Accuracy**: 85% accuracy in cash flow predictions
 - **Content Quality**: Users report 40% improvement in social media engagement
 - **Strategy Value**: >4.5/5 star rating for strategy consultation usefulness
@@ -853,7 +853,7 @@ AI: "💰 **Laporan Keuangan - Desember 2024**
 
 ### Technical Risks
 - **ChatWise**: Rate limiting, prompt injection attacks, context window limits
-- **ChefWise**: Recipe quality validation, ingredient matching accuracy
+- **AI Recipe Generator**: Recipe quality validation, ingredient matching accuracy
 - **FinanceWise**: Data accuracy, forecasting model reliability, real-time sync
 - **ContentWise**: Image processing quality and platform API limitations
 - **StrategyWise**: AI reasoning accuracy for complex business scenarios
@@ -893,4 +893,4 @@ AI: "💰 **Laporan Keuangan - Desember 2024**
 
 ---
 
-*This document serves as the comprehensive specification for HeyTrack's AI Agents system. The 6 agents (ChatWise, ChefWise, FinanceWise, ContentWise, StrategyWise, SOPWise) are designed specifically for Indonesian UMKM needs with local market understanding, cultural adaptation, and mobile-first UX. Each agent addresses critical pain points while maintaining simplicity and actionable outputs.*
+*This document serves as the comprehensive specification for HeyTrack's AI Agents system. The agents are designed specifically for Indonesian UMKM needs with local market understanding, cultural adaptation, and mobile-first UX. Each agent addresses critical pain points while maintaining simplicity and actionable outputs.*

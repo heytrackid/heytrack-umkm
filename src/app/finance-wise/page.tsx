@@ -125,7 +125,7 @@ export default function FinanceWisePage() {
           title="FinanceWise AI"
           description="Cash Flow Intelligence & Financial Insights powered by AI"
           actions={
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <DateRangePicker
                 value={dateRange}
                 onChange={setDateRange}
@@ -164,7 +164,7 @@ export default function FinanceWisePage() {
 
             {/* Summary Stats */}
             {summary && (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
                 <StatCard
                   title="Revenue"
                   value={formatCurrentCurrency(summary.revenue)}
@@ -237,10 +237,10 @@ export default function FinanceWisePage() {
                   </div>
                   
                   {/* Legend Cards */}
-                  <div className="grid gap-4 md:grid-cols-3 mt-6">
+                  <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-3 mt-6">
                     {pieChartData.map((item: { name: string; value: number; color: string }, index: number) => (
-                      <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center">
+                      <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg">
+                        <div className="flex flex-col sm:flex-row sm:items-center">
                           <div 
                             className="w-4 h-4 rounded mr-3"
                             style={{ backgroundColor: item.color }}
@@ -261,7 +261,7 @@ export default function FinanceWisePage() {
             {aiInsights && (
               <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
                 <CardHeader>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <Sparkles className="h-5 w-5 text-primary" />
                     <CardTitle>AI Insights & Recommendations</CardTitle>
                   </div>
@@ -345,10 +345,10 @@ export default function FinanceWisePage() {
                     </div>
                     
                     {/* Detailed Forecast Cards */}
-                    <div className="grid gap-4 md:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-3">
                       {forecast.map((forecastItem, index) => (
                         <div key={index} className="border rounded-lg p-4 space-y-3">
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                             <div>
                               <h4 className="font-semibold">{forecastItem.month}</h4>
                               <p className="text-sm text-muted-foreground">
@@ -460,7 +460,7 @@ export default function FinanceWisePage() {
                     </div>
 
                     {/* Summary Stats */}
-                    <div className="grid gap-4 md:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-3">
                       <div className="text-center p-4 bg-green-50 dark:bg-green-950/20 rounded-lg">
                         <p className="text-sm text-muted-foreground">Most Profitable</p>
                         <p className="font-semibold text-green-600 dark:text-green-400">
@@ -527,7 +527,7 @@ function FinancialHealthCard({ health }: { health: FinancialHealth }) {
   return (
     <Card className="border-2">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
           <div>
             <CardTitle>Financial Health Score</CardTitle>
             <CardDescription>Overall business financial status</CardDescription>
@@ -541,7 +541,7 @@ function FinancialHealthCard({ health }: { health: FinancialHealth }) {
       <CardContent>
         <div className="space-y-4">
           {/* Score */}
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex-1">
               <div className="flex items-baseline gap-2">
                 <span className="text-4xl font-bold">{health.score}</span>
@@ -615,7 +615,7 @@ function LoadingSkeleton() {
   return (
     <div className="space-y-6">
       <Skeleton className="h-32 w-full" />
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
         {[1, 2, 3, 4].map((i) => (
           <Skeleton key={i} className="h-24" />
         ))}

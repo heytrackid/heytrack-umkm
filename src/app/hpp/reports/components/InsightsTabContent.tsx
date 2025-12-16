@@ -17,7 +17,7 @@ const InsightsTabContent = ({ isMobile }: InsightsTabContentProps): JSX.Element 
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="p-4 bg-muted/20 rounded-lg">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
             <TrendingUp className="h-5 w-5 text-muted-foreground" />
             <span className="font-semibold">Supplier Negotiation</span>
           </div>
@@ -27,7 +27,7 @@ const InsightsTabContent = ({ isMobile }: InsightsTabContentProps): JSX.Element 
         </div>
 
         <div className="p-4 bg-muted/20 rounded-lg">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
             <TrendingUp className="h-5 w-5 text-muted-foreground" />
             <span className="font-semibold">Recipe Optimization</span>
           </div>
@@ -37,7 +37,7 @@ const InsightsTabContent = ({ isMobile }: InsightsTabContentProps): JSX.Element 
         </div>
 
         <div className="p-4 bg-muted/20 rounded-lg">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
             <TrendingUp className="h-5 w-5 text-muted-foreground" />
             <span className="font-semibold">Seasonal Pricing</span>
           </div>

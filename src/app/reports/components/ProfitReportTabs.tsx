@@ -114,10 +114,10 @@ const ProductsTab = ({ profitData }: {
     const leastProducts = profitData.least_profitable_products ?? []
 
     return (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2">
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
                         <TrendingUp className="h-5 w-5 text-muted-foreground" />
                         Top 5 Produk Paling Menguntungkan
                     </CardTitle>
@@ -147,7 +147,7 @@ const ProductsTab = ({ profitData }: {
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
                         <TrendingDown className="h-5 w-5 text-red-600" />
                         5 Produk Kurang Menguntungkan
                     </CardTitle>
@@ -197,7 +197,7 @@ const ExpensesTab = ({ profitData }: {
                     <div className="space-y-3">
                         {breakdown.map((expense, index) => (
                             <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
-                                <div className="flex items-center gap-3">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                                     <div
                                         className="w-4 h-4 rounded-full"
                                         style={{ backgroundColor: COLORS[index % COLORS.length] }}
@@ -263,7 +263,7 @@ const ComparisonTab = ({
         return (
             <div className="space-y-6">
                 {/* Period Comparison Summary */}
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2">
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-lg">Periode Saat Ini</CardTitle>
@@ -317,7 +317,7 @@ const ComparisonTab = ({
                         <CardTitle>Perubahan & Tren</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="grid gap-4 md:grid-cols-3">
+                        <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-3">
                             <div className="text-center p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
                                 <div className="text-2xl font-bold text-blue-600">
                                     {revenueGrowth > 0 ? '+' : ''}{revenueGrowth.toFixed(1)}%

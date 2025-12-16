@@ -142,7 +142,7 @@ export const CustomerDialog = ({ open, onOpenChange, customer, onSuccess }: Cust
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
+                    <DialogTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
                         <User className="h-5 w-5" />
                         {isEditMode ? 'Edit Pelanggan' : 'Tambah Pelanggan Baru'}
                     </DialogTitle>
@@ -160,7 +160,7 @@ export const CustomerDialog = ({ open, onOpenChange, customer, onSuccess }: Cust
 
                         {/* Name */}
                         <div className="space-y-2">
-                            <Label htmlFor="name" className="flex items-center gap-2">
+                            <Label htmlFor="name" className="flex flex-col sm:flex-row sm:items-center gap-2">
                                 <User className="h-4 w-4" />
                                 Nama Pelanggan <span className="text-destructive">*</span>
                             </Label>
@@ -177,7 +177,7 @@ export const CustomerDialog = ({ open, onOpenChange, customer, onSuccess }: Cust
 
                         {/* Phone */}
                         <div className="space-y-2">
-                            <Label htmlFor="phone" className="flex items-center gap-2">
+                            <Label htmlFor="phone" className="flex flex-col sm:flex-row sm:items-center gap-2">
                                 <Phone className="h-4 w-4" />
                                 Nomor Telepon
                             </Label>
@@ -195,7 +195,7 @@ export const CustomerDialog = ({ open, onOpenChange, customer, onSuccess }: Cust
 
                         {/* Email */}
                         <div className="space-y-2">
-                            <Label htmlFor="email" className="flex items-center gap-2">
+                            <Label htmlFor="email" className="flex flex-col sm:flex-row sm:items-center gap-2">
                                 <Mail className="h-4 w-4" />
                                 Email
                             </Label>
@@ -213,7 +213,7 @@ export const CustomerDialog = ({ open, onOpenChange, customer, onSuccess }: Cust
 
                         {/* Address */}
                         <div className="space-y-2">
-                            <Label htmlFor="address" className="flex items-center gap-2">
+                            <Label htmlFor="address" className="flex flex-col sm:flex-row sm:items-center gap-2">
                                 <MapPin className="h-4 w-4" />
                                 Alamat
                             </Label>
@@ -234,10 +234,10 @@ export const CustomerDialog = ({ open, onOpenChange, customer, onSuccess }: Cust
                     <div className="space-y-4">
                         <h3 className="text-sm font-medium text-muted-foreground">Tipe & Diskon</h3>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Customer Type */}
                             <div className="space-y-2">
-                                <Label htmlFor="customer_type" className="flex items-center gap-2">
+                                <Label htmlFor="customer_type" className="flex flex-col sm:flex-row sm:items-center gap-2">
                                     <Tag className="h-4 w-4" />
                                     Tipe Pelanggan
                                 </Label>
@@ -259,7 +259,7 @@ export const CustomerDialog = ({ open, onOpenChange, customer, onSuccess }: Cust
 
                             {/* Discount Percentage */}
                             <div className="space-y-2">
-                                <Label htmlFor="discount_percentage" className="flex items-center gap-2">
+                                <Label htmlFor="discount_percentage" className="flex flex-col sm:flex-row sm:items-center gap-2">
                                     <Percent className="h-4 w-4" />
                                     Diskon (%)
                                 </Label>
@@ -285,7 +285,7 @@ export const CustomerDialog = ({ open, onOpenChange, customer, onSuccess }: Cust
                         <h3 className="text-sm font-medium text-muted-foreground">Catatan Tambahan</h3>
 
                         <div className="space-y-2">
-                            <Label htmlFor="notes" className="flex items-center gap-2">
+                            <Label htmlFor="notes" className="flex flex-col sm:flex-row sm:items-center gap-2">
                                 <FileText className="h-4 w-4" />
                                 Catatan
                             </Label>
@@ -306,7 +306,7 @@ export const CustomerDialog = ({ open, onOpenChange, customer, onSuccess }: Cust
                     <div className="space-y-4">
                         <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
 
-                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg">
                             <div className="space-y-0.5">
                                 <Label htmlFor="is_active" className="text-base">
                                     Status Aktif

@@ -122,23 +122,6 @@ export interface AiSuggestions {
   }
 }
 
-interface AvailableIngredient {
-  id: string
-  name: string
-  price_per_unit: number
-  unit: string
-  current_stock: number
-}
-
-interface IngredientSubstitution {
-  name: string
-  newCost: number
-  savings: number
-  confidence: number
-  reason: string
-  inStock: boolean
-}
-
 export class AiService extends BaseService {
   constructor(context: import('@/services/base').ServiceContext) {
     super(context)
@@ -353,90 +336,6 @@ export class AiService extends BaseService {
       apiLogger.info({ userId }, 'AI context deleted successfully')
     } catch (error) {
       apiLogger.error({ error, userId }, 'Failed to delete AI context')
-      throw error
-    }
-  }
-
-  async generateRecipe(request: RecipeGenerationRequest): Promise<RecipeGenerationResponse> {
-    const userId = this.context.userId
-    const startTime = Date.now()
-
-    apiLogger.info({ userId, request }, 'Starting recipe generation')
-
-    try {
-      const { productName, productType, servings, preferredIngredients = [], dietaryRestrictions = [], budget, specialInstructions } = request
-
-      if (!productName || !servings) {
-        throw new Error('productName dan servings wajib diisi')
-      }
-
-      // Get available ingredients for the user (optional - for cost calculation)
-      const availableIngredients = await this.getAvailableIngredients(userId) as AvailableIngredient[]
-      apiLogger.info({ userId, ingredientCount: availableIngredients.length }, 'Fetched available ingredients')
-
-      // Import prompt builder and AI service
-      const { buildRecipePrompt } = await import('@/app/api/ai/generate-recipe/services/prompt-builder')
-      const { callAIServiceWithRetry } = await import('@/app/api/ai/generate-recipe/services/ai-service')
-
-      // Build the prompt
-      const promptParams = {
-        productName,
-        productType: productType || 'other',
-        servings,
-        dietaryRestrictions,
-        availableIngredients: availableIngredients.map(ing => ({
-          id: ing.id,
-          name: ing.name,
-          price_per_unit: ing.price_per_unit,
-          unit: ing.unit,
-          current_stock: 0 // Default value since it's not in the type
-        })),
-        userProvidedIngredients: preferredIngredients,
-        ...(specialInstructions && { specialInstructions }),
-        ...(budget !== undefined && { targetPrice: budget })
-      }
-      const prompt = buildRecipePrompt(promptParams)
-
-      // Call AI service
-      const aiResponse = await callAIServiceWithRetry(prompt, 3)
-
-      // Parse the response
-      let recipe: GeneratedRecipe
-      try {
-        recipe = JSON.parse(aiResponse) as GeneratedRecipe
-      } catch {
-        apiLogger.error({ aiResponse }, 'Failed to parse AI response as JSON')
-        throw new Error('AI menghasilkan format yang tidak valid. Silakan coba lagi.')
-      }
-
-      // Validate required fields
-      if (!recipe.name || !recipe.ingredients || !recipe.instructions) {
-        throw new Error('Resep yang dihasilkan tidak lengkap. Silakan coba lagi.')
-      }
-
-      // Post-process: Calculate accurate costs with waste factors
-      const processedRecipe = await this.calculateRecipeCosts(recipe, availableIngredients, servings)
-      
-      // Generate ingredient substitutions and cost optimizations
-      const optimizedRecipe = await this.generateIngredientSubstitutions(processedRecipe, availableIngredients, budget)
-
-      const processingTime = Date.now() - startTime
-
-      apiLogger.info({
-        userId,
-        productName,
-        servings,
-        ingredientCount: recipe.ingredients.length,
-        processingTime
-      }, 'Recipe generated successfully')
-
-      return {
-        recipe: optimizedRecipe,
-        confidence: 0.85,
-        processing_time: processingTime
-      }
-    } catch (error) {
-      apiLogger.error({ error, userId, request }, 'Recipe generation failed')
       throw error
     }
   }
@@ -732,6 +631,200 @@ ATURAN:
     return suggestions
   }
 
+  async generateRecipe(request: RecipeGenerationRequest): Promise<GeneratedRecipe> {
+    const userId = this.context.userId
+    const startTime = Date.now()
+
+    // Defensive checks for required parameters
+    if (!request) {
+      throw new Error('Request parameter is required')
+    }
+    
+    if (!request.productName || !request.productType) {
+      throw new Error('Product name and product type are required')
+    }
+
+    // Rate limiting
+    const rateLimitKey = `recipe-gen:${userId}`
+    if (!RateLimiter.check(rateLimitKey, RATE_LIMITS.RECIPE_GENERATION.maxRequests, RATE_LIMITS.RECIPE_GENERATION.windowMs)) {
+      const resetTime = RateLimiter.getResetTime(rateLimitKey)
+      const remaining = RateLimiter.getRemaining(rateLimitKey, RATE_LIMITS.RECIPE_GENERATION.maxRequests)
+      apiLogger.warn({ userId, remaining, resetTime }, 'Recipe generation rate limit exceeded')
+      throw new Error('Terlalu banyak permintaan. Silakan tunggu sebentar.')
+    }
+    try {
+      // Get user's inventory for context
+      const { data: ingredients } = await this.context.supabase
+        .from('ingredients')
+        .select('name, current_stock, unit, cost')
+        .eq('user_id', this.context.userId)
+        .eq('is_active', true)
+        .gt('current_stock', 0)
+        .limit(50) as unknown as { data: { name: string; current_stock: number; unit: string; cost: number | null }[] }
+
+      const inventoryContext = ingredients?.map((ing: { name: string; current_stock: number; unit: string; cost: number | null }) => 
+        `- ${ing.name}: ${ing.current_stock} ${ing.unit} (Rp ${ing.cost || 0}/${ing.unit})`
+      ).join('\n') || 'Tidak ada bahan di inventory'
+
+      // ... rest of the code remains the same ...
+      const systemPrompt = `Kamu adalah ChefWise AI, ahli pembuat resep kuliner Indonesia yang berpengalaman.
+
+TUGAS: Buat resep kuliner yang lezat, praktis, dan hemat biaya berdasarkan permintaan user.
+
+CONTEXT INVENTORY USER:
+${inventoryContext}
+
+FORMAT OUTPUT WAJIB JSON:
+{
+  "name": "Nama Resep",
+  "description": "Deskripsi singkat",
+  "category": "Kategori (Appetizer/Main/Dessert)",
+  "servings": ${request.servings},
+  "prep_time_minutes": waktu_preparasi,
+  "cook_time_minutes": waktu_memasak,
+  "total_time_minutes": total_waktu,
+  "difficulty": "Simple|Medium|Complex",
+  "cooking_method": "Metode masak",
+  "ingredients": [
+    {
+      "name": "Nama bahan",
+      "quantity": jumlah,
+      "unit": "satuan",
+      "notes": "catatan opsional",
+      "actualCost": harga_estimasi
+    }
+  ],
+  "instructions": [
+    "Langkah 1",
+    "Langkah 2"
+  ],
+  "nutrition_info": {
+    "calories": jumlah_kalori,
+    "protein": jumlah_protein,
+    "carbs": jumlah_karbo,
+    "fat": jumlah_lemak
+  },
+  "cost_info": {
+    "total_cost": total_biaya,
+    "cost_per_serving": biaya_per_porsi
+  }
+}
+
+ATURAN:
+1. Gunakan bahan dari inventory user jika memungkinkan
+2. Jika bahan tidak ada, suggest substitusi yang hemat
+3. Hitung cost berdasarkan harga pasar Indonesia
+4. Instructions harus step-by-step yang jelas
+5. Sesuaikan dengan budget: ${request.budget || 'Tidak ada batas'}
+6. Complexity: ${request.complexity || 'Tidak ada preferensi'}
+7. Dietary: ${request.dietaryRestrictions?.join(', ') || 'Tidak ada batasan'}
+8. Special instructions: ${request.specialInstructions || 'Tidak ada'}
+
+RESPONSE HARUS JSON VALID TANPA KOMENTAR!`
+
+      const userPrompt = `Buat resep untuk: ${request.productName} (${request.productType})`
+
+      // Call OpenRouter API
+      const apiKey = process.env['OPENROUTER_API_KEY']
+      if (!apiKey) {
+        throw new Error('API key tidak dikonfigurasi')
+      }
+
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+          'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
+          'X-Title': 'ChefWise Recipe Generator'
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash-lite',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+          temperature: 0.7,
+          max_tokens: 2000
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        apiLogger.error({ error }, 'OpenRouter recipe generation API error')
+        throw new Error('Gagal generate resep. Silakan coba lagi.')
+      }
+
+      const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> }
+      const content = data.choices?.[0]?.message?.content
+      
+      if (!content) {
+        throw new Error('AI tidak merespon')
+      }
+
+      // Parse JSON response
+      let recipe: GeneratedRecipe
+      try {
+        // Clean response if it contains markdown
+        const jsonContent = content.replace(/```json\n?|\n?```/g, '').trim()
+        recipe = JSON.parse(jsonContent)
+      } catch (parseError) {
+        apiLogger.error({ parseError, content }, 'Failed to parse recipe JSON')
+        throw new Error('Format resep tidak valid. Silakan coba lagi.')
+      }
+
+      // Post-processing
+      recipe.totalCost = recipe.cost_info?.total_cost || 0
+      recipe.costPerServing = recipe.cost_info?.cost_per_serving || 0
+      recipe.budgetCompliance = request.budget ? (recipe.totalCost || 0) <= request.budget : null
+
+      // Calculate potential savings if using inventory
+      if (ingredients && ingredients.length > 0) {
+        const inventorySavings = recipe.ingredients.reduce((savings: number, ing: { name: string; actualCost?: number; quantity?: number }) => {
+          const inventoryItem = ingredients?.find((inv: { name: string; cost: number | null }) => 
+            inv.name.toLowerCase().includes(ing.name.toLowerCase()) ||
+            ing.name.toLowerCase().includes(inv.name.toLowerCase())
+          )
+          if (inventoryItem && inventoryItem.cost) {
+            const marketCost = ing.actualCost || 0
+            const inventoryCost = inventoryItem.cost * (ing.quantity || 0)
+            return savings + Math.max(0, marketCost - inventoryCost)
+          }
+          return savings
+        }, 0)
+        
+        recipe.totalPotentialSavings = inventorySavings
+      }
+
+      const processingTime = Date.now() - startTime
+      apiLogger.info({
+        userId,
+        recipeName: recipe.name,
+        servings: recipe.servings,
+        totalCost: recipe.totalCost,
+        processingTime
+      }, 'Recipe generated successfully')
+
+      return recipe
+    } catch (error) {
+      apiLogger.error({ error, userId, request }, 'Recipe generation failed')
+      
+      if (error instanceof Error) {
+        if (error.message.includes('rate limit')) {
+          throw new Error('Terlalu banyak permintaan. Silakan tunggu beberapa saat.')
+        }
+        if (error.message.includes('timeout')) {
+          throw new Error('Koneksi timeout. Silakan coba lagi.')
+        }
+        if (error.message.includes('network')) {
+          throw new Error('Masalah koneksi jaringan. Periksa internet Anda.')
+        }
+      }
+      
+      throw new Error('Maaf, saya mengalami kesulitan membuat resep. Silakan coba lagi.')
+    }
+  }
+
   private async analyzeBusinessHealth(userId: string): Promise<'excellent' | 'good' | 'needs_attention' | 'critical'> {
     // Simple business health analysis
     const { data: orders } = await this.context.supabase
@@ -749,332 +842,9 @@ ATURAN:
     const completedOrders = orders.filter(o => o.status === deliveredStatus).length
     const completionRate = completedOrders / orders.length
 
-    if (completionRate >= 0.9) return 'excellent'
-    if (completionRate >= 0.7) return 'good'
-    if (completionRate >= 0.5) return 'needs_attention'
+    if (completionRate >= 0.95) return 'excellent'
+    if (completionRate >= 0.8) return 'good'
+    if (completionRate >= 0.6) return 'needs_attention'
     return 'critical'
   }
-
-  private async generateIngredientSubstitutions(
-    recipe: GeneratedRecipe,
-    availableIngredients: AvailableIngredient[],
-    budget?: number
-  ): Promise<GeneratedRecipe> {
-    // Define ingredient substitution categories
-    const substitutionCategories = {
-      'daging sapi': ['daging kambing', 'daging ayam', 'tempe', 'tahu'],
-      'ayam': ['daging sapi', 'telur', 'tempe', 'tahu'],
-      'telur': ['tempe', 'tahu', 'ayam'],
-      'susu': ['santan', 'air kelapa', 'air'],
-      'keju': ['telur', 'santan', 'tempe'],
-      'mentega': ['minyak goreng', 'santan', 'margarine'],
-      'gula pasir': ['gula merah', 'gula aren', 'madu'],
-      'tepung terigu': ['tepung beras', 'tepung sagu', 'tepung tapioka'],
-      'bawang bombay': ['bawang merah', 'bawang putih'],
-      'cabai merah': ['cabai rawit', 'cabai hijau', 'lada'],
-      'jahe': ['kunyit', 'lada', 'jahe instan'],
-      'kunyit': ['jahe', 'kunyit instan', 'kunyit bubuk'],
-      'kemiri': ['kacang tanah', 'almond', 'susu kental manis'],
-      'serai': ['daun jeruk', 'jeruk nipis'],
-      'lengkuas': ['jahe', 'kunyit'],
-      'udang': ['ikan teri', 'teri medan', 'telur', 'tempe'],
-      'cumi': ['ikan tongkol', 'ikan lele', 'ayam'],
-      'ikan salmon': ['ikan lele', 'ikan mas', 'ayam'],
-      'brokoli': ['kembang kol', 'buncis', 'wortel'],
-      'bayam': ['kangkung', 'sawi', 'daun singkong'],
-      'tomat': ['tomat ceri', 'saus tomat'],
-      'wortel': ['labu siam', 'kentang', 'ubi jalar']
-    }
-
-    const enhancedIngredients = await Promise.all(recipe.ingredients.map(async (ingredient) => {
-      const substitutions = await this.findSubstitutions(
-        ingredient.name.toLowerCase(),
-        ingredient,
-        availableIngredients,
-        substitutionCategories
-      )
-
-      return {
-        ...ingredient,
-        substitutions,
-        hasSubstitutions: substitutions.length > 0,
-        potentialSavings: substitutions.length > 0 
-          ? Math.max(0, (ingredient.actualCost || 0) - Math.min(...substitutions.map(s => s.newCost)))
-          : 0
-      }
-    }))
-
-    // Calculate total potential savings
-    const totalPotentialSavings = enhancedIngredients.reduce((sum: number, ing) => sum + ing.potentialSavings, 0)
-    const optimizedCostPerServing = Math.max(0, recipe.costPerServing! - (totalPotentialSavings / recipe.servings!))
-
-    // Generate cost optimization suggestions
-    const costOptimizations = this.generateCostOptimizations(enhancedIngredients, budget, recipe.costPerServing)
-
-    return {
-      ...recipe,
-      ingredients: enhancedIngredients,
-      totalPotentialSavings,
-      optimizedCostPerServing,
-      costOptimizations,
-      budgetCompliance: budget ? optimizedCostPerServing <= (budget * 0.6) : null // 60% cost target
-    } as GeneratedRecipe
-  }
-
-  private async findSubstitutions(
-    ingredientName: string, 
-    originalIngredient: GeneratedRecipe['ingredients'][0], 
-    availableIngredients: AvailableIngredient[], 
-    substitutionCategories: Record<string, string[]>
-  ): Promise<IngredientSubstitution[]> {
-    const substitutions: Array<{
-      name: string;
-      newCost: number;
-      savings: number;
-      confidence: number;
-      reason: string;
-      inStock: boolean;
-    }> = []
-
-    // Find direct category matches
-    const categories = substitutionCategories[ingredientName] || []
-    const alternatives = availableIngredients.filter((ing) => 
-      categories.includes(ing.name.toLowerCase()) && ing.name.toLowerCase() !== ingredientName
-    )
-          
-    for (const altIngredient of alternatives) {
-      if (altIngredient && altIngredient.price_per_unit < (originalIngredient.actualCost || 0) / originalIngredient.quantity) {
-        const newCost = originalIngredient.quantity * altIngredient.price_per_unit * this.getWasteFactor(originalIngredient.unit)
-        const savings = (originalIngredient.actualCost || 0) - newCost
-        
-        if (savings > 100) { // Only show meaningful savings (> Rp 100)
-          substitutions.push({
-            name: altIngredient.name,
-            newCost: Math.round(newCost),
-            savings: Math.round(savings),
-            confidence: this.getConfidenceScore(ingredientName, altIngredient.name),
-            reason: this.getSubstitutionReason(ingredientName, altIngredient.name, 'category'),
-            inStock: altIngredient.current_stock > 0
-          })
-        }
-      }
-    }
-
-    // Find cheaper alternatives with similar function (price-based)
-    const similarIngredients = availableIngredients.filter((ing) => {
-      const originalUnit = originalIngredient.unit
-      const altUnit = ing.unit
-      
-      // Similar units comparison
-      const isCompatibleUnit = 
-        (originalUnit.includes('gram') && altUnit.includes('gram')) ||
-        (originalUnit.includes('kg') && altUnit.includes('kg')) ||
-        (originalUnit.includes('ml') && altUnit.includes('ml')) ||
-        (originalUnit.includes('liter') && altUnit.includes('liter')) ||
-        (originalUnit === altUnit)
-
-      return isCompatibleUnit && 
-             ing.name.toLowerCase() !== ingredientName &&
-             ing.price_per_unit < (originalIngredient.actualCost || 0) / originalIngredient.quantity
-    })
-
-    // Add top 3 cheapest alternatives
-    const cheapestAlternatives = similarIngredients
-      .sort((a, b) => a.price_per_unit - b.price_per_unit)
-      .slice(0, 3)
-
-    for (const alt of cheapestAlternatives) {
-      const newCost = originalIngredient.quantity * alt.price_per_unit * this.getWasteFactor(originalIngredient.unit)
-      const savings = (originalIngredient.actualCost || 0) - newCost
-      
-      if (savings > 100) { // Only show meaningful savings (> Rp 100)
-        substitutions.push({
-          name: alt.name,
-          newCost: Math.round(newCost),
-          savings: Math.round(savings),
-          confidence: 0.6, // Lower confidence for generic substitutions
-          reason: 'Alternatif lebih murah dengan fungsi serupa',
-          inStock: alt.current_stock > 0
-        })
-      }
-    }
-
-    return substitutions.sort((a, b) => b.savings - a.savings).slice(0, 3) // Top 3 substitutions
-  }
-
-  private getConfidenceScore(category: string, _substitution: string): number {
-    // High confidence substitutions
-    const highConfidence = [
-      ['daging sapi', 'daging ayam'],
-      ['ayam', 'daging sapi'],
-      ['telur', 'tempe'],
-      ['gula pasir', 'gula merah'],
-      ['tepung terigu', 'tepung beras'],
-      ['bawang bombay', 'bawang merah'],
-      ['cabai merah', 'cabai rawit']
-    ]
-
-    // Medium confidence substitutions
-    const mediumConfidence = [
-      ['daging sapi', 'tempe'],
-      ['susu', 'santan'],
-      ['mentega', 'minyak goreng'],
-      ['keju', 'telur'],
-      ['udang', 'ikan teri']
-    ]
-
-    for (const [cat, _sub] of highConfidence) {
-      if (category === cat && _sub === _substitution) return 0.9
-    }
-    
-    for (const [cat, _sub] of mediumConfidence) {
-      if (category === cat && _sub === _substitution) return 0.7
-    }
-
-    return 0.5 // Default confidence
-  }
-
-  private getSubstitutionReason(category: string, _substitution: string, type: 'category' | 'price'): string {
-    const reasons: Record<string, string> = {
-      'daging sapi': 'Protein serupa, tekstur berbeda',
-      'ayam': 'Protein lebih murah, tekstur lebih lembut',
-      'telur': 'Protein alternatif, tekstur berbeda',
-      'susu': 'Rasa gurih alternatif',
-      'keju': 'Tekstur creamy alternatif',
-      'mentega': 'Lemak untuk memasak alternatif',
-      'gula pasir': 'Rasa manis alternatif',
-      'tepung terigu': 'Tepung alternatif untuk mengental'
-    }
-
-    if (type === 'category' && reasons[category]) {
-      return reasons[category]
-    }
-
-    return 'Alternatif hemat biaya'
-  }
-
-  private generateCostOptimizations(
-    ingredients: Array<{ potentialSavings: number; name: string; hasSubstitutions: boolean }>,
-    budget?: number,
-    currentCostPerServing?: number
-  ): string[] {
-    const optimizations: string[] = []
-
-    // High potential savings ingredients
-    const highSavingsIngredients = ingredients
-      .filter(ing => ing.potentialSavings > 1000)
-      .sort((a, b) => b.potentialSavings - a.potentialSavings)
-      .slice(0, 3)
-
-    if (highSavingsIngredients.length > 0) {
-      optimizations.push(
-        `💰 Hemat hingga Rp ${highSavingsIngredients.reduce((sum, ing) => sum + ing.potentialSavings, 0).toLocaleString('id-ID')} dengan substitusi ${highSavingsIngredients.map(ing => ing.name).join(', ')}`
-      )
-    }
-
-    // Budget compliance
-    if (budget && currentCostPerServing) {
-      const targetCost = budget * 0.6
-      if (currentCostPerServing > targetCost) {
-        optimizations.push(
-          `🎯 Gunakan substitusi untuk mencapai target biaya 60% (Rp ${targetCost.toLocaleString('id-ID')}) dari harga jual`
-        )
-      }
-    }
-
-    // General optimization tips
-    const ingredientsWithSubstitutions = ingredients.filter(ing => ing.hasSubstitutions)
-    if (ingredientsWithSubstitutions.length > 0) {
-      optimizations.push(
-        `📊 ${ingredientsWithSubstitutions.length} bahan dapat diganti dengan alternatif lebih murah`
-      )
-    }
-
-    return optimizations
-  }
-
-  private async calculateRecipeCosts(
-    recipe: GeneratedRecipe, 
-    availableIngredients: Array<{ id: string; name: string; price_per_unit: number; unit: string }>,
-    servings: number
-  ): Promise<GeneratedRecipe> {
-    // Create ingredient price map for quick lookup
-    const ingredientPriceMap = new Map<string, { price: number; unit: string }>()
-    for (const ing of availableIngredients) {
-      ingredientPriceMap.set(ing.name.toLowerCase(), { price: ing.price_per_unit, unit: ing.unit })
-    }
-
-    // Calculate costs for each ingredient with waste factors
-    const processedIngredients = recipe.ingredients.map(ing => {
-      const priceInfo = ingredientPriceMap.get(ing.name.toLowerCase())
-      let actualCost = 0
-      
-      if (priceInfo) {
-        // Apply waste factors based on ingredient type
-        const wasteFactor = this.getWasteFactor(ing.unit)
-        actualCost = ing.quantity * priceInfo.price * wasteFactor
-      }
-
-      return {
-        ...ing,
-        actualCost: Math.round(actualCost),
-        costPerServing: Math.round(actualCost / servings)
-      }
-    })
-
-    // Calculate total costs
-    const totalCost = processedIngredients.reduce((sum, ing) => sum + (ing.actualCost || 0), 0)
-    const costPerServing = Math.round(totalCost / servings)
-
-    // Add cost information to recipe
-    return {
-      ...recipe,
-      ingredients: processedIngredients,
-      totalCost,
-      costPerServing,
-      estimatedProfit: costPerServing > 0 ? Math.round((costPerServing * 2.5) - costPerServing) : 0 // Assuming 60% margin target
-    } as GeneratedRecipe & { 
-      totalCost: number; 
-      costPerServing: number; 
-      estimatedProfit: number;
-      ingredients: Array<{ actualCost: number; costPerServing: number } & typeof recipe.ingredients[0]>
-    }
-  }
-
-  private getWasteFactor(unit: string): number {
-    // Waste factors based on ingredient type
-    const solidUnits = ['gram', 'kg', 'piece', 'buah', 'siung', 'batang', 'lembar']
-    const liquidUnits = ['ml', 'liter', 'cup', 'gelas']
-    
-    if (solidUnits.includes(unit)) return 1.05 // 5% waste for solids
-    if (liquidUnits.includes(unit)) return 1.02 // 2% waste for liquids
-    return 1.03 // 3% default for other units
-  }
-
-  private async getAvailableIngredients(userId: string): Promise<Array<{
-    id: string
-    name: string
-    price_per_unit: number
-    unit: string
-    current_stock: number
-  }>> {
-    const { data: ingredients } = await this.context.supabase
-      .from('ingredients')
-      .select('id, name, price_per_unit, unit, current_stock')
-      .eq('user_id', userId)
-      .eq('is_active', true)
-      .order('name')
-
-    // Filter out ingredients with null price_per_unit and ensure proper types
-    return (ingredients || [])
-      .filter(ing => ing.price_per_unit !== null && ing.price_per_unit !== undefined)
-      .map(ing => ({
-        id: ing.id,
-        name: ing.name,
-        price_per_unit: ing.price_per_unit ?? 0,
-        unit: ing.unit,
-        current_stock: ing.current_stock ?? 0
-      }))
-  }
-
 }

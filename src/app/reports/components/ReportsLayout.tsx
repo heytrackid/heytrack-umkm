@@ -49,11 +49,11 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
         />
 
         {/* Summary Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
           <Card>
             <CardContent className="p-6">
               <div className="flex flex-col space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">
                     Total Penjualan
                   </span>
@@ -92,7 +92,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
           <Card>
             <CardContent className="p-6">
               <div className="flex flex-col space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">
                     Laba Bersih
                   </span>
@@ -124,7 +124,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
           <Card>
             <CardContent className="p-6">
               <div className="flex flex-col space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">
                     Stok Rendah
                   </span>
@@ -154,7 +154,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
           <Card>
             <CardContent className="p-6">
               <div className="flex flex-col space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">
                     Total Pesanan
                   </span>

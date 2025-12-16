@@ -32,7 +32,7 @@ export function AdminStats() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-3 gap-6">
         {[...Array(6)].map((_, i) => (
           <Card key={i}>
             <CardHeader className="animate-pulse">
@@ -90,7 +90,7 @@ export function AdminStats() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-3 gap-6">
         {stats.map((stat) => {
           const Icon = stat.icon
           return (
@@ -106,7 +106,7 @@ export function AdminStats() {
               <CardContent>
                 <div className="text-3xl font-bold text-gray-900">{stat.value}</div>
                 {stat.recent !== undefined && (
-                  <div className="flex items-center gap-1 mt-2 text-sm text-green-600">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 mt-2 text-sm text-green-600">
                     <TrendingUp className="w-4 h-4" />
                     <span>+{stat.recent} last 7 days</span>
                   </div>
@@ -123,19 +123,19 @@ export function AdminStats() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between">
               <span className="text-sm text-gray-600">Database Status</span>
               <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
                 Healthy
               </span>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between">
               <span className="text-sm text-gray-600">API Status</span>
               <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
                 Operational
               </span>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between">
               <span className="text-sm text-gray-600">Cache Status</span>
               <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
                 Active

@@ -115,7 +115,7 @@ const DashboardPage = () => {
         <div className="space-y-6">
           <DashboardHeaderSkeleton />
           <StatsSkeleton count={4} />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 grid-cols-1 lg:grid-cols-2 gap-6">
             <RecentOrdersSkeleton />
             <StockAlertSkeleton />
           </div>
@@ -167,7 +167,7 @@ const DashboardPage = () => {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2">
+                <div className="grid grid-cols-2 grid-cols-1 sm:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2">
                   <LoadingButton variant="outline" asChild className="h-24 flex-col gap-2">
                     <Link href="/ingredients">
                       <Package className="h-6 w-6 text-muted-foreground" />
@@ -225,7 +225,7 @@ const DashboardPage = () => {
           {/* Revenue Chart */}
           <RevenueChart />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 grid-cols-1 lg:grid-cols-2 gap-6">
             <RecentOrdersSection orders={dashboardData?.orders?.recent ?? []} />
             <StockAlertsSection lowStockItems={dashboardData?.inventory?.lowStockAlerts ?? []} />
           </div>
@@ -235,13 +235,13 @@ const DashboardPage = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
               Aksi Cepat
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 grid-cols-1 md:grid-cols-3 grid-cols-1 lg:grid-cols-6 gap-3">
               <Button
                 variant="default"
                 className="h-auto p-4 flex flex-col items-center gap-2 text-center"
@@ -253,7 +253,7 @@ const DashboardPage = () => {
               <Button
                 variant="outline"
                 className="h-auto p-4 flex flex-col items-center gap-2 text-center"
-                onClick={() => router.push('/recipes/ai-generator')}
+                onClick={() => router.push('/chef-wise')}
               >
                 <ChefHat className="h-6 w-6" />
                 <div className="text-sm font-medium">Generate Resep</div>

@@ -197,7 +197,7 @@ const RecipesListComponent = (): JSX.Element => {
         action={
           <div className="flex gap-2">
             <Button onClick={handleAdd}><Plus className="h-4 w-4 mr-2" />Resep Baru</Button>
-            <Button variant="outline" onClick={() => router.push('/recipes/ai-generator')}>
+            <Button variant="outline" onClick={() => router.push('/chef-wise')}>
               <Sparkles className="h-4 w-4 mr-2" />AI Generator
             </Button>
           </div>

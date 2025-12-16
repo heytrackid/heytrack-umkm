@@ -148,11 +148,11 @@ const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }): JS
           }
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-3 gap-6">
           {/* Customer Info */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
                 <User className="h-5 w-5" />
                 Informasi Pelanggan
               </CardTitle>
@@ -196,13 +196,13 @@ const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }): JS
           {/* Statistics */}
           <Card className="md:col-span-2">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
                 <TrendingUp className="h-5 w-5" />
                 Statistik Pembelian
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Total Pesanan</p>
                   <p className="text-2xl font-bold">{stats.totalOrders}</p>
@@ -232,7 +232,7 @@ const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }): JS
         {/* Order History */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
               <ShoppingCart className="h-5 w-5" />
               Riwayat Pesanan
             </CardTitle>
@@ -252,7 +252,7 @@ const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }): JS
                     {(orders as unknown as OrderListItem[]).map((order: OrderListItem) => (
                        <div
                          key={order['id']}
-                         className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                         className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                          role="button"
                          tabIndex={0}
                          onClick={() => router.push(`/orders/${order['id']}`)}

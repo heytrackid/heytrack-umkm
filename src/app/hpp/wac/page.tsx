@@ -85,7 +85,7 @@ const WacEnginePage = (): JSX.Element => {
               onClick={recalculateAll}
               disabled={recalculating}
               variant="outline"
-              className="flex items-center gap-2"
+              className="flex flex-col sm:flex-row sm:items-center gap-2"
             >
               <RefreshCw className={`h-4 w-4 ${recalculating ? 'animate-spin' : ''}`} />
               {recalculating ? 'Recalculating...' : 'Recalculate All'}
@@ -96,13 +96,13 @@ const WacEnginePage = (): JSX.Element => {
         {/* WAC Calculator */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
               <DollarSign className="h-5 w-5" />
               Calculate WAC
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label htmlFor="ingredient-select" className="text-sm font-medium">Pilih Bahan Baku</label>
                 <Select value={selectedIngredient} onValueChange={setSelectedIngredient}>
@@ -167,7 +167,7 @@ const WacEnginePage = (): JSX.Element => {
         </Card>
 
         {/* WAC Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">

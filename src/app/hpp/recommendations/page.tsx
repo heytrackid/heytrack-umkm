@@ -78,7 +78,7 @@ const HppRecommendationsPage = (): JSX.Element => {
         />
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -151,7 +151,7 @@ const HppRecommendationsPage = (): JSX.Element => {
         {/* Filter */}
         <Card>
           <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <label htmlFor="recommendation-filter" className="text-sm font-medium">Filter:</label>
               <Select
                 value={filter}
@@ -215,7 +215,7 @@ const HppRecommendationsPage = (): JSX.Element => {
                       </div>
 
                       <div className="flex-1 space-y-3">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                           <h3 className="font-semibold">{rec.title}</h3>
                           <Badge variant={getPriorityColor(rec.priority)}>
                             {rec.priority}
@@ -233,7 +233,7 @@ const HppRecommendationsPage = (): JSX.Element => {
 
 
                         {rec.potential_savings > 0 && (
-                          <div className="flex items-center gap-2 text-sm">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm">
                             <span className="font-medium">Potential Savings:</span>
                             <Badge variant="secondary" className="text-muted-foreground">
                               {formatCurrency(rec.potential_savings)}
@@ -252,7 +252,7 @@ const HppRecommendationsPage = (): JSX.Element => {
                         variant="outline"
                         size="sm"
                         onClick={() => markAsImplemented(rec['id'])}
-                        className="flex items-center gap-2"
+                        className="flex flex-col sm:flex-row sm:items-center gap-2"
                       >
                         <CheckCircle className="h-3 w-3" />
                         Mark Implemented

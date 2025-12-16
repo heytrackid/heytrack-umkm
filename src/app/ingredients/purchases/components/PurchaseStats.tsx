@@ -63,11 +63,11 @@ const PurchaseStatsCard = ({ purchases }: PurchaseStatsProps): JSX.Element => {
   ]
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
       {stats.map((stat, index) => (
         <Card key={index}>
           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
               <p className="text-sm font-medium text-muted-foreground">
                 {stat.title}
               </p>

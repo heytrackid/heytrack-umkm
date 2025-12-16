@@ -194,7 +194,7 @@ export function QuickActionTemplates({
                   }}
                   disabled={disabled}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <span className="flex-shrink-0">{template.icon}</span>
                     <span className="text-xs truncate">{template.label}</span>
                   </div>
