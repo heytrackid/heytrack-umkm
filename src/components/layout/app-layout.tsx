@@ -10,10 +10,10 @@ import { WelcomeModal } from '@/components/onboarding'
 import { UpdateBanner } from '@/components/shared/UpdateBanner'
 import { Button } from '@/components/ui/button'
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { LoadingState } from '@/components/ui/loading-state'
 
@@ -71,15 +71,23 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
     let startY = 0
     let isHorizontalSwipe = false
     let ignoreGesture = false
+    let isSwipeEnabledRoute = false
 
     const handleTouchStart = (e: TouchEvent) => {
+      const currentPath = window.location.pathname
+      const navOrder = ['/dashboard', '/orders', '/customers', '/ingredients']
+      const currentIndex = navOrder.findIndex(
+        (path) => currentPath === path || (path !== '/' && currentPath.startsWith(path))
+      )
+      isSwipeEnabledRoute = currentIndex !== -1
+
       const target = e.target as Element | null
       ignoreGesture = Boolean(
         target?.closest(
           'input, textarea, select, button, a, [role="button"], [data-swipe-ignore]'
         )
       )
-      if (ignoreGesture) {
+      if (ignoreGesture || !isSwipeEnabledRoute) {
         startX = 0
         startY = 0
         isHorizontalSwipe = false
@@ -93,7 +101,7 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
     }
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (ignoreGesture) return
+      if (ignoreGesture || !isSwipeEnabledRoute) return
       if (!startX || !startY || !e.touches[0]) return
 
       const deltaX = e.touches[0].clientX - startX
@@ -108,6 +116,10 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
     const handleTouchEnd = (e: TouchEvent) => {
       if (ignoreGesture) {
         ignoreGesture = false
+        return
+      }
+      if (!isSwipeEnabledRoute) {
+        isSwipeEnabledRoute = false
         return
       }
       if (!isHorizontalSwipe || !startX || !e.changedTouches[0]) return
@@ -142,6 +154,7 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
       startY = 0
       isHorizontalSwipe = false
       ignoreGesture = false
+      isSwipeEnabledRoute = false
     }
 
     mainContent.addEventListener('touchstart', handleTouchStart, { passive: true })
