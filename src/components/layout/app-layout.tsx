@@ -70,8 +70,21 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
     let startX = 0
     let startY = 0
     let isHorizontalSwipe = false
+    let ignoreGesture = false
 
     const handleTouchStart = (e: TouchEvent) => {
+      const target = e.target as Element | null
+      ignoreGesture = Boolean(
+        target?.closest(
+          'input, textarea, select, button, a, [role="button"], [data-swipe-ignore]'
+        )
+      )
+      if (ignoreGesture) {
+        startX = 0
+        startY = 0
+        isHorizontalSwipe = false
+        return
+      }
       if (e.touches[0]) {
         startX = e.touches[0].clientX
         startY = e.touches[0].clientY
@@ -80,6 +93,7 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
     }
 
     const handleTouchMove = (e: TouchEvent) => {
+      if (ignoreGesture) return
       if (!startX || !startY || !e.touches[0]) return
 
       const deltaX = e.touches[0].clientX - startX
@@ -92,6 +106,10 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
     }
 
     const handleTouchEnd = (e: TouchEvent) => {
+      if (ignoreGesture) {
+        ignoreGesture = false
+        return
+      }
       if (!isHorizontalSwipe || !startX || !e.changedTouches[0]) return
 
       const endX = e.changedTouches[0].clientX
@@ -123,6 +141,7 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
       startX = 0
       startY = 0
       isHorizontalSwipe = false
+      ignoreGesture = false
     }
 
     mainContent.addEventListener('touchstart', handleTouchStart, { passive: true })
