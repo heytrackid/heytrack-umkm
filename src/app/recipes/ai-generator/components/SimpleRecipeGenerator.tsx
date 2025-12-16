@@ -395,9 +395,18 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
                 setPrompt(nextValue)
                 setPromptError(validatePrompt(nextValue))
               }}
-              className={`min-h-[120px] resize-none ${promptError ? 'border-red-500 focus:border-red-500' : ''}`}
+              onInput={(e) => {
+                const nextValue = (e.target as HTMLTextAreaElement).value
+                setPrompt(nextValue)
+                setPromptError(validatePrompt(nextValue))
+              }}
+              className={`min-h-[120px] resize-none touch-manipulation ${promptError ? 'border-red-500 focus:border-red-500' : ''}`}
               disabled={isGenerating}
               maxLength={500}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
             />
             
             <div className="flex items-center justify-between">
@@ -414,8 +423,14 @@ export function SimpleRecipeGenerator({ onRecipeGenerated }: SimpleRecipeGenerat
               </div>
               <Button
                 onClick={handleGenerate}
+                onTouchEnd={(e) => {
+                  e.preventDefault()
+                  if (!isGenerating && prompt.trim() && !Boolean(promptError)) {
+                    handleGenerate()
+                  }
+                }}
                 disabled={isGenerating || !prompt.trim() || Boolean(promptError)}
-                className="gap-2"
+                className="gap-2 touch-manipulation"
               >
                 {isGenerating ? (
                   <>

@@ -261,8 +261,14 @@ export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps)
                       placeholder="Contoh: Nasi goreng pedas dengan ayam dan sayuran, cocok untuk sarapan"
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
+                      onInput={(e) => setPrompt((e.target as HTMLTextAreaElement).value)}
                       rows={4}
                       disabled={generateRecipeMutation.isPending}
+                      className="touch-manipulation"
+                      autoComplete="off"
+                      autoCorrect="off"
+                      autoCapitalize="off"
+                      spellCheck={false}
                     />
                     <p className="text-xs text-muted-foreground">
                       Jelaskan resep yang ingin Anda buat dengan detail
@@ -329,7 +335,17 @@ export function AIRecipeGenerator({ onRecipeGenerated }: AIRecipeGeneratorProps)
                 </div>
 
                 <div className="flex gap-2">
-                  <Button onClick={handleGenerate} disabled={generateRecipeMutation.isPending} className="flex-1">
+                  <Button 
+                    onClick={handleGenerate}
+                    onTouchEnd={(e) => {
+                      e.preventDefault()
+                      if (!generateRecipeMutation.isPending && prompt.trim()) {
+                        handleGenerate()
+                      }
+                    }}
+                    disabled={generateRecipeMutation.isPending} 
+                    className="flex-1 touch-manipulation"
+                  >
                     {generateRecipeMutation.isPending ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
