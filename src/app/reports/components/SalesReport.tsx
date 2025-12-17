@@ -10,7 +10,7 @@ import type { DateRange } from 'react-day-picker'
 
 import { CheckCircle, Clock, DollarSign, ShoppingCart } from '@/components/icons'
 import { StatsCards as UiStatsCards, type StatCardData } from '@/components/ui/stats-cards'
-import { useSalesStats } from '@/hooks/api/useReports'
+import { useSalesStats } from '@/hooks/useReports'
 
 interface SalesReportProps {
   dateRange?: DateRange

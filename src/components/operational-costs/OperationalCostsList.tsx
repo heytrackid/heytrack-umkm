@@ -47,7 +47,7 @@ export const OperationalCostsList = (): JSX.Element => {
   const deleteCostMutation = useDeleteOperationalCost()
 
   const quickSetupMutation = useMutation({
-    mutationFn: () => postApi<{ count: number }>('/operational-costs/quick-setup', {}),
+    mutationFn: () => postApi<{ count: number }>('/api/operational-costs/quick-setup', {}),
     onSuccess: (data) => {
       successToast("Berhasil", `${data.count ?? COST_CATEGORIES.length} template biaya operasional berhasil ditambahkan`)
       void queryClient.invalidateQueries({ queryKey: ['operational-costs'] })

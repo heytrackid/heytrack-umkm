@@ -1,5 +1,8 @@
 import { fetchApi } from '@/lib/query/query-helpers'
+import type { Row } from '@/types/database'
 import { useQuery } from '@tanstack/react-query'
+
+type Order = Row<'orders'>
 
 interface SalesReportData {
   total_sales: number
@@ -158,4 +161,51 @@ export function useExportReport() {
     window.URL.revokeObjectURL(url)
     document.body.removeChild(a)
   }
+}
+
+/**
+ * Sales Stats for dashboard (consolidated from hooks/api/useReports)
+ */
+export interface SalesStats {
+  totalOrders: number
+  totalRevenue: number
+  completedOrders: number
+  pendingOrders: number
+}
+
+export function useSalesStats(options?: { dateRange?: { start?: string; end?: string } }) {
+  return useQuery({
+    queryKey: ['sales-stats', options],
+    queryFn: async (): Promise<SalesStats> => {
+      const params = new URLSearchParams()
+      params.set('limit', '500')
+      params.set('page', '1')
+      params.set('sort_order', 'desc')
+      if (options?.dateRange?.start) params.set('start_date', options.dateRange.start)
+      if (options?.dateRange?.end) params.set('end_date', options.dateRange.end)
+
+      const response = await fetchApi<{ data: Order[]; pagination?: unknown }>(`/api/orders?${params}`)
+      
+      // Handle paginated response structure
+      let orders: Order[] = []
+      if (response && typeof response === 'object' && 'data' in response) {
+        orders = Array.isArray(response.data) ? response.data : []
+      } else if (Array.isArray(response)) {
+        orders = response
+      }
+      
+      const totalOrders = orders.length
+      const totalRevenue = orders.reduce((sum: number, order: Order) => sum + (order.total_amount || 0), 0)
+      const completedOrders = orders.filter((order: Order) => order.status === 'READY').length
+      const pendingOrders = orders.filter((order: Order) => order.status === 'PENDING').length
+
+      return {
+        totalOrders,
+        totalRevenue,
+        completedOrders,
+        pendingOrders
+      }
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
 }

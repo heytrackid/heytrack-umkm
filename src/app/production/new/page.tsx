@@ -49,7 +49,7 @@ const CreateProductionBatchContent = () => {
             notes: string | null
         }) => {
             const { postApi } = await import('@/lib/query/query-helpers')
-            return postApi('/api/production-batches', data)
+            return postApi('/api/production/batches', data)
         },
         onSuccess: () => {
             void queryClient.invalidateQueries({ queryKey: ['production-batches'] })

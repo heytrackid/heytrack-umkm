@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { useCreateWhatsAppTemplate, useUpdateWhatsAppTemplate } from '@/hooks/api/useWhatsAppTemplates'
+import { useCreateWhatsAppTemplate, useUpdateWhatsAppTemplate } from '@/hooks/useWhatsAppTemplates'
 import { uiLogger } from '@/lib/client-logger'
 
 interface TemplateFormProps {
@@ -199,7 +199,7 @@ const TemplateForm = ({
             if (editingTemplate) {
                 await updateTemplateMutation.mutateAsync({
                     id: editingTemplate.id,
-                    template: templateData
+                    data: templateData
                 })
             } else {
                 await createTemplateMutation.mutateAsync(templateData)

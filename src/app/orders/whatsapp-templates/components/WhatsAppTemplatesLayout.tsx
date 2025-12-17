@@ -12,9 +12,9 @@ import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useDeleteWhatsAppTemplate, useGenerateDefaultTemplates, useUpdateWhatsAppTemplate, useWhatsAppTemplates } from '@/hooks/api/useWhatsAppTemplates'
 import { useAuth } from '@/hooks/index'
 import { successToast, } from '@/hooks/use-toast'
+import { useDeleteWhatsAppTemplate, useGenerateDefaultTemplates, useUpdateWhatsAppTemplate, useWhatsAppTemplates } from '@/hooks/useWhatsAppTemplates'
 import { handleError } from '@/lib/error-handling'
 
 import TemplateForm from './TemplateForm'
@@ -87,8 +87,7 @@ const WhatsAppTemplatesLayout = () => {
     const handleToggleDefault = useCallback(async (template: WhatsAppTemplate) => {
         await updateMutation.mutateAsync({
             id: template.id,
-            template: {
-                ...template,
+            data: {
                 is_default: !template.is_default
             }
         })
@@ -259,7 +258,7 @@ const WhatsAppTemplatesLayout = () => {
 
                 {/* Templates Table */}
                 <TemplatesTable
-                    templates={templates}
+                    templates={templates as unknown as WhatsAppTemplate[]}
                     isLoading={loading}
                     onEdit={handleEdit}
                     onDelete={handleDeleteRequest}

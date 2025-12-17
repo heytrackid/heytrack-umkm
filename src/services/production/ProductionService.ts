@@ -27,25 +27,32 @@ export interface ProductionBatch {
   id: string
   recipe_id: string
   recipe_name: string
+  batch_number: string
   planned_quantity: number
-  actual_quantity?: number
+  quantity: number
+  actual_quantity?: number | undefined
   status: string
-  planned_start_time?: string
-  actual_start_time?: string
-  planned_end_time?: string
-  actual_end_time?: string
-  notes?: string
+  planned_date: string
+  planned_start_time?: string | undefined
+  actual_start_time?: string | undefined
+  planned_end_time?: string | undefined
+  actual_end_time?: string | undefined
+  unit: string
+  actual_cost?: number | undefined
+  notes?: string | undefined
+  started_at?: string | null | undefined
+  completed_at?: string | null | undefined
   created_at: string
   updated_at: string
 }
 
 export interface ProductionBatchWithDetails extends ProductionBatch {
-  labor_cost?: number
-  overhead_cost?: number
-  total_cost?: number
-  efficiency?: number
-  yield_percentage?: number
-  waste_quantity?: number
+  labor_cost?: number | undefined
+  overhead_cost?: number | undefined
+  total_cost?: number | undefined
+  efficiency?: number | undefined
+  yield_percentage?: number | undefined
+  waste_quantity?: number | undefined
 }
 
 export interface ProductionBatchCreateData {
@@ -117,9 +124,16 @@ export class ProductionService extends BaseService {
         id: batch.id,
         recipe_id: batch.recipe_id,
         recipe_name: batch.recipes?.name || 'Unknown Recipe',
+        batch_number: batch.batch_number,
         planned_quantity: batch.quantity,
+        quantity: batch.quantity,
         status: batch.status || '',
+        planned_date: batch.planned_date,
         planned_start_time: batch.planned_date,
+        unit: batch.unit,
+        actual_cost: batch.actual_cost ?? undefined,
+        started_at: batch.started_at,
+        completed_at: batch.completed_at,
         ...(batch.started_at && { actual_start_time: batch.started_at }),
         ...(batch.completed_at && { actual_end_time: batch.completed_at }),
         ...(batch.notes && { notes: batch.notes }),
@@ -177,9 +191,16 @@ export class ProductionService extends BaseService {
         id: batch.id,
         recipe_id: batch.recipe_id,
         recipe_name: batch.recipes?.name || 'Unknown Recipe',
+        batch_number: batch.batch_number,
         planned_quantity: batch.quantity,
+        quantity: batch.quantity,
         status: batch.status || '',
+        planned_date: batch.planned_date,
         planned_start_time: batch.planned_date,
+        unit: batch.unit,
+        actual_cost: batch.actual_cost ?? undefined,
+        started_at: batch.started_at,
+        completed_at: batch.completed_at,
         ...(batch.started_at && { actual_start_time: batch.started_at }),
         ...(batch.completed_at && { actual_end_time: batch.completed_at }),
         ...(batch.notes && { notes: batch.notes }),
@@ -237,9 +258,16 @@ export class ProductionService extends BaseService {
             id: typedData.id,
             recipe_id: typedData.recipe_id,
             recipe_name: typedData.recipes?.name || 'Unknown Recipe',
+            batch_number: typedData.batch_number,
             planned_quantity: typedData.quantity,
+            quantity: typedData.quantity,
             status: typedData.status || '',
+            planned_date: typedData.planned_date,
             planned_start_time: typedData.planned_date,
+            unit: typedData.unit,
+            actual_cost: typedData.actual_cost ?? undefined,
+            started_at: typedData.started_at,
+            completed_at: typedData.completed_at,
             ...(typedData.notes && { notes: typedData.notes }),
             created_at: typedData.created_at || '',
             updated_at: typedData.updated_at || '',
@@ -298,14 +326,20 @@ export class ProductionService extends BaseService {
           }
 
       const batch = data as ProductionBatchWithRecipe
-      const updatedBatch = {
+      const updatedBatch: ProductionBatchWithDetails = {
         id: batch.id,
         recipe_id: batch.recipe_id,
         recipe_name: batch.recipes?.name || 'Unknown Recipe',
+        batch_number: batch.batch_number,
         planned_quantity: batch.quantity,
-
+        quantity: batch.quantity,
         status: batch.status || '',
+        planned_date: batch.planned_date,
         planned_start_time: batch.planned_date,
+        unit: batch.unit,
+        actual_cost: batch.actual_cost ?? undefined,
+        started_at: batch.started_at,
+        completed_at: batch.completed_at,
         ...(batch.started_at && { actual_start_time: batch.started_at }),
         ...(batch.completed_at && { actual_end_time: batch.completed_at }),
         ...(batch.notes && { notes: batch.notes }),
