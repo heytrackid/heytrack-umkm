@@ -53,6 +53,18 @@ export interface RecipeSummary {
 
 /**
  * Calculate recipe HPP (Harga Pokok Produksi)
+ * 
+ * @deprecated This is a LEGACY function with simplified calculation.
+ * For accurate HPP calculations, use HppCalculatorService instead:
+ * - Uses WAC (Weighted Average Cost) for material pricing
+ * - Production-based labor cost allocation
+ * - Volume-based overhead distribution
+ * - Waste factor consideration
+ * 
+ * Import: import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
+ * Usage: await hppService.calculateRecipeHpp(recipeId)
+ * 
+ * This function is kept for backward compatibility only.
  */
 export const calculateRecipeHPP = (
   ingredients: RecipeIngredientWithDetails[],
@@ -60,6 +72,8 @@ export const calculateRecipeHPP = (
   laborCost: number = 0,
   packagingCost: number = 0
 ): HppCalculationResult => {
+  // LEGACY CALCULATION - Uses current price only, fixed overhead rate
+  // Does NOT consider: WAC, waste factor, production history
   const ingredientCost = ingredients.reduce((total, recipeIngredient) => {
     if (!recipeIngredient.ingredient) {return total}
     
