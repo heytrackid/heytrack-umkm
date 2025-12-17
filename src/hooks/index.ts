@@ -25,6 +25,7 @@ export * from './useOperationalCosts'
 
 // HPP & Pricing
 export * from './useHppData'
+export * from './useHppMigration'
 export * from './useOrderPricing'
 export * from './useRecipeCostPreview'
 

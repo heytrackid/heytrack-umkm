@@ -10,10 +10,10 @@ import { WelcomeModal } from '@/components/onboarding'
 import { UpdateBanner } from '@/components/shared/UpdateBanner'
 import { Button } from '@/components/ui/button'
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { LoadingState } from '@/components/ui/loading-state'
 
@@ -21,6 +21,7 @@ import { NotificationBell } from '@/components/layout/NotificationBell'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { NotificationProvider } from '@/contexts/notification-context'
 import { useAuth } from '@/hooks/useAuth'
+import { useHppMigration } from '@/hooks/useHppMigration'
 import { useInstantNavigation } from '@/hooks/useInstantNavigation'
 import { cn } from '@/lib/utils'
 
@@ -39,6 +40,9 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
   const mainContentRef = useRef<HTMLDivElement>(null)
   const [mounted, setMounted] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  
+  // Auto-recalculate HPP with improved accuracy on first load
+  useHppMigration()
 
   useLayoutEffect(() => {
     const timer = setTimeout(() => {
