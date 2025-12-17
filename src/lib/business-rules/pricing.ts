@@ -4,10 +4,20 @@
  */
 
 /**
- * Calculate HPP (Harga Pokok Penjualan / Cost of Goods Sold)
+ * Calculate Simple HPP (Harga Pokok Penjualan / Cost of Goods Sold)
  * Formula: (Ingredient Cost + Overhead) / (1 - Profit Margin)
+ * 
+ * @deprecated This is a SIMPLIFIED calculation for AI demo/explanation purposes ONLY.
+ * For production HPP calculations, use HppCalculatorService which includes:
+ * - WAC (Weighted Average Cost) for material pricing
+ * - Production-based labor cost allocation
+ * - Volume-based overhead distribution
+ * - Waste factor consideration
+ * 
+ * Import: import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
+ * Usage: await hppService.calculateRecipeHpp(recipeId)
  */
-export function calculateHPP(
+export function calculateSimpleHPP(
   ingredientCost: number,
   overheadCost: number,
   profitMarginPercent: number

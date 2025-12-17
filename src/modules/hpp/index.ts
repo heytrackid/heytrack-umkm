@@ -16,9 +16,7 @@ export { UnifiedHppPage } from './components/UnifiedHppPage'
 // - import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
 
 // Hooks
-export { useHppCalculatorWorker } from './hooks/useHppCalculatorWorker'
 export { useHppOverview } from './hooks/useHppOverview'
-export { useHppWorker } from './hooks/useHppWorker'
 export { useUnifiedHpp } from './hooks/useUnifiedHpp'
 
 // Types

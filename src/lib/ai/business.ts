@@ -4,7 +4,7 @@ import { PromptBuilder } from '@/lib/ai/prompt-builder'
 import { AIService } from '@/lib/ai/service'
 
 // Business Rules
-import { calculateHPP, validateMinimumMarkup } from '@/lib/business-rules/pricing'
+import { calculateSimpleHPP, validateMinimumMarkup } from '@/lib/business-rules/pricing'
 
 /**
  * Business AI Module
@@ -165,7 +165,7 @@ ${context.orders.recent.slice(0, 3).map(order =>
       const overheadCost = 3000   // Rp 3,000 overhead
       const profitMargin = 30     // 30%
 
-      const hpp = calculateHPP(ingredientCost, overheadCost, profitMargin)
+      const hpp = calculateSimpleHPP(ingredientCost, overheadCost, profitMargin)
       const markupValidation = validateMinimumMarkup(profitMargin)
 
       return `
