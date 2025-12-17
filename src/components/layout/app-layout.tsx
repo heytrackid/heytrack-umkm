@@ -10,10 +10,10 @@ import { WelcomeModal } from '@/components/onboarding'
 import { UpdateBanner } from '@/components/shared/UpdateBanner'
 import { Button } from '@/components/ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { LoadingState } from '@/components/ui/loading-state'
 
@@ -195,7 +195,7 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
           {/* Main wrapper - takes remaining space */}
           <div
             className={cn(
-              'flex-1 flex flex-col min-h-screen transition-all duration-300',
+              'flex-1 flex flex-col min-h-screen transition-all duration-300 overflow-x-hidden',
               !isMobile && (sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64')
             )}
           >
@@ -240,11 +240,14 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
             <main
               ref={mainContentRef}
               className={cn(
-                'flex-1 bg-background p-4 md:p-6',
-                isMobile && 'pb-[calc(56px+env(safe-area-inset-bottom))]'
+                'flex-1 bg-background overflow-x-hidden',
+                isMobile ? 'p-3 pb-[calc(56px+env(safe-area-inset-bottom))]' : 'p-4 md:p-6'
               )}
             >
-              <div className="mx-auto max-w-7xl space-y-4">{children}</div>
+              <div className={cn(
+                'mx-auto space-y-4',
+                !isMobile && 'max-w-7xl'
+              )}>{children}</div>
             </main>
           </div>
 

@@ -46,7 +46,7 @@ const ReportsPage = () => {
   // Show loading state while auth is initializing
   if (isAuthLoading) {
     return (
-      <div className="space-y-6 p-6">
+      <div className="space-y-6">
         {/* Stats skeleton */}
         <StatsSkeleton count={4} />
 
@@ -57,7 +57,7 @@ const ReportsPage = () => {
   }
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4">
       <ReportsLayout />
     </div>
   )

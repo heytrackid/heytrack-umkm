@@ -1,19 +1,19 @@
 'use client'
 
 import {
-  ArrowDownAZ,
-  ArrowUpAZ,
-  Download,
-  Edit,
-  Eye,
-  Grid3X3,
-  List,
-  MoreVertical,
-  Plus,
-  RefreshCw,
-  Search,
-  Trash2,
-  X
+    ArrowDownAZ,
+    ArrowUpAZ,
+    Download,
+    Edit,
+    Eye,
+    Grid3X3,
+    List,
+    MoreVertical,
+    Plus,
+    RefreshCw,
+    Search,
+    Trash2,
+    X
 } from '@/components/icons'
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -21,12 +21,12 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Input } from '@/components/ui/input'
@@ -416,8 +416,7 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
             ) : (
               <div className="border rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
-                  <Table className={cn("min-w-[720px] lg:min-w-full")}
-                  >
+                  <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/50">
                         {enableBulkActions && (

@@ -1,17 +1,12 @@
 'use client'
 
-import { Plus } from '@/components/icons'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { Building2, FileText, Mail, Phone, Plus, User } from '@/components/icons'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
+import { EntityForm, type FormSection } from '@/components/shared'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { Textarea } from '@/components/ui/textarea'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { errorToast, successToast } from '@/hooks/use-toast'
 import { uiLogger } from '@/lib/logger'
 
@@ -33,31 +28,40 @@ interface SupplierFormProps {
 
 const SupplierForm = ({ onSubmit }: SupplierFormProps): JSX.Element => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const form = useForm<SupplierFormData>({
-    resolver: zodResolver(SupplierFormSchema),
-    defaultValues: {
-      name: '',
-      contact_person: '',
-      phone: '',
-      email: '',
-      address: '',
-      is_active: true,
-      notes: '',
+  const sections: FormSection[] = [
+    {
+      title: 'Informasi Supplier',
+      fields: [
+        { name: 'name', label: 'Nama Supplier', type: 'text', icon: Building2, required: true, placeholder: 'PT. Supplier Jaya' },
+        { name: 'contact_person', label: 'Nama Kontak', type: 'text', icon: User, placeholder: 'John Doe' },
+        { name: 'phone', label: 'Telepon', type: 'tel', icon: Phone, placeholder: '08123456789' },
+        { name: 'email', label: 'Email', type: 'email', icon: Mail, placeholder: 'Masukkan email jika ada' },
+        { name: 'address', label: 'Alamat', type: 'textarea', icon: Building2, placeholder: 'Jl. Supplier No. 123', rows: 3 },
+        { name: 'notes', label: 'Catatan', type: 'textarea', icon: FileText, placeholder: 'Catatan tambahan...', rows: 3 }
+      ]
+    },
+    {
+      title: 'Status',
+      fields: [
+        { name: 'is_active', label: 'Status Aktif', type: 'switch', description: 'Supplier aktif dapat menerima pesanan' }
+      ]
     }
-  })
+  ]
 
-  const handleSubmit = async (data: SupplierFormData) => {
+  const handleFormSubmit = async (data: SupplierFormData) => {
+    setIsSubmitting(true)
     try {
       await onSubmit(data)
-      
-      form.reset()
       setIsDialogOpen(false)
       successToast('Berhasil', 'Supplier berhasil ditambahkan')
     } catch (error) {
       const normalizedError = error instanceof Error ? error : new Error(String(error))
       uiLogger.error({ error: normalizedError }, 'Error creating supplier')
       errorToast('Error', normalizedError.message || 'Gagal menambahkan supplier')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -69,99 +73,28 @@ const SupplierForm = ({ onSubmit }: SupplierFormProps): JSX.Element => {
           Tambah Supplier
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
-        <form onSubmit={form.handleSubmit(handleSubmit)}>
-          <DialogHeader>
-            <DialogTitle>Tambah Supplier</DialogTitle>
-            <DialogDescription>
-              Input detail supplier baru
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid grid-cols-1 gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nama Supplier *</Label>
-              <Input
-                id="name"
-                placeholder="PT. Supplier Jaya"
-                {...form.register('name')}
-              />
-              {form.formState.errors.name && (
-                <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="contact_person">Nama Kontak</Label>
-              <Input
-                id="contact_person"
-                placeholder="John Doe"
-                {...form.register('contact_person')}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="phone">Telepon</Label>
-                <Input
-                  id="phone"
-                  placeholder="08123456789"
-                  {...form.register('phone')}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email (Opsional)</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Masukkan email jika ada"
-                  {...form.register('email')}
-                />
-                {form.formState.errors.email && (
-                  <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="address">Alamat</Label>
-              <Textarea
-                id="address"
-                placeholder="Jl. Supplier No. 123"
-                {...form.register('address')}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="notes">Catatan</Label>
-              <Textarea
-                id="notes"
-                placeholder="Catatan tambahan..."
-                {...form.register('notes')}
-              />
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-              <Label htmlFor="is_active">Status Aktif</Label>
-              <Switch
-                id="is_active"
-                // eslint-disable-next-line react-hooks/incompatible-library
-                checked={form.watch('is_active')}
-                onCheckedChange={(checked) => form.setValue('is_active', checked)}
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Batal
-            </Button>
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? 'Menyimpan...' : 'Simpan Supplier'}
-            </Button>
-          </DialogFooter>
-        </form>
+      <DialogContent className="w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Tambah Supplier</DialogTitle>
+        </DialogHeader>
+        <EntityForm<SupplierFormData>
+          title=""
+          sections={sections}
+          defaultValues={{
+            name: '',
+            contact_person: '',
+            phone: '',
+            email: '',
+            address: '',
+            is_active: true,
+            notes: '',
+          }}
+          schema={SupplierFormSchema}
+          onSubmit={handleFormSubmit}
+          onCancel={() => setIsDialogOpen(false)}
+          isLoading={isSubmitting}
+          submitLabel="Simpan Supplier"
+        />
       </DialogContent>
     </Dialog>
   )

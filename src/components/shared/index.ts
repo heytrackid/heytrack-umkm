@@ -2,7 +2,7 @@
 // Shared Components and Utilities Index
 
 // Error Boundary
-export { ErrorBoundary, withErrorBoundary, useErrorHandler } from './ErrorBoundary'
+export { ErrorBoundary, useErrorHandler, withErrorBoundary } from './ErrorBoundary'
 
 // Data Table
 export { SharedDataTable } from './SharedDataTable'
@@ -12,52 +12,37 @@ export { SharedForm, SharedModalForm, useSharedForm } from './SharedForm'
 
 // Page Components
 export {
-  PageHeader,
-  SharedStatsCards,
-  ErrorCard,
-  DetailView,
-  ActionButtons,
-  StatusBadge
+    ActionButtons, DetailView, ErrorCard, PageHeader,
+    SharedStatsCards, StatusBadge
 } from './PageComponents'
 
 // Layout Components
 export {
-  PageLayout,
-  ContentGrid,
-  CardGrid,
-  Section,
-  DataView,
-  Container,
-  MobileNav
+    CardGrid, Container, ContentGrid, DataView, MobileNav, PageLayout, Section
 } from './LayoutComponents'
 
 // Data Components
 export {
-  SearchInput,
-  AdvancedFilters,
-  SortableColumn,
-  ExportActions,
-  BulkActions,
-  TableSkeleton,
-  CardSkeleton,
-  FormSkeleton,
-  EmptyState,
-  QuickActions
+    AdvancedFilters, BulkActions, CardSkeleton, EmptyState, ExportActions, FormSkeleton, QuickActions, SearchInput, SortableColumn, TableSkeleton
 } from './DataComponents'
 
 // Business Components
 export {
-  InventoryAlerts,
-  StockLevelIndicator,
-  MetricCard,
-  ProfitabilityCalculator,
-  CustomerInsights
+    CustomerInsights, InventoryAlerts, MetricCard,
+    ProfitabilityCalculator, StockLevelIndicator
 } from './BusinessComponents'
+
+// Alert Banner
+export { AlertBanner, type AlertBannerProps, type AlertVariant } from './AlertBanner'
+
+// Entity Form
+export { EntityForm, type EntityFormProps, type FormField, type FormFieldType, type FormSection } from './EntityForm'
 
 
 
 // Re-export utilities
-export * from '@/lib/shared/utilities'
 export * from '@/lib/shared/constants'
-export * from '@/lib/shared/validation'
 export * from '@/lib/shared/data-management'
+export * from '@/lib/shared/utilities'
+export * from '@/lib/shared/validation'
+

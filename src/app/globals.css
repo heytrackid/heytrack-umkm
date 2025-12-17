@@ -125,9 +125,22 @@
 
   html {
     @apply h-full;
+    overflow-x: hidden;
+    width: 100%;
   }
   body {
     @apply bg-background text-foreground h-full m-0 p-0;
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+  }
+  
+  /* Prevent horizontal overflow on main containers */
+  #__next,
+  main,
+  [role="main"] {
+    overflow-x: hidden;
+    width: 100%;
   }
 
   /* Full screen layout fixes */

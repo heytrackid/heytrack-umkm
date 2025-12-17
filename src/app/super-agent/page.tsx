@@ -58,7 +58,7 @@ export default function SuperAgentPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6 p-6">
+      <div className="space-y-6">
         <PageHeader
           title="Super Agent"
           description="Koleksi AI Agent untuk membantu optimasi bisnis kuliner Anda"

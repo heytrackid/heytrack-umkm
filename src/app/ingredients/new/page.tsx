@@ -1,20 +1,20 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft } from '@/components/icons'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { EnhancedIngredientForm } from '@/components/ingredients/index'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { BreadcrumbPatterns, PageBreadcrumb } from '@/components/ui/page-breadcrumb'
-import { PageHeader } from '@/components/layout/PageHeader'
 import { useAuth } from '@/hooks/index'
-import { useCreateIngredient } from '@/hooks/useIngredients'
 import { successToast, } from '@/hooks/use-toast'
+import { useCreateIngredient } from '@/hooks/useIngredients'
 import { handleError } from '@/lib/error-handling'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 
@@ -83,7 +83,7 @@ const NewIngredientPage = (): JSX.Element => {
 
   return (
     <AppLayout>
-      <div className="space-y-6 p-6">
+      <div className="space-y-6">
         <PageBreadcrumb items={BreadcrumbPatterns.ingredientNew} />
 
         <PageHeader

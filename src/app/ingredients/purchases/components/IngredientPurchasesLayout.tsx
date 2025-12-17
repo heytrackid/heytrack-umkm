@@ -72,7 +72,7 @@ const IngredientPurchasesLayout = (): JSX.Element => {
   if (isAuthLoading) {
     return (
       <AppLayout>
-        <div className="space-y-6 p-6">
+        <div className="space-y-6">
           <PageBreadcrumb items={BreadcrumbPatterns.ingredientPurchases} />
 
           <PageHeader
@@ -88,7 +88,7 @@ const IngredientPurchasesLayout = (): JSX.Element => {
 
   return (
     <AppLayout>
-      <div className="space-y-6 p-6">
+      <div className="space-y-6">
         <PageBreadcrumb items={BreadcrumbPatterns.ingredientPurchases} />
 
         <PageHeader

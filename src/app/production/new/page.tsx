@@ -203,7 +203,7 @@ export default function CreateProductionBatchPage() {
     return (
         <Suspense
             fallback={(
-                <div className="space-y-6 p-6">
+                <div className="space-y-6">
                     <Card className="max-w-2xl mx-auto">
                         <CardHeader>
                             <CardTitle>Form Produksi</CardTitle>

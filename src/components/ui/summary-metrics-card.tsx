@@ -27,12 +27,12 @@ export const SummaryMetricsCard = ({
   className,
   cardClassName,
   contentClassName,
-  gridClassName = 'grid grid-cols-2 sm:grid-cols-4 gap-4',
+  gridClassName = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3',
 }: SummaryMetricsCardProps): JSX.Element => {
   return (
-    <Card className={cn(cardClassName, className)}>
-      <CardContent className={cn('p-4', contentClassName)}>
-        <div className={gridClassName}>
+    <Card className={cn(cardClassName, className, 'w-full overflow-hidden')}>
+      <CardContent className={cn('p-3 sm:p-4', contentClassName)}>
+        <div className={cn(gridClassName, 'w-full')}>
           {items.map((item) => {
             const Icon = item.icon
             return (

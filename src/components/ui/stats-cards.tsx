@@ -36,10 +36,10 @@ interface StatsCardsProps {
 /**
  * Standardized stats cards grid component
  */
-export const StatsCards = ({ stats, className, gridClassName = "grid grid-cols-2 gap-4 lg:grid-cols-4" }: StatsCardsProps) => (
-  <div className={`${gridClassName} ${className ?? ''}`}>
+export const StatsCards = ({ stats, className, gridClassName = "grid grid-cols-1 sm:grid-cols-2 gap-3 lg:grid-cols-4" }: StatsCardsProps) => (
+  <div className={cn(gridClassName, className, "w-full max-w-full overflow-hidden")}>
     {stats.map((stat, index) => (
-      <div key={index} className="min-w-0">
+      <div key={index} className="min-w-0 w-full max-w-full">
         <StatCard {...stat} />
       </div>
     ))}
@@ -62,9 +62,9 @@ export const StatCard = ({
   trend,
   variant: _variant = 'default'
 }: StatCardData) => (
-  <Card className={cardClassName}>
+  <Card className={cn(cardClassName, "max-w-full overflow-hidden")}>
     <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0 pb-2">
-      <CardTitle className="text-sm font-medium min-w-0 whitespace-normal break-words">
+      <CardTitle className="text-sm font-medium min-w-0 whitespace-normal break-words max-w-full">
         {title}
       </CardTitle>
       {Icon && (
@@ -79,24 +79,24 @@ export const StatCard = ({
           )
       )}
     </CardHeader>
-    <CardContent>
+    <CardContent className="max-w-full overflow-hidden">
       <div className={cn(
-        'text-lg sm:text-2xl font-bold leading-tight whitespace-normal break-words max-w-full',
+        'text-lg sm:text-2xl font-bold leading-tight whitespace-normal break-words max-w-full overflow-hidden',
         valueClassName
       )}>
         {value}
       </div>
       {(description || trend) && (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between max-w-full">
           {description && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground truncate">
               {description}
             </p>
           )}
           {trend && (
             <Badge
               variant={trend.isPositive ? 'default' : 'destructive'}
-              className="text-xs"
+              className="text-xs shrink-0"
             >
               {trend.isPositive ? '+' : ''}{trend.value}%
             </Badge>
@@ -104,7 +104,7 @@ export const StatCard = ({
         </div>
       )}
       {footer && (
-        <div className={cn((description || trend) ? 'mt-1' : 'mt-2')}>
+        <div className={cn((description || trend) ? 'mt-1' : 'mt-2', "max-w-full overflow-hidden")}>
           {footer}
         </div>
       )}

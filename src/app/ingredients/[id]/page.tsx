@@ -106,7 +106,7 @@ const EditIngredientPage = (): JSX.Element | null => {
     if (fetching) {
         return (
             <AppLayout>
-                <div className="space-y-6 p-6">
+                <div className="space-y-6">
                     <PageBreadcrumb items={breadcrumbItems} />
                     <Card>
                         <CardContent className="p-6">
@@ -121,7 +121,7 @@ const EditIngredientPage = (): JSX.Element | null => {
     if (!ingredient) {
         return (
             <AppLayout>
-                <div className="space-y-6 p-6">
+                <div className="space-y-6">
                     <PageBreadcrumb items={breadcrumbItems} />
                     <Card>
                         <CardContent className="pt-6">

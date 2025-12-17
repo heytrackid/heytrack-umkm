@@ -1,33 +1,33 @@
 'use client'
 
 import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Cell,
-    Legend,
-    Line,
-    LineChart,
-    Pie,
-    PieChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
 } from "recharts";
 
 import {
-    AlertTriangle,
-    ArrowDownRight,
-    ArrowUpRight,
-    Calendar,
-    CheckCircle2,
-    DollarSign,
-    Download,
-    RefreshCw,
-    Sparkles,
-    TrendingDown,
-    TrendingUp
+  AlertTriangle,
+  ArrowDownRight,
+  ArrowUpRight,
+  Calendar,
+  CheckCircle2,
+  DollarSign,
+  Download,
+  RefreshCw,
+  Sparkles,
+  TrendingDown,
+  TrendingUp
 } from '@/components/icons';
 import { PageHeader } from '@/components/layout';
 import { AppLayout } from '@/components/layout/app-layout';
@@ -120,7 +120,7 @@ export default function FinanceWisePage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6 p-6">
+      <div className="space-y-6">
         {/* Header */}
         <PageHeader
           title="FinanceWise AI"
