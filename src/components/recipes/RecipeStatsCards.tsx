@@ -1,12 +1,10 @@
 'use client'
 
-import { ChefHat, TrendingUp, Calculator, BarChart3 } from '@/components/icons'
+import { BarChart3, Calculator, ChefHat, TrendingUp } from '@/components/icons'
 
-import { Card, CardContent } from '@/components/ui/card'
+import { StatsCards, type StatCardData } from '@/components/ui/stats-cards'
 
 import type { Row } from '@/types/database'
-
-
 
 type Recipe = Row<'recipes'>
 
@@ -68,65 +66,36 @@ export const RecipeStatsCards = ({ recipes }: RecipeStatsCardsProps) => {
         return labels[category] ?? category
     }
 
+    const totalRecipesDescription = totalRecipes !== activeRecipes ? `dari ${totalRecipes} total` : null
+
+    const stats: StatCardData[] = [
+        {
+            title: 'Total Resep',
+            value: activeRecipes,
+            ...(totalRecipesDescription ? { description: totalRecipesDescription } : {}),
+            icon: ChefHat,
+        },
+        {
+            title: 'Tingkat Kesulitan',
+            value: getDifficultyLabel(avgDifficulty),
+            description: 'rata-rata',
+            icon: TrendingUp,
+        },
+        {
+            title: 'Kategori Terbanyak',
+            value: getCategoryLabel(mostCommonCategory),
+            description: `${categoryCount[mostCommonCategory] ?? 0} resep`,
+            icon: BarChart3,
+        },
+        {
+            title: 'Siap Dihitung',
+            value: activeRecipes,
+            description: 'resep aktif',
+            icon: Calculator,
+        },
+    ]
+
     return (
-        <div className="grid gap-4 md:grid-cols-4">
-            <Card>
-                <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Total Resep</p>
-                            <p className="text-2xl font-bold">{activeRecipes}</p>
-                            {totalRecipes !== activeRecipes && (
-                                <p className="text-xs text-muted-foreground">dari {totalRecipes} total</p>
-                            )}
-                        </div>
-                        <ChefHat className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Tingkat Kesulitan</p>
-                            <p className="text-2xl font-bold">
-                                {getDifficultyLabel(avgDifficulty)}
-                            </p>
-                            <p className="text-xs text-muted-foreground">rata-rata</p>
-                        </div>
-                        <TrendingUp className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Kategori Terbanyak</p>
-                            <p className="text-2xl font-bold">{getCategoryLabel(mostCommonCategory)}</p>
-                            <p className="text-xs text-muted-foreground">
-                                {categoryCount[mostCommonCategory] ?? 0} resep
-                            </p>
-                        </div>
-                        <BarChart3 className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Siap Dihitung</p>
-                            <p className="text-2xl font-bold">{activeRecipes}</p>
-                            <p className="text-xs text-muted-foreground">resep aktif</p>
-                        </div>
-                        <Calculator className="h-8 w-8 text-orange-600" />
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
+        <StatsCards stats={stats} gridClassName="grid grid-cols-2 gap-4 lg:grid-cols-4" />
     )
 }

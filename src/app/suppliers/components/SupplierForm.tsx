@@ -12,8 +12,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import { errorToast, successToast } from '@/hooks/use-toast'
 import { uiLogger } from '@/lib/logger'
-import { successToast, errorToast } from '@/hooks/use-toast'
 
 const SupplierFormSchema = z.object({
   name: z.string().min(1, 'Nama supplier wajib diisi'),
@@ -100,7 +100,7 @@ const SupplierForm = ({ onSubmit }: SupplierFormProps): JSX.Element => {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="phone">Telepon</Label>
                 <Input

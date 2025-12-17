@@ -1,7 +1,8 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-import type { ComponentType } from 'react'
+import { cn } from '@/lib/utils'
+import type { ComponentType, ReactNode } from 'react'
 
 /**
  * Shared Stats Cards Components
@@ -10,10 +11,15 @@ import type { ComponentType } from 'react'
 
 
 export interface StatCardData {
-  title: string
-  value: number | string
+  title: ReactNode
+  value: ReactNode
+  valueClassName?: string
   description?: string
    icon?: ComponentType<{ className?: string }>
+  iconWrapperClassName?: string
+  iconClassName?: string
+  cardClassName?: string
+  footer?: ReactNode
   trend?: {
     value: number
     isPositive: boolean
@@ -30,10 +36,12 @@ interface StatsCardsProps {
 /**
  * Standardized stats cards grid component
  */
-export const StatsCards = ({ stats, className, gridClassName = "grid gap-4 md:grid-cols-2 lg:grid-cols-4" }: StatsCardsProps) => (
+export const StatsCards = ({ stats, className, gridClassName = "grid grid-cols-2 gap-4 lg:grid-cols-4" }: StatsCardsProps) => (
   <div className={`${gridClassName} ${className ?? ''}`}>
     {stats.map((stat, index) => (
-      <StatCard key={index} {...stat} />
+      <div key={index} className="min-w-0">
+        <StatCard {...stat} />
+      </div>
     ))}
   </div>
 )
@@ -44,35 +52,62 @@ export const StatsCards = ({ stats, className, gridClassName = "grid gap-4 md:gr
 export const StatCard = ({
   title,
   value,
+  valueClassName,
   description,
   icon: Icon,
+  iconWrapperClassName,
+  iconClassName,
+  cardClassName,
+  footer,
   trend,
   variant: _variant = 'default'
 }: StatCardData) => (
-  <Card>
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-sm font-medium">
+  <Card className={cardClassName}>
+    <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium min-w-0 whitespace-normal break-words">
         {title}
       </CardTitle>
-      {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
+      {Icon && (
+        iconWrapperClassName
+          ? (
+            <div className={cn('shrink-0', iconWrapperClassName)}>
+              <Icon className={cn('h-4 w-4', iconClassName)} />
+            </div>
+          )
+          : (
+            <Icon className={cn('h-4 w-4 text-muted-foreground shrink-0', iconClassName)} />
+          )
+      )}
     </CardHeader>
     <CardContent>
-      <div className="text-2xl font-bold">{value}</div>
-      <div className="flex items-center justify-between">
-        {description && (
-          <p className="text-xs text-muted-foreground">
-            {description}
-          </p>
-        )}
-        {trend && (
-          <Badge
-            variant={trend.isPositive ? 'default' : 'secondary'}
-            className="text-xs"
-          >
-            {trend.isPositive ? '+' : ''}{trend.value}%
-          </Badge>
-        )}
+      <div className={cn(
+        'text-lg sm:text-2xl font-bold leading-tight whitespace-normal break-words max-w-full',
+        valueClassName
+      )}>
+        {value}
       </div>
+      {(description || trend) && (
+        <div className="flex items-center justify-between">
+          {description && (
+            <p className="text-xs text-muted-foreground">
+              {description}
+            </p>
+          )}
+          {trend && (
+            <Badge
+              variant={trend.isPositive ? 'default' : 'destructive'}
+              className="text-xs"
+            >
+              {trend.isPositive ? '+' : ''}{trend.value}%
+            </Badge>
+          )}
+        </div>
+      )}
+      {footer && (
+        <div className={cn((description || trend) ? 'mt-1' : 'mt-2')}>
+          {footer}
+        </div>
+      )}
     </CardContent>
   </Card>
 )

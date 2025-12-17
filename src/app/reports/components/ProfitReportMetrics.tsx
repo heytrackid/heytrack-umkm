@@ -5,6 +5,7 @@ import { ArrowDownRight, ArrowUpRight, DollarSign, Minus, Package, ShoppingCart,
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { StatsCards as UiStatsCards, type StatCardData } from '@/components/ui/stats-cards'
 import { useCurrency } from '@/hooks/useCurrency'
 
 interface ProfitMetricsProps {
@@ -39,7 +40,7 @@ export const ProfitMetrics = ({ summary, isMobile = false }: ProfitMetricsProps)
     // Early return if summary is undefined
     if (!summary) {
         return (
-            <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {Array.from({ length: 4 }, (_, i) => (
                     <Card key={i} className="animate-pulse">
                         <CardHeader className="pb-2">
@@ -55,94 +56,67 @@ export const ProfitMetrics = ({ summary, isMobile = false }: ProfitMetricsProps)
         )
     }
 
-    const gridClass = isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4'
+    const gridClass = isMobile ? 'grid-cols-2' : 'grid-cols-2 lg:grid-cols-4'
+
+    const cards: StatCardData[] = [
+        {
+            title: 'Total Pendapatan',
+            value: formatCurrency(summary.totalRevenue),
+            icon: DollarSign,
+            footer: (
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm">
+                    {getTrendIcon(summary.totalRevenue)}
+                    <span className={getTrendColor(summary.totalRevenue)}>
+                        Data tersedia
+                    </span>
+                </div>
+            ),
+        },
+        {
+            title: 'COGS (Biaya Produksi)',
+            value: formatCurrency(summary.totalCOGS),
+            icon: Package,
+            valueClassName: 'text-orange-600',
+            footer: (
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm text-muted-foreground">
+                    <span>
+                        {summary.totalRevenue > 0
+                            ? ((summary.totalCOGS / summary.totalRevenue) * 100).toFixed(1)
+                            : 0}% dari revenue
+                    </span>
+                </div>
+            ),
+        },
+        {
+            title: 'Laba Kotor',
+            value: formatCurrency(summary.grossProfit),
+            icon: TrendingUp,
+            valueClassName: summary.grossProfit >= 0 ? 'text-green-600' : 'text-red-600',
+            footer: (
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1">
+                    <Badge variant={((summary.grossProfit / summary.totalRevenue) * 100) >= 30 ? 'default' : 'secondary'}>
+                        Margin: {((summary.grossProfit / summary.totalRevenue) * 100).toFixed(1)}%
+                    </Badge>
+                </div>
+            ),
+        },
+        {
+            title: 'Laba Bersih',
+            value: formatCurrency(summary.netProfit),
+            icon: ShoppingCart,
+            valueClassName: summary.netProfit >= 0 ? 'text-green-600' : 'text-red-600',
+            footer: (
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1">
+                    <Badge variant={summary.netProfit >= 0 ? 'default' : 'destructive'}>
+                        Margin: {summary.profitMargin.toFixed(1)}%
+                    </Badge>
+                </div>
+            ),
+        },
+    ]
 
     return (
-        <div className={`grid gap-4 ${gridClass}`}>
-            {/* Total Revenue Card */}
-            <Card className="hover: ">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                        Total Pendapatan
-                    </CardTitle>
-                    <DollarSign className="h-5 w-5 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold">
-                        {formatCurrency(summary.totalRevenue)}
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm">
-                        {getTrendIcon(summary.totalRevenue)}
-                        <span className={getTrendColor(summary.totalRevenue)}>
-                            {/* Orders count not available in new summary */}
-                            Data tersedia
-                        </span>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* COGS Card */}
-            <Card className="hover: ">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                        COGS (Biaya Produksi)
-                    </CardTitle>
-                    <Package className="h-5 w-5 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold text-orange-600">
-                        {formatCurrency(summary.totalCOGS)}
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm text-muted-foreground">
-                        <span>
-                            {summary.totalRevenue > 0
-                                ? ((summary.totalCOGS / summary.totalRevenue) * 100).toFixed(1)
-                                : 0}% dari revenue
-                        </span>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Gross Profit Card */}
-            <Card className="hover: ">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                        Laba Kotor
-                    </CardTitle>
-                    <TrendingUp className="h-5 w-5 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <div className={`text-2xl font-bold ${summary.grossProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatCurrency(summary.grossProfit)}
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-1">
-                        <Badge variant={((summary.grossProfit / summary.totalRevenue) * 100) >= 30 ? 'default' : 'secondary'}>
-                            Margin: {((summary.grossProfit / summary.totalRevenue) * 100).toFixed(1)}%
-                        </Badge>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Net Profit Card */}
-            <Card className="hover: ">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                        Laba Bersih
-                    </CardTitle>
-                    <ShoppingCart className="h-5 w-5 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <div className={`text-2xl font-bold ${summary.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatCurrency(summary.netProfit)}
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-1">
-                        <Badge variant={summary.netProfit >= 0 ? 'default' : 'destructive'}>
-                            Margin: {summary.profitMargin.toFixed(1)}%
-                        </Badge>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
+        <UiStatsCards stats={cards} gridClassName={`grid gap-4 ${gridClass}`} />
     )
 }
 

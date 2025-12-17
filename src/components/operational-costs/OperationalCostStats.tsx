@@ -1,11 +1,10 @@
 'use client'
 
-import { Receipt, TrendingUp, DollarSign, BarChart3 } from '@/components/icons'
+import { BarChart3, DollarSign, Receipt, TrendingUp } from '@/components/icons'
 
-import { Card, CardContent } from '@/components/ui/card'
+import { StatsCards, type StatCardData } from '@/components/ui/stats-cards'
 
 import type { Row } from '@/types/database'
-
 
 
 type OperationalCost = Row<'operational_costs'>
@@ -27,60 +26,35 @@ export const OperationalCostStats = ({
     const variableCosts = costs.filter((c) => !c.recurring).length
     const totalMonthly = costs.reduce((sum, cost) => sum + calculateMonthlyCost(cost), 0)
 
+    const stats: StatCardData[] = [
+        {
+            title: 'Total Biaya',
+            value: totalCosts,
+            description: 'item biaya',
+            icon: Receipt,
+        },
+        {
+            title: 'Biaya Tetap',
+            value: fixedCosts,
+            description: 'biaya rutin',
+            icon: TrendingUp,
+        },
+        {
+            title: 'Biaya Variabel',
+            value: variableCosts,
+            description: 'biaya tidak tetap',
+            icon: BarChart3,
+        },
+        {
+            title: 'Total Bulanan',
+            value: formatCurrency(totalMonthly),
+            description: 'per bulan',
+            icon: DollarSign,
+        },
+    ]
+
     return (
-        <div className="grid gap-4 md:grid-cols-4">
-            <Card>
-                <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Total Biaya</p>
-                            <p className="text-2xl font-bold">{totalCosts}</p>
-                            <p className="text-xs text-muted-foreground">item biaya</p>
-                        </div>
-                        <Receipt className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Biaya Tetap</p>
-                            <p className="text-2xl font-bold">{fixedCosts}</p>
-                            <p className="text-xs text-muted-foreground">biaya rutin</p>
-                        </div>
-                        <TrendingUp className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Biaya Variabel</p>
-                            <p className="text-2xl font-bold">{variableCosts}</p>
-                            <p className="text-xs text-muted-foreground">biaya tidak tetap</p>
-                        </div>
-                        <BarChart3 className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Total Bulanan</p>
-                            <p className="text-2xl font-bold">{formatCurrency(totalMonthly)}</p>
-                            <p className="text-xs text-muted-foreground">per bulan</p>
-                        </div>
-                        <DollarSign className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
+        <StatsCards stats={stats} gridClassName="grid grid-cols-2 gap-4 lg:grid-cols-4" />
     )
 }
 

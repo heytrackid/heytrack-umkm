@@ -3,6 +3,7 @@
 import { Calculator, DollarSign, Percent, TrendingUp } from '@/components/icons'
 
 import { Card, CardContent } from '@/components/ui/card'
+import { MetricsGrid, type MetricsGridItem } from '@/components/ui/metrics-grid'
 import { useCurrency } from '@/hooks/useCurrency'
 
 import type { RecipeWithCosts } from '@/modules/hpp/hooks/useUnifiedHpp'
@@ -22,46 +23,61 @@ export const HppQuickSummary = ({ recipe }: HppQuickSummaryProps): JSX.Element =
     ? ((profit / recipe.selling_price) * 100)
     : 0
 
+  const items: MetricsGridItem[] = [
+    {
+      key: 'total-hpp',
+      content: (
+        <div className="text-center p-4 bg-card rounded-lg border">
+          <Calculator className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
+          <div className="text-2xl font-bold text-foreground">
+            {formatCurrency(recipe.total_cost)}
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">HPP / {yieldUnit}</div>
+        </div>
+      ),
+    },
+    {
+      key: 'selling-price',
+      content: (
+        <div className="text-center p-4 bg-card rounded-lg border">
+          <DollarSign className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
+          <div className="text-2xl font-bold text-foreground">
+            {formatCurrency(recipe.selling_price ?? 0)}
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">Harga Jual</div>
+        </div>
+      ),
+    },
+    {
+      key: 'profit',
+      content: (
+        <div className="text-center p-4 bg-card rounded-lg border">
+          <TrendingUp className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
+          <div className="text-2xl font-bold text-foreground">
+            {formatCurrency(profit)}
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">Profit</div>
+        </div>
+      ),
+    },
+    {
+      key: 'margin',
+      content: (
+        <div className="text-center p-4 bg-card rounded-lg border">
+          <Percent className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
+          <div className="text-2xl font-bold text-foreground">
+            {marginPercent.toFixed(0)}%
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">Margin</div>
+        </div>
+      ),
+    },
+  ]
+
   return (
     <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
       <CardContent className="p-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {/* Total HPP */}
-          <div className="text-center p-4 bg-card rounded-lg border">
-            <Calculator className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
-            <div className="text-2xl font-bold text-foreground">
-              {formatCurrency(recipe.total_cost)}
-            </div>
-            <div className="text-xs text-muted-foreground mt-1">HPP / {yieldUnit}</div>
-          </div>
-
-          {/* Harga Jual */}
-          <div className="text-center p-4 bg-card rounded-lg border">
-            <DollarSign className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
-            <div className="text-2xl font-bold text-foreground">
-              {formatCurrency(recipe.selling_price ?? 0)}
-            </div>
-            <div className="text-xs text-muted-foreground mt-1">Harga Jual</div>
-          </div>
-
-          {/* Profit */}
-          <div className="text-center p-4 bg-card rounded-lg border">
-            <TrendingUp className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
-            <div className="text-2xl font-bold text-foreground">
-              {formatCurrency(profit)}
-            </div>
-            <div className="text-xs text-muted-foreground mt-1">Profit</div>
-          </div>
-
-          {/* Margin */}
-          <div className="text-center p-4 bg-card rounded-lg border">
-            <Percent className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
-            <div className="text-2xl font-bold text-foreground">
-              {marginPercent.toFixed(0)}%
-            </div>
-            <div className="text-xs text-muted-foreground mt-1">Margin</div>
-          </div>
-        </div>
+        <MetricsGrid items={items} gridClassName="grid grid-cols-2 md:grid-cols-4 gap-4" />
 
         {/* Quick Info */}
         <div className="mt-4 text-center text-sm text-muted-foreground">

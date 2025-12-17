@@ -13,11 +13,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
+import { usePricingAssistant, type PricingRecommendation } from '@/hooks/api/useHpp'
+import { successToast, } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useRecipes } from '@/hooks/useRecipes'
-import { usePricingAssistant, type PricingRecommendation } from '@/hooks/api/useHpp'
 import { handleError } from '@/lib/error-handling'
-import { successToast, } from '@/hooks/use-toast'
 
 const pricingBreadcrumbs = [
   { label: 'Dashboard', href: '/' },
@@ -114,7 +114,7 @@ const PricingAssistantPage = (): JSX.Element => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label htmlFor="pricing-recipe-select" className="text-sm font-medium">Pilih Resep</label>
                 <Select
@@ -169,7 +169,7 @@ const PricingAssistantPage = (): JSX.Element => {
 
         {/* Recommendation Results */}
         {recommendation && (
-          <div className="grid grid-cols-1 grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Price Comparison */}
             <Card>
               <CardHeader>
@@ -351,7 +351,7 @@ const PricingAssistantPage = (): JSX.Element => {
                 </AlertDescription>
               </Alert>
 
-              <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center p-4 border rounded-lg">
                   <DollarSign className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                   <h4 className="font-semibold">Cost-Based</h4>

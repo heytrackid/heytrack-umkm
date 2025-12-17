@@ -1,17 +1,17 @@
 'use client'
 
-import { AlertTriangle, Trash2, CheckCircle, type LucideIcon } from '@/components/icons'
+import { AlertTriangle, CheckCircle, Trash2, type LucideIcon } from '@/components/icons'
 import { useState } from 'react'
 
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { LoadingButton } from '@/components/ui/loading-button'
@@ -90,7 +90,7 @@ export const ConfirmationDialog = ({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="sm:max-w-md">
+      <AlertDialogContent className="w-[95vw] sm:max-w-md">
         <AlertDialogHeader>
           <div className="flex items-center gap-3">
             <div className={`rounded-full p-2 ${getBgColor()}`}>

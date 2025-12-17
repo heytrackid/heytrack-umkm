@@ -37,7 +37,7 @@
     "supabase:types:service-role": "supabase gen types typescript --local --schema public > src/types/supabase-generated.ts",
     "prepare": "husky"
   },
-  "packageManager": "pnpm@10.25.0",
+  "packageManager": "pnpm@10.26.0",
   "pnpm": {
     "overrides": {
       "react": "^18.3.1",

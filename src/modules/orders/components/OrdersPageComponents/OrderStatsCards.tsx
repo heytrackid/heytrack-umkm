@@ -1,7 +1,7 @@
 'use client'
 
 import { BarChart3, Clock, DollarSign, ShoppingCart } from '@/components/icons'
-import { Card, CardContent } from '@/components/ui/card'
+import { StatsCards as UiStatsCards, type StatCardData } from '@/components/ui/stats-cards'
 
 import type { OrderStats } from './types'
 
@@ -11,63 +11,34 @@ interface OrderStatsCardsProps {
 }
 
 export function OrderStatsCards({ stats, formatCurrency }: OrderStatsCardsProps) {
+  const cards: StatCardData[] = [
+    {
+      title: 'Total Pesanan',
+      value: stats.total_orders,
+      description: 'Rata-rata nilai per pesanan',
+      icon: ShoppingCart,
+    },
+    {
+      title: 'Total Pendapatan',
+      value: formatCurrency(stats.total_revenue),
+      description: `${stats.revenue_growth}% dari periode sebelumnya`,
+      icon: DollarSign,
+    },
+    {
+      title: 'Rata-rata Nilai',
+      value: formatCurrency(stats.average_order_value),
+      description: 'per pesanan',
+      icon: BarChart3,
+    },
+    {
+      title: 'Pendapatan Tertunda',
+      value: formatCurrency(stats.pending_revenue),
+      description: 'belum dibayar',
+      icon: Clock,
+    },
+  ]
+
   return (
-    <div className="grid gap-4 md:grid-cols-4">
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Total Pesanan</p>
-              <p className="text-2xl font-bold">{stats.total_orders}</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Rata-rata nilai per pesanan
-              </p>
-            </div>
-            <ShoppingCart className="h-8 w-8 text-gray-600 dark:text-gray-400" />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Total Pendapatan</p>
-              <p className="text-2xl font-bold">{formatCurrency(stats.total_revenue)}</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {stats.revenue_growth}% dari periode sebelumnya
-              </p>
-            </div>
-            <DollarSign className="h-8 w-8 text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Rata-rata Nilai</p>
-              <p className="text-2xl font-bold">{formatCurrency(stats.average_order_value)}</p>
-              <p className="text-xs text-muted-foreground mt-1">per pesanan</p>
-            </div>
-            <BarChart3 className="h-8 w-8 text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Pendapatan Tertunda</p>
-              <p className="text-2xl font-bold">{formatCurrency(stats.pending_revenue)}</p>
-              <p className="text-xs text-muted-foreground mt-1">belum dibayar</p>
-            </div>
-            <Clock className="h-8 w-8 text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <UiStatsCards stats={cards} gridClassName="grid grid-cols-2 gap-4 lg:grid-cols-4" />
   )
 }

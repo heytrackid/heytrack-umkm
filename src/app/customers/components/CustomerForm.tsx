@@ -218,7 +218,7 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps): JSX
                     <div className="space-y-4">
                         <h3 className="text-sm font-medium text-muted-foreground">Tipe & Diskon</h3>
 
-                        <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Customer Type */}
                             <div className="space-y-2">
                                 <Label htmlFor="customer_type" className="flex flex-col sm:flex-row sm:items-center gap-2">

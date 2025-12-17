@@ -30,7 +30,7 @@ export const UpdateBanner = memo(function UpdateBanner({
 
   return (
     <Dialog open={hasUpdate} onOpenChange={(open) => !open && dismissUpdate()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="w-[95vw] sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Download className="h-5 w-5 text-primary" />

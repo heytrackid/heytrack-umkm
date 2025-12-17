@@ -5,6 +5,7 @@ import { AppLayout } from '@/components/layout/app-layout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { StatsCards as UiStatsCards, type StatCardData } from '@/components/ui/stats-cards'
 import type { GeneratedRecipe } from '@/services/ai'
 import { ChefHat, Clock, DollarSign, Sparkles } from 'lucide-react'
 import { useState } from 'react'
@@ -151,59 +152,35 @@ export default function ChefWisePage() {
         />
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Resep Dibuat</CardTitle>
-              <ChefHat className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">24</div>
-              <p className="text-xs text-muted-foreground">
-                +3 minggu ini
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Rata-rata Biaya</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">Rp 45K</div>
-              <p className="text-xs text-muted-foreground">
-                per resep
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Waktu Aktif</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">35m</div>
-              <p className="text-xs text-muted-foreground">
-                rata-rata
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Hemat Biaya</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">15%</div>
-              <p className="text-xs text-muted-foreground">
-                vs harga pasar
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        <UiStatsCards
+          stats={([
+            {
+              title: 'Total Resep Dibuat',
+              value: 24,
+              description: '+3 minggu ini',
+              icon: ChefHat,
+            },
+            {
+              title: 'Rata-rata Biaya',
+              value: 'Rp 45K',
+              description: 'per resep',
+              icon: DollarSign,
+            },
+            {
+              title: 'Waktu Aktif',
+              value: '35m',
+              description: 'rata-rata',
+              icon: Clock,
+            },
+            {
+              title: 'Hemat Biaya',
+              value: '15%',
+              description: 'vs harga pasar',
+              icon: DollarSign,
+            },
+          ] satisfies StatCardData[])}
+          gridClassName="grid grid-cols-2 gap-4 lg:grid-cols-4"
+        />
 
         <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
           {/* Main Content */}

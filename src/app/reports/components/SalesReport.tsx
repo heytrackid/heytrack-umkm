@@ -9,6 +9,7 @@ import { memo, useCallback, useMemo, useState } from 'react'
 import type { DateRange } from 'react-day-picker'
 
 import { CheckCircle, Clock, DollarSign, ShoppingCart } from '@/components/icons'
+import { StatsCards as UiStatsCards, type StatCardData } from '@/components/ui/stats-cards'
 import { useSalesStats } from '@/hooks/api/useReports'
 
 interface SalesReportProps {
@@ -77,7 +78,7 @@ const SalesReportComponent = ({ dateRange: externalDateRange, onDateRangeChange 
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }, (_, i) => (
             <Card key={i} className="animate-pulse">
               <CardHeader className="pb-2">
@@ -123,56 +124,39 @@ const SalesReportComponent = ({ dateRange: externalDateRange, onDateRangeChange 
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Pesanan
-            </CardTitle>
-            <ShoppingCart className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{safeSalesStats.totalOrders}</div>
-            <p className="text-xs text-muted-foreground">+{orderGrowth}% dari periode sebelumnya</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Pendapatan
-            </CardTitle>
-            <DollarSign className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(safeSalesStats.totalRevenue)}</div>
-            <p className="text-xs text-muted-foreground">+{revenueGrowth}% dari periode sebelumnya</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Selesai
-            </CardTitle>
-            <CheckCircle className="h-5 w-5 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{safeSalesStats.completedOrders}</div>
-            <p className="text-xs text-muted-foreground">Diterima pelanggan</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Pending
-            </CardTitle>
-            <Clock className="h-5 w-5 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{safeSalesStats.pendingOrders}</div>
-            <p className="text-xs text-muted-foreground">Perlu ditindaklanjuti</p>
-          </CardContent>
-        </Card>
-      </div>
+      <UiStatsCards
+        stats={([
+          {
+            title: 'Total Pesanan',
+            value: safeSalesStats.totalOrders,
+            description: `+${orderGrowth}% dari periode sebelumnya`,
+            icon: ShoppingCart,
+          },
+          {
+            title: 'Total Pendapatan',
+            value: formatCurrency(safeSalesStats.totalRevenue),
+            description: `+${revenueGrowth}% dari periode sebelumnya`,
+            icon: DollarSign,
+          },
+          {
+            title: 'Selesai',
+            value: safeSalesStats.completedOrders,
+            description: 'Diterima pelanggan',
+            icon: CheckCircle,
+            iconClassName: 'text-green-500',
+            valueClassName: 'text-green-600',
+          },
+          {
+            title: 'Pending',
+            value: safeSalesStats.pendingOrders,
+            description: 'Perlu ditindaklanjuti',
+            icon: Clock,
+            iconClassName: 'text-orange-500',
+            valueClassName: 'text-orange-600',
+          },
+        ] satisfies StatCardData[])}
+        gridClassName="grid grid-cols-2 gap-4 lg:grid-cols-4"
+      />
 
       {/* Charts */}
       {safeSalesStats.totalOrders > 0 && (

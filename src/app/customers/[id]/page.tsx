@@ -1,30 +1,30 @@
 'use client'
 
 import { ArrowLeft, Edit, Mail, MapPin, Phone, ShoppingCart, Trash2, TrendingUp, User } from '@/components/icons'
+import { successToast, } from '@/hooks/use-toast'
+import { handleError } from '@/lib/error-handling'
 import { useRouter } from 'next/navigation'
 import { use, useState } from 'react'
-import { handleError } from '@/lib/error-handling'
-import { successToast, } from '@/hooks/use-toast'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useOrdersList } from '@/hooks/api/useOrders'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useCustomer, useDeleteCustomer } from '@/hooks/useCustomers'
-import { useOrdersList } from '@/hooks/api/useOrders'
 import type { OrderListItem } from '@/types/database'
 
 // Helper function to get status variant
@@ -148,7 +148,7 @@ const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }): JS
           }
         />
 
-        <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Customer Info */}
           <Card>
             <CardHeader>
@@ -202,7 +202,7 @@ const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }): JS
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Total Pesanan</p>
                   <p className="text-2xl font-bold">{stats.totalOrders}</p>

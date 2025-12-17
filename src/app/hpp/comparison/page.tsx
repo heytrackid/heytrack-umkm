@@ -151,7 +151,7 @@ const ComparisonAnalyticsPage = (): JSX.Element => {
 
         {/* Benchmark Overview */}
         {benchmark && (
-          <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <Card>
               <CardContent className="pt-6">
                 <div className="text-2xl font-bold text-muted-foreground">
@@ -272,7 +272,7 @@ const ComparisonAnalyticsPage = (): JSX.Element => {
 
         {/* Top Performers */}
         {benchmark && (benchmark.topPerformer ?? benchmark.worstPerformer) && (
-          <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {benchmark.topPerformer && (
               <Card>
                 <CardHeader>
@@ -360,7 +360,7 @@ const ComparisonAnalyticsPage = (): JSX.Element => {
             <CardTitle>Comparison Insights</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center">
                 <BarChart3 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                 <h4 className="font-semibold mb-2">Margin Distribution</h4>

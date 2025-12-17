@@ -78,7 +78,7 @@ interface DataGridProps {
  */
 export const DataGrid = ({ children, className, variant = 'default' }: DataGridProps) => {
   const gridClasses = {
-    default: "grid gap-4 md:grid-cols-2 lg:grid-cols-4",
+    default: "grid grid-cols-2 gap-4 lg:grid-cols-4",
     cards: "grid gap-4 md:grid-cols-2 lg:grid-cols-3",
     list: "space-y-4"
   }

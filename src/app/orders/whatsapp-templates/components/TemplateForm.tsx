@@ -1,9 +1,9 @@
 'use client'
 
-import { Info, Copy, Check } from '@/components/icons'
-import { useState, useLayoutEffect, useRef, type FormEvent } from 'react'
+import { Check, Copy, Info } from '@/components/icons'
+import { useLayoutEffect, useRef, useState, type FormEvent } from 'react'
 
-import { TEMPLATE_CATEGORIES, AVAILABLE_VARIABLES, DEFAULT_TEMPLATES, type WhatsAppTemplate, type TemplateFormData, type TemplateVariable } from '@/app/orders/whatsapp-templates/components/types'
+import { AVAILABLE_VARIABLES, DEFAULT_TEMPLATES, TEMPLATE_CATEGORIES, type TemplateFormData, type TemplateVariable, type WhatsAppTemplate } from '@/app/orders/whatsapp-templates/components/types'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -12,8 +12,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { uiLogger } from '@/lib/client-logger'
 import { useCreateWhatsAppTemplate, useUpdateWhatsAppTemplate } from '@/hooks/api/useWhatsAppTemplates'
+import { uiLogger } from '@/lib/client-logger'
 
 interface TemplateFormProps {
   showDialog: boolean
@@ -220,7 +220,7 @@ const TemplateForm = ({
             onOpenChange(open)
             if (!open) { resetForm() }
         }}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
                         {editingTemplate ? 'Edit Template' : 'Tambah Template Baru'}
@@ -238,7 +238,7 @@ const TemplateForm = ({
                                 <Info className="h-4 w-4" />
                                 Mulai dengan Template Default
                             </Label>
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 {DEFAULT_TEMPLATES.map((template) => (
                                     <Button
                                         key={template.name}
@@ -255,7 +255,7 @@ const TemplateForm = ({
                         </div>
                     )}
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <Label htmlFor="name">Nama Template *</Label>
                             <Input
@@ -297,7 +297,7 @@ const TemplateForm = ({
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         {/* Template Content */}
                         <div className="space-y-2">
                             <Label htmlFor="template_content">Isi Template *</Label>

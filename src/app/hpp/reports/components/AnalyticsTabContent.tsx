@@ -48,7 +48,7 @@ const AnalyticsTabContent = ({ analytics, loading, formatCurrency }: AnalyticsTa
   }
 
   return (
-    <div className="grid grid-cols-1 grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Key Metrics */}
       <Card>
         <CardHeader>

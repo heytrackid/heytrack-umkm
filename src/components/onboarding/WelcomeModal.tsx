@@ -117,7 +117,7 @@ export function WelcomeModal({ onComplete }: WelcomeModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg p-0 overflow-hidden">
+      <DialogContent className="w-[95vw] sm:max-w-lg p-0 overflow-hidden">
         {/* Step 0: Welcome */}
         {step === 0 && (
           <div className="p-6 text-center space-y-6">
@@ -166,7 +166,7 @@ export function WelcomeModal({ onComplete }: WelcomeModalProps) {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {FEATURES.map((feature, index) => (
                 <div
                   key={index}

@@ -9,6 +9,7 @@ import type { DateRange } from 'react-day-picker'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AreaChartComponent, PieChartComponent, type ChartConfig } from '@/components/ui/charts'
 import { DateRangePicker } from '@/components/ui/date-range-picker'
+import { StatsCards as UiStatsCards, type StatCardData } from '@/components/ui/stats-cards'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useFinancialRecords } from '@/hooks/useFinancialRecords'
 
@@ -142,6 +143,40 @@ const FinancialReportComponent = ({ dateRange: externalDateRange, onDateRangeCha
     expense: { label: 'Pengeluaran', color: 'hsl(0, 84%, 60%)' },
   }
 
+  const summaryCards: StatCardData[] = [
+    {
+      title: 'Total Pemasukan',
+      value: formatCurrency(financialStats.totalIncome),
+      description: `+${incomeGrowth}% dari periode sebelumnya`,
+      icon: TrendingUp,
+      iconClassName: 'text-green-500',
+      valueClassName: 'text-muted-foreground',
+    },
+    {
+      title: 'Total Pengeluaran',
+      value: formatCurrency(financialStats.totalExpense),
+      description: `+${expenseGrowth}% dari periode sebelumnya`,
+      icon: TrendingDown,
+      iconClassName: 'text-red-500',
+      valueClassName: 'text-red-600',
+    },
+    {
+      title: 'Laba Bersih',
+      value: formatCurrency(netProfit),
+      description: `+${profitGrowth}% dari periode sebelumnya`,
+      icon: PiggyBank,
+      iconClassName: 'text-green-500',
+      valueClassName: netProfit >= 0 ? 'text-green-600' : 'text-red-600',
+    },
+    {
+      title: 'Margin Laba',
+      value: `${profitMargin.toFixed(1)}%`,
+      description: 'Rasio laba terhadap pemasukan',
+      icon: DollarSign,
+      iconClassName: 'text-blue-500',
+    },
+  ]
+
   return (
     <div className="space-y-6">
       {/* Date Range Picker */}
@@ -156,64 +191,7 @@ const FinancialReportComponent = ({ dateRange: externalDateRange, onDateRangeCha
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
-        <Card className="hover: ">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Pemasukan
-            </CardTitle>
-            <TrendingUp className="h-5 w-5 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-muted-foreground">
-              {formatCurrency(financialStats.totalIncome)}
-            </div>
-            <p className="text-xs text-muted-foreground">+{incomeGrowth}% dari periode sebelumnya</p>
-          </CardContent>
-        </Card>
-        <Card className="hover: ">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Pengeluaran
-            </CardTitle>
-            <TrendingDown className="h-5 w-5 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {formatCurrency(financialStats.totalExpense)}
-            </div>
-            <p className="text-xs text-muted-foreground">+{expenseGrowth}% dari periode sebelumnya</p>
-          </CardContent>
-        </Card>
-        <Card className="hover: ">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Laba Bersih
-            </CardTitle>
-            <PiggyBank className="h-5 w-5 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {formatCurrency(netProfit)}
-            </div>
-            <p className="text-xs text-muted-foreground">+{profitGrowth}% dari periode sebelumnya</p>
-          </CardContent>
-        </Card>
-        <Card className="hover: ">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Margin Laba
-            </CardTitle>
-            <DollarSign className="h-5 w-5 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {profitMargin.toFixed(1)}%
-            </div>
-            <p className="text-xs text-muted-foreground">Rasio laba terhadap pemasukan</p>
-          </CardContent>
-        </Card>
-      </div>
+      <UiStatsCards stats={summaryCards} gridClassName="grid grid-cols-2 gap-4 lg:grid-cols-4" />
 
       {/* Charts Section */}
       {trendChartData.length > 0 && (

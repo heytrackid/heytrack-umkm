@@ -221,7 +221,7 @@ const ProfitReportPage = () => {
             )}
 
             {/* Product Profitability Charts */}
-            <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 grid-cols-1 lg:grid-cols-2'}`}>
+            <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
               <BarChartComponent
                 data={products.slice(0, 10).map(p => ({ 
                   name: p.product_name.length > 15 ? p.product_name.substring(0, 15) + '...' : p.product_name, 

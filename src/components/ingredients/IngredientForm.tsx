@@ -40,7 +40,7 @@ export function IngredientForm({
         {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="category">Kategori</Label>
           <Input id="category" {...register('category')} placeholder="Contoh: Bahan Kering" />
@@ -54,7 +54,7 @@ export function IngredientForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="price_per_unit">Harga per Satuan *</Label>
           <Input

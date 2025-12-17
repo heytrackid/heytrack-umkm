@@ -143,7 +143,7 @@ export function SupplierEditDialog({
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="edit-phone">Telepon</Label>
                                 <Input
@@ -178,7 +178,7 @@ export function SupplierEditDialog({
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="edit-supplier_type">Tipe Supplier</Label>
                                 <Select

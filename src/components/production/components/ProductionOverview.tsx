@@ -1,6 +1,6 @@
 import { CheckCircle, Clock, Play } from '@/components/icons'
 
-import { Card, CardContent } from '@/components/ui/card'
+import { StatsCards as UiStatsCards, type StatCardData } from '@/components/ui/stats-cards'
 
 import type { ProductionBatch } from '@/types/production'
 
@@ -23,44 +23,26 @@ const PRODUCTION_STATUS = {
 export const ProductionOverview = ({ batches }: ProductionOverviewProps) => {
   const completedBatches = batches.filter(b => b['status'] === PRODUCTION_STATUS.COMPLETED).slice(0, 5)
 
+  const cards: StatCardData[] = [
+    {
+      title: 'Active Batches',
+      value: batches.filter(b => b['status'] === PRODUCTION_STATUS.IN_PROGRESS).length,
+      icon: Play,
+    },
+    {
+      title: 'Scheduled',
+      value: batches.filter(b => b['status'] === PRODUCTION_STATUS.PLANNED).length,
+      icon: Clock,
+    },
+    {
+      title: 'Completed Today',
+      value: completedBatches.length,
+      icon: CheckCircle,
+    },
+  ]
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Active Batches</p>
-              <p className="text-2xl font-bold">{batches.filter(b => b['status'] === PRODUCTION_STATUS.IN_PROGRESS).length}</p>
-            </div>
-            <Play className="h-8 w-8 text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Scheduled</p>
-              <p className="text-2xl font-bold">{batches.filter(b => b['status'] === PRODUCTION_STATUS.PLANNED).length}</p>
-            </div>
-            <Clock className="h-8 w-8 text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Completed Today</p>
-              <p className="text-2xl font-bold">{completedBatches.length}</p>
-            </div>
-            <CheckCircle className="h-8 w-8 text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <UiStatsCards stats={cards} gridClassName="grid grid-cols-1 gap-4 md:grid-cols-3" />
   )
 }
 

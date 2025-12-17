@@ -6,9 +6,10 @@ import { useRouter } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { MetricsGrid, type MetricsGridItem } from '@/components/ui/metrics-grid'
 
-import { useCurrency } from '@/hooks/useCurrency'
 import { useCalculateAllHpp } from '@/hooks/api/useHpp'
+import { useCurrency } from '@/hooks/useCurrency'
 
 
 
@@ -32,6 +33,83 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps): JSX.Element
     const completionPercentage = overview.totalRecipes > 0
         ? Math.round((overview.calculatedRecipes / overview.totalRecipes) * 100)
         : 0
+
+    const statsItems: MetricsGridItem[] = [
+        {
+            key: 'calculated',
+            content: (
+                <div className="p-4 bg-muted/20 rounded-lg border border-border/20 ">
+                    <div className="text-2xl font-bold text-foreground mb-1">
+                        {overview.calculatedRecipes}/{overview.totalRecipes}
+                    </div>
+                    <div className="text-xs text-muted-foreground mb-2">Produk Dihitung</div>
+                    <div className="w-full bg-muted dark:bg-muted rounded-full h-1.5">
+                        <div
+                            className="bg-primary h-1.5 rounded-full transition-all"
+                            style={{ width: `${completionPercentage}%` }}
+                        />
+                    </div>
+                </div>
+            ),
+        },
+        {
+            key: 'avg-cost',
+            content: (
+                <div className="p-4 bg-muted/20 rounded-lg border border-border/20 ">
+                    <div className="text-2xl font-bold text-foreground mb-1">
+                        {formatCurrency(overview.calculatedRecipes > 0 ? overview.totalHppValue / overview.calculatedRecipes : 0)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Biaya Rata-rata</div>
+                    <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                        <TrendingUp className="h-3 w-3" />
+                        <span>Per produk</span>
+                    </div>
+                </div>
+            ),
+        },
+        {
+            key: 'alerts',
+            content: (
+                <div className={`p-4 rounded-lg border ${(overview.alerts?.length ?? 0) > 0
+                    ? 'border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/10'
+                    : 'border-border/20 bg-muted/20'
+                    }`}>
+                    <div className="text-2xl font-bold mb-1 text-muted-foreground">
+                        {(overview.alerts?.length ?? 0)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Peringatan Baru</div>
+                    <div className="flex items-center gap-1 mt-1 text-xs">
+                        {(overview.alerts?.length ?? 0) > 0 ? (
+                            <>
+                                <Bell className="h-3 w-3 text-muted-foreground" />
+                                <span className="text-muted-foreground">Perlu tindakan</span>
+                            </>
+                        ) : (
+                            <>
+                                <CheckCircle className="h-3 w-3 text-muted-foreground" />
+                                <span className="text-muted-foreground">Semua aman</span>
+                            </>
+                        )}
+                    </div>
+                </div>
+            ),
+        },
+        {
+            key: 'progress',
+            content: (
+                <div className="p-4 bg-muted/20 rounded-lg border border-border/20 ">
+                    <div className="text-2xl font-bold text-foreground mb-1">
+                        {completionPercentage}%
+                    </div>
+                    <div className="text-xs text-muted-foreground">Progress</div>
+                    <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                        <Calculator className="h-3 w-3" />
+                        <span>Kelengkapan data</span>
+                    </div>
+                </div>
+            ),
+        },
+    ]
 
     return (
         <Card>
@@ -58,69 +136,7 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps): JSX.Element
             </CardHeader>
             <CardContent className="space-y-6">
                 {/* Stats Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {/* Produk Dihitung */}
-                    <div className="p-4 bg-muted/20 rounded-lg border border-border/20 ">
-                        <div className="text-2xl font-bold text-foreground mb-1">
-                            {overview.calculatedRecipes}/{overview.totalRecipes}
-                        </div>
-                        <div className="text-xs text-muted-foreground mb-2">Produk Dihitung</div>
-                        <div className="w-full bg-muted dark:bg-muted rounded-full h-1.5">
-                            <div
-                                className="bg-primary h-1.5 rounded-full transition-all"
-                                style={{ width: `${completionPercentage}%` }}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Biaya Rata-rata */}
-                    <div className="p-4 bg-muted/20 rounded-lg border border-border/20 ">
-                        <div className="text-2xl font-bold text-foreground mb-1">
-                            {formatCurrency(overview.calculatedRecipes > 0 ? overview.totalHppValue / overview.calculatedRecipes : 0)}
-                        </div>
-                        <div className="text-xs text-muted-foreground">Biaya Rata-rata</div>
-                        <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
-                            <TrendingUp className="h-3 w-3" />
-                            <span>Per produk</span>
-                        </div>
-                    </div>
-
-                    {/* Peringatan */}
-                    <div className={`p-4 rounded-lg border ${(overview.alerts?.length ?? 0) > 0
-                        ? 'border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/10'
-                        : 'border-border/20 bg-muted/20'
-                        }`}>
-                        <div className="text-2xl font-bold mb-1 text-muted-foreground">
-                            {(overview.alerts?.length ?? 0)}
-                        </div>
-                        <div className="text-xs text-muted-foreground">Peringatan Baru</div>
-                        <div className="flex items-center gap-1 mt-1 text-xs">
-                            {(overview.alerts?.length ?? 0) > 0 ? (
-                                <>
-                                    <Bell className="h-3 w-3 text-muted-foreground" />
-                                    <span className="text-muted-foreground">Perlu tindakan</span>
-                                </>
-                            ) : (
-                                <>
-                                    <CheckCircle className="h-3 w-3 text-muted-foreground" />
-                                    <span className="text-muted-foreground">Semua aman</span>
-                                </>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Progress */}
-                    <div className="p-4 bg-muted/20 rounded-lg border border-border/20 ">
-                        <div className="text-2xl font-bold text-foreground mb-1">
-                            {completionPercentage}%
-                        </div>
-                        <div className="text-xs text-muted-foreground">Progress</div>
-                        <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
-                            <Calculator className="h-3 w-3" />
-                            <span>Kelengkapan data</span>
-                        </div>
-                    </div>
-                </div>
+                <MetricsGrid items={statsItems} gridClassName="grid grid-cols-2 md:grid-cols-4 gap-4" />
 
                 {/* Quick Actions */}
                 <div className="pt-4 border-t">

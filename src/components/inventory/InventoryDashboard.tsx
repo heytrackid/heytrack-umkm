@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
+import { StatsCards as UiStatsCards, type StatCardData } from '@/components/ui/stats-cards'
 import { useSettings } from '@/contexts/settings-context'
 import { useInventoryAlerts } from '@/hooks/useInventoryAlerts'
 import { useReorderSuggestions } from '@/hooks/useReorderManagement'
@@ -86,19 +87,19 @@ const InventoryDashboardComponent = (): JSX.Element => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold">Inventory Management</h2>
           <p className="text-muted-foreground">Monitor stock levels and reorder suggestions</p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          <div className="relative w-full sm:w-auto">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search ingredients..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8 w-64"
+              className="pl-8 w-full sm:w-64"
               aria-label="Search ingredients"
             />
           </div>
@@ -110,61 +111,36 @@ const InventoryDashboardComponent = (): JSX.Element => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Ingredients</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{inventoryStatus.total_ingredients}</div>
-            <p className="text-xs text-muted-foreground">
-              {inventoryStatus.healthy_stock_count} in good stock
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Low Stock Alerts</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">
-              {inventoryStatus.low_stock_count + inventoryStatus.out_of_stock_count}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {inventoryStatus.out_of_stock_count} out of stock
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Reorder Suggestions</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{reorderData.length}</div>
-            <p className="text-xs text-muted-foreground">
-              {formatCurrency(reorderData.reduce((sum, item) => sum + (item.estimated_cost || 0), 0))}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Inventory Value</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(inventoryStatus.total_value)}</div>
-            <p className="text-xs text-muted-foreground">
-              Current stock value
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <UiStatsCards
+        stats={([
+          {
+            title: 'Total Ingredients',
+            value: inventoryStatus.total_ingredients,
+            description: `${inventoryStatus.healthy_stock_count} in good stock`,
+            icon: Package,
+          },
+          {
+            title: 'Low Stock Alerts',
+            value: inventoryStatus.low_stock_count + inventoryStatus.out_of_stock_count,
+            description: `${inventoryStatus.out_of_stock_count} out of stock`,
+            icon: AlertTriangle,
+            iconClassName: 'text-orange-600',
+          },
+          {
+            title: 'Reorder Suggestions',
+            value: reorderData.length,
+            description: formatCurrency(reorderData.reduce((sum, item) => sum + (item.estimated_cost || 0), 0)),
+            icon: ShoppingCart,
+          },
+          {
+            title: 'Inventory Value',
+            value: formatCurrency(inventoryStatus.total_value),
+            description: 'Current stock value',
+            icon: TrendingUp,
+          },
+        ] satisfies StatCardData[])}
+        gridClassName="grid grid-cols-2 gap-4 lg:grid-cols-4"
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Inventory Alerts */}

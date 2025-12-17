@@ -1,7 +1,7 @@
 'use client'
 
 import { AlertTriangle, Calendar, Package, TrendingDown } from '@/components/icons'
-import { Card, CardContent } from '@/components/ui/card'
+import { SummaryMetricsCard, type SummaryMetricItem } from '@/components/ui/summary-metrics-card'
 import { useSettings } from '@/contexts/settings-context'
 import { cn } from '@/lib/utils'
 import type { Row } from '@/types/database'
@@ -72,82 +72,81 @@ export const InventorySummaryCard = memo(({ ingredients, className }: InventoryS
 
     const hasAlerts = stats.lowStockCount > 0 || stats.outOfStockCount > 0 || stats.expiringCount > 0 || stats.expiredCount > 0
 
+    const items: SummaryMetricItem[] = useMemo(() => {
+        const stockContent = (
+            <div className="flex items-center gap-3">
+                {stats.outOfStockCount > 0 && (
+                    <span className="inline-flex items-center gap-1 text-sm font-medium text-red-600">
+                        <span className="w-2 h-2 rounded-full bg-red-500" />
+                        {stats.outOfStockCount} habis
+                    </span>
+                )}
+                {stats.lowStockCount > 0 && (
+                    <span className="inline-flex items-center gap-1 text-sm font-medium text-yellow-600">
+                        <span className="w-2 h-2 rounded-full bg-yellow-500" />
+                        {stats.lowStockCount} rendah
+                    </span>
+                )}
+                {!hasAlerts && (
+                    <span className="text-sm text-muted-foreground">Semua aman</span>
+                )}
+            </div>
+        )
+
+        const expiryContent = (
+            <div className="flex items-center gap-3">
+                {stats.expiredCount > 0 && (
+                    <span className="inline-flex items-center gap-1 text-sm font-medium text-red-600">
+                        <span className="w-2 h-2 rounded-full bg-red-500" />
+                        {stats.expiredCount} expired
+                    </span>
+                )}
+                {stats.expiringCount > 0 && (
+                    <span className="inline-flex items-center gap-1 text-sm font-medium text-orange-600">
+                        <span className="w-2 h-2 rounded-full bg-orange-500" />
+                        {stats.expiringCount} segera
+                    </span>
+                )}
+                {stats.expiredCount === 0 && stats.expiringCount === 0 && (
+                    <span className="text-sm text-muted-foreground">Tidak ada</span>
+                )}
+            </div>
+        )
+
+        return [
+            {
+                key: 'total-items',
+                label: 'Total Item',
+                icon: Package,
+                value: stats.totalItems,
+            },
+            {
+                key: 'total-value',
+                label: 'Nilai Inventori',
+                icon: TrendingDown,
+                value: formatCurrency(stats.totalValue),
+                valueClassName: 'text-primary',
+            },
+            {
+                key: 'stock-alert',
+                label: 'Stok Alert',
+                icon: AlertTriangle,
+                content: stockContent,
+            },
+            {
+                key: 'expiry',
+                label: 'Kadaluarsa',
+                icon: Calendar,
+                content: expiryContent,
+            },
+        ]
+    }, [formatCurrency, hasAlerts, stats.expiredCount, stats.expiringCount, stats.lowStockCount, stats.outOfStockCount, stats.totalItems, stats.totalValue])
+
     return (
-        <Card className={cn('bg-gradient-to-br from-background to-muted/30', className)}>
-            <CardContent className="p-4">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    {/* Total Items */}
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                            <Package className="h-4 w-4" />
-                            <span>Total Item</span>
-                        </div>
-                        <p className="text-2xl font-bold">{stats.totalItems}</p>
-                    </div>
-
-                    {/* Total Value */}
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                            <TrendingDown className="h-4 w-4" />
-                            <span>Nilai Inventori</span>
-                        </div>
-                        <p className="text-2xl font-bold text-primary">
-                            {formatCurrency(stats.totalValue)}
-                        </p>
-                    </div>
-
-                    {/* Stock Alerts */}
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                            <AlertTriangle className="h-4 w-4" />
-                            <span>Stok Alert</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            {stats.outOfStockCount > 0 && (
-                                <span className="inline-flex items-center gap-1 text-sm font-medium text-red-600">
-                                    <span className="w-2 h-2 rounded-full bg-red-500" />
-                                    {stats.outOfStockCount} habis
-                                </span>
-                            )}
-                            {stats.lowStockCount > 0 && (
-                                <span className="inline-flex items-center gap-1 text-sm font-medium text-yellow-600">
-                                    <span className="w-2 h-2 rounded-full bg-yellow-500" />
-                                    {stats.lowStockCount} rendah
-                                </span>
-                            )}
-                            {!hasAlerts && (
-                                <span className="text-sm text-muted-foreground">Semua aman</span>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Expiry Alerts */}
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                            <Calendar className="h-4 w-4" />
-                            <span>Kadaluarsa</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            {stats.expiredCount > 0 && (
-                                <span className="inline-flex items-center gap-1 text-sm font-medium text-red-600">
-                                    <span className="w-2 h-2 rounded-full bg-red-500" />
-                                    {stats.expiredCount} expired
-                                </span>
-                            )}
-                            {stats.expiringCount > 0 && (
-                                <span className="inline-flex items-center gap-1 text-sm font-medium text-orange-600">
-                                    <span className="w-2 h-2 rounded-full bg-orange-500" />
-                                    {stats.expiringCount} segera
-                                </span>
-                            )}
-                            {stats.expiredCount === 0 && stats.expiringCount === 0 && (
-                                <span className="text-sm text-muted-foreground">Tidak ada</span>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
+        <SummaryMetricsCard
+            items={items}
+            cardClassName={cn('bg-gradient-to-br from-background to-muted/30', className)}
+        />
     )
 })
 

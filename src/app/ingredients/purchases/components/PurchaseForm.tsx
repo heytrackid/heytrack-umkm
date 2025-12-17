@@ -98,7 +98,7 @@ export function PurchaseForm({ ingredients, onSubmit, onSuccess }: PurchaseFormP
           Tambah Pembelian
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Tambah Pembelian Bahan Baku</DialogTitle>
           <DialogDescription>
@@ -132,7 +132,7 @@ export function PurchaseForm({ ingredients, onSubmit, onSuccess }: PurchaseFormP
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="quantity"

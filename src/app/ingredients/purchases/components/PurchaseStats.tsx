@@ -1,6 +1,6 @@
 import { DollarSign, Package, ShoppingCart, TrendingUp, type LucideIcon } from '@/components/icons'
 
-import { Card, CardContent } from '@/components/ui/card'
+import { StatsCards, type StatCardData } from '@/components/ui/stats-cards'
 import { formatRupiah } from '@/lib/currency'
 
 import type { IngredientPurchase, StatsItem } from '@/app/ingredients/purchases/components/types'
@@ -62,29 +62,17 @@ const PurchaseStatsCard = ({ purchases }: PurchaseStatsProps): JSX.Element => {
     }
   ]
 
+  const cards: StatCardData[] = stats.map((stat) => ({
+    title: stat.title,
+    value: stat.value,
+    description: stat.description,
+    icon: stat.icon,
+    iconWrapperClassName: `shrink-0 p-2 rounded-lg ${stat.bgColor}`,
+    iconClassName: stat.color,
+  }))
+
   return (
-    <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
-      {stats.map((stat, index) => (
-        <Card key={index}>
-          <CardContent className="p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
-              <p className="text-sm font-medium text-muted-foreground">
-                {stat.title}
-              </p>
-              <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                <stat.icon className={`h-4 w-4 ${stat.color}`} />
-              </div>
-            </div>
-            <p className="text-2xl font-bold">
-              {stat.value}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {stat.description}
-            </p>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+    <StatsCards stats={cards} gridClassName="grid grid-cols-2 gap-4 lg:grid-cols-4" />
   )
 }
 

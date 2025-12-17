@@ -1,13 +1,14 @@
 'use client'
 
 import { AlertTriangle, Calculator, Sparkles, TrendingDown, TrendingUp } from '@/components/icons'
-import { useState, useRef } from 'react'
+import { useRef, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { MetricsGrid, type MetricsGridItem } from '@/components/ui/metrics-grid'
 import {
     Select,
     SelectContent,
@@ -110,6 +111,45 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Ele
         setScenarios([...scenarios, newScenario])
     }
 
+    const headerItems: MetricsGridItem[] = [
+        {
+            key: 'current-cost',
+            content: (
+                <div className="text-center p-3 bg-card rounded-lg border">
+                    <div className="text-lg font-bold">{formatCurrency(currentCost)}</div>
+                    <div className="text-xs text-muted-foreground">HPP Saat Ini</div>
+                </div>
+            ),
+        },
+        {
+            key: 'selling-price',
+            content: (
+                <div className="text-center p-3 bg-card rounded-lg border">
+                    <div className="text-lg font-bold">{formatCurrency(sellingPrice)}</div>
+                    <div className="text-xs text-muted-foreground">Harga Jual</div>
+                </div>
+            ),
+        },
+        {
+            key: 'current-margin',
+            content: (
+                <div className="text-center p-3 bg-card rounded-lg border">
+                    <div className="text-lg font-bold text-foreground">{currentMargin.toFixed(1)}%</div>
+                    <div className="text-xs text-muted-foreground">Margin Saat Ini</div>
+                </div>
+            ),
+        },
+        {
+            key: 'active-scenarios',
+            content: (
+                <div className="text-center p-3 bg-card rounded-lg border">
+                    <div className="text-lg font-bold text-foreground">{scenarios.length}</div>
+                    <div className="text-xs text-muted-foreground">Skenario Aktif</div>
+                </div>
+            ),
+        },
+    ]
+
     const removeScenario = (id: string): void => {
         setScenarios(scenarios.filter(s => s['id'] !== id))
     }
@@ -174,24 +214,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Ele
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="text-center p-3 bg-card rounded-lg border">
-                            <div className="text-lg font-bold">{formatCurrency(currentCost)}</div>
-                            <div className="text-xs text-muted-foreground">HPP Saat Ini</div>
-                        </div>
-                        <div className="text-center p-3 bg-card rounded-lg border">
-                            <div className="text-lg font-bold">{formatCurrency(sellingPrice)}</div>
-                            <div className="text-xs text-muted-foreground">Harga Jual</div>
-                        </div>
-                        <div className="text-center p-3 bg-card rounded-lg border">
-                            <div className="text-lg font-bold text-foreground">{currentMargin.toFixed(1)}%</div>
-                            <div className="text-xs text-muted-foreground">Margin Saat Ini</div>
-                        </div>
-                        <div className="text-center p-3 bg-card rounded-lg border">
-                            <div className="text-lg font-bold text-foreground">{scenarios.length}</div>
-                            <div className="text-xs text-muted-foreground">Skenario Aktif</div>
-                        </div>
-                    </div>
+                    <MetricsGrid items={headerItems} gridClassName="grid grid-cols-2 md:grid-cols-4 gap-4" />
                 </CardContent>
             </Card>
 

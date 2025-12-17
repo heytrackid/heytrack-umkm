@@ -1,9 +1,10 @@
-import { Package, PackageCheck, AlertTriangle, ShoppingCart } from '@/components/icons'
+import { AlertTriangle, Package, PackageCheck, ShoppingCart } from '@/components/icons'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { useIngredientsList } from '@/hooks/useIngredients'
+import { StatsCards as UiStatsCards, type StatCardData } from '@/components/ui/stats-cards'
 import { useCurrency } from '@/hooks/useCurrency'
+import { useIngredientsList } from '@/hooks/useIngredients'
 
 // Inventory Report Component
 // Handles inventory data filtering, calculations, and display
@@ -51,59 +52,42 @@ export const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps 
   const totalItems = ingredientList.length
   const adequateStock = totalItems - inventoryStats.lowStock - inventoryStats.outOfStock
 
+  const cards: StatCardData[] = [
+    {
+      title: 'Total Item',
+      value: totalItems,
+      description: 'Jumlah bahan dalam inventaris',
+      icon: Package,
+    },
+    {
+      title: 'Nilai Inventory',
+      value: formatCurrency(inventoryStats.totalValue),
+      description: 'Nilai total semua stok',
+      icon: PackageCheck,
+      iconClassName: 'text-green-500',
+    },
+    {
+      title: 'Stok Rendah',
+      value: inventoryStats.lowStock,
+      description: 'Perlu restock segera',
+      icon: AlertTriangle,
+      iconClassName: 'text-orange-500',
+      valueClassName: 'text-orange-600',
+    },
+    {
+      title: 'Habis',
+      value: inventoryStats.outOfStock,
+      description: 'Perlu pengadaan segera',
+      icon: ShoppingCart,
+      iconClassName: 'text-red-500',
+      valueClassName: 'text-red-600',
+    },
+  ]
+
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
-        <Card className="hover: ">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Item
-            </CardTitle>
-            <Package className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalItems}</div>
-            <p className="text-xs text-muted-foreground">Jumlah bahan dalam inventaris</p>
-          </CardContent>
-        </Card>
-        <Card className="hover: ">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Nilai Inventory
-            </CardTitle>
-            <PackageCheck className="h-5 w-5 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(inventoryStats.totalValue)}</div>
-            <p className="text-xs text-muted-foreground">Nilai total semua stok</p>
-          </CardContent>
-        </Card>
-        <Card className="hover: ">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Stok Rendah
-            </CardTitle>
-            <AlertTriangle className="h-5 w-5 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{inventoryStats.lowStock}</div>
-            <p className="text-xs text-muted-foreground">Perlu restock segera</p>
-          </CardContent>
-        </Card>
-        <Card className="hover: ">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Habis
-            </CardTitle>
-            <ShoppingCart className="h-5 w-5 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{inventoryStats.outOfStock}</div>
-            <p className="text-xs text-muted-foreground">Perlu pengadaan segera</p>
-          </CardContent>
-        </Card>
-      </div>
+      <UiStatsCards stats={cards} gridClassName="grid grid-cols-2 gap-4 lg:grid-cols-4" />
 
       {/* Inventory Status Overview */}
       <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2">

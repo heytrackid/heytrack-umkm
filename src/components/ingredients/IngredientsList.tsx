@@ -124,6 +124,7 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}): JSX.Ele
     {
       key: 'unit',
       header: 'Satuan',
+      hideOnMobile: true,
       render: (_, item) => <span className="text-muted-foreground">{item.unit}</span>
     },
     {
@@ -188,6 +189,7 @@ const IngredientsListComponent = ({ onAdd }: IngredientsListProps = {}): JSX.Ele
     {
       key: 'total_value',
       header: 'Total Nilai',
+      hideOnMobile: true,
       render: (_, item) => {
         const currentStock = item.current_stock ?? 0
         const unitPrice = item.price_per_unit ?? item.weighted_average_cost

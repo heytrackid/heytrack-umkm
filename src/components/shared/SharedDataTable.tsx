@@ -1,19 +1,19 @@
 'use client'
 
 import {
-    ArrowDownAZ,
-    ArrowUpAZ,
-    Download,
-    Edit,
-    Eye,
-    Grid3X3,
-    List,
-    MoreVertical,
-    Plus,
-    RefreshCw,
-    Search,
-    Trash2,
-    X
+  ArrowDownAZ,
+  ArrowUpAZ,
+  Download,
+  Edit,
+  Eye,
+  Grid3X3,
+  List,
+  MoreVertical,
+  Plus,
+  RefreshCw,
+  Search,
+  Trash2,
+  X
 } from '@/components/icons'
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -21,12 +21,12 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Input } from '@/components/ui/input'
@@ -317,6 +317,7 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
   }
 
   const cardGridClass = { 2: 'grid-cols-1 md:grid-cols-2', 3: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3', 4: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' }[cardsPerRow]
+  const hideOnMobileClass = "hidden lg:table-cell"
 
   return (
     <Card className={className}>
@@ -415,14 +416,15 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
             ) : (
               <div className="border rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
-                  <Table>
+                  <Table className={cn("min-w-[720px] lg:min-w-full")}
+                  >
                     <TableHeader>
                       <TableRow className="bg-muted/50">
                         {enableBulkActions && (
                           <TableHead className="w-[50px]">☑</TableHead>
                         )}
                         {columns.map((col) => (
-                          <TableHead key={String(col.key)} className={cn(col.hideOnMobile && "hidden md:table-cell", col.className)}>
+                          <TableHead key={String(col.key)} className={cn(col.hideOnMobile && hideOnMobileClass, col.className)}>
                             {col.header}
                           </TableHead>
                         ))}
@@ -446,7 +448,7 @@ const SharedDataTableComponent = <T extends Record<string, unknown>>({
                             </TableCell>
                           )}
                           {columns.map((col) => (
-                            <TableCell key={String(col.key)} className={cn(col.hideOnMobile && "hidden md:table-cell", col.className)}>
+                            <TableCell key={String(col.key)} className={cn(col.hideOnMobile && hideOnMobileClass, col.className)}>
                               {col.render ? col.render(getValue(item, col.key), item) : String(getValue(item, col.key) ?? '')}
                             </TableCell>
                           ))}

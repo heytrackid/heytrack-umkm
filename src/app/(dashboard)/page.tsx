@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { Separator } from '@/components/ui/separator'
+import { StatsCards as UiStatsCards, type StatCardData } from '@/components/ui/stats-cards'
 import { useDashboardStats, useWeeklySales } from '@/hooks/api/useDashboard'
 
 import { ProductionScheduleWidget } from '@/components/dashboard/ProductionScheduleWidget'
@@ -91,52 +92,39 @@ export default function DashboardPage(): JSX.Element {
         />
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
-          <Card className="p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <ShoppingCart className="h-6 w-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Orders</p>
-                <p className="text-2xl font-bold">{stats?.orders.total || 0}</p>
-              </div>
-            </div>
-          </Card>
-          <Card className="p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <DollarSign className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Pendapatan</p>
-                <p className="text-2xl font-bold">{formatCurrency(stats?.revenue.weekly || 0)}</p>
-              </div>
-            </div>
-          </Card>
-          <Card className="p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Package className="h-6 w-6 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Suppliers</p>
-                <p className="text-2xl font-bold">{stats?.customers.total || 0}</p>
-              </div>
-            </div>
-          </Card>
-          <Card className="p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Users className="h-6 w-6 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Customers</p>
-                <p className="text-2xl font-bold">{stats?.customers.total || 0}</p>
-              </div>
-            </div>
-          </Card>
-        </div>
+        <UiStatsCards
+          stats={([
+            {
+              title: 'Total Orders',
+              value: stats?.orders.total || 0,
+              icon: ShoppingCart,
+              iconWrapperClassName: 'shrink-0 p-2 bg-green-100 rounded-lg',
+              iconClassName: 'h-6 w-6 text-green-600',
+            },
+            {
+              title: 'Pendapatan',
+              value: formatCurrency(stats?.revenue.weekly || 0),
+              icon: DollarSign,
+              iconWrapperClassName: 'shrink-0 p-2 bg-blue-100 rounded-lg',
+              iconClassName: 'h-6 w-6 text-blue-600',
+            },
+            {
+              title: 'Suppliers',
+              value: stats?.customers.total || 0,
+              icon: Package,
+              iconWrapperClassName: 'shrink-0 p-2 bg-orange-100 rounded-lg',
+              iconClassName: 'h-6 w-6 text-orange-600',
+            },
+            {
+              title: 'Customers',
+              value: stats?.customers.total || 0,
+              icon: Users,
+              iconWrapperClassName: 'shrink-0 p-2 bg-purple-100 rounded-lg',
+              iconClassName: 'h-6 w-6 text-purple-600',
+            },
+          ] satisfies StatCardData[])}
+          gridClassName="grid grid-cols-2 gap-4 lg:grid-cols-4"
+        />
 
         {/* Revenue Chart */}
         <RevenueChart 

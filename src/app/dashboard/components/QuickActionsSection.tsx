@@ -58,7 +58,7 @@ const QuickActionsSection = (): JSX.Element => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 grid-cols-1 md:grid-cols-3 grid-cols-1 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {quickActions.map((action, index) => (
             <Button
               key={index}

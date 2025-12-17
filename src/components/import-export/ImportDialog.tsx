@@ -1,12 +1,12 @@
 'use client'
 
+import { AlertCircle, CheckCircle2, Download, FileText, Upload } from '@/components/icons'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
-import { generateTemplate, parseCSV, type CSVParseResult } from '@/lib/import-export/csv-handler'
 import { handleError } from '@/lib/error-handling'
-import { AlertCircle, CheckCircle2, Download, FileText, Upload } from '@/components/icons'
+import { generateTemplate, parseCSV, type CSVParseResult } from '@/lib/import-export/csv-handler'
 import { useRef, useState } from 'react'
 
 interface ImportDialogProps {
@@ -104,7 +104,7 @@ export function ImportDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>

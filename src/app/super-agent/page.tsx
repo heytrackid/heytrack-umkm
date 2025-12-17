@@ -73,7 +73,7 @@ export default function SuperAgentPage() {
         />
 
         {/* Agents Grid */}
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
           {agents.map((agent) => (
             <Card key={agent.id} className="group hover:shadow-lg transition-all duration-200 border-2 hover:border-primary/20">
               <CardHeader className="pb-4">

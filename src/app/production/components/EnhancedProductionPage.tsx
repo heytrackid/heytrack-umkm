@@ -203,7 +203,7 @@ const EnhancedProductionPage = () => {
                 </Card>
 
                 {/* Production Cards Skeleton */}
-                <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-3'}`}>
+                <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
                     {[1, 2, 3].map(i => (
                         <Card key={`card-skeleton-${i}`}>
                             <CardHeader className="pb-3">
@@ -341,7 +341,7 @@ const EnhancedProductionPage = () => {
                             compact
                         />
                     ) : (
-                        <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-3'}`}>
+                        <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
                             {filteredProductions
                                 .filter(p => p['status'] === 'PLANNED' || p['status'] === 'IN_PROGRESS')
                                 .map((production) => (
@@ -359,7 +359,7 @@ const EnhancedProductionPage = () => {
                 </SwipeableTabsContent>
 
                 <SwipeableTabsContent value="completed" className="space-y-4">
-                    <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-3'}`}>
+                    <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
                         {filteredProductions
                             .filter(p => p['status'] === 'COMPLETED')
                             .map((production) => (
@@ -376,7 +376,7 @@ const EnhancedProductionPage = () => {
                 </SwipeableTabsContent>
 
                 <SwipeableTabsContent value="all" className="space-y-4">
-                    <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-3'}`}>
+                    <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
                         {filteredProductions.map((production) => (
                             <ProductionCard
                                 key={production['id']}
@@ -401,7 +401,7 @@ const EnhancedProductionPage = () => {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                             <div>
                                 <p className="text-sm text-muted-foreground">Total Completed</p>
                                 <p className="text-2xl font-bold">{stats.completed} batch</p>

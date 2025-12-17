@@ -1,8 +1,8 @@
 'use client'
 
-import { ShoppingCart, DollarSign, Package, Clock } from '@/components/icons'
+import { Clock, DollarSign, Package, ShoppingCart } from '@/components/icons'
 
-import { Card, CardContent } from '@/components/ui/card'
+import { StatsCards as UiStatsCards, type StatCardData } from '@/components/ui/stats-cards'
 
 
 
@@ -21,59 +21,35 @@ const OrdersStatsSection = ({
   pendingRevenue,
   formatCurrency,
 }: OrdersStatsSectionProps): JSX.Element => (
-  <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-4">
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">Total Pesanan</p>
-            <p className="text-2xl font-bold">{totalOrders}</p>
-            <p className="text-xs text-muted-foreground mt-1">18.7% dari periode sebelumnya</p>
-          </div>
-          <ShoppingCart className="h-8 w-8 text-muted-foreground" />
-        </div>
-      </CardContent>
-    </Card>
-
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">Total Pendapatan</p>
-            <p className="text-2xl font-bold">{formatCurrency(totalRevenue)}</p>
-            <p className="text-xs text-muted-foreground mt-1">23.2% dari periode sebelumnya</p>
-          </div>
-          <DollarSign className="h-8 w-8 text-muted-foreground" />
-        </div>
-      </CardContent>
-    </Card>
-
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">Rata-rata Nilai</p>
-            <p className="text-2xl font-bold">{formatCurrency(averageOrderValue)}</p>
-            <p className="text-xs text-muted-foreground mt-1">per pesanan</p>
-          </div>
-          <Package className="h-8 w-8 text-muted-foreground" />
-        </div>
-      </CardContent>
-    </Card>
-
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">Pendapatan Pending</p>
-            <p className="text-2xl font-bold">{formatCurrency(pendingRevenue)}</p>
-            <p className="text-xs text-muted-foreground mt-1">belum dibayar</p>
-          </div>
-          <Clock className="h-8 w-8 text-muted-foreground" />
-        </div>
-      </CardContent>
-    </Card>
-  </div>
+  <UiStatsCards
+    stats={([
+      {
+        title: 'Total Pesanan',
+        value: totalOrders,
+        description: '18.7% dari periode sebelumnya',
+        icon: ShoppingCart,
+      },
+      {
+        title: 'Total Pendapatan',
+        value: formatCurrency(totalRevenue),
+        description: '23.2% dari periode sebelumnya',
+        icon: DollarSign,
+      },
+      {
+        title: 'Rata-rata Nilai',
+        value: formatCurrency(averageOrderValue),
+        description: 'per pesanan',
+        icon: Package,
+      },
+      {
+        title: 'Pendapatan Pending',
+        value: formatCurrency(pendingRevenue),
+        description: 'belum dibayar',
+        icon: Clock,
+      },
+    ] satisfies StatCardData[])}
+    gridClassName="grid grid-cols-2 gap-4 lg:grid-cols-4"
+  />
 )
 
 export { OrdersStatsSection }

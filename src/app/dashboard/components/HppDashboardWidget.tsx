@@ -8,8 +8,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { GridSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
-import { useCurrency } from '@/hooks/useCurrency'
 import { useHppDashboardSummary } from '@/hooks/api/useDashboard'
+import { useCurrency } from '@/hooks/useCurrency'
 import { handleError } from '@/lib/error-handling'
 
  
@@ -67,7 +67,7 @@ const HppDashboardWidget = (): JSX.Element | null => {
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Key Metrics */}
-        <div className="grid grid-cols-2 grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-foreground flex items-center justify-center">
               <Target className="h-4 w-4 mr-1" />

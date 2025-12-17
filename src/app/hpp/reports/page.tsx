@@ -4,8 +4,8 @@ import { BarChart3, Calendar, Download, FileImage, FileSpreadsheet, FileText, Li
 import { useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
-import { SharedStatsCards } from '@/components/shared/index'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { SharedStatsCards } from '@/components/shared/index'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -226,7 +226,7 @@ const HppReportsPage = (): JSX.Element => {
               }
               
               return (
-              <div className="grid grid-cols-1 grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Key Metrics */}
                 <Card>
                   <CardHeader>
@@ -380,7 +380,7 @@ const HppReportsPage = (): JSX.Element => {
                 {/* Metrics */}
                 <div className="space-y-2">
                   <Label>Metrics to Include</Label>
-                  <div className="grid grid-cols-2 grid-cols-1 md:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                     {metricOptions.map((metric) => (
                       <div key={metric.value} className="flex flex-col sm:flex-row sm:items-center space-x-2">
                         <input
@@ -427,7 +427,7 @@ const HppReportsPage = (): JSX.Element => {
 
           {/* Export Tab */}
           <SwipeableTabsContent value="export" className="space-y-6">
-            <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 grid-cols-1 lg:grid-cols-4'}`}>
+            <div className={`grid gap-4 ${isMobile ? 'grid-cols-2' : 'grid-cols-2 lg:grid-cols-4'}`}>
               {formatOptions.map((option) => (
                 <Card key={option.value} className="cursor-pointer hover: ">
                   <CardContent className="p-6 text-center space-y-4">

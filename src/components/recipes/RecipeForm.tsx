@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { recipeSchema, type RecipeFormData, type RecipeFormInput } from '@/lib/validations/recipes'
@@ -67,7 +67,7 @@ export function RecipeForm({
           {errors.name && <p id="name-error" className="text-sm text-destructive">{errors.name.message}</p>}
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="category">Kategori</Label>
             <Input id="category" {...register('category')} placeholder="Contoh: Makanan Utama" aria-describedby={errors.category ? 'category-error' : undefined} />
@@ -131,7 +131,7 @@ export function RecipeForm({
           )}
         </div>
 
-         <div className="grid grid-cols-2 gap-4">
+         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
            <div className="space-y-2">
              <Label htmlFor="prep_time">Waktu Persiapan (menit)</Label>
              <Input

@@ -37,6 +37,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Skeleton } from '@/components/ui/skeleton';
+import { StatsCards as UiStatsCards, type StatCardData } from '@/components/ui/stats-cards';
 import { useFinanceWiseDashboard } from '@/hooks/api/useFinanceWise';
 import { formatCurrentCurrency } from '@/lib/currency';
 import type { FinancialHealth } from '@/services/ai';
@@ -164,37 +165,67 @@ export default function FinanceWisePage() {
 
             {/* Summary Stats */}
             {summary && (
-              <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
-                <StatCard
-                  title="Revenue"
-                  value={formatCurrentCurrency(summary.revenue)}
-                  change={summary.revenueGrowth}
-                  icon={DollarSign}
-                  trend={summary.revenueGrowth >= 0 ? 'up' : 'down'}
-                />
-                <StatCard
-                  title="Expenses"
-                  value={formatCurrentCurrency(summary.expenses)}
-                  change={summary.expenseGrowth}
-                  icon={TrendingDown}
-                  trend={summary.expenseGrowth >= 0 ? 'up' : 'down'}
-                  invertTrend
-                />
-                <StatCard
-                  title="Profit"
-                  value={formatCurrentCurrency(summary.profit)}
-                  change={summary.profitMargin}
-                  icon={TrendingUp}
-                  trend={summary.profit >= 0 ? 'up' : 'down'}
-                  suffix="margin"
-                />
-                <StatCard
-                  title="Runway"
-                  value={health ? `${health.runway.toFixed(1)} bulan` : '-'}
-                  icon={Calendar}
-                  trend={health && health.runway >= 3 ? 'up' : 'down'}
-                />
-              </div>
+              <UiStatsCards
+                stats={([
+                  {
+                    title: 'Revenue',
+                    value: formatCurrentCurrency(summary.revenue),
+                    icon: DollarSign,
+                    footer: (
+                      <p className={`text-xs flex items-center gap-1 mt-1 ${
+                        (summary.revenueGrowth ?? 0) >= 0
+                          ? 'text-green-600 dark:text-green-400'
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {(summary.revenueGrowth ?? 0) >= 0
+                          ? <ArrowUpRight className="h-3 w-3" />
+                          : <ArrowDownRight className="h-3 w-3" />}
+                        {Math.abs(summary.revenueGrowth ?? 0).toFixed(1)}%
+                      </p>
+                    ),
+                  },
+                  {
+                    title: 'Expenses',
+                    value: formatCurrentCurrency(summary.expenses),
+                    icon: TrendingDown,
+                    footer: (
+                      <p className={`text-xs flex items-center gap-1 mt-1 ${
+                        (summary.expenseGrowth ?? 0) <= 0
+                          ? 'text-green-600 dark:text-green-400'
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {(summary.expenseGrowth ?? 0) <= 0
+                          ? <ArrowUpRight className="h-3 w-3" />
+                          : <ArrowDownRight className="h-3 w-3" />}
+                        {Math.abs(summary.expenseGrowth ?? 0).toFixed(1)}%
+                      </p>
+                    ),
+                  },
+                  {
+                    title: 'Profit',
+                    value: formatCurrentCurrency(summary.profit),
+                    icon: TrendingUp,
+                    footer: (
+                      <p className={`text-xs flex items-center gap-1 mt-1 ${
+                        (summary.profitMargin ?? 0) >= 0
+                          ? 'text-green-600 dark:text-green-400'
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {(summary.profitMargin ?? 0) >= 0
+                          ? <ArrowUpRight className="h-3 w-3" />
+                          : <ArrowDownRight className="h-3 w-3" />}
+                        {Math.abs(summary.profitMargin ?? 0).toFixed(1)}% margin
+                      </p>
+                    ),
+                  },
+                  {
+                    title: 'Runway',
+                    value: health ? `${health.runway.toFixed(1)} bulan` : '-',
+                    icon: Calendar,
+                  },
+                ] satisfies StatCardData[])}
+                gridClassName="grid grid-cols-2 gap-4 lg:grid-cols-4"
+              />
             )}
 
             {/* Financial Overview Pie Chart */}
@@ -576,46 +607,11 @@ function FinancialHealthCard({ health }: { health: FinancialHealth }) {
   )
 }
 
-interface StatCardProps {
-  title: string
-  value: string
-  change?: number
-  icon: React.ComponentType<{ className?: string }>
-  trend?: 'up' | 'down'
-  invertTrend?: boolean
-  suffix?: string
-}
-
-function StatCard({ title, value, change, icon: Icon, trend, invertTrend, suffix }: StatCardProps) {
-  const isPositive = invertTrend ? trend === 'down' : trend === 'up'
-  const TrendIcon = trend === 'up' ? ArrowUpRight : ArrowDownRight
-
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        {change !== undefined && (
-          <p className={`text-xs flex items-center gap-1 mt-1 ${
-            isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-          }`}>
-            <TrendIcon className="h-3 w-3" />
-            {Math.abs(change).toFixed(1)}%{suffix ? ` ${suffix}` : ''}
-          </p>
-        )}
-      </CardContent>
-    </Card>
-  )
-}
-
 function LoadingSkeleton() {
   return (
     <div className="space-y-6">
       <Skeleton className="h-32 w-full" />
-      <div className="grid grid-cols-1 gap-4 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[1, 2, 3, 4].map((i) => (
           <Skeleton key={i} className="h-24" />
         ))}

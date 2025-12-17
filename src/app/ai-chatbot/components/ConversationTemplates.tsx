@@ -50,7 +50,7 @@ export const ConversationTemplates = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 grid-cols-1 md:grid-cols-2 grid-cols-1 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
         {CONVERSATION_TEMPLATES.map((template) => (
           <Card
             key={template.id}

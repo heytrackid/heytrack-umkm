@@ -41,7 +41,7 @@ const ReportsTabContent = ({ config, setConfig, generateReport, generating }: Re
        {/* Metrics */}
       <div className="space-y-2">
         <Label>Metrics to Include</Label>
-        <div className="grid grid-cols-2 grid-cols-1 md:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
           {[
             { value: 'hpp' as const, label: 'HPP Values' },
             { value: 'margin' as const, label: 'Margins' },
