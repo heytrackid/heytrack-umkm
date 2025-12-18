@@ -11,9 +11,8 @@ import { useAIService, useChatMessages } from '@/app/ai-chatbot/hooks/index'
 
 import { ChatHeader } from './components/ChatHeader'
 import { ChatInput } from './components/ChatInput'
+import { EmptyState } from './components/EmptyState'
 import { MessageList } from './components/MessageList'
-
-
 
 const AIChatbotPage = (): JSX.Element => {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth()
@@ -22,10 +21,8 @@ const AIChatbotPage = (): JSX.Element => {
   const { processAIQuery } = useAIService(currentSessionId)
   const [input, setInput] = useState('')
   
-  // Ref to track pending session update to prevent race condition
   const pendingSessionRef = useRef<string | null>(null)
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       router.push('/auth/login?redirectTo=/ai-chatbot')
@@ -50,15 +47,12 @@ const AIChatbotPage = (): JSX.Element => {
     try {
       const response = await processAIQuery(textToSend)
 
-      // Update session ID if API returned a new one (with race condition protection)
       const responseData = response['data'] as Record<string, unknown> | undefined
       const newSessionId = responseData?.['sessionId']
       if (newSessionId && typeof newSessionId === 'string') {
-        // Only update if no pending update or this is the pending one
         if (!pendingSessionRef.current || pendingSessionRef.current === newSessionId) {
           pendingSessionRef.current = newSessionId
           setSessionId(newSessionId)
-          // Clear pending after a short delay to allow state to settle
           setTimeout(() => {
             if (pendingSessionRef.current === newSessionId) {
               pendingSessionRef.current = null
@@ -94,7 +88,6 @@ const AIChatbotPage = (): JSX.Element => {
     void handleSendMessage(suggestion)
   }, [handleSendMessage])
 
-  // Show loading while checking auth
   if (authLoading) {
     return (
       <AppLayout pageTitle="AI Chatbot">
@@ -103,48 +96,46 @@ const AIChatbotPage = (): JSX.Element => {
     )
   }
 
-  // Don't render if not authenticated (should redirect)
   if (!isAuthenticated || !user) {
     return (
       <AppLayout pageTitle="AI Chatbot">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-center h-[calc(100vh-4rem)]">
+        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
           <div className="text-muted-foreground">Redirecting to login...</div>
         </div>
       </AppLayout>
     )
   }
 
+  const hasMessages = messages.length > 0
+
   return (
     <AppLayout pageTitle="AI Chatbot">
-      {/* Full viewport chat container with mobile optimizations */}
-      <div className="flex flex-col h-[calc(100vh-4rem)] safe-top max-w-5xl mx-auto w-full">
-        {/* Minimal header */}
-        <div className="flex-shrink-0">
-          <ChatHeader />
+      <div className="flex flex-col h-[calc(100vh-4rem)] max-w-4xl mx-auto w-full">
+        {/* Header */}
+        <ChatHeader />
+
+        {/* Main content area */}
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          {hasMessages ? (
+            <MessageList
+              messages={messages}
+              isLoading={isLoading}
+              scrollAreaRef={scrollAreaRef}
+              onSuggestionClick={handleSuggestionClick}
+              onFeedbackSubmit={submitFeedback}
+            />
+          ) : (
+            <EmptyState onSuggestionClick={handleSuggestionClick} />
+          )}
         </div>
 
-        {/* Messages area - takes remaining height */}
-        <div className="flex-1 overflow-hidden relative min-h-0">
-          <MessageList
-            messages={messages}
-            isLoading={isLoading}
-            scrollAreaRef={scrollAreaRef}
-            onSuggestionClick={handleSuggestionClick}
-            onFeedbackSubmit={submitFeedback}
-          />
-        </div>
-
-        {/* Input area - fixed at bottom with safe area */}
-        <div className="flex-shrink-0">
-          <ChatInput
-            input={input}
-            setInput={setInput}
-            onSendMessage={handleSendMessage}
-            isLoading={isLoading}
-            showQuickActions={messages.length === 0}
-            showSuggestionChips={messages.length === 0}
-          />
-        </div>
+        {/* Input area */}
+        <ChatInput
+          input={input}
+          setInput={setInput}
+          onSendMessage={handleSendMessage}
+          isLoading={isLoading}
+        />
       </div>
     </AppLayout>
   )

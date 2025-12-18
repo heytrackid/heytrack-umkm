@@ -4,18 +4,12 @@ import { type FormEvent } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-
-import { QuickActionTemplates } from '@/app/ai-chatbot/components/QuickActionTemplates'
-import { SuggestionChips } from '@/app/ai-chatbot/components/SuggestionChips'
 
 interface ChatInputProps {
   input: string
   setInput: (value: string) => void
   onSendMessage: (message?: string) => void
   isLoading: boolean
-  showQuickActions?: boolean
-  showSuggestionChips?: boolean
 }
 
 export const ChatInput = ({
@@ -23,8 +17,6 @@ export const ChatInput = ({
   setInput,
   onSendMessage,
   isLoading,
-  showQuickActions = true,
-  showSuggestionChips = true,
 }: ChatInputProps): JSX.Element => {
   const handleSubmit = (e: FormEvent): void => {
     e.preventDefault()
@@ -33,87 +25,41 @@ export const ChatInput = ({
     }
   }
 
-  const handleSuggestionClick = (suggestion: string): void => {
-    onSendMessage(suggestion)
-  }
-
   return (
-    <div className="border-t border-border/20 bg-background px-4 py-4 safe-bottom">
-      <div className="space-y-3 max-w-4xl mx-auto">
-        {/* Quick Action Templates */}
-        {showQuickActions && (
-          <QuickActionTemplates
-            onSelectTemplate={handleSuggestionClick}
+    <div className="flex-shrink-0 border-t border-border/40 bg-background/80 backdrop-blur-sm px-4 py-3">
+      <form onSubmit={handleSubmit} className="flex items-end gap-2 max-w-3xl mx-auto">
+        <div className="flex-1 relative">
+          <Textarea
+            value={input}
+            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
+            placeholder="Tanyakan apa saja tentang bisnis UMKM kuliner Anda..."
+            className="min-h-[44px] max-h-[120px] resize-none pr-2 rounded-xl border-border/50 focus:border-primary/50 transition-colors"
             disabled={isLoading}
+            rows={1}
+            onKeyDown={(e: KeyboardEvent<HTMLTextAreaElement>) => {
+              if (e.key === 'Enter' && !e.shiftKey && input.trim()) {
+                e.preventDefault()
+                onSendMessage()
+              }
+            }}
           />
-        )}
-
-        {/* Quick Suggestions */}
-        {showSuggestionChips && (
-          <SuggestionChips
-            onSuggestionClick={handleSuggestionClick}
-            disabled={isLoading}
-          />
-        )}
-
-        {/* Input Form */}
-        <form onSubmit={handleSubmit} className="flex gap-2" role="search" aria-label="Kirim pesan chatbot">
-          <TooltipProvider disableHoverableContent>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Textarea
-                  value={input}
-                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
-                  placeholder="Tanyakan apa saja tentang bisnis UMKM kuliner Anda..."
-                  className="flex-1 min-h-[44px] max-h-[140px] resize-none input-mobile focus-mobile"
-                  disabled={isLoading}
-                  aria-label="Kolom input pesan"
-                  onKeyDown={(e: KeyboardEvent<HTMLTextAreaElement>) => {
-                    if (e.key === 'Enter' && !e.shiftKey && input.trim()) {
-                      e.preventDefault()
-                      onSendMessage()
-                    }
-                  }}
-                />
-              </TooltipTrigger>
-              <TooltipContent side="top" align="end">
-                <div className="text-xs">
-                  <div><b>Enter</b> untuk kirim</div>
-                  <div><b>Shift+Enter</b> untuk baris baru</div>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
-          <TooltipProvider disableHoverableContent>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="submit"
-                  disabled={!input.trim() || isLoading}
-                  size="icon"
-                  className="touch-target shrink-0"
-                  aria-label="Kirim"
-                  title="Kirim"
-                >
-                  {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <div className="text-xs">Kirim (Enter)</div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </form>
-
-        <p className="text-xs text-center text-muted-foreground hidden sm:block">
-          Enter: kirim • Shift+Enter: baris baru
-        </p>
-      </div>
+        </div>
+        <Button
+          type="submit"
+          disabled={!input.trim() || isLoading}
+          size="icon"
+          className="h-11 w-11 rounded-xl shrink-0"
+        >
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Send className="h-4 w-4" />
+          )}
+        </Button>
+      </form>
+      <p className="text-[10px] text-center text-muted-foreground mt-2">
+        Enter: kirim • Shift+Enter: baris baru
+      </p>
     </div>
   )
 }
