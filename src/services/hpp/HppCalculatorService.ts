@@ -311,16 +311,34 @@ export class HppCalculatorService extends BaseService {
       // Step 3: Calculate from operational costs (labor category)
       const { data: laborCosts, error: laborError } = await this.context.supabase
         .from('operational_costs')
-        .select('amount')
+        .select('amount, frequency')
         .eq('user_id', this.context.userId)
         .eq('is_active', true)
         .ilike('category', '%labor%')
 
       if (!laborError && laborCosts && laborCosts.length > 0) {
-        const totalLaborCost = laborCosts.reduce(
-          (sum, cost) => sum + Number(cost.amount ?? 0),
-          0
-        )
+        // FIXED: Convert all labor costs to monthly basis before summing
+        const monthlyLaborCosts = laborCosts.map(cost => {
+          const amount = Number(cost.amount ?? 0)
+          const frequency = cost.frequency ?? 'MONTHLY'
+
+          // Convert to monthly equivalent
+          switch (frequency.toUpperCase()) {
+            case 'YEARLY':
+              return amount / 12 // Yearly cost divided by 12 months
+            case 'QUARTERLY':
+              return amount / 3 // Quarterly cost divided by 3 months
+            case 'MONTHLY':
+              return amount // Already monthly
+            case 'ONE_TIME':
+              // One-time costs: amortize over 12 months (1 year assumption)
+              return amount / 12
+            default:
+              return amount // Default to monthly
+          }
+        })
+
+        const totalMonthlyLaborCost = monthlyLaborCosts.reduce((sum, cost) => sum + cost, 0)
 
         // FIXED: Try recent productions first (30 days), then all productions if no recent data
         let totalVolume = 0
@@ -353,9 +371,15 @@ export class HppCalculatorService extends BaseService {
           )
         }
 
-        if (totalVolume > 0 && totalLaborCost > 0) {
-          const laborCostPerUnit = totalLaborCost / totalVolume
-          this.logger.debug({ recipeId, laborCostPerUnit, source: 'operational_costs' }, 'Labor cost calculated from operational costs')
+        if (totalVolume > 0 && totalMonthlyLaborCost > 0) {
+          const laborCostPerUnit = totalMonthlyLaborCost / totalVolume
+          this.logger.debug({
+            recipeId,
+            totalMonthlyLaborCost,
+            totalVolume,
+            laborCostPerUnit,
+            source: 'operational_costs_monthly'
+          }, 'Labor cost calculated from operational costs (frequency-adjusted)')
           return laborCostPerUnit
         }
       }
@@ -388,10 +412,10 @@ export class HppCalculatorService extends BaseService {
     recipeId: string
   ): Promise<number> {
     try {
-      // Get active operational costs (EXCLUDING labor - that's calculated separately)
+      // FIXED: Get active operational costs with frequency information
       const { data: operationalCosts, error } = await this.context.supabase
         .from('operational_costs')
-        .select('amount, category')
+        .select('amount, category, frequency')
         .eq('user_id', this.context.userId)
         .eq('is_active', true)
 
@@ -414,12 +438,33 @@ export class HppCalculatorService extends BaseService {
         }
       )
 
-      const totalOverhead = nonLaborCosts.reduce(
-        (sum, cost) => sum + Number(cost.amount ?? 0),
+      // FIXED: Convert all overhead costs to monthly basis before summing
+      const monthlyOverheadCosts = nonLaborCosts.map(cost => {
+        const amount = Number(cost.amount ?? 0)
+        const frequency = cost.frequency ?? 'MONTHLY'
+
+        // Convert to monthly equivalent
+        switch (frequency.toUpperCase()) {
+          case 'YEARLY':
+            return amount / 12 // Yearly cost divided by 12 months
+          case 'QUARTERLY':
+            return amount / 3 // Quarterly cost divided by 3 months
+          case 'MONTHLY':
+            return amount // Already monthly
+          case 'ONE_TIME':
+            // One-time costs: amortize over 12 months (1 year assumption)
+            return amount / 12
+          default:
+            return amount // Default to monthly
+        }
+      })
+
+      const totalMonthlyOverhead = monthlyOverheadCosts.reduce(
+        (sum, cost) => sum + cost,
         0
       )
 
-      if (totalOverhead === 0) {
+      if (totalMonthlyOverhead === 0) {
         return 0 // No overhead costs
       }
 
@@ -456,17 +501,17 @@ export class HppCalculatorService extends BaseService {
       // Case 1: Recipe has production history - allocate based on volume ratio
       if (totalVolume > 0 && recipeVolume > 0) {
         // Volume-based allocation: each unit gets equal share of total overhead
-        // overheadPerUnit = totalOverhead / totalVolume (fair allocation per unit)
-        const overheadPerUnit = totalOverhead / totalVolume
+        // overheadPerUnit = totalMonthlyOverhead / totalVolume (fair allocation per unit)
+        const overheadPerUnit = totalMonthlyOverhead / totalVolume
         
         this.logger.debug({
           recipeId,
-          totalOverhead,
+          totalMonthlyOverhead,
           recipeVolume,
           totalVolume,
           overheadPerUnit,
           source: 'volume_based'
-        }, 'Overhead calculated based on production volume')
+        }, 'Overhead calculated based on production volume (frequency-adjusted)')
         
         return overheadPerUnit
       }
@@ -482,7 +527,7 @@ export class HppCalculatorService extends BaseService {
 
       // For new recipes, allocate equal share of overhead
       // Then divide by THIS recipe's servings (not average)
-      const overheadPerRecipe = totalOverhead / activeRecipeCount
+      const overheadPerRecipe = totalMonthlyOverhead / activeRecipeCount
 
       // FIXED: Get this recipe's servings instead of using average
       const { data: thisRecipe } = await this.context.supabase
@@ -498,7 +543,7 @@ export class HppCalculatorService extends BaseService {
 
       this.logger.debug({
         recipeId,
-        totalOverhead,
+        totalMonthlyOverhead,
         activeRecipeCount,
         recipeServings,
         overheadPerUnit,
