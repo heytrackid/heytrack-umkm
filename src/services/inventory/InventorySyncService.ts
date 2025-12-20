@@ -66,11 +66,12 @@ export class InventorySyncService extends BaseService {
           ? newTotalValue / newStock
           : (previousWac || unitPrice) // Fallback to previous WAC or purchase price
 
-        // Update ingredient stock
+        // Update ingredient stock and WAC
         const { error: updateError } = await this.context.supabase
           .from('ingredients')
           .update({
             current_stock: newStock,
+            weighted_average_cost: newWac,
             updated_at: new Date().toISOString(),
             updated_by: this.context.userId
           })
@@ -172,11 +173,12 @@ export class InventorySyncService extends BaseService {
         const previousWac = Number(ingredient.weighted_average_cost ?? ingredient.price_per_unit ?? 0)
 
         // Calculate new WAC using weighted average formula
+        // No spoilage adjustment needed here since waste_factor is handled in HPP calculations
         const totalOldValue = previousStock * previousWac
         const totalNewValue = quantity * unitPrice
         const newTotalStock = previousStock + quantity
-        const newWac = newTotalStock > 0 
-          ? (totalOldValue + totalNewValue) / newTotalStock 
+        const newWac = newTotalStock > 0
+          ? (totalOldValue + totalNewValue) / newTotalStock
           : unitPrice
 
         // Update ingredient stock and WAC

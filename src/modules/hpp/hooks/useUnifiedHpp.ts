@@ -54,6 +54,14 @@ export type RecipeWithCosts = RecipeDetailResponse & RecipeWithHpp & {
   labor_costs: number
   overhead_costs: number
   total_cost: number
+  estimated_cost_per_unit?: number
+  actual_hpp?: {
+    available: boolean
+    actual_quantity: number | null
+    cost_per_unit: number | null
+    total_cost: number | null
+    note: string
+  }
 }
 
 export interface UseUnifiedHppReturn {

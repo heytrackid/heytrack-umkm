@@ -46,6 +46,7 @@ export const IngredientFormDialog = ({
             price_per_unit: ingredient.price_per_unit,
             current_stock: ingredient.current_stock ?? 0,
             min_stock: ingredient.min_stock ?? 0,
+            spoilage_rate: (ingredient as unknown as { spoilage_rate?: number }).spoilage_rate ?? 0.05,
             description: ingredient.description ?? '',
         } : {
             name: '',
@@ -53,6 +54,7 @@ export const IngredientFormDialog = ({
             price_per_unit: 0,
             current_stock: 0,
             min_stock: 0,
+            spoilage_rate: 0.05,
             description: '',
         }
     })
@@ -100,6 +102,7 @@ export const IngredientFormDialog = ({
                                 price_per_unit: ingredient.price_per_unit || 0,
                                 current_stock: ingredient.current_stock ?? 0,
                                 min_stock: ingredient.min_stock ?? 0,
+                                spoilage_rate: (ingredient as unknown as { spoilage_rate?: number }).spoilage_rate ?? 0.05,
                                 description: ingredient.description ?? '',
                             }
                         } : {})}

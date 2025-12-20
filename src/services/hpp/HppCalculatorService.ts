@@ -16,14 +16,12 @@ import type { Insert, Row } from '@/types/database'
  */
 
 
-type RecipeIngredient = Row<'recipe_ingredients'>
-type Ingredient = Row<'ingredients'>
-
 export interface HppCalculationResult {
   recipe_id: string // Use snake_case for consistency with DB
   material_cost: number
   labor_cost: number
   overhead_cost: number
+  packaging_cost: number
   total_hpp: number
   cost_per_unit: number
   wac_adjustment: number
@@ -120,6 +118,7 @@ export class HppCalculatorService extends BaseService {
         }
 
         const quantity = Number(ri.quantity ?? 0)
+        
         // FIXED: Use WAC if available, fallback to current price
         // WAC is more accurate for costing as it considers historical purchase prices
         const unit_price = Number(
@@ -128,15 +127,43 @@ export class HppCalculatorService extends BaseService {
           0
         )
         
+        // Validate inputs - skip invalid ingredients
+        if (quantity <= 0) {
+          this.logger.warn({ ingredient_id: ri.ingredient_id, quantity }, 'Skipping ingredient with invalid quantity')
+          continue
+        }
+        
+        if (unit_price < 0) {
+          this.logger.warn({ ingredient_id: ri.ingredient_id, unit_price }, 'Skipping ingredient with negative price')
+          continue
+        }
+        
+        if (unit_price === 0) {
+          this.logger.warn({ ingredient_id: ri.ingredient_id }, 'Ingredient has zero price - using for breakdown but no cost impact')
+        }
+        
         // Apply waste factor (default 1.0 = no waste, 1.05 = 5% waste)
-        const waste_factor = Number(validIngredient.waste_factor ?? 1.0)
-        const total_cost = quantity * unit_price * waste_factor
+        // FIXED: Waste factor should increase quantity needed, not multiply total cost
+        const waste_factor = Math.round((Number(validIngredient.waste_factor ?? 1.0)) * 1000) / 1000 // Round to 3 decimal places
+        const effective_quantity = Math.round((quantity * waste_factor) * 1000) / 1000 // Round to 3 decimal places
+        const total_cost = Math.round((effective_quantity * unit_price) * 100) / 100 // Round to 2 decimal places for currency
+
+        // Enforce unit consistency: recipe ingredient quantity follows ingredient.unit
+        const ingredientUnit = validIngredient.unit
+        if (ri.unit && ri.unit !== ingredientUnit) {
+          this.logger.warn({
+            recipeId,
+            ingredient_id: ri.ingredient_id,
+            recipeIngredientUnit: ri.unit,
+            ingredientUnit
+          }, 'Recipe ingredient unit differs from ingredient unit; using ingredient unit for HPP calculation')
+        }
 
         material_breakdown.push({
           ingredient_id: validIngredient['id'],
           ingredient_name: validIngredient.name,
-          quantity,
-          unit: ri.unit,
+          quantity: effective_quantity, // Show actual quantity used (including waste)
+          unit: ingredientUnit,
           unit_price,
           total_cost
         })
@@ -153,18 +180,16 @@ export class HppCalculatorService extends BaseService {
           // Calculate overhead cost (per unit) with production-based allocation
           const overhead_cost_per_unit = await this.calculateOverheadCost(recipeId)
 
-          // Calculate WAC adjustment (difference between WAC and current price)
-          // This is ONLY for tracking, not double-counted
-          const wac_adjustment_per_unit = await this.calculateWacAdjustment(
-            recipeIngredients as unknown as Array<RecipeIngredient & { ingredients: Ingredient | null }>,
-            servings
-          )
+          // Calculate packaging cost (per unit) from recipe data
+          // packaging_cost_per_unit is stored per serving in the recipe
+          const packaging_cost_per_unit = Number((recipeData as unknown as { packaging_cost_per_unit?: number }).packaging_cost_per_unit ?? 0)
 
       // Final per-unit and per-batch totals
       // FIXED: WAC adjustment is for TRACKING ONLY, not added to actual cost
-      // HPP = Material Cost + Labor Cost + Overhead Cost
-      const cost_per_unit =
-        material_cost_per_unit + labor_cost_per_unit + overhead_cost_per_unit
+      // HPP = Material Cost + Labor Cost + Overhead Cost + Packaging Cost
+      const cost_per_unit = Math.round((
+        material_cost_per_unit + labor_cost_per_unit + overhead_cost_per_unit + packaging_cost_per_unit
+      ) * 100) / 100 // Round to 2 decimal places
       
       // Validate cost_per_unit
       if (cost_per_unit < 0) {
@@ -173,23 +198,26 @@ export class HppCalculatorService extends BaseService {
       if (isNaN(cost_per_unit)) {
         throw new Error(`Invalid cost_per_unit (NaN) for recipe ${recipeId}`)
       }
+      if (!isFinite(cost_per_unit)) {
+        throw new Error(`Invalid cost_per_unit (infinite) for recipe ${recipeId}`)
+      }
 
-      const total_hpp = cost_per_unit * servings
+      const total_hpp = Math.round((cost_per_unit * servings) * 100) / 100 // Round to 2 decimal places
 
       // Convert per-unit components back to per-batch totals for persistence
-      const labor_cost = labor_cost_per_unit * servings
-      const overhead_cost = overhead_cost_per_unit * servings
-      // WAC adjustment is stored separately for reporting/tracking purposes only
-      const wac_adjustment = wac_adjustment_per_unit * servings
+      const labor_cost = Math.round((labor_cost_per_unit * servings) * 100) / 100
+      const overhead_cost = Math.round((overhead_cost_per_unit * servings) * 100) / 100
+      const packaging_cost = Math.round((packaging_cost_per_unit * servings) * 100) / 100
 
       const result: HppCalculationResult = {
         recipe_id: recipeId,
         material_cost: total_material_cost,
         labor_cost,
         overhead_cost,
+        packaging_cost,
         total_hpp: Math.max(0, total_hpp), // Ensure non-negative
         cost_per_unit: Math.max(0, cost_per_unit), // Ensure non-negative
-        wac_adjustment,
+        wac_adjustment: 0, // No longer used - set to 0
         production_quantity: servings,
         material_breakdown
       }
@@ -395,9 +423,9 @@ export class HppCalculatorService extends BaseService {
         return 0 // No overhead costs
       }
 
-      // Get production volume for this recipe (last 30 days)
-      const thirtyDaysAgo = new Date()
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+      // Get production volume for this recipe (last 90 days for seasonal consideration)
+      const ninetyDaysAgo = new Date()
+      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
 
       const { data: recipeProductions } = await this.context.supabase
         .from('productions')
@@ -405,7 +433,7 @@ export class HppCalculatorService extends BaseService {
         .eq('recipe_id', recipeId)
         .eq('user_id', this.context.userId)
         .eq('status', 'COMPLETED')
-        .gte('actual_end_time', thirtyDaysAgo.toISOString())
+        .gte('actual_end_time', ninetyDaysAgo.toISOString())
 
       const recipeVolume = (recipeProductions ?? []).reduce(
         (sum: number, p: { actual_quantity: number | null }) => sum + Number(p.actual_quantity ?? 0),
@@ -418,7 +446,7 @@ export class HppCalculatorService extends BaseService {
         .select('actual_quantity')
         .eq('user_id', this.context.userId)
         .eq('status', 'COMPLETED')
-        .gte('actual_end_time', thirtyDaysAgo.toISOString())
+        .gte('actual_end_time', ninetyDaysAgo.toISOString())
 
       const totalVolume = (allProductions ?? []).reduce(
         (sum: number, p: { actual_quantity: number | null }) => sum + Number(p.actual_quantity ?? 0),
@@ -486,121 +514,6 @@ export class HppCalculatorService extends BaseService {
   }
 
   /**
-   * Calculate WAC (Weighted Average Cost) adjustment
-   * Compares WAC from stock transactions with ingredient's stored WAC
-   * 
-   * NOTE: This is for tracking/reporting purposes only.
-   * Material cost already uses ingredient.weighted_average_cost (line 126).
-   * This adjustment tracks variance between transaction-based WAC and stored WAC.
-   */
-  private async calculateWacAdjustment(
-    recipeIngredients: Array<RecipeIngredient & { ingredients: Ingredient | null }>,
-    servings: number
-  ): Promise<number> {
-    try {
-      if (!recipeIngredients || recipeIngredients.length === 0) {
-        return 0
-      }
-
-      if (servings <= 0) {
-        return 0
-      }
-
-      const ingredientIds = recipeIngredients
-        .filter(ri => ri.ingredients)
-        .map(ri => ri.ingredient_id)
-
-      if (ingredientIds.length === 0) {
-        return 0
-      }
-
-      // Get recent purchase transactions for these ingredients
-      const cutoffDate = new Date()
-      cutoffDate.setDate(cutoffDate.getDate() - HPP_CONFIG.WAC_MAX_AGE_DAYS)
-
-      const { data: transactions, error } = await this.context.supabase
-        .from('stock_transactions')
-        .select('ingredient_id, quantity, unit_price, total_price, created_at')
-        .in('ingredient_id', ingredientIds)
-        .eq('user_id', this.context.userId)
-        .eq('type', 'PURCHASE')
-        .gte('created_at', cutoffDate.toISOString())
-        .order('created_at', { ascending: false })
-        .limit(HPP_CONFIG.WAC_LOOKBACK_TRANSACTIONS)
-
-      if (error ?? !transactions) {
-        this.logger.warn({ error }, 'Failed to fetch stock transactions for WAC')
-        return 0
-      }
-
-      let totalAdjustment = 0
-
-      // Calculate WAC adjustment per unit for each ingredient
-      // Adjustment = (WAC - Current Price) × Qty per Unit
-      for (const ri of recipeIngredients) {
-        const ingredient = ri.ingredients
-        if (!ingredient) {
-          continue
-        }
-
-        const ingredientTransactions = transactions.filter(
-          t => t.ingredient_id === ri.ingredient_id
-        )
-
-        if (ingredientTransactions.length === 0) {
-          continue
-        }
-
-        // Calculate weighted average cost from transactions
-        const totalQuantity = ingredientTransactions.reduce(
-          (sum, t) => sum + Number(t.quantity ?? 0),
-          0
-        )
-        const totalValue = ingredientTransactions.reduce(
-          (sum, t) => sum + Number(t.total_price ?? 0),
-          0
-        )
-
-        if (totalQuantity === 0) {
-          continue
-        }
-
-        const transactionWac = totalValue / totalQuantity
-        const storedWac = Number((ingredient as unknown as { weighted_average_cost?: number | null }).weighted_average_cost ?? 0)
-
-        // FIXED: Compare transaction-based WAC with stored WAC (not current price)
-        // This tracks variance between real transaction history and stored value
-        if (Math.abs(transactionWac - storedWac) < 0.01) {
-          continue
-        }
-
-        // Adjustment per unit: (qty per unit) * (transactionWac - storedWac)
-        const quantityBatch = Number(ri.quantity ?? 0)
-        const qtyPerUnit = quantityBatch / servings
-        const adjustmentPerUnit = (transactionWac - storedWac) * qtyPerUnit
-
-        totalAdjustment += adjustmentPerUnit
-
-        this.logger.debug({
-          ingredientId: (ingredient as unknown as { id?: string }).id,
-          ingredientName: (ingredient as unknown as { name?: string }).name,
-          transactionWac,
-          storedWac,
-          qtyPerUnit,
-          adjustmentPerUnit,
-          note: 'WAC adjustment tracks variance between transaction history and stored WAC'
-        }, 'WAC adjustment calculated per unit for ingredient')
-      }
-
-      return totalAdjustment
-
-    } catch (error: unknown) {
-      this.logger.error({ error }, 'Failed to calculate WAC adjustment')
-      return 0
-    }
-  }
-
-  /**
    * Save HPP calculation to database
    */
   private async saveHppCalculation(
@@ -614,6 +527,8 @@ export class HppCalculatorService extends BaseService {
         material_cost: result.material_cost,
         labor_cost: result.labor_cost,
         overhead_cost: result.overhead_cost,
+        // TODO: Remove 'as any' after running migrations and regenerating types
+        ...(result.packaging_cost && { packaging_cost: result.packaging_cost } as unknown as Insert<'hpp_calculations'>),
         total_hpp: result.total_hpp,
         cost_per_unit: result.cost_per_unit,
         wac_adjustment: result.wac_adjustment,

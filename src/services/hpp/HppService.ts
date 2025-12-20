@@ -104,9 +104,13 @@ export class HppService extends BaseService {
           name
         ),
         material_cost,
-        operational_cost,
+        labor_cost,
+        overhead_cost,
+        packaging_cost,
         total_hpp,
         cost_per_unit,
+        wac_adjustment,
+        production_quantity,
         created_at
       `, { count: 'exact' })
       .eq('user_id', this.context.userId)
@@ -143,6 +147,7 @@ export class HppService extends BaseService {
       material_cost: (item as Record<string, unknown>)['material_cost'] as number,
       labor_cost: (item as Record<string, unknown>)['labor_cost'] as number,
       overhead_cost: (item as Record<string, unknown>)['overhead_cost'] as number,
+      packaging_cost: (item as Record<string, unknown>)['packaging_cost'] as number || 0, // Default to 0 for existing records
       total_hpp: (item as Record<string, unknown>)['total_hpp'] as number,
       cost_per_unit: (item as Record<string, unknown>)['cost_per_unit'] as number,
       wac_adjustment: (item as Record<string, unknown>)['wac_adjustment'] as number,

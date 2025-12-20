@@ -14,6 +14,7 @@ import {
     Users,
 } from '@/components/icons'
 import { OptimizedImage } from '@/components/ui/optimized-image'
+import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -21,6 +22,7 @@ import { ProductionScaler } from '@/components/recipes/ProductionScaler'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { DeleteModal } from '@/components/ui/index'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ListSkeleton, StatsSkeleton } from '@/components/ui/skeleton-loader'
@@ -28,6 +30,8 @@ import { successToast } from '@/components/ui/toast'
 import { useAuth } from '@/hooks/index'
 import { useDeleteRecipe, useRecipe } from '@/hooks/useRecipes'
 import { handleError } from '@/lib/error-handling'
+
+import { UMKMTooltip } from '@/modules/recipes/components/UMKMTooltip'
 
 import { PageHeader } from '@/components/layout/PageHeader'
 import type { Ingredient } from '@/types/database'
@@ -52,6 +56,17 @@ interface RecipeDetailPageProps {
     recipeId: string
 }
 
+interface HppRecipeResponse {
+    actual_hpp?: {
+        available: boolean
+        actual_quantity: number | null
+        cost_per_unit: number | null
+        total_cost: number | null
+        note: string
+    }
+    estimated_cost_per_unit?: number
+}
+
 const RecipeDetailPageComponent = ({ recipeId }: RecipeDetailPageProps) => {
     const router = useRouter()
     const { isLoading: authLoading } = useAuth()
@@ -59,10 +74,31 @@ const RecipeDetailPageComponent = ({ recipeId }: RecipeDetailPageProps) => {
 
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const [showCostBreakdown, setShowCostBreakdown] = useState(false)
+    const [showActualHpp, setShowActualHpp] = useState(false)
 
     // React Query hooks
     const { data: recipe, isLoading: loading, error } = useRecipe(recipeId)
     const deleteRecipeMutation = useDeleteRecipe()
+
+    const { data: hppRecipeData } = useQuery<HppRecipeResponse | null>({
+        queryKey: ['hpp-recipe', recipeId],
+        queryFn: async (): Promise<HppRecipeResponse | null> => {
+            const response = await fetch(`/api/hpp/recipe/${recipeId}`, {
+                credentials: 'include',
+            })
+            if (!response.ok) {
+                return null
+            }
+            const result = await response.json()
+            return (result?.data as HppRecipeResponse | null) ?? null
+        },
+        enabled: Boolean(recipeId),
+        staleTime: 60 * 1000,
+        refetchOnWindowFocus: false,
+    })
+
+    const estimatedCostPerUnit = recipe?.cost_per_unit ?? hppRecipeData?.estimated_cost_per_unit ?? 0
+    const actualHpp = hppRecipeData?.actual_hpp
 
     // Memoize breadcrumbs and action
     const breadcrumbs = useMemo(() => [
@@ -317,6 +353,87 @@ const RecipeDetailPageComponent = ({ recipeId }: RecipeDetailPageProps) => {
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Estimated vs Actual HPP (optional) */}
+            <Card className="transition-all">
+                <CardHeader className="pb-4">
+                    <CardTitle className="text-lg sm:text-xl flex items-center justify-between">
+                        <span>💰 HPP</span>
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 sm:p-6 space-y-4">
+                    <div className="flex items-start justify-between gap-3">
+                        <div>
+                            <UMKMTooltip
+                                title="HPP Estimasi"
+                                content="HPP estimasi dihitung dari resep (servings) + biaya bahan (WAC + waste factor) + tenaga kerja + overhead + kemasan. Ini angka utama yang dipakai untuk pricing."
+                            >
+                                <p className="text-sm font-medium text-muted-foreground">HPP Estimasi (per porsi)</p>
+                            </UMKMTooltip>
+                            <p className="text-2xl font-bold text-primary">
+                                Rp {estimatedCostPerUnit.toLocaleString('id-ID')}
+                            </p>
+                        </div>
+
+                        <div className="text-right">
+                            <p className="text-sm text-muted-foreground">Total Batch</p>
+                            <p className="text-lg font-semibold">
+                                Rp {(estimatedCostPerUnit * (recipe.servings ?? 1)).toLocaleString('id-ID')}
+                            </p>
+                        </div>
+                    </div>
+
+                    <Collapsible open={showActualHpp} onOpenChange={setShowActualHpp}>
+                        <div className="flex items-center justify-between">
+                            <CollapsibleTrigger asChild>
+                                <Button variant="ghost" size="sm" className="px-0">
+                                    <div className="flex items-center gap-2">
+                                        {showActualHpp ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                        <UMKMTooltip
+                                            title="HPP Aktual (opsional)"
+                                            content="HPP aktual dihitung dari produksi terakhir yang statusnya selesai (COMPLETED) memakai jumlah hasil nyata (actual_quantity). Gunanya untuk cek selisih estimasi vs real."
+                                        >
+                                            <span className="text-sm text-muted-foreground">HPP Aktual (opsional)</span>
+                                        </UMKMTooltip>
+                                    </div>
+                                </Button>
+                            </CollapsibleTrigger>
+                        </div>
+
+                        <CollapsibleContent className="pt-2">
+                            {(() => {
+                                if (!actualHpp || !actualHpp.available) {
+                                    return (
+                                        <p className="text-sm text-muted-foreground">
+                                            {actualHpp?.note ?? 'Belum ada data produksi selesai untuk menghitung HPP aktual.'}
+                                        </p>
+                                    )
+                                }
+
+                                return (
+                                    <div className="space-y-2 rounded-lg border bg-muted/20 p-3">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div>
+                                                <p className="text-sm font-medium text-muted-foreground">HPP Aktual (per unit hasil)</p>
+                                                <p className="text-lg font-semibold text-foreground">
+                                                    Rp {(actualHpp.cost_per_unit ?? 0).toLocaleString('id-ID')}
+                                                </p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-xs text-muted-foreground">Hasil Produksi</p>
+                                                <p className="text-sm font-medium">
+                                                    {(actualHpp.actual_quantity ?? 0).toLocaleString('id-ID')}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">{actualHpp.note}</p>
+                                    </div>
+                                )
+                            })()}
+                        </CollapsibleContent>
+                    </Collapsible>
+                </CardContent>
+            </Card>
 
             {/* Ingredients */}
             <Card className="transition-all">

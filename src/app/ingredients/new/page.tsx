@@ -44,6 +44,7 @@ const NewIngredientPage = (): JSX.Element => {
       price_per_unit: 0,
       current_stock: 0,
       min_stock: 0,
+      spoilage_rate: 0.05,
       description: ''
     }
   })
