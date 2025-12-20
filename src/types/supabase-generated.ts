@@ -170,7 +170,7 @@ export type Database = {
             columns: ["recipe_id"]
             isOneToOne: false
             referencedRelation: "recipe_availability"
-            referencedColumns: ["recipe_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "chefwise_generations_recipe_id_fkey"
@@ -338,7 +338,7 @@ export type Database = {
             columns: ["top_selling_recipe_id"]
             isOneToOne: false
             referencedRelation: "recipe_availability"
-            referencedColumns: ["recipe_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "daily_sales_summary_top_selling_recipe_id_fkey"
@@ -485,7 +485,7 @@ export type Database = {
             columns: ["saved_recipe_id"]
             isOneToOne: false
             referencedRelation: "recipe_availability"
-            referencedColumns: ["recipe_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "generated_recipes_saved_recipe_id_fkey"
@@ -563,7 +563,7 @@ export type Database = {
             columns: ["recipe_id"]
             isOneToOne: false
             referencedRelation: "recipe_availability"
-            referencedColumns: ["recipe_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "hpp_alerts_recipe_id_fkey"
@@ -584,6 +584,7 @@ export type Database = {
           material_cost: number | null
           notes: string | null
           overhead_cost: number | null
+          packaging_cost: number
           production_quantity: number | null
           recipe_id: string | null
           total_hpp: number | null
@@ -599,6 +600,7 @@ export type Database = {
           material_cost?: number | null
           notes?: string | null
           overhead_cost?: number | null
+          packaging_cost?: number
           production_quantity?: number | null
           recipe_id?: string | null
           total_hpp?: number | null
@@ -614,6 +616,7 @@ export type Database = {
           material_cost?: number | null
           notes?: string | null
           overhead_cost?: number | null
+          packaging_cost?: number
           production_quantity?: number | null
           recipe_id?: string | null
           total_hpp?: number | null
@@ -626,7 +629,7 @@ export type Database = {
             columns: ["recipe_id"]
             isOneToOne: false
             referencedRelation: "recipe_availability"
-            referencedColumns: ["recipe_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "hpp_calculations_recipe_id_fkey"
@@ -680,7 +683,7 @@ export type Database = {
             columns: ["recipe_id"]
             isOneToOne: false
             referencedRelation: "recipe_availability"
-            referencedColumns: ["recipe_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "hpp_history_recipe_id_fkey"
@@ -734,7 +737,7 @@ export type Database = {
             columns: ["recipe_id"]
             isOneToOne: false
             referencedRelation: "recipe_availability"
-            referencedColumns: ["recipe_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "hpp_recommendations_recipe_id_fkey"
@@ -810,7 +813,7 @@ export type Database = {
             columns: ["ingredient_id"]
             isOneToOne: false
             referencedRelation: "inventory_availability"
-            referencedColumns: ["ingredient_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "ingredient_purchases_ingredient_id_fkey"
@@ -843,6 +846,7 @@ export type Database = {
           price_per_unit: number
           reorder_point: number | null
           reserved_stock: number | null
+          spoilage_rate: number
           supplier: string | null
           supplier_contact: string | null
           tags: string[] | null
@@ -875,6 +879,7 @@ export type Database = {
           price_per_unit?: number
           reorder_point?: number | null
           reserved_stock?: number | null
+          spoilage_rate?: number
           supplier?: string | null
           supplier_contact?: string | null
           tags?: string[] | null
@@ -907,6 +912,7 @@ export type Database = {
           price_per_unit?: number
           reorder_point?: number | null
           reserved_stock?: number | null
+          spoilage_rate?: number
           supplier?: string | null
           supplier_contact?: string | null
           tags?: string[] | null
@@ -976,7 +982,7 @@ export type Database = {
             columns: ["ingredient_id"]
             isOneToOne: false
             referencedRelation: "inventory_availability"
-            referencedColumns: ["ingredient_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "inventory_alerts_ingredient_id_fkey"
@@ -1031,7 +1037,7 @@ export type Database = {
             columns: ["ingredient_id"]
             isOneToOne: true
             referencedRelation: "inventory_availability"
-            referencedColumns: ["ingredient_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "inventory_reorder_rules_ingredient_id_fkey"
@@ -1098,7 +1104,7 @@ export type Database = {
             columns: ["ingredient_id"]
             isOneToOne: false
             referencedRelation: "inventory_availability"
-            referencedColumns: ["ingredient_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "inventory_stock_logs_ingredient_id_fkey"
@@ -1379,7 +1385,7 @@ export type Database = {
             columns: ["recipe_id"]
             isOneToOne: false
             referencedRelation: "recipe_availability"
-            referencedColumns: ["recipe_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "order_items_recipe_id_fkey"
@@ -1645,7 +1651,7 @@ export type Database = {
             columns: ["recipe_id"]
             isOneToOne: false
             referencedRelation: "recipe_availability"
-            referencedColumns: ["recipe_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "production_batches_recipe_id_fkey"
@@ -1723,7 +1729,7 @@ export type Database = {
             columns: ["recipe_id"]
             isOneToOne: false
             referencedRelation: "recipe_availability"
-            referencedColumns: ["recipe_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "production_schedules_recipe_id_fkey"
@@ -1825,7 +1831,7 @@ export type Database = {
             columns: ["recipe_id"]
             isOneToOne: false
             referencedRelation: "recipe_availability"
-            referencedColumns: ["recipe_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "productions_recipe_id_fkey"
@@ -1874,7 +1880,7 @@ export type Database = {
             columns: ["ingredient_id"]
             isOneToOne: false
             referencedRelation: "inventory_availability"
-            referencedColumns: ["ingredient_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "recipe_ingredients_ingredient_id_fkey"
@@ -1888,7 +1894,7 @@ export type Database = {
             columns: ["recipe_id"]
             isOneToOne: false
             referencedRelation: "recipe_availability"
-            referencedColumns: ["recipe_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "recipe_ingredients_recipe_id_fkey"
@@ -1916,6 +1922,7 @@ export type Database = {
           last_made_at: string | null
           margin_percentage: number | null
           name: string
+          packaging_cost_per_unit: number
           prep_time: number | null
           previous_cost: number | null
           rating: number | null
@@ -1945,6 +1952,7 @@ export type Database = {
           last_made_at?: string | null
           margin_percentage?: number | null
           name: string
+          packaging_cost_per_unit?: number
           prep_time?: number | null
           previous_cost?: number | null
           rating?: number | null
@@ -1974,6 +1982,7 @@ export type Database = {
           last_made_at?: string | null
           margin_percentage?: number | null
           name?: string
+          packaging_cost_per_unit?: number
           prep_time?: number | null
           previous_cost?: number | null
           rating?: number | null
@@ -2048,7 +2057,7 @@ export type Database = {
             columns: ["ingredient_id"]
             isOneToOne: false
             referencedRelation: "inventory_availability"
-            referencedColumns: ["ingredient_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "stock_reservations_ingredient_id_fkey"
@@ -2133,7 +2142,7 @@ export type Database = {
             columns: ["ingredient_id"]
             isOneToOne: false
             referencedRelation: "inventory_availability"
-            referencedColumns: ["ingredient_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "stock_transactions_ingredient_id_fkey"
@@ -2194,7 +2203,7 @@ export type Database = {
             columns: ["ingredient_id"]
             isOneToOne: false
             referencedRelation: "inventory_availability"
-            referencedColumns: ["ingredient_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "supplier_ingredients_ingredient_id_fkey"
@@ -2364,7 +2373,7 @@ export type Database = {
             columns: ["ingredient_id"]
             isOneToOne: false
             referencedRelation: "inventory_availability"
-            referencedColumns: ["ingredient_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "usage_analytics_ingredient_id_fkey"
@@ -2496,79 +2505,86 @@ export type Database = {
     Views: {
       inventory_availability: {
         Row: {
-          available: boolean | null
+          availability_status: string | null
           current_stock: number | null
-          ingredient_id: string | null
-          ingredient_name: string | null
+          id: string | null
+          minimum_stock: number | null
+          name: string | null
+          suggested_order_quantity: number | null
+          surplus_quantity: number | null
           unit: string | null
-          user_id: string | null
         }
         Insert: {
-          available?: never
+          availability_status?: never
           current_stock?: number | null
-          ingredient_id?: string | null
-          ingredient_name?: string | null
+          id?: string | null
+          minimum_stock?: number | null
+          name?: string | null
+          suggested_order_quantity?: never
+          surplus_quantity?: never
           unit?: string | null
-          user_id?: string | null
         }
         Update: {
-          available?: never
+          availability_status?: never
           current_stock?: number | null
-          ingredient_id?: string | null
-          ingredient_name?: string | null
+          id?: string | null
+          minimum_stock?: number | null
+          name?: string | null
+          suggested_order_quantity?: never
+          surplus_quantity?: never
           unit?: string | null
-          user_id?: string | null
         }
         Relationships: []
       }
       inventory_status: {
         Row: {
-          cost: number | null
           current_stock: number | null
           id: string | null
-          min_stock: number | null
+          last_purchase_date: string | null
+          minimum_stock: number | null
           name: string | null
           stock_status: string | null
+          supplier: string | null
+          total_value: number | null
           unit: string | null
-          updated_at: string | null
-          user_id: string | null
+          unit_cost: number | null
         }
         Insert: {
-          cost?: number | null
           current_stock?: number | null
           id?: string | null
-          min_stock?: number | null
+          last_purchase_date?: string | null
+          minimum_stock?: number | null
           name?: string | null
           stock_status?: never
+          supplier?: string | null
+          total_value?: never
           unit?: string | null
-          updated_at?: string | null
-          user_id?: string | null
+          unit_cost?: number | null
         }
         Update: {
-          cost?: number | null
           current_stock?: number | null
           id?: string | null
-          min_stock?: number | null
+          last_purchase_date?: string | null
+          minimum_stock?: number | null
           name?: string | null
           stock_status?: never
+          supplier?: string | null
+          total_value?: never
           unit?: string | null
-          updated_at?: string | null
-          user_id?: string | null
+          unit_cost?: number | null
         }
         Relationships: []
       }
       order_summary: {
         Row: {
+          calculated_total: number | null
           created_at: string | null
           customer_id: string | null
           customer_name: string | null
           id: string | null
-          order_date: string | null
-          order_no: string | null
+          item_count: number | null
           status: Database["public"]["Enums"]["order_status"] | null
           total_amount: number | null
-          updated_at: string | null
-          user_id: string | null
         }
         Relationships: [
           {
@@ -2582,10 +2598,13 @@ export type Database = {
       }
       recipe_availability: {
         Row: {
-          can_make: boolean | null
-          recipe_id: string | null
-          recipe_name: string | null
-          user_id: string | null
+          can_produce: boolean | null
+          description: string | null
+          id: string | null
+          ingredients: Json | null
+          is_active: boolean | null
+          max_producible_quantity: number | null
+          name: string | null
         }
         Relationships: []
       }

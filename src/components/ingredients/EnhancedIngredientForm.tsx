@@ -200,6 +200,21 @@ export const EnhancedIngredientForm = ({
                         onChange={(_, value) => setValue('min_stock', value as number)}
                     />
 
+                    <FormField
+                        label="Tingkat Kehilangan (Spoilage Rate)"
+                        name="spoilage_rate"
+                        type="number"
+                        error={errors.spoilage_rate?.message}
+                        required
+                        min={0}
+                        max={1}
+                        step={0.01}
+                        placeholder="0.05"
+                        hint="Persentase bahan yang hilang/busuk (0.05 = 5%). Digunakan untuk kalkulasi HPP yang akurat."
+                        value={watch('spoilage_rate') ?? 0.05}
+                        onChange={(_, value) => setValue('spoilage_rate', value as number)}
+                    />
+
                     {/* Total Value Display */}
                     {totalValue > 0 && (
                         <div className="p-4 bg-muted rounded-lg border">

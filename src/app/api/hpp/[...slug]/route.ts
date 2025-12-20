@@ -291,6 +291,10 @@ export const GET = createApiRoute(
         let operationalCost = 0
         let laborCost = 0
         let overheadCost = 0
+        let packagingCostPerUnit = Number((recipe as Record<string, unknown>)['packaging_cost_per_unit'] ?? 0)
+        if (!isFinite(packagingCostPerUnit) || packagingCostPerUnit < 0) {
+          packagingCostPerUnit = 0
+        }
 
         if (hppCalculation) {
           // Use existing calculation
@@ -320,14 +324,80 @@ export const GET = createApiRoute(
               ri.ingredients?.weighted_average_cost ?? ri.ingredients?.price_per_unit ?? 0
             )
             const wasteFactor = Number(ri.ingredients?.waste_factor ?? 1)
-            return sum + quantity * unitPrice * wasteFactor
+            const effectiveQty = quantity * (isFinite(wasteFactor) && wasteFactor > 0 ? wasteFactor : 1)
+            return sum + effectiveQty * unitPrice
           }, 0)
 
+          // Keep legacy fallback behavior but include packaging
           operationalCost = Math.max(
             ingredientCost * 0.15, // 15%
             2500 // Minimum 2500 IDR
           )
-          totalCost = ingredientCost + operationalCost
+          totalCost = ingredientCost + operationalCost + packagingCostPerUnit
+        }
+
+        // Optional: compute Actual HPP per unit based on latest completed production yield
+        // This is shown as an advanced section in UI to avoid confusing users.
+        let actualHpp: {
+          available: boolean
+          actual_quantity: number | null
+          cost_per_unit: number | null
+          total_cost: number | null
+          note: string
+        } = {
+          available: false,
+          actual_quantity: null,
+          cost_per_unit: null,
+          total_cost: null,
+          note: 'Belum ada data produksi selesai untuk menghitung HPP aktual.'
+        }
+
+        try {
+          if (!hppCalculation) {
+            actualHpp = {
+              available: false,
+              actual_quantity: null,
+              cost_per_unit: null,
+              total_cost: null,
+              note: 'Hitung HPP dulu untuk bisa menghitung HPP aktual dari produksi.'
+            }
+          } else {
+            const { data: latestProduction } = await context.supabase
+              .from('productions')
+              .select('actual_quantity, labor_cost, actual_end_time')
+              .eq('recipe_id', recipeId)
+              .eq('user_id', context.user.id)
+              .eq('status', 'COMPLETED')
+              .order('actual_end_time', { ascending: false })
+              .limit(1)
+              .single()
+
+            const actualQuantity = Number(latestProduction?.actual_quantity ?? 0)
+            if (actualQuantity > 0) {
+              const materialTotal = Number(hppCalculation.material_cost ?? 0)
+              const overheadTotal = Number(hppCalculation.overhead_cost ?? 0)
+
+              const laborTotalFromProduction = Number(latestProduction?.labor_cost ?? 0)
+              const laborTotal = laborTotalFromProduction > 0
+                ? laborTotalFromProduction
+                : Number(hppCalculation.labor_cost ?? 0)
+
+              const packagingTotal = packagingCostPerUnit * actualQuantity
+
+              const actualTotal = Math.round((materialTotal + laborTotal + overheadTotal + packagingTotal) * 100) / 100
+              const actualPerUnit = Math.round((actualTotal / actualQuantity) * 100) / 100
+
+              actualHpp = {
+                available: true,
+                actual_quantity: actualQuantity,
+                cost_per_unit: actualPerUnit,
+                total_cost: actualTotal,
+                note: 'HPP aktual dihitung dari produksi terakhir (hasil nyata). Material/Labor/Overhead dari kalkulasi HPP terakhir, lalu dibagi hasil aktual.'
+              }
+            }
+          }
+        } catch {
+          // ignore - keep actualHpp default
         }
 
         // Transform ingredients for frontend
@@ -352,7 +422,9 @@ export const GET = createApiRoute(
           operational_costs: operationalCost,
           labor_costs: laborCost,
           overhead_costs: overheadCost,
-          total_cost: totalCost
+          total_cost: totalCost,
+          estimated_cost_per_unit: totalCost,
+          actual_hpp: actualHpp
         }
 
         apiLogger.info({

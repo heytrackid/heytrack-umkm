@@ -180,11 +180,28 @@ export const POST = createApiRoute(
 
     // Create recipe ingredients
     if (ingredients && ingredients.length > 0) {
+      const ingredientIds = ingredients.map((ing) => ing.ingredient_id)
+      const { data: ingredientRows, error: ingredientError } = await typedSupabase
+        .from('ingredients')
+        .select('id, unit')
+        .in('id', ingredientIds)
+        .eq('user_id', user.id)
+
+      if (ingredientError) {
+        apiLogger.error({ error: ingredientError }, 'Error fetching ingredients for unit enforcement')
+        await typedSupabase.from('recipes').delete().eq('id', createdRecipe.id).eq('user_id', user.id)
+        return handleAPIError(ingredientError, 'POST /api/recipes')
+      }
+
+      const unitByIngredientId = new Map(
+        (ingredientRows ?? []).map((row) => [row.id, row.unit])
+      )
+
       const recipeIngredients = ingredients.map((ing) => ({
         recipe_id: createdRecipe.id,
         ingredient_id: ing.ingredient_id,
         quantity: ing.quantity,
-        unit: ing.unit || 'pcs',
+        unit: unitByIngredientId.get(ing.ingredient_id) ?? 'pcs',
         user_id: user.id
       })) as RecipeIngredientInsert[]
 
@@ -289,12 +306,28 @@ export const PUT = createApiRoute(
         return handleAPIError(deleteError, 'PUT /api/recipes')
       }
 
-      // Insert new ingredients
+      const ingredientIds = ingredients.map((ing) => ing.ingredient_id)
+      const { data: ingredientRows, error: ingredientError } = await typedSupabase
+        .from('ingredients')
+        .select('id, unit')
+        .in('id', ingredientIds)
+        .eq('user_id', user.id)
+
+      if (ingredientError) {
+        apiLogger.error({ error: ingredientError }, 'Error fetching ingredients for unit enforcement')
+        return handleAPIError(ingredientError, 'PUT /api/recipes')
+      }
+
+      const unitByIngredientId = new Map(
+        (ingredientRows ?? []).map((row) => [row.id, row.unit])
+      )
+
+      // Insert new ingredients (unit is enforced from ingredient.unit)
       const recipeIngredients = ingredients.map((ing) => ({
         recipe_id: recipeId,
         ingredient_id: ing.ingredient_id,
         quantity: ing.quantity,
-        unit: ing.unit,
+        unit: unitByIngredientId.get(ing.ingredient_id) ?? 'pcs',
         notes: ing.notes ?? null,
         user_id: user.id
       })) as RecipeIngredientInsert[]

@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, Trash2, Save, X, ChefHat, Clock, Users, DollarSign } from '@/components/icons'
+import { ChefHat, Clock, DollarSign, Plus, Save, Trash2, Users, X } from '@/components/icons'
 import { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -16,8 +16,8 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { handleError } from '@/lib/error-handling'
 import { useCurrency } from '@/hooks/useCurrency'
+import { handleError } from '@/lib/error-handling'
 
 interface RecipeIngredient {
     id?: string
@@ -43,6 +43,7 @@ interface RecipeData {
     servings: number
     prep_time_minutes: number
     cook_time_minutes: number
+    packaging_cost_per_unit: number
     ingredients: RecipeIngredient[]
     steps: RecipeStep[]
     notes?: string
@@ -86,6 +87,7 @@ export const RecipeEditor = ({
         servings: 1,
         prep_time_minutes: 0,
         cook_time_minutes: 0,
+        packaging_cost_per_unit: 0,
         ingredients: [],
         steps: [],
         notes: ''
@@ -321,6 +323,28 @@ export const RecipeEditor = ({
                         </div>
 
                         <div>
+                            <Label htmlFor="packaging_cost">Biaya Kemasan per Porsi</Label>
+                            <div className="flex gap-2">
+                                <Input
+                                    id="packaging_cost"
+                                    type="number"
+                                    value={recipe.packaging_cost_per_unit}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRecipe({ ...recipe, packaging_cost_per_unit: Number(e.target.value) })}
+                                    min={0}
+                                    step={100}
+                                    placeholder="0"
+                                />
+                                <Badge variant="outline" className="px-3 flex items-center">
+                                    <DollarSign className="h-3 w-3 mr-1" />
+                                    IDR
+                                </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                                Kotak, plastik, label, dll per porsi
+                            </p>
+                        </div>
+
+                        <div>
                             <Label htmlFor="prep_time">Waktu Persiapan</Label>
                             <div className="flex gap-2">
                                 <Input
@@ -414,7 +438,7 @@ export const RecipeEditor = ({
                                 <Label className="text-xs">Satuan</Label>
                                 <Input
                                     value={newIngredient.unit}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewIngredient({ ...newIngredient, unit: e.target.value })}
+                                    readOnly
                                     placeholder="gram"
                                 />
                             </div>

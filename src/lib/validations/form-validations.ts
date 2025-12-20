@@ -32,6 +32,7 @@ export const IngredientSchema = z.object({
   price_per_unit: rupiah,
   current_stock: positiveNumber,
   min_stock: positiveNumber,
+  spoilage_rate: z.number().min(0, 'Minimal 0').max(1, 'Maksimal 1').default(0.05),
   max_stock: positiveNumber.optional(),
   supplier: optionalString,
   category: optionalString,
@@ -275,6 +276,7 @@ export const IngredientFormSchema = z.object({
   price_per_unit: z.number().positive('Harga harus lebih dari 0'),
   current_stock: positiveNumber,
   min_stock: positiveNumber.optional(),
+  spoilage_rate: z.number().min(0).max(1),
   description: optionalString
 }).refine(data => {
   // Custom validation: min_stock should be less than or equal to current_stock
