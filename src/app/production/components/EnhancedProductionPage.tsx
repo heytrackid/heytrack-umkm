@@ -5,6 +5,7 @@ import { useProductionBatches, useUpdateProductionBatch } from '@/hooks/useProdu
 import { useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -81,6 +82,7 @@ const STATUS_CONFIG = {
 }
 
 const EnhancedProductionPage = () => {
+    const router = useRouter()
     const { formatCurrency } = useCurrency()
     const { isMobile } = useResponsive()
     const queryClient = useQueryClient()
@@ -350,6 +352,7 @@ const EnhancedProductionPage = () => {
                                         production={production}
                                         onStart={handleStartProduction}
                                         onComplete={handleCompleteProduction}
+                                        onViewDetail={(id) => router.push(`/production/${id}`)}
                                         formatCurrency={formatCurrency}
                                         getStatusBadge={getStatusBadge}
                                     />
@@ -368,6 +371,7 @@ const EnhancedProductionPage = () => {
                                     production={production}
                                     onStart={handleStartProduction}
                                     onComplete={handleCompleteProduction}
+                                    onViewDetail={(id) => router.push(`/production/${id}`)}
                                     formatCurrency={formatCurrency}
                                     getStatusBadge={getStatusBadge}
                                 />
@@ -383,6 +387,7 @@ const EnhancedProductionPage = () => {
                                 production={production}
                                 onStart={handleStartProduction}
                                 onComplete={handleCompleteProduction}
+                                onViewDetail={(id) => router.push(`/production/${id}`)}
                                 formatCurrency={formatCurrency}
                                 getStatusBadge={getStatusBadge}
                             />
@@ -438,6 +443,7 @@ interface ProductionCardProps {
     production: ProductionWithRecipe
     onStart: (id: string) => void
     onComplete: (id: string) => void
+    onViewDetail: (id: string) => void
     formatCurrency: (amount: number) => string
     getStatusBadge: (status: ProductionStatus) => JSX.Element
 }
@@ -446,6 +452,7 @@ const ProductionCard = ({
     production,
     onStart,
     onComplete,
+    onViewDetail,
     formatCurrency,
     getStatusBadge
 }: ProductionCardProps) => (
@@ -511,7 +518,12 @@ const ProductionCard = ({
             )}
 
             <div className="flex gap-2 pt-2">
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1"
+                    onClick={() => onViewDetail(production['id'])}
+                >
                     Detail
                 </Button>
                 {production['status'] === 'PLANNED' && (
