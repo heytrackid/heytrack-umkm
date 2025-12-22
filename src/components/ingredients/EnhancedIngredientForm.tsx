@@ -14,6 +14,8 @@ import type { Row } from '@/types/database'
 
 import type { UseFormReturn } from 'react-hook-form'
 
+import { BUSINESS_CONSTANTS } from '@/lib/shared/constants'
+
 
 
 type Ingredient = Row<'ingredients'>
@@ -209,9 +211,9 @@ export const EnhancedIngredientForm = ({
                         min={0}
                         max={1}
                         step={0.01}
-                        placeholder="0.05"
+                        placeholder={BUSINESS_CONSTANTS.DEFAULT_SPOILAGE_RATE.toString()}
                         hint="Persentase bahan yang hilang/busuk (0.05 = 5%). Digunakan untuk kalkulasi HPP yang akurat."
-                        value={watch('spoilage_rate') ?? 0.05}
+                        value={watch('spoilage_rate') ?? BUSINESS_CONSTANTS.DEFAULT_SPOILAGE_RATE}
                         onChange={(_, value) => setValue('spoilage_rate', value as number)}
                     />
 

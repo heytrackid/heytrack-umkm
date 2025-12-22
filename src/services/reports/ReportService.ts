@@ -7,6 +7,8 @@ import type {
     ProfitTrends,
 } from '@/types/features/profit-report'
 
+import { BUSINESS_CONSTANTS } from '@/lib/shared/constants'
+
 
 
 type AggregationPeriod = 'daily' | 'weekly' | 'monthly'
@@ -215,7 +217,7 @@ export class ReportService extends BaseService {
   ): Promise<ProfitReport> {
     const { startDate, endDate, aggregation = 'monthly' } = filters
 
-    const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+    const start = startDate ? new Date(startDate) : new Date(Date.now() - BUSINESS_CONSTANTS.THIRTY_DAYS_MS)
     const end = endDate ? new Date(endDate) : new Date()
 
     try {
@@ -695,7 +697,7 @@ export class ReportService extends BaseService {
   ): Promise<SalesReport> {
     const { startDate, endDate } = filters
 
-    const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+    const start = startDate ? new Date(startDate) : new Date(Date.now() - BUSINESS_CONSTANTS.THIRTY_DAYS_MS)
     const end = endDate ? new Date(endDate) : new Date()
 
     try {

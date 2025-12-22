@@ -20,6 +20,7 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { useHppOverview } from '@/hooks/useHppData'
 import { useResponsive } from '@/hooks/useResponsive'
 import { handleError } from '@/lib/error-handling'
+import { BUSINESS_CONSTANTS } from '@/lib/shared/constants'
 
 type HppExportFormat = 'csv' | 'excel' | 'json' | 'pdf'
 type HppExportMetric = 'alerts' | 'cost_breakdown' | 'hpp' | 'margin' | 'recommendations' | 'trends'
@@ -73,7 +74,7 @@ const HppReportsPage = (): JSX.Element => {
 
   const [config, setConfig] = useState<ReportConfig>({
     dateRange: {
-      from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      from: new Date(Date.now() - BUSINESS_CONSTANTS.THIRTY_DAYS_MS),
       to: new Date()
     },
     recipeIds: [],

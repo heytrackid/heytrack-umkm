@@ -13,6 +13,8 @@ import {
     rupiah
 } from '@/lib/validations/base-validations'
 
+import { BUSINESS_CONSTANTS } from '@/lib/shared/constants'
+
 
 // Form validation schemas
 // Validation schemas specifically for form submissions and user input 
@@ -32,7 +34,7 @@ export const IngredientSchema = z.object({
   price_per_unit: rupiah,
   current_stock: positiveNumber,
   min_stock: positiveNumber,
-  spoilage_rate: z.number().min(0, 'Minimal 0').max(1, 'Maksimal 1').default(0.05),
+  spoilage_rate: z.number().min(0, 'Minimal 0').max(1, 'Maksimal 1').default(BUSINESS_CONSTANTS.DEFAULT_SPOILAGE_RATE),
   max_stock: positiveNumber.optional(),
   supplier: optionalString,
   category: optionalString,

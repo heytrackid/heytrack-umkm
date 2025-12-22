@@ -11,6 +11,7 @@
 
 import { apiLogger } from '@/lib/logger'
 import { BaseService, type ServiceContext } from '@/services/base'
+import { API_CONFIG } from '@/lib/shared/constants'
 
 // Types
 export interface FinancialSummary {
@@ -686,7 +687,7 @@ Berikan:
 
 Format dengan markdown, maksimal 300 kata.`
 
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const response = await fetch(API_CONFIG.OPENROUTER_CHAT_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

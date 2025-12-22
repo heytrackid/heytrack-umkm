@@ -5,6 +5,8 @@ import { BaseService, type ServiceContext } from '@/services/base'
 
 import type { Insert, Row } from '@/types/database'
 
+import { BUSINESS_CONSTANTS, VALIDATION_LIMITS } from '@/lib/shared/constants'
+
 
 
 /**
@@ -349,7 +351,7 @@ export class HppCalculatorService extends BaseService {
           .select('actual_quantity')
           .eq('user_id', this.context.userId)
           .eq('status', 'COMPLETED')
-          .gte('actual_end_time', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+          .gte('actual_end_time', new Date(Date.now() - BUSINESS_CONSTANTS.THIRTY_DAYS_MS).toISOString())
 
         totalVolume = (recentProductions ?? []).reduce(
           (sum, p) => sum + Number(p.actual_quantity ?? 0),
@@ -363,7 +365,7 @@ export class HppCalculatorService extends BaseService {
             .select('actual_quantity')
             .eq('user_id', this.context.userId)
             .eq('status', 'COMPLETED')
-            .limit(1000)
+            .limit(VALIDATION_LIMITS.LARGE_API_LIMIT)
 
           totalVolume = (allProductions ?? []).reduce(
             (sum, p) => sum + Number(p.actual_quantity ?? 0),

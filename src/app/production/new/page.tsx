@@ -18,13 +18,14 @@ import { useRecipes } from '@/hooks/useRecipes'
 import { handleError } from '@/lib/error-handling'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Factory } from 'lucide-react'
+import { VALIDATION_LIMITS } from '@/lib/shared/constants'
 
 const CreateProductionBatchContent = () => {
     const router = useRouter()
     const searchParams = useSearchParams()
     const recipeIdParam = searchParams.get('recipeId')
     
-    const { data: recipes = [], isLoading: loadingRecipes } = useRecipes({ limit: 1000 })
+    const { data: recipes = [], isLoading: loadingRecipes } = useRecipes({ limit: VALIDATION_LIMITS.LARGE_API_LIMIT })
     const queryClient = useQueryClient()
 
     const [formData, setFormData] = useState({

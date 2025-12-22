@@ -3,6 +3,7 @@ import { apiLogger } from '@/lib/logger'
 import type { HppComparison, HppOverview } from '@/modules/hpp/types'
 import { BaseService, type ServiceContext } from '@/services/base'
 import { HppCalculatorService, type HppCalculationResult as CalculatorResult } from './HppCalculatorService'
+import { VALIDATION_LIMITS } from '@/lib/shared/constants'
 
 /**
  * HPP Service - High-level HPP operations
@@ -93,7 +94,7 @@ export class HppService extends BaseService {
     page: number
     limit: number
   }> {
-    const { page = 1, limit = 50, recipe_id, start_date, end_date } = filters
+    const { page = 1, limit = VALIDATION_LIMITS.DEFAULT_API_LIMIT, recipe_id, start_date, end_date } = filters
 
     let query = this.context.supabase
       .from('hpp_calculations')

@@ -137,6 +137,17 @@ export const VALIDATION_MESSAGES = {
 } as const
 
 /**
+ * Validation limits and defaults
+ */
+export const VALIDATION_LIMITS = {
+  MAX_NAME_LENGTH: 255,
+  MAX_DESCRIPTION_LENGTH: 1000,
+  DEFAULT_API_LIMIT: 50,
+  MEDIUM_API_LIMIT: 100,
+  LARGE_API_LIMIT: 1000,
+} as const
+
+/**
  * API response status codes
  */
 export const API_STATUS = {
@@ -150,6 +161,14 @@ export const API_STATUS = {
   CONFLICT: 409,
   UNPROCESSABLE_ENTITY: 422,
   INTERNAL_SERVER_ERROR: 500,
+} as const
+
+/**
+ * API configuration constants
+ */
+export const API_CONFIG = {
+  OPENROUTER_CHAT_URL: 'https://openrouter.ai/api/v1/chat/completions',
+  DEV_BASE_URL: 'http://localhost:3000',
 } as const
 
 /**
@@ -236,6 +255,29 @@ export const PRIORITY_LEVELS = [
   { value: 'HIGH', label: 'Tinggi', color: 'bg-orange-100 text-orange-800' },
   { value: 'URGENT', label: 'Mendesak', color: 'bg-red-100 text-red-800' },
 ] as const
+
+/**
+ * Business logic constants
+ */
+export const BUSINESS_CONSTANTS = {
+  DEFAULT_SPOILAGE_RATE: 0.05,
+  THIRTY_DAYS_MS: 30 * 24 * 60 * 60 * 1000,
+  DEFAULT_MARGIN_PERCENTAGE: 35,
+  MARGIN_THRESHOLDS: {
+    LOW: 20,
+    HIGH: 50,
+  },
+} as const
+
+/**
+ * Cost breakdown percentages for HPP calculations
+ */
+export const COST_BREAKDOWN_PERCENTAGES = {
+  LABOR: 0.15,
+  UTILITIES: 0.10,
+  PACKAGING: 0.05,
+  OVERHEAD: 0.07,
+} as const
 
 /**
  * Export format options

@@ -18,6 +18,7 @@ import type {
     RecipeWithHpp,
 } from '@/modules/hpp/types/index'
 import type { Row } from '@/types/database'
+import { VALIDATION_LIMITS } from '@/lib/shared/constants'
 
 const logger = createClientLogger('ClientFile')
 
@@ -98,7 +99,7 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
   const { data: recipesData, isLoading: recipesLoading } = useQuery<Array<Pick<Recipe, 'id' | 'name'>>>({
     queryKey: ['recipes-list'],
     queryFn: async (): Promise<Array<Pick<Recipe, 'id' | 'name'>>> => {
-      const response = await fetch('/api/recipes?limit=100', {
+      const response = await fetch(`/api/recipes?limit=${VALIDATION_LIMITS.MEDIUM_API_LIMIT}`, {
         credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) {throw new Error('Failed to fetch recipes')}
