@@ -694,6 +694,57 @@ export type Database = {
           },
         ]
       }
+      hpp_recalculation_queue: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          processed_at: string | null
+          recipe_id: string
+          status: string | null
+          trigger_details: Json | null
+          trigger_reason: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          processed_at?: string | null
+          recipe_id: string
+          status?: string | null
+          trigger_details?: Json | null
+          trigger_reason: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          processed_at?: string | null
+          recipe_id?: string
+          status?: string | null
+          trigger_details?: Json | null
+          trigger_reason?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hpp_recalculation_queue_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipe_availability"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hpp_recalculation_queue_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hpp_recommendations: {
         Row: {
           created_at: string | null
@@ -2459,6 +2510,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_stock_settings: {
+        Row: {
+          allow_negative_stock: boolean
+          auto_reorder_enabled: boolean
+          created_at: string
+          low_stock_alert_threshold: number | null
+          stock_valuation_method: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allow_negative_stock?: boolean
+          auto_reorder_enabled?: boolean
+          created_at?: string
+          low_stock_alert_threshold?: number | null
+          stock_valuation_method?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allow_negative_stock?: boolean
+          auto_reorder_enabled?: boolean
+          created_at?: string
+          low_stock_alert_threshold?: number | null
+          stock_valuation_method?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       whatsapp_templates: {
         Row: {
           category: string | null
@@ -2662,6 +2743,20 @@ export type Database = {
           updated_at: string
         }[]
       }
+      deduct_ingredient_stock_safe: {
+        Args: {
+          p_ingredient_id: string
+          p_quantity: number
+          p_reference_id?: string
+          p_reference_type?: string
+          p_user_id: string
+        }
+        Returns: {
+          error_message: string
+          new_stock: number
+          success: boolean
+        }[]
+      }
       deduct_stock_from_reservations: {
         Args: { p_order_items: Json; p_user_id: string }
         Returns: undefined
@@ -2740,6 +2835,14 @@ export type Database = {
         Args: { p_notification_id: string; p_user_id: string }
         Returns: boolean
       }
+      process_hpp_recalculation_queue: {
+        Args: { p_batch_size?: number; p_user_id: string }
+        Returns: {
+          failed_count: number
+          pending_count: number
+          processed_count: number
+        }[]
+      }
       release_reserved_stock: {
         Args: { p_order_items: Json; p_user_id: string }
         Returns: undefined
@@ -2783,6 +2886,14 @@ export type Database = {
           check_name: string
           details: string
           status: string
+        }[]
+      }
+      validate_stock_deduction: {
+        Args: { p_ingredient_id: string; p_quantity: number; p_user_id: string }
+        Returns: {
+          available_stock: number
+          error_message: string
+          is_valid: boolean
         }[]
       }
     }

@@ -269,6 +269,7 @@ export class InventorySyncService extends BaseService {
 
   /**
    * Deduct stock for production usage
+   * IMPROVED: Now respects user's strict mode setting
    */
   async deductStockForProduction(
     ingredientId: string,
@@ -281,7 +282,7 @@ export class InventorySyncService extends BaseService {
         // Get current ingredient data
         const { data: ingredient, error: fetchError } = await this.context.supabase
           .from('ingredients')
-          .select('id, name, current_stock, weighted_average_cost')
+          .select('id, name, current_stock, weighted_average_cost, reserved_stock')
           .eq('id', ingredientId)
           .eq('user_id', this.context.userId)
           .single()
@@ -291,16 +292,43 @@ export class InventorySyncService extends BaseService {
         }
 
         const previousStock = Number(ingredient.current_stock ?? 0)
+        const reservedStock = Number(ingredient.reserved_stock ?? 0)
+        const availableStock = previousStock - reservedStock
         const wac = Number(ingredient.weighted_average_cost ?? 0)
 
-        if (previousStock < quantity) {
+        // IMPROVED: Check user's strict mode setting
+        const { data: userSettings } = await this.context.supabase
+          .from('user_stock_settings')
+          .select('allow_negative_stock')
+          .eq('user_id', this.context.userId)
+          .single()
+
+        const allowNegativeStock = userSettings?.allow_negative_stock ?? false
+
+        // Validate stock availability based on strict mode
+        if (!allowNegativeStock && availableStock < quantity) {
+          this.logger.error({
+            ingredientId,
+            ingredientName: ingredient.name,
+            required: quantity,
+            available: availableStock,
+            strictMode: true
+          }, 'Insufficient stock for production (strict mode enabled)')
+          
+          throw new Error(
+            `Insufficient stock for ${ingredient.name}. Available: ${availableStock}, Required: ${quantity}. ` +
+            `Enable "Allow Negative Stock" in settings to override.`
+          )
+        }
+
+        if (allowNegativeStock && availableStock < quantity) {
           this.logger.warn({
             ingredientId,
             ingredientName: ingredient.name,
             required: quantity,
-            available: previousStock
-          }, 'Insufficient stock for production')
-          // Continue anyway but log warning - business may allow negative stock
+            available: availableStock,
+            strictMode: false
+          }, 'Insufficient stock for production (negative stock allowed)')
         }
 
         const newStock = previousStock - quantity
