@@ -2,6 +2,7 @@ import { apiLogger } from '@/lib/logger'
 import { RATE_LIMITS, RateLimiter } from '@/lib/services/RateLimiter'
 import { BaseService } from '@/services/base'
 import { InputSanitizer } from '@/utils/security/index'
+import { API_CONFIG } from '@/lib/shared/constants'
 
 
 export interface ChatRequest {
@@ -450,7 +451,7 @@ ATURAN:
 7. Response harus CONCISE, maksimal 300 kata`
 
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const response = await fetch(API_CONFIG.OPENROUTER_CHAT_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -730,7 +731,7 @@ RESPONSE HARUS JSON VALID TANPA KOMENTAR!`
         throw new Error('API key tidak dikonfigurasi')
       }
 
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const response = await fetch(API_CONFIG.OPENROUTER_CHAT_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -827,17 +828,17 @@ RESPONSE HARUS JSON VALID TANPA KOMENTAR!`
 
   private async analyzeBusinessHealth(userId: string): Promise<'excellent' | 'good' | 'needs_attention' | 'critical'> {
     // Simple business health analysis
+    const { ORDER_STATUSES, BUSINESS_CONSTANTS } = await import('@/lib/shared/constants')
+
     const { data: orders } = await this.context.supabase
       .from('orders')
       .select('status')
       .eq('user_id', userId)
-      .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+      .gte('created_at', new Date(Date.now() - BUSINESS_CONSTANTS.THIRTY_DAYS_MS).toISOString())
 
     if (!orders || orders.length === 0) {
       return 'needs_attention'
     }
-
-    const { ORDER_STATUSES } = await import('@/lib/shared/constants')
     const deliveredStatus = ORDER_STATUSES.find(s => s.value === 'DELIVERED')?.value
     const completedOrders = orders.filter(o => o.status === deliveredStatus).length
     const completionRate = completedOrders / orders.length

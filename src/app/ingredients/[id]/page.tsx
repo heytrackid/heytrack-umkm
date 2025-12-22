@@ -20,6 +20,8 @@ import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/valid
 
 import type { Update } from '@/types/database'
 
+import { BUSINESS_CONSTANTS } from '@/lib/shared/constants'
+
 
 
 
@@ -46,7 +48,7 @@ const EditIngredientPage = (): JSX.Element | null => {
             price_per_unit: 0,
             current_stock: 0,
             min_stock: 0,
-            spoilage_rate: 0.05,
+            spoilage_rate: BUSINESS_CONSTANTS.DEFAULT_SPOILAGE_RATE,
             description: ''
         }
     })
@@ -60,7 +62,7 @@ const EditIngredientPage = (): JSX.Element | null => {
                 price_per_unit: ingredient.price_per_unit,
                 current_stock: ingredient.current_stock ?? 0,
                 min_stock: ingredient.min_stock ?? 0,
-                spoilage_rate: (ingredient as unknown as { spoilage_rate?: number }).spoilage_rate ?? 0.05,
+                                        spoilage_rate: (ingredient as unknown as { spoilage_rate?: number }).spoilage_rate ?? BUSINESS_CONSTANTS.DEFAULT_SPOILAGE_RATE,
                 description: ingredient.description ?? ''
             })
         }
@@ -175,7 +177,7 @@ const EditIngredientPage = (): JSX.Element | null => {
                                         price_per_unit: ingredient.price_per_unit,
                                         current_stock: ingredient.current_stock ?? 0,
                                         min_stock: ingredient.min_stock ?? 0,
-                                        spoilage_rate: (ingredient as unknown as { spoilage_rate?: number }).spoilage_rate ?? 0.05,
+                spoilage_rate: (ingredient as unknown as { spoilage_rate?: number }).spoilage_rate ?? BUSINESS_CONSTANTS.DEFAULT_SPOILAGE_RATE,
                                         description: ingredient.description ?? ''
                                     }}
                                 />

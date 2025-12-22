@@ -1,6 +1,7 @@
 import { NonNegativeNumberSchema, PositiveNumberSchema, UUIDSchema } from '@/lib/validations/base-validations'
 import { z } from 'zod'
 
+import { BUSINESS_CONSTANTS } from '@/lib/shared/constants'
 
 /**
  * Ingredient Validation Schemas
@@ -16,7 +17,7 @@ export const IngredientInsertSchema = z.object({
   price_per_unit: PositiveNumberSchema,
   current_stock: NonNegativeNumberSchema.default(0),
   min_stock: NonNegativeNumberSchema.default(0),
-  spoilage_rate: z.number().min(0).max(1).default(0.05),
+  spoilage_rate: z.number().min(0).max(1).default(BUSINESS_CONSTANTS.DEFAULT_SPOILAGE_RATE),
   max_stock: NonNegativeNumberSchema.optional(),
   supplier: z.string().max(255).optional().nullable(),
   category: z.string().max(100).optional().nullable(),
@@ -67,7 +68,7 @@ export const IngredientFormSchema = z.object({
   price_per_unit: z.number().positive('validation.pricePositive'),
   current_stock: z.number().min(0, 'validation.stockNonNegative'),
   min_stock: z.number().min(0, 'validation.minStockNonNegative'),
-  spoilage_rate: z.number().min(0, 'validation.spoilageRateNonNegative').max(1, 'validation.spoilageRateMax').default(0.05),
+  spoilage_rate: z.number().min(0, 'validation.spoilageRateNonNegative').max(1, 'validation.spoilageRateMax').default(BUSINESS_CONSTANTS.DEFAULT_SPOILAGE_RATE),
   max_stock: z.number().min(0).optional(),
   supplier: z.string().optional(),
   category: z.string().optional(),

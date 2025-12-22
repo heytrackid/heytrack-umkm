@@ -1,5 +1,7 @@
 import { apiLogger } from '@/lib/logger'
 
+import { API_CONFIG } from '@/lib/shared/constants'
+
 /**
  * AI Client Module
  * Handles API calls to OpenRouter
@@ -33,7 +35,7 @@ export class AIClient {
     }
 
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const response = await fetch(API_CONFIG.OPENROUTER_CHAT_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -106,7 +108,7 @@ export class AIClient {
       throw new Error('OpenRouter API key not configured. Please set OPENROUTER_API_KEY in your environment file')
     }
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const response = await fetch(API_CONFIG.OPENROUTER_CHAT_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
