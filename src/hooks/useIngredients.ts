@@ -3,9 +3,11 @@ import { createClientLogger } from '@/lib/client-logger'
 import { queryConfig } from '@/lib/query/query-config'
 import { buildApiUrl, deleteApi, fetchApi, postApi, putApi } from '@/lib/query/query-helpers'
 import { getErrorMessage } from '@/lib/type-guards'
-import type { Insert, Row, Update } from '@/types/database'
+import type { Row } from '@/types/database'
 import type { PaginationMeta } from '@/types/pagination'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
+import type { IngredientInsert as ApiIngredientInsert, IngredientUpdate as ApiIngredientUpdate } from '@/lib/validations/domains/ingredient'
 
 
 const logger = createClientLogger('Hook')
@@ -17,8 +19,8 @@ const logger = createClientLogger('Hook')
 
 
 type Ingredient = Row<'ingredients'>
-type IngredientInsert = Insert<'ingredients'>
-type IngredientUpdate = Update<'ingredients'>
+type IngredientInsert = ApiIngredientInsert
+type IngredientUpdate = ApiIngredientUpdate
 
 interface UseIngredientsOptions {
   page?: number

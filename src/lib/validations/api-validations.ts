@@ -18,44 +18,35 @@ import { DateStringSchema, UUIDSchema } from '@/lib/validations/base-validations
 
 // Re-export common schemas for backward compatibility
 export {
-  PaginationQuerySchema,
-  DateRangeQuerySchema,
-  IdParamSchema,
-  HPPExportQuerySchema,
-  HPPComparisonQuerySchema,
-  HPPAnalysisQuerySchema,
-  SalesQuerySchema,
-  ReportQuerySchema,
+    DateRangeQuerySchema, HPPAnalysisQuerySchema, HPPComparisonQuerySchema, HPPExportQuerySchema, IdParamSchema, PaginationQuerySchema, ReportQuerySchema, SalesQuerySchema
 } from './domains/common'
 
 // Re-export domain schemas for backward compatibility
 export {
-  CustomerInsertSchema,
-  CustomerUpdateSchema,
-  CustomerQuerySchema
+    CustomerInsertSchema, CustomerQuerySchema, CustomerUpdateSchema
 } from './domains/customer'
 
 export {
-  OrderFormSchema,
-  OrderInsertSchema,
+    OrderFormSchema,
+    OrderInsertSchema
 } from './domains/order'
 
 export {
-  IngredientFormSchema,
-  IngredientInsertSchema,
+    IngredientFormSchema,
+    IngredientInsertSchema
 } from './domains/ingredient'
 
 export {
-  RecipeFormSchema,
-  RecipeInsertSchema,
+    RecipeFormSchema,
+    RecipeInsertSchema
 } from './domains/recipe'
 
 export {
-  SupplierInsertSchema,
+    SupplierInsertSchema
 } from './domains/supplier'
 
 export {
-  SupplierFormSchema,
+    SupplierFormSchema
 } from './form-validations'
 
 // Reports API validation schemas
@@ -117,8 +108,8 @@ export const BusinessInfoSettingsSchema = z.object({
   businessType: z.enum(['UMKM', 'cafe', 'restaurant', 'food-truck', 'catering', 'other']),
   taxId: z.string().max(50).optional().or(z.literal('')),
   address: z.string().max(500).optional().or(z.literal('')),
-  phone: z.string().regex(/^(\+62|62|0)[8-9][0-9]{7,11}$/).optional(),
-  email: z.string().email().optional(),
+  phone: z.string().regex(/^(\+62|62|0)[8-9][0-9]{7,11}$/).optional().or(z.literal('')),
+  email: z.string().email().optional().or(z.literal('')),
   website: z.string().url().optional().or(z.literal('')),
   description: z.string().max(1000).optional().or(z.literal('')),
 })

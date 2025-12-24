@@ -18,7 +18,7 @@ import { useIngredient, useUpdateIngredient } from '@/hooks/useIngredients'
 import { handleError } from '@/lib/error-handling'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 
-import type { Update } from '@/types/database'
+import type { IngredientUpdate } from '@/lib/validations/domains/ingredient'
 
 import { BUSINESS_CONSTANTS } from '@/lib/shared/constants'
 
@@ -26,8 +26,6 @@ import { BUSINESS_CONSTANTS } from '@/lib/shared/constants'
 
 
 
-
-type IngredientUpdate = Update<'ingredients'>
 
 const EditIngredientPage = (): JSX.Element | null => {
     const router = useRouter()
@@ -86,6 +84,7 @@ const EditIngredientPage = (): JSX.Element | null => {
                 price_per_unit: data.price_per_unit,
                 current_stock: data.current_stock,
                 min_stock: data.min_stock ?? 0,
+                spoilage_rate: data.spoilage_rate,
                 description: data.description ?? null,
             }
 
