@@ -14,6 +14,8 @@ import type { Row } from '@/types/database'
 import { EnhancedIngredientForm } from '@/components/ingredients/EnhancedIngredientForm'
 import { BUSINESS_CONSTANTS } from '@/lib/shared/constants'
 
+import type { IngredientInsert, IngredientUpdate } from '@/lib/validations/domains/ingredient'
+
 
 
 
@@ -62,15 +64,26 @@ export const IngredientFormDialog = ({
 
     const handleSubmit = async (data: SimpleIngredientFormData) => {
         try {
+            const basePayload = {
+                name: data.name,
+                unit: data.unit,
+                price_per_unit: data.price_per_unit,
+                current_stock: data.current_stock,
+                min_stock: data.min_stock ?? 0,
+                spoilage_rate: data.spoilage_rate,
+                description: data.description ? data.description : null,
+                is_active: true,
+            }
+
             if (ingredient) {
                 // Update existing ingredient
                 await updateMutation.mutateAsync({
                     id: ingredient.id,
-                    data: data as never // Type mismatch between form and database schema
+                    data: basePayload as IngredientUpdate
                 })
             } else {
                 // Create new ingredient
-                await createMutation.mutateAsync(data as never) // Type mismatch between form and database schema
+                await createMutation.mutateAsync(basePayload as IngredientInsert)
             }
 
             // Toast already handled by mutation hook

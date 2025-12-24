@@ -14,28 +14,57 @@ interface UserProfile {
   avatar_url?: string
 }
 
+/**
+ * Business settings
+ */
 export interface BusinessSettings {
-  business_name: string
-  business_address?: string
-  business_phone?: string
-  business_email?: string
-  tax_id?: string
-  currency: string
-  timezone: string
-  date_format: string
-  logo_url?: string
+  businessName: string
+  businessType?: string
+  taxId?: string
+  taxNumber?: string
+  address?: string
+  phone?: string
+  email?: string
+  website?: string
+  description?: string
+  currency?: string
+  timezone?: string
+  dateFormat?: string
+  logoUrl?: string
 }
 
+/**
+ * Profile settings
+ */
 export interface ProfileSettings extends UserProfile {}
 
-export interface PreferencesSettings extends NotificationPreferences {}
-
+/**
+ * Notification preferences
+ */
 interface NotificationPreferences {
   email_notifications: boolean
   low_stock_alerts: boolean
   order_updates: boolean
   price_change_alerts: boolean
   weekly_reports: boolean
+}
+
+/**
+ * Application preferences (system + ui)
+ */
+export interface PreferencesSettings {
+  system: {
+    defaultTax: number
+    lowStockThreshold: number
+  }
+  ui: {
+    theme: 'dark' | 'light' | 'system'
+    language: 'id' | 'en' | 'jv'
+    dateFormat: 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD'
+    timeFormat: '12h' | '24h'
+    currency: 'IDR' | 'USD' | 'EUR' | 'SGD' | 'MYR'
+    numberFormat: string
+  }
 }
 
 /**
@@ -107,6 +136,18 @@ export function useNotificationPreferences() {
 }
 
 /**
+ * Get application preferences (system + ui)
+ */
+export function usePreferencesSettings() {
+  return useQuery<PreferencesSettings>({
+    queryKey: ['preferences-settings'],
+    queryFn: () => fetchApi<PreferencesSettings>('/api/settings/preferences'),
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: true,
+  })
+}
+
+/**
  * Update notification preferences
  */
 export function useUpdateNotificationPreferences() {
@@ -119,6 +160,22 @@ export function useUpdateNotificationPreferences() {
       successToast('Berhasil', 'Preferensi notifikasi berhasil diperbarui')
     },
     onError: (error) => handleError(error, 'Update notification preferences', true, 'Gagal memperbarui preferensi notifikasi'),
+  })
+}
+
+/**
+ * Update application preferences (system + ui)
+ */
+export function useUpdatePreferencesSettings() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (data: PreferencesSettings) => putApi('/api/settings/preferences', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['preferences-settings'] })
+      successToast('Berhasil', 'Preferensi aplikasi berhasil diperbarui')
+    },
+    onError: (error) => handleError(error, 'Update preferences settings', true, 'Gagal memperbarui preferensi aplikasi'),
   })
 }
 
@@ -165,6 +222,4 @@ export function useUploadBusinessLogo() {
 
 // Aliases for backward compatibility
 export const useProfileSettings = useUserProfile
-export const usePreferencesSettings = useNotificationPreferences
 export const useUpdateProfileSettings = useUpdateUserProfile
-export const useUpdatePreferencesSettings = useUpdateNotificationPreferences

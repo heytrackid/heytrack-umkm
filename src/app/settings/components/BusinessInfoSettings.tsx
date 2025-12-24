@@ -1,18 +1,14 @@
 'use client'
 
 import { Building } from '@/components/icons'
-import React, { useState, useLayoutEffect } from 'react'
+import React, { useLayoutEffect, useState } from 'react'
 
 import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { handleError } from '@/lib/error-handling'
-import { validateBusinessInfoSettings } from '@/lib/settings-validation'
-
-
-
+import { validateBusinessInfoSettingsSafe } from '@/lib/settings-validation'
 
 type BusinessSettingsState = AppSettingsState['general']
 
@@ -39,31 +35,16 @@ const BusinessInfoSettingsComponent = ({ settings, onSettingChange }: BusinessIn
     setLocalSettings(newSettings)
 
     // Validate on change
-    try {
-      const validatedData = validateBusinessInfoSettings(newSettings)
-      setErrors({})
-      // If validation passes, update parent
-      onSettingChange('general', field, validatedData[field as keyof typeof validatedData] ?? value)
-    } catch (error) {
-      // Don't update parent if validation fails, but allow user to continue typing
-      if (error instanceof Error) {
-        // Extract field-specific errors if possible
-        const errorMessage = error.message
-        if (errorMessage.includes(field)) {
-          setErrors({ [field]: errorMessage })
-        }
-      }
-    }
+    const validation = validateBusinessInfoSettingsSafe(newSettings)
+    setErrors(validation.errors ?? {})
+    // Always update parent so changes are not lost even while other fields are invalid
+    onSettingChange('general', field, value)
   }
 
   const handleBlur = (_field: string) => {
     // Final validation on blur
-    try {
-      validateBusinessInfoSettings(localSettings)
-      setErrors({})
-    } catch (error) {
-      handleError(error, 'Business info validation', true)
-    }
+    const validation = validateBusinessInfoSettingsSafe(localSettings)
+    setErrors(validation.errors ?? {})
   }
 
   return (

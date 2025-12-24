@@ -1,9 +1,19 @@
-import { useEffect, useMemo, useState } from 'react'
 import { handleError } from '@/lib/error-handling'
+import { useEffect, useMemo, useState } from 'react'
 
 import { DEFAULT_APP_SETTINGS, normalizeSettings, type AppSettingsState, type SettingsUpdateHandler } from '@/app/settings/types'
 import { useSettings } from '@/contexts/settings-context'
-import { useBusinessSettings, usePreferencesSettings, useProfileSettings, useUpdateBusinessSettings, useUpdatePreferencesSettings, useUpdateProfileSettings, type BusinessSettings, type PreferencesSettings, type ProfileSettings } from '@/hooks/useSettings'
+import {
+    useBusinessSettings,
+    usePreferencesSettings,
+    useProfileSettings,
+    useUpdateBusinessSettings,
+    useUpdatePreferencesSettings,
+    useUpdateProfileSettings,
+    type BusinessSettings,
+    type PreferencesSettings,
+    type ProfileSettings,
+} from '@/hooks/useSettings'
 
 export function useSettingsManager() {
   const { settings: contextSettings } = useSettings()
@@ -68,10 +78,22 @@ export function useSettingsManager() {
     setIsSaving(true)
 
     try {
+        const general = settings.general
+        const businessPayload: BusinessSettings = {
+          businessName: general.businessName,
+          businessType: general.businessType,
+          taxId: general.taxNumber,
+          address: general.address,
+          phone: general.phone,
+          email: general.email,
+          website: general.website,
+          description: general.description,
+        }
+
         // Save in parallel using mutations
         // Map the settings to match API expectations
         await Promise.all([
-            updateBusinessMutation.mutateAsync(settings.general as unknown as BusinessSettings),
+            updateBusinessMutation.mutateAsync(businessPayload),
             updateProfileMutation.mutateAsync(settings.user as unknown as ProfileSettings),
             updatePreferencesMutation.mutateAsync({
                 system: settings.system,

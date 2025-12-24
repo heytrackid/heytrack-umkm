@@ -20,14 +20,12 @@ import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/valid
 
 
 
-import type { Insert } from '@/types/database'
+import type { IngredientInsert } from '@/lib/validations/domains/ingredient'
 
 import { BUSINESS_CONSTANTS } from '@/lib/shared/constants'
 
 
 
-
-type IngredientInsert = Insert<'ingredients'>
 
 const NewIngredientPage = (): JSX.Element => {
   const router = useRouter()
@@ -66,10 +64,9 @@ const NewIngredientPage = (): JSX.Element => {
         price_per_unit: data.price_per_unit,
         current_stock: data.current_stock,
         min_stock: data.min_stock ?? 0,
+        spoilage_rate: data.spoilage_rate,
         description: data.description ?? null,
-        user_id: user['id'],
         is_active: true,
-        weighted_average_cost: 0
       }
 
       await createIngredientMutation.mutateAsync(payload)
